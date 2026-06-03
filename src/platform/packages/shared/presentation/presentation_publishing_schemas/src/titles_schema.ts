@@ -13,4 +13,5 @@ export const serializedTitlesSchema = schema.object({
   description: schema.maybe(schema.string()),
   hide_title: schema.maybe(schema.boolean()),
   title: schema.maybe(schema.string()),
+  hide_border: schema.maybe(schema.boolean()),
 });

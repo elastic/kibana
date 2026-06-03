@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
 import type {
@@ -25,6 +25,10 @@ export interface InternalToolDefinition<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TType, TConfig> {
+  /**
+   * When true, this tool is only available when experimental features are enabled.
+   */
+  experimental: boolean;
   /**
    * Check if the tool is available for the current context.
    */

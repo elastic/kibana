@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 
 interface Props {
@@ -30,15 +29,6 @@ interface State {
 }
 
 export class Popover extends Component<Props, State> {
-  static propTypes = {
-    isOpen: PropTypes.bool,
-    ownFocus: PropTypes.bool,
-    button: PropTypes.func.isRequired,
-    children: PropTypes.func.isRequired,
-    tooltip: PropTypes.string,
-    tooltipPosition: PropTypes.oneOf(['top', 'bottom', 'left', 'right']),
-  };
-
   static defaultProps = {
     isOpen: false,
     ownFocus: true,

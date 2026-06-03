@@ -38,6 +38,7 @@ import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stat
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import { getStatsOverviewEmbeddableSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
+import { registerDataProviders } from './agent_builder/register_data_provider';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -114,16 +115,20 @@ export class Plugin implements PluginType {
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
 
     // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
-    plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+      title: 'Synthetics stats overview',
       getTransforms: getStatsTransforms,
       getSchema: getStatsOverviewEmbeddableSchema,
     });
 
     // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
-    plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_MONITORS_EMBEDDABLE, {
+      title: 'Synthetics monitors',
       getTransforms: getMonitorsTransforms,
       getSchema: () => syntheticsMonitorsEmbeddableSchema,
     });
+
+    registerDataProviders({ core, plugins });
 
     return {};
   }

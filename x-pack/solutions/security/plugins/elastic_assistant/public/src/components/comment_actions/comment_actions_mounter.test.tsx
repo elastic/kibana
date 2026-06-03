@@ -12,7 +12,6 @@ import { EuiFlexItem } from '@elastic/eui';
 import { CommentActionsMounter } from './comment_actions_mounter';
 import { CommentsService } from '@kbn/elastic-assistant-shared-state';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { createRoot } from 'react-dom/client';
 
 describe('CommentActionsMounter', () => {

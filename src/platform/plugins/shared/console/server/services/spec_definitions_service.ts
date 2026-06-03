@@ -75,7 +75,15 @@ export class SpecDefinitionsService {
     }
 
     if (isServerless) {
-      description.documentation = description.documentation_serverless || API_DOCS_LINK;
+      const serverlessDocUrl =
+        typeof description.documentation_serverless === 'string'
+          ? description.documentation_serverless.trim()
+          : undefined;
+      description.documentation = serverlessDocUrl || API_DOCS_LINK;
+
+      if (!serverlessDocUrl) {
+        delete description.documentation_serverless;
+      }
     }
 
     _.assign(copiedDescription, description);

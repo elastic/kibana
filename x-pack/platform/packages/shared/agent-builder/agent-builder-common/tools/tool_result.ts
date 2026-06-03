@@ -6,6 +6,7 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { TimeRange } from '../attachments/attachment_types';
 
 export enum ToolResultType {
   resource = 'resource',
@@ -83,6 +84,8 @@ export interface EsqlResultsData {
   query: string;
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
+  /** Optional time range used for named parameters ?_tstart and ?_tend */
+  time_range?: TimeRange;
 }
 
 export type EsqlResults = ToolResultMixin<ToolResultType.esqlResults>;
@@ -114,12 +117,18 @@ export enum SupportedChartType {
   XY = 'xy',
   RegionMap = 'region_map',
   Heatmap = 'heatmap',
+  Datatable = 'datatable',
+  Pie = 'pie',
+  Treemap = 'treemap',
+  Waffle = 'waffle',
+  Mosaic = 'mosaic',
 }
 
 export interface VisualizationResultData {
   visualization: Record<string, unknown>;
   chart_type: SupportedChartType;
   esql: string;
+  time_range?: TimeRange;
 }
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;

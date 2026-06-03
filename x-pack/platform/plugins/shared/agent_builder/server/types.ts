@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type { UsageApiSetup, UsageApiStart } from '@kbn/usage-api-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -23,17 +26,35 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
-import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
-import type { AgentRegistry } from './services/agents';
-import type { AttachmentServiceSetup } from './services/attachments';
-import type { SkillServiceSetup } from './services/skills';
-import type { AgentExecutionService } from './services/execution';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
+
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  TopSnippetsConfig,
+  ToolsSetup,
+  ToolsStart,
+  AttachmentsSetup,
+  SkillsSetup,
+  SkillsStart,
+  AgentsSetup,
+  AgentsStart,
+  ExecutionStart,
+  PluginsSetup,
+  PluginsStart,
+  RuntimeStart,
+  ReadOnlyConversationClient,
+  ConversationsStart,
+} from '@kbn/agent-builder-server';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
+  usageApi?: UsageApiSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   inference: InferenceServerSetup;
@@ -43,128 +64,19 @@ export interface AgentBuilderSetupDependencies {
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
+  usageApi?: UsageApiStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
-}
-
-export interface AttachmentsSetup {
-  /**
-   * Register an attachment type to be available in agentBuilder.
-   */
-  registerType: AttachmentServiceSetup['registerType'];
-}
-
-export interface SkillsSetup {
-  /**
-   * Register a skill to be available in agentBuilder.
-   */
-  register: SkillServiceSetup['registerSkill'];
-}
-
-/**
- * AgentBuilder tool service's setup contract
- */
-export interface ToolsSetup {
-  /**
-   * Register a built-in tool to be available in agentBuilder.
-   */
-  register: ToolsServiceSetup['register'];
-}
-
-/**
- * AgentBuilder tool service's start contract
- */
-export interface ToolsStart {
-  /**
-   * Execute a tool.
-   */
-  execute: RunToolFn;
-  /**
-   * Return a tool registry scoped to the current user and context.
-   */
-  getRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
-}
-
-export interface AgentsSetup {
-  /**
-   * Register a built-in agent to be available in agentBuilder.
-   */
-  register: (definition: BuiltInAgentDefinition) => void;
-}
-
-export interface AgentsStart {
-  /**
-   * Executes an agent with the given parameters.
-   * @deprecated use execution service instead.
-   */
-  runAgent: RunAgentFn;
-  /**
-   * Return an agent registry scoped to the current user and context.
-   */
-  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
-}
-
-/**
- * AgentBuilder execution service's start contract
- */
-export interface ExecutionStart {
-  /**
-   * Execute an agent.
-   */
-  executeAgent: AgentExecutionService['executeAgent'];
-  /**
-   * Retrieve an agent execution by its ID.
-   */
-  getExecution: AgentExecutionService['getExecution'];
-}
-
-/**
- * Setup contract of the agentBuilder plugin.
- */
-export interface AgentBuilderPluginSetup {
-  /**
-   * Agents setup contract, which can be used to register built-in agents.
-   */
-  agents: AgentsSetup;
-  /**
-   * Tools setup contract, which can be used to register built-in tools.
-   */
-  tools: ToolsSetup;
-  /**
-   * Attachments setup contract, which can be used to register attachment types.
-   */
-  attachments: AttachmentsSetup;
-  /**
-   * Hooks setup contract, which can be used to register lifecycle event hooks.
-   */
-  hooks: HooksServiceSetup;
-  /**
-   * Skills setup contract, which can be used to register skills.
-   */
-  skills: SkillsSetup;
-}
-
-/**
- * Start contract of the agentBuilder plugin.
- */
-export interface AgentBuilderPluginStart {
-  /**
-   * Agents service, to execute agents.
-   */
-  agents: AgentsStart;
-  /**
-   * Tools service, to manage or execute tools.
-   */
-  tools: ToolsStart;
-  /**
-   * Execution service, to execute agents and retrieve execution status.
-   */
-  execution: ExecutionStart;
+  security?: SecurityPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  agentContextLayer: AgentContextLayerPluginStart;
 }

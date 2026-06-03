@@ -31,6 +31,7 @@
       "{index}/_mtermvectors"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-mtermvectors",
     "availability": {
       "stack": true,
       "serverless": true

@@ -44,6 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     after(async () => {
@@ -51,6 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Full workflow with snapshot and restore', () => {
@@ -120,6 +122,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamConfigBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Web app stream with processing and custom fields',
             ingest: {
               lifecycle: { inherit: {} },
@@ -172,11 +175,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'slow-requests',
+              type: 'match' as const,
               title: 'Slow Requests',
-              kql: { query: 'attributes.response_time_ms > 100' },
+              description: '',
               esql: {
                 query:
-                  'FROM logs.web-app,logs.web-app.* | WHERE KQL("attributes.response_time_ms > 100")',
+                  'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
               },
             },
           ],
@@ -345,8 +349,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Verify significant event query survived the restore
         expect(restoredWebAppDefinition.queries).to.have.length(1);
         expect(restoredWebAppDefinition.queries[0].title).to.eql('Slow Requests');
-        expect(restoredWebAppDefinition.queries[0].kql.query).to.eql(
-          'attributes.response_time_ms > 100'
+        expect(restoredWebAppDefinition.queries[0].esql.query).to.eql(
+          'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")'
         );
 
         // Verify the underlying alerting rule also survived and is still enabled
@@ -438,6 +442,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updatedStreamBody: Streams.WiredStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: 'Updated description after restore',
             ingest: {
               lifecycle: { inherit: {} },

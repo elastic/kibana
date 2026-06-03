@@ -51,9 +51,9 @@ export class CloudConnectedPlugin
     core: CoreSetup<CloudConnectedStartDeps>,
     plugins: CloudConnectedSetupDeps
   ): CloudConnectedPluginSetup {
-    // Skip plugin registration if running on Elastic Cloud.
-    // This plugin is only for self-managed clusters connecting to Cloud services
-    if (plugins.cloud?.isCloudEnabled) {
+    // Skip plugin registration if running on ESS.
+    // CCM is enabled for ECE deployments and self-managed clusters.
+    if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
       return {};
     }
 

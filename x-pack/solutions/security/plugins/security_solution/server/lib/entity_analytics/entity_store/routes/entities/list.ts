@@ -8,7 +8,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { EntityType } from '../../../../../../common/search_strategy';
 import { LIST_ENTITIES_URL } from '../../../../../../common/entity_analytics/entity_store/constants';
 import type { ListEntitiesResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';

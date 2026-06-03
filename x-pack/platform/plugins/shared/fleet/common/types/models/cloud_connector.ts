@@ -4,6 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type {
+  NewPackagePolicy,
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+} from './package_policy';
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
 const CLOUD_PROVIDERS: readonly CloudProvider[] = ['aws', 'azure', 'gcp'];
@@ -21,6 +27,17 @@ export interface CloudConnectorSecretReference {
   id: string;
 }
 
+export function isCloudConnectorSecretReference(
+  value: string | CloudConnectorSecretReference | undefined
+): value is CloudConnectorSecretReference {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'isSecretRef' in value &&
+    typeof (value as CloudConnectorSecretReference).id === 'string'
+  );
+}
+
 export interface CloudConnectorVar {
   type?: 'text';
   value: string;
@@ -34,9 +51,15 @@ export interface CloudConnectorSecretVar {
   frozen?: boolean;
 }
 
+/** Used only in create/update requests: plaintext value the server will convert to a Fleet secret. */
+export interface CloudConnectorNewSecretVar {
+  type: 'password';
+  value: string;
+}
+
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
-  external_id: CloudConnectorSecretVar;
+  external_id: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
 }
 
 export interface AzureCloudConnectorVars {
@@ -45,7 +68,18 @@ export interface AzureCloudConnectorVars {
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
-export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
+export interface GcpCloudConnectorVars {
+  service_account: CloudConnectorVar;
+  audience: CloudConnectorVar;
+  gcp_credentials_cloud_connector_id: CloudConnectorSecretVar;
+}
+
+export type CloudConnectorVars =
+  | AwsCloudConnectorVars
+  | AzureCloudConnectorVars
+  | GcpCloudConnectorVars;
+
+export type VerificationStatus = 'pending' | 'success' | 'failed';
 
 export interface CloudConnector {
   id: string;
@@ -57,6 +91,9 @@ export interface CloudConnector {
   created_at: string;
   updated_at: string;
   namespace?: string;
+  verification_status?: VerificationStatus;
+  verification_started_at?: string;
+  verification_failed_at?: string;
 }
 
 export interface CloudConnectorListOptions {
@@ -65,3 +102,43 @@ export interface CloudConnectorListOptions {
   kuery?: string;
   fields?: string[];
 }
+
+/**
+ * A package policy that belongs to a cloud connector.
+ * Narrows cloud_connector_id and cloud_connector_name to required non-null strings.
+ */
+export interface CloudConnectorPackagePolicy extends NewPackagePolicy {
+  cloud_connector_id: string;
+  cloud_connector_name: string;
+  supports_cloud_connector: true;
+  supports_agentless: true;
+}
+
+/**
+ * Typed stream vars for the verifier_otel package, matching the manifest.
+ * Extends PackagePolicyConfigRecord so it can be used directly as stream vars.
+ * All `required: true` vars in the manifest are documented in VERIFIER_REQUIRED_VARS.
+ */
+export type VerifierStreamVars = PackagePolicyConfigRecord & {
+  'data_stream.dataset': PackagePolicyConfigRecordEntry;
+  identity_federation_id: PackagePolicyConfigRecordEntry;
+  verification_id: PackagePolicyConfigRecordEntry;
+  verification_type: PackagePolicyConfigRecordEntry;
+  provider: PackagePolicyConfigRecordEntry;
+  policy_id: PackagePolicyConfigRecordEntry;
+  policy_templates: PackagePolicyConfigRecordEntry;
+  package_name: PackagePolicyConfigRecordEntry;
+};
+
+/**
+ * Required manifest var names for the verifier_otel package.
+ * If any of these are missing the verifier OTel collector will fail to start.
+ */
+export const VERIFIER_REQUIRED_VARS: readonly string[] = [
+  'identity_federation_id',
+  'verification_id',
+  'provider',
+  'policy_id',
+  'policy_templates',
+  'package_name',
+] as const;

@@ -69,3 +69,11 @@ export const BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS = i18n.translate(
     defaultMessage: 'A maximum of 1000 gaps will be filled per rule.',
   }
 );
+
+export const BULK_FILL_RULE_GAPS_EXCLUDED_REASONS = i18n.translate(
+  'xpack.securitySolution.bulkFillRuleGapsModal.excludedReasons',
+  {
+    defaultMessage:
+      'Gaps caused by disabled rules will not be filled. You can change this in Rule Settings.',
+  }
+);

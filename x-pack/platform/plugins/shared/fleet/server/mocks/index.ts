@@ -204,6 +204,12 @@ export const createAppContextStartContractMock = (
       getRulesClientWithRequest: jest.fn(),
     } as any,
     reportingStart: reportingMock.createStart(),
+    lockManagerService: {
+      withLock: jest
+        .fn()
+        .mockImplementation((_lockId: string, callback: () => Promise<unknown>) => callback()),
+      getLock: jest.fn().mockResolvedValue(undefined),
+    } as any,
   };
 };
 

@@ -11,6 +11,7 @@ import type { DashboardState } from '../../types';
 
 const APIToSavedObjectOptionsKeys = {
   hide_panel_titles: 'hidePanelTitles',
+  hide_panel_borders: 'hidePanelBorders',
   use_margins: 'useMargins',
   sync_colors: 'syncColors',
   sync_tooltips: 'syncTooltips',
@@ -18,7 +19,7 @@ const APIToSavedObjectOptionsKeys = {
   auto_apply_filters: 'autoApplyFilters',
 } as const;
 
-export function transformOptionsIn(options: DashboardState['options']): string {
+export function transformOptionsIn(options: Partial<DashboardState['options']>): string {
   const apiOptions = options ?? {};
   const savedObjectOptions: { [key: string]: unknown } = {};
 

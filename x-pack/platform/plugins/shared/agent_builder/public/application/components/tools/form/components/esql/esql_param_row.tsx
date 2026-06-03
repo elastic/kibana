@@ -22,7 +22,8 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useCallback, useMemo } from 'react';
 import type { FieldArrayWithId, FieldError } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
@@ -108,7 +109,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           ((errorMessages && (
             <EuiIconTip
               content={errorMessages}
-              type="errorFilled"
+              type="errorFill"
               color={euiTheme.colors.danger}
               size="m"
             />
@@ -116,15 +117,15 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             (warning && (
               <EuiIconTip
                 content={warning}
-                type="warningFilled"
+                type="warningFill"
                 color={euiTheme.colors.warning}
                 size="m"
               />
             )) ||
             (source === EsqlParamSource.Inferred ? (
-              <EuiIcon type="sparkles" color="subdued" size="m" />
+              <EuiIcon type="sparkles" color="subdued" size="m" aria-hidden={true} />
             ) : (
-              <EuiIcon type="documentEdit" color="subdued" size="m" />
+              <EuiIcon type="pencil" color="subdued" size="m" aria-hidden={true} />
             )))}
       </EuiTableRowCell>
       <EuiTableRowCell
@@ -319,6 +320,10 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           }}
           size="s"
           aria-label={i18nMessages.removeParamButtonLabel}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.REMOVE_PARAM,
+          })}
         />
       </EuiTableRowCell>
     </EuiTableRow>

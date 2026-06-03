@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import type { WorkflowDetailHeaderProps } from './workflow_detail_header';
-import { WorkflowDetailHeader } from './workflow_detail_header';
+import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import {
+  SkipUnsavedRunConfirmationStorageKey,
+  WorkflowDetailHeader,
+  type WorkflowDetailHeaderProps,
+} from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _clearComputedData,
@@ -18,11 +23,11 @@ import {
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
 const mockUseParams = jest.fn();
-const mockUseCapabilities = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseSaveYaml = jest.fn();
 const mockUseUpdateWorkflow = jest.fn();
@@ -35,9 +40,16 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
 }));
-jest.mock('../../../hooks/use_capabilities', () => ({
-  useCapabilities: () => mockUseCapabilities(),
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
 }));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
+const defaultWorkflowsCapabilities = createMockWorkflowsCapabilities();
+
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
@@ -78,17 +90,21 @@ describe('WorkflowDetailHeader', () => {
       hasChanges = false,
       hasYamlSchemaValidationErrors = false,
       serverValid = true,
+      isSaving = false,
+      isManaged = false,
     }: {
       isValid?: boolean;
       hasChanges?: boolean;
       hasYamlSchemaValidationErrors?: boolean;
       serverValid?: boolean;
+      isSaving?: boolean;
+      isManaged?: boolean;
     } = {}
   ) => {
     const store = createMockStore();
 
     // Set up the workflow in the store (with server-side valid flag)
-    store.dispatch(setWorkflow({ ...mockWorkflow, valid: serverValid }));
+    store.dispatch(setWorkflow({ ...mockWorkflow, managed: isManaged, valid: serverValid }));
     store.dispatch(setYamlString(hasChanges ? 'modified yaml' : mockWorkflow.yaml));
 
     if (!isValid) {
@@ -101,16 +117,20 @@ describe('WorkflowDetailHeader', () => {
     if (hasYamlSchemaValidationErrors) {
       store.dispatch(setHasYamlSchemaValidationErrors(true));
     }
+    if (isSaving) {
+      store.dispatch(saveYamlThunk.pending('', undefined));
+    }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => {
       return <TestWrapper store={store}>{children}</TestWrapper>;
     };
 
-    return render(component, { wrapper });
+    return { ...render(component, { wrapper }), store };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -128,11 +148,7 @@ describe('WorkflowDetailHeader', () => {
       },
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
-    mockUseCapabilities.mockReturnValue({
-      canCreateWorkflow: true,
-      canUpdateWorkflow: true,
-      canExecuteWorkflow: true,
-    });
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
       setActiveTab: jest.fn(),
@@ -151,18 +167,16 @@ describe('WorkflowDetailHeader', () => {
   });
 
   it('shows saved status when no changes', () => {
-    const { container } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    // The WorkflowUnsavedChangesBadge component displays "Saved" when there are no changes
-    // We need to check if the component renders without the unsaved changes badge
-    expect(container).toBeTruthy();
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
   });
 
   it('shows unsaved changes when there are changes', () => {
-    const { container } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
       hasChanges: true,
     });
-    expect(container).toBeTruthy();
+    expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
   it('disables run workflow button when yaml has syntax errors', () => {
@@ -202,5 +216,236 @@ describe('WorkflowDetailHeader', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     const button = result.getByTestId('runWorkflowHeaderButton');
     expect(button).toBeEnabled();
+  });
+
+  it('shows the managed badge for managed workflows', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+
+    expect(result.getByTestId('workflowDetailManagedBadge')).toHaveTextContent('Managed');
+  });
+
+  it('keeps the enabled toggle editable for managed workflows', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      isManaged: true,
+    });
+
+    expect(result.getByRole('switch')).not.toBeDisabled();
+  });
+
+  it('disables saving managed workflow YAML', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+      isManaged: true,
+    });
+
+    expect(result.getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
+  });
+
+  it('shows the unsaved changes confirmation when running with unsaved changes', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+
+    expect(
+      result.getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')
+    ).toBeInTheDocument();
+    expect(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
+  });
+
+  it('stores the run confirmation preference when confirming with the checkbox selected', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+    fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
+    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
+    expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBe('true');
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
+  });
+
+  it('skips the unsaved changes confirmation when the preference is stored', () => {
+    localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+    });
+
+    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
+
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
+  });
+
+  it('disables run workflow button while save is in flight', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      hasChanges: true,
+      isSaving: true,
+    });
+
+    const runButton = result.getByTestId('runWorkflowHeaderButton');
+
+    expect(runButton).toBeDisabled();
+    fireEvent.click(runButton);
+
+    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
+    expect(result.store.getState().detail.isTestModalOpen).toBe(false);
+  });
+
+  it('disables executions tab when user cannot read workflow executions', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...defaultWorkflowsCapabilities,
+      canReadWorkflowExecution: false,
+    });
+    const { getByRole } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    const executionsTab = getByRole('button', { name: 'Executions' });
+    expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  describe('Authorization matrix', () => {
+    interface MatrixRow {
+      roleLabel: string;
+      capabilities: Partial<WorkflowsManagementCapabilities>;
+      expectRunDisabled: boolean;
+      expectSaveDisabled: boolean;
+      expectEnabledSwitchDisabled: boolean;
+      expectExecutionsTabDisabled: boolean;
+    }
+
+    const matrix: MatrixRow[] = [
+      {
+        roleLabel: 'Read-only',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: true,
+          canCreateWorkflow: false,
+          canUpdateWorkflow: false,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: false,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: true,
+        expectSaveDisabled: true,
+        expectEnabledSwitchDisabled: true,
+        expectExecutionsTabDisabled: false,
+      },
+      {
+        roleLabel: 'Operator (run, no CRUD)',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: true,
+          canCreateWorkflow: false,
+          canUpdateWorkflow: false,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: true,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: false,
+        expectSaveDisabled: true,
+        expectEnabledSwitchDisabled: true,
+        expectExecutionsTabDisabled: false,
+      },
+      {
+        roleLabel: 'Editor (no delete)',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: true,
+          canCreateWorkflow: true,
+          canUpdateWorkflow: true,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: true,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: false,
+        expectSaveDisabled: true,
+        expectEnabledSwitchDisabled: false,
+        expectExecutionsTabDisabled: false,
+      },
+      {
+        roleLabel: 'No execution read',
+        capabilities: {
+          canReadWorkflow: true,
+          canReadWorkflowExecution: false,
+          canCreateWorkflow: true,
+          canUpdateWorkflow: true,
+          canDeleteWorkflow: false,
+          canExecuteWorkflow: true,
+          canCancelWorkflowExecution: false,
+        },
+        expectRunDisabled: false,
+        expectSaveDisabled: true,
+        expectEnabledSwitchDisabled: false,
+        expectExecutionsTabDisabled: true,
+      },
+    ];
+
+    it.each(matrix)(
+      '$roleLabel: run disabled=$expectRunDisabled, save=$expectSaveDisabled, enabled switch=$expectEnabledSwitchDisabled, executions tab=$expectExecutionsTabDisabled',
+      ({
+        capabilities,
+        expectRunDisabled,
+        expectSaveDisabled,
+        expectEnabledSwitchDisabled,
+        expectExecutionsTabDisabled,
+      }) => {
+        mockUseWorkflowsCapabilities.mockReturnValue({
+          ...defaultWorkflowsCapabilities,
+          ...capabilities,
+        });
+
+        const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+        const runBtn = result.getByTestId('runWorkflowHeaderButton');
+        const saveBtn = result.getByTestId('saveWorkflowHeaderButton');
+
+        if (expectRunDisabled) {
+          expect(runBtn).toBeDisabled();
+        } else {
+          expect(runBtn).not.toBeDisabled();
+        }
+        if (expectSaveDisabled) {
+          expect(saveBtn).toBeDisabled();
+        } else {
+          expect(saveBtn).not.toBeDisabled();
+        }
+
+        const enabledSwitch = result.getByRole('switch');
+        if (expectEnabledSwitchDisabled) {
+          expect(enabledSwitch).toBeDisabled();
+        } else {
+          expect(enabledSwitch).not.toBeDisabled();
+        }
+
+        const executionsTab = result.getByRole('button', { name: 'Executions' });
+        if (expectExecutionsTabDisabled) {
+          expect(executionsTab).toHaveAttribute('aria-disabled', 'true');
+        } else {
+          expect(executionsTab).not.toHaveAttribute('aria-disabled', 'true');
+        }
+      }
+    );
+
+    it('New workflow URL: save requires createWorkflow, not updateWorkflow', () => {
+      mockUseParams.mockReturnValue({});
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canReadWorkflow: true,
+        canReadWorkflowExecution: true,
+        canCreateWorkflow: true,
+        canUpdateWorkflow: false,
+        canDeleteWorkflow: false,
+        canExecuteWorkflow: false,
+        canCancelWorkflowExecution: false,
+      });
+
+      const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        hasChanges: true,
+      });
+      expect(result.getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
+    });
   });
 });

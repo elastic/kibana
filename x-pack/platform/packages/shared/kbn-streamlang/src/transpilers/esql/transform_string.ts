@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { buildIgnoreMissingFilter } from './processors/common';
 import { conditionToESQLAst } from './condition_to_esql';
 import type { Condition } from '../../../types/conditions';

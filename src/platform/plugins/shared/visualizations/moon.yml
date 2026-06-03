@@ -4,24 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/visualizations-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/visualizations-plugin'
+  title: '@kbn/visualizations-plugin'
   description: Moon project for @kbn/visualizations-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/visualizations
+  sourceRoot: src/platform/plugins/shared/visualizations
 dependsOn:
   - '@kbn/core'
   - '@kbn/charts-plugin'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'
@@ -84,7 +84,6 @@ dependsOn:
   - '@kbn/search-response-warnings'
   - '@kbn/content-management-utils'
   - '@kbn/react-hooks'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/css-utils'
@@ -93,6 +92,8 @@ dependsOn:
   - '@kbn/visualization-listing-components'
   - '@kbn/cps'
   - '@kbn/kql'
+  - '@kbn/cps-utils'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
@@ -105,16 +106,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

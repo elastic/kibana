@@ -6,6 +6,7 @@
  */
 
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
@@ -13,15 +14,12 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-
-jest.mock('../../../../../sourcerer/containers');
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,10 +34,40 @@ const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
+const mockOpenSystemFlyout = jest.fn();
+const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockDocumentFlyoutWrapper'}</div>
+));
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        overlays: {
+          ...original.useKibana().services.overlays,
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
+      },
+    }),
+  };
+});
 
 const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
@@ -78,7 +106,6 @@ const mockDataView = new DataView({
 
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
-  useSourcererDataView();
   return (
     <TestProviders store={store}>
       <TimelineDataTable
@@ -116,10 +143,11 @@ const getTimelineFromStore = (
 
 describe('unified data table', () => {
   beforeEach(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
+      closeFlyout: jest.fn(),
     });
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -154,6 +182,28 @@ describe('unified data table', () => {
           },
         });
       });
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens the system flyout with the existing hit when newFlyoutSystemEnabled is enabled',
+    async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+      });
+
+      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
+      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
+      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
+      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
     },
     SPECIAL_TEST_TIMEOUT
   );

@@ -46,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks, cloud } = useStartServices();
+  const { docLinks } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -54,8 +54,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
-  const enableSyncIntegrations =
-    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
+  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
 
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
@@ -131,7 +130,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             defaultMessage: 'Specify host URL',
           }
         )}
-        {...inputs.elasticsearchUrlInput.props}
+        {...inputs.remoteElasticsearchUrlInput.props}
         isUrl
       />
       <EuiSpacer size="m" />
@@ -213,6 +212,22 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       <EuiSpacer size="m" />
       {enableSyncIntegrations ? (
         <>
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="syncIntegrationsServerlessCallout"
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.syncIntegrationsServerlessCallout',
+              {
+                defaultMessage:
+                  'Integration sync is not supported when the remote cluster is a serverless project.',
+              }
+            )}
+            iconType="warning"
+            color="warning"
+            size="s"
+            heading="p"
+          />
+          <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
             helpText={

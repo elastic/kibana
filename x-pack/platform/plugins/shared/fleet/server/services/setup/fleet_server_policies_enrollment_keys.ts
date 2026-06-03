@@ -42,9 +42,17 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     agentPolicies,
     async (agentPolicy) => {
       const [latestFleetPolicy] = await Promise.all([
-        agentPolicyService.getLatestFleetPolicy(esClient, agentPolicy.id),
+        agentPolicyService.getLatestFleetPolicyRevision(esClient, agentPolicy.id),
         ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
       ]);
+
+      if (latestFleetPolicy && latestFleetPolicy.revision_idx !== agentPolicy.revision) {
+        logger.warn(
+          `Policy [${agentPolicy.id}] has mismatched revisions: ` +
+            `.kibana_ingest revision [${agentPolicy.revision}], ` +
+            `.fleet-policies revision_idx [${latestFleetPolicy.revision_idx}]`
+        );
+      }
 
       if ((latestFleetPolicy?.revision_idx ?? -1) < agentPolicy.revision) {
         outdatedAgentPolicyIds.push({ id: agentPolicy.id, spaceId: agentPolicy.space_ids?.[0] });

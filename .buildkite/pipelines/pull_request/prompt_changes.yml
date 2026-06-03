@@ -1,7 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/checks/prompt_changes_detector.sh
-    cancel_on_build_failing: true
     label: 'Check Prompt Changes'
+    key: prompt_changes
     agents:
       machineType: n2-standard-2
       preemptible: true

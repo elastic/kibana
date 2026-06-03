@@ -7,14 +7,17 @@
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { PackageInfo, PackagePolicyInput } from '../types';
 
-import { isInputOnlyPolicyTemplate } from './policy_template';
+import { getNormalizedInputs } from './policy_template';
 
 export const OTEL_INPUTS_MINIMUM_VERSION = '9.2.0';
 
+/**
+ * Returns true when the package has at least one OTel collector input, regardless
+ * of whether it is an input-only package or a composable integration package.
+ */
 export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =>
-  (packageInfo?.policy_templates || []).some(
-    (template) =>
-      isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
+  (packageInfo?.policy_templates || []).some((template) =>
+    getNormalizedInputs(template).some((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
   );
 
 export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>

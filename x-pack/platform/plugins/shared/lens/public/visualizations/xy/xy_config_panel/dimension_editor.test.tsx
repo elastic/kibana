@@ -12,7 +12,7 @@ import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
 import type { FramePublicAPI, DatasourcePublicAPI } from '@kbn/lens-common';
-import type { XYState, XYDataLayerConfig } from '../types';
+import type { XYVisualizationState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -24,7 +24,7 @@ import { getKbnPalettes } from '@kbn/palettes';
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
 
-  function testState(): XYState {
+  function testState(): XYVisualizationState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -124,7 +124,7 @@ describe('XY Config panels', () => {
             accessors: ['bar'],
           },
         ],
-      } as XYState;
+      } as XYVisualizationState;
       const component = mount(
         <DataDimensionEditor
           layerId={state.layers[0].layerId}
@@ -170,7 +170,7 @@ describe('XY Config panels', () => {
             yConfig: [{ forAccessor: 'bar', color: 'red' }],
           },
         ],
-      } as XYState;
+      } as XYVisualizationState;
 
       const component = mount(
         <DataDimensionEditor
@@ -224,7 +224,7 @@ describe('XY Config panels', () => {
               yConfig: [{ forAccessor: 'bar', color: 'red' }],
             },
           ],
-        } as XYState;
+        } as XYVisualizationState;
 
         render(
           <DataDimensionEditor
@@ -278,7 +278,7 @@ describe('XY Config panels', () => {
             yConfig: [{ forAccessor: 'bar', color: 'red' }],
           },
         ],
-      } as XYState;
+      } as XYVisualizationState;
 
       const component = mount(
         <DataDimensionEditor

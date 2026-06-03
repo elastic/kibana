@@ -28,11 +28,47 @@ export interface UserActivityActionDefinition {
  * @private
  */
 export const userActivityActions = {
-  user_logged_in: {
+  log_in_user: {
     description: 'User logged in to Kibana.',
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Authentication',
     versionAddedAt: '9.4',
+  },
+  log_out_user: {
+    description: 'User logged out of Kibana.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Authentication',
+    versionAddedAt: '9.4',
+  },
+  dashboard_create: {
+    description: 'User created a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_update: {
+    description: 'User updated a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_delete: {
+    description: 'User deleted a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_view: {
+    description: 'User viewed a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_refresh: {
+    description: 'The dashboard was refreshed (either by the user or auto-refresh interval).',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
   },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 

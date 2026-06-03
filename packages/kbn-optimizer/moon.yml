@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/optimizer'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/optimizer'
+  title: '@kbn/optimizer'
   description: Moon project for @kbn/optimizer
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-optimizer
+  sourceRoot: packages/kbn-optimizer
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/dev-utils'
@@ -45,16 +44,6 @@ fileGroups:
     - '**/*.ts'
     - '!**/__fixtures__/**/*'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

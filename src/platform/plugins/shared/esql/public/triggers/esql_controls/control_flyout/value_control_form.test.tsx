@@ -11,7 +11,7 @@ import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
@@ -20,6 +20,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import {
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -34,7 +38,7 @@ jest.mock('@kbn/esql-utils', () => {
             },
           },
         ],
-        values: [],
+        values: [['v1'], ['v2']],
       },
     }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
@@ -62,7 +66,7 @@ describe('ValueControlForm', () => {
     data: dataMock,
   };
 
-  services.core.http.get = jest
+  services.core.http.post = jest
     .fn()
     .mockImplementation((_url: string) => Promise.resolve({ timeField: '@timestamp' }));
 
@@ -90,8 +94,7 @@ describe('ValueControlForm', () => {
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
 
       // variable name input should be rendered and with the default value
       expect(await findByTestId('esqlVariableName')).toHaveValue('?interval');
@@ -158,8 +161,8 @@ describe('ValueControlForm', () => {
 
     it('should default correctly if initial state is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
         available_options: ['5 minutes'],
         selected_options: ['5 minutes'],
@@ -190,8 +193,8 @@ describe('ValueControlForm', () => {
 
     it('should call the onEditControl callback, if initialState is given', async () => {
       const initialState = {
-        grow: true,
-        width: 'small',
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         title: 'my control',
         available_options: ['5 minutes'],
         selected_options: ['5 minutes'],
@@ -234,8 +237,7 @@ describe('ValueControlForm', () => {
         );
         // control type dropdown should be rendered and default to 'Values from a query'
         expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-        const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-        expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(
           `Values from a query`
         );
 
@@ -262,8 +264,7 @@ describe('ValueControlForm', () => {
         fireEvent.change(variableNameInput, { target: { value: '??field' } });
 
         expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
-        const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
-        expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+        expect(await findByTestId('esqlControlTypeDropdown')).toHaveTextContent(`Static values`);
         // identifiers dropdown should be rendered
         const identifiersOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
         expect(identifiersOptionsDropdown).toBeInTheDocument();
@@ -289,6 +290,7 @@ describe('ValueControlForm', () => {
           expect(getESQLResults).toHaveBeenCalledWith(
             expect.objectContaining({
               timeRange: mockTimeRange,
+              signal: expect.any(AbortSignal),
             })
           );
         });
@@ -297,11 +299,10 @@ describe('ValueControlForm', () => {
       it('should preserve custom esqlQuery when editing an existing VALUES_FROM_QUERY control', async () => {
         const customQuery = 'FROM custom-logs* | STATS BY custom_field';
         const initialState = {
-          grow: false,
-          width: 'medium',
+          ...DEFAULT_PINNED_CONTROL_STATE,
+          ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
           title: 'Custom Query Control',
           available_options: [],
-          selected_options: [], // Start with empty to trigger the useEffect
           variable_name: 'customVar',
           variable_type: ESQLVariableType.VALUES,
           esql_query: customQuery,
@@ -362,6 +363,27 @@ describe('ValueControlForm', () => {
         );
 
         expect(await findByTestId('esqlNoValuesForControlCallout')).toBeInTheDocument();
+      });
+
+      it('should disable the save button until the values preview is successfully validated', async () => {
+        const { getByTestId } = render(
+          <IntlProvider locale="en">
+            <KibanaContextProvider services={services}>
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+              />
+            </KibanaContextProvider>
+          </IntlProvider>
+        );
+
+        const saveButton = getByTestId('saveEsqlControlsFlyoutButton');
+        expect(saveButton).toBeDisabled();
+
+        await waitFor(() => {
+          expect(saveButton).not.toBeDisabled();
+        });
       });
     });
   });

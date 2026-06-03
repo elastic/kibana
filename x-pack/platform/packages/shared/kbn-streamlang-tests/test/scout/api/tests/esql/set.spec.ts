@@ -28,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest(indexName, docs);
@@ -54,7 +54,7 @@ apiTest.describe(
       };
 
       // Should throw validation error for Mustache templates
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed'
       );
     });
@@ -77,7 +77,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       // ES|QL errors out when unmapped fields (columns) are read
       // The following docs helps map the fields for which ES|QL has to perform nullability checks
@@ -121,7 +121,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'should-be-copied' }];
       await testBed.ingest(indexName, docs);
@@ -149,7 +149,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
         const docWithStatus = { attributes: { status: 'active' } }; // 'attributes.status' already exists
         const docs = [docWithStatus, { attributes: { size: 1024 } }];
         await testBed.ingest(indexName, docs);
@@ -185,7 +185,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
         const docs = [{ attributes: { status: 'active' } }]; // 'attributes.status' already exists
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
@@ -207,18 +207,8 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
-              path: ['steps', 0, 'value', 'copy_from'],
-            },
-          ],
-          null,
-          2
-        )
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
 
@@ -234,18 +224,8 @@ apiTest.describe(
         ],
       };
 
-      expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
-              path: ['steps', 0, 'value', 'copy_from'],
-            },
-          ],
-          null,
-          2
-        )
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
   }

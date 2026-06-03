@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,

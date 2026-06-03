@@ -6,9 +6,12 @@
  */
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
-import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 
 import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -25,7 +28,9 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: [ALERTS_API_READ],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })

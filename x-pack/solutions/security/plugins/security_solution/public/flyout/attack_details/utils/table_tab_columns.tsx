@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EventFieldsData } from '../../../common/components/event_details/types';
 import { TableFieldNameCell } from '../../document_details/right/components/table_field_name_cell';
 import { getFieldFromBrowserField } from '../../document_details/right/tabs/table_tab';
+import { CellActions } from '../components/cell_actions';
 import { TableFieldValueCell } from '../components/table_field_value_cell';
 
 export const FIELD = i18n.translate(
@@ -63,16 +64,14 @@ export const getTableTabColumns: ColumnsProvider = ({ browserFields, attackId })
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
 
       return (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <TableFieldValueCell
-              data={data as EventFieldsData}
-              attackId={attackId}
-              fieldFromBrowserField={fieldFromBrowserField}
-              values={values}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
+          <TableFieldValueCell
+            data={data as EventFieldsData}
+            attackId={attackId}
+            fieldFromBrowserField={fieldFromBrowserField}
+            values={values}
+          />
+        </CellActions>
       );
     },
   },

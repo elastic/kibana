@@ -109,6 +109,7 @@ function getMockOptions({
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
     customLogoutURL,
+    userActivity: { trackUserAction: jest.fn() },
   };
 }
 
@@ -321,6 +322,50 @@ describe('Authenticator', () => {
               httpServerMock.createKibanaRequest({ query: { msg: LogoutReason.SESSION_EXPIRED } })
             )
           ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_EXPIRED');
+        });
+
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_IDLE_TIMEOUT', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
+            })
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({
+                query: { msg: LogoutReason.SESSION_IDLE_TIMEOUT },
+              })
+            )
+          ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_IDLE_TIMEOUT');
+        });
+
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_LIFESPAN_TIMEOUT', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
+            })
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({
+                query: { msg: LogoutReason.SESSION_LIFESPAN_TIMEOUT },
+              })
+            )
+          ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_LIFESPAN_TIMEOUT');
         });
       });
     });
@@ -630,6 +675,127 @@ describe('Authenticator', () => {
           outcome: 'failure',
           kibana: expect.objectContaining({ authentication_type: 'basic', session_id: undefined }),
         });
+      });
+    });
+
+    describe('user activity tracking', () => {
+      it('tracks log_in_user action on successful login', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization: 'Basic .....' } })
+        );
+        mockOptions.session.create.mockResolvedValue(mockSessVal);
+
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith({
+          message: 'User logged in via basic provider "basic1".',
+          event: { action: 'log_in_user', type: 'start' },
+          object: {
+            id: user.username,
+            name: user.username,
+            type: 'user',
+            tags: [],
+          },
+          metadata: {
+            authenticationProvider: 'basic1',
+            authenticationType: 'basic',
+          },
+        });
+      });
+
+      it('uses userProfileId as object id when profile is activated', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+        const userProfileGrant: UserProfileGrant = {
+          type: 'password',
+          username: 'some-user',
+          password: 'some-password',
+        };
+
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, {
+            userProfileGrant,
+            state: { authorization: 'Basic .....' },
+          })
+        );
+        mockOptions.session.create.mockResolvedValue(mockSessVal);
+
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: expect.objectContaining({ id: 'some-profile-uid' }),
+          })
+        );
+      });
+
+      it('does not track user activity on failed login', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.failed(new Error('Not Authorized'))
+        );
+
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).not.toHaveBeenCalled();
+      });
+
+      it('does not track user activity when not handled', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        await authenticator.login(request, { provider: { type: 'token' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).not.toHaveBeenCalled();
+      });
+
+      it('does not track log_out_user when invalidating an intermediate session during login', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: undefined },
+        });
+
+        const user = mockAuthenticatedUser();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization: 'Basic .....' } })
+        );
+
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith(
+          expect.objectContaining({ event: { action: 'log_in_user', type: 'start' } })
+        );
+      });
+
+      it('tracks log_out_user when login overwrites an existing session with a different username', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: 'old-username' },
+        });
+        mockOptions.session.create.mockResolvedValue(mockSessVal);
+
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization: 'Basic .....' } })
+        );
+
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(2);
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ event: { action: 'log_out_user', type: 'end' } })
+        );
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ event: { action: 'log_in_user', type: 'start' } })
+        );
       });
     });
 
@@ -963,7 +1129,7 @@ describe('Authenticator', () => {
         expect(mockSAMLAuthenticationProvider2.login).toHaveBeenCalledWith(
           request,
           loginAttemptValue,
-          mockSessVal.state
+          { ...mockSessVal, provider: { type: 'saml', name: 'saml2' } }
         );
 
         // Presence of the session has precedence over order.
@@ -1810,7 +1976,7 @@ describe('Authenticator', () => {
         it('expected message is attached to the URL when authentication provider redirects to login page', async () => {
           const request = httpServerMock.createKibanaRequest();
           const redirectUrl = '/mock-server-basepath/login?foo=bar';
-          const failureReason = new FailureClass();
+          const failureReason: SessionError = new FailureClass();
 
           mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
 
@@ -2795,10 +2961,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
-      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(
-        request,
-        mockSessVal.state
-      );
+      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(request, mockSessVal);
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
@@ -2989,6 +3152,45 @@ describe('Authenticator', () => {
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    describe('user activity tracking', () => {
+      it('tracks log_out_user action on logout with an active session', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockBasicAuthenticationProvider.logout.mockResolvedValue(
+          DeauthenticationResult.redirectTo('some-url')
+        );
+        mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
+
+        await authenticator.logout(request);
+
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith({
+          message: 'User logged out via basic provider "basic1".',
+          event: { action: 'log_out_user', type: 'end' },
+          object: {
+            id: mockSessVal.userProfileId,
+            name: mockSessVal.username,
+            type: 'user',
+            tags: [],
+          },
+          metadata: {
+            authenticationProvider: 'basic1',
+            authenticationType: 'basic',
+          },
+        });
+      });
+
+      it('does not track user activity on logout without an active session', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockBasicAuthenticationProvider.logout.mockResolvedValue(
+          DeauthenticationResult.redirectTo('some-url')
+        );
+
+        await authenticator.logout(request);
+
+        expect(mockOptions.userActivity.trackUserAction).not.toHaveBeenCalled();
+      });
     });
 
     it('redirects to login form if session does not exist and provider name is invalid', async () => {

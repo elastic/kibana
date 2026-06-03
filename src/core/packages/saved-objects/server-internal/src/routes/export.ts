@@ -169,10 +169,10 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         request: {
           body: schema.object({
             hasReference: schema.maybe(
-              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
             ),
             type: schema.maybe(
-              schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+              schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
                 meta: {
                   description:
                     'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',

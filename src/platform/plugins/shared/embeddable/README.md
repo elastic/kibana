@@ -1,8 +1,9 @@
 ## Table of Contents
 
+  - [Embeddable overview](#embeddable-overview)
   - [Public](#public)
     - [Guiding principles](#guiding-principles)
-    - [Embeddable overview](#embeddable-overview)
+    - [Embeddable public overview](#embeddable-public-overview)
     - [Publishing packages](#publishing-packages)
     - [Embeddable panel](#embeddable-panel)
     - [Best practices](#best-practices)
@@ -10,6 +11,16 @@
   - [Server](#server)
     - [REST APIs](#rest-apis-considerations)
     - [Transforms](#transforms)
+
+
+## Embeddable overview
+Embeddables require registration in both server and public.
+
+### registerEmbeddableServerDefinition
+Server registration defines the embeddable schema and other information required to include embeddables in public REST APIs like "dashboards as code". 
+
+### registerEmbeddablePublicDefinition
+Public registration defines the embeddable's UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 
 
 
 ## Public
@@ -27,12 +38,12 @@ Each embeddable manages its own state. This is because the embeddable system all
 
 An embeddable API shares state via a publishing subject, a read only RxJS Observable. An embeddable API shares setter methods for updating state.
 
-### Embeddable overview
+### Embeddable public overview
 Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 Plugins register new embeddable types with the embeddable plugin.
 ```
-embeddablePublicSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
+embeddablePublicSetup.registerEmbeddablePublicDefinition('my_embeddable_type', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
   return myEmbeddableFactory;
 });
@@ -190,12 +201,118 @@ Embeddable serialized state can not be modified with breaking changes. Fields ca
 #### snake_case
 Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
 
-#### Minimize required fields
-Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable. Where possible, avoid a required field by specifying a default.
+#### Avoid duplicating state
+Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable.
 
 #### Apply defaults in your schema
-POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. Any key that has a `defaultValue` must not be wrapped
-in a `schema.maybe`, as this will cause the defaults not to be applied at validation time.
+POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. 
+
+Any key that has a `defaultValue` should not be wrapped
+in a `schema.maybe`, as this will cause the defaults to not be applied at validation time.
+
+When a field is required with a default, instead of failing the request for not supplying a required field, route validation supplies the default value to the handler. 
+
+```
+//
+// Use this pattern
+//
+// When route validation recieves "{}", validation passes "{ foo: '' }" to handler
+//
+const myEmbeddlabeStateSchema = schema: schema.object({
+  foo: schema.string({
+    defaultValue: ''
+  }),
+});
+```
+
+When a field is optional with a default, route validation does not supply the default value to the handler.
+
+```
+//
+// Avoid this pattern
+//
+// When route validation recieves "{}", validation passes "{}" to route handler
+//
+const myEmbeddlabeStateSchema = schema: schema.object({
+  foo: schema.maybe(schema.string({
+    defaultValue: ''
+  })),
+});
+```
+
+#### Derive types from schemas
+Derive Embeddable state typescript types from REST API schemas to ensure type consistency.
+
+```
+//
+// Example deriving type MyEmbeddableState from schema myEmbeddlabeStateSchema
+//
+
+import type { TypeOf } from '@kbn/config-schema';
+
+const myEmbeddlabeStateSchema = schema: schema.object({
+  foo: schema.string(),
+});
+
+export type MyEmbeddableState = TypeOf<typeof myEmbeddlabeStateSchema>;
+```
+
+```
+//
+// Example deriving type MyEmbeddableState from function
+//
+
+import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import type { TypeOf } from '@kbn/config-schema';
+
+export const getMyEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+  return schema.allOf([
+    serializedTitlesSchema,
+    getDrilldownsSchema(MY_EMBEDDABLE_SUPPORTED_TRIGGERS),
+    schema.object({
+      foo: schema.string(),
+    })
+  ])
+};
+
+export type MyEmbeddableState = TypeOf<ReturnType<typeof getMyEmbeddableSchema>>;
+```
+
+Then, in common and public, replace existing embeddable types with derived types.
+
+```
+//
+// Example showing how to use derived type when registering embeddable factory in public 
+//
+
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { MyEmbeddableState } from '../../server';
+
+export type MyEditorApi = DefaultEmbeddableApi<MyEmbeddableState>; 
+
+export const myEmbeddableFactory: EmbeddablePublicDefinition<
+  MyEmbeddableState,
+  MyEmbeddableApi
+> = {
+  type: MY_EMBEDDABLE_TYPE,
+  buildEmbeddable: async (initialState) => {
+    //
+    // initialState passed to Embeddable as MyEmbeddableState
+    //
+    return {
+      api: {
+        serializeState: () => {
+          // Embeddable serializes state as MyEmbeddableState
+          return {
+            foo: 'hello world'
+          }
+        }
+      },
+      component: mockComponent
+    }
+  },
+
+```
 
 ### Transforms
 Transforms decouple REST API state from stored state, allowing embeddables to have one shape for REST APIs and another for storage.
@@ -204,14 +321,17 @@ Transforms decouple REST API state from stored state, allowing embeddables to ha
 
 **Note:** Transforms are optional and only required when an embeddable has references or a container has stored legacy embeddable state that needs to converted into new schema defined shape.
 
+**Note:** If your embeddable registeres `transformOut`, then you must also register the same function with `embeddablePublicSetup.registerLegacyURLTransform`. Dashboard allows users to share unsaved dashboard changes. This feature stores embeddable state in URLs.
+
 Containers use schemas to
 - Include embeddable state schemas in OpenAPI Specification (OAS) documenation.
 - Validate embeddable state, failing REST API requests when schema validation fails.
 
 ```
-embeddableServerSetup.registerTransforms(
-  'myEmbeddableType',
+embeddableServerSetup.registerEmbeddableServerDefinition(
+  'my_embeddable_type',
   {
+    title: 'My embeddable',
     getTransforms: (drilldownTransfroms) => ({
       transformIn: (state: EmbeddableState) => {
         return {
@@ -224,8 +344,7 @@ embeddableServerSetup.registerTransforms(
       },
     }),
     getSchema: (getDrilldownsSchema) => schema: schema.object({
-      required_field: schema.string(),
-      optional_field: schema.maybe(schema.string()),
+      foo: schema.string(),
     })
   }
 });

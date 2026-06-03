@@ -11,13 +11,25 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { NotesButton } from './notes_button';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { ThemeProvider } from 'styled-components';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
 const toggleShowNotesMock = jest.fn();
+
+const mockEventData: DataTableRecord & TimelineItem = {
+  id: 'event-id',
+  raw: { _id: 'event-id', _index: 'test-index' },
+  flattened: {},
+  _id: 'event-id',
+  data: [],
+  ecs: { _id: 'event-id', _index: 'test-index' },
+} as unknown as DataTableRecord & TimelineItem;
 
 const defaultProps: ComponentProps<typeof NotesButton> = {
   ariaLabel: 'Sample Notes',
   isDisabled: false,
   toggleShowNotes: toggleShowNotesMock,
+  eventData: mockEventData,
   eventId: 'event-id',
   notesCount: 1,
   timelineType: TimelineTypeEnum.default,
@@ -71,7 +83,7 @@ describe('helpers', () => {
     fireEvent.click(button);
 
     expect(toggleShowNotesMock).toHaveBeenCalledTimes(1);
-    expect(toggleShowNotesMock).toHaveBeenCalledWith('event-id');
+    expect(toggleShowNotesMock).toHaveBeenCalledWith('event-id', mockEventData);
   });
 
   test('should call the toggleShowNotes correctly when the button is clicked and eventId is not available', () => {

@@ -7,13 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { CreateTemplateForm } from './template_form';
-import { useCreateTemplate } from '../hooks/use_create_template';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { useAvailableCasesOwners } from '../../app/use_available_owners';
+import { TemplateYamlEditor } from './template_form';
 import { TestProviders } from '../../../common/mock';
-import * as i18n from '../translations';
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
@@ -25,54 +20,125 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
-jest.mock('../hooks/use_create_template');
-jest.mock('../../cases_context/use_cases_context');
-jest.mock('../../app/use_available_owners');
+jest.mock('../hooks/use_field_name_validation', () => ({
+  useFieldNameValidation: jest.fn(),
+}));
 
-describe('CreateTemplateForm', () => {
-  const mutateAsync = jest.fn();
+jest.mock('../hooks/use_user_picker_validation', () => ({
+  useUserPickerValidation: jest.fn(),
+}));
 
-  const renderForm = (definition: string) => {
-    const Wrapper = () => {
-      const form = useForm({
-        defaultValues: {
-          name: '',
-          owner: '',
-          definition,
-        },
-      });
-
-      return (
-        <TestProviders>
-          <FormProvider {...form}>
-            <CreateTemplateForm />
-          </FormProvider>
-        </TestProviders>
-      );
-    };
-
-    return render(<Wrapper />);
-  };
+describe('TemplateFormFields', () => {
+  const mockOnChange = jest.fn();
+  const mockUseFieldNameValidation = jest.requireMock(
+    '../hooks/use_field_name_validation'
+  ).useFieldNameValidation;
+  const mockUseUserPickerValidation = jest.requireMock(
+    '../hooks/use_user_picker_validation'
+  ).useUserPickerValidation;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useCreateTemplate as jest.Mock).mockReturnValue({ mutateAsync, isLoading: false });
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: ['securitySolution'] });
-    (useAvailableCasesOwners as jest.Mock).mockReturnValue(['securitySolution', 'observability']);
   });
 
-  it('submits the template with the default owner and definition', async () => {
-    renderForm('fields:\n  - name: test_field\n    type: keyword');
-
-    fireEvent.click(screen.getByRole('button', { name: i18n.SAVE_TEMPLATE }));
-
-    await waitFor(() =>
-      expect(mutateAsync).toHaveBeenCalledWith({
-        template: {
-          owner: 'securitySolution',
-          definition: 'fields:\n  - name: test_field\n    type: keyword',
-        },
-      })
+  const renderFields = (definition: string, onChange = mockOnChange) => {
+    return render(
+      <TestProviders>
+        <TemplateYamlEditor value={definition} onChange={onChange} />
+      </TestProviders>
     );
+  };
+
+  it('renders the YAML code editor with the provided definition', () => {
+    renderFields('fields:\n  - name: test_field\n    type: keyword');
+
+    expect(screen.getByTestId('code-editor')).toBeInTheDocument();
+    expect(screen.getByTestId('code-editor')).toHaveValue(
+      'fields:\n  - name: test_field\n    type: keyword'
+    );
+  });
+
+  it('calls onChange when the editor content changes', async () => {
+    renderFields('initial: value');
+
+    fireEvent.change(screen.getByTestId('code-editor'), {
+      target: { value: 'updated: value' },
+    });
+
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith('updated: value');
+    });
+  });
+
+  it('shows saved check icon when isSaved is true', () => {
+    render(
+      <TestProviders>
+        <TemplateYamlEditor value="test: value" onChange={mockOnChange} isSaved={true} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTitle('Template saved')).toBeInTheDocument();
+  });
+
+  it('calls useFieldNameValidation hook with editor and value', () => {
+    const yamlValue = 'fields:\n  - name: field1\n    type: keyword';
+    renderFields(yamlValue);
+
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, yamlValue);
+  });
+
+  it('calls useFieldNameValidation hook when value changes', async () => {
+    const { rerender } = render(
+      <TestProviders>
+        <TemplateYamlEditor value="initial: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'initial: value');
+
+    rerender(
+      <TestProviders>
+        <TemplateYamlEditor value="updated: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'updated: value');
+    });
+  });
+
+  it('calls useUserPickerValidation hook with editor, value and security', () => {
+    const yamlValue = 'fields:\n  - name: assignee\n    control: USER_PICKER\n    type: keyword';
+    renderFields(yamlValue);
+
+    expect(mockUseUserPickerValidation).toHaveBeenCalledWith(null, yamlValue, expect.anything());
+  });
+
+  it('calls useUserPickerValidation hook when value changes', async () => {
+    const { rerender } = render(
+      <TestProviders>
+        <TemplateYamlEditor value="initial: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    expect(mockUseUserPickerValidation).toHaveBeenCalledWith(
+      null,
+      'initial: value',
+      expect.anything()
+    );
+
+    rerender(
+      <TestProviders>
+        <TemplateYamlEditor value="updated: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseUserPickerValidation).toHaveBeenCalledWith(
+        null,
+        'updated: value',
+        expect.anything()
+      );
+    });
   });
 });

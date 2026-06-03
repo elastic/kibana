@@ -17,7 +17,7 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import { ALERTS_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -67,7 +67,7 @@ const mockUseKibanaReturnValue = {
   services: {
     timelines: { ...mockTimelines },
     application: {
-      capabilities: { [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true } },
+      capabilities: { [ALERTS_FEATURE_ID]: { edit: true, read: true }, [SECURITY_FEATURE_ID]: {} },
     },
     cases: {
       ...mockCasesContract(),
@@ -81,6 +81,7 @@ const mockUseKibanaReturnValue = {
           push: true,
           createComment: true,
           reopenCase: true,
+          manageTemplates: true,
         }),
         getRuleIdFromEvent: jest.fn(),
         getObservablesFromEcs: jest.fn().mockReturnValue([]),
@@ -105,7 +106,23 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
+}));
+
+const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runAlertWorkflowPanel: [],
+});
+jest.mock('./use_run_alert_workflow_panel', () => ({
+  useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+}));
+
+const mockUseRunDocumentWorkflowPanel = jest.fn().mockReturnValue({
+  runWorkflowMenuItem: [],
+  runDocumentWorkflowPanel: [],
+});
+jest.mock('./use_run_document_workflow_panel', () => ({
+  useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
 }));
 
 const actionMenuButton = 'timeline-context-menu-button';
@@ -117,6 +134,31 @@ const markAsClosedButton = 'alert-close-context-menu-item';
 const addEndpointEventFilterButton = 'add-event-filter-menu-item';
 const applyAlertTagsButton = 'alert-tags-context-menu-item';
 const applyAlertAssigneesButton = 'alert-assignees-context-menu-item';
+const runWorkflowActionButton = 'run-workflow-action';
+const alertWorkflowContextMenuPanel = 'alert-workflow-context-menu-panel';
+const alertWorkflowPanelContent = 'alert-workflow-panel-content';
+const runDocumentWorkflowActionButton = 'run-document-workflow-action';
+const documentWorkflowPanelContent = 'document-workflow-panel-content';
+
+// `alert_context_menu.tsx` eagerly imports four flyout components that are
+// never opened by any test in this file. Their transitive module graphs add a
+// large one-time cost to the first render through `<TestProviders>` +
+// `<AlertContextMenu>`, which under CI load was pushing the first `Case
+// actions` test past Jest's default 5s test timeout (flake on
+// kibana-on-merge build 96698). Replacing the flyouts with no-op components
+// removes the cost at its source.
+jest.mock(
+  '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout',
+  () => ({ EndpointExceptionsFlyout: () => null })
+);
+jest.mock('../../osquery/osquery_flyout', () => ({ OsqueryFlyout: () => null }));
+jest.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => ({
+  AddExceptionFlyout: () => null,
+}));
+jest.mock(
+  '../../../../management/pages/event_filters/view/components/event_filters_flyout',
+  () => ({ EventFiltersFlyout: () => null })
+);
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -179,6 +221,189 @@ describe('Alert table context menu', () => {
       expect(wrapper.queryByTestId(markAsOpenButton)).toBeNull();
       expect(wrapper.getByTestId(markAsAcknowledgedButton)).toBeInTheDocument();
       expect(wrapper.getByTestId(markAsClosedButton)).toBeInTheDocument();
+    });
+  });
+
+  describe('Workflow actions', () => {
+    const mockRunWorkflowMenuItem = [
+      {
+        'data-test-subj': runWorkflowActionButton,
+        key: 'run-workflow-action',
+        name: 'Run workflow',
+        panel: 'RUN_WORKFLOW_PANEL_ID',
+      },
+    ];
+    const mockRunAlertWorkflowPanel = [
+      {
+        id: 'RUN_WORKFLOW_PANEL_ID',
+        title: 'Alert workflows',
+        'data-test-subj': alertWorkflowContextMenuPanel,
+        content: <div data-test-subj={alertWorkflowPanelContent}>{'Workflow panel'}</div>,
+      },
+    ];
+
+    test('it does not render the run workflow action when workflow capability is disabled', async () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runAlertWorkflowPanel: [],
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(runWorkflowActionButton)).not.toBeInTheDocument();
+    });
+
+    test('it renders the run workflow action when workflow is enabled', async () => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockRunWorkflowMenuItem,
+        runAlertWorkflowPanel: mockRunAlertWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.getByTestId(runWorkflowActionButton)).toBeInTheDocument();
+    });
+
+    test('it shows the workflow panel when run workflow action is clicked', async () => {
+      // EuiPopover applies `pointer-events: none` on the panel until its mount
+      // transition completes. user-event v14 throws synchronously when it
+      // encounters that style, which made this click flaky. Disabling the
+      // pointer-events check here mirrors the sibling Document workflow test
+      // below and is the same fix the user-event docs recommend for popovers.
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockRunWorkflowMenuItem,
+        runAlertWorkflowPanel: mockRunAlertWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...props} scopeId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      await user.click(wrapper.getByTestId(actionMenuButton));
+      await user.click(wrapper.getByTestId(runWorkflowActionButton));
+
+      await waitFor(() => {
+        expect(wrapper.getByTestId(alertWorkflowPanelContent)).toBeInTheDocument();
+        expect(wrapper.getByText('Workflow panel')).toBeInTheDocument();
+      });
+    });
+
+    afterEach(() => {
+      mockUseRunAlertWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runAlertWorkflowPanel: [],
+      });
+    });
+  });
+
+  describe('Document workflow actions (events)', () => {
+    const eventEcsRowData: Ecs = {
+      _id: '1',
+      agent: { type: ['blah'] },
+      event: {
+        kind: ['event'],
+      },
+    };
+
+    const eventProps = {
+      ...props,
+      ecsRowData: eventEcsRowData,
+    };
+
+    const mockDocumentWorkflowMenuItem = [
+      {
+        'data-test-subj': runDocumentWorkflowActionButton,
+        key: 'run-document-workflow-action',
+        name: 'Run workflow',
+        panel: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
+      },
+    ];
+    const mockDocumentWorkflowPanel = [
+      {
+        id: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
+        title: 'Document workflows',
+        'data-test-subj': 'document-workflow-context-menu-panel',
+        content: (
+          <div data-test-subj={documentWorkflowPanelContent}>{'Document workflow panel'}</div>
+        ),
+      },
+    ];
+
+    test('it does not render the run document workflow action when workflow capability is disabled', async () => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.queryByTestId(runDocumentWorkflowActionButton)).not.toBeInTheDocument();
+    });
+
+    test('it renders the run document workflow action for event rows when workflow is enabled', async () => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockDocumentWorkflowMenuItem,
+        runDocumentWorkflowPanel: mockDocumentWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      await userEvent.click(wrapper.getByTestId(actionMenuButton));
+
+      expect(wrapper.getByTestId(runDocumentWorkflowActionButton)).toBeInTheDocument();
+    });
+
+    test('it shows the document workflow panel when run workflow action is clicked', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: mockDocumentWorkflowMenuItem,
+        runDocumentWorkflowPanel: mockDocumentWorkflowPanel,
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <AlertContextMenu {...eventProps} scopeId={TableId.hostsPageEvents} />
+        </TestProviders>
+      );
+
+      await user.click(wrapper.getByTestId(actionMenuButton));
+      await user.click(wrapper.getByTestId(runDocumentWorkflowActionButton));
+
+      await waitFor(() => {
+        expect(wrapper.getByTestId(documentWorkflowPanelContent)).toBeInTheDocument();
+      });
+    });
+
+    afterEach(() => {
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [],
+        runDocumentWorkflowPanel: [],
+      });
     });
   });
 

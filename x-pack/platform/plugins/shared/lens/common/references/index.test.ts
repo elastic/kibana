@@ -35,7 +35,7 @@ const getMockLensState = (
 describe('references', () => {
   describe('injectLensReferences', () => {
     it('should return by-ref state', () => {
-      const state = getMockLensState([getMockPanelReference()], { savedObjectId: uuidv4() });
+      const state = getMockLensState([getMockPanelReference()], { ref_id: uuidv4() });
       const references = [getMockPanelReference()];
       const injected = injectLensReferences(state, references);
 

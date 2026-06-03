@@ -36,6 +36,7 @@ export const bulkExportTemplatesRoute = createCasesRoute({
       body: { ids },
     },
     response,
+    logger,
   }) => {
     try {
       const caseContext = await context.cases;
@@ -58,9 +59,19 @@ export const bulkExportTemplatesRoute = createCasesRoute({
         });
       }
 
-      const parsedTemplates: ParsedTemplate[] = templates.flatMap(({ template }) =>
-        template ? [parseTemplate(template.attributes)] : []
-      );
+      const parsedTemplates: ParsedTemplate[] = templates.flatMap(({ template, templateId }) => {
+        if (!template) {
+          return [];
+        }
+        try {
+          return [parseTemplate(template.attributes)];
+        } catch (parseError) {
+          logger.warn(
+            `Skipping invalid template "${template.attributes.name}" (ID: ${templateId}): ${parseError}`
+          );
+          return [];
+        }
+      });
 
       return response.ok({
         body: parsedTemplates,

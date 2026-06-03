@@ -65,20 +65,21 @@ describe('dataStreamDetailsRoute', () => {
             client: jest.fn(),
           },
         }),
-      } as any,
+      },
       logger: mockLogger,
       request: mockRequest,
       plugins: {
         fleet: {
-          setup: {} as any,
+          setup: {},
           start: jest.fn().mockResolvedValue({
             packageService: {
               asScoped: jest.fn().mockReturnValue({}),
             },
           }),
         },
-      } as any,
+      },
       getEsCapabilities: jest.fn(),
+      getIsSecurityEnabled: jest.fn().mockResolvedValue(true),
       params: {
         path: {
           dataStream: 'logs-test-default',
@@ -88,7 +89,9 @@ describe('dataStreamDetailsRoute', () => {
           end: 1234567900,
         },
       },
-    } as any;
+    } as unknown as DatasetQualityRouteHandlerResources & {
+      params: { path: { dataStream: string }; query: { start: number; end: number } };
+    };
 
     mockGetDataStreamDetails.mockResolvedValue({
       docsCount: 1000,
@@ -164,6 +167,7 @@ describe('dataStreamDetailsRoute', () => {
         start: 1234567890,
         end: 1234567900,
         isServerless: false,
+        isSecurityEnabled: true,
       });
 
       expect(mockGetDataStreamDefaultRetentionPeriod).toHaveBeenCalledWith({
@@ -202,7 +206,9 @@ describe('dataStreamDetailsRoute', () => {
     });
 
     it('returns empty object when getDataStreamDetails returns null', async () => {
-      mockGetDataStreamDetails.mockResolvedValue(null as any);
+      mockGetDataStreamDetails.mockResolvedValue(
+        null as unknown as Awaited<ReturnType<typeof getDataStreamDetails>>
+      );
 
       const result = await handler(mockResources);
 
@@ -300,20 +306,21 @@ describe('updateFailureStoreRoute', () => {
             client: jest.fn(),
           },
         }),
-      } as any,
+      },
       logger: mockLogger,
       request: mockRequest,
       plugins: {
         fleet: {
-          setup: {} as any,
+          setup: {},
           start: jest.fn().mockResolvedValue({
             packageService: {
               asScoped: jest.fn().mockReturnValue({}),
             },
           }),
         },
-      } as any,
+      },
       getEsCapabilities: jest.fn(),
+      getIsSecurityEnabled: jest.fn().mockResolvedValue(true),
       params: {
         path: {
           dataStream: 'logs-test-default',
@@ -323,7 +330,12 @@ describe('updateFailureStoreRoute', () => {
           customRetentionPeriod: '30d',
         },
       },
-    } as any;
+    } as unknown as DatasetQualityRouteHandlerResources & {
+      params: {
+        path: { dataStream: string };
+        body: { failureStoreEnabled: boolean; customRetentionPeriod: string | undefined };
+      };
+    };
 
     mockUpdateFailureStore.mockResolvedValue({
       headers: { 'x-elastic-product': 'Elasticsearch' },

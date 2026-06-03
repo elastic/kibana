@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SmlSearchFilters } from '@kbn/agent-context-layer-plugin/public';
+
 /**
  * Query keys for react-query
  */
@@ -17,6 +19,12 @@ export const queryKeys = {
   agentProfiles: {
     all: ['agentProfiles'] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
+    acl: (agentProfileId: string) => ['agentProfiles', agentProfileId, 'acl'] as const,
+  },
+  security: {
+    users: ['security', 'users'] as const,
+    suggestUsers: (query: string) => ['security', 'users', 'suggest', query] as const,
+    roles: ['security', 'roles'] as const,
   },
   tools: {
     all: ['tools', 'list'] as const,
@@ -43,5 +51,26 @@ export const queryKeys = {
       validate: (namespace: string, connectorId?: string) =>
         ['tools', 'namespace', 'validate', namespace, connectorId] as const,
     },
+  },
+  skills: {
+    all: ['skills'] as const,
+    list: ['skills', 'list'] as const,
+    byId: (skillId?: string) => ['skills', skillId],
+    byAgent: (agentId?: string) => ['skills', 'byAgent', agentId],
+  },
+  sml: {
+    search: (query: string, skipContent: boolean, filters?: SmlSearchFilters) =>
+      ['sml', 'search', { query, skipContent, filters }] as const,
+  },
+  plugins: {
+    all: ['plugins', 'list'] as const,
+    byId: (pluginId?: string) => ['plugins', pluginId],
+  },
+  connectors: {
+    all: ['connectors'] as const,
+  },
+  oauthClients: {
+    all: ['oauthClients', 'list'] as const,
+    byId: (clientId: string) => ['oauthClients', clientId] as const,
   },
 };

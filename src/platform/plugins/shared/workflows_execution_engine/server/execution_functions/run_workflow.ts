@@ -9,9 +9,20 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isTerminalStatus,
+} from '@kbn/workflows';
+import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -23,7 +34,9 @@ export async function runWorkflow({
   config,
   fakeRequest,
   dependencies,
+  workflowsExecutionEngine,
   meteringService,
+  internalResumeWorkflowExecution,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -32,7 +45,9 @@ export async function runWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -40,19 +55,81 @@ export async function runWorkflow({
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
     workflowTaskManager,
     workflowExecutionRepository,
     esClient,
-  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+    telemetryClient,
+  } = await setupDependencies(
+    workflowRunId,
+    spaceId,
+    logger,
+    config,
+    dependencies,
+    fakeRequest,
+    workflowsExecutionEngine
+  );
+
   setupSpan?.end();
 
-  // Span for runtime initialization
+  const execution = workflowExecutionState.getWorkflowExecution();
+  if (isTerminalStatus(execution.status)) {
+    logger.debug(
+      `Skipping workflow run ${workflowRunId}: execution already terminal [${execution.status}]`
+    );
+    if (meteringService) {
+      void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
+    }
+    return;
+  }
+
+  const triggeredBy = execution.triggeredBy;
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+  if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
+    const cancelledAt = new Date().toISOString();
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason: 'Event-driven execution disabled by operator',
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    logger.debug(
+      `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+    );
+    telemetryClient.reportEventDrivenExecutionSuppressed({
+      workflowExecution: {
+        ...execution,
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: 'Event-driven execution disabled by operator',
+        cancelledAt,
+        cancelledBy: 'system',
+      },
+      logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
+    });
+    return;
+  }
+
+  // Span for runtime initialization (graph building, topsort, etc.)
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
-  await workflowRuntime.start();
-  startSpan?.end();
+  try {
+    await workflowRuntime.start();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(
+      `Workflow execution ${workflowRunId} failed during runtime start: ${errorMessage}`
+    );
+    if (errorStack) {
+      logger.error(`Workflow execution ${workflowRunId} runtime start error stack: ${errorStack}`);
+    }
+    throw error;
+  } finally {
+    startSpan?.end();
+  }
 
   // Span for the main execution loop
   const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');
@@ -61,6 +138,7 @@ export async function runWorkflow({
       workflowRuntime,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
+      stepIoService,
       workflowExecutionRepository,
       workflowLogger,
       nodesFactory,
@@ -77,26 +155,26 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
+
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
   }
 
-  // Report metering after execution completes and state is flushed.
-  // This is fire-and-forget: the metering service handles retries and
-  // will no-op for non-terminal states (e.g., WAITING for resume).
-  if (meteringService) {
-    try {
-      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowRunId,
-        spaceId
-      );
-      if (finalExecution) {
-        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
-      }
-    } catch (err) {
-      logger.warn(
-        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  }
+  await handlePostExecutionLoop({
+    workflowRunId,
+    spaceId,
+    logger,
+    fakeRequest,
+    workflowExecutionRepository,
+    internalResumeWorkflowExecution,
+    workflowTaskManager,
+    meteringService,
+    cloudSetup: dependencies.cloudSetup,
+  });
 }

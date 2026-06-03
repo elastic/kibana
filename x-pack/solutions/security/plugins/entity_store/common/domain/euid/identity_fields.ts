@@ -6,39 +6,53 @@
  */
 
 import type { EntityType } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
 
 export interface IdentitySourceFields {
-  /** At least one must be present for identity to be valid.
-   * This can be used to filter documents before the entity ID is calculated.
+  /** Fields that participate in identity (EUID composition). Derived from euidRanking.
+   * At least one is typically required for a valid identity; the exact rule is in documentsFilter.
    */
   requiresOneOf: string[];
-  /** All field names used in EUID composition, deduplicated
+  /** All field names used in EUID composition, deduplicated.
    * This can be used to extract the ID fields from the document.
-   **/
+   */
   identitySourceFields: string[];
 }
 
 /**
- * Returns the identity source field names for a given entity type and
- * required fields for the entity ID.
+ * Returns the identity source field names for a given entity type.
+ * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
  *
  * @param entityType - The entity type (e.g. 'host', 'user', 'service')
- * @returns requiresOneOf and identitySourceFields from the entity definition
+ * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidRanking
  */
 export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
-  const {
-    identityField: { requiresOneOfFields, euidFields },
-  } = getEntityDefinitionWithoutId(entityType);
-  return {
-    requiresOneOf: requiresOneOfFields,
-    identitySourceFields: Array.from(
-      new Set(
-        euidFields.flatMap((composedField) =>
-          composedField.filter(isEuidField).map((attr) => attr.field)
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const field = identityField.singleField;
+    return {
+      requiresOneOf: [field],
+      identitySourceFields: [field],
+    };
+  }
+
+  const { euidRanking, fieldEvaluations } = identityField;
+  const evaluationDestinations = new Set((fieldEvaluations ?? []).map((e) => e.destination));
+  const allFields = Array.from(
+    new Set(
+      euidRanking.branches.flatMap((branch) =>
+        branch.ranking.flatMap((composition) =>
+          composition.filter(isEuidField).map((attr) => attr.field)
         )
       )
-    ),
+    )
+  );
+  const identitySourceFields = allFields.filter((field) => !evaluationDestinations.has(field));
+  return {
+    requiresOneOf: identitySourceFields,
+    identitySourceFields,
   };
 }

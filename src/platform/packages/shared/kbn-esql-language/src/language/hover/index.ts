@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { Walker, within } from '../../ast';
-import { Parser } from '../../parser';
+import { Walker, within, Parser } from '@elastic/esql';
 
-import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '../../types';
+import type { ESQLFunction, ESQLSingleAstItem, ESQLSource } from '@elastic/esql/types';
 
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getPromqlHoverItem, getVariablesHoverContent } from './helpers';
@@ -33,7 +32,7 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
   const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
 
   if (commandAtOffset?.name === 'promql') {
-    return getPromqlHoverItem(root, offset);
+    return getPromqlHoverItem(root, offset, callbacks, fullText);
   }
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;

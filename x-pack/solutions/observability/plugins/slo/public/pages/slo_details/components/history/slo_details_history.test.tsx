@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
+import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { render } from '../../../../utils/test_helper';
 import { buildSlo } from '../../../../data/slo/slo';
 import { buildCalendarAlignedTimeWindow } from '../../../../data/slo/time_window';
@@ -20,9 +21,11 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_fetch_historical_summary');
+jest.mock('../../../../hooks/use_fetch_apm_indices');
 
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
+const useFetchApmIndicesMock = useFetchApmIndices as jest.Mock;
 
 const mockHistoricalSummaryData: FetchHistoricalSummaryResponse = [
   {
@@ -94,12 +97,16 @@ describe('SloDetailsHistory', () => {
             return '';
           },
         },
+        share: { url: { locators: { get: () => undefined } } },
+        http: { basePath: { prepend: (path: string) => path } },
+        application: { capabilities: { apm: { show: false } } },
       },
     });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: false,
       data: mockHistoricalSummaryData,
     });
+    useFetchApmIndicesMock.mockReturnValue({ data: { metric: '', transaction: '', span: '' } });
   });
 
   it('renders the history view with error rate panel', () => {
@@ -150,6 +157,16 @@ describe('SloDetailsHistory', () => {
     expect(screen.getByText('Objective')).toBeTruthy();
   });
 
+  it('shows reset control for calendar aligned time window', () => {
+    const slo = buildSlo({
+      timeWindow: buildCalendarAlignedTimeWindow(),
+    });
+
+    render(<SloDetailsHistory slo={slo} />);
+
+    expect(screen.getByTestId('sloSloDetailsHistoryResetButton')).toBeDisabled();
+  });
+
   it('works with rolling time window', () => {
     const slo = buildSlo({
       timeWindow: buildRollingTimeWindow(),
@@ -159,6 +176,7 @@ describe('SloDetailsHistory', () => {
     expect(screen.queryByTestId('errorRatePanel')).toBeTruthy();
     expect(screen.getByText('Observed value')).toBeTruthy();
     expect(screen.getByText('Objective')).toBeTruthy();
+    expect(screen.queryByTestId('sloSloDetailsHistoryResetButton')).toBeNull();
   });
 
   it('handles NO_DATA status in historical data', () => {

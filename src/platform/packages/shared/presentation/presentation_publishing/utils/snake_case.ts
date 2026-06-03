@@ -25,7 +25,7 @@ export const convertCamelCasedKeysToSnakeCase = <StateType extends object = obje
     for (const [key, value] of Object.entries(subObject)) {
       const currentPath = `${path}${path.length ? '.' : ''}${snakeCase(key)}`;
 
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (typeof value === 'object' && value !== null && Object.entries(value).length) {
         convertSubObject(value, currentPath);
       } else {
         /**

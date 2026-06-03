@@ -30,8 +30,7 @@ test.describe(
       const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
       expect(isHeaderVisible).toBe(true);
 
-      const isSelectorVisible = await pageObjects.spaces.isSpacesSelectorVisible();
-      expect(isSelectorVisible).toBe(true);
+      await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
     });
 
     test('as Viewer - does not display the manage button in the space selection menu', async ({
@@ -60,8 +59,7 @@ test.describe(
       const isHeaderVisible = await pageObjects.spaces.isProjectHeaderVisible();
       expect(isHeaderVisible).toBe(true);
 
-      const isSelectorVisible = await pageObjects.spaces.isSpacesSelectorVisible();
-      expect(isSelectorVisible).toBe(true);
+      await expect(pageObjects.spaces.spacesSelectorLocator()).toBeVisible();
     });
 
     test('as Admin - displays the manage button in the space selection menu', async ({

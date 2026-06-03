@@ -1,5 +1,5 @@
 {
-  "sha1": "4e645a9e1ebd8d0615712aa4407b0f5968c7ed2f",
+  "sha1": "1198d846efb2e4afdd26ee6d18d1facfa45977e8",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,8 +13,92 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 20,
-        "column": 16
+        "line": 28,
+        "column": 1
+      }
+    },
+    {
+      "id": "4799fe461e33a92-c74e20529e96d27",
+      "title": "Alert details - Explore in APM Stateful - View in APM link from alert details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "4799fe461e33a92-31a86326526525f",
+      "title": "Alert details - Explore in APM Serverless - View in APM link from alert details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-345cf8b9ba5e4fc",
+      "title": "Alert details - Chart layout Stateful - Latency threshold renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-064ee06ae3efb3a",
+      "title": "Alert details - Chart layout Serverless - Latency threshold renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-06f72cdbe1613f9",
+      "title": "Alert details - Chart layout Stateful - Failed transaction rate renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b772722b95dac-03c7c4e61ee8c9e",
+      "title": "Alert details - Chart layout Serverless - Failed transaction rate renders correct chart layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 90,
+        "column": 7
       }
     },
     {
@@ -29,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 144,
+        "line": 95,
         "column": 7
       }
     },
@@ -43,7 +127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 187,
+        "line": 138,
         "column": 7
       }
     },
@@ -57,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 193,
+        "line": 144,
         "column": 7
       }
     },
@@ -174,6 +258,22 @@
       }
     },
     {
+      "id": "715f0d1ddbfcb97-ca43ac1288c82b0",
+      "title": "Dependency Operation Detail Page Service badge in waterfall links to service overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
+        "line": 87,
+        "column": 9
+      }
+    },
+    {
       "id": "715f0d1ddbfcb97-fe96886a2c0edec",
       "title": "Dependency Operation Detail Page Has no detectable a11y violations on load",
       "expectedStatus": "passed",
@@ -185,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 87,
+        "line": 99,
         "column": 9
       }
     },
@@ -478,6 +578,70 @@
       }
     },
     {
+      "id": "df56a3325a48a71-afebe196ba7356a",
+      "title": "Infrastructure tab passes automated accessibility checks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-20a57e1ac67e92e",
+      "title": "Infrastructure tab shows container, pod, and host tabs when all infrastructure attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-840fea91fe7661e",
+      "title": "Infrastructure tab shows only the host tab when only host attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "df56a3325a48a71-0e5d0a0406776e4",
+      "title": "Infrastructure tab shows no data message when no infrastructure attributes exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
       "id": "60c9455fa8e8206-13b591e4873487b",
       "title": "Service Dashboards displays a linked dashboard with a control group",
       "expectedStatus": "passed",
@@ -489,7 +653,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 20,
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "60c9455fa8e8206-ef6b96f5ed98950",
+      "title": "Service Dashboards unlinks a dashboard and shows the empty state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
+        "line": 95,
         "column": 9
       }
     },
@@ -537,7 +717,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 44,
+        "line": 49,
         "column": 9
       }
     },
@@ -553,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 52,
+        "line": 57,
         "column": 9
       }
     },
@@ -569,14 +749,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 61,
+        "line": 68,
         "column": 9
       }
     },
     {
       "id": "027a724476bf822-7a5ac6225930c1c",
       "title": "Service map - accessibility axe-core automated accessibility checks pass",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -585,30 +765,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 29,
-        "column": 9
-      }
-    },
-    {
-      "id": "027a724476bf822-3e58cea4efef368",
-      "title": "Service map - accessibility keyboard navigation works correctly",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 67,
+        "line": 27,
         "column": 9
       }
     },
     {
       "id": "027a724476bf822-d188045f3c69eae",
       "title": "Service map - accessibility focus management and visible indicators work correctly",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -617,14 +781,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 114,
+        "line": 44,
         "column": 9
       }
     },
     {
       "id": "027a724476bf822-c5ee877afe0ab0a",
       "title": "Service map - accessibility ARIA attributes are properly set for screen readers",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -633,8 +797,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 141,
+        "line": 86,
         "column": 9
+      }
+    },
+    {
+      "id": "f762bf7edaabdb2-a543bea8165a91c",
+      "title": "Service map - active alert badge on node shows active alert count on service node (stateful)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
+        "line": 143,
+        "column": 7
+      }
+    },
+    {
+      "id": "f762bf7edaabdb2-61114232b2416d8",
+      "title": "Service map - active alert badge on node shows active alert count on service node (serverless)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
+        "line": 149,
+        "column": 7
       }
     },
     {
@@ -649,7 +841,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 32,
+        "line": 36,
         "column": 9
       }
     },
@@ -665,7 +857,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 63,
+        "line": 67,
         "column": 9
       }
     },
@@ -681,7 +873,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 78,
+        "line": 81,
         "column": 9
       }
     },
@@ -697,7 +889,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 91,
+        "line": 93,
         "column": 9
       }
     },
@@ -713,7 +905,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 102,
+        "line": 105,
         "column": 9
       }
     },
@@ -729,7 +921,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 117,
+        "line": 119,
         "column": 9
       }
     },
@@ -745,7 +937,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 136,
+        "line": 137,
         "column": 9
       }
     },
@@ -766,6 +958,22 @@
       }
     },
     {
+      "id": "6ab0e55ecb54392-b5d9e6a756e8940",
+      "title": "Service map embeddable adds Service map panel with service name, environment and KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
       "id": "431bbf1927933f1-820ffa8139e87c1",
       "title": "Service map renders page with selected date range",
       "expectedStatus": "passed",
@@ -777,7 +985,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 9
       }
     },
@@ -793,7 +1001,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 9
       }
     },
@@ -809,7 +1017,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 45,
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-306551b6afaacbe",
+      "title": "Service map options panel: find in page, filter placeholders, and Ctrl+K focus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 57,
         "column": 9
       }
     },
@@ -890,6 +1114,358 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
         "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-0ab00f544989df5",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-apm-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-17e81ddfc1fc81e",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-apm-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-eb42082faf7f921",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-2f1561cf77c2ce4",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-5ed2d20b3456188",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-dotnet (v9)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-703ea67da9b1846",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-dotnet-lte-v8",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-91a78811f036116",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-4111eb38f32ae9a",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-b635f4d346de101",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-dotnet",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-8c4725fb3f904a9",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-go",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-8aca599734b641a",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-dc22de484ac0e17",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-7d9ef290b028adb",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-python",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-fb52a243b4159c6",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-a197d918d98d10d",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-a3c8ce45cc39ff5",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-python",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-b116340b7c905db",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-go",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 217,
+        "column": 11
+      }
+    },
+    {
+      "id": "4242553c72842b7-83696829f0d91be",
+      "title": "Metrics Tab - Non-Dashboard Variations renders JVM metrics overview for JRuby agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "4242553c72842b7-dbc59ad4d31842e",
+      "title": "Metrics Tab - Non-Dashboard Variations renders generic service metrics for Go agent (elastic agent without dashboard)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "4242553c72842b7-7a8ae3773644c59",
+      "title": "Metrics Tab - Non-Dashboard Variations renders serverless metrics for AWS Lambda",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
+        "line": 112,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2b5cbd964753d1-a075ca8194c0ad2",
+      "title": "Service Overview - AWS Lambda displays cold start rate chart and not transaction breakdown chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_aws_lambda.spec.ts",
+        "line": 20,
+        "column": 9
+      }
+    },
+    {
+      "id": "61abd2418453f25-d9f094b073ce786",
+      "title": "Service Overview - Azure Functions displays cold start rate chart and not transaction breakdown chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_azure_functions.spec.ts",
+        "line": 21,
         "column": 9
       }
     },
@@ -1033,7 +1609,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 9
       }
     },
@@ -1049,7 +1625,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 9
       }
     },
@@ -1065,7 +1641,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 93,
+        "line": 99,
         "column": 9
       }
     },
@@ -1081,7 +1657,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 115,
+        "line": 122,
         "column": 9
       }
     },
@@ -1097,7 +1673,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 143,
+        "line": 169,
         "column": 9
       }
     },
@@ -1225,7 +1801,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 9
       }
     },
@@ -1241,7 +1817,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 65,
+        "line": 67,
         "column": 9
       }
     },
@@ -1257,7 +1833,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 9
       }
     },
@@ -1481,7 +2057,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 103,
+        "line": 106,
         "column": 9
       }
     },
@@ -1497,7 +2073,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 131,
+        "line": 134,
         "column": 9
       }
     },
@@ -1513,7 +2089,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 153,
+        "line": 156,
         "column": 9
       }
     },
@@ -1728,8 +2304,8 @@
       }
     },
     {
-      "id": "b1d9732f2022f52-1d041dd11a76a98",
-      "title": "Custom links template validation Create custom link with template URL and filters",
+      "id": "b1d9732f2022f52-21e57a8269d0449",
+      "title": "Custom links template validation template URL with filters — create from settings, verify in transaction, delete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1739,13 +2315,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 33,
+        "line": 29,
         "column": 9
       }
     },
     {
-      "id": "b1d9732f2022f52-244e245a602c0a7",
-      "title": "Custom links template validation Verify template variables are populated correctly in custom link URLs",
+      "id": "b1d9732f2022f52-4eb454b9f6d8aaf",
+      "title": "Custom links template validation default URL flow — create link from transaction details with prefilled filters, delete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1755,55 +2331,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 64,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-8c63ceeb998a13d",
-      "title": "Custom links template validation Delete custom link with template URL",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 92,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-ac6bad5f389c557",
-      "title": "Custom links template validation Open transaction and validate the default url when creating a custom link",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 112,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-5f08fd317b97702",
-      "title": "Custom links template validation Delete custom link created from transaction details",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 186,
+        "line": 102,
         "column": 9
       }
     },
@@ -1983,7 +2511,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 29,
+        "line": 31,
         "column": 9
       }
     },
@@ -1999,7 +2527,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 83,
+        "line": 77,
         "column": 9
       }
     },
@@ -2015,7 +2543,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 125,
+        "line": 114,
         "column": 9
       }
     },
@@ -2031,7 +2559,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 159,
+        "line": 151,
         "column": 9
       }
     },
@@ -2047,7 +2575,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 194,
+        "line": 186,
         "column": 9
       }
     },
@@ -2079,7 +2607,71 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 50,
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-e9cb937ad8469a8",
+      "title": "Trace waterfall flyout Full trace flyout renders waterfall and opens child flyouts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-ff7eb0f1f1af6e7",
+      "title": "Trace waterfall flyout \"Open in Discover\" opens Discover with trace filter and results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-89205e72f80dbc5",
+      "title": "Trace waterfall flyout \"Open in APM\" navigates to the root transaction detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-e7b2804e4de31d3",
+      "title": "Transaction details Redirects to transaction list when transactionName is missing in URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 26,
         "column": 9
       }
     },
@@ -2095,7 +2687,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 26,
+        "line": 48,
         "column": 9
       }
     },
@@ -2111,7 +2703,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 53,
+        "line": 71,
         "column": 9
       }
     },
@@ -2127,7 +2719,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 75,
+        "line": 93,
         "column": 9
       }
     },

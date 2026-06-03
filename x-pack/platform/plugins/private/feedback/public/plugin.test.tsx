@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { FeedbackPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -19,20 +20,47 @@ describe('Feedback Plugin', () => {
   describe('start', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      sessionStorage.clear();
     });
 
-    it('should register feedback button when feedback is enabled, telemetry is enabled and user is opted in', () => {
+    const enableFeedback = () => {
       coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
       jest.spyOn(telemetryStartMock.telemetryService, 'canSendTelemetry').mockReturnValue(true);
       jest.spyOn(telemetryStartMock.telemetryService, 'getIsOptedIn').mockReturnValue(true);
+    };
+
+    it('should register feedback button when feedback is enabled, telemetry is enabled and user is opted in', () => {
+      enableFeedback();
 
       plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
       expect(coreStartMock.notifications.feedback.isEnabled).toHaveBeenCalled();
+      const [[{ content }]] = coreStartMock.chrome.navControls.registerRight.mock.calls;
       expect(coreStartMock.chrome.navControls.registerRight).toHaveBeenCalledWith({
         order: 1001,
-        mount: expect.any(Function),
+        content: expect.anything(),
       });
+      expect(React.isValidElement(content)).toBe(true);
+    });
+
+    it('should register feedback handler in the Chrome Next namespace when Chrome Next is enabled', () => {
+      enableFeedback();
+      coreStartMock.featureFlags.getBooleanValue.mockReturnValue(true);
+
+      plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
+
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
+
+    it('should not register feedback handler when Chrome Next is disabled', () => {
+      enableFeedback();
+      coreStartMock.featureFlags.getBooleanValue.mockReturnValue(false);
+
+      plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
+
+      expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
     });
 
     it('should not register feedback button when feedback is disabled', () => {

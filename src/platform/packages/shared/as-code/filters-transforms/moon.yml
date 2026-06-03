@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/as-code-filters-transforms'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/as-code-filters-transforms'
+  title: '@kbn/as-code-filters-transforms'
   description: Moon project for @kbn/as-code-filters-transforms
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/packages/shared/as-code/filters-transforms
+  sourceRoot: src/platform/packages/shared/as-code/filters-transforms
 dependsOn:
   - '@kbn/as-code-filters-schema'
   - '@kbn/es-query-server'
@@ -37,16 +36,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

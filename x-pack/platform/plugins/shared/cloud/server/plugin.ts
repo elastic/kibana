@@ -113,6 +113,16 @@ export interface CloudSetup {
     secretToken?: string;
   };
   /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
+  /**
    * Onboarding configuration.
    */
   onboarding: {
@@ -121,6 +131,11 @@ export interface CloudSetup {
      */
     defaultSolution?: SolutionId;
   };
+  /**
+   * `true` when running on ECE (Elastic Cloud Enterprise).
+   * `false` or `undefined` on ESS or self-managed.
+   */
+  isEce?: boolean;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -170,6 +185,11 @@ export interface CloudSetup {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 /**
@@ -196,6 +216,11 @@ export interface CloudStart {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -376,11 +401,15 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
+      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
       trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
       },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
@@ -398,6 +427,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         organizationInTrial: this.config.serverless?.in_trial,
       },
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -406,6 +436,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -418,18 +449,22 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  private isInTrial(): boolean {
-    if (this.config.serverless?.in_trial) return true;
-    if (this.trialEndDate !== undefined) {
-      if (this.config.trial_end_date) {
-        const endDateMs = this.trialEndDate.getTime();
-        if (!Number.isNaN(endDateMs)) {
-          return Date.now() <= endDateMs;
-        } else {
-          this.logger.error('cloud.trial_end_date config value could not be parsed.');
-        }
+  private trialDaysLeft(): number | undefined {
+    if (this.trialEndDate !== undefined && this.config.trial_end_date) {
+      const endDateMs = this.trialEndDate.getTime();
+      if (!Number.isNaN(endDateMs)) {
+        const diff = endDateMs - Date.now();
+        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+      } else {
+        this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return false;
+    return undefined;
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    const daysLeft = this.trialDaysLeft();
+    return daysLeft !== undefined && daysLeft > 0;
   }
 }

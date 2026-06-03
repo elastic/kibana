@@ -6,8 +6,8 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { partition } from 'lodash';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { groupBy } from 'lodash';
 import { isResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
@@ -22,6 +22,7 @@ import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
+import { getVendorProcessor } from '../../vendors/get_vendor_processor';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -70,9 +71,41 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               return res.notFound({ body: { message: 'Migration not found' } });
             }
 
-            const [lookups, macros] = partition(resources, { type: 'lookup' });
+            const resourcesByType = groupBy(resources, 'type');
+            const lookups = resourcesByType.lookup ?? [];
+            const macros = resourcesByType.macro ?? [];
+            const watchlists = resourcesByType.watchlist ?? [];
+
+            if (watchlists.length > 0 && rule.original_rule.vendor !== 'microsoft-sentinel') {
+              return res.badRequest({
+                body: {
+                  message:
+                    'Sentinel watchlist resources can only be uploaded to Sentinel migrations',
+                },
+              });
+            }
+
+            let lookupsToProcess = lookups;
+            if (watchlists.length > 0) {
+              try {
+                const VendorProcessor = getVendorProcessor('microsoft-sentinel');
+                const processedWatchlists = new VendorProcessor({
+                  migrationId,
+                  dataClient: ruleMigrationsClient.data.items,
+                  logger,
+                }).getProcessor('resources')(watchlists);
+                lookupsToProcess = [...lookups, ...processedWatchlists];
+              } catch (error) {
+                return res.badRequest({
+                  body: {
+                    message: `Failed to process Sentinel watchlist resources: ${error.message}`,
+                  },
+                });
+              }
+            }
+
             const processedLookups = await processLookups(
-              lookups,
+              lookupsToProcess,
               ruleMigrationsClient.data.lookups
             );
             const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({

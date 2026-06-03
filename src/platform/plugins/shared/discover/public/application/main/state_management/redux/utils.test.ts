@@ -11,6 +11,7 @@ import {
   createTabItem,
   extractEsqlVariables,
   getSerializedSearchSourceDataViewDetails,
+  parseControlGroupJson,
 } from './utils';
 import { type TabState } from './types';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
@@ -124,16 +125,22 @@ describe('extractEsqlVariables', () => {
     width: 'medium',
     grow: false,
     control_type: EsqlControlType.STATIC_VALUES,
-    esql_query: '',
   });
 
-  it('should extract single-select string variable', () => {
+  it('should extract variables from control panels', () => {
     const panels: ControlPanelsState<OptionsListESQLControlState> = {
       panel1: createMockESQLControlPanel(
         'myVar',
         ESQLVariableType.VALUES,
         ['option1', 'option2'],
         true
+      ),
+      panel2: createMockESQLControlPanel(
+        'multiVar',
+        ESQLVariableType.MULTI_VALUES,
+        ['1', '2', '3'],
+        false,
+        1
       ),
     };
 
@@ -142,63 +149,63 @@ describe('extractEsqlVariables', () => {
       {
         key: 'myVar',
         type: ESQLVariableType.VALUES,
-        value: 'option1', // First selected value as string
+        value: 'option1',
+      },
+      {
+        key: 'multiVar',
+        type: ESQLVariableType.MULTI_VALUES,
+        value: ['1', '2', '3'],
       },
     ]);
   });
 
-  it('should extract single-select numeric variable', () => {
-    const panels: ControlPanelsState<OptionsListESQLControlState> = {
-      panel1: createMockESQLControlPanel('numVar', ESQLVariableType.VALUES, ['123', '456'], true),
-    };
+  it('should extract variables from legacy parsed control panels', () => {
+    const panels = parseControlGroupJson(
+      JSON.stringify({
+        panel1: {
+          ...createMockESQLControlPanel('legacyVar', ESQLVariableType.VALUES, ['legacyValue']),
+          type: 'esqlControl',
+        },
+      })
+    );
 
-    const result = extractEsqlVariables(panels);
-    expect(result).toEqual([
+    expect(panels.panel1?.type).toBe(ESQL_CONTROL);
+    expect(extractEsqlVariables(panels)).toEqual([
       {
-        key: 'numVar',
+        key: 'legacyVar',
         type: ESQLVariableType.VALUES,
-        value: 123, // First selected value converted to number
+        value: 'legacyValue',
       },
     ]);
   });
+});
 
-  it('should extract multi-select string variables', () => {
-    const panels: ControlPanelsState<OptionsListESQLControlState> = {
-      panel1: createMockESQLControlPanel(
-        'multiVar',
-        ESQLVariableType.MULTI_VALUES,
-        ['apple', 'banana', 'cherry'],
-        false
-      ),
-    };
-
-    const result = extractEsqlVariables(panels);
-    expect(result).toEqual([
-      {
-        key: 'multiVar',
-        type: ESQLVariableType.MULTI_VALUES,
-        value: ['apple', 'banana', 'cherry'],
+describe('parseControlGroupJson', () => {
+  it('should normalize legacy esqlControl panel types', () => {
+    expect(
+      parseControlGroupJson(
+        JSON.stringify({
+          panel1: {
+            type: 'esqlControl',
+            variable_name: 'legacyVar',
+          },
+          panel2: {
+            type: 'options_list_control',
+          },
+        })
+      )
+    ).toEqual({
+      panel1: {
+        type: ESQL_CONTROL,
+        variable_name: 'legacyVar',
       },
-    ]);
+      panel2: {
+        type: 'options_list_control',
+      },
+    });
   });
 
-  it('should extract multi-select numeric variables', () => {
-    const panels: ControlPanelsState<OptionsListESQLControlState> = {
-      panel1: createMockESQLControlPanel(
-        'multiVar',
-        ESQLVariableType.MULTI_VALUES,
-        ['1', '2', '3'],
-        false
-      ),
-    };
-
-    const result = extractEsqlVariables(panels);
-    expect(result).toEqual([
-      {
-        key: 'multiVar',
-        type: ESQLVariableType.MULTI_VALUES,
-        value: [1, 2, 3],
-      },
-    ]);
+  it('should return an empty object for invalid JSON', () => {
+    expect(parseControlGroupJson('{')).toEqual({});
   });
 });

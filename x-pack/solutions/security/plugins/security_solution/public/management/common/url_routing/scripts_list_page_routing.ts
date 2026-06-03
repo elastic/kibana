@@ -11,8 +11,8 @@ import { isEmpty } from 'lodash/fp';
 import { generatePath } from 'react-router-dom';
 import { appendSearch } from '../../../common/components/link_to/helpers';
 import { AdministrationSubTab } from '../../types';
-import type { ScriptsLibraryUrlParams } from '../../pages/scripts_library/view/components/scripts_library_url_params';
-import { MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH } from '../constants';
+import type { ScriptLibraryUrlParams } from '../../pages/script_library/view/components/script_library_url_params';
+import { MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH } from '../constants';
 
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
 type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
@@ -34,17 +34,17 @@ export const getScriptsLibraryPath = ({
   query,
   search,
 }: {
-  query: ScriptsLibraryUrlParams;
+  query: ScriptLibraryUrlParams;
   search?: string;
 }) => {
-  const filteredQuery = getNonEmptyUrlParams<ScriptsLibraryUrlParams>(query);
-  const urlQueryParams = queryStringify<ScriptsLibraryUrlParams, typeof filteredQuery>(
+  const filteredQuery = getNonEmptyUrlParams<ScriptLibraryUrlParams>(query);
+  const urlQueryParams = queryStringify<ScriptLibraryUrlParams, typeof filteredQuery>(
     filteredQuery
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-  return `${generatePath(MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH, {
-    tabName: AdministrationSubTab.scriptsLibrary,
+  return `${generatePath(MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH, {
+    tabName: AdministrationSubTab.scriptLibrary,
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
@@ -52,17 +52,17 @@ export const getScriptsDetailPath = ({
   query,
   search,
 }: {
-  query: ScriptsLibraryUrlParams;
+  query: ScriptLibraryUrlParams;
   search?: string;
 }) => {
-  const filteredQuery = getNonEmptyUrlParams<ScriptsLibraryUrlParams>(query);
-  const urlQueryParams = queryStringify<ScriptsLibraryUrlParams, typeof filteredQuery>(
+  const filteredQuery = getNonEmptyUrlParams<ScriptLibraryUrlParams>(query);
+  const urlQueryParams = queryStringify<ScriptLibraryUrlParams, typeof filteredQuery>(
     filteredQuery
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-  const returnUrl = `${generatePath(MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH, {
-    tabName: AdministrationSubTab.scriptsLibrary,
+  const returnUrl = `${generatePath(MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH, {
+    tabName: AdministrationSubTab.scriptLibrary,
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 
   return returnUrl;

@@ -6,12 +6,19 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
+import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
+import { pciComplianceSkill } from './pci_compliance';
+import { threatHuntingSkill } from './threat_hunting';
+import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
+import { createFindRulesSkill } from './find_rules';
+import { siemReadinessSkill } from './siem_readiness';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -19,6 +26,7 @@ interface RegisterSkillsOpts {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
+  ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
     endpointAppContextService: EndpointAppContextService;
   };
@@ -33,17 +41,33 @@ export const registerSkills = async ({
   getStartServices,
   kibanaVersion,
   logger,
+  ml,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
   if (experimentalFeatures.automaticTroubleshootingSkill) {
-    await agentBuilder.skills.register(
+    agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)
     );
   }
 
+  const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
   await agentBuilder.skills.register(
-    getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
+    getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
 
-  // agentBuilder.skills.register(alertAnalysisSampleSkill);
+  agentBuilder.skills.register(getDetectionRuleEditSkill());
+  await agentBuilder.skills.register(
+    findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
+  );
+
+  await agentBuilder.skills.register(threatHuntingSkill);
+  await agentBuilder.skills.register(alertAnalysisSkill);
+  if (experimentalFeatures.dexAiSkillFindRules) {
+    await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
+  }
+  await agentBuilder.skills.register(siemReadinessSkill);
+
+  if (experimentalFeatures.pciComplianceAgentBuilder) {
+    agentBuilder.skills.register(pciComplianceSkill);
+  }
 };

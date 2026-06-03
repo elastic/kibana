@@ -8,46 +8,63 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { getRouteConfig } from '../get_route_config';
+import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { logRequest } from '../log_request';
 
-export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const searchRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/search`,
+export function registerSearchRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
+) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
+  const searchRoute = router.get({
+    path: `${basePath}`,
     summary: `Search dashboards`,
-    ...commonRouteConfig,
+    ...routeConfig,
+    description:
+      'Returns a paginated list of dashboards. Each result includes title, description, tags, and metadata, but not the full panel layout. Use `GET /api/dashboards/{id}` to retrieve the complete state.',
   });
 
   searchRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: {
         request: {
-          body: searchRequestBodySchema,
+          query: searchRequestParamsSchema,
         },
         response: {
           200: {
             body: () => searchResponseBodySchema,
+            description: 'success',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          500: {
+            description: 'internal server error',
           },
         },
       },
     },
-    async (ctx, req, res) => {
-      let result;
-      try {
-        result = await search(ctx, req.body);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await search(ctx, req.query);
+          return res.ok({ body: result });
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
+            return res.forbidden({ body: { message: e.message } });
+          }
+
+          logRequest(logger, req, 'error', e.message);
+          return res.customError({ statusCode: 500, body: { message: e.message } });
         }
-
-        return res.badRequest();
-      }
-
-      return res.ok({ body: result });
-    }
+      })
   );
 }

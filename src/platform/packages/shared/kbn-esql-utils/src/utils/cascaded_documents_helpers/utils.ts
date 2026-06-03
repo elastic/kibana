@@ -9,14 +9,9 @@
 
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { type DataView } from '@kbn/data-views-plugin/public';
-import type { ESQLFunction, EsqlQuery } from '@kbn/esql-language';
-import {
-  Builder,
-  isFunctionExpression,
-  mutate,
-  type ESQLCommand,
-  type ESQLLiteral,
-} from '@kbn/esql-language';
+import { Builder, isFunctionExpression, mutate } from '@elastic/esql';
+import type { EsqlQuery } from '@elastic/esql';
+import type { ESQLFunction, ESQLCommand, ESQLLiteral } from '@elastic/esql/types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getFieldDefinitionFromArg, type Terminal } from '../esql_fields_utils';

@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CORRELATIONS_EBT_ELEMENTS } from './ebt_constants';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -231,7 +232,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
                 { defaultMessage: 'Filter by {fieldName}', values: { fieldName } }
               ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
               onAddFilter({
@@ -250,7 +251,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
                 { defaultMessage: 'Filter out {fieldName}', values: { fieldName } }
               ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
               onAddFilter({
@@ -298,7 +299,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return histogramTerms.find(
+      return histogramTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue
@@ -343,8 +344,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
         <EuiFlexItem grow={false}>
           <OpenInDiscover
-            variant="button"
             dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            label={i18n.translate('xpack.apm.latencyCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -356,7 +360,9 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               transactionType,
               sampleRangeFrom,
               sampleRangeTo,
+              sortDirection: 'DESC',
             }}
+            ebt={{ element: CORRELATIONS_EBT_ELEMENTS.LATENCY }}
           />
         </EuiFlexItem>
 

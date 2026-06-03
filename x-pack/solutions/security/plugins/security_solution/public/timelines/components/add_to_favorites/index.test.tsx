@@ -61,7 +61,7 @@ describe('AddToFavoritesButton', () => {
 
     expect(button).toBeInTheDocument();
     expect(button).toHaveProperty('id', '');
-    expect(button.firstChild).toHaveAttribute('data-euiicon-type', 'starEmpty');
+    expect(button.firstChild).toHaveAttribute('data-euiicon-type', 'star');
     expect(queryByTestId('timeline-favorite-filled-star')).not.toBeInTheDocument();
   });
 

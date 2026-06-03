@@ -5,43 +5,55 @@
  * 2.0.
  */
 
-import type { CoreStart, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import React from 'react';
+import type { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 
-import { getCreateIntegrationLazy } from './components/create_integration';
-import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
-import {
-  Telemetry,
-  ExperimentalFeaturesService,
-  type Services,
-  type RenderUpselling,
-} from './services';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
-import type { ExperimentalFeatures } from '../common/experimental_features';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import type {
   AutomaticImportPluginSetup,
   AutomaticImportPluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
-import type { AutomaticImportConfigType } from '../server/config';
+import type { Services } from './services/types';
+import { useGetAllIntegrations } from './common/hooks/use_get_all_integrations';
+import { useGetIntegrationById } from './common/hooks/use_get_integration_by_id';
+import { getCreateIntegrationLazy } from './components/create_integration';
+import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
+import { getDataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout';
+import { AutomaticImportTelemetry } from './services/telemetry';
 
 export class AutomaticImportPlugin
   implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
 {
-  private telemetry = new Telemetry();
-  private renderUpselling$ = new BehaviorSubject<RenderUpselling | undefined>(undefined);
-  private config: AutomaticImportConfigType;
-  private experimentalFeatures: ExperimentalFeatures;
+  private telemetry = new AutomaticImportTelemetry();
+  private readonly renderUpselling$ = new BehaviorSubject<React.ReactNode | undefined>(undefined);
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<AutomaticImportConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
-    ExperimentalFeaturesService.init(this.experimentalFeatures);
-  }
-
-  public setup(core: CoreSetup): AutomaticImportPluginSetup {
+  public setup(
+    core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
+  ): AutomaticImportPluginSetup {
+    // Register EBT telemetry event types
     this.telemetry.setup(core.analytics);
-    this.config = this.config;
+
+    const telemetry = this.telemetry;
+    const renderUpselling$ = this.renderUpselling$;
+    core.application.register({
+      id: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      visibleIn: [],
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        const [coreStart, plugins] = await core.getStartServices();
+        return renderApp({
+          coreStart,
+          plugins,
+          params,
+          telemetryService: telemetry.start(),
+          renderUpselling$: renderUpselling$.asObservable(),
+        });
+      },
+    });
+
     return {};
   }
 
@@ -49,20 +61,29 @@ export class AutomaticImportPlugin
     core: CoreStart,
     dependencies: AutomaticImportPluginStartDependencies
   ): AutomaticImportPluginStart {
+    const telemetry = this.telemetry.start();
     const services: Services = {
       ...core,
       ...dependencies,
-      telemetry: this.telemetry.start(),
+      telemetry,
       renderUpselling$: this.renderUpselling$.asObservable(),
     };
 
     return {
+      hooks: {
+        useGetIntegrationById,
+        useGetAllIntegrations,
+      },
       components: {
         CreateIntegration: getCreateIntegrationLazy(services),
-        CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),
+        CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
+        DataStreamResultsFlyout: getDataStreamResultsFlyoutComponent(),
       },
-      renderUpselling: (renderUpselling) => {
-        this.renderUpselling$.next(renderUpselling);
+      telemetry,
+      renderUpselling: (UpsellComponent) => {
+        this.renderUpselling$.next(
+          UpsellComponent ? React.createElement(UpsellComponent) : undefined
+        );
       },
     };
   }

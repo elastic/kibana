@@ -12,7 +12,11 @@ import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
   KibanaStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -20,6 +24,7 @@ export const GraphNodeSchema = z.object({
   type: z.string(),
   stepId: z.string(),
   stepType: z.string(),
+  templateDependencies: z.array(z.unknown()).optional(),
 });
 
 export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
@@ -35,6 +40,13 @@ export const WaitGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WaitStepSchema,
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
+
+export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('waitForInput'),
+  configuration: WaitForInputStepSchema,
+});
+export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
 
 export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
@@ -60,3 +72,24 @@ export const KibanaGraphNodeSchema = GraphNodeSchema.extend({
   configuration: KibanaStepSchema,
 });
 export type KibanaGraphNode = z.infer<typeof KibanaGraphNodeSchema>;
+
+export const WorkflowExecuteGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.execute'),
+  configuration: WorkflowExecuteStepSchema,
+});
+export type WorkflowExecuteGraphNode = z.infer<typeof WorkflowExecuteGraphNodeSchema>;
+
+export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.executeAsync'),
+  configuration: WorkflowExecuteAsyncStepSchema,
+});
+export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
+
+export const WorkflowOutputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.output'),
+  configuration: WorkflowOutputStepSchema,
+});
+export type WorkflowOutputGraphNode = z.infer<typeof WorkflowOutputGraphNodeSchema>;

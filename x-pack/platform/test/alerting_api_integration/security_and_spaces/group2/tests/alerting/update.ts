@@ -778,7 +778,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '[request body.rule_type_id]: definition for this key is missing',
+                message:
+                  "[request body.rule_type_id]: Additional properties are not allowed ('rule_type_id' was unexpected)",
               });
               break;
             default:

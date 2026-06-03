@@ -10,11 +10,15 @@
 import type { ReactNode } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import type { SkeletonOutput } from '@kbn/content-list-assembly';
 import { table } from '../assembly';
 import type { ColumnBuilderContext } from './types';
 import type { NameColumnProps } from './name/name_builder';
 import type { UpdatedAtColumnProps } from './updated_at/updated_at_builder';
 import type { ActionsColumnProps } from './actions/actions_builder';
+import type { StarredColumnProps } from './starred/starred_builder';
+import type { CreatedByColumnProps } from './created_by/created_by_builder';
+import { getColumnLayoutProps, type ColumnLayoutProps } from './layout';
 
 /**
  * Props for the `Column` component (custom columns).
@@ -23,13 +27,11 @@ import type { ActionsColumnProps } from './actions/actions_builder';
  * `render` function. Pre-built columns (like `Column.Name`) have
  * dedicated preset components with their own props interfaces.
  */
-export interface ColumnProps {
+export interface ColumnProps extends ColumnLayoutProps {
   /** Unique identifier for the column. */
   id: string;
   /** Display name for the column header. */
   name: ReactNode;
-  /** Column width (CSS value like `'200px'` or `'40%'`). */
-  width?: string;
   /** Whether the column is sortable. */
   sortable?: boolean;
   /**
@@ -40,6 +42,14 @@ export interface ColumnProps {
   field?: string;
   /** Optional test subject for the column header/cells. */
   'data-test-subj'?: string;
+  /**
+   * Optional skeleton descriptor for this custom column during initial load.
+   *
+   * Use this when the column renders something richer than ordinary text,
+   * such as an avatar, badge, icon, or multi-line cell. When omitted, the
+   * table infers a text-like skeleton from the resolved column metadata.
+   */
+  skeleton?: SkeletonOutput | ((context: ColumnBuilderContext) => SkeletonOutput | undefined);
   /** Render function for the column cells. */
   render: (item: ContentListItem) => ReactNode;
 }
@@ -55,6 +65,18 @@ export interface ColumnNamespace {
   Name: (props: NameColumnProps) => ReactNode;
   UpdatedAt: (props: UpdatedAtColumnProps) => ReactNode;
   Actions: (props: ActionsColumnProps) => ReactNode;
+  /**
+   * Pre-built star-toggle column for favoritable items.
+   *
+   * @param props - {@link StarredColumnProps}
+   */
+  Starred: (props: StarredColumnProps) => ReactNode;
+  /**
+   * Pre-built "Created by" avatar column.
+   *
+   * @param props - {@link CreatedByColumnProps}
+   */
+  CreatedBy: (props: CreatedByColumnProps) => ReactNode;
 }
 
 /** Preset-to-props mapping for table columns. */
@@ -62,6 +84,8 @@ export interface ColumnPresets {
   name: NameColumnProps;
   updatedAt: UpdatedAtColumnProps;
   actions: ActionsColumnProps;
+  starred: StarredColumnProps;
+  createdBy: CreatedByColumnProps;
 }
 
 /** Part factory for table columns. */
@@ -78,7 +102,18 @@ export const column = table.definePart<
  * Custom columns are identified by `props.id` rather than a preset name.
  */
 const resolveCustomColumn = (
-  { id, name, width, sortable, field, render, 'data-test-subj': dataTestSubj }: ColumnProps,
+  {
+    id,
+    name,
+    width,
+    minWidth,
+    maxWidth,
+    truncateText,
+    sortable,
+    field,
+    render,
+    'data-test-subj': dataTestSubj,
+  }: ColumnProps,
   { supports }: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> => {
   const fieldId = field ?? id;
@@ -88,10 +123,21 @@ const resolveCustomColumn = (
     name,
     field: fieldId,
     sortable: supportsSorting ? sortable : false,
-    ...(width && { width }),
+    ...getColumnLayoutProps({ width, minWidth, maxWidth, truncateText }),
     render: (_value: unknown, record: ContentListItem) => render(record),
     'data-test-subj': dataTestSubj ?? `content-list-table-column-${id}`,
   };
+};
+
+const resolveCustomColumnSkeleton = (
+  { skeleton }: ColumnProps,
+  context: ColumnBuilderContext
+): SkeletonOutput | undefined => {
+  if (typeof skeleton === 'function') {
+    return skeleton(context);
+  }
+
+  return skeleton;
 };
 
 /**
@@ -121,4 +167,5 @@ const resolveCustomColumn = (
  */
 export const Column = column.createComponent<ColumnProps>({
   resolve: resolveCustomColumn,
+  skeleton: resolveCustomColumnSkeleton,
 });

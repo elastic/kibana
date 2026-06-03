@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { InvalidDefendInsightTypeError } from '../../../errors';
@@ -39,17 +37,16 @@ export function getDefendInsightsPrompt({
   ...args
 }: {
   type: DefendInsightType;
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  connector?: Connector;
+  getInferenceConnectorById?: (id: string) => Promise<InferenceConnector>;
   connectorId: string;
   model?: string;
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<DefendInsightsCombinedPrompts> {
   switch (type) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return getIncompatibleAntivirusPrompt(args);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return getPolicyResponseFailurePrompt(args);
     default:
       throw new InvalidDefendInsightTypeError();

@@ -8,7 +8,7 @@
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { type ToolHandlerContext, type ToolHandlerResult } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import {
@@ -52,7 +52,7 @@ export const riskScoreDynamicInlineToolHandler = async (
     });
 
     const identifierFilter = isEntityStoreV2Enabled
-      ? `'WHERE (${euid.getEuidEsqlDocumentsContainsIdFilter(entityType)})'`
+      ? `'WHERE (${euid.esql.getEuidDocumentsContainsIdFilter(entityType)})'`
       : `'WHERE ${EntityTypeToIdentifierField[entityType as EntityType]} IS NOT NULL'`;
 
     if (indexExists) {

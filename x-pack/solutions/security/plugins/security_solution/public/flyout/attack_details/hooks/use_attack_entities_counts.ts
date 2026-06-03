@@ -6,17 +6,10 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
-import { useAttackDetailsContext } from '../context';
-import { normalizeToStringArray } from './use_header_data';
+import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { fetchQueryAlerts } from '../../../detections/containers/detection_engine/alerts/api';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
-
-const FIELD_ALERT_IDS = 'kibana.alert.attack_discovery.alert_ids' as const;
-const FIELD_REPLACEMENTS = 'kibana.alert.attack_discovery.replacements' as const;
-
-const EMPTY_REPLACEMENTS: Record<string, string> = {};
 
 interface AttackEntitiesAggregations {
   unique_users?: { value: number };
@@ -35,25 +28,7 @@ export interface UseAttackEntitiesCountsResult {
  * Queries the detection alerts index filtered by the attack's alert IDs and uses cardinality aggregations.
  */
 export const useAttackEntitiesCounts = (): UseAttackEntitiesCountsResult => {
-  const { getFieldsData } = useAttackDetailsContext();
-
-  const alertIds = useMemo(
-    () => normalizeToStringArray(getFieldsData(FIELD_ALERT_IDS)),
-    [getFieldsData]
-  );
-
-  const replacements = useMemo(() => {
-    const value = getFieldsData(FIELD_REPLACEMENTS);
-    if (!value || typeof value === 'string' || Array.isArray(value)) {
-      return EMPTY_REPLACEMENTS;
-    }
-    return value as Record<string, string>;
-  }, [getFieldsData]);
-
-  const originalAlertIds = useMemo(
-    () => getOriginalAlertIds({ alertIds, replacements }),
-    [alertIds, replacements]
-  );
+  const originalAlertIds = useOriginalAlertIds();
 
   const query = useMemo(
     () => ({

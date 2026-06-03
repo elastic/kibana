@@ -20,7 +20,7 @@
       "management",
       "navigation",
       "licensing",
-      "cloud",
+      "cloud"
     ],
     "optionalPlugins": [],
     "requiredBundles": [

@@ -11,8 +11,12 @@ import { EditTemplatePage } from './page';
 import * as i18n from '../../translations';
 
 const mockUseTemplateViewParams = jest.fn();
+const mockNavigateToCasesTemplates = jest.fn();
 jest.mock('../../../../common/navigation', () => ({
   useTemplateViewParams: () => mockUseTemplateViewParams(),
+  useCasesTemplatesNavigation: () => ({
+    navigateToCasesTemplates: mockNavigateToCasesTemplates,
+  }),
 }));
 
 const mockUseGetTemplate = jest.fn();
@@ -20,32 +24,45 @@ jest.mock('../../hooks/use_get_template', () => ({
   useGetTemplate: () => mockUseGetTemplate(),
 }));
 
+jest.mock('../../hooks/use_update_template', () => ({
+  useUpdateTemplate: () => ({ mutateAsync: jest.fn(), isLoading: false }),
+}));
+
 jest.mock('../../components/template_form', () => ({
-  UpdateTemplateForm: () => <div data-test-subj="update-template-form" />,
+  TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+}));
+
+jest.mock('../../components/template_preview', () => ({
+  TemplatePreview: () => <div data-test-subj="template-preview" />,
+}));
+
+jest.mock('../../../../common/use_cases_local_storage', () => ({
+  useCasesLocalStorage: () => ['', jest.fn(), jest.fn()],
+}));
+
+jest.mock('../../../use_breadcrumbs', () => ({
+  useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
 const mockTemplateFormLayout = jest.fn();
 jest.mock('../../components/template_form_layout', () => ({
-  TemplateFormLayout: (props: {
-    title: string;
-    isLoading?: boolean;
-    formContent: React.ReactNode;
-  }) => mockTemplateFormLayout(props),
+  TemplateFormLayout: (props: { title: string; isLoading?: boolean }) =>
+    mockTemplateFormLayout(props),
 }));
 
 describe('EditTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockTemplateFormLayout.mockImplementation(({ title, isLoading, formContent }) => (
+    mockTemplateFormLayout.mockImplementation(({ title, isLoading }) => (
       <div>
         <div data-test-subj="layout-title">{title}</div>
         <div data-test-subj={isLoading ? 'layout-loading' : 'layout-loaded'} />
-        <div data-test-subj="layout-form-content">{formContent}</div>
+        <div data-test-subj="template-yaml-editor" />
       </div>
     ));
   });
 
-  it('renders the edit layout with update form', () => {
+  it('renders the edit layout with form fields', () => {
     mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
     mockUseGetTemplate.mockReturnValue({
       data: {
@@ -53,6 +70,7 @@ describe('EditTemplatePage', () => {
         name: 'Test Template',
         owner: 'cases',
         definition: { name: 'Test Template', fields: [] },
+        definitionString: 'name: Test Template\nfields: []',
         templateVersion: 2,
         deletedAt: null,
         isLatest: true,
@@ -65,15 +83,15 @@ describe('EditTemplatePage', () => {
 
     expect(screen.getByTestId('layout-title')).toHaveTextContent(i18n.EDIT_TEMPLATE_TITLE);
     expect(screen.getByTestId('layout-loaded')).toBeInTheDocument();
-    expect(screen.getByTestId('update-template-form')).toBeInTheDocument();
+    expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
   });
 
-  it('shows loading state when template is not yet available', () => {
+  it('renders nothing when template is loading and not yet available', () => {
     mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: true });
 
-    render(<EditTemplatePage />);
+    const { container } = render(<EditTemplatePage />);
 
-    expect(screen.getByTestId('layout-loading')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });

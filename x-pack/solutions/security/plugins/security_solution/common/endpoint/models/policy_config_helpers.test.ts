@@ -558,9 +558,11 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
+    ransomware: { mode: ProtectionModes.off, supported: true },
     device_control: { enabled: false, usb_storage: 'audit' },
     popup: {
       malware: { message: '', enabled: false },
+      ransomware: { message: '', enabled: false },
       behavior_protection: { message: '', enabled: false },
       memory_protection: { message: '', enabled: false },
       device_control: { message: '', enabled: false },

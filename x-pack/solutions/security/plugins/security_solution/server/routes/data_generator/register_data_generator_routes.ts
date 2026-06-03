@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getSavedObjectsTypes } from '@kbn/cases-plugin/common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 

@@ -114,7 +114,7 @@ export const RisksTable = ({
           <EuiButtonEmpty
             data-test-subj="view-all-failed-findings"
             onClick={onViewAllClick}
-            iconType="search"
+            iconType="magnify"
           >
             {viewAllButtonTitle}
           </EuiButtonEmpty>

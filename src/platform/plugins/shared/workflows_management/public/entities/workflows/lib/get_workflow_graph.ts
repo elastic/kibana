@@ -19,6 +19,7 @@ export type WorkflowGraphNodeType =
   | 'parallel'
   | 'action'
   | 'foreach'
+  | 'while'
   | 'atomic'
   | 'http'
   | 'trigger';
@@ -33,7 +34,16 @@ export interface WorkflowGraphNodeLabel {
 
 export type WorkflowGraph = graphlib.Graph<WorkflowGraphNodeLabel>;
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
+export const flowNodeTypes = [
+  'if',
+  'merge',
+  'parallel',
+  'foreach',
+  'while',
+  'atomic',
+  'http',
+  'trigger',
+];
 
 function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

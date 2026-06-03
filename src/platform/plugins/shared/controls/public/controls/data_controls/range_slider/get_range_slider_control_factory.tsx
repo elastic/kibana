@@ -11,16 +11,17 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
+  apiHasPinnedPanels,
+  apiHasSections,
   apiPublishesViewMode,
   fetch$,
+  initializeStateApi,
   useBatchedPublishingSubjects,
-  apiHasSections,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
+
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import {
   defaultDataControlComparators,
@@ -34,13 +35,16 @@ import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 import { buildFilter } from './utils/filter_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getRangesliderControlFactory = (): EmbeddableFactory<
+export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
   RangeSliderControlApi
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
@@ -67,23 +71,22 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<RangeSliderControlState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...dataControlManager.getLatestState(),
           ...editorStateManager.getLatestState(),
           value: selections.value$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
-          selections.value$,
+          selections.value$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           editorStateManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => {
           return {
             ...editorComparators,
@@ -91,18 +94,17 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
-          selections.setValue(lastSaved?.value);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
+          selections.setValue(nextState.value);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
         dataLoading$,
-        serializeState,
         clearSelections: () => {
           selections.setValue(undefined);
         },
@@ -129,7 +131,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          editorStateManager.api.setStep(1);
+          editorStateManager.api.setStep(DEFAULT_RANGE_SLIDER_STATE.step);
           selections.setValue(undefined);
         });
 
@@ -209,6 +211,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
@@ -222,6 +226,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value,
             fieldName,
             viewMode,
+            label,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -231,7 +236,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             editorStateManager.api.step$,
             selections.value$,
             dataControlManager.api.fieldName$,
-            viewMode$
+            viewMode$,
+            dataControlManager.api.label$
           );
 
           useEffect(() => {
@@ -241,6 +247,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
               outputFilterSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -254,10 +262,12 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               max={max}
               min={min}
               onChange={selections.setValue}
-              step={step ?? 1}
+              step={step}
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}
+              isPinned={isPinned}
+              label={label}
             />
           );
         },

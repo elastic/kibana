@@ -57,13 +57,13 @@ export function initializeTrackPanel(
       const id = highlightPanelId$.value;
       if (!id) return;
 
-      untilLoaded(id).then(() => {
+      untilLoaded(id).then(async () => {
         // Adds the highlight class in the next event loop to allow the DOM to update
-        setTimeout(() => panelRef.classList.add('dshDashboardGrid__item--highlighted'), 0);
+        await new Promise((res) => setTimeout(res, 0));
+        panelRef.classList.add('dshDashboardGrid__item--highlighted');
         // Removes the class after the highlight animation finishes
-        setTimeout(() => {
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-        }, highlightAnimationDuration);
+        await new Promise((res) => setTimeout(res, highlightAnimationDuration));
+        panelRef.classList.remove('dshDashboardGrid__item--highlighted');
       });
 
       highlightPanelId$.next(undefined);

@@ -84,7 +84,12 @@ describe('SecurityService', function () {
           mockCoreContext.create({
             configService: configServiceMock.create({
               getConfig$: {
-                xpack: { security: { uiam: { enabled: false, sharedSecret: 'some-secret' } } },
+                xpack: {
+                  security: {
+                    fipsMode: { enabled: !!getFips() },
+                    uiam: { enabled: false, sharedSecret: 'some-secret' },
+                  },
+                },
               },
             }),
           })
@@ -97,7 +102,12 @@ describe('SecurityService', function () {
           mockCoreContext.create({
             configService: configServiceMock.create({
               getConfig$: {
-                xpack: { security: { uiam: { enabled: true, sharedSecret: 'some-secret' } } },
+                xpack: {
+                  security: {
+                    fipsMode: { enabled: !!getFips() },
+                    uiam: { enabled: true, sharedSecret: 'some-secret' },
+                  },
+                },
               },
             }),
           })

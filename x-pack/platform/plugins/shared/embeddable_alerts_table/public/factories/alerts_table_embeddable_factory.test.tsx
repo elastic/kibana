@@ -8,7 +8,8 @@
 // Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { Subject } from 'rxjs';
+import { act, render, waitFor } from '@testing-library/react';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
@@ -46,7 +47,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
     initializeDrilldownsManager: jest.fn(),
     initialState: {
-      timeRange: {
+      time_range: {
         from: '2025-01-01T00:00:00.000Z',
         to: '2025-01-01T01:00:00.000Z',
       },
@@ -66,6 +67,10 @@ describe('getEmbeddableAlertsTableFactory', () => {
     uuid: UUID,
     parentApi: {} as any,
   };
+
+  beforeEach(() => {
+    mockEmbeddableAlertsTable.mockClear();
+  });
 
   it('should render AlertsTable with the correct props', async () => {
     const { Component, api } = await factory.buildEmbeddable(embeddableParams);
@@ -91,5 +96,120 @@ describe('getEmbeddableAlertsTableFactory', () => {
     const { api } = await factory.buildEmbeddable(embeddableParams);
 
     expect(api.isEditingEnabled()).toBeFalsy();
+  });
+
+  it('should restore the saved query after a user edits the panel config and resets changes', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+    const updatedQuery = {
+      type: 'alertsFilters' as const,
+      filters: [{ filter: { field: 'kibana.alert.rule.name', value: 'updated' } }],
+    };
+
+    render(<Component />);
+
+    // simulate the user applying a new query to the panel
+    await act(async () => {
+      await api.applySerializedState({
+        ...embeddableParams.initialState,
+        tableConfig: {
+          solution: 'observability',
+          query: updatedQuery,
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: updatedQuery,
+        }),
+        {}
+      );
+    });
+
+    // simulate the user resetting the changes
+    await act(async () => {
+      await api.applySerializedState(embeddableParams.initialState);
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: embeddableParams.initialState.tableConfig.query,
+        }),
+        {}
+      );
+    });
+  });
+
+  it('should set `lastReloadRequestTime` when the dashboard triggers a reload', async () => {
+    const reload$ = new Subject<void>();
+    const parentApi = { ...getMockPresentationContainer(), reload$ };
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(987654321);
+
+    const { Component } = await factory.buildEmbeddable({
+      ...embeddableParams,
+      finalizeApi: (apiRegistration) => ({
+        ...(apiRegistration as any),
+        parentApi,
+      }),
+    });
+
+    // Render and flush the initial async fetch-context emission within `act`
+    await act(async () => {
+      render(<Component />);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalled();
+    // No reload has been requested yet, so the table should not have a reload timestamp
+    expect(mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0].lastReloadRequestTime).toBeUndefined();
+
+    // The fetch context pipeline resolves the reload asynchronously, so flush microtasks
+    // within `act` to apply the resulting state update without React warnings.
+    await act(async () => {
+      reload$.next();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0].lastReloadRequestTime).toBe(
+        987654321
+      );
+    });
+
+    dateNowSpy.mockRestore();
+  });
+
+  it('should propagate the table loading state to the `dataLoading$` panel observable', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+
+    // Render and flush the initial async fetch-context emission within `act`
+    await act(async () => {
+      render(<Component />);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalled();
+
+    const props = mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0];
+    expect(props?.onLoadingChange).toBeDefined();
+
+    let latestLoading: boolean | undefined;
+    const subscription = api.dataLoading$.subscribe((value) => {
+      latestLoading = value;
+    });
+
+    act(() => {
+      props?.onLoadingChange?.(false);
+    });
+    expect(latestLoading).toBe(false);
+
+    act(() => {
+      props?.onLoadingChange?.(true);
+    });
+    expect(latestLoading).toBe(true);
+
+    subscription.unsubscribe();
   });
 });

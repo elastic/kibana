@@ -8,5 +8,3 @@
  */
 
 export { WorkflowsMeteringService } from './metering_service';
-export type { UsageMetrics, UsageRecord, UsageSource } from './types';
-export { UsageReportingService } from './usage_reporting_service';

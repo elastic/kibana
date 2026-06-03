@@ -438,5 +438,41 @@ describe('getESQLQuery', () => {
       const kqlIndex = result!.indexOf('KQL');
       expect(sortIndex).toBeGreaterThan(kqlIndex);
     });
+
+    it('should add SORT @timestamp DESC with service and transaction filters', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName: 'my-service',
+          environment: 'production',
+          transactionName: 'GET /api/users',
+          transactionType: 'request',
+          sortDirection: 'DESC',
+        },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
+      expect(result).toContain(`\`${SERVICE_ENVIRONMENT}\` == "production"`);
+      expect(result).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
+      expect(result).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
+      expect(result).toContain('SORT @timestamp DESC');
+    });
+
+    it('should add SORT @timestamp DESC for error index queries', () => {
+      const result = getESQLQuery({
+        indexType: 'error',
+        params: {
+          serviceName: 'my-service',
+          errorGroupId: 'error-123',
+          sortDirection: 'DESC',
+        },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${ERROR_GROUP_ID}\` == "error-123"`);
+      expect(result).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
+      expect(result).toContain('SORT @timestamp DESC');
+    });
   });
 });

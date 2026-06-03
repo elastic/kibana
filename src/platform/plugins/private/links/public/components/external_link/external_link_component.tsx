@@ -16,7 +16,7 @@ import type { LinksLayoutType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
 
 export const ExternalLinkComponent = ({
   link,
@@ -33,16 +33,16 @@ export const ExternalLinkComponent = ({
   }, [link.options]);
 
   const destination = useMemo(() => {
-    return link.destination && linkOptions.encodeUrl
+    return link.destination && linkOptions.encode_url
       ? encodeURI(link.destination)
       : link.destination;
   }, [linkOptions, link.destination]);
 
   const id = `externalLink--${link.id}`;
+  const testId = `externalLink--${link.title}`;
 
   return (
     <EuiListGroupItem
-      size="s"
       external
       color="text"
       isDisabled={Boolean(link.error)}
@@ -52,13 +52,12 @@ export const ExternalLinkComponent = ({
         content: link.error?.message,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
-        'data-test-subj': `${id}--tooltip`,
+        'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
       id={id}
       label={link.label || link.destination}
-      data-test-subj={link.error ? `${id}--error` : `${id}`}
+      data-test-subj={link.error ? `${testId}--error` : `${testId}`}
       href={destination}
       onClick={async (event) => {
         if (!destination) return;
@@ -69,7 +68,7 @@ export const ExternalLinkComponent = ({
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
         if (!modifiedClick) {
           event.preventDefault();
-          if (linkOptions.openInNewTab) {
+          if (linkOptions.open_in_new_tab) {
             window.open(destination, '_blank');
           } else {
             await coreServices.application.navigateToUrl(destination);

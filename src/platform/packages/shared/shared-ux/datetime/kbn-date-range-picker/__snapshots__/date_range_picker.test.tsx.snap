@@ -2,53 +2,80 @@
 
 exports[`DateRangePicker renders 1`] = `
 <div
-  class="euiPopover emotion-euiPopover-block-DateRangePickerDialog"
+  class="css-1e8rkcj-containerStyles-DateRangePickerLayout"
 >
   <div
-    class="css-sai07k-containerStyles"
+    class="euiPopover emotion-euiPopover-inline"
+    data-test-subj="dateRangePickerPopoverTriggerWrapper"
   >
     <div
-      class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
+      class="css-0"
+      data-test-subj="dateRangePickerControlWrapper"
     >
       <div
-        class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+        class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
       >
-        <span
-          class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-          id="generated-id-wrapper"
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlLeftIconsCount: 1;"
         >
-          <button
-            class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
-            data-test-subj="dateRangePickerControlButton"
-            type="button"
-            value="Last 20 minutes"
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-compressed-absolute-left"
           >
             <span
-              class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
             >
               <span
-                class="eui-textTruncate css-z3gg36-textContent"
-              >
-                Last 20 minutes
-              </span>
-               
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="calendar"
+              />
+            </span>
+          </div>
+          <span
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            id="generated-id-wrapper"
+          >
+            <button
+              class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth-DateRangePickerControl"
+              data-date-range="now-20m to now"
+              data-test-subj="dateRangePickerControlButton"
+              type="button"
+            >
               <span
-                class="euiBadge emotion-euiBadge-default"
-                title="20min"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
               >
-                <span
-                  class="euiBadge__content emotion-euiBadge__content"
-                >
+                <span>
                   <span
-                    class="euiBadge__text emotion-euiBadge__text"
+                    class="eui-textTruncate css-rbdo33-root"
+                    data-test-subj="dateRangePickerValueDisplay"
                   >
-                    20min
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      Last
+                    </span>
+                     
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      20
+                    </span>
+                     
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      minutes
+                    </span>
                   </span>
                 </span>
               </span>
-            </span>
-          </button>
-        </span>
+            </button>
+          </span>
+        </div>
       </div>
     </div>
   </div>

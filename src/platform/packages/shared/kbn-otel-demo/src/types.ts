@@ -10,7 +10,13 @@
 /**
  * Supported demo environment types
  */
-export type DemoType = 'otel-demo' | 'online-boutique';
+export type DemoType =
+  | 'otel-demo'
+  | 'online-boutique'
+  | 'bank-of-anthos'
+  | 'quarkus-super-heroes'
+  | 'aws-retail-store'
+  | 'rust-k8s-demo';
 
 /**
  * Service configuration for a microservice in the demo
@@ -25,6 +31,24 @@ export interface ServiceConfig {
     limits?: { memory?: string; cpu?: string };
   };
   volumeMounts?: Array<{ name: string; mountPath: string }>;
+  /** Override the default container command */
+  command?: string[];
+  /** Arguments to pass to the command */
+  args?: string[];
+  /** Init containers to run before the main container */
+  initContainers?: Array<{
+    name: string;
+    image: string;
+    command?: string[];
+    args?: string[];
+    volumeMounts?: Array<{ name: string; mountPath: string }>;
+  }>;
+  /** Volumes to mount in the pod */
+  volumes?: Array<{
+    name: string;
+    emptyDir?: Record<string, never>;
+    configMap?: { name: string };
+  }>;
 }
 
 /**
@@ -50,6 +74,23 @@ export interface DemoConfig {
   };
   /** Function that returns service configurations for a specific version */
   getServices: (version?: string) => ServiceConfig[];
+  /**
+   * If true, this demo requires custom-built container images that are not available
+   * in public registries. Users must build and push images before deploying.
+   */
+  requiresCustomImages?: boolean;
+  /** Instructions for building custom images when requiresCustomImages is true */
+  customImageInstructions?: string;
+  /** Configuration for automatic image building when requiresCustomImages is true */
+  imageBuildConfig?: {
+    gitUrl: string;
+    images: Array<{
+      name: string;
+      context: string;
+      dockerfile?: string;
+    }>;
+    preBuildCommand?: string;
+  };
 }
 
 /**
@@ -88,6 +129,10 @@ export interface ManifestOptions {
   collectorConfigYaml: string;
   /** Per-service environment variable overrides from failure scenarios */
   envOverrides?: Record<string, Record<string, string>>;
+  /** Host aliases to inject into the collector pod for DNS resolution from inside pods */
+  hostAliases?: Array<{ ip: string; hostnames: string[] }>;
+  /** OTel Collector container image — always set by ensure_otel_demo (EDOT by default, vanilla with --vanilla) */
+  collectorImage?: string;
 }
 
 /**

@@ -11,9 +11,9 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '.';
-import type { AIConnector } from '@kbn/elastic-assistant';
+import type { AIConnector } from '@kbn/inference-connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 jest.mock('../../../../common/lib/kibana');
@@ -43,8 +43,8 @@ const availableConnectorsMock: AIConnector[] = [
   },
 ] as unknown as AIConnector[];
 
-jest.mock('../../../../common/hooks/use_ai_connectors');
-const useAIConnectorsMock = useAIConnectors as jest.MockedFunction<typeof useAIConnectors>;
+jest.mock('@kbn/inference-connectors');
+const useLoadConnectorsMock = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
 
 const renderTestComponent = (props: Partial<ComponentProps<typeof StartMigrationModal>> = {}) => {
   const finalProps = {
@@ -80,14 +80,16 @@ const settingsServiceMock = {
 
 describe('StartMigrationModal', () => {
   beforeEach(() => {
-    useAIConnectorsMock.mockReturnValue({
-      aiConnectors: availableConnectorsMock,
+    useLoadConnectorsMock.mockReturnValue({
+      data: availableConnectorsMock,
       isLoading: false,
-    } as unknown as ReturnType<typeof useAIConnectors>);
+    } as unknown as ReturnType<typeof useLoadConnectors>);
     siemMigrationsServiceMock.rules.connectorIdStorage.get.mockReturnValue('connector-2');
 
     useKibanaMock.mockReturnValue({
       services: {
+        http: {},
+        notifications: { toasts: {} },
         triggersActionsUi: {
           actionTypeRegistry: {
             get: jest.fn().mockReturnValue('Mock Action Type'),

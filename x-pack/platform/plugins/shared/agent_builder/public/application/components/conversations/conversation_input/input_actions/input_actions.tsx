@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
-import { TourStep, useAgentBuilderTour } from '../../../../context/agent_builder_tour_context';
-import { AgentSelector } from './agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
+
+const connectorFlexItemStyles = css`
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+`;
 
 interface InputActionsProps {
   onSubmit: () => void;
@@ -24,39 +29,28 @@ export const InputActions: React.FC<InputActionsProps> = ({
   isSubmitDisabled,
   resetToPendingMessage,
   agentId,
-}) => {
-  const { getStepProps } = useAgentBuilderTour();
-
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup
-        gutterSize="s"
-        responsive={false}
-        alignItems="center"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
-            <ConnectorSelector />
-          </EuiTourStep>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTourStep {...getStepProps(TourStep.AgentSelector)}>
-                <AgentSelector agentId={agentId} />
-              </EuiTourStep>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ConversationActionButton
-                onSubmit={onSubmit}
-                isSubmitDisabled={isSubmitDisabled}
-                resetToPendingMessage={resetToPendingMessage}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-};
+}) => (
+  <EuiFlexItem grow={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      responsive={false}
+      alignItems="center"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+        <ConnectorSelector />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <ConversationActionButton
+              onSubmit={onSubmit}
+              isSubmitDisabled={isSubmitDisabled}
+              resetToPendingMessage={resetToPendingMessage}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);

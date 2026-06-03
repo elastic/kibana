@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/grid-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/grid-example-plugin'
+  title: '@kbn/grid-example-plugin'
   description: Moon project for @kbn/grid-example-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: examples/grid_example
+  sourceRoot: examples/grid_example
 dependsOn:
   - '@kbn/grid-layout'
   - '@kbn/core-application-browser'

@@ -1,4 +1,5 @@
 .aws-config.json
+.bk.yaml
 .signing-config.json
 .ackrc
 /.es
@@ -20,7 +21,10 @@ target
 .jruby
 .idea
 .claude/*.local.json
-.cursor
+.claude/worktrees/
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
 !x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
@@ -29,6 +33,10 @@ target
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+config_sets/bug_fixer/
 
 # Ignore example plugin builds
 /examples/*/build
@@ -69,6 +77,7 @@ webpackstats.json
 !/config/serverless.yml
 !/config/serverless.es.yml
 !/config/serverless.workplaceai.yml
+!/config/serverless.vectordb.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml
@@ -82,6 +91,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn
@@ -192,3 +202,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
+
+# Agent skill working output (team-auto-tests-stats markdown only — never commit)
+.cursor/tmp/
+.agents/tmp/

@@ -10,7 +10,9 @@
 import React, { useCallback } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -26,8 +28,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 
-const MAX_TABS_COUNT = 25;
-
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
@@ -37,18 +37,16 @@ export const TabsView = (props: SingleTabViewProps) => {
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const currentDataView = useCurrentTabRuntimeState(
-    props.runtimeStateManager,
-    (tab) => tab.currentDataView$
-  );
+  const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
 
-  const scopedEbtManager = useCurrentTabRuntimeState(
-    props.runtimeStateManager,
-    (state) => state.scopedEbtManager$
-  );
-
-  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
-    useAppMenuData({ currentDataView });
+  const {
+    shouldCollapseAppMenu,
+    onResize,
+    getTopTabMenuItems,
+    getAdditionalTabMenuItems,
+    topNavMenuItems,
+  } = useAppMenuData({ currentDataView });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -77,6 +75,22 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
+  const onTabLimitReached: UnifiedTabsProps['onTabLimitReached'] = useCallback(
+    (droppedCount: number) => {
+      services.toastNotifications.addWarning({
+        title: i18n.translate('discover.tabs.tabLimitReachedWarningTitle', {
+          defaultMessage: 'Tab limit reached',
+        }),
+        text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
+          defaultMessage:
+            'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
+          values: { droppedCount, maxTabs: MAX_DISCOVER_SESSION_TABS },
+        }),
+      });
+    },
+    [services.toastNotifications]
+  );
+
   return (
     /**
      * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
@@ -84,14 +98,14 @@ export const TabsView = (props: SingleTabViewProps) => {
      */
     <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
-        <div ref={resizeRef}>
+        <div ref={resizeRef} className="eui-fullHeight">
           <UnifiedTabs
             services={services}
             items={items}
             selectedItemId={currentTabId}
             recentlyClosedItems={recentlyClosedItems}
             unsavedItemIds={unsavedTabIds}
-            maxItemsCount={MAX_TABS_COUNT}
+            maxItemsCount={MAX_DISCOVER_SESSION_TABS}
             hideTabsBar={hideTabsBar}
             createItem={createItem}
             getPreviewData={getPreviewData}
@@ -99,6 +113,8 @@ export const TabsView = (props: SingleTabViewProps) => {
             onChanged={onChanged}
             onEBTEvent={onEvent}
             onClearRecentlyClosed={onClearRecentlyClosed}
+            onTabLimitReached={onTabLimitReached}
+            getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
               <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />

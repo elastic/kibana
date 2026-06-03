@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { EuiSearchBar } from '@elastic/eui';
+import { EuiSearchBar, EuiText } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
+import {
+  useContentListConfig,
+  useContentListSearch,
+  useContentListSelection,
+  useContentListPhase,
+} from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
 import { SelectionBar } from './selection_bar';
+import { ToolbarSkeleton } from './skeleton/toolbar_skeleton';
 
 /**
  * Props for the {@link ContentListToolbar} component.
@@ -32,82 +38,119 @@ const defaultPlaceholder = i18n.translate(
   { defaultMessage: 'Search…' }
 );
 
+const parseErrorPrefix = i18n.translate(
+  'contentManagement.contentList.toolbar.searchParseErrorPrefix',
+  { defaultMessage: 'Invalid search:' }
+);
+
 /**
  * `ContentListToolbar` component.
  *
- * Provides a toolbar with search and filter controls for content lists using `EuiSearchBar`.
- * Currently supports search and the Sort filter; additional filters will be added in subsequent PRs.
- *
- * When items are selected in the table, a "Delete N entities" button appears in the
- * toolbar's left tools area (via `EuiSearchBar`'s `toolsLeft`), matching the existing
- * `TableListView` pattern.
- *
- * **Smart Defaults**: When no children are provided, auto-renders filters
- * based on provider configuration.
- *
- * **Declarative Configuration**: Use {@link Filters} children
- * to customize filter order.
- *
- * @param props - The component props. See {@link ContentListToolbarProps}.
- * @returns A React element containing the toolbar.
- *
- * @example
- * ```tsx
- * const { Filters } = ContentListToolbar;
- *
- * // Smart defaults - auto-renders based on provider config.
- * <ContentListToolbar />
- *
- * // Custom filter order.
- * <ContentListToolbar>
- *   <Filters>
- *     <Filters.Sort />
- *   </Filters>
- * </ContentListToolbar>
- * ```
+ * `queryText` from state flows directly to `EuiSearchBar`'s `query` prop.
+ * When the user types or commits a filter, `onChange` stores `query.text`
+ * back to state. No displayText, no typingRef, no sync hacks — one source
+ * of truth.
  */
 const ContentListToolbarComponent = ({
   children,
   'data-test-subj': dataTestSubj = 'contentListToolbar',
 }: ContentListToolbarProps) => {
+  const phase = useContentListPhase();
   const { labels, supports } = useContentListConfig();
-  const { search, setSearch, isSupported: searchIsSupported } = useContentListSearch();
+  const {
+    queryText,
+    setQueryFromEuiQuery,
+    isSupported: searchIsSupported,
+    fieldNames,
+  } = useContentListSearch();
+  const { selectedCount } = useContentListSelection();
   const filters = useFilters(children);
 
+  // Surface `EuiSearchBar` parse errors below the input — the built-in
+  // invalid-icon + browser `title` tooltip is easy to miss
+  // ({@link https://github.com/elastic/kibana/issues/271705}).
+  const [parseError, setParseError] = useState<string | null>(null);
+
   const handleSearchChange = useCallback(
-    ({ queryText, error }: EuiSearchBarOnChangeArgs) => {
-      if (error) {
+    ({ query, error }: EuiSearchBarOnChangeArgs) => {
+      if (error || !query) {
+        // Capture the parse message for the hint popover but do not echo the
+        // raw text back through the controlled `query` prop —
+        // `EuiSearchBar.getDerivedStateFromProps` re-parses every new value
+        // and would throw on unparseable text.
+        setParseError(error ? error.message : null);
         return;
       }
-      // `queryText` preserves the raw input (including whitespace) for display fidelity.
-      // `filters.search` is trimmed so data fetching ignores leading/trailing spaces.
-      setSearch(queryText, { search: queryText.trim() || undefined });
+      setParseError(null);
+      setQueryFromEuiQuery(query);
     },
-    [setSearch]
+    [setQueryFromEuiQuery]
   );
 
-  // Only include the selection bar when selection is supported to avoid
-  // running selection hooks unnecessarily in read-only or selection-disabled modes.
+  const searchHint = useMemo(
+    () =>
+      parseError
+        ? {
+            content: (
+              <EuiText color="danger" size="s" data-test-subj={`${dataTestSubj}-searchParseError`}>
+                {parseErrorPrefix} {parseError}
+              </EuiText>
+            ),
+            popoverProps: { isOpen: true },
+          }
+        : undefined,
+    [parseError, dataTestSubj]
+  );
+
+  // Build an EuiSearchBar schema so it recognizes registered fields (e.g., `tag`,
+  // `createdBy`) and doesn't escape the colon when the user types `field:value`.
+  const boxSchema = useMemo(() => {
+    if (fieldNames.length === 0) {
+      return undefined;
+    }
+    const schemaFields: Record<string, { type: 'string' }> = {};
+    for (const name of fieldNames) {
+      schemaFields[name] = { type: 'string' };
+    }
+    return { strict: false, fields: schemaFields };
+  }, [fieldNames]);
+
+  // Only pass the SelectionBar as a toolsLeft item when there are actually
+  // selected items. EuiSearchBar renders every toolsLeft entry as a flex item
+  // regardless of whether the child renders null, producing an empty gap when
+  // nothing is selected.
   const toolsLeft = useMemo(
     () =>
-      supports.selection
+      supports.selection && selectedCount > 0
         ? [<SelectionBar key="selection" data-test-subj={`${dataTestSubj}-selectionBar`} />]
         : undefined,
-    [supports.selection, dataTestSubj]
+    [supports.selection, selectedCount, dataTestSubj]
   );
+
+  if (phase === 'initialLoad') {
+    return (
+      <ToolbarSkeleton
+        filterCount={filters.length}
+        hasSelection={supports.selection}
+        data-test-subj={`${dataTestSubj}-skeleton`}
+      />
+    );
+  }
 
   return (
     <EuiSearchBar
-      query={search}
+      query={queryText}
       box={{
         placeholder: labels.searchPlaceholder ?? defaultPlaceholder,
         incremental: true,
         'data-test-subj': `${dataTestSubj}-searchBox`,
         disabled: !searchIsSupported,
+        ...(boxSchema && { schema: boxSchema }),
       }}
       onChange={handleSearchChange}
       toolsLeft={toolsLeft}
       filters={filters}
+      hint={searchHint}
       data-test-subj={dataTestSubj}
     />
   );

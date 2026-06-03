@@ -8,7 +8,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -60,14 +59,6 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes: Record<string, PropTypes.Validator<unknown>> = {
-    data: PropTypes.object.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    fieldFormats: PropTypes.object.isRequired,
-    uiActions: PropTypes.object.isRequired,
-    isFilterable: PropTypes.func.isRequired,
-  };
-
   csvSeparator = this.props.uiSettings.get('csv:separator', ',');
   quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
@@ -97,7 +88,7 @@ class DataTableFormatClass extends Component<
                 }
               >
                 <EuiButtonIcon
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   color="text"
                   aria-label={i18n.translate('data.inspector.table.filterForValueButtonAriaLabel', {
                     defaultMessage: 'Filter for value',
@@ -127,7 +118,7 @@ class DataTableFormatClass extends Component<
                   }
                 >
                   <EuiButtonIcon
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     color="text"
                     aria-label={i18n.translate(
                       'data.inspector.table.filterOutValueButtonAriaLabel',
@@ -176,7 +167,7 @@ class DataTableFormatClass extends Component<
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
-          const formattedValue = fieldFormatter.convert(value);
+          const formattedValue = fieldFormatter.convertToText(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
           return DataTableFormatClass.renderCell({
@@ -204,6 +195,9 @@ class DataTableFormatClass extends Component<
 
     return (
       <EuiInMemoryTable
+        tableCaption={i18n.translate('data.inspector.table.tableCaption', {
+          defaultMessage: 'Inspector data',
+        })}
         tableLayout="auto"
         className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"

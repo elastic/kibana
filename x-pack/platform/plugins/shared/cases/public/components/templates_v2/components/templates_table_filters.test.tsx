@@ -7,7 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { TemplatesTableFilters } from './templates_table_filters';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -22,6 +23,7 @@ describe('TemplatesTableFilters', () => {
     search: '',
     tags: [],
     author: [],
+    owner: [],
     isDeleted: false,
   };
 
@@ -41,9 +43,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    expect(await screen.findByTestId('templates-table-filters')).toBeInTheDocument();
-    expect(await screen.findByTestId('templates-search')).toBeInTheDocument();
-    expect(await screen.findByTestId('templates-refresh-button')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table-filters')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('templates-search')).toBeInTheDocument();
+    expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
   });
 
   it('calls onQueryParamsChange when search is performed', async () => {
@@ -55,7 +59,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    await userEvent.type(await screen.findByTestId('templates-search'), 'test search{enter}');
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-search')).toBeInTheDocument();
+    });
+
+    await userEvent.type(screen.getByTestId('templates-search'), 'test search{enter}');
 
     expect(onQueryParamsChange).toHaveBeenCalledWith({ search: 'test search', page: 1 });
   });
@@ -69,7 +77,11 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    await userEvent.click(await screen.findByTestId('templates-refresh-button'));
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('templates-refresh-button'));
 
     expect(onRefresh).toHaveBeenCalled();
   });
@@ -84,24 +96,135 @@ describe('TemplatesTableFilters', () => {
       />
     );
 
-    const refreshButton = await screen.findByTestId('templates-refresh-button');
-    expect(refreshButton).toHaveAttribute('aria-label', 'Refresh templates');
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-refresh-button')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('templates-refresh-button')).toHaveAttribute(
+      'aria-label',
+      'Refresh templates'
+    );
   });
 
   it('displays the current search value', async () => {
-    const queryParamsWithSearch = {
-      ...defaultQueryParams,
-      search: 'existing search',
-    };
-
     renderWithTestingProviders(
       <TemplatesTableFilters
-        queryParams={queryParamsWithSearch}
+        queryParams={{ ...defaultQueryParams, search: 'existing search' }}
         onQueryParamsChange={onQueryParamsChange}
         onRefresh={onRefresh}
       />
     );
 
-    expect(await screen.findByDisplayValue('existing search')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('existing search')).toBeInTheDocument();
+    });
+  });
+
+  describe('status filter', () => {
+    it('renders the status filter button', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('options-filter-popover-button-status')).toBeInTheDocument();
+      });
+    });
+
+    it('shows Enabled and Disabled options in the popover', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByRole('option', { name: 'Enabled' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Disabled' })).toBeInTheDocument();
+    });
+
+    it('sends isEnabled: false when Enabled is deselected (only Disabled remains)', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      await userEvent.click(screen.getByRole('option', { name: 'Enabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: false, page: 1 });
+      });
+    });
+
+    it('sends isEnabled: true when Disabled is deselected (only Enabled remains)', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={defaultQueryParams}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      await userEvent.click(screen.getByRole('option', { name: 'Disabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: true, page: 1 });
+      });
+    });
+
+    it('sends isEnabled: undefined when both options are selected', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={{ ...defaultQueryParams, isEnabled: false }}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      await userEvent.click(screen.getByRole('option', { name: 'Enabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: undefined, page: 1 });
+      });
+    });
+
+    it('sends isEnabled: undefined when both options are deselected', async () => {
+      renderWithTestingProviders(
+        <TemplatesTableFilters
+          queryParams={{ ...defaultQueryParams, isEnabled: true }}
+          onQueryParamsChange={onQueryParamsChange}
+          onRefresh={onRefresh}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
+      await waitForEuiPopoverOpen();
+
+      await userEvent.click(screen.getByRole('option', { name: 'Enabled' }));
+
+      await waitFor(() => {
+        expect(onQueryParamsChange).toHaveBeenCalledWith({ isEnabled: undefined, page: 1 });
+      });
+    });
   });
 });

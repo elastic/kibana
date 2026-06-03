@@ -21,6 +21,7 @@ import {
  */
 export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin): ApiStats {
   const { missingApiItems, referencedDeprecations, adoptionTrackedAPIs, unnamedExports } = issues;
+  const documentedTypeLabels = getTopLevelApiLabels(doc);
 
   const stats: ApiStats = {
     missingComments: [],
@@ -39,13 +40,13 @@ export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin)
     unnamedExports: unnamedExports?.[doc.id] || [],
   };
   Object.values(doc.client).forEach((def) => {
-    collectStatsForApi(def, stats, doc);
+    collectStatsForApi(def, stats, documentedTypeLabels);
   });
   Object.values(doc.server).forEach((def) => {
-    collectStatsForApi(def, stats, doc);
+    collectStatsForApi(def, stats, documentedTypeLabels);
   });
   Object.values(doc.common).forEach((def) => {
-    collectStatsForApi(def, stats, doc);
+    collectStatsForApi(def, stats, documentedTypeLabels);
   });
   stats.deprecatedAPIsReferencedCount = referencedDeprecations[doc.id]
     ? referencedDeprecations[doc.id].length
@@ -68,14 +69,29 @@ function collectAdoptionTrackedAPIStats(
   ).length;
 }
 
-function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
+function collectStatsForApi(
+  doc: ApiDeclaration,
+  stats: ApiStats,
+  documentedTypeLabels: Set<string>,
+  insideTypedParam = false
+): void {
   const hasDescription = doc.description !== undefined && doc.description.length > 0;
   const childHasDescription =
     doc.children?.some(
       (child) => child.description !== undefined && child.description.length > 0
     ) ?? false;
   const isParameterNode = doc.id.includes('.$'); // parameters and destructured parameter nodes carry .$ in their id
-  const missingComment = !hasDescription && !(isParameterNode && childHasDescription);
+
+  // A parameter node whose type is a named reference (interface/type alias).
+  // Its property-level documentation lives on the referenced type's own ApiDeclaration.
+  const isTypedParam = isParameterNode && isDocumentedOnReferencedType(doc, documentedTypeLabels);
+
+  // Suppress missingComments for parameter nodes when the parameter (or an ancestor
+  // parameter) has a named type reference — the documentation is on the interface.
+  const suppressForTypedParam = isTypedParam || (isParameterNode && insideTypedParam);
+
+  const missingComment =
+    !suppressForTypedParam && !hasDescription && !(isParameterNode && childHasDescription);
   // Ignore all stats coming from third party libraries, we can't fix that!
   if (doc.path.includes('node_modules')) {
     return;
@@ -85,7 +101,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
     stats.missingComments.push(doc);
   }
 
-  trackParamDocMismatches(doc, stats);
+  trackParamDocMismatches(doc, stats, documentedTypeLabels);
   trackMissingComplexTypeInfo(doc, stats);
   trackMissingReturns(doc, stats);
 
@@ -94,7 +110,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
   }
   if (doc.children) {
     doc.children.forEach((child) => {
-      collectStatsForApi(child, stats, pluginApi);
+      collectStatsForApi(child, stats, documentedTypeLabels, isTypedParam || insideTypedParam);
     });
   }
   if (!doc.references || doc.references.length === 0) {
@@ -123,14 +139,47 @@ const isFunctionLike = (doc: ApiDeclaration): boolean => {
 };
 
 /**
+ * Returns true when a parameter's type is a named reference (interface, object, or type alias).
+ * Such parameters are documented on the referenced type's own ApiDeclaration, so the checker
+ * should not require per-property descriptions on the function parameter itself.
+ */
+const getTopLevelApiLabels = (pluginApi: PluginApi): Set<string> => {
+  return new Set(
+    [
+      ...Object.values(pluginApi.client),
+      ...Object.values(pluginApi.server),
+      ...Object.values(pluginApi.common),
+    ].map(({ label }) => label)
+  );
+};
+
+const isDocumentedOnReferencedType = (
+  param: ApiDeclaration,
+  documentedTypeLabels: Set<string>
+): boolean => {
+  return (
+    param.docsReferencedTypeName !== undefined &&
+    documentedTypeLabels.has(param.docsReferencedTypeName)
+  );
+};
+
+/**
  * Tracks functions where not all parameters have documentation.
  *
  * For function-like declarations, `children` represents the function's parameters.
  * This is distinct from interface/class children which represent properties/methods.
  * Each function-like member within an interface has its own declaration with its own
  * children (parameters), so we don't conflate interface properties with function parameters.
+ *
+ * Parameters whose type is a named reference (interface or type alias) are treated as
+ * documented without requiring their own description — the documentation lives on the
+ * referenced type, which is rendered in its own section.
  */
-const trackParamDocMismatches = (doc: ApiDeclaration, stats: ApiStats): void => {
+const trackParamDocMismatches = (
+  doc: ApiDeclaration,
+  stats: ApiStats,
+  documentedTypeLabels: Set<string>
+): void => {
   if (!isFunctionLike(doc)) {
     return;
   }
@@ -138,7 +187,9 @@ const trackParamDocMismatches = (doc: ApiDeclaration, stats: ApiStats): void => 
     return;
   }
   const describedParams = doc.children.filter(
-    (param) => param.description && param.description.length > 0
+    (param) =>
+      (param.description && param.description.length > 0) ||
+      isDocumentedOnReferencedType(param, documentedTypeLabels)
   ).length;
   if (describedParams !== doc.children.length) {
     stats.paramDocMismatches.push(doc);

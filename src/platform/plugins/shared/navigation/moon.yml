@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/navigation-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/navigation-plugin'
+  title: '@kbn/navigation-plugin'
   description: Moon project for @kbn/navigation-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/navigation
+  sourceRoot: src/platform/plugins/shared/navigation
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-feature-flags-server'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
   - '@kbn/i18n-react'
@@ -51,16 +51,6 @@ fileGroups:
     - server/**/*.ts
     - test/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

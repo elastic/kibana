@@ -1,0 +1,37 @@
+{
+  "sha1": "d13cacdde036940b0bf8a3edc2024c2a7cc515c2",
+  "tests": [
+    {
+      "id": "443757f38e97c4a-80eda8e48a7b083",
+      "title": "Attacks execution with EIS inference connector successfully executes manual _generate endpoint without \"Saved object not found\" error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/api/parallel_tests/detections/attacks/attacks_execution.spec.ts",
+        "line": 23,
+        "column": 14
+      }
+    },
+    {
+      "id": "443757f38e97c4a-962bec2e5768709",
+      "title": "Attacks execution with EIS inference connector successfully executes scheduled background task without \"Saved object not found\" error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/api/parallel_tests/detections/attacks/attacks_execution.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    }
+  ]
+}

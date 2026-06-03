@@ -36,6 +36,7 @@ import {
   getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
+  isRequestLineStart,
   replaceRequestVariables,
   shouldTriggerSuggestions,
   trackSentRequests,
@@ -310,6 +311,9 @@ export class MonacoEditorActionsProvider {
     } = context;
     const { toasts } = notifications;
     try {
+      // Update request state immediately so the UI can reflect progress
+      // even if parsing / sending the request is slow.
+      dispatch({ type: 'setRequestInFlight', payload: true });
       const allRequests = await this.getRequests();
       const selectedRequests = await this.getSelectedParsedRequests();
       if (selectedRequests.length) {
@@ -328,6 +332,7 @@ export class MonacoEditorActionsProvider {
               },
             })
           );
+          dispatch({ type: 'setRequestInFlight', payload: false });
           return;
         }
       }
@@ -349,14 +354,17 @@ export class MonacoEditorActionsProvider {
             defaultMessage: 'The selected request is not valid.',
           })
         );
+        dispatch({ type: 'setRequestInFlight', payload: false });
         return;
       } else if (!requests.length) {
-        toasts.add(
-          i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
+        toasts.add({
+          title: i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
-          })
-        );
+          }),
+          color: 'primary',
+        });
+        dispatch({ type: 'setRequestInFlight', payload: false });
         return;
       }
 
@@ -503,23 +511,26 @@ export class MonacoEditorActionsProvider {
     return insideComment;
   }
 
-  private async getAutocompleteType(
-    model: monaco.editor.ITextModel,
-    { lineNumber, column }: monaco.Position
-  ): Promise<AutocompleteType | null> {
+  private isPositionInsideComment(model: monaco.editor.ITextModel, lineNumber: number): boolean {
     // Get the content of the current line up until the cursor position
-    const currentLineContent = model.getLineContent(lineNumber);
-    const trimmedContent = currentLineContent.trim();
+    const trimmedContent = model.getLineContent(lineNumber).trim();
 
-    // If we are positioned inside a comment block, no autocomplete should be provided
-    if (
+    return (
       trimmedContent.startsWith('#') ||
       trimmedContent.startsWith('//') ||
       trimmedContent.startsWith('/*') ||
       trimmedContent.startsWith('*') ||
       trimmedContent.includes('*/') ||
       this.isInsideMultilineComment(model, lineNumber)
-    ) {
+    );
+  }
+
+  private async getAutocompleteType(
+    model: monaco.editor.ITextModel,
+    { lineNumber, column }: monaco.Position
+  ): Promise<AutocompleteType | null> {
+    // If we are positioned inside a comment block, no autocomplete should be provided
+    if (this.isPositionInsideComment(model, lineNumber)) {
       return null;
     }
 
@@ -527,9 +538,16 @@ export class MonacoEditorActionsProvider {
     const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
     const currentRequest = currentRequests.at(0);
 
-    // if there is no request, suggest method
+    // if there is no request, only suggest method when the line could plausibly
+    // be the start of a new request (empty or starting with letters). A line
+    // that starts with `"`, `{`, `[`, etc. is body-like content and must not
+    // trigger method suggestions.
+    // https://github.com/elastic/kibana/issues/186767
     if (!currentRequest) {
-      return AutocompleteType.METHOD;
+      if (isRequestLineStart(model.getLineContent(lineNumber))) {
+        return AutocompleteType.METHOD;
+      }
+      return null;
     }
 
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
@@ -542,9 +560,17 @@ export class MonacoEditorActionsProvider {
         endLineNumber: lineNumber,
         endColumn: column,
       });
+      const fullLineContent = model.getLineContent(lineNumber);
       const lineTokens = getLineTokens(lineContent);
-      // if there is 1 or fewer tokens, suggest method
+      // if there is 1 or fewer tokens, suggest method — but only when the
+      // full line could plausibly start a request. The parser produces a
+      // partial request (`startOffset` only) on lines that begin with `"`, `{`,
+      // `[`, etc., so this branch is reached even for body-like content.
+      // https://github.com/elastic/kibana/issues/186767
       if (lineTokens.length <= 1) {
+        if (!isRequestLineStart(fullLineContent)) {
+          return null;
+        }
         return AutocompleteType.METHOD;
       }
       // if there are 2 tokens, look at the 2nd one and suggest path or url_params
@@ -857,6 +883,14 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
+
+    // Don't trigger (and visually open) the suggestions widget inside comments.
+    // Even when our completion provider returns 0 results, Monaco can still surface
+    // an empty suggestions widget, which breaks user expectations and our UI tests.
+    if (this.isPositionInsideComment(model, position.lineNumber)) {
+      return;
+    }
+
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideEsqlQuery }) => {
         if (insideTripleQuotes && !insideEsqlQuery) {

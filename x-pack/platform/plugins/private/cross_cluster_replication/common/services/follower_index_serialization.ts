@@ -136,7 +136,10 @@ export const serializeAdvancedSettings = ({
   read_poll_timeout: readPollTimeout,
 });
 
-export const serializeFollowerIndex = (followerIndex: FollowerIndex): FollowerIndexToEs => ({
+export const serializeFollowerIndex = (
+  followerIndex: Pick<FollowerIndex, 'remoteCluster' | 'leaderIndex'> &
+    FollowerIndexAdvancedSettings
+): FollowerIndexToEs => ({
   remote_cluster: followerIndex.remoteCluster,
   leader_index: followerIndex.leaderIndex,
   ...serializeAdvancedSettings(followerIndex),

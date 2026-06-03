@@ -19,6 +19,10 @@ import {
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import {
+  disablePerPolicyEndpointExceptions,
+  optInForPerPolicyEndpointExceptions,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/endpoint_artifact_services';
 import type { CustomRole } from '../../../../config/services/types';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
@@ -28,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
+  const kibanaServer = getService('kibanaServer');
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
     config.get('kbnTestServer.serverArgs', []) as string[]
@@ -47,6 +52,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
+    });
+
+    beforeEach(async () => {
+      if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
+        await optInForPerPolicyEndpointExceptions(kibanaServer);
+      }
     });
 
     after(async () => {
@@ -184,7 +195,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
-          it(`should accept item on [${endpointListApiCall.method}] if no assignment tag is present`, async () => {
+          it(`should accept item on [${endpointListApiCall.method}] if no assignment tag is present after user has opted in for per policy`, async () => {
+            await optInForPerPolicyEndpointExceptions(kibanaServer);
+
             const requestBody = endpointListApiCall.getBody();
             requestBody.tags = [];
 
@@ -195,6 +208,24 @@ export default function ({ getService }: FtrProviderContext) {
               .send(requestBody)
               .expect(200)
               .expect(({ body }) => expect(body.tags).to.not.contain(GLOBAL_ARTIFACT_TAG));
+
+            const deleteUrl = `${ENDPOINT_LIST_ITEM_URL}?item_id=${requestBody.item_id}`;
+            await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+          });
+
+          it(`should add global artifact tag on [${endpointListApiCall.method}] if no assignment tag is present if user has not opted in for per policy`, async () => {
+            await disablePerPolicyEndpointExceptions(kibanaServer);
+
+            const requestBody = endpointListApiCall.getBody();
+            requestBody.tags = [];
+
+            await endpointPolicyManagerSupertest[endpointListApiCall.method](
+              endpointListApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(requestBody)
+              .expect(200)
+              .expect(({ body }) => expect(body.tags).to.contain(GLOBAL_ARTIFACT_TAG));
 
             const deleteUrl = `${ENDPOINT_LIST_ITEM_URL}?item_id=${requestBody.item_id}`;
             await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
@@ -395,10 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await endpointArtifactTestResources.deleteList(
-          'endpoint_list',
-          endpointPolicyManagerSupertest
-        );
+        await endpointArtifactTestResources.deleteList('endpoint_list');
       });
 
       it('should return 404 when endpoint list does not exist', async () => {

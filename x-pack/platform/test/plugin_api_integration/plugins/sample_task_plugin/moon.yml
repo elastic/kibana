@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/sample-task-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/sample-task-plugin'
+  title: '@kbn/sample-task-plugin'
   description: Moon project for @kbn/sample-task-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
+  sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/task-manager-plugin'

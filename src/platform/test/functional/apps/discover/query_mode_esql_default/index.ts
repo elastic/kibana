@@ -20,12 +20,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1600, 1200);
     });
 
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
     loadTestFile(require.resolve('./_default_query_mode'));
   });
 }

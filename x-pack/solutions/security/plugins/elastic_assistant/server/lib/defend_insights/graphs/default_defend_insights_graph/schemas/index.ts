@@ -20,9 +20,9 @@ export function getDefendInsightsSchema({
   prompts: DefendInsightsGenerationPrompts;
 }) {
   switch (type) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return getDefendInsightsIncompatibleAntiVirusGenerationSchema(prompts);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return getDefendInsightsPolicyResponseFailureGenerationSchema(prompts);
     default:
       throw new InvalidDefendInsightTypeError();

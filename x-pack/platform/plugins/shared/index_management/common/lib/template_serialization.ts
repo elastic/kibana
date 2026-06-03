@@ -20,7 +20,7 @@ import {
   LOGSDB_INDEX_MODE,
 } from '../constants';
 import type { DataStreamOptions } from '../types/data_streams';
-import { buildTemplateSettings } from './utils';
+import { buildTemplateMappings, buildTemplateSettings } from './utils';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -42,20 +42,29 @@ export function serializeTemplate(
     deprecated,
   } = templateDeserialized;
 
-  // Build settings object, properly handling index mode
-  const settings = buildTemplateSettings(template, indexMode);
+  // Build settings object, properly handling index mode source mode.
+  // During serialization, we prefer the source mode from mappings since it represents the latest user choice in the UI.
+  const settings = buildTemplateSettings(template, indexMode, { preferMappingsSourceMode: true });
+  const mappings = buildTemplateMappings(template, { preferMappingsSourceMode: true });
 
   // Separate settings and lifecycle from other template properties so we can rebuild template cleanly
-  const { settings: _templateSettings, lifecycle, ...otherTemplateProperties } = template || {};
+  const {
+    settings: _templateSettings,
+    lifecycle,
+    mappings: _templateMappings,
+    ...otherTemplateProperties
+  } = template || {};
 
   const showTemplateOptions =
     Object.keys(otherTemplateProperties).length > 0 ||
+    (mappings && Object.keys(mappings).length > 0) ||
     (settings && Object.keys(settings).length > 0) ||
     (lifecycle && Object.keys(lifecycle).length > 0) ||
     dataStreamOptions;
 
   const templateOptions = {
     ...otherTemplateProperties,
+    ...(mappings && { mappings }),
     ...(settings && { settings }),
     ...(lifecycle && { lifecycle }),
     // If the existing template contains data stream options, we need to persist them.
@@ -113,13 +122,24 @@ export function deserializeTemplate(
       ? LOGSDB_INDEX_MODE
       : undefined)) as IndexMode | undefined;
 
+  // When deserializing, preferMappingsSourceMode is false by default.
+  // This means _source.mode is not migrated to settings so the flyout shows the raw payload correctly.
+  const migratedSettings = buildTemplateSettings(template, indexMode);
+  const migratedMappings = buildTemplateMappings(template);
+  const { mappings: _templateMappings, settings: _templateSettings, ...otherTemplate } = template;
+  const migratedTemplate = {
+    ...otherTemplate,
+    ...(migratedSettings ? { settings: migratedSettings } : {}),
+    ...(migratedMappings ? { mappings: migratedMappings } : {}),
+  };
+
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
     priority,
     ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
-    template,
+    template: migratedTemplate,
     indexMode,
     ilmPolicy: ilmPolicyName ? { name: ilmPolicyName } : undefined,
     composedOf: composedOf ?? [],
@@ -165,21 +185,36 @@ export function deserializeTemplateList(
  * ------------------------------------------
  */
 
-export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyTemplateSerialized {
-  const {
-    version,
-    order,
-    indexPatterns,
-    template: { settings, aliases, mappings } = {},
-  } = template;
+export function serializeLegacyTemplate({
+  template,
+  indexPatterns,
+  version,
+  order,
+  indexMode,
+}: TemplateDeserialized): LegacyTemplateSerialized {
+  const migratedTemplatePayload = {
+    settings: template?.settings,
+    mappings: template?.mappings,
+  } as TemplateDeserialized['template'];
+
+  const migratedSettings = buildTemplateSettings(
+    migratedTemplatePayload,
+    (indexMode ?? (template?.settings?.index?.mode as IndexMode | undefined)) as
+      | IndexMode
+      | undefined,
+    { preferMappingsSourceMode: true }
+  );
+  const migratedMappings = buildTemplateMappings(migratedTemplatePayload, {
+    preferMappingsSourceMode: true,
+  });
 
   return {
     version,
     order,
     index_patterns: indexPatterns,
-    settings,
-    aliases,
-    mappings,
+    settings: migratedSettings,
+    aliases: template?.aliases,
+    mappings: migratedMappings,
   };
 }
 

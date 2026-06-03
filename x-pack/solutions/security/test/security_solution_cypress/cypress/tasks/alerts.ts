@@ -167,6 +167,11 @@ export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).first().trigger('click');
 };
 
+export const expandBulkActions = () => {
+  cy.contains(SELECTED_ALERTS, /Selected \d+ alerts/);
+  cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible').click();
+};
+
 export const hideMessageTooltip = () => {
   cy.get('body').then(($body) => {
     if ($body.find(TOOLTIP).length > 0) {
@@ -350,8 +355,8 @@ export const openAlertsFieldBrowser = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    waitForAlerts();
     cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
     cy.get('@checkbox').should('be.checked');
   }
@@ -449,10 +454,10 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 export const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {

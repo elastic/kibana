@@ -1,7 +1,15 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "jest",
+      "@emotion/jest",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+      "@kbn/core-user-settings-types"
+    ]
   },
   "include": [
     "common/**/*",
@@ -95,7 +103,15 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
-    "@kbn/mock-idp-utils"
+    "@kbn/mock-idp-utils",
+    "@kbn/core-user-activity-server",
+    "@kbn/core-user-activity-server-mocks",
+    "@kbn/management-settings-ids",
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/react-query",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/core-user-profile-common"
   ],
   "exclude": ["target/**/*"]
 }

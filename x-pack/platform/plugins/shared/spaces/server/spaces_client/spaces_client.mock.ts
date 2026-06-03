@@ -29,6 +29,7 @@ const createSpacesClientMock = () => {
         disabledFeatures: [],
       });
     }),
+    getPersistedFeatureVisibility: jest.fn().mockResolvedValue([]),
     create: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     update: jest.fn().mockImplementation((space: Space) => Promise.resolve(space)),
     createSavedObjectFinder: repositoryMock.createPointInTimeFinder,

@@ -16,18 +16,19 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
-import type { DocViewerExtensionParams } from '../../context_awareness';
-import { useProfileAccessor } from '../../context_awareness';
+import { DocumentType, useProfileAccessor } from '../../context_awareness';
+import { recordHasContext } from '../../context_awareness/profiles_manager/record_has_context';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
 export interface DiscoverGridFlyoutProps
   extends Pick<
-    DocViewerProps,
+    UnifiedDocViewerFlyoutProps,
     'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
   > {
   savedSearchId?: string;
@@ -40,7 +41,6 @@ export interface DiscoverGridFlyoutProps
   dataView: DataView;
   initialTabId?: string;
   docViewerRef?: DocViewerProps['ref'];
-  docViewerExtensionActions?: DocViewerExtensionParams['actions'];
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;
@@ -51,6 +51,9 @@ export interface DiscoverGridFlyoutProps
   ) => void;
   hideFilteringOnComputedColumns?: boolean;
 }
+
+const getOriginDocType = (record: DataTableRecord): DocumentType =>
+  recordHasContext(record) ? record.context.type : DocumentType.Default;
 
 /**
  * Flyout displaying an expanded Elasticsearch document
@@ -66,7 +69,6 @@ export function DiscoverGridFlyout({
   query,
   initialTabId,
   docViewerRef,
-  docViewerExtensionActions,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -100,15 +102,18 @@ export function DiscoverGridFlyout({
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    return getDocViewer({ actions: docViewerExtensionActions ?? {}, record: actualHit });
-  }, [actualHit, docViewerExtensionActions, getDocViewerAccessor]);
+    return getDocViewer({ record: actualHit });
+  }, [actualHit, getDocViewerAccessor]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
   }, []);
 
+  const originDocType = useMemo(() => getOriginDocType(actualHit), [actualHit]);
+
   return (
     <UnifiedDocViewerFlyout
+      originDocType={originDocType}
       flyoutTitle={docViewer.title}
       flyoutActions={
         !isESQLQuery && flyoutActions.length > 0 ? (
@@ -118,6 +123,8 @@ export function DiscoverGridFlyout({
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
       docViewsRegistry={docViewer.docViewsRegistry}
+      renderCustomHeader={docViewer.renderHeader}
+      renderCustomFooter={docViewer.renderFooter}
       isEsqlQuery={isESQLQuery}
       hit={hit}
       hits={hits}

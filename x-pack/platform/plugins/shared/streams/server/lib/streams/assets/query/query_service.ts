@@ -5,25 +5,57 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { buildEsqlQuery } from '@kbn/streams-schema';
+import {
+  ensureMetadata,
+  deriveQueryType,
+  QUERY_TYPE_MATCH,
+  QUERY_TYPE_STATS,
+} from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
+  QUERY_SEARCH_EMBEDDING,
+  QUERY_TYPE,
   STREAM_NAME,
   RULE_ID,
+  RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
+import {
+  queryStorageSettings,
+  getQueryStorageSettings,
+  type QueryStorageSettings,
+} from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
-import { computeRuleId } from './helpers/query';
+import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
+import { V1RulesAdapter } from './v1_rules_adapter';
+import { V2RulesAdapter, V2RulesNotInstalledAdapter } from './v2_rules_adapter';
+import { DualCleanupRulesAdapter } from './dual_cleanup_rules_adapter';
+import {
+  DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  type SigEventsTuningConfig,
+} from '../../../../../common/sig_events_tuning_config';
+import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
+import {
+  isSignificantEventsAlertingV2Active,
+  logAlertingV2PluginUnavailable,
+  readSignificantEventsAlertingV2UiEnabled,
+} from '../../../sig_events/significant_events_alerting_v2';
 
 export class QueryService {
   constructor(
@@ -31,23 +63,49 @@ export class QueryService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<QueryClient> {
-    const [core, pluginStart] = await this.coreSetup.getStartServices();
+  async getClient({
+    esClient,
+    soClient,
+    alertingRulesClient,
+    alertingV2RulesClient,
+    config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
+  }: {
+    esClient: ElasticsearchClient;
+    soClient: SavedObjectsClientContract;
+    alertingRulesClient: RulesClient;
+    alertingV2RulesClient?: RulesClientApi;
+    config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
+  }): Promise<QueryClient> {
+    const [core] = await this.coreSetup.getStartServices();
 
-    const soClient = core.savedObjects.getScopedClient(request);
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const isSignificantEventsEnabled =
-      (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
+    const [isSignificantEventsEnabled, alertingV2UiEnabled] = await Promise.all([
+      uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
+      readSignificantEventsAlertingV2UiEnabled(uiSettings, this.logger),
+    ]);
 
-    const rulesClient = await pluginStart.alerting.getRulesClientWithRequestInSpace(
-      request,
-      DEFAULT_SPACE_ID
+    if (alertingV2UiEnabled && !alertingV2RulesClient) {
+      logAlertingV2PluginUnavailable(this.logger);
+    }
+
+    const alertingV2Enabled = isSignificantEventsAlertingV2Active(
+      alertingV2UiEnabled,
+      alertingV2RulesClient
     );
 
+    const existingInferenceId = await getInferenceIdFromIndex(
+      esClient,
+      queryStorageSettings.name,
+      QUERY_SEARCH_EMBEDDING,
+      this.logger
+    );
+
+    const storageSettings = getQueryStorageSettings(existingInferenceId);
+
     const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
-      core.elasticsearch.client.asInternalUser,
+      esClient,
       this.logger.get('queries'),
-      queryStorageSettings,
+      storageSettings as QueryStorageSettings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -63,7 +121,12 @@ export class QueryService {
             ) {
               try {
                 featureFilter = JSON.parse(featureFilterJson) as Condition;
-              } catch {
+              } catch (parseError) {
+                this.logger.warn(
+                  `Failed to parse featureFilter JSON during migration for stream "${
+                    migrated[STREAM_NAME]
+                  }": ${parseError instanceof Error ? parseError.message : String(parseError)}`
+                );
                 featureFilter = undefined;
               }
             }
@@ -82,8 +145,34 @@ export class QueryService {
 
             // Uses the wired stream pattern as a best-effort fallback:
             // the definition is not available in the sync storage migration callback.
-            const esqlQuery = buildEsqlQuery([streamName, `${streamName}.*`], input);
+            const esqlQuery = buildEsqlQueryFromKql([streamName, `${streamName}.*`], input);
             migrated = { ...migrated, [QUERY_ESQL_QUERY]: esqlQuery };
+          }
+
+          const esqlQuery = migrated[QUERY_ESQL_QUERY] as string;
+          // Derive type first — all subsequent migration steps depend on this.
+          // Guard against corrupt/empty ES|QL: treat unparseable queries as
+          // match (safe default) and force rule_backed=false so no alerting
+          // rule is created for a broken query.
+          const isCorruptEsql = !esqlQuery || !esqlQuery.trim();
+          const derivedType = isCorruptEsql ? QUERY_TYPE_MATCH : deriveQueryType(esqlQuery);
+
+          migrated = { ...migrated, [QUERY_TYPE]: derivedType };
+
+          let metadataFailed = false;
+          if (derivedType !== QUERY_TYPE_STATS) {
+            try {
+              migrated = { ...migrated, [QUERY_ESQL_QUERY]: ensureMetadata(esqlQuery) };
+            } catch (metadataError) {
+              metadataFailed = true;
+              this.logger.warn(
+                `ensureMetadata failed during migration for stream "${
+                  migrated[STREAM_NAME]
+                }", asset "${migrated[ASSET_UUID] ?? 'unknown'}": ${
+                  metadataError instanceof Error ? metadataError.message : String(metadataError)
+                }. Forcing rule_backed=false to prevent orphaned rule state.`
+              );
+            }
           }
 
           // Back-fill rule_id for pre-existing documents using the KQL query as the hash
@@ -95,19 +184,46 @@ export class QueryService {
             migrated = { ...migrated, [RULE_ID]: computeRuleId(uuid, kqlQuery) };
           }
 
+          // Pre-existing queries were all rule-backed; back-fill the flag.
+          // STATS queries (introduced alongside the type field) are never
+          // rule-backed, so force false to avoid orphaned rule state.
+          // Corrupt/empty ES|QL or failed metadata also gets rule_backed=false
+          // since the alerting rule can't function without metadata.
+          if (!(RULE_BACKED in migrated)) {
+            migrated = {
+              ...migrated,
+              [RULE_BACKED]: !isCorruptEsql && !metadataFailed && derivedType !== QUERY_TYPE_STATS,
+            };
+          }
+
+          // Back-fill description for queries created before the field was introduced.
+          if (!(QUERY_DESCRIPTION in migrated)) {
+            migrated = { ...migrated, [QUERY_DESCRIPTION]: '' };
+          }
+
           return migrated as StoredQueryLink;
         },
       }
     );
 
+    const v1Adapter = new V1RulesAdapter(alertingRulesClient);
+    const v2Client = alertingV2RulesClient
+      ? new V2RulesAdapter(alertingV2RulesClient)
+      : new V2RulesNotInstalledAdapter(this.logger);
+
+    const rulesManagementClient = alertingV2Enabled
+      ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)
+      : new DualCleanupRulesAdapter(v1Adapter, v2Client, this.logger);
+
     return new QueryClient(
       {
         storageClient: adapter.getClient(),
         soClient,
-        rulesClient,
+        rulesManagementClient,
         logger: this.logger,
       },
-      isSignificantEventsEnabled
+      isSignificantEventsEnabled,
+      config
     );
   }
 }

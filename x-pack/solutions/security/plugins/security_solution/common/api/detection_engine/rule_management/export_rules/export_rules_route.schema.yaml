@@ -16,9 +16,9 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       tags:
         - Import/Export API
       parameters:
@@ -73,6 +73,13 @@ paths:
                       rule_id:
                         $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
                   description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
+            examples:
+              exportByRuleIds:
+                summary: Request body to export a subset of rules
+                value:
+                  objects:
+                    - rule_id: 343580b5-c811-447c-8d2d-2ccf052c6900
+                    - rule_id: 2938c9fa-53eb-4c04-b79c-33cbf041b18d
       responses:
         200:
           description: Indicates a successful call.
@@ -85,3 +92,9 @@ paths:
                   An `.ndjson` file containing the returned rules.
 
                   Each line in the file represents an object (a rule, exception list parent container, or exception list item), and the last line includes a summary of what was exported.
+              examples:
+                sampleNdjson:
+                  value: |
+                    {"rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900","name":"Example rule","type":"query","enabled":true}
+                    {"exception_list":true}
+                    {"export_summary":{"total_rules":1,"exceptions_count":0}}

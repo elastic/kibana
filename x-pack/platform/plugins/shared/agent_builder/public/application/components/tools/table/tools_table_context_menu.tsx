@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
@@ -31,13 +33,17 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const editMenuItem = (
     <EuiContextMenuItem
-      icon="documentEdit"
+      icon="pencil"
       key="edit"
-      size="s"
       onClick={() => {
         editTool(tool.id);
         setIsOpen(false);
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_EDIT,
+        detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+      })}
     >
       {labels.tools.editToolButtonLabel}
     </EuiContextMenuItem>
@@ -47,7 +53,6 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="trash"
       key="delete"
-      size="s"
       css={css`
         color: ${euiTheme.colors.textDanger};
       `}
@@ -55,6 +60,11 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         deleteTool(tool.id);
         setIsOpen(false);
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
+        detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+      })}
     >
       {labels.tools.deleteToolButtonLabel}
     </EuiContextMenuItem>
@@ -64,11 +74,15 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="play"
       key="test"
-      size="s"
       onClick={() => {
         testTool(tool.id);
         setIsOpen(false);
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_TEST,
+        detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+      })}
     >
       {labels.tools.testToolButtonLabel}
     </EuiContextMenuItem>
@@ -78,11 +92,15 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="copy"
       key="clone"
-      size="s"
       onClick={() => {
         cloneTool(tool.id);
         setIsOpen(false);
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_CLONE,
+        detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+      })}
     >
       {labels.tools.cloneToolButtonLabel}
     </EuiContextMenuItem>
@@ -92,11 +110,15 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="eye"
       key="view"
-      size="s"
       onClick={() => {
         viewTool(tool.id);
         setIsOpen(false);
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+        detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+      })}
     >
       {labels.tools.viewToolButtonLabel}
     </EuiContextMenuItem>
@@ -113,15 +135,20 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       panelPaddingSize="s"
       button={
         <EuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.toolContextMenuButtonLabel}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
         />
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
     >
-      <EuiContextMenuPanel size="s" items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
 };

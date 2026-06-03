@@ -1,0 +1,49 @@
+name: ES|QL Query Output to New Index
+description: Runs an ES|QL query to detect suspicious transactions over $10k, then indexes each result as a SAR report document.
+enabled: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: detect-amount-over-10k
+    type: elasticsearch.esql.query
+    with:
+      query: >
+        FROM fraud-workshop*
+        | WHERE event.amount >= 10000 AND (wire.inbound.bank_name IS NOT NULL OR wire.outbound.bank_name IS NOT NULL)
+        | GROK account.address "%{GREEDYDATA:account.address}, %{WORD:account.city}, %{WORD:account.state} %{NUMBER:account.zip}$"
+        | DISSECT account.name "%{account.first_name} %{account.last_name}"
+        | RENAME wire.inbound.bank_name AS bank_name
+        | RENAME wire.outbound.bank_name AS bank_name
+        | RENAME wire.inbound.routing_number AS routing_number
+        | RENAME wire.outbound.routing_number AS routing_number
+        | RENAME wire.direction AS direction
+        | STATS SARs = COUNT(*) BY event.amount, account.event, account.address, account.city, account.first_name, account.last_name, account.state, account.zip, account.type, account.telephone_number, bank_name, routing_number, direction
+        | SORT event.amount DESC
+
+  - name: loop_over_columns
+    type: foreach
+    foreach: '{{steps.detect-amount-over-10k.output.values}}'
+    steps:
+      # id uses execution.id + foreach.index to guarantee uniqueness across runs
+      - name: log_to_elasticsearch
+        type: elasticsearch.index
+        with:
+          index: 'sar-reports'
+          id: '{{ execution.id }}-{{ foreach.index }}'
+          document:
+            timestamp: '{{ execution.startedAt }}'
+            total_dollar_amount: '${{ foreach.item[1] }}'
+            activity_description: 'Account had {{ foreach.item[2] }} amount exceeding SAR threshold.'
+            activity_type: '{{ foreach.item[13] }} {{ foreach.item[2] }} in excess of $10,000'
+            financial_institution_name: '${{ foreach.item[11] }}'
+            financial_institution_ein: '${{ foreach.item[12] }}'
+            report_date: '{{ execution.startedAt }}'
+            suspect_first_name: '${{ foreach.item[5] }}'
+            suspect_last_name: '${{ foreach.item[6] }}'
+            suspect_address: '${{ foreach.item[3] }}'
+            suspect_city: '${{ foreach.item[4] }}'
+            suspect_state: '${{ foreach.item[7] }}'
+            suspect_zip: '${{ foreach.item[8] }}'
+            suspect_phone: '${{ foreach.item[10] }}'

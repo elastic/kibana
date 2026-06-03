@@ -12,6 +12,7 @@ import type { EditableScriptFields } from '../../../../common/endpoint/types';
 const EDITABLE_SCRIPT_FIELD_KEYS = [
   'name',
   'platform',
+  'fileType',
   'tags',
   'description',
   'instructions',

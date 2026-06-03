@@ -9,6 +9,7 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { selectWorkflow } from '../selectors';
@@ -30,6 +31,7 @@ export const runWorkflowThunk = createAsyncThunk<
   'detail/runWorkflowThunk',
   async ({ inputs }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     try {
       const workflow = selectWorkflow(getState());
 
@@ -37,12 +39,7 @@ export const runWorkflowThunk = createAsyncThunk<
         return rejectWithValue('No workflow to run');
       }
 
-      // Make the API call to run the workflow
-      const response = await http.post<RunWorkflowResponse>(`/api/workflows/${workflow.id}/run`, {
-        body: JSON.stringify({
-          inputs,
-        }),
-      });
+      const response = await api.runWorkflow(workflow.id, { inputs });
       // Show success notification
       notifications.toasts.addSuccess(
         i18n.translate('workflows.detail.runWorkflow.success', {

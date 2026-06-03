@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/entity-manager-fixture-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-entities'
-toolchain:
+  defaultOwner: '@elastic/core-analysis'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/entity-manager-fixture-plugin'
+  title: '@kbn/entity-manager-fixture-plugin'
   description: Moon project for @kbn/entity-manager-fixture-plugin
   channel: ''
-  owner: '@elastic/obs-entities'
-  metadata:
-    sourceRoot: x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin
+  owner: '@elastic/core-analysis'
+  sourceRoot: x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/encrypted-saved-objects-plugin'

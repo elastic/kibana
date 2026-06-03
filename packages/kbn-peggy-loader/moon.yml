@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/peggy-loader'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/peggy-loader'
+  title: '@kbn/peggy-loader'
   description: Moon project for @kbn/peggy-loader
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-peggy-loader
+  sourceRoot: packages/kbn-peggy-loader
 dependsOn:
   - '@kbn/peggy'
 tags:
@@ -31,16 +30,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.js'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

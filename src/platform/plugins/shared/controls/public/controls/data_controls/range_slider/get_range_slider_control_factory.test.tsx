@@ -8,18 +8,21 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { PublishesUnifiedSearch, PresentationContainer } from '@kbn/presentation-publishing';
 import type { Query } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
+import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import type { RangeSliderControlState } from '@kbn/controls-schemas';
+import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { RangeSliderControlApi } from './types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -80,9 +83,7 @@ describe('RangeSliderControlApi', () => {
       },
       getFormatterForField: () => {
         return {
-          getConverterFor: () => {
-            return (value: string) => `${value} myUnits`;
-          },
+          convertToText: (value: string) => `${value} myUnits`,
         };
       },
     } as unknown as DataView;
@@ -99,6 +100,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -113,6 +115,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           value: ['5', '10'],
@@ -152,6 +155,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'notGonnaFindMeDataView',
           field_name: 'myFieldName',
           value: ['5', '10'],
@@ -175,6 +179,7 @@ describe('RangeSliderControlApi', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           value: ['5', '10'],
@@ -195,6 +200,7 @@ describe('RangeSliderControlApi', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -217,6 +223,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -232,6 +239,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           step: 1024,
@@ -242,6 +250,88 @@ describe('RangeSliderControlApi', () => {
       });
       const serializedState = api.serializeState() as RangeSliderControlState;
       expect(serializedState.step).toBe(1024);
+    });
+  });
+
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = rangeSliderControlSchema.validate({
+        data_view_id: 'oldDataViewId',
+        field_name: 'myFieldName',
+      });
+      const initialState = {
+        ...lastSavedState,
+        data_view_id: 'newDataViewId',
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = rangeSliderControlSchema.validate({
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
+    });
+  });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: RangeSliderControlApi;
+    beforeEach((done) => {
+      factory
+        .buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: rangeSliderControlSchema.validate({
+            data_view_id: 'oldDataViewId',
+            field_name: 'myFieldName',
+          }),
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
+      });
+      embeddableApi.setTitle('cute puppies');
     });
   });
 });

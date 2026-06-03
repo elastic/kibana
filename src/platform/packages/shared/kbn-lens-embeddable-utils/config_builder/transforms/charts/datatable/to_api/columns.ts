@@ -12,16 +12,25 @@ import type {
   TextBasedLayer,
   ColumnState,
 } from '@kbn/lens-common';
-import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
+import type { PaletteOutput } from '@kbn/coloring';
+import type {
+  DatatableConfig,
+  DatatableConfigESQL,
+  DatatableConfigNoESQL,
+} from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
-import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
+import {
+  AUTO_COLOR,
+  fromColorByValueLensStateToAPI,
+  fromColorMappingLensStateToAPI,
+} from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
-import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
+import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
 
 type APIMetricRowCommonProps = Partial<
-  Pick<NonNullable<DatatableState['metrics']>[number], 'visible' | 'alignment' | 'width'>
+  Pick<NonNullable<DatatableConfig['metrics']>[number], 'visible' | 'alignment' | 'width'>
 >;
 
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
@@ -39,11 +48,11 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
  */
 function buildColorProps(
   column: ColumnState
-): Partial<Pick<NonNullable<DatatableState['metrics']>[number], 'apply_color_to' | 'color'>> {
+): Partial<Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color'>> {
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
-  const applyColorTo = colorMode === 'text' ? 'value' : 'background';
+  const applyColorTo = colorModeToApplyColorTo(colorMode);
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -56,16 +65,18 @@ function buildColorProps(
   if (palette) {
     return {
       apply_color_to: applyColorTo,
-      color: fromColorByValueLensStateToAPI(palette),
+      color: palette.params
+        ? fromColorByValueLensStateToAPI(palette)
+        : fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };
   }
 
-  return { apply_color_to: applyColorTo };
+  return { apply_color_to: applyColorTo, color: AUTO_COLOR };
 }
 
 type APIMetricProps = APIMetricRowCommonProps &
   Partial<
-    Pick<NonNullable<DatatableState['metrics']>[number], 'apply_color_to' | 'color' | 'summary'>
+    Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color' | 'summary'>
   >;
 
 function buildMetricsAPI(column: ColumnState): APIMetricProps {
@@ -74,14 +85,14 @@ function buildMetricsAPI(column: ColumnState): APIMetricProps {
     ...buildCommonMetricRowProps(column),
     ...buildColorProps(column),
     ...(summaryRow && summaryRow !== 'none'
-      ? { summary: { type: summaryRow, ...(summaryLabel ? { label: summaryLabel } : {}) } }
+      ? { summary: { type: summaryRow, ...(summaryLabel != null ? { label: summaryLabel } : {}) } }
       : {}),
   };
 }
 
 function buildRowCommonProps(
   column: ColumnState
-): Pick<NonNullable<DatatableState['rows']>[number], 'collapse_by' | 'click_filter'> {
+): Pick<NonNullable<DatatableConfig['rows']>[number], 'collapse_by' | 'click_filter'> {
   const { collapseFn, oneClickFilter } = column;
   return {
     ...buildCommonMetricRowProps(column),
@@ -93,19 +104,22 @@ function buildRowCommonProps(
 type APIRowPropsNoESQL = APIMetricRowCommonProps &
   Partial<
     Pick<
-      NonNullable<DatatableStateNoESQL['rows']>[number],
+      NonNullable<DatatableConfigNoESQL['rows']>[number],
       'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
     >
   >;
 
 function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
-  const { colorMode, colorMapping } = column;
+  const { colorMode, colorMapping, palette } = column;
   return {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
-          apply_color_to: colorMode === 'text' ? 'value' : 'background',
-          ...(colorMapping ? { color: fromColorMappingLensStateToAPI(colorMapping) } : {}),
+          apply_color_to: colorModeToApplyColorTo(colorMode),
+          color:
+            colorMapping || palette
+              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              : AUTO_COLOR,
         }
       : {}),
   };
@@ -114,7 +128,7 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
 type APIRowPropsESQL = APIMetricRowCommonProps &
   Partial<
     Pick<
-      NonNullable<DatatableStateESQL['rows']>[number],
+      NonNullable<DatatableConfigESQL['rows']>[number],
       'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
     >
   >;
@@ -127,11 +141,11 @@ function buildRowsAPIESQL(column: ColumnState): APIRowPropsESQL {
 }
 
 type DatatableColumnsNoESQLAndMapping = Pick<
-  DatatableStateNoESQL,
+  DatatableConfigNoESQL,
   'metrics' | 'rows' | 'split_metrics_by'
 > & { columnIdMapping: ColumnIdMapping };
 type DatatableColumnsESQLAndMapping = Pick<
-  DatatableStateESQL,
+  DatatableConfigESQL,
   'metrics' | 'rows' | 'split_metrics_by'
 > & { columnIdMapping: ColumnIdMapping };
 
@@ -170,9 +184,9 @@ export function convertDatatableColumnsToAPI(
   const columnStateMap = new Map(columns.map((col) => [col.columnId, col]));
 
   if (isFormBasedLayer(layer)) {
-    const metrics: DatatableStateNoESQL['metrics'] = [];
-    const rows: NonNullable<DatatableStateNoESQL['rows']> = [];
-    const splitMetricsBy: NonNullable<DatatableStateNoESQL['split_metrics_by']> = [];
+    const metrics: DatatableConfigNoESQL['metrics'] = [];
+    const rows: NonNullable<DatatableConfigNoESQL['rows']> = [];
+    const splitMetricsBy: NonNullable<DatatableConfigNoESQL['split_metrics_by']> = [];
 
     // Use columnOrder from the layer to preserve the correct row ordering/ aggregation nesting
     const orderedColumnIds = layer.columnOrder;
@@ -229,9 +243,9 @@ export function convertDatatableColumnsToAPI(
     };
   }
 
-  const metrics: DatatableStateESQL['metrics'] = [];
-  const rows: NonNullable<DatatableStateESQL['rows']> = [];
-  const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
+  const metrics: DatatableConfigESQL['metrics'] = [];
+  const rows: NonNullable<DatatableConfigESQL['rows']> = [];
+  const splitMetricsBy: NonNullable<DatatableConfigESQL['split_metrics_by']> = [];
 
   // Preserve ES|QL column order based on the datasource layer columns
   const orderedColumnIds = layer.columns.map(({ columnId }) => columnId);

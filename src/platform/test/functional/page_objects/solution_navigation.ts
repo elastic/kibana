@@ -332,7 +332,12 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickPanelLink(navId: string) {
         // TODO: properly distinguish between panel link and main nav link
         // https://github.com/elastic/kibana/issues/236242
-        await testSubjects.click(`~nav-item-id-${navId}`);
+        await retry.try(async () => {
+          const link = await testSubjects.find(`~nav-item-id-${navId}`, 2500);
+          await link.scrollIntoViewIfNecessary();
+          await link.moveMouseTo();
+          await link.click();
+        });
       },
 
       async expectPanelExists(sectionId: NavigationId) {
@@ -493,7 +498,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         }
       },
-      async expectBreadcrumbTexts(expectedBreadcrumbTexts: string[]) {
+      async expectBreadcrumbTexts(
+        expectedBreadcrumbTexts: string[],
+        options?: { removeProjectName?: boolean }
+      ) {
         log.debug(
           'SolutionNavigation.breadcrumbs.expectBreadcrumbTexts',
           JSON.stringify(expectedBreadcrumbTexts)
@@ -501,9 +509,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await retry.try(async () => {
           const breadcrumbsContainer = await testSubjects.find('breadcrumbs', TIMEOUT_CHECK);
           const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
-          breadcrumbs.shift(); // remove home
-          expect(expectedBreadcrumbTexts.length).to.eql(breadcrumbs.length);
           const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
+          if (options?.removeProjectName) {
+            texts.shift(); // remove project name breadcrumb in serverless
+          }
+          expect(expectedBreadcrumbTexts.length).to.eql(texts.length);
           expect(expectedBreadcrumbTexts).to.eql(texts);
         });
       },

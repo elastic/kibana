@@ -26,6 +26,7 @@ describe('set unified alerts workflow status', () => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
+    context.core.uiSettings.client.get.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
     );
@@ -116,6 +117,38 @@ describe('set unified alerts workflow status', () => {
 
       expect(response.status).toEqual(200);
       expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
+    });
+
+    test('returns 400 when closing reason is invalid', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: {
+          signal_ids: ['somefakeid1'],
+          status: 'closed',
+          reason: 'invalid_reason',
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('returns 200 when closing reason is in configured custom reasons', async () => {
+      context.core.uiSettings.client.get.mockResolvedValue(['configured_custom_reason']);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: {
+          signal_ids: ['somefakeid1'],
+          status: 'closed',
+          reason: 'configured_custom_reason',
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(200);
     });
 
     test('handles different status values', async () => {

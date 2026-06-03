@@ -8,12 +8,16 @@
 import type { RootSchema } from '@elastic/ebt/client';
 import type {
   StreamEndpointLatencyProps,
-  StreamsSystemIdentificationIdentifiedProps,
   StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
   StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
+  StreamsFeaturesIdentifiedProps,
+  StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventStatusUpdateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -69,40 +73,6 @@ const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
   },
 };
 
-const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdentificationIdentifiedProps> =
-  {
-    count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems identified',
-      },
-    },
-    input_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of input tokens used for the generation request',
-      },
-    },
-    output_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of output tokens used for the generation request',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-  };
-
 const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
   input_tokens_used: {
     type: 'long',
@@ -136,12 +106,6 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
       type: 'long',
       _meta: {
         description: 'The number of significant events queries generated',
-      },
-    },
-    systems_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems used to generate the queries',
       },
     },
     input_tokens_used: {
@@ -274,12 +238,255 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
     },
   };
 
+const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
+  run_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'UUID identifying the full identification run (shared across iterations)',
+    },
+  },
+  iteration: {
+    type: 'long',
+    _meta: {
+      description: 'Iteration number (1-based); 0 for terminal failure/cancel events',
+    },
+  },
+  docs_count: {
+    type: 'long',
+    _meta: {
+      description: 'Number of documents used in this iteration',
+    },
+  },
+  features_new: {
+    type: 'long',
+    _meta: {
+      description: 'New features identified in this iteration',
+    },
+  },
+  features_updated: {
+    type: 'long',
+    _meta: {
+      description: 'Existing features updated in this iteration',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Input tokens used in this iteration',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Output tokens used in this iteration',
+    },
+  },
+  total_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Total tokens used in this iteration',
+    },
+  },
+  excluded_features_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of excluded features present at the time of identification',
+    },
+  },
+  llm_ignored_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of features the LLM reported as matching excluded features',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inferred features dropped server-side because they matched excluded features',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'Cached tokens used in this iteration',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description: 'Duration of this iteration in milliseconds',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  state: {
+    type: 'keyword',
+    _meta: {
+      description: 'The state of the features identification task (success, failure, or canceled)',
+    },
+  },
+  filters_capped: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the filters were capped',
+    },
+  },
+  total_filters: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of filters available in features',
+    },
+  },
+  has_filtered_documents: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the sample query found documents after filters were applied',
+    },
+  },
+};
+
+const streamsAgentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<StreamsAgentBuilderKnowledgeIndicatorCreatedProps> =
+  {
+    ki_kind: {
+      type: 'keyword',
+      _meta: {
+        description: 'The kind of KI created by the agent builder tool: feature or query',
+      },
+    },
+    tool_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The tool that created the KI',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether KI creation succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired, classic, query, or unknown',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI creation fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentToolKiIdentificationStartedProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether starting KI identification succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI identification start fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventStatusUpdateProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the event status update succeeded',
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The identifier of the updated significant event',
+      },
+    },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'The status value set on the significant event',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when event status update fails',
+        optional: true,
+      },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsSystemIdentificationIdentifiedSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
   streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
+  streamsFeaturesIdentifiedSchema,
+  streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
 };

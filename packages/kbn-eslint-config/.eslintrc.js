@@ -19,6 +19,46 @@
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
+const USES_ELASTIC_APM_AGENT = [
+  // Core platform APM integration & agent infrastructure
+  /src[\/\\]core[\/\\]/,
+  /kbn-apm-config-loader[\/\\]/,
+  /kbn-apm-utils[\/\\]/,
+
+  // Test & dev tooling
+  /kbn-test[\/\\]src[\/\\]/,
+  /kbn-journeys[\/\\]/,
+  /kbn-cli-dev-mode[\/\\]/,
+  /kbn-docs-utils[\/\\]/,
+  /src[\/\\]platform[\/\\]test[\/\\]/,
+  /x-pack[\/\\]platform[\/\\]test[\/\\]/,
+
+  // Shared packages with APM tracing
+  /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
+  /kbn-reporting[\/\\]export_types[\/\\]/,
+
+  // Plugins with legacy APM custom spans (pending OTel migration)
+  /workflows_execution_engine[\/\\]server[\/\\]/,
+  /task_manager[\/\\]server[\/\\]/,
+  /fleet[\/\\]server[\/\\]/,
+  /alerting[\/\\]server[\/\\]/,
+  /screenshotting[\/\\]server[\/\\]/,
+  /reporting[\/\\]server[\/\\]/,
+  /intercepts[\/\\]server[\/\\]/,
+  /data_usage[\/\\]server[\/\\]/,
+  /encrypted_saved_objects[\/\\]server[\/\\]/,
+  /plugins[\/\\]shared[\/\\]data[\/\\]server[\/\\]search[\/\\]/,
+  /telemetry[\/\\]server[\/\\]/,
+  /telemetry_collection_manager[\/\\]server[\/\\]/,
+  /security_solution[\/\\]server[\/\\]/,
+  /lists[\/\\]server[\/\\]/,
+  /elastic_assistant[\/\\]server[\/\\]/,
+  /plugins[\/\\]apm[\/\\]/,
+  /synthetics[\/\\]server[\/\\]/,
+  /feature-flags[\/\\]server-internal[\/\\]/,
+  /plugins[\/\\]slo[\/\\]server[\/\\]/,
+];
+
 module.exports = {
   extends: [
     './javascript.js',
@@ -172,18 +212,17 @@ module.exports = {
           to: '@kbn/rison',
         },
         {
-          from: 'react-dom/client',
-          to: 'react-dom',
-          exact: true,
-          disallowedMessage:
-            'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
-        },
-        {
           from: '@tanstack/react-query',
           to: '@kbn/react-query',
           exact: true,
           disallowedMessage:
             'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
+        },
+        {
+          from: 'elastic-apm-node',
+          to: false,
+          exclude: USES_ELASTIC_APM_AGENT,
+          disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
         },
       ],
     ],
@@ -328,6 +367,7 @@ module.exports = {
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
+    '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
@@ -337,6 +377,8 @@ module.exports = {
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
     '@kbn/imports/no_direct_handlebars_import': 'error',
+    '@kbn/imports/no_direct_monaco_import': 'warn',
+    '@kbn/imports/no_undeclared_plugin_target': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
@@ -352,5 +394,37 @@ module.exports = {
         message: 'For client-side, please use `useEuiTheme` instead.',
       },
     ],
+
+    /**
+     * a11y-related rules:
+     * all existing violations were fixed; keep this as error to prevent new ones.
+     */
+    '@elastic/eui/prefer-eui-icon-tip': 'error',
+    '@elastic/eui/sr-output-disabled-tooltip': 'error',
+    '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/consistent-is-invalid-props': 'error',
   },
+
+  overrides: [
+    {
+      files: [
+        'src/platform/plugins/**/server/index.ts',
+        'x-pack/platform/plugins/**/server/index.ts',
+        'x-pack/solutions/**/plugins/**/server/index.ts',
+        'examples/**/server/index.ts',
+        'packages/kbn-mock-idp-plugin/server/index.ts',
+      ],
+      excludedFiles: ['**/test/**'],
+      rules: {
+        /**
+         * Plugin server entry should not load ./plugin until the plugin is enabled.
+         * @see https://github.com/elastic/kibana/pull/170856
+         * @see https://github.com/elastic/kibana/issues/171080
+         *
+         * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
+         */
+        '@kbn/eslint/no_sync_import_from_plugin': 'error',
+      },
+    },
+  ],
 };

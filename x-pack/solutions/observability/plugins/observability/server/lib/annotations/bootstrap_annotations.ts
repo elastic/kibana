@@ -14,6 +14,8 @@ import type {
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
+import { createOrUpdateIndexTemplate } from '../../utils/create_or_update_index_template';
+import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 
 interface Params {
   index: string;
@@ -36,6 +38,31 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
     index,
     logger,
   });
+
+  // Install an index template so that when the index is auto-created on first write,
+  // it gets the correct mappings (keyword types for service.name, tags, etc.).
+  const [coreStart] = await core.getStartServices();
+  const internalClient = coreStart.elasticsearch.client.asInternalUser;
+
+  try {
+    await createOrUpdateIndexTemplate({
+      indexTemplate: {
+        name: `${index}-template`,
+        index_patterns: [index],
+        template: {
+          settings: {
+            auto_expand_replicas: '0-1',
+          },
+          mappings: ANNOTATION_MAPPINGS,
+        },
+      },
+      client: internalClient,
+      logger,
+    });
+    logger.debug(`Installed index template for ${index}`);
+  } catch (e) {
+    logger.error(`Failed to install index template for ${index}`, { error: e });
+  }
 
   return {
     getScopedAnnotationsClient: async (

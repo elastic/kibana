@@ -1,5 +1,5 @@
 {
-  "sha1": "4f0c5c041e4229813210d3dea972cbae39b8f585",
+  "sha1": "671c1715b40d5d8674bcc48da6b8452f42322ab0",
   "tests": [
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
@@ -33,138 +33,6 @@
       }
     },
     {
-      "id": "96dc43247652ad2-5dffb57f64bb9de",
-      "title": "Metrics in Discover - Grid should render metrics grid with cards",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
-        "line": 37,
-        "column": 14
-      }
-    },
-    {
-      "id": "96dc43247652ad2-f2ef49ddfad8ddc",
-      "title": "Metrics in Discover - Grid should render grid with WHERE filter",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
-        "line": 51,
-        "column": 14
-      }
-    },
-    {
-      "id": "96dc43247652ad2-67aeead5ce34d63",
-      "title": "Metrics in Discover - Grid should render grid with LIMIT",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
-        "line": 58,
-        "column": 14
-      }
-    },
-    {
-      "id": "96dc43247652ad2-d62abe4ab8aa5fe",
-      "title": "Metrics in Discover - Grid should render grid with SORT",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
-        "line": 65,
-        "column": 14
-      }
-    },
-    {
-      "id": "96dc43247652ad2-14688950b91de99",
-      "title": "Metrics in Discover - Grid should not render grid with FROM command",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
-        "line": 72,
-        "column": 14
-      }
-    },
-    {
-      "id": "96dc43247652ad2-02d09836901d31f",
-      "title": "Metrics in Discover - Grid should not render grid with STATS command",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
-        "line": 77,
-        "column": 14
-      }
-    },
-    {
       "id": "1c8d238ba178b3f-d0060d150395e69",
       "title": "Discover app - saved searches should customize time range on dashboards",
       "expectedStatus": "passed",
@@ -174,7 +42,9 @@
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
@@ -192,7 +62,9 @@
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
@@ -288,7 +160,9 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
@@ -314,7 +188,9 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
@@ -340,7 +216,9 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",

@@ -26,6 +26,7 @@ describe('useTemplatesPagination', () => {
     search: '',
     tags: [],
     author: [],
+    owner: [],
     isDeleted: false,
   };
 

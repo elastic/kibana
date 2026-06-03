@@ -22,12 +22,19 @@ import {
   getNormalizedInputs,
   isIntegrationPolicyTemplate,
   getRegistryStreamWithDataStreamForInputType,
+  getInputEffectiveName,
+  buildInputKey,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  RegistryInput,
+} from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 import { isInputCompatibleWithVarGroupSelections } from '../../services';
@@ -43,6 +50,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
 }> = ({
@@ -54,6 +62,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
   noTopRule = false,
   isEditPage = false,
+  isUpgrade = false,
   isAgentlessSelected = false,
   varGroupSelections = {},
 }) => {
@@ -71,6 +80,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
+
+  const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
+
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
@@ -81,6 +93,57 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
             const isPolicyTemplateDeprecated = !hasIntegrations && !!policyTemplate.deprecated;
+
+            const inputsToRender = inputs
+              .map((packageInput) => {
+                const registryEffectiveName = getInputEffectiveName(packageInput);
+                const packagePolicyInput = packagePolicyInputs.find(
+                  (input) =>
+                    getInputEffectiveName(input) === registryEffectiveName &&
+                    (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                );
+
+                const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
+                  registryEffectiveName,
+                  packageInfo,
+                  hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
+                    ? policyTemplate.data_streams
+                    : []
+                );
+
+                if (
+                  !packagePolicyInput ||
+                  !isInputAllowedForDeploymentMode(
+                    packagePolicyInput,
+                    deploymentMode,
+                    packageInfo
+                  ) ||
+                  !isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections)
+                ) {
+                  return null;
+                }
+
+                return { packageInput, packagePolicyInput, packageInputStreams };
+              })
+              .filter(
+                (
+                  item
+                ): item is {
+                  packageInput: RegistryInput;
+                  packagePolicyInput: NewPackagePolicyInput;
+                  packageInputStreams: ReturnType<
+                    typeof getRegistryStreamWithDataStreamForInputType
+                  >;
+                } => item !== null
+              );
+
+            const isSingleInput = isSinglePolicyTemplate && inputsToRender.length === 1;
+            //  Enable simplified agentless UX for single input/datastreams integrations
+            const isSingleInputAndStreams =
+              ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX &&
+              isSingleInput &&
+              inputsToRender[0].packagePolicyInput.streams.length <= 1;
+
             return (
               <React.Fragment key={policyTemplate.name}>
                 {isPolicyTemplateDeprecated && (
@@ -104,26 +167,14 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     <EuiSpacer size="m" />
                   </>
                 )}
-                {inputs.map((packageInput) => {
-                  const packagePolicyInput = packagePolicyInputs.find(
-                    (input) =>
-                      input.type === packageInput.type &&
-                      (hasIntegrations ? input.policy_template === policyTemplate.name : true)
-                  );
-                  const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
-                    packageInput.type,
-                    packageInfo,
-                    hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
-                      ? policyTemplate.data_streams
-                      : []
-                  );
-
+                {inputsToRender.map(({ packageInput, packagePolicyInput, packageInputStreams }) => {
+                  const policyInputEffectiveName = getInputEffectiveName(packagePolicyInput);
                   const updatePackagePolicyInput = (
                     updatedInput: Partial<NewPackagePolicyInput>
                   ) => {
                     const indexOfUpdatedInput = packagePolicyInputs.findIndex(
                       (input) =>
-                        input.type === packageInput.type &&
+                        getInputEffectiveName(input) === policyInputEffectiveName &&
                         (hasIntegrations ? input.policy_template === policyTemplate.name : true)
                     );
                     const newInputs = [...packagePolicyInputs];
@@ -136,23 +187,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     });
                   };
 
-                  const allStreamsDeprecated =
-                    packageInputStreams.length > 0 &&
-                    packageInputStreams.every((s) => !!s.deprecated);
-                  const isDeprecatedInput =
-                    !!packagePolicyInput?.deprecated || allStreamsDeprecated;
-                  const isInputAvailable =
-                    packagePolicyInput &&
-                    isInputAllowedForDeploymentMode(
-                      packagePolicyInput,
-                      deploymentMode,
-                      packageInfo
-                    ) &&
-                    isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections) &&
-                    (!isDeprecatedInput || isEditPage); // Hide deprecated inputs on new installations
-                  return isInputAvailable ? (
-                    <EuiFlexItem key={packageInput.type}>
+                  return (
+                    <EuiFlexItem key={getInputEffectiveName(packageInput)}>
                       <PackagePolicyInputPanel
+                        isSingleInputAndStreams={isSingleInputAndStreams}
                         packageInput={packageInput}
                         packageInfo={packageInfo}
                         packageInputStreams={packageInputStreams}
@@ -160,18 +198,22 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                         updatePackagePolicyInput={updatePackagePolicyInput}
                         inputValidationResults={
                           validationResults?.inputs?.[
-                            hasIntegrations
-                              ? `${policyTemplate.name}-${packagePolicyInput.type}`
-                              : packagePolicyInput.type
+                            buildInputKey(
+                              policyInputEffectiveName,
+                              policyTemplate.name,
+                              hasIntegrations
+                            )
                           ] ?? {}
                         }
                         forceShowErrors={submitAttempted}
                         isEditPage={isEditPage}
+                        isUpgrade={isUpgrade}
+                        isAgentless={deploymentMode === 'agentless'}
                         varGroupSelections={varGroupSelections}
                       />
                       <EuiHorizontalRule margin="m" />
                     </EuiFlexItem>
-                  ) : null;
+                  );
                 })}
               </React.Fragment>
             );
@@ -180,7 +222,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
       </>
     ) : (
       <EuiEmptyPrompt
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         iconColor="success"
         body={
           <EuiText>

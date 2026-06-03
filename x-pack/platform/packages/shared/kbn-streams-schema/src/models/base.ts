@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { IModel, OmitUpsertProps } from './core';
+import { z } from '@kbn/zod/v4';
+import type { OmitUpsertProps } from './core';
 import type { StreamQuery } from '../queries';
 import { streamQuerySchema } from '../queries';
-import type { ModelValidation } from './validation/model_validation';
-import { modelValidation } from './validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
@@ -53,28 +51,32 @@ export namespace BaseStream {
   }
 }
 
-export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValidation({
-  Definition: z.object({
-    name: z.string(),
-    description: z.string(),
-    updated_at: z.string().datetime(),
-    query_streams: z
-      .array(
-        z.object({
-          name: z.string(),
-        })
-      )
-      .optional(),
-  }),
-  Source: z.object({}),
-  GetResponse: z.object({
-    dashboards: z.array(z.string()),
-    rules: z.array(z.string()),
-    queries: z.array(streamQuerySchema),
-  }),
-  UpsertRequest: z.object({
-    dashboards: z.array(z.string()),
-    rules: z.array(z.string()),
-    queries: z.array(streamQuerySchema),
-  }),
+export const baseStreamDefinitionSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  updated_at: z.iso.datetime(),
+  query_streams: z
+    .array(
+      z.object({
+        name: z.string(),
+      })
+    )
+    .optional(),
+});
+
+export const baseStreamGetResponseSchema = z.object({
+  dashboards: z.array(z.string()),
+  rules: z.array(z.string()),
+  queries: z.array(streamQuerySchema),
+});
+
+export const baseStreamUpsertRequestSchema = z.object({
+  dashboards: z.array(z.string()),
+  rules: z.array(z.string()),
+  queries: z.array(streamQuerySchema),
+});
+
+export const baseStreamUpsertDefinitionSchema = baseStreamDefinitionSchema.omit({
+  name: true,
+  updated_at: true,
 });

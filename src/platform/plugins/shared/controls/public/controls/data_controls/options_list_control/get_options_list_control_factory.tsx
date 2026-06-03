@@ -21,19 +21,18 @@ import {
   skip,
 } from 'rxjs';
 
+import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
-  DEFAULT_SEARCH_TECHNIQUE,
-  OPTIONS_LIST_CONTROL,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '@kbn/controls-constants';
-import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+  apiHasPinnedPanels,
+  apiHasSections,
+  initializeStateApi,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
-import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
-import { coreServices } from '../../../services/kibana_services';
+import { isValidSearch } from '../../../../common/options_list';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -51,7 +50,7 @@ import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
 import {
   clearSelections,
@@ -60,21 +59,21 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getOptionsListControlFactory = (): EmbeddableFactory<
-  OptionsListControlState,
+export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
+  OptionsListDSLControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
-      if (isOptionsListESQLControlState(state)) {
-        throw new Error('ES|QL control state handling not yet implemented');
-      }
       const editorStateManager = initializeEditorStateManager(state);
-      const temporaryStateManager = initializeTemporayStateManager();
+      const temporaryStateManager = initializeTemporayStateManager<OptionsListSelection>();
       const selectionsManager = initializeSelectionsManager(state);
 
       const dataControlManager: DataControlStateManager =
@@ -134,26 +133,11 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         )
         .subscribe(() => {
           temporaryStateManager.api.setSearchString('');
-          selectionsManager.api.setSelectedOptions(undefined);
+          selectionsManager.api.setSelectedOptions(DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options);
           selectionsManager.api.setExistsSelected(false);
           selectionsManager.api.setExclude(false);
-          selectionsManager.api.setSort(OPTIONS_LIST_DEFAULT_SORT);
+          selectionsManager.api.setSort(DEFAULT_DSL_OPTIONS_LIST_STATE.sort);
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
-        });
-
-      // we do not want to delay the embeddable creation waiting for this, so do not await promise
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
-      coreServices.http
-        .get<{
-          allowExpensiveQueries: boolean;
-        }>('/internal/controls/getExpensiveQueriesSetting', {
-          version: '1',
-        })
-        .catch(() => {
-          return { allowExpensiveQueries: true }; // default to true on error
-        })
-        .then(({ allowExpensiveQueries }) => {
-          if (!allowExpensiveQueries) allowExpensiveQueries$.next(false);
         });
 
       /** Fetch the suggestions and perform validation */
@@ -168,7 +152,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           parentApi,
           uuid,
         },
-        allowExpensiveQueries$,
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
@@ -187,7 +170,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         // fetch was successful so set all attributes from result
         const successResponse = result as OptionsListSuccessResponse;
         temporaryStateManager.api.setAvailableOptions(successResponse.suggestions);
-        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality ?? 0);
+        temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality);
         temporaryStateManager.api.setInvalidSelections(
           new Set(successResponse.invalidSelections ?? [])
         );
@@ -252,21 +235,16 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }
         );
 
-      function serializeState(): OptionsListDSLControlState {
-        return {
+      const stateApi = initializeStateApi<OptionsListDSLControlState>({
+        uuid,
+        parentApi,
+        serializeState: (): OptionsListDSLControlState => ({
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),
-
           // serialize state that cannot be changed to keep it consistent
           display_settings: state.display_settings,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OptionsListDSLControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
@@ -282,18 +260,15 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           };
         },
         defaultState: {
-          search_technique: DEFAULT_SEARCH_TECHNIQUE,
-          sort: OPTIONS_LIST_DEFAULT_SORT,
+          search_technique: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique,
+          sort: DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
           exclude: false,
           exists_selected: false,
         },
-        onReset: (lastSaved) => {
-          if (isOptionsListESQLControlState(lastSaved)) {
-            throw new Error('ES|QL control state handling not yet implemented');
-          }
-          dataControlManager.reinitializeState(lastSaved);
-          selectionsManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          selectionsManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
         },
       });
 
@@ -310,20 +285,18 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         .subscribe((error) => blockingError$.next(error));
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-        serializeState,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
-      const componentApi: OptionsListComponentApi = {
+      const componentApi: DSLOptionsListComponentApi = {
         ...api,
-        ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,
@@ -341,8 +314,9 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           }),
         selectAll: (keys: string[]) => selectAll({ api, keys, selectionsManager }),
         deselectAll: (keys: string[]) => deselectAll({ api, keys, selectionsManager }),
-        allowExpensiveQueries$,
       };
+
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
@@ -359,6 +333,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -369,7 +345,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                 displaySettings: state.display_settings ?? {},
               }}
             >
-              <OptionsListControl />
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },

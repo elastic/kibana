@@ -1,0 +1,817 @@
+{
+  "sha1": "09149f5dafff317839f3b76f6b4edb982e766397",
+  "tests": [
+    {
+      "id": "9b2dcf397b5bf4d-f3183219f13c400",
+      "title": "Alert deletion schedules a deletion task and removes old alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_deletion.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "8f6baf4aef167da-ea2a6253719774d",
+      "title": "Create connector from connector spec creates a spec-defined AlienVault OTX connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_from_spec.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "e0bf6344b976f93-5b78379599b5df5",
+      "title": "Jira connector shows the created connector in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
+        "line": 82,
+        "column": 7
+      }
+    },
+    {
+      "id": "e0bf6344b976f93-7d0878a2d799068",
+      "title": "Jira connector does not throw a type error for other fields when its valid json",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
+        "line": 94,
+        "column": 7
+      }
+    },
+    {
+      "id": "e0bf6344b976f93-009f73e4800ec2a",
+      "title": "Jira connector disables the execute button when other fields is not valid json",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
+        "line": 110,
+        "column": 7
+      }
+    },
+    {
+      "id": "3727cd43770f0ac-4304800f91cace3",
+      "title": "Slack connector shows only the Slack webhook card, not the Slack API card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "3727cd43770f0ac-985381a8f95725a",
+      "title": "Slack connector creates a webhook Slack connector via the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "3727cd43770f0ac-46ac0ad13057d55",
+      "title": "Slack connector saves a rule with a webhook Slack connector as its action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-f46b9e2c7139d74",
+      "title": "Tines connector creates a Tines connector via the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-784297f54ba5c57",
+      "title": "Tines connector edits a Tines connector via the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 170,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-46264b9a91fc078",
+      "title": "Tines connector resets the connector form when an edit is canceled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 204,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-db69740567ce43e",
+      "title": "Tines connector disables the Run button when the test-connector fields are empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 243,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-d0e1a83e14f4cc4",
+      "title": "Tines connector shows the story/webhook selectors and JSON editor on the test tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 274,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-f66b65169858c47",
+      "title": "Tines connector enables the story selector once stories are loaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 293,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-ec097e83659795b",
+      "title": "Tines connector enables the webhook selector after a story is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 310,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-a9c2b5e5d8e3ede",
+      "title": "Tines connector clears and disables the webhook selector when the selected story is cleared",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 323,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-8e16e5e246c4130",
+      "title": "Tines connector keeps the Run button disabled when story+webhook are set but JSON is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 351,
+        "column": 7
+      }
+    },
+    {
+      "id": "7833fb84b69d418-98039f8629fa5c6",
+      "title": "Tines connector enables the Run button and executes successfully with story, webhook, and JSON filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
+        "line": 372,
+        "column": 7
+      }
+    },
+    {
+      "id": "26a2ff6ed40159a-9064144ce2e83f0",
+      "title": "Webhook connector creates a connector with config and secret headers via the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "26a2ff6ed40159a-07c5fed478fa7ad",
+      "title": "Webhook connector renders CR and PFX tabs for SSL auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
+        "line": 86,
+        "column": 7
+      }
+    },
+    {
+      "id": "26a2ff6ed40159a-29643d8a9af7ad4",
+      "title": "Webhook connector displays headers as expected when the connector was created via API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "4743bb59b7bc878-ff8cac6bb86c5ab",
+      "title": "Maintenance window create form creates a maintenance window with a custom recurring schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 102,
+        "column": 7
+      }
+    },
+    {
+      "id": "4743bb59b7bc878-ce9f05d87274a3b",
+      "title": "Maintenance window create form shows a callout when filters toggle is on and scope query is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 138,
+        "column": 7
+      }
+    },
+    {
+      "id": "b6898f62f9fd022-21bd727162c6236",
+      "title": "Maintenance window update form updates a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "b6898f62f9fd022-902f94c166361e6",
+      "title": "Maintenance window update form shows the multiple-solutions callout when editing a MW with legacy multi-category state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
+        "line": 145,
+        "column": 7
+      }
+    },
+    {
+      "id": "b6898f62f9fd022-61a8583b57114af",
+      "title": "Maintenance window update form keeps the callout visible and submits when editing a MW that already has a scope query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
+        "line": 177,
+        "column": 7
+      }
+    },
+    {
+      "id": "b4b539a64e36b08-cf340212ea83da6",
+      "title": "Rule details alerts tab filters alerts table with search bar query",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_alerts_tab.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "b621efd3ec8d996-e8dfa7be3731465",
+      "title": "Rule logs \"show all spaces\" switch hides the switch when only the default space exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "b621efd3ec8d996-5a271ef4519f6c6",
+      "title": "Rule logs \"show all spaces\" switch shows the switch and toggles it when multiple spaces are accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "b621efd3ec8d996-bec0e1b69570809",
+      "title": "Rule logs \"show all spaces\" switch hides the switch when the user can only access one space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "bae6b7d04612518-73fc6642f1d9bb6",
+      "title": "Rules create flow opens the rule type modal and the rule form when a rule type is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "bae6b7d04612518-d46876d1517f6f9",
+      "title": "Rules create flow creates a rule and displays it in the rules list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "bae6b7d04612518-941895179452f96",
+      "title": "Rules create flow redirects to the rule details page after saving a new rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-a76523058bbc608",
+      "title": "Rules home page loads the Rules page with alerts-and-actions role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-a3844c4ca73888c",
+      "title": "Rules home page shows the no-permission prompt when the user has actions but no alerting privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-324663b1eec2a0e",
+      "title": "Rules home page loads the Rules page as admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-352b2eaa6e31174",
+      "title": "Rules home page renders the rules list with a newly-created rule visible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "eda0390d2b96ae1-cf41b97453bbbad",
+      "title": "Rules home page navigates to the rule details page when clicking a rule in the list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
+        "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-b1be38b2d4b56e5",
+      "title": "Rules page navigation and loading redirects to Stack Management rules page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-1211e89e04348b2",
+      "title": "Rules page navigation and loading loads with the correct page title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "e8c3862f6d55eee-b39978856446ad2",
+      "title": "Rules page navigation and loading displays the rules list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-57791701106b473",
+      "title": "Rules page tab functionality selects the Rules tab by default on load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-baebad54642ecd3",
+      "title": "Rules page tab functionality shows the Logs tab when the user has permission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-375bbd42989e239",
+      "title": "Rules page tab functionality navigates to rules logs tab when clicking the Logs tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-7f5a1d7fce883be",
+      "title": "Rules page tab functionality navigates back to rules list when clicking the Rules tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "60712085c74f944-9ae519159ac0aa4",
+      "title": "Rules page tab functionality updates the URL correctly when switching back and forth between tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "eed3b91c11a0e78-5089e2cd39a0734",
+      "title": "Rules settings flyout the rules settings link is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "id": "eed3b91c11a0e78-6fa8ceddad3b668",
+      "title": "Rules settings flyout opens the rules settings flyout with the configured values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "eed3b91c11a0e78-904f40306eb4327",
+      "title": "Rules settings flyout modifies the rules settings and persists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
+        "line": 113,
+        "column": 7
+      }
+    },
+    {
+      "id": "5ac51ad762cb790-c3be1697362c2e7",
+      "title": "Stack alerts page (admin) loads the page with the Alerts heading",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "5ac51ad762cb790-657848bef4676ca",
+      "title": "Stack alerts page (admin) shows all solution quick filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "5ac51ad762cb790-8d2040f2702d2fa",
+      "title": "Stack alerts page (admin) applies a quick filter when clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "5ac51ad762cb790-b8852e93bacedcc",
+      "title": "Stack alerts page (admin) disables the non-SIEM solution filters when Security is applied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "5ac51ad762cb790-83e673bf35e9dcd",
+      "title": "Stack alerts page (admin) disables the SIEM solution filter when any other is applied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-9a50dac28b462b9",
+      "title": "Stack alerts page roles alerts_and_actions_role loads the page with the Alerts heading",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-789ada774ede6ee",
+      "title": "Stack alerts page roles alerts_and_actions_role loads the page with a pre-saved filters configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-a4af92be1d70b26",
+      "title": "Stack alerts page roles alerts_and_actions_role shows only Stack and Observability solution filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "f8c5fbdc13df3f4-bc533e661f0c80c",
+      "title": "Stack alerts page roles only_actions_role shows the missing-permission prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_roles.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    }
+  ]
+}

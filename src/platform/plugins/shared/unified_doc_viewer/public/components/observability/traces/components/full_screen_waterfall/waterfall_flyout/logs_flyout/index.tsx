@@ -16,15 +16,13 @@ import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/
 export { useLogFlyoutData } from './use_log_flyout_data';
 export type { UseLogFlyoutDataParams, LogFlyoutData } from './use_log_flyout_data';
 
-export const logsFlyoutId = 'logsFlyout' as const;
-
 export interface LogFlyoutContentProps {
   hit: DataTableRecord;
   logDataView: DocViewRenderProps['dataView'];
 }
 
 export function LogFlyoutContent({ hit, logDataView }: LogFlyoutContentProps) {
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const actions = useDocViewerExtensionActionsContext();
 
   return (
@@ -34,6 +32,7 @@ export function LogFlyoutContent({ hit, logDataView }: LogFlyoutContentProps) {
       indexes={indexes}
       showTraceWaterfall={false}
       docViewActions={actions}
+      profileId={profileId}
     />
   );
 }

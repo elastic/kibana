@@ -5,18 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  UnknownAttachment,
+  ScreenContextAttachmentData,
+} from '@kbn/agent-builder-common/attachments';
+import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useAgentId } from '../../../../../hooks/use_conversation';
+import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
-import { useCanvasContext } from './canvas_context';
+import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
   attachmentsService: AttachmentsService;
   isSidebar: boolean;
   conversationId: string;
+  screenContext?: ScreenContextAttachmentData;
+  /**
+   * Shared preview state for header actions/badges.
+   */
+  previewBadgeState?: AttachmentPreviewState;
 }
 
 /**
@@ -27,51 +40,131 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   attachmentsService,
   isSidebar,
   conversationId,
+  screenContext,
+  previewBadgeState,
 }) => {
-  const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
+  const {
+    openCanvas: openCanvasContext,
+    closeCanvas,
+    previewedAttachmentKey,
+    setPreviewedAttachmentKey,
+  } = useCanvasContext();
+  const { conversationActions } = useConversationContext();
+  const agentId = useAgentId();
+  const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar);
   }, [openCanvasContext, attachment, isSidebar]);
 
-  const updateOrigin = useCallback(async (originId: string) => {
-    // TODO: Implement updateOrigin
-    //   attachmentsService.updateOrigin(conversationId, attachment.id, originId);
-  }, []);
+  const updateOrigin = useCallback(
+    async (origin: string) => {
+      const result = await attachmentsService.updateOrigin(conversationId, attachment.id, origin);
+      conversationActions.invalidateConversation();
+      return result;
+    },
+    [attachmentsService, conversationId, attachment.id, conversationActions]
+  );
+
+  const openSidebarConversation = useCallback(() => {
+    openSidebarConversationInternal({ conversationId });
+  }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
+  const [dynamicButtonsState, setDynamicButtonsState] = useState<{
+    key: string;
+    buttons: ActionButton[];
+  }>({ key: attachmentPreviewKey, buttons: [] });
 
-  const inlineActionButtons = useMemo(
+  const registerActionButtons = useCallback(
+    (buttons: ActionButton[]) => {
+      setDynamicButtonsState({ key: attachmentPreviewKey, buttons });
+    },
+    [attachmentPreviewKey]
+  );
+
+  const staticActionButtons = useMemo(
     () =>
       uiDefinition?.getActionButtons?.({
         attachment,
         isSidebar,
+        agentId,
         updateOrigin,
         openCanvas,
+        openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
         isCanvas: false,
-      }),
-    [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
+        setPreviewBadgeState: (nextPreviewState) => {
+          setPreviewedAttachmentKey(
+            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
+          );
+        },
+      }) ?? [],
+    [
+      uiDefinition,
+      attachment,
+      isSidebar,
+      agentId,
+      updateOrigin,
+      openCanvas,
+      setPreviewedAttachmentKey,
+      attachmentPreviewKey,
+      openSidebarConversation,
+    ]
   );
 
-  const isViewingAttachmentInCanvas = useMemo(() => {
-    return canvasState?.attachment.id === attachment.id;
-  }, [canvasState, attachment]);
+  const inlineActionButtons = useMemo(
+    () => [
+      ...staticActionButtons,
+      ...(dynamicButtonsState.key === attachmentPreviewKey ? dynamicButtonsState.buttons : []),
+    ],
+    [staticActionButtons, attachmentPreviewKey, dynamicButtonsState]
+  );
+
+  const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
+
+  const resolvedPreviewBadgeState: AttachmentPreviewState =
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
 
   if (!uiDefinition) {
     return null;
   }
 
-  const title = attachment.type.toUpperCase(); // TODO: fix this - it won't scale well for all attachment types
+  const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const header = uiDefinition?.getHeader?.({ attachment });
+  const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+    <EuiSplitPanel.Outer
+      grow
+      hasShadow={false}
+      hasBorder={true}
+      css={css`
+        overflow: visible; // allow vis actions to overflow
+        ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
+      `}
+    >
       <AttachmentHeader
+        icon={header?.icon}
         title={title}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={inlineActionButtons}
-        showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
+        previewBadgeState={resolvedPreviewBadgeState}
+        onClosePreview={closeCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+        {uiDefinition?.renderInlineContent?.(
+          {
+            attachment,
+            isSidebar,
+            screenContext,
+            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+          },
+          {
+            registerActionButtons,
+          }
+        )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

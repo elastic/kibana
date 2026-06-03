@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const VISUALIZATIONS = i18n.translate('xpack.cases.caseView.visualizations.displayName', {
+  defaultMessage: 'Visualizations',
+});
+
 export const ADDED_VISUALIZATION = i18n.translate(
   'xpack.cases.caseView.visualizations.addedVisualization',
   {

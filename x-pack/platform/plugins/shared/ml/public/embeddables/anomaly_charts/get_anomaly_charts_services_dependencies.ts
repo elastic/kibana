@@ -5,7 +5,9 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { HttpService } from '../../application/services/http_service';
+import { mlUsageCollectionProvider } from '../../application/services/usage_collection';
 import type { MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import type { AnomalyChartsEmbeddableServices } from '..';
@@ -13,7 +15,8 @@ import { AnomalyExplorerChartsService } from '../../application/services/anomaly
 
 export const getAnomalyChartsServiceDependencies = async (
   coreStart: CoreStart,
-  pluginsStart: MlStartDependencies
+  pluginsStart: MlStartDependencies,
+  usageCollection?: UsageCollectionSetup
 ): Promise<AnomalyChartsEmbeddableServices> => {
   const [
     { AnomalyDetectorService },
@@ -65,6 +68,7 @@ export const getAnomalyChartsServiceDependencies = async (
       mlFieldFormatService,
       mlResultsService,
       mlApi,
+      mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     },
   ];
   return anomalyChartsEmbeddableServices;

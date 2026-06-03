@@ -20,16 +20,14 @@ import { css } from '@emotion/css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getEsqlViewName } from '@kbn/streams-schema';
 import useMount from 'react-use/lib/useMount';
+import { useChildStreamInput } from '../stream_name_form_row';
+import { useStreamsRoutingSelector } from '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 import { QueryStreamForm } from './query_stream_form';
 
 /**
  * Props for the InlineQueryStreamForm component
  */
 export interface InlineQueryStreamFormProps {
-  /**
-   * The parent stream name (used to generate child stream naming)
-   */
-  parentStreamName: string;
   /**
    * Initial name for the query stream (suffix only, without parent prefix)
    */
@@ -39,7 +37,7 @@ export interface InlineQueryStreamFormProps {
    */
   initialEsqlQuery?: string;
   /**
-   * Callback when save is clicked with the form data
+   * Callback when save is clicked. `name` is the partition suffix only (no parent prefix).
    */
   onSave: (data: { name: string; esqlQuery: string }) => void | Promise<void>;
   /**
@@ -58,17 +56,32 @@ export interface InlineQueryStreamFormProps {
    * Whether the form fields should be read-only
    */
   readOnly?: boolean;
+  /**
+   * Whether the stream name field should be read-only (independent of `readOnly`)
+   */
+  nameReadOnly?: boolean;
+  /**
+   * Custom label for the save button (defaults to "Create query stream")
+   */
+  saveButtonLabel?: string;
+  /**
+   * Callback when delete is clicked. The delete button is only shown when this is provided.
+   */
+  onDelete?: () => void;
+  /**
+   * Full names of existing query-stream siblings — required for the duplicate-name check
+   * because query siblings are not present in the wired routing array.
+   */
+  existingSiblingNames?: readonly string[];
 }
 
 /**
- * A reusable inline form component for creating or editing query streams.
- * This component manages its own form state and is not coupled to any specific
- * state management solution, making it reusable across different contexts.
+ * Inline form for creating or editing a query stream. Must be rendered within a
+ * `StreamRoutingContext` subtree — it reads the parent stream name from that context.
  *
  * @example
  * ```tsx
  * <InlineQueryStreamForm
- *   parentStreamName="logs"
  *   onSave={async ({ name, esqlQuery }) => {
  *     await createQueryStream(name, esqlQuery);
  *   }}
@@ -78,7 +91,6 @@ export interface InlineQueryStreamFormProps {
  * ```
  */
 export function InlineQueryStreamForm({
-  parentStreamName,
   initialName = '',
   initialEsqlQuery,
   onSave,
@@ -86,8 +98,15 @@ export function InlineQueryStreamForm({
   onQueryChange,
   isSaving = false,
   readOnly = false,
+  saveButtonLabel,
+  onDelete,
+  nameReadOnly = false,
+  existingSiblingNames,
 }: InlineQueryStreamFormProps) {
   const { euiTheme } = useEuiTheme();
+  const parentStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
   const prefix = `${parentStreamName}.`;
   // Form state
   const [name, setName] = useState(initialName);
@@ -95,14 +114,25 @@ export function InlineQueryStreamForm({
     () => initialEsqlQuery ?? `FROM ${getEsqlViewName(parentStreamName)}`
   );
 
+  const fullName = `${prefix}${name}`;
+  const { isStreamNameValid, errorMessage, helpText, setLocalStreamName } = useChildStreamInput({
+    streamName: fullName,
+    readOnly: nameReadOnly || readOnly || isSaving,
+    checkRootChildExists: false,
+    additionalExistingNames: existingSiblingNames,
+  });
+
+  const shouldShowNameValidation = !nameReadOnly;
+  const displayedIsStreamNameValid = shouldShowNameValidation ? isStreamNameValid : true;
+  const displayedErrorMessage = shouldShowNameValidation ? errorMessage : undefined;
+
   useMount(() => {
     if (onQueryChange) onQueryChange(esqlQuery);
   });
 
   const handleNameChange = useCallback(
-    (fullName: string) => {
-      // Extract suffix from full name (remove parent prefix)
-      const suffix = fullName.replace(prefix, '');
+    (newFullName: string) => {
+      const suffix = newFullName.replace(prefix, '');
       setName(suffix);
     },
     [prefix]
@@ -130,7 +160,12 @@ export function InlineQueryStreamForm({
 
   const handleSave = () => onSave({ name, esqlQuery });
 
-  const canSave = name && name.trim() !== '';
+  const canSave =
+    (nameReadOnly || isStreamNameValid) &&
+    name &&
+    name.trim() !== '' &&
+    esqlQuery &&
+    esqlQuery.trim() !== '';
 
   return (
     <EuiPanel
@@ -146,8 +181,12 @@ export function InlineQueryStreamForm({
         <QueryStreamForm.StreamName
           partitionName={name}
           onChange={handleNameChange}
-          prefix={`${parentStreamName}.`}
-          readOnly={readOnly || isSaving}
+          setLocalStreamName={setLocalStreamName}
+          prefix={prefix}
+          readOnly={nameReadOnly || readOnly || isSaving}
+          isStreamNameValid={displayedIsStreamNameValid}
+          errorMessage={displayedErrorMessage}
+          helpText={helpText}
         />
         <QueryStreamForm.ESQLEditor
           isLoading={isSaving}
@@ -159,25 +198,46 @@ export function InlineQueryStreamForm({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} disabled={isSaving || readOnly}>
-            {i18n.translate('xpack.streams.inlineQueryStreamForm.cancelButton', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
+          {onDelete && (
+            <EuiButton
+              color="danger"
+              size="s"
+              onClick={onDelete}
+              disabled={isSaving || readOnly}
+              data-test-subj="streamsAppQueryStreamFormDeleteButton"
+            >
+              {i18n.translate('xpack.streams.inlineQueryStreamForm.deleteButton', {
+                defaultMessage: 'Remove',
+              })}
+            </EuiButton>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleSave}
-            isLoading={isSaving}
-            disabled={!canSave || isSaving || readOnly}
-          >
-            {i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
-              defaultMessage: 'Create query stream',
-            })}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel} disabled={isSaving || readOnly}>
+                {i18n.translate('xpack.streams.inlineQueryStreamForm.cancelButton', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleSave}
+                isLoading={isSaving}
+                disabled={!canSave || isSaving || readOnly}
+                data-test-subj="streamsAppQueryStreamFormSaveButton"
+              >
+                {saveButtonLabel ??
+                  i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
+                    defaultMessage: 'Create query stream',
+                  })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

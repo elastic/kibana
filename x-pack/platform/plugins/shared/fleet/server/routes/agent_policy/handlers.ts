@@ -7,10 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import pMap from 'p-map';
-import { dump } from 'js-yaml';
 
 import { isEmpty, uniq } from 'lodash';
+
+import yaml from 'yaml';
 
 import {
   ALL_SPACES_ID,
@@ -29,7 +31,6 @@ import {
 } from '../../services';
 import { type AgentClient } from '../../services/agents';
 import {
-  AGENTS_PREFIX,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   UNPRIVILEGED_AGENT_KUERY,
 } from '../../constants';
@@ -85,12 +86,10 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
-/**
- * Builds kuery that matches agents assigned to a policy or any of its version-specific policies.
- * Wildcard must be outside quotes so KQL treats * as wildcard, not literal.
- */
 function getPolicyOrVersionSpecificKuery(policyId: string): string {
-  return `(${AGENTS_PREFIX}.policy_id:"${policyId}" or ${AGENTS_PREFIX}.policy_id:${policyId}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+  return `(policy_id:"${escapeQuotes(policyId)}" or policy_id:${escapeKuery(
+    policyId
+  )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
 }
 
 export async function populateAssignedAgentsCount(
@@ -414,7 +413,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
           throw new FleetError(
-            `No enough permissions to create policies in space ${requestedSpaceId}`
+            `Not enough permissions to create policies in space ${requestedSpaceId}`
           );
         }
       }
@@ -852,7 +851,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       });
     }
     const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -894,7 +893,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,

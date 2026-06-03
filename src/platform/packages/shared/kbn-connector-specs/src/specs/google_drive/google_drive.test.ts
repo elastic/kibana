@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  getConnectorActionErrorMeta,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+} from '../../connector_utils';
 import type { ActionContext } from '../../connector_spec';
 import { GoogleDriveConnector } from './google_drive';
 
@@ -23,6 +27,53 @@ describe('GoogleDriveConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(GoogleDriveConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct Google defaults', () => {
+      const oauthType = GoogleDriveConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      });
+    });
+
+    it('supports ears auth type with correct Google defaults and overrides', () => {
+      const types = GoogleDriveConnector.auth?.types as Array<
+        | string
+        | {
+            type: string;
+            defaults?: Record<string, unknown>;
+            overrides?: Record<string, unknown>;
+          }
+      >;
+      expect(types.map((t) => (typeof t === 'string' ? t : t.type))).toContain('ears');
+
+      const earsType = types.find((t) => typeof t === 'object' && t.type === 'ears');
+      expect(earsType).toMatchObject({
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+      });
+    });
   });
 
   describe('searchFiles action', () => {
@@ -320,6 +371,32 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('downloadFile action', () => {
+    it('should attach file size hints when content download exceeds the Axios limit', async () => {
+      const metadataResponse = {
+        data: {
+          id: 'file-1',
+          name: 'report.pdf',
+          mimeType: 'application/pdf',
+          size: '10485760',
+        },
+      };
+      const error = new Error('maxContentLength size of 1048576 exceeded');
+
+      mockClient.get.mockResolvedValueOnce(metadataResponse).mockRejectedValueOnce(error);
+
+      await expect(
+        GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'file-1',
+        })
+      ).rejects.toBe(error);
+
+      expect(getConnectorActionErrorMeta(error)).toEqual({
+        contentLengthBytes: 10 * 1024 * 1024,
+        estimatedOutputBytes:
+          Math.ceil((10 * 1024 * 1024) / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+      });
+    });
+
     it('should download a native file', async () => {
       const metadataResponse = {
         data: {

@@ -20,3 +20,10 @@ export const LONG_EXECUTION_TIMEOUT = 60_000;
 
 /** Timeout for waiting on asynchronous alert-triggered executions to appear in the list. */
 export const ALERT_PROPAGATION_TIMEOUT = 60_000;
+
+/**
+ * Overall test timeout for alert trigger tests.
+ * These tests involve a multi-hop async chain: rule creation → rule scheduling (15s interval)
+ * → document indexing → alert detection → workflow execution → UI navigation.
+ */
+export const ALERT_TRIGGER_TEST_TIMEOUT = 120_000;

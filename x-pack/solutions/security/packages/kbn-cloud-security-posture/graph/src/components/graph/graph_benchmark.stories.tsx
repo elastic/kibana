@@ -85,9 +85,9 @@ const useExpandButtonPopover = () => {
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
     >
-      <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
+      <EuiListGroup color="primary" bordered={false}>
         <PopoverListItem
-          iconType="visTagCloud"
+          iconType="chartTagCloud"
           label="Explore related entities"
           onClick={() => {}}
         />
@@ -98,7 +98,7 @@ const useExpandButtonPopover = () => {
           onClick={() => {}}
         />
         <EuiHorizontalRule margin="xs" />
-        <PopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
+        <PopoverListItem iconType="maximize" label="View entity details" onClick={() => {}} />
       </EuiListGroup>
     </GraphPopover>
   ));

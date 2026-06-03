@@ -119,7 +119,9 @@ describe('When rendering PolicySettingsLayout', () => {
       set(policySettings, 'linux.popup.behavior_protection.enabled', false);
 
       // Set Ransomware User Notification message
-      await userEvent.type(getByTestId(testSubj.ransomware.notifyCustomMessage), 'foo message');
+      const messageInput = getByTestId(testSubj.ransomware.notifyCustomMessage);
+      await userEvent.clear(messageInput);
+      await userEvent.paste('foo message');
       set(policySettings, 'windows.popup.ransomware.message', 'foo message');
 
       // skipping Advanced Options as changing them takes too long.

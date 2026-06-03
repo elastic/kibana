@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,
@@ -26,15 +26,25 @@ import type {
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
+      'agent-builder': FileDirectory;
+      alerting: FileDirectory;
       dashboard: FileDirectory;
+      discover: FileDirectory;
+      streams: FileDirectory;
+      visualization: FileDirectory;
+      workflows: FileDirectory;
     }>;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      compliance: FileDirectory<{}>;
+      rules: FileDirectory;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
+      ml: FileDirectory<{}>;
+      siem_readiness: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;
@@ -81,6 +91,11 @@ export interface SkillDefinition<
    * Max 1024 characters. Non-empty. Describes what the skill does and when to use it.
    */
   description: string;
+  /**
+   * When true, this skill is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
   /**
    * Content of the skill.
    */

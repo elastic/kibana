@@ -86,6 +86,7 @@ describe('registerTransactionDurationRuleType', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
         'processor.event': 'transaction',
@@ -176,6 +177,7 @@ describe('registerTransactionDurationRuleType', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request, name: GET /products. Alert when > 3.0 s.',
         'processor.event': 'transaction',
@@ -266,6 +268,7 @@ describe('registerTransactionDurationRuleType', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
         'processor.event': 'transaction',
@@ -356,6 +359,7 @@ describe('registerTransactionDurationRuleType', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3.0 s.',
         'processor.event': 'transaction',
@@ -445,6 +449,7 @@ describe('registerTransactionDurationRuleType', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: All, type: request, name: tx-java. Alert when > 3.0 s.',
         'processor.event': 'transaction',
@@ -541,6 +546,7 @@ describe('registerTransactionDurationRuleType', () => {
       payload: {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
+        'kibana.alert.grouping': expect.anything(),
         'kibana.alert.reason':
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
         'processor.event': 'transaction',
@@ -596,6 +602,16 @@ describe('registerTransactionDurationRuleType', () => {
           'processor.event': 'transaction',
           'kibana.alert.evaluation.value': 1000000,
           'kibana.alert.evaluation.threshold': 149000,
+          'kibana.alert.grouping': {
+            service: {
+              environment: 'Synthtrace: many_errors',
+              name: 'synthtrace-high-cardinality-0',
+            },
+            transaction: {
+              name: 'from-recovered-hit',
+              type: 'request',
+            },
+          },
           'kibana.alert.reason':
             'Avg. latency is 1,000 ms in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 149 ms.',
           'agent.name': 'java',
@@ -667,6 +683,7 @@ describe('registerTransactionDurationRuleType', () => {
             name: 'synthtrace-high-cardinality-0',
           },
           transaction: {
+            name: 'from-recovered-hit',
             type: 'request',
           },
         },

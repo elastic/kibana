@@ -22,8 +22,8 @@ import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -80,7 +80,7 @@ export const selectHasUnsavedChanges = (
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
         initialAppState: getInitialAppState({
-          initialUrlState: undefined,
+          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
           dataView: getSerializedSearchSourceDataViewDetails(
             persistedTab.serializedSearchSource,
@@ -92,22 +92,18 @@ export const selectHasUnsavedChanges = (
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
+      currentDataView: undefined,
     });
 
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-    const normalizedTab = tabStateContainer
-      ? fromSavedSearchToSavedObjectTab({
-          tab: tabState,
-          savedSearch: tabStateContainer.savedSearchState.getState(),
-          services,
-        })
-      : fromTabStateToSavedObjectTab({
-          tab: tabState,
-          overridenTimeRestore: Boolean(persistedTab.timeRestore),
-          services,
-        });
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    const normalizedTab = fromTabStateToSavedObjectTab({
+      tab: tabState,
+      currentDataView,
+      services,
+    });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
@@ -216,6 +212,7 @@ const TAB_COMPARATORS: TabComparators = {
   columns: fieldComparator('columns', []),
   grid: fieldComparator('grid', {}),
   hideChart: fieldComparator('hideChart', false),
+  hideTable: fieldComparator('hideTable', false),
   // isTextBasedQuery is derived from the query itself and can be ignored
   isTextBasedQuery: NOOP_COMPARATOR,
   // usesAdHocDataView is derived from the data view itself and can be ignored

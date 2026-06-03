@@ -16,40 +16,55 @@ import {
 } from '@kbn/inference-tracing';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import {
+  attachOpikDistributedTrace,
+  type OpikDistributedTraceHeaders,
+} from './opik_distributed_tracing';
+import { withAgentBuilderContext } from './agent_builder_context';
 
 interface WithConverseSpanOptions {
   agentId: string;
   conversationId: string | undefined;
+  spaceId: string;
+  opikHeaders?: OpikDistributedTraceHeaders;
 }
 
 export function withConverseSpan(
-  { agentId, conversationId }: WithConverseSpanOptions,
+  { agentId, conversationId, spaceId, opikHeaders }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
-  return withActiveInferenceSpan(
-    'Converse',
-    {
-      attributes: {
-        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [ElasticGenAIAttributes.AgentId]: agentId,
-        [ElasticGenAIAttributes.AgentConversationId]: conversationId,
-        [GenAISemanticConventions.GenAIConversationId]: conversationId,
-      },
-    },
-    (span) => {
-      if (!span) {
-        return cb();
-      }
-
-      return cb(span).pipe(
-        tap({
-          next: (event) => {
-            if (isRoundCompleteEvent(event)) {
-              span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
-            }
+  return withAgentBuilderContext(
+    () =>
+      withActiveInferenceSpan(
+        'Converse',
+        {
+          attributes: {
+            [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+            [ElasticGenAIAttributes.AgentId]: agentId,
+            [ElasticGenAIAttributes.AgentConversationId]: conversationId,
+            [GenAISemanticConventions.GenAIConversationId]: conversationId,
           },
-        })
-      );
-    }
+        },
+        (span) => {
+          if (!span) {
+            return cb();
+          }
+
+          if (opikHeaders) {
+            attachOpikDistributedTrace(span, opikHeaders);
+          }
+
+          return cb(span).pipe(
+            tap({
+              next: (event) => {
+                if (isRoundCompleteEvent(event)) {
+                  span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
+                }
+              },
+            })
+          );
+        }
+      ),
+    { spaceId }
   );
 }

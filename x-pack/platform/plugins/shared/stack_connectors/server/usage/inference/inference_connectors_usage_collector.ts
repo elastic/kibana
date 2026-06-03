@@ -156,6 +156,18 @@ const PROVIDER_SCHEMA: Record<ServiceProviderKeys, ProviderTelemetryField> = {
       description: 'The number of inference connectors created using the Contextual AI provider.',
     },
   },
+  fireworksai: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Fireworks AI provider.',
+    },
+  },
+  nvidia: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the NVIDIA provider.',
+    },
+  },
   groq: {
     type: 'long',
     _meta: {

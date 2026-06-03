@@ -11,11 +11,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import { monaco, type MonacoMessage } from '@kbn/code-editor';
 import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
@@ -116,77 +115,99 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
   ];
 };
 
+const ES_PROBLEM_MARKER_REGEX = /line (\d+):(\d+):/g;
+
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
-  return errors.map((error) => {
+  return errors.flatMap((error): MonacoMessage[] => {
+    const errorMessage = typeof error.message === 'string' ? error.message : String(error.message);
     try {
       if (
         // Found while testing random commands (as inlinestats)
-        !error.message.includes('esql_illegal_argument_exception') &&
-        error.message.includes('line')
+        !errorMessage.includes('esql_illegal_argument_exception') &&
+        errorMessage.includes('line')
       ) {
-        const text = error.message.split('line')[1];
-        const [lineNumber, startPosition, errorMessage] = text.split(':');
-        // initialize the length to 10 in case no error word found
-        let errorLength = 10;
-        const [_, wordWithError] = errorMessage.split('[');
-        if (wordWithError) {
-          errorLength = wordWithError.length - 1;
+        const markers: Array<{ line: number; column: number; end: number; start: number }> = [];
+        for (const match of errorMessage.matchAll(ES_PROBLEM_MARKER_REGEX)) {
+          markers.push({
+            line: Number(match[1]),
+            column: Number(match[2]),
+            start: match.index ?? 0,
+            end: (match.index ?? 0) + match[0].length,
+          });
         }
-        return {
+
+        if (markers.length > 0) {
+          return markers.map((marker, i) => {
+            const messageEnd = i + 1 < markers.length ? markers[i + 1].start : errorMessage.length;
+            const message = errorMessage.slice(marker.end, messageEnd).replace(/\s+$/, '');
+            const bracketed = message.match(/\[([^\]]*)\]/);
+            const errorLength = bracketed ? bracketed[1].length : 10;
+            return {
+              message,
+              startColumn: marker.column,
+              startLineNumber: marker.line,
+              endColumn: marker.column + errorLength + 1,
+              endLineNumber: marker.line,
+              severity: monaco.MarkerSeverity.Error,
+              code: 'errorFromES',
+            };
+          });
+        }
+      }
+
+      if (errorMessage.includes('expression was aborted')) {
+        return [
+          {
+            message: i18n.translate('esqlEditor.query.aborted', {
+              defaultMessage: 'Request was aborted',
+            }),
+            startColumn: 1,
+            startLineNumber: 1,
+            endColumn: 10,
+            endLineNumber: 1,
+            severity: monaco.MarkerSeverity.Warning,
+            code: 'abortedRequest',
+          },
+        ];
+      }
+
+      return [
+        {
           message: errorMessage,
-          startColumn: Number(startPosition),
-          startLineNumber: Number(lineNumber),
-          endColumn: Number(startPosition) + errorLength + 1,
-          endLineNumber: Number(lineNumber),
-          severity: monaco.MarkerSeverity.Error,
-          code: 'errorFromES',
-        };
-      } else if (error.message.includes('expression was aborted')) {
-        return {
-          message: i18n.translate('esqlEditor.query.aborted', {
-            defaultMessage: 'Request was aborted',
-          }),
-          startColumn: 1,
-          startLineNumber: 1,
-          endColumn: 10,
-          endLineNumber: 1,
-          severity: monaco.MarkerSeverity.Warning,
-          code: 'abortedRequest',
-        };
-      } else {
-        // unknown error message
-        return {
-          message: error.message,
           startColumn: 1,
           startLineNumber: 1,
           endColumn: 10,
           endLineNumber: 1,
           severity: monaco.MarkerSeverity.Error,
           code: 'unknownError',
-        };
-      }
+        },
+      ];
     } catch (e) {
-      return {
-        message: error.message,
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Error,
-        code: 'unknownError',
-      };
+      return [
+        {
+          message: errorMessage,
+          startColumn: 1,
+          startLineNumber: 1,
+          endColumn: 10,
+          endLineNumber: 1,
+          severity: monaco.MarkerSeverity.Error,
+          code: 'unknownError',
+        },
+      ];
     }
   });
 };
 
 // refresh the esql cache entry after 10 minutes
-const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+export const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+export const DATA_SOURCES_CACHE_KEY = 'dataSources';
+export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
 
-export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
-  if (cache.has(esqlQuery)) {
-    const cacheEntry = cache.get(esqlQuery);
+export const clearCacheWhenOld = (cache: MapCache, key: string) => {
+  if (cache.has(key)) {
+    const cacheEntry = cache.get(key);
     if (Date.now() - cacheEntry.timestamp > CACHE_INVALIDATE_DELAY) {
-      cache.delete(esqlQuery);
+      cache.delete(key);
     }
   }
 };
@@ -302,9 +323,15 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
         color: ${theme.euiTheme.colors.textParagraph} !important;
       }
     }
-    .hover-row.status-bar {
+
+    /* Hide View Problem action, it's always the first action */
+    .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
       display: none;
     }
+    .monaco-editor .action-widget {
+      min-width: calc(${theme.euiTheme.size.xl} * 6);
+    }
+
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
     }
@@ -318,6 +345,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       ${euiShadow(theme, 'l')}
       // Suggestions must be rendered above flyouts
       z-index: ${theme.euiTheme.levels.toast} !important;
+    }
+
+    .suggest-widget.message {
+      display: none !important;
     }
 
     .suggest-details-container {
@@ -386,4 +417,85 @@ export const filterDuplicatedWarnings = (
   return uniqBy(warnings, (warning) => {
     return warning.message;
   });
+};
+
+/**
+ * Computes toggled comment lines for a set of lines, following standard IDE behavior:
+ * comment all lines if any line is uncommented, uncomment all only if every line
+ * is already commented.
+ */
+export const getToggleCommentLines = (lines: string[]): string[] => {
+  const allCommented = lines.every((line) => line.startsWith('//'));
+  const shouldComment = !allCommented;
+
+  return lines.map((line) => {
+    const isCommented = line.startsWith('//');
+    if (shouldComment && !isCommented) {
+      return `//${line}`;
+    }
+    if (!shouldComment && isCommented) {
+      return line.replace('//', '');
+    }
+    return line;
+  });
+};
+
+/**
+ * Keeps suggestions alive when the text before the cursor ends with:
+ * - a token character (`[\w`]`)
+ * - a space
+ * - `::`
+ * - `.`
+ */
+export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  const lastCharacter = lineContentBeforeCursor.at(-1);
+  const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
+  const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');
+  const dotHasBeenTyped = lineContentBeforeCursor.endsWith('.');
+  const currentTokenHasBeenTyped = Boolean(lastCharacter && /[\w`]/.test(lastCharacter));
+
+  return spaceHasBeenTyped || inlineCastHasBeenTyped || dotHasBeenTyped || currentTokenHasBeenTyped;
+};
+
+/**
+ * Tracks the Monaco suggest-widget visibility so the editor can avoid
+ * re-triggering autocomplete while the popup is already open.
+ */
+export const trackSuggestionPopupState = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
+) => {
+  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
+    | (monaco.editor.IEditorContribution & {
+        widget?: {
+          value?: {
+            onDidShow?: (cb: () => void) => void;
+            onDidHide?: (cb: () => void) => void;
+          };
+        };
+      })
+    | undefined;
+  const suggestionWidget = suggestionController?.widget?.value;
+
+  if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
+    suggestionWidget.onDidShow(() => {
+      isSuggestionPopupOpenRef.current = true;
+    });
+    suggestionWidget.onDidHide(() => {
+      isSuggestionPopupOpenRef.current = false;
+    });
+  }
+};
+
+/**
+ * Checks if the code actions menu is being displayed.
+ * @param editor
+ * @returns
+ */
+export const isCodeActionMenuVisible = (editor: monaco.editor.IStandaloneCodeEditor): boolean => {
+  const actionWidgetList = editor.getDomNode()?.querySelector('.action-widget .actionList');
+  if (actionWidgetList) {
+    return Array.from(actionWidgetList.children).length > 0;
+  }
+  return false;
 };

@@ -8,20 +8,28 @@
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+  STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
+  STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsSystemIdentificationIdentifiedSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
   streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
+  streamsFeaturesIdentifiedSchema,
+  streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -32,11 +40,6 @@ const streamsEndpointLatencyEventType = {
 const streamsStateErrorEventType = {
   eventType: STREAMS_STATE_ERROR_EVENT,
   schema: streamsStateErrorSchema,
-};
-
-const streamsSystemIdentificationIdentifiedEventType = {
-  eventType: STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
-  schema: streamsSystemIdentificationIdentifiedSchema,
 };
 
 const streamsDescriptionGeneratedEventType = {
@@ -57,12 +60,41 @@ const streamsProcessingPipelineSuggestedEventType = {
   schema: streamsProcessingPipelineSuggestedSchema,
 };
 
+const streamsFeaturesIdentifiedEventType = {
+  eventType: STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
+  schema: streamsFeaturesIdentifiedSchema,
+};
+
+const streamsAgentBuilderKnowledgeIndicatorCreatedEventType = {
+  eventType: STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  schema: streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+};
+
+const streamsAgentToolKiIdentificationStartedEventType = {
+  eventType: STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  schema: streamsAgentToolKiIdentificationStartedSchema,
+};
+
+const streamsAgentToolEventCreateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  schema: streamsAgentToolEventCreateSchema,
+};
+
+const streamsAgentToolEventStatusUpdateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  schema: streamsAgentToolEventStatusUpdateSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
-  streamsSystemIdentificationIdentifiedEventType,
   streamsDescriptionGeneratedEventType,
   streamsSignificantEventsGeneratedEventType,
   streamsInsightsGeneratedEventType,
   streamsProcessingPipelineSuggestedEventType,
+  streamsFeaturesIdentifiedEventType,
+  streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
+  streamsAgentToolKiIdentificationStartedEventType,
+  streamsAgentToolEventCreateEventType,
+  streamsAgentToolEventStatusUpdateEventType,
 };

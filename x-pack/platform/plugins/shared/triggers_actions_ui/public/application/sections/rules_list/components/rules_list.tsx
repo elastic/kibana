@@ -35,6 +35,7 @@ import {
   getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
   BulkEditActions,
   Pagination,
@@ -73,6 +74,7 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListUiamApiKeyBanner } from './rules_list_uiam_api_key_banner';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
@@ -166,14 +168,18 @@ export const RulesList = ({
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities, navigateToApp },
+    application,
     http,
+    cps,
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
     ...startServices
   } = kibanaServices;
 
+  const { capabilities, navigateToApp } = application;
+
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.DISABLED, { application, cps });
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
@@ -751,6 +757,9 @@ export const RulesList = ({
 
   return (
     <>
+      {kibanaServices.isServerless && config.apiKeyType === 'uiam' ? (
+        <RulesListUiamApiKeyBanner />
+      ) : null}
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
@@ -946,7 +955,9 @@ export const RulesList = ({
                   <EuiButtonIcon
                     onClick={() => toggleErrorMessage(_executionStatus, rule)}
                     aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+                    iconType={
+                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                    }
                   />
                 ) : null;
               }}
@@ -1028,6 +1039,7 @@ export const RulesList = ({
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
+            cps={cps}
           />
         )}
       </EuiPageTemplate.Section>

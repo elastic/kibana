@@ -458,7 +458,7 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 timeout: {
                   type: 'text',
-                  value: '16s',
+                  value: '30s',
                 },
                 type: {
                   type: 'text',
@@ -949,14 +949,14 @@ describe('formatSyntheticsPolicy', () => {
                 dataset: 'browser.network',
                 type: 'synthetics',
               },
-              enabled: true,
+              enabled: false,
             },
             {
               data_stream: {
                 dataset: 'browser.screenshot',
                 type: 'synthetics',
               },
-              enabled: true,
+              enabled: false,
             },
           ],
           type: 'synthetics/browser',
@@ -1146,8 +1146,8 @@ const testNewPolicy = {
             maintenance_windows: { type: 'yaml' },
           },
         },
-        { enabled: true, data_stream: { type: 'synthetics', dataset: 'browser.network' } },
-        { enabled: true, data_stream: { type: 'synthetics', dataset: 'browser.screenshot' } },
+        { enabled: false, data_stream: { type: 'synthetics', dataset: 'browser.network' } },
+        { enabled: false, data_stream: { type: 'synthetics', dataset: 'browser.screenshot' } },
       ],
     },
   ],
@@ -1163,7 +1163,7 @@ const browserConfig: any = {
   'service.name': 'Local Service',
   config_id: '00bb3ceb-a242-4c7a-8405-8da963661374',
   tags: ['cookie-test', 'browser'],
-  timeout: '16',
+  timeout: '60',
   name: 'Test HTTP Monitor 03',
   locations: [
     {

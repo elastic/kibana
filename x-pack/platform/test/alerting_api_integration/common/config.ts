@@ -42,6 +42,7 @@ interface CreateTestConfigOptions {
   maxAlerts?: number;
   emailMaximumBodyLength?: number;
   indexRefreshInterval?: string | false;
+  ruleChangeTrackingEnabled?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -93,6 +94,8 @@ const enabledActionTypes = [
   'test.connector-with-hooks',
   'test.deprecated',
   'test.single_file_connector',
+  'test.oauth-connector',
+  'test.oauth-executor',
 ];
 
 export const getPreConfiguredActions = (
@@ -233,6 +236,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     experimentalFeatures = [],
     maxAlerts = 20,
     indexRefreshInterval,
+    ruleChangeTrackingEnabled = false,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -328,6 +332,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? []
         : [`--xpack.actions.email.maximum_body_length=${options.emailMaximumBodyLength}`];
 
+    const ruleChangeTrackingSettings = ruleChangeTrackingEnabled
+      ? [
+          '--xpack.alerting.ruleChangeTracking.enabled=true',
+          `--xpack.alerting.ruleChangeTracking.scope=${JSON.stringify(['stack'])}`,
+        ]
+      : [];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
@@ -355,6 +366,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
+            '127.0.0.1',
             'some.non.existent.com',
             'smtp-mail.outlook.com',
             'slack.com',
@@ -380,6 +392,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledRuleTypesSetting,
           ...enabledRuleTypesSetting,
           ...emailMaximumBodyLengthSetting,
+          ...ruleChangeTrackingSettings,
           '--xpack.eventLog.logEntries=true',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',

@@ -27,6 +27,7 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsPublicPluginStart> =
     getAllTriggerDefinitions: jest.fn(() => []),
     getTriggerDefinition: jest.fn(),
     hasTriggerDefinition: jest.fn(),
+    isReady: jest.fn(() => Promise.resolve()),
   };
 };
 

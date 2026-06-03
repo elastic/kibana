@@ -7,38 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ESQLAst,
-  ESQLAstItem,
-  ESQLAstCommand,
-  ESQLAstJoinCommand,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLTimeSpanLiteral,
-  ESQLLocation,
-  ESQLMessage,
-  ESQLSingleAstItem,
-  ESQLAstQueryExpression,
-  ESQLSource,
-  ESQLColumn,
-  ESQLLiteral,
-  ESQLParamLiteral,
-  EditorError,
-  ESQLAstNode,
-  ESQLInlineCast,
-  ESQLAstBaseItem,
-  ESQLAstChangePointCommand,
-  ESQLAstForkCommand,
-  ESQLForkParens,
-  ESQLAstPromqlCommand,
-} from './src/types';
-
 export * from './src/constants';
-export * from './src/parser';
-export * from './src/ast';
-export * from './src/composer';
-export * from './src/pretty_print';
 export * from './src/commands';
 export * from './src/language';
 

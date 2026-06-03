@@ -21,6 +21,21 @@ import { DiscoverToolkitTestProvider } from '../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 describe('test useInspector', () => {
+  test('does not throw before data state is initialized for the current tab', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+
+    expect(() =>
+      renderHook(() => useInspector({ inspector: services.inspector }), {
+        wrapper: ({ children }) => (
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+        ),
+      })
+    ).not.toThrow();
+  });
+
   test('inspector open function is executed, expanded doc is closed', async () => {
     const services = createDiscoverServicesMock();
     let adapters: Adapters | undefined;
@@ -32,7 +47,7 @@ describe('test useInspector', () => {
     const lensRequests = new RequestAdapter();
     const toolkit = getDiscoverInternalStateMock({ services });
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
     toolkit.internalState.dispatch(
@@ -43,10 +58,7 @@ describe('test useInspector', () => {
     );
     const { result } = renderHook(
       () => {
-        return useInspector({
-          stateContainer,
-          inspector: services.inspector,
-        });
+        return useInspector({ inspector: services.inspector });
       },
       {
         wrapper: ({ children }) => (

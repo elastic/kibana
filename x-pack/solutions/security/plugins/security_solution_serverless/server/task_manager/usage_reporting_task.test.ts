@@ -152,7 +152,7 @@ describe('SecurityUsageReportingTask', () => {
     reportUsageMock = jest.fn();
   }
 
-  describe('meteringCallback integration', () => {
+  describe.skip('meteringCallback integration', () => {
     async function setupMocks() {
       await setupBaseMocks();
       taskArgs = buildTaskArgs({

@@ -123,10 +123,20 @@ export async function cloneRule<Params extends RuleParams = never>(
     username,
     shouldUpdateApiKey: ruleSavedObject.attributes.enabled,
     errorMessage: 'Error creating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: ruleSavedObject.attributes.apiKeyCreatedByUser },
   });
 
+  // remove API key attributes from rule SO
+  const {
+    apiKey: _sourceApiKey,
+    apiKeyOwner: _sourceApiKeyOwner,
+    apiKeyCreatedByUser: _sourceApiKeyCreatedByUser,
+    uiamApiKey: _sourceUiamApiKey,
+    ...sourceAttributes
+  } = ruleSavedObject.attributes;
+
   const ruleAttributes: RawRule = {
-    ...ruleSavedObject.attributes,
+    ...sourceAttributes,
     name: ruleName,
     ...apiKeyAttributes,
     legacyId,
@@ -184,7 +194,7 @@ export async function cloneRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: false });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

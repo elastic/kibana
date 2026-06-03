@@ -47,7 +47,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
               {(copy) => (
                 <EuiButtonIcon
                   data-test-subj="apmAgentKeyCallOutButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   onClick={copy}
                   aria-label={i18n.translate(
                     'xpack.apm.settings.agentKeys.copyAgentKeyField.copyButton',

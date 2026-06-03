@@ -13,6 +13,7 @@ paths:
       x-state: Technical Preview
       operationId: UpdateWatchlist
       summary: Update an existing watchlist
+      description: Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
       parameters:
         - name: id
           in: path
@@ -28,7 +29,6 @@ paths:
               type: object
               required:
                 - name
-                - description
                 - riskModifier
               properties:
                 name:
@@ -39,6 +39,8 @@ paths:
                   description: Description of the watchlist
                 riskModifier:
                   type: number
+                  minimum: 0
+                  maximum: 2
                   description: Risk score modifier associated with the watchlist
                 managed:
                   type: boolean

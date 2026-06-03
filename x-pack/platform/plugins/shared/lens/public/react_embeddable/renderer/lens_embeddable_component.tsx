@@ -34,11 +34,15 @@ export function LensEmbeddableComponent({
     blockingErrors,
     // has the render completed?
     hasRendered,
+    hideTitle,
+    panelTitle,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
     internalApi.validationMessages$,
     api.rendered$,
+    api.hideTitle$,
+    api.title$,
     // listen to view change mode but do not use its actual value
     // just call the Lens API to know whether it's in edit mode
     api.viewMode$
@@ -61,8 +65,8 @@ export function LensEmbeddableComponent({
     () =>
       internalApi.getDisplayOptions()?.noPanelTitle
         ? undefined
-        : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() },
-    [api.defaultTitle$, api.title$, internalApi]
+        : { 'data-title': panelTitle ?? api.defaultTitle$?.getValue() },
+    [api.defaultTitle$, panelTitle, internalApi]
   );
   const description = api.description$?.getValue()
     ? {
@@ -81,7 +85,7 @@ export function LensEmbeddableComponent({
       ref={rootRef}
     >
       {expressionParams == null || blockingErrors.length ? null : (
-        <ExpressionWrapper {...expressionParams} />
+        <ExpressionWrapper {...expressionParams} paddingTop={hideTitle || !panelTitle?.length} />
       )}
       <UserMessages
         blockingErrors={blockingErrors}

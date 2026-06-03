@@ -7,7 +7,16 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import { validateQuery } from '@kbn/esql-language';
-import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
+import { Parser } from '@elastic/esql';
+import type { ESQLSource, ESQLCommand } from '@elastic/esql/types';
+import {
+  LOGS_ROOT_STREAM_NAME,
+  Streams,
+  getEsqlViewName,
+  getParentId,
+  isChildOf,
+  validateStreamName,
+} from '@kbn/streams-schema';
 import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
 import { getEsqlView } from '../../esql_views/manage_esql_views';
@@ -23,6 +32,32 @@ import type { StateDependencies, StreamChange } from '../types';
 
 interface QueryStreamChanges extends StreamChanges {
   query_streams: boolean;
+}
+
+/**
+ * Extracts the source names (FROM clause targets) from an ES|QL query.
+ * @param esql - The ES|QL query string to parse
+ * @returns Array of source names referenced in the FROM clause
+ */
+export function getSourcesFromEsqlQuery(esql: string): string[] {
+  try {
+    const { root } = Parser.parse(esql);
+    const sourceCommand = root.commands.find(
+      (cmd: ESQLCommand) => cmd.name === 'from' || cmd.name === 'ts'
+    );
+
+    if (!sourceCommand) {
+      return [];
+    }
+
+    const args = sourceCommand.args as ESQLSource[];
+    return args
+      .filter((arg): arg is ESQLSource => arg.sourceType === 'index')
+      .map((source) => source.name);
+  } catch {
+    // If parsing fails, return empty array - syntax validation will catch this separately
+    return [];
+  }
 }
 
 export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definition> {
@@ -149,9 +184,26 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
   ): Promise<ValidationResult> {
     const errors: Error[] = [];
 
-    // Validate that stream name is not empty
-    if (!this._definition.name || this._definition.name.trim() === '') {
-      errors.push(new Error('Stream name cannot be empty'));
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
+    // validateStreamName's prefix/reserved-name rules only check the start of the full name,
+    // so validate the partition segment separately to catch e.g. "-x" under "logs.ecs".
+    const parent = getParentId(this._definition.name);
+    const partition = parent
+      ? this._definition.name.slice(parent.length + 1)
+      : this._definition.name;
+    const partitionValidation = validateStreamName(partition);
+    if (!partitionValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(partitionValidation.message)],
+      };
     }
 
     // Validate that query is defined
@@ -203,7 +255,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
 
       // Validate the ES|QL query can be executed (basic test with LIMIT 0)
       try {
-        await this.dependencies.scopedClusterClient.asCurrentUser.esql.query({
+        await this.dependencies.esClient.esql.query({
           query: `${this._definition.query.esql}\n| LIMIT 0`,
           format: 'json',
         });
@@ -211,6 +263,46 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
         errors.push(
           new Error(`ES|QL query execution validation failed: ${getErrorMessage(error)}`)
         );
+      }
+
+      // Validate that child query streams reference their parent stream's data source
+      const parentId = getParentId(this._definition.name);
+      if (parentId) {
+        const querySources = getSourcesFromEsqlQuery(this._definition.query.esql);
+
+        const parentStream = desiredState.get(parentId);
+
+        if (!parentStream) {
+          errors.push(
+            new Error(
+              `Parent stream "${parentId}" not found for query stream "${this._definition.name}"`
+            )
+          );
+        } else {
+          // Determine valid parent references based on parent stream type
+          // - Classic streams are referenced by data stream name (parent-name)
+          // - Wired and Query streams have ES|QL views ($.parent-name)
+          const isParentClassicStream = Streams.ClassicStream.Definition.is(
+            parentStream.definition
+          );
+
+          const expectedParentSource = isParentClassicStream ? parentId : getEsqlViewName(parentId);
+
+          if (querySources.length === 0) {
+            errors.push(
+              new Error(
+                `Query stream "${this._definition.name}" must have a FROM clause referencing the parent stream "${expectedParentSource}"`
+              )
+            );
+          } else if (!querySources.includes(expectedParentSource)) {
+            errors.push(
+              new Error(
+                `Query stream "${this._definition.name}" must reference its parent stream "${expectedParentSource}" in the FROM clause. ` +
+                  `Found: FROM ${querySources.join(', ')}`
+              )
+            );
+          }
+        }
       }
     }
 
@@ -225,6 +317,14 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     }
 
     // Check for conflicts with existing streams
+    if (this._definition.name === LOGS_ROOT_STREAM_NAME) {
+      errors.push(
+        new Error(
+          `Cannot create query stream: a stream with name "${this._definition.name}" is reserved for the legacy root stream`
+        )
+      );
+    }
+
     if (existingStream && !Streams.QueryStream.Definition.is(existingStream.definition)) {
       errors.push(
         new Error(
@@ -411,7 +511,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       // Verify the view exists before updating
       try {
         await getEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: this._definition.query.view,
         });

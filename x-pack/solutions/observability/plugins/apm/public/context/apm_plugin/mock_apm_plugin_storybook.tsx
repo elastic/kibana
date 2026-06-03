@@ -11,21 +11,30 @@ import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
+import type { Router } from '@kbn/typed-react-router-config';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
-import { apmRouter } from '../../components/routing/apm_route_config';
+import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
+import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+
+const mockPerformanceApi = {
+  onPageReady: () => {},
+  onPageRefreshStart: () => {},
+};
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -76,14 +85,19 @@ const mockPlugin = {
       },
     },
   },
+  observability: {
+    useRulesLink: () => ({ href: '/app/rules', onClick: jest.fn() }),
+  },
 };
 
-const mockCore = {
+export const mockCore = {
   application: {
     capabilities: {
       apm: {},
       ml: {},
+      slo: { read: true },
       savedObjectsManagement: {},
+      dashboard_v2: { show: true },
     },
     currentAppId$: new Observable(),
     getUrlForApp: (appId: string) => '',
@@ -101,14 +115,10 @@ const mockCore = {
     links: {
       apm: {},
       observability: { guide: '' },
+      security: { apiKeyServiceSettings: '' },
     },
   },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`,
-      get: () => '/basepath',
-    },
-  },
+  http: storybookMockHttp,
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },
@@ -151,13 +161,25 @@ const mockCore = {
   },
 };
 
+/** Satisfies `useKibana` consumers (e.g. service map) that read `services.telemetry`. */
+export const storybookTelemetry: ITelemetryClient = {
+  reportSearchQuerySubmitted: () => {},
+  reportSloOverviewFlyoutViewed: () => {},
+  reportSloOverviewFlyoutSearchQueried: () => {},
+  reportSloOverviewFlyoutStatusFiltered: () => {},
+  reportSloInfoShown: () => {},
+  reportServiceMapDagreLayoutFallback: () => {},
+  reportMetricsCalloutDateRangeSelected: () => {},
+  reportMetricsCalloutLoaded: () => {},
+};
+
 const mockUnifiedSearchBar = {
   ui: {
     SearchBar: () => <div />,
   },
 };
 
-const mockApmPluginContext = {
+export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
   unifiedSearch: mockUnifiedSearchBar,
@@ -177,17 +199,42 @@ export function MockApmPluginStorybook({
   children,
   apmContext = {} as ApmPluginContextValue,
   routePath,
+  router,
   serviceContextValue = {} as APMServiceContextValue,
 }: {
   children?: ReactNode;
   routePath?: string;
+  /**
+   * The typed router to provide. Callers must pass `apmRouter` (or another router) explicitly:
+   * importing `apmRouter` here would eagerly load the full route tree, which breaks per-test
+   * `jest.mock()` of any module reachable from a route component.
+   */
+  router: Router<any>;
   apmContext?: ApmPluginContextValue;
   serviceContextValue?: APMServiceContextValue;
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
   const KibanaReactContext = createKibanaReactContext(
-    contextMock.core as unknown as Partial<CoreStart>
+    merge({}, contextMock.core, {
+      telemetry: storybookTelemetry,
+      securityService: {
+        authc: {
+          getCurrentUser: async () => ({
+            username: 'storybook_user',
+            roles: ['superuser'],
+            enabled: true,
+            authentication_realm: { name: 'native', type: 'native' },
+            lookup_realm: { name: 'native', type: 'native' },
+            authentication_provider: { type: 'basic', name: 'basic' },
+          }),
+        },
+      },
+      triggersActionsUi: {
+        ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+        actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+      },
+    }) as unknown as Partial<CoreStart>
   );
 
   const history = createMemoryHistory({
@@ -199,15 +246,19 @@ export function MockApmPluginStorybook({
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
-            <APMServiceContext.Provider value={serviceContextValue}>
-              <RouterProvider router={apmRouter as any} history={history}>
-                <MockTimeRangeContextProvider>
-                  <ApmTimeRangeMetadataContextProvider>
-                    {children}
-                  </ApmTimeRangeMetadataContextProvider>
-                </MockTimeRangeContextProvider>
-              </RouterProvider>
-            </APMServiceContext.Provider>
+            <PerformanceContext.Provider value={mockPerformanceApi}>
+              <APMServiceContext.Provider value={serviceContextValue}>
+                <RouterProvider router={router} history={history}>
+                  <MockTimeRangeContextProvider>
+                    <ApmTimeRangeMetadataContextProvider>
+                      <ChartPointerEventContextProvider>
+                        {children}
+                      </ChartPointerEventContextProvider>
+                    </ApmTimeRangeMetadataContextProvider>
+                  </MockTimeRangeContextProvider>
+                </RouterProvider>
+              </APMServiceContext.Provider>
+            </PerformanceContext.Provider>
           </ApmPluginContext.Provider>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { hostname as osHostname } from 'os';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
-import { createEsClientForTesting } from '@kbn/test';
+import { createEsClientForTesting } from '@kbn/test-es-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
+import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
-import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
@@ -32,6 +32,15 @@ import {
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
+import { EvalsClient } from './utils/evals_client';
+import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
+import { buildIngestRequest } from './utils/build_ingest_request';
+import type {
+  DefaultEvaluators,
+  EvaluationDataset,
+  EvaluationSpecificWorkerFixtures,
+  Example,
+} from './types';
 
 function isElasticCloudEsUrl(esUrl: string): boolean {
   try {
@@ -47,6 +56,28 @@ function isElasticCloudEsUrl(esUrl: string): boolean {
   }
 }
 
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toDatasetRouteExample(example: Example) {
+  if (example.input != null && !isObjectRecord(example.input)) {
+    throw new Error('Dataset example input must be an object when provided');
+  }
+  if (example.output != null && !isObjectRecord(example.output)) {
+    throw new Error('Dataset example output must be an object when provided');
+  }
+  if (example.metadata != null && !isObjectRecord(example.metadata)) {
+    throw new Error('Dataset example metadata must be an object when provided');
+  }
+
+  return {
+    ...(example.input != null && { input: example.input }),
+    ...(example.output != null && { output: example.output }),
+    ...(example.metadata != null && { metadata: example.metadata }),
+  };
+}
+
 /**
  * Test type for evaluations. Loads an inference client and a
  * executor client.
@@ -60,11 +91,35 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  fetch: [
+  evalsClient: [
     async ({ kbnClient, log }, use) => {
-      // add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client)
-      const fetch = httpHandlerFromKbnClient({ kbnClient, log });
+      const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
+      const evalsClient = new EvalsClient(evaluationsKbnClient, log);
+      await evalsClient.assertPluginEnabled();
+      await use(evalsClient);
+    },
+    { scope: 'worker' },
+  ],
+  workerExecutionId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
+  workerExperimentId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
+  fetch: [
+    async ({ kbnClient, log, workerExecutionId, workerExperimentId }, use) => {
+      const fetch = httpHandlerFromKbnClient({
+        kbnClient,
+        log,
+        getExecutionId: () => workerExecutionId.current,
+        getExperimentId: () => workerExperimentId.current,
+      });
       await use(fetch);
     },
     { scope: 'worker' },
@@ -178,7 +233,16 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   executorClient: [
     async (
-      { log, connector, evaluationConnector, repetitions, evaluationsEsClient, reportModelScore },
+      {
+        log,
+        evalsClient,
+        connector,
+        evaluationConnector,
+        repetitions,
+        reportModelScore,
+        workerExecutionId,
+        workerExperimentId,
+      },
       use
     ) => {
       function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
@@ -187,6 +251,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           config: connectorWithId.config,
           connectorId: connectorWithId.id,
           name: connectorWithId.name,
+          isPreconfigured: false,
+          isInferenceEndpoint: false,
           capabilities: {
             contextWindowSize: 32000,
           },
@@ -195,7 +261,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         const model: Model = {
           family: getConnectorFamily(inferenceConnector),
           provider: getConnectorProvider(inferenceConnector),
-          id: getConnectorModel(inferenceConnector),
+          id: getConnectorModel(inferenceConnector) ?? connectorWithId.name,
         };
 
         return model;
@@ -203,50 +269,75 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
+      const suiteId = process.env.EVAL_SUITE_ID;
+      const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
 
-      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+      const baseExecutionId = process.env.TEST_RUN_ID;
+      const executionId =
+        baseExecutionId && model.id ? `${baseExecutionId}::${model.id}` : baseExecutionId;
+
+      workerExecutionId.current = executionId;
+
+      const gitMetadata = getGitMetadata();
+      const hostName = osHostname();
 
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        runId: process.env.TEST_RUN_ID!,
+        executionId,
         repetitions,
+        upsertDataset: async (dataset: EvaluationDataset) => {
+          await evalsClient.upsertDataset({
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples.map(toDatasetRouteExample),
+          });
+        },
+        getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
+        onExperimentStart: async ({ experimentId }) => {
+          workerExperimentId.current = experimentId;
+        },
+        onEvaluationComplete: async (event) => {
+          try {
+            const ingestRequests = buildIngestRequest({
+              taskModel: model,
+              evaluatorModel,
+              repetitions,
+              hostName,
+              gitMetadata,
+              suiteId,
+              executionId,
+              buildkiteMetadata,
+              source: { kind: 'event', event },
+              log,
+            });
+            const results = await Promise.all(
+              ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
+            );
+            for (const result of results) {
+              if (result.failed.length > 0) {
+                log.warning(
+                  `Score ingest partially failed for example ${event.exampleId}: ${result.failed
+                    .map((f) => f.reason)
+                    .join(', ')}`
+                );
+              }
+            }
+          } catch (error) {
+            log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
+          }
+        },
       });
 
-      const currentRunId = process.env.TEST_RUN_ID;
       await use(executorClient);
 
-      if (!currentRunId) {
-        throw new Error(
-          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
-        );
+      const datasetRunResults = await executorClient.getDatasetRunResults();
+      for (const result of datasetRunResults) {
+        await reportModelScore(evalsClient, result.id, log, {
+          taskModelId: model.id,
+          suiteId,
+        });
       }
-
-      const experiments = await executorClient.getRanExperiments();
-      const documents = await mapToEvaluationScoreDocuments({
-        experiments,
-        taskModel: model,
-        evaluatorModel,
-        runId: currentRunId,
-        totalRepetitions: repetitions,
-      });
-
-      try {
-        await exportEvaluations(documents, scoreRepository, log);
-      } catch (error) {
-        log.error(
-          new Error(
-            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
-            { cause: error }
-          )
-        );
-        throw error;
-      }
-
-      await reportModelScore(scoreRepository, currentRunId, log, {
-        taskModelId: model.id,
-        suiteId: process.env.EVAL_SUITE_ID,
-      });
     },
     {
       scope: 'worker',
@@ -319,21 +410,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           })
         : esClient;
       await use(traceEsClient);
-    },
-    { scope: 'worker' },
-  ],
-  evaluationsEsClient: [
-    async ({ esClient }, use) => {
-      const esUrl = process.env.EVALUATIONS_ES_URL;
-      const apiKey = process.env.EVALUATIONS_ES_API_KEY;
-      const evaluationsEsClient = esUrl
-        ? createEsClientForTesting({
-            esUrl,
-            isCloud: isElasticCloudEsUrl(esUrl),
-            ...(apiKey ? { auth: { apiKey } } : {}),
-          })
-        : esClient;
-      await use(evaluationsEsClient);
     },
     { scope: 'worker' },
   ],

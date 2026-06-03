@@ -43,11 +43,19 @@ export interface ExecuteQueryAction {
   error?: string;
 }
 
+export interface ValidateQueryAction {
+  type: 'validate_query';
+  query: string;
+  success: boolean;
+  error?: string;
+}
+
 export type Action =
   | RequestDocumentationAction
   | GenerateQueryAction
   | AutocorrectQueryAction
-  | ExecuteQueryAction;
+  | ExecuteQueryAction
+  | ValidateQueryAction;
 
 export function isRequestDocumentationAction(action: Action): action is RequestDocumentationAction {
   return action.type === 'request_documentation';
@@ -63,6 +71,10 @@ export function isAutocorrectQueryAction(action: Action): action is AutocorrectQ
 
 export function isExecuteQueryAction(action: Action): action is ExecuteQueryAction {
   return action.type === 'execute_query';
+}
+
+export function isValidateQueryAction(action: Action): action is ValidateQueryAction {
+  return action.type === 'validate_query';
 }
 
 /**
@@ -113,6 +125,7 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
                 hasMistakes: action.wasCorrected,
                 output: action.output,
               },
+              wrapToolResult: false,
             }),
           ];
     case 'execute_query':
@@ -144,6 +157,39 @@ Can you fix the query?`
                 success: action.success,
                 error: action.error,
               },
+              wrapToolResult: false,
+            }),
+          ];
+    case 'validate_query':
+      if (action.success) {
+        return [];
+      }
+      return withoutToolCalls
+        ? [
+            createAIMessage('Now you can validate the query'),
+            createUserMessage(
+              `I tried validating the query and got the following error:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+Can you fix the query?`
+            ),
+          ]
+        : [
+            createToolCallMessage({
+              toolCallId,
+              toolName: 'validate_query',
+              args: { query: action.query },
+            }),
+            createToolResultMessage({
+              toolCallId,
+              content: {
+                success: action.success,
+                error: action.error,
+              },
+              wrapToolResult: false,
             }),
           ];
     case 'request_documentation':
@@ -160,6 +206,7 @@ Can you fix the query?`
           content: {
             documentation: action.fetchedDoc,
           },
+          wrapToolResult: false,
         }),
       ];
   }

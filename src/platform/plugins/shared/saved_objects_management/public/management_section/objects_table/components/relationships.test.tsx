@@ -52,7 +52,7 @@ describe('Relationships', () => {
             id: '1',
             relationship: 'parent',
             meta: {
-              icon: 'search',
+              icon: 'magnify',
               inAppUrl: {
                 path: '/app/discover#//1',
                 uiCapabilitiesPath: 'discover_v2.show',
@@ -153,7 +153,7 @@ describe('Relationships', () => {
         references: [],
         meta: {
           title: 'MySearch',
-          icon: 'search',
+          icon: 'magnify',
           inAppUrl: {
             path: '/discover/1',
             uiCapabilitiesPath: 'discover_v2.show',

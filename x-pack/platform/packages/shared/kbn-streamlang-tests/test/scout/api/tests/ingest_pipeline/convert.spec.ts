@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { ConvertProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -28,13 +29,13 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs[0]?.attributes?.size).toBe('4096');
+      expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.size).toBe('4096');
     });
 
     // Template syntax validation tests - these should now REJECT Mustache templates
@@ -76,9 +77,9 @@ apiTest.describe(
           ],
         };
 
-        expect(() => {
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed'); // Should throw validation error for Mustache templates
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+        );
       });
     });
 
@@ -98,14 +99,14 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs[0]?.attributes?.size).toBe(4096);
-        expect(ingestedDocs[0]?.attributes?.size_str).toBe('4096');
+        expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.size).toBe(4096);
+        expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.size_str).toBe('4096');
       }
     );
 
@@ -129,14 +130,14 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs[0]?.attributes?.size).toBe(4096);
-        expect(ingestedDocs[0]?.attributes?.size_str).toBe('4096');
+        expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.size).toBe(4096);
+        expect(asDoc(asDoc(ingestedDocs[0])?.attributes)?.size_str).toBe('4096');
       }
     );
   }

@@ -116,7 +116,6 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                     count,
                   },
                 })}
-                delay="long"
               >
                 <EuiText
                   tabIndex={0}
@@ -137,7 +136,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               `}
             >
               {(formattedFieldValue?.length ?? 0) > 0 ? (
-                <EuiToolTip content={formattedFieldValue} delay="long">
+                <EuiToolTip content={formattedFieldValue}>
                   <EuiTextBlockTruncate lines={3}>
                     <EuiText size="xs" color={'subdued'} {...textProps}>
                       {formattedFieldValue}
@@ -178,7 +177,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => onAddFilter(field, fieldValue, '+')}
                   aria-label={filterForLabel}
                   data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
@@ -195,7 +194,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
-                  iconType="minusInCircle"
+                  iconType="minusCircle"
                   onClick={() => onAddFilter(field, fieldValue, '-')}
                   aria-label={filterOutLabel}
                   data-test-subj={`minus-${fieldLabel}-${fieldValue}`}

@@ -7,15 +7,20 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { allowedExperimentalValues } from '../../../../../../../../common/experimental_features';
 
 import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
+
+const deps = { safeLoadYaml: parse, conditionValidator: validateAgentConditionExpression };
 
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
@@ -30,7 +35,7 @@ describe('StepConfigurePackage', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (isAgentlessSelected = false) => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, deps);
 
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -296,7 +301,7 @@ describe('StepConfigurePackage', () => {
     });
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -396,7 +401,7 @@ describe('StepConfigurePackage', () => {
     ];
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -413,6 +418,846 @@ describe('StepConfigurePackage', () => {
         await renderResult.findByText('Collect logs from Nginx instances')
       ).toBeInTheDocument();
     });
+  });
+});
+
+describe('StepConfigurePackage with multiple inputs of same type but different ids', () => {
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  const otelPackageInfo: PackageInfo = {
+    name: 'nginx',
+    title: 'Nginx',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'Nginx integration with OTel inputs',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'nginx',
+        title: 'Nginx logs and metrics',
+        description: 'Collect logs and metrics from Nginx',
+        data_streams: ['access', 'stubstatus'],
+        inputs: [
+          {
+            name: 'filelog_otel',
+            type: 'otelcol',
+            title: 'Collect Nginx access logs via filelog OTel receiver',
+            description: 'Tail Nginx access log files',
+          },
+          {
+            name: 'nginx_otel',
+            type: 'otelcol',
+            title: 'Collect Nginx stub status metrics via OTel receiver',
+            description: 'Scrape Nginx stub_status metrics',
+          },
+        ],
+        multiple: true,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'filelog_otel',
+            vars: [
+              {
+                name: 'log_path',
+                type: 'text',
+                title: 'Log Path',
+                required: true,
+                show_user: true,
+                default: '/var/log/nginx/access.log',
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx access logs',
+            description: 'Collect Nginx access logs',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'access',
+      },
+      {
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stub status',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'nginx_otel',
+            vars: [
+              {
+                name: 'endpoint',
+                type: 'text',
+                title: 'Stub Status Endpoint',
+                required: true,
+                show_user: true,
+                default: 'http://localhost:8080/stub_status',
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx stub status metrics',
+            description: 'Collect Nginx stub status metrics',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'stubstatus',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const otelPackagePolicy: NewPackagePolicy = {
+    name: 'nginx-1',
+    description: '',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    inputs: [
+      {
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'nginx.access' },
+            vars: {
+              log_path: { value: '/var/log/nginx/access.log', type: 'text' },
+            },
+          },
+        ],
+      },
+      {
+        type: 'otelcol',
+        name: 'nginx_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'metrics', dataset: 'nginx.stubstatus' },
+            vars: {
+              endpoint: { value: 'http://localhost:8080/stub_status', type: 'text' },
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  it('should render both input panels with their respective titles', async () => {
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={otelPackageInfo}
+        packagePolicy={otelPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(async () => {
+      expect(
+        await renderResult.findByText('Collect Nginx access logs via filelog OTel receiver')
+      ).toBeInTheDocument();
+      expect(
+        await renderResult.findByText('Collect Nginx stub status metrics via OTel receiver')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should render two separate input panels with independent stream toggles, not mixed', async () => {
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={otelPackageInfo}
+        packagePolicy={otelPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(async () => {
+      // Both input panel titles should be present
+      expect(
+        await renderResult.findByText('Collect Nginx access logs via filelog OTel receiver')
+      ).toBeInTheDocument();
+      expect(
+        await renderResult.findByText('Collect Nginx stub status metrics via OTel receiver')
+      ).toBeInTheDocument();
+
+      // Each input panel has exactly one stream toggle switch (one per data stream)
+      // If inputs were mixed, the wrong streams would appear under each panel
+      const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+      expect(switches).toHaveLength(2);
+    });
+  });
+});
+
+describe('isSingleInputAndStreams behavior', () => {
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  const singleInputPackageInfo: PackageInfo = {
+    name: 'simple_pkg',
+    title: 'Simple Package',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'A simple single-input package',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'simple',
+        title: 'Simple template',
+        description: 'Simple single-input template',
+        inputs: [
+          {
+            type: 'logfile',
+            title: 'Collect logs',
+            description: 'Collect logs from instances',
+          },
+        ],
+        multiple: true,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'simple_pkg.logs',
+        title: 'Simple logs',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/*.log'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Simple logs',
+            description: 'Collect simple logs',
+            enabled: true,
+          },
+        ],
+        package: 'simple_pkg',
+        path: 'logs',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const singleInputPackagePolicy: NewPackagePolicy = {
+    name: 'simple-1',
+    description: 'desc',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    supports_agentless: false,
+    inputs: [
+      {
+        type: 'logfile',
+        policy_template: 'simple',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'simple_pkg.logs' },
+            vars: {
+              paths: { value: ['/var/log/*.log'], type: 'text' },
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  it('should render toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const validationResults = validatePackagePolicy(
+      singleInputPackagePolicy,
+      singleInputPackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={singleInputPackageInfo}
+        packagePolicy={singleInputPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should render toggle switch when feature flag is off', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: false,
+    });
+
+    const validationResults = validatePackagePolicy(
+      singleInputPackagePolicy,
+      singleInputPackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={singleInputPackageInfo}
+        packagePolicy={singleInputPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should render toggle switch when there are multiple inputs', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const multiInputPackageInfo: PackageInfo = {
+      ...singleInputPackageInfo,
+      policy_templates: [
+        {
+          name: 'multi',
+          title: 'Multi input template',
+          description: 'Template with multiple inputs',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs',
+              description: 'Collect logs from instances',
+            },
+            {
+              type: 'httpjson',
+              title: 'Collect via HTTP',
+              description: 'Collect via HTTP endpoint',
+            },
+          ],
+          multiple: true,
+        },
+      ],
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'simple_pkg.logs',
+          title: 'Simple logs',
+          release: 'ga',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'logfile',
+              vars: [
+                {
+                  name: 'paths',
+                  type: 'text',
+                  title: 'Paths',
+                  multi: true,
+                  required: true,
+                  show_user: true,
+                  default: ['/var/log/*.log'],
+                },
+              ],
+              template_path: 'stream.yml.hbs',
+              title: 'Logs stream',
+              description: 'Collect logs',
+              enabled: true,
+            },
+          ],
+          package: 'simple_pkg',
+          path: 'logs',
+        },
+        {
+          type: 'logs',
+          dataset: 'simple_pkg.http',
+          title: 'HTTP logs',
+          release: 'ga',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'httpjson',
+              vars: [
+                {
+                  name: 'url',
+                  type: 'text',
+                  title: 'URL',
+                  required: true,
+                  show_user: true,
+                },
+              ],
+              template_path: 'stream.yml.hbs',
+              title: 'HTTP stream',
+              description: 'Collect via HTTP',
+              enabled: true,
+            },
+          ],
+          package: 'simple_pkg',
+          path: 'http',
+        },
+      ],
+    };
+
+    const multiInputPolicy: NewPackagePolicy = {
+      ...singleInputPackagePolicy,
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'multi',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.logs' },
+              vars: {
+                paths: { value: ['/var/log/*.log'], type: 'text' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'httpjson',
+          policy_template: 'multi',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.http' },
+              vars: {
+                url: { value: 'http://localhost', type: 'text' },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, deps);
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={multiInputPackageInfo}
+        packagePolicy={multiInputPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it('should render toggle switch when there are multiple policy templates', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const multiTemplatePackageInfo: PackageInfo = {
+      ...singleInputPackageInfo,
+      policy_templates: [
+        {
+          name: 'template_a',
+          title: 'Template A',
+          description: 'First template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs A',
+              description: 'Collect logs from A',
+            },
+          ],
+          multiple: true,
+        },
+        {
+          name: 'template_b',
+          title: 'Template B',
+          description: 'Second template',
+          inputs: [
+            {
+              type: 'httpjson',
+              title: 'Collect logs B',
+              description: 'Collect logs from B',
+            },
+          ],
+          multiple: true,
+        },
+      ],
+      data_streams: [
+        ...singleInputPackageInfo.data_streams!,
+        {
+          type: 'logs',
+          dataset: 'simple_pkg.http',
+          title: 'HTTP logs',
+          release: 'ga',
+          ingest_pipeline: 'default',
+          streams: [
+            {
+              input: 'httpjson',
+              vars: [
+                {
+                  name: 'url',
+                  type: 'text',
+                  title: 'URL',
+                  required: true,
+                  show_user: true,
+                },
+              ],
+              template_path: 'stream.yml.hbs',
+              title: 'HTTP stream',
+              description: 'Collect via HTTP',
+              enabled: true,
+            },
+          ],
+          package: 'simple_pkg',
+          path: 'http',
+        },
+      ],
+    };
+
+    const multiTemplatePolicy: NewPackagePolicy = {
+      ...singleInputPackagePolicy,
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'template_a',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.logs' },
+              vars: {
+                paths: { value: ['/var/log/*.log'], type: 'text' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'httpjson',
+          policy_template: 'template_b',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'simple_pkg.http' },
+              vars: {
+                url: { value: 'http://localhost', type: 'text' },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const validationResults = validatePackagePolicy(
+      multiTemplatePolicy,
+      multiTemplatePackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={multiTemplatePackageInfo}
+        packagePolicy={multiTemplatePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+      />
+    );
+
+    await waitFor(() => {
+      const switches = renderResult.getAllByTestId('PackagePolicy.InputStreamConfig.Switch');
+      expect(switches.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  it('should show deprecated policy template callout on edit page', async () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableSimplifiedAgentlessUX: true,
+    });
+
+    const deprecatedTemplatePackageInfo: PackageInfo = {
+      ...singleInputPackageInfo,
+      policy_templates: [
+        {
+          name: 'simple',
+          title: 'Deprecated template',
+          description: 'A deprecated template',
+          inputs: [
+            {
+              type: 'logfile',
+              title: 'Collect logs',
+              description: 'Collect logs from instances',
+            },
+          ],
+          multiple: true,
+          deprecated: {
+            description: 'This template is deprecated. Use the new template instead.',
+          },
+        },
+      ],
+    };
+
+    const validationResults = validatePackagePolicy(
+      singleInputPackagePolicy,
+      deprecatedTemplatePackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={deprecatedTemplatePackageInfo}
+        packagePolicy={singleInputPackagePolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('deprecatedPolicyTemplateCallout')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('condition field behavior', () => {
+  // A dummy second template forces isSinglePolicyTemplate=false
+  const supportsAgentlessPackageInfo: PackageInfo = {
+    name: 'supports_agentless',
+    title: 'Supports Agentless',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'Package supporting both deployment modes',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'supports_agentless',
+        title: 'Supports agentless template',
+        description: 'Template that supports both default and agentless',
+        deployment_modes: {
+          default: { enabled: true },
+          agentless: { enabled: true },
+        },
+        inputs: [
+          {
+            type: 'httpjson',
+            title: 'Collect via HTTP',
+            description: 'Collect data via HTTP JSON',
+          },
+        ],
+        multiple: true,
+      },
+      {
+        name: 'unused',
+        title: 'Unused template',
+        description: 'Never shown',
+        deployment_modes: { default: { enabled: false }, agentless: { enabled: false } },
+        inputs: [],
+        multiple: false,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'supports_agentless.events',
+        title: 'Supports agentless events',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'httpjson',
+            vars: [],
+            template_path: 'stream.yml.hbs',
+            title: 'Events',
+            description: 'Collect events',
+            enabled: true,
+          },
+        ],
+        package: 'supports_agentless',
+        path: 'events',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const supportsAgentlessPolicy: NewPackagePolicy = {
+    name: 'supports-agentless-1',
+    description: '',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    supports_agentless: true,
+    inputs: [
+      {
+        type: 'httpjson',
+        policy_template: 'supports_agentless',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'supports_agentless.events' },
+            vars: {},
+          },
+        ],
+      },
+    ],
+  };
+
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  const renderSupportsAgentless = (isAgentlessSelected = false) => {
+    const validationResults = validatePackagePolicy(
+      supportsAgentlessPolicy,
+      supportsAgentlessPackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={supportsAgentlessPackageInfo}
+        packagePolicy={supportsAgentlessPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isAgentlessSelected={isAgentlessSelected}
+      />
+    );
+  };
+
+  it('shows condition field in Advanced options when not agentless', async () => {
+    renderSupportsAgentless(false);
+
+    // Expand the input panel body via the "Change defaults" button
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Advanced options')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Advanced options'));
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+    });
+  });
+
+  it('hides condition field when agentless is selected', async () => {
+    renderSupportsAgentless(true);
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
+  });
+
+  it('hides condition field on edit page of an agentless policy', async () => {
+    const validationResults = validatePackagePolicy(
+      supportsAgentlessPolicy,
+      supportsAgentlessPackageInfo,
+      deps
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={supportsAgentlessPackageInfo}
+        packagePolicy={supportsAgentlessPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
   });
 });
 

@@ -310,6 +310,7 @@ export const schema = Joi.object()
     uiSettings: Joi.object()
       .keys({
         defaults: Joi.object().unknown(true),
+        globalDefaults: Joi.object().unknown(true),
       })
       .default(),
 
@@ -354,6 +355,7 @@ export const schema = Joi.object()
           })
           .default(['superuser']),
         disableTestUser: Joi.boolean(),
+        cookieLogin: Joi.boolean().default(true),
       })
       .default(),
 

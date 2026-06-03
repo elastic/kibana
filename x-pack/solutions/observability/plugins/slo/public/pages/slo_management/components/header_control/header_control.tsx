@@ -27,15 +27,23 @@ export function HeaderControl() {
     setIsPopoverOpen(false);
   };
 
+  const handleHealthScan = () => {
+    triggerAction({
+      type: 'health_scan',
+    });
+    setIsPopoverOpen(false);
+  };
+
   return (
     <EuiPopover
       data-test-subj="headerControlPopover"
+      panelPaddingSize="none"
       button={
         <EuiButton
           data-test-subj="headerControlActionsButton"
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSize="s"
           onClick={handleActionsClick}
         >
@@ -48,8 +56,17 @@ export function HeaderControl() {
       closePopover={closePopover}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
+          <EuiContextMenuItem
+            key="healthScan"
+            icon="inspect"
+            onClick={handleHealthScan}
+            data-test-subj="healthScanItem"
+          >
+            {i18n.translate('xpack.slo.sloManagement.headerControl.healthScanItem', {
+              defaultMessage: 'Health scan',
+            })}
+          </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="purgeStaleInstances"
             icon="broom"

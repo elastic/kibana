@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/actions-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/actions-plugin'
+  title: '@kbn/actions-plugin'
   description: Moon project for @kbn/actions-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/actions
+  sourceRoot: x-pack/platform/plugins/shared/actions
 dependsOn:
   - '@kbn/core'
+  - '@kbn/human-readable-id'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
   - '@kbn/licensing-plugin'
@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/actions-utils'
   - '@kbn/encrypted-saved-objects-shared'
   - '@kbn/usage-api-plugin'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
@@ -79,16 +80,6 @@ fileGroups:
     - public/**/*
     - common/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -12,11 +12,13 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import type { Store } from 'redux';
 import { I18nProvider } from '@kbn/i18n-react';
+import { type QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 
 interface TestWrapperProps {
   children: React.ReactNode;
   store?: Store;
+  queryClient?: QueryClient;
   routerHistory?: string[];
 }
 
@@ -25,16 +27,23 @@ interface TestWrapperProps {
  * for testing Kibana components.
  *
  * @param store - The Redux store to use
+ * @param queryClient - Optional QueryClient for React Query hooks
  * @param routerHistory - Optional array of routes to simulate browser history
  * @param children - The component(s) to render within the providers
  */
-export function TestWrapper({ store, routerHistory, children }: TestWrapperProps) {
+export function TestWrapper({ store, queryClient, routerHistory, children }: TestWrapperProps) {
   const reduxStore = store ?? createMockStore();
-  return (
+  const content = (
     <MemoryRouter initialEntries={routerHistory}>
       <I18nProvider>
         <ReduxProvider store={reduxStore}>{children}</ReduxProvider>
       </I18nProvider>
     </MemoryRouter>
   );
+
+  if (queryClient) {
+    return <QueryClientProvider client={queryClient}>{content}</QueryClientProvider>;
+  }
+
+  return content;
 }

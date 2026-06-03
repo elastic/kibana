@@ -18,6 +18,8 @@ import type {
   DetectionAlertsApiService,
   EntityAnalyticsApiService,
   CloudConnectorApiService,
+  TimelineApiService,
+  AttackDiscoveryApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
@@ -25,6 +27,8 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionAlerts: DetectionAlertsApiService;
   entityAnalytics: EntityAnalyticsApiService;
   cloudConnectorApi: CloudConnectorApiService;
+  timeline: TimelineApiService;
+  attackDiscovery: AttackDiscoveryApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

@@ -203,6 +203,18 @@ export interface DeleteExceptionListItemByIdOptions {
 }
 
 /**
+ * ExceptionListClient.bulkDeleteExceptionListItems
+ * {@link ExceptionListClient.bulkDeleteExceptionListItems}
+ */
+export interface BulkDeleteExceptionListItemsOptions {
+  /** the "ids" of the exception list items */
+  ids: Id[];
+
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
  * ExceptionListClient.deleteEndpointListItem
  * {@link ExceptionListClient.deleteEndpointListItem}
  */

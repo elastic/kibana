@@ -18,6 +18,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -79,6 +80,7 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {

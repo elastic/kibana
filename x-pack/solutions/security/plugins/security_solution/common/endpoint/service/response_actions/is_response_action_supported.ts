@@ -146,7 +146,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   runscript: {
     automated: {
-      endpoint: false,
+      endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
       microsoft_defender_endpoint: false,
@@ -166,7 +166,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       microsoft_defender_endpoint: false,
     },
     manual: {
-      endpoint: false,
+      endpoint: true,
       sentinel_one: false,
       crowdstrike: false,
       microsoft_defender_endpoint: true,

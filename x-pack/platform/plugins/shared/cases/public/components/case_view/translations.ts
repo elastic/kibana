@@ -190,18 +190,6 @@ export const ATTACHMENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.attachm
   defaultMessage: 'Attachments',
 });
 
-export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-export const EVENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.events', {
-  defaultMessage: 'Events',
-});
-
-export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
-  defaultMessage: 'Files',
-});
-
 export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observables', {
   defaultMessage: 'Observables',
 });
@@ -209,13 +197,6 @@ export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observa
 export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.similar', {
   defaultMessage: 'Similar cases',
 });
-
-export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.cases.caseView.tabs.alerts.emptyDescription',
-  {
-    defaultMessage: 'No alerts have been added to this case.',
-  }
-);
 
 export const SEND_EMAIL_ARIA = (user: string) =>
   i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
@@ -259,6 +240,12 @@ export const ADDED_OBSERVABLES = (totalObservables: number): string =>
       'added {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
 
+export const EDIT_FIELD_ARIA_LABEL = (fieldName: string) =>
+  i18n.translate('xpack.cases.caseView.editFieldAriaLabel', {
+    values: { fieldName },
+    defaultMessage: 'Edit {fieldName}',
+  });
+
 export const DELETED_OBSERVABLES = (totalObservables: number): string =>
   i18n.translate('xpack.cases.caseView.observables.deletedObservables', {
     values: { totalObservables },
@@ -266,9 +253,45 @@ export const DELETED_OBSERVABLES = (totalObservables: number): string =>
       'deleted {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
 
+export const FIELD_NOT_DEFINED = i18n.translate('xpack.cases.caseView.fieldNotDefined', {
+  defaultMessage: 'Field not defined',
+});
+
 export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
   i18n.translate('xpack.cases.caseView.observables.updatedObservables', {
     values: { totalObservables },
     defaultMessage:
       'updated {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
+
+export const FIELD_SUBMISSION_ERROR = i18n.translate('xpack.cases.caseView.fieldSubmissionError', {
+  defaultMessage: 'Error submitting field',
+});
+
+export const TEMPLATE_CHANGED_SUCCESSFULLY = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToast',
+  {
+    defaultMessage: 'Template changed successfully.',
+  }
+);
+
+export const ERROR_CHANGING_TEMPLATE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.errorToast',
+  {
+    defaultMessage: 'Error changing template',
+  }
+);
+
+export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
+  'xpack.cases.caseView.attachments.noSearchResults.title',
+  {
+    defaultMessage: 'No results match your search criteria',
+  }
+);
+
+export const NO_SEARCH_RESULTS_BODY = i18n.translate(
+  'xpack.cases.caseView.attachments.noSearchResults.body',
+  {
+    defaultMessage: 'Try modifying your search.',
+  }
+);

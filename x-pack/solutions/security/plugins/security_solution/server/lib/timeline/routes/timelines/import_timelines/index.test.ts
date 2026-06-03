@@ -859,7 +859,7 @@ describe('import timeline templates', () => {
       request = requestMock.create({
         method: 'post',
         path: TIMELINE_EXPORT_URL,
-        body: { isImmutable: 1 },
+        body: { isImmutable: 1, file: {} },
       });
       const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
 
@@ -867,7 +867,7 @@ describe('import timeline templates', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        "isImmutable: Expected 'true' | 'false', received number"
+        'isImmutable: Invalid option: expected one of "true"|"false"'
       );
     });
   });

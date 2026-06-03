@@ -22,6 +22,7 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -50,9 +51,12 @@ import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
+
+  dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({ query: '', language: 'kuery' }));
 
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
@@ -84,12 +88,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.dataViews = createDiscoverDataViewsMock();
 
-  dataPlugin.search.searchSource.createEmpty = jest.fn(() => {
+  const createSearchSourceWithDeps = (fields?: Record<string, unknown>) => {
     const deps = {
       getConfig: jest.fn(),
     } as unknown as SearchSourceDependencies;
-    const searchSource = new SearchSource({}, deps);
-    searchSource.fetch$ = jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }));
+    const searchSource = new SearchSource(fields ?? {}, deps);
+    searchSource.fetch$ = jest
+      .fn()
+      .mockReturnValue(of({ rawResponse: { hits: { total: 2, hits: [] } } }));
     searchSource.createChild = jest.fn((options = {}) => {
       const childSearchSource = new SearchSource({}, deps);
       childSearchSource.setParent(searchSource, options);
@@ -100,6 +106,20 @@ export function createDiscoverServicesMock(): DiscoverServices {
       return childSearchSource;
     });
     return searchSource;
+  };
+
+  dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());
+
+  dataPlugin.search.searchSource.create = jest.fn(async (fields?: Record<string, unknown>) => {
+    if (typeof fields?.index === 'string') {
+      try {
+        const dataView = await dataPlugin.dataViews.get(fields.index);
+        return createSearchSourceWithDeps({ ...fields, index: dataView });
+      } catch {
+        // Data view not found in mock, create with raw fields
+      }
+    }
+    return createSearchSourceWithDeps(fields);
   });
 
   const expressionsPlugin = expressionsPluginMock.createStartContract();
@@ -219,7 +239,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
-      get: jest.fn().mockResolvedValue(''),
+      post: jest.fn((path: string) => {
+        // Mock ES|QL timefield endpoint so an ES|QL data view can be created
+        if (path.startsWith('/internal/esql/get_timefield')) {
+          return Promise.resolve({ timeField: '@timestamp' });
+        }
+        return Promise.resolve('');
+      }),
     },
     dataViewEditor: {
       openEditor: jest.fn(),
@@ -238,6 +264,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     metadata: {
       branch: 'test',
+      version: 'major.minor.patch',
     },
     theme,
     storage: new LocalStorageMock({}) as unknown as Storage,
@@ -281,19 +308,28 @@ export function createDiscoverServicesMock(): DiscoverServices {
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
+    cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
+      getEmbeddableTransformsEnabled: jest.fn(() => true),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
+      canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
-      getByValueInput: jest.fn(),
+      getByValueTab: jest.fn(),
+      getEmbeddableId: jest.fn(() => undefined),
+      clearEditorState: jest.fn(),
+    },
+    alertingVTwo: {
+      DynamicRuleFormFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
+    logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
 }
 

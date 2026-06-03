@@ -157,7 +157,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
           'data-telemetry-id': `entSearchContent-connector-header-sync-cancelSync`,
           disabled:
             (isCanceling && ingestionStatus !== IngestionStatus.ERROR) || status === Status.LOADING,
-          icon: <EuiIcon type="cross" size="m" color="danger" />,
+          icon: <EuiIcon type="cross" size="m" color="danger" aria-hidden={true} />,
           name: (
             <EuiText color="danger" size="s">
               <p>
@@ -179,12 +179,16 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.contentConnectors.content.index.syncButton.popover.ariaLabel',
+        { defaultMessage: 'Sync options' }
+      )}
       button={
         <EuiButton
           disabled={disabled || isWaitingForConnector}
           data-test-subj="enterpriseSearchSyncsContextMenuButton"
           data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={togglePopover}
           fill

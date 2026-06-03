@@ -68,6 +68,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     priority: {
       type: 'integer',
     },
+    cost: {
+      type: 'keyword',
+    },
     // NO NEED TO BE INDEXED
     // apiKey: {
     //   type: 'binary',
@@ -76,6 +79,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
       properties: {
         // Indexing apiKeyId to query for mass deletion in the future
         apiKeyId: {
+          type: 'keyword',
+        },
+        uiamApiKeyId: {
           type: 'keyword',
         },
         // NO NEED TO BE INDEXED

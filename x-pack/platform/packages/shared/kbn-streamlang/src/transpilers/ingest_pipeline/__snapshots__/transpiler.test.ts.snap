@@ -6,7 +6,26 @@ Object {
     Object {
       "set": Object {
         "field": "foo",
-        "if": "ctx._source.active == true",
+        "if": "
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+
+try {
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
+    _parentConditionMet = true;
+  }
+} catch (Exception e) {
+  // _parentConditionMet stays false on error
+}
+
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+ctx._source.active == true
+",
         "ignore_failure": true,
         "on_failure": Array [
           Object {
@@ -53,7 +72,26 @@ Object {
     Object {
       "set": Object {
         "field": "baz",
-        "if": "ctx._source.env == 'prod'",
+        "if": "
+// Combined condition: parent 'where' AND nested 'if'
+def _parentConditionMet = false;
+
+try {
+  def val_attributes_status = $('attributes.status', null); if (val_attributes_status instanceof List && val_attributes_status.size() == 1) { val_attributes_status = val_attributes_status[0]; }
+  
+  if ((val_attributes_status !== null && ((val_attributes_status instanceof Number && val_attributes_status.toString() == \\"active\\") || val_attributes_status == \\"active\\"))) {
+    _parentConditionMet = true;
+  }
+} catch (Exception e) {
+  // _parentConditionMet stays false on error
+}
+
+if (!_parentConditionMet) {
+  return false;
+}
+// Evaluate nested processor's 'if' condition
+ctx._source.env == 'prod'
+",
         "ignore_failure": true,
         "on_failure": Array [
           Object {
@@ -134,7 +172,7 @@ Object {
   def val_attributes_is_inactive_str = $('attributes.is_inactive_str', null); if (val_attributes_is_inactive_str instanceof List && val_attributes_is_inactive_str.size() == 1) { val_attributes_is_inactive_str = val_attributes_is_inactive_str[0]; }
   
   
-  if ((val_attributes_is_active !== null && ((val_attributes_is_active instanceof Number && val_attributes_is_active.toString() == \\"true\\") || val_attributes_is_active == true)) && (val_attributes_is_active_str !== null && ((val_attributes_is_active_str instanceof Number && val_attributes_is_active_str.toString() == \\"true\\") || val_attributes_is_active_str == \\"true\\")) && (val_attributes_is_inactive !== null && ((val_attributes_is_inactive instanceof Number && val_attributes_is_inactive.toString() != \\"true\\") || val_attributes_is_inactive != true)) && (val_attributes_is_inactive_str !== null && ((val_attributes_is_inactive_str instanceof Number && val_attributes_is_inactive_str.toString() != \\"true\\") || val_attributes_is_inactive_str != \\"true\\"))) {
+  if ((val_attributes_is_active !== null && ((val_attributes_is_active instanceof Number && val_attributes_is_active.toString() == \\"true\\") || val_attributes_is_active == true)) && (val_attributes_is_active_str !== null && ((val_attributes_is_active_str instanceof Number && val_attributes_is_active_str.toString() == \\"true\\") || val_attributes_is_active_str == \\"true\\")) && (val_attributes_is_inactive === null || ((val_attributes_is_inactive instanceof Number && val_attributes_is_inactive.toString() != \\"true\\") || val_attributes_is_inactive != true)) && (val_attributes_is_inactive_str === null || ((val_attributes_is_inactive_str instanceof Number && val_attributes_is_inactive_str.toString() != \\"true\\") || val_attributes_is_inactive_str != \\"true\\"))) {
     return true;
   }
   return false;
@@ -157,7 +195,7 @@ Object {
   def val_attributes_is_enabled_str = $('attributes.is_enabled_str', null); if (val_attributes_is_enabled_str instanceof List && val_attributes_is_enabled_str.size() == 1) { val_attributes_is_enabled_str = val_attributes_is_enabled_str[0]; }
   
   
-  if ((val_attributes_is_disabled !== null && ((val_attributes_is_disabled instanceof Number && val_attributes_is_disabled.toString() == \\"false\\") || val_attributes_is_disabled == false)) && (val_attributes_is_disabled_str !== null && ((val_attributes_is_disabled_str instanceof Number && val_attributes_is_disabled_str.toString() == \\"false\\") || val_attributes_is_disabled_str == \\"false\\")) && (val_attributes_is_enabled !== null && ((val_attributes_is_enabled instanceof Number && val_attributes_is_enabled.toString() != \\"false\\") || val_attributes_is_enabled != false)) && (val_attributes_is_enabled_str !== null && ((val_attributes_is_enabled_str instanceof Number && val_attributes_is_enabled_str.toString() != \\"false\\") || val_attributes_is_enabled_str != \\"false\\"))) {
+  if ((val_attributes_is_disabled !== null && ((val_attributes_is_disabled instanceof Number && val_attributes_is_disabled.toString() == \\"false\\") || val_attributes_is_disabled == false)) && (val_attributes_is_disabled_str !== null && ((val_attributes_is_disabled_str instanceof Number && val_attributes_is_disabled_str.toString() == \\"false\\") || val_attributes_is_disabled_str == \\"false\\")) && (val_attributes_is_enabled === null || ((val_attributes_is_enabled instanceof Number && val_attributes_is_enabled.toString() != \\"false\\") || val_attributes_is_enabled != false)) && (val_attributes_is_enabled_str === null || ((val_attributes_is_enabled_str instanceof Number && val_attributes_is_enabled_str.toString() != \\"false\\") || val_attributes_is_enabled_str != \\"false\\"))) {
     return true;
   }
   return false;
@@ -180,7 +218,7 @@ Object {
   def val_attributes_other_code_str = $('attributes.other_code_str', null); if (val_attributes_other_code_str instanceof List && val_attributes_other_code_str.size() == 1) { val_attributes_other_code_str = val_attributes_other_code_str[0]; }
   
   
-  if ((val_attributes_status_code !== null && ((val_attributes_status_code instanceof Number && val_attributes_status_code.toString() == \\"450\\") || val_attributes_status_code == 450)) && (val_attributes_status_code_str !== null && ((val_attributes_status_code_str instanceof Number && val_attributes_status_code_str.toString() == \\"450\\") || val_attributes_status_code_str == \\"450\\")) && (val_attributes_other_code !== null && ((val_attributes_other_code instanceof Number && val_attributes_other_code.toString() != \\"450\\") || val_attributes_other_code != 450)) && (val_attributes_other_code_str !== null && ((val_attributes_other_code_str instanceof Number && val_attributes_other_code_str.toString() != \\"450\\") || val_attributes_other_code_str != \\"450\\"))) {
+  if ((val_attributes_status_code !== null && ((val_attributes_status_code instanceof Number && val_attributes_status_code.toString() == \\"450\\") || val_attributes_status_code == 450)) && (val_attributes_status_code_str !== null && ((val_attributes_status_code_str instanceof Number && val_attributes_status_code_str.toString() == \\"450\\") || val_attributes_status_code_str == \\"450\\")) && (val_attributes_other_code === null || ((val_attributes_other_code instanceof Number && val_attributes_other_code.toString() != \\"450\\") || val_attributes_other_code != 450)) && (val_attributes_other_code_str === null || ((val_attributes_other_code_str instanceof Number && val_attributes_other_code_str.toString() != \\"450\\") || val_attributes_other_code_str != \\"450\\"))) {
     return true;
   }
   return false;
@@ -222,6 +260,17 @@ Object {
 exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variety of processor steps and where blocks 1`] = `
 Object {
   "processors": Array [
+    Object {
+      "registered_domain": Object {
+        "description": undefined,
+        "field": "expression",
+        "if": undefined,
+        "ignore_failure": undefined,
+        "ignore_missing": true,
+        "tag": undefined,
+        "target_field": "prefix",
+      },
+    },
     Object {
       "network_direction": Object {
         "destination_ip": "destination_ip",
@@ -419,6 +468,34 @@ fromValues.add(' ');if (ctx.containsKey('last_name') && ctx['last_name'] != null
       "dissect": Object {
         "field": "body.log",
         "pattern": "%{attributes.client} %{attributes.method} %{attributes.path}",
+      },
+    },
+    Object {
+      "uri_parts": Object {
+        "field": "attributes.request_url",
+      },
+    },
+    Object {
+      "uri_parts": Object {
+        "field": "attributes.href",
+        "if": "
+  try {
+  
+  def val_attributes_href = $('attributes.href', null); if (val_attributes_href instanceof List && val_attributes_href.size() == 1) { val_attributes_href = val_attributes_href[0]; }
+  
+  
+  if ((val_attributes_href === null || ((val_attributes_href instanceof Number && val_attributes_href.toString() != \\"\\") || val_attributes_href != \\"\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "ignore_missing": true,
+        "keep_original": false,
+        "remove_if_successful": true,
+        "target_field": "attributes.parsed",
       },
     },
     Object {

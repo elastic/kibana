@@ -32,11 +32,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the SOC trends timerange and stats on D&R page
-   */
-  socTrendsEnabled: false,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -53,13 +48,25 @@ export const allowedExperimentalValues = Object.freeze({
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
-  responseActionsEndpointRunScript: false,
+  responseActionsEndpointRunScript: true,
+
+  /**
+   * Support for Automated Endpoint `runscript` (from rules)
+   * Release: 9.4
+   */
+  responseActionsEndpointAutomatedRunScript: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
-  responseActionsScriptLibraryManagement: false,
+  responseActionsScriptLibraryManagement: true,
+
+  /**
+   * `cancel` response action for Elastic Defend Endpoint
+   * Release: 9.5
+   */
+  responseActionsEndpointCancel: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -80,16 +87,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+  /**
+   * Enables the new Entity Analytics home page experience.
+   */
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   * Enables the lead generation pipeline for Entity Analytics.
+   * When enabled, the lead generation engine, observation modules,
+   * API routes, and persistence indices are activated.
    */
-  entityDetailsHighlightsEnabled: true,
-
-  /**
-   * Enables the experimental Threat Hunting home experience.
-   */
-  entityThreatHuntingEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -97,14 +105,9 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables the storing of gaps in the event log
-   */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -120,7 +123,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -134,17 +137,15 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   * Additionally: enables import/export for all Endpoint artifacts.
    */
-  endpointExceptionsMovedUnderManagement: false,
+  endpointExceptionsMovedUnderManagement: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
@@ -169,10 +170,6 @@ export const allowedExperimentalValues = Object.freeze({
   automaticDashboardsMigration: true,
 
   /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
-  /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
    */
@@ -180,11 +177,15 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  enableAlertsAndAttacksAlignment: false,
+  enableAlertsAndAttacksAlignment: true,
   /**
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
+  /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: false,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -193,7 +194,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -227,9 +228,57 @@ export const allowedExperimentalValues = Object.freeze({
   automaticTroubleshootingSkill: false,
 
   /**
+   * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
+   * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
+   */
+  pciComplianceAgentBuilder: true,
+
+  /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: true,
+
+  /**
+   * Enables entity ML job behavior maintainer
+   */
+  entityAnalyticsMlJobBehaviorMaintainer: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: true,
+
+  /**
+   * Enables the Detection Rule Changes History API endpoint
+   * (`GET /api/detection_engine/rules/_history`).
+   *
+   * Independent of the alerting framework's `xpack.alerting.ruleChangeTracking.enabled`
+   * config flag, which gates the underlying primitive that produces the history
+   * records. Both must be enabled for the API to return non-empty results.
+   */
+  ruleChangesHistoryEnabled: false,
+
+  /**
+   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
+   */
+  securityClassicNavExternalLinks: false,
+  /**
+   * Enables public Detection Engine attacks REST APIs
+   * (`/api/detection_engine/attacks/*`).
+   */
+  publicAttacksApiEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

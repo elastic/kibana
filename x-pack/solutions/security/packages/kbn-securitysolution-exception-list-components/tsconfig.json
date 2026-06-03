@@ -6,8 +6,7 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
-      "../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -20,6 +19,8 @@
     "@kbn/securitysolution-autocomplete",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/securitysolution-list-utils",
   ],
   "exclude": [
     "target/**/*",

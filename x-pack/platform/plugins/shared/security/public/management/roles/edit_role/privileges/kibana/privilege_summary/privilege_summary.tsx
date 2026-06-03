@@ -13,6 +13,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 
@@ -32,6 +33,7 @@ interface Props {
 }
 export const PrivilegeSummary = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const numberOfPrivilegeDefinitions = props.role.kibana.length;
   const flyoutSize = numberOfPrivilegeDefinitions > 5 ? 'l' : 'm';
@@ -49,10 +51,11 @@ export const PrivilegeSummary = (props: Props) => {
           onClose={() => setIsOpen(false)}
           size={flyoutSize}
           maskProps={{ headerZindexLocation: 'below' }}
+          aria-labelledby={flyoutTitleId}
         >
           <EuiFlyoutHeader>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={flyoutTitleId}>
                 <FormattedMessage
                   id="xpack.security.management.editRole.privilegeSummary.modalHeaderTitle"
                   defaultMessage="Privilege summary"

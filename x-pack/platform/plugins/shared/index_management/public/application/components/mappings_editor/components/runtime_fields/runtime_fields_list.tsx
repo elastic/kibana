@@ -141,7 +141,7 @@ export const RuntimeFieldsList = () => {
       <EuiButtonEmpty
         disabled={isCreateFieldDisabled}
         onClick={createField}
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         data-test-subj="createRuntimeFieldButton"
       >
         {i18n.translate('xpack.idxMgmt.mappingsEditor.addRuntimeFieldButtonLabel', {

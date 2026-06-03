@@ -10,7 +10,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as t from 'io-ts';
 import { NEVER } from 'rxjs';
 import * as makeZodValidationObject from './make_zod_validation_object';
@@ -169,7 +169,7 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
@@ -181,19 +181,44 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
     expect(bodyDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unexpectedKey\\"
+          \\"code\\": \\"invalid_union\\",
+          \\"errors\\": [
+            [
+              {
+                \\"code\\": \\"unrecognized_keys\\",
+                \\"keys\\": [
+                  \\"unexpectedKey\\"
+                ],
+                \\"path\\": [],
+                \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
+              }
+            ],
+            [
+              {
+                \\"expected\\": \\"null\\",
+                \\"code\\": \\"invalid_type\\",
+                \\"path\\": [],
+                \\"message\\": \\"Invalid input: expected null, received object\\"
+              }
+            ],
+            [
+              {
+                \\"expected\\": \\"undefined\\",
+                \\"code\\": \\"invalid_type\\",
+                \\"path\\": [],
+                \\"message\\": \\"Invalid input: expected undefined, received object\\"
+              }
+            ]
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Invalid input\\"
         }
       ]"
     `);

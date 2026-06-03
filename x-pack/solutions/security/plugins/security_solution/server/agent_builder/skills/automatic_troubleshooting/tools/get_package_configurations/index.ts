@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -57,7 +57,7 @@ This tool fetches Elastic Defend package configurations to assist in troubleshoo
         }
         const defaultTransformSettings: Array<{ path: string; config: unknown }> = [];
         if (packageData) {
-          packageData.assetsMap.forEach((buffer, path) => {
+          packageData.assetsMap?.forEach((buffer, path) => {
             if (path.includes('elasticsearch/transform/') && buffer) {
               const content = buffer.toString('utf-8');
               const config: unknown = JSON.parse(content);

@@ -81,11 +81,15 @@ export const PostFleetServerHostRequestSchema = {
 };
 
 export const GetOneFleetServerHostRequestSchema = {
-  params: schema.object({ itemId: schema.string() }),
+  params: schema.object({
+    itemId: schema.string({ meta: { description: 'The ID of the Fleet Server host' } }),
+  }),
 };
 
 export const PutFleetServerHostRequestSchema = {
-  params: schema.object({ itemId: schema.string() }),
+  params: schema.object({
+    itemId: schema.string({ meta: { description: 'The ID of the Fleet Server host' } }),
+  }),
   body: FleetServerHostBaseSchema,
 };
 

@@ -11,4 +11,5 @@ import type { SecuritySolutionPluginRouter } from '../../types';
 export interface SiemReadinessRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
+  isServerless: boolean;
 }

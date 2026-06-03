@@ -6,6 +6,7 @@
  */
 
 import type { AxiosInstance } from 'axios';
+import type { AuthMode } from '@kbn/connector-specs';
 import { isWorkflowsOnlyConnectorType } from '../../../../lib/single_file_connectors/is_workflows_only_connector';
 import type { RawAction } from '../../../../types';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
@@ -35,9 +36,11 @@ export async function getAxiosInstance(
     spaces,
     unsecuredSavedObjectsClient,
     connectorTokenClient,
+    getCurrentUserProfileId,
   } = context;
 
   let actionTypeId: string | undefined;
+  let authMode: AuthMode | undefined;
 
   try {
     if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {
@@ -53,6 +56,7 @@ export async function getAxiosInstance(
       );
 
       actionTypeId = attributes.actionTypeId;
+      authMode = attributes.authMode;
     }
   } catch (err) {
     log.debug(`Failed to retrieve actionTypeId for action [${connectorId}]`, err);
@@ -102,10 +106,14 @@ export async function getAxiosInstance(
   const configurationUtilities = actionTypeRegistry.getUtils();
   const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 
+  const profileUid = await getCurrentUserProfileId?.(request);
+
   return await getAxiosInstanceWithAuth({
     connectorId,
     connectorTokenClient,
     additionalHeaders: actionType.globalAuthHeaders,
     secrets: validatedSecrets,
+    authMode,
+    profileUid,
   });
 }

@@ -18,7 +18,6 @@ import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { QueryClient } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -97,11 +96,40 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   filesClient,
 }) => {
   const finalCoreStart = useMemo(() => {
-    return coreStart ?? coreMock.createStart();
-  }, [coreStart]);
+    const baseServices = createStartServicesMock({ license });
+    const nextCoreStart = coreStart ?? (baseServices as unknown as CoreStart);
+    if (
+      jest.isMockFunction(nextCoreStart.uiSettings.get) &&
+      nextCoreStart.uiSettings.get.getMockImplementation() == null
+    ) {
+      (nextCoreStart.uiSettings.get as jest.Mock).mockImplementation(
+        (_key: string, defaultValue: unknown) => defaultValue
+      );
+    }
+    return nextCoreStart;
+  }, [coreStart, license]);
   const finalServices = useMemo(() => {
-    return { ...createStartServicesMock({ license }), ...coreStart, ...services };
-  }, [coreStart, license, services]);
+    const baseServices = createStartServicesMock({ license });
+    const mergedServices = { ...baseServices, ...finalCoreStart, ...services };
+
+    const baseCapabilities = baseServices.application.capabilities ?? {};
+    const coreCapabilities = finalCoreStart.application?.capabilities ?? {};
+
+    mergedServices.application = {
+      ...baseServices.application,
+      ...finalCoreStart.application,
+      capabilities: {
+        ...baseCapabilities,
+        ...coreCapabilities,
+        actions: {
+          ...(baseCapabilities.actions ?? {}),
+          ...(coreCapabilities.actions ?? {}),
+        },
+      },
+    };
+
+    return mergedServices;
+  }, [finalCoreStart, license, services]);
 
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 

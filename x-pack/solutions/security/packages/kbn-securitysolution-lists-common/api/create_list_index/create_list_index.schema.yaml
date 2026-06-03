@@ -5,11 +5,18 @@ info:
 paths:
   /api/lists/index:
     post:
+      deprecated: true
       x-labels: [serverless, ess]
       operationId: CreateListIndex
       x-codegen-enabled: true
       summary: Create list data streams
-      description: Create `.lists` and `.items` data streams in the relevant space.
+      description: |
+        **DEPRECATED.** `deprecated: true` is set on this operation. Value list backing data streams for the space
+        are now created as part of supported workflows; calling this explicitly is rarely required.
+        **WARNING:** Do not use for new integrations. Prefer the UI or the list and list-item APIs after confirming
+        indices exist with `GET /api/lists/index`.
+
+        Creates the `.lists` and `.items` data streams in the current Kibana space.
       responses:
         200:
           description: Successful response
@@ -21,6 +28,10 @@ paths:
                   acknowledged:
                     type: boolean
                 required: [acknowledged]
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
         400:
           description: Invalid input data response
           content:
@@ -29,6 +40,11 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Indices exist but the request could not be completed for the current space. Check that Elasticsearch and Kibana privileges allow index creation for lists."
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
@@ -48,6 +64,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/lists/index] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         409:
           description: List data stream exists response
           content:

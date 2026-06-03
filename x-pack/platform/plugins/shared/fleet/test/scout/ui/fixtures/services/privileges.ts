@@ -206,6 +206,34 @@ export const getAutomaticImportConnectorReadRole = (): KibanaRole => ({
 });
 
 /**
+ * Role definition for the manage integrations table view.
+ * Requires explicit `automatic_import: ['all']` because the feature uses
+ * `excludeFromBasePrivileges: true` — base `all` does NOT grant it.
+ */
+export const getManageIntegrationsRole = (): KibanaRole => ({
+  elasticsearch: {
+    cluster: ['manage_service_account'],
+    indices: [
+      {
+        names: ['*'],
+        privileges: ['all'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        fleetv2: ['all'],
+        fleet: ['all'],
+        automatic_import: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+
+/**
  * Role definition for automatic import with All integrations and All actions permissions.
  */
 export const getAutomaticImportConnectorAllRole = (): KibanaRole => ({

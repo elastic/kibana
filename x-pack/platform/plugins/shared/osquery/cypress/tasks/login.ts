@@ -8,7 +8,7 @@
 import { disableNewFeaturesTours } from './navigation';
 import { ServerlessRoleName } from '../support/roles';
 
-import { request } from './common';
+import { request, suppressGlobalAnnouncements } from './common';
 
 // Functions that mocks the list/index call
 const createListsIndex = () => {
@@ -22,12 +22,12 @@ const createListsIndex = () => {
 // Login as a SOC_MANAGER to properly initialize Security Solution App
 export const initializeDataViews = () => {
   cy.login(ServerlessRoleName.SOC_MANAGER);
+  suppressGlobalAnnouncements();
   createListsIndex();
   cy.visit('/app/security/alerts', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
-  cy.getBySel('globalLoadingIndicator').should('exist');
-  // In serverless the app sometimes takes a long time to load with this check causing flakiness.
+  // Wait for loading to complete - don't require it to appear first (page may load quickly)
   cy.getBySel('globalLoadingIndicator', { timeout: 1.5 * 60 * 1000 }).should('not.exist');
   cy.getBySel('alerts-page-manage-alert-detection-rules').should('exist');
 };

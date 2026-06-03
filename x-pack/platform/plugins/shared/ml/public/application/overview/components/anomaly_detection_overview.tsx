@@ -10,9 +10,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../locator';
-import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.png';
+import type { MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.svg';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
@@ -113,7 +113,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   ]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} />
+    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} iconSize="m" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
@@ -121,6 +121,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       hasBorder={true}
       hasShadow={false}
       iconSrc={adImage}
+      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       })}

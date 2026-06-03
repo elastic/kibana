@@ -14,7 +14,8 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 const TYPE_CHECK_CONFIG_FILENAME = 'tsconfig.type_check.json';
 const PROJECT_CONFIG_FILENAME = 'tsconfig.json';
 
-const formatPathForLog = (path: string) => {
+/** Formats absolute paths relative to the repo root when possible for cleaner logs. */
+export const formatPathForLog = (path: string) => {
   if (!Path.isAbsolute(path)) {
     return path;
   }

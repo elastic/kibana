@@ -43,8 +43,16 @@ export default function (providerContext: FtrProviderContext) {
       attributes: {
         policy_ids: [id],
         name: 'Fleet Server',
+        enabled: true,
+        inputs: [],
+        revision: 1,
+        created_at: new Date().toISOString(),
+        created_by: 'system',
+        updated_at: new Date().toISOString(),
+        updated_by: 'system',
         package: {
           name: 'fleet_server',
+          version: '1.0.0',
         },
         latest_revision: true,
       },
@@ -96,6 +104,16 @@ export default function (providerContext: FtrProviderContext) {
       // index doesn't exist
     }
   };
+
+  const authHeaderConflictCases: Array<[string, { auth?: {}; secrets?: {} }]> = [
+    ['username/password', { auth: { username: 'testuser', password: 'testpassword' } }],
+    [
+      'username/password as secret',
+      { auth: { username: 'testuser' }, secrets: { auth: { password: 'testpassword' } } },
+    ],
+    ['api_key', { auth: { api_key: 'my-api-key' } }],
+    ['api_key as secret', { secrets: { auth: { api_key: 'my-api-key' } } }],
+  ];
 
   describe('fleet_download_sources_crud', function () {
     let defaultDownloadSourceId: string;
@@ -329,8 +347,8 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
-              certificate: 'path/to/cert',
+              certificate_authorities: ['/path/to/cert-authority'],
+              certificate: '/path/to/cert',
               key: 'KEY',
             },
             secrets: { ssl: { key: 'KEY' } },
@@ -351,7 +369,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'KEY1' } },
@@ -503,6 +521,28 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.message).to.contain(
           'Cannot specify both auth.api_key and secrets.auth.api_key'
         );
+      });
+
+      authHeaderConflictCases.forEach(([description, { auth, secrets }]) => {
+        it(`should return 400 when Authorization header is combined with ${description} credentials on create`, async function () {
+          const baseAuth = {
+            headers: [{ key: 'Authorization', value: 'Bearer token' }],
+          };
+
+          const res = await supertest
+            .post(`/api/fleet/agent_download_sources`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Download source auth conflict ${Date.now()}`,
+              host: 'http://test.fr:443',
+              is_default: false,
+              auth: { ...baseAuth, ...auth },
+              ...(secrets ? { secrets } : {}),
+            })
+            .expect(400);
+
+          expect(res.body.message).to.contain('Cannot use "Authorization" custom header');
+        });
       });
 
       it('should store auth secrets when fleet server meets minimum version', async function () {
@@ -657,7 +697,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'https://test.co',
             is_default: true,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'KEY1' } },
@@ -683,7 +723,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'KEY1' } },
@@ -703,7 +743,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'NEW_KEY' } },
@@ -738,7 +778,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               key: 'KEY1',
             },
@@ -754,7 +794,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'NEW_KEY' } },
@@ -790,6 +830,38 @@ export default function (providerContext: FtrProviderContext) {
             is_default: true,
           })
           .expect(400);
+      });
+
+      authHeaderConflictCases.forEach(([description, { auth, secrets }]) => {
+        it(`should return 400 when Authorization header is combined with ${description} credentials on update`, async function () {
+          const { body: createRes } = await supertest
+            .post(`/api/fleet/agent_download_sources`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Bad auth combination test ${Date.now()}`,
+              host: 'http://test.fr:443',
+              is_default: false,
+            })
+            .expect(200);
+
+          const baseAuth = {
+            headers: [{ key: 'Authorization', value: 'Bearer token' }],
+          };
+
+          const res = await supertest
+            .put(`/api/fleet/agent_download_sources/${createRes.item.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Download source auth conflict ${Date.now()}`,
+              host: 'http://test.fr:443',
+              is_default: false,
+              auth: { ...baseAuth, ...auth },
+              ...(secrets ? { secrets } : {}),
+            })
+            .expect(400);
+
+          expect(res.body.message).to.contain('Cannot use "Authorization" custom header');
+        });
       });
 
       it('should delete password secret when switching from username/password to api_key', async function () {
@@ -1071,7 +1143,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'SSL_KEY_VALUE' } },
@@ -1097,7 +1169,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(updateRes.item.secrets.ssl.key.id).to.equal(secretId);
         expect(updateRes.item.ssl.certificate).to.equal('path/to/cert');
-        expect(updateRes.item.ssl.certificate_authorities).to.eql(['cert authorities']);
+        expect(updateRes.item.ssl.certificate_authorities).to.eql(['/path/to/cert-authority']);
 
         const secretAfterUpdate = await getSecretById(secretId);
         // @ts-ignore _source unknown type
@@ -1163,7 +1235,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: {
@@ -1496,7 +1568,7 @@ export default function (providerContext: FtrProviderContext) {
             host: 'http://test.fr:443',
             is_default: false,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
             },
             secrets: { ssl: { key: 'KEY1' } },

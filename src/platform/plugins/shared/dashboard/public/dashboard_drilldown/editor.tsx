@@ -14,15 +14,15 @@ import { EuiFormRow, EuiComboBox, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DrilldownEditorProps } from '@kbn/embeddable-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-navigation-options-components';
 import type { DashboardDrilldownState } from '../../server';
 import { findService } from '../dashboard_client';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '../../common/page_bundle_constants';
-import { DashboardNavigationOptionsEditor } from '../dashboard_navigation/options_editor';
 
 export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDrilldownState>) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
-  const [initialDashboardOption, setInitialDashboardOption] = useState<
+  const [selectedOption, setSelectedOption] = useState<
     EuiComboBoxOptionOption<string> | undefined
   >();
   const [isLoadingInitialDashboard, setIsLoadingInitialDashboard] = useState(false);
@@ -44,7 +44,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
 
     findService
       .search({
-        search: debouncedSearchString ?? '',
+        query: debouncedSearchString ?? '',
         per_page: 100,
       })
       .then((results) => {
@@ -96,7 +96,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
         return;
       }
 
-      setInitialDashboardOption({
+      setSelectedOption({
         value: initialDashboardId,
         label: result.attributes.title,
       });
@@ -109,23 +109,6 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
     // run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const mergedOptions = useMemo(() => {
-    if (!initialDashboardOption || initialDashboardOption.value !== props.state.dashboard_id) {
-      return options;
-    }
-
-    const hasInitialDashboard = options.some(({ value }) => value === initialDashboardOption.value);
-    return hasInitialDashboard ? options : [initialDashboardOption, ...options];
-  }, [initialDashboardOption, options, props.state]);
-
-  const selectedOptions = useMemo(() => {
-    if (!props.state.dashboard_id) {
-      return undefined;
-    }
-    const selectedOption = mergedOptions.find(({ value }) => value === props.state.dashboard_id);
-    return selectedOption ? [selectedOption] : undefined;
-  }, [mergedOptions, props.state.dashboard_id]);
 
   const navigationOptions = useMemo(() => {
     return {
@@ -149,9 +132,10 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
       >
         <EuiComboBox<string>
           async
-          selectedOptions={selectedOptions}
-          options={mergedOptions}
+          selectedOptions={selectedOption ? [selectedOption] : undefined}
+          options={options}
           onChange={(nextSelectedOptions) => {
+            setSelectedOption(nextSelectedOptions?.[0]);
             props.onChange({ ...props.state, dashboard_id: nextSelectedOptions?.[0]?.value });
             if (error) {
               setError(undefined);

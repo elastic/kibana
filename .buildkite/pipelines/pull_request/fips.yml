@@ -1,7 +1,7 @@
 steps:
   - command: .buildkite/scripts/steps/fips/build.sh
-    cancel_on_build_failing: true
     label: 'Build FIPS Image'
+    key: build_fips_image
     agents:
       machineType: n2-standard-2
       preemptible: true

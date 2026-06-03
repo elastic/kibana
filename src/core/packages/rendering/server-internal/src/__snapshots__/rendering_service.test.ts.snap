@@ -17,6 +17,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -45,6 +46,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -84,6 +91,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -105,6 +115,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -133,6 +144,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -168,6 +185,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -189,6 +209,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -217,6 +238,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -256,6 +283,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -277,6 +307,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -305,6 +336,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -340,6 +377,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -361,6 +401,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -389,6 +430,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -424,6 +471,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -445,6 +495,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -473,6 +524,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -512,6 +569,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -533,6 +593,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -561,6 +622,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -596,6 +663,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -617,6 +687,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -645,6 +716,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -680,6 +757,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -701,6 +781,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -729,6 +810,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -764,6 +851,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -785,6 +875,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -813,6 +904,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -848,6 +945,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -874,6 +974,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -902,6 +1003,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -941,6 +1048,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -962,6 +1072,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -992,6 +1103,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1027,6 +1144,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1053,6 +1173,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1081,6 +1202,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1120,6 +1247,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1146,6 +1276,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1174,6 +1305,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1209,6 +1346,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1230,6 +1370,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1258,6 +1399,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1293,6 +1440,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1319,6 +1469,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1347,6 +1498,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1386,6 +1543,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1412,6 +1572,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1440,6 +1601,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1475,6 +1642,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1501,6 +1671,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1529,6 +1700,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1564,6 +1741,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1590,6 +1770,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1620,6 +1801,12 @@ Object {
     },
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1655,6 +1842,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;
@@ -1681,6 +1871,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1711,6 +1902,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1746,6 +1943,9 @@ Object {
     "version": "v8",
   },
   "uiPlugins": Array [],
+  "userStorage": Object {
+    "values": Object {},
+  },
   "version": Any<String>,
 }
 `;

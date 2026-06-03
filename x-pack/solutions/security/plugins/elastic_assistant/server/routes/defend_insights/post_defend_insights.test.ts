@@ -73,7 +73,7 @@ describe('postDefendInsightsRoute', () => {
   ): DefendInsightsPostRequestBody {
     return {
       endpointIds: [],
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       subAction: 'invokeAI',
       apiConfig: mockApiConfig,
       anonymizationFields: [],
@@ -92,7 +92,7 @@ describe('postDefendInsightsRoute', () => {
     tools.clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
     mockCurrentInsight = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock())[0];
-    mockCurrentInsight.status = DefendInsightStatus.Enum.running;
+    mockCurrentInsight.status = DefendInsightStatus.enum.running;
 
     mockUser = getDefaultUser();
     mockDataClient = getDefaultDataClient();
@@ -216,7 +216,7 @@ describe('postDefendInsightsRoute', () => {
       (isDefendInsightsPolicyResponseFailureEnabled as jest.Mock).mockReturnValueOnce(false);
       const response = await server.inject(
         postDefendInsightsRequest(
-          getDefaultRequestBody({ insightType: DefendInsightType.Enum.policy_response_failure })
+          getDefaultRequestBody({ insightType: DefendInsightType.enum.policy_response_failure })
         ),
         requestContextMock.convertContext(context)
       );
@@ -234,7 +234,7 @@ describe('postDefendInsightsRoute', () => {
       (isDefendInsightsPolicyResponseFailureEnabled as jest.Mock).mockReturnValueOnce(true);
       const response = await server.inject(
         postDefendInsightsRequest(
-          getDefaultRequestBody({ insightType: DefendInsightType.Enum.policy_response_failure })
+          getDefaultRequestBody({ insightType: DefendInsightType.enum.policy_response_failure })
         ),
         requestContextMock.convertContext(context)
       );

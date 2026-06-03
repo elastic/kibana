@@ -216,7 +216,7 @@ describe('Patch rule route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", type: Invalid literal value, expected "threshold", and 5 more'
+        'type: Invalid input: expected "eql", language: Invalid input: expected "eql", type: Invalid input: expected "query", type: Invalid input: expected "saved_query", type: Invalid input: expected "threshold", and 5 more'
       );
     });
 
@@ -242,7 +242,9 @@ describe('Patch rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('from: Failed to parse date-math expression')
+      );
     });
   });
 });

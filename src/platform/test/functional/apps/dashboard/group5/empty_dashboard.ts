@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open editor menu when editor button is clicked', async () => {
       await dashboardAddPanel.openAddPanelFlyout();
-      await testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+      await testSubjects.existOrFail('dashboardAddPanel');
     });
   });
 }

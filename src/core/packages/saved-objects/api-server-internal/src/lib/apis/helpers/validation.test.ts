@@ -87,7 +87,7 @@ describe('Saved Objects type validation helper', () => {
         kibanaVersion: defaultVersion,
       });
       const validationError = new Error(
-        '[attributes.count]: definition for this key is missing: Bad Request'
+        "[attributes.count]: Additional properties are not allowed ('count' was unexpected): Bad Request"
       );
       const data = createMockObject(typeC, { attributes: { foo: 'hi', count: 1 } });
       expect(() => helper.validateObjectForCreate(typeC, data)).toThrowError(validationError);

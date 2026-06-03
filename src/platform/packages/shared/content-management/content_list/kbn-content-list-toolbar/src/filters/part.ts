@@ -19,23 +19,53 @@ import { toolbar } from '../assembly';
  * forwarded to the underlying {@link SortRenderer}. Extend this interface
  * only with props the `resolve` callback can act on directly.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SortFilterProps {}
+export type SortFilterProps = Record<never, never>;
+
+/**
+ * Props for the {@link TagFilter} declarative component.
+ *
+ * Note: `TagFilter` is a non-rendering declarative component whose props are
+ * parsed as attributes during filter resolution. Because `EuiSearchBar`
+ * instantiates `custom_component` filters itself, attributes cannot be
+ * forwarded to the underlying {@link TagFilterRenderer}. Extend this interface
+ * only with props the `resolve` callback can act on directly.
+ */
+export type TagFilterProps = Record<never, never>;
+
+/**
+ * Props for the {@link StarredFilter} declarative component.
+ *
+ * Note: `StarredFilter` is a non-rendering declarative component whose props are
+ * parsed as attributes during filter resolution. Because `EuiSearchBar`
+ * instantiates `custom_component` filters itself, attributes cannot be
+ * forwarded to the underlying {@link StarredFilterRenderer}. Extend this interface
+ * only with props the `resolve` callback can act on directly.
+ */
+export type StarredFilterProps = Record<never, never>;
+
+/**
+ * Props for the {@link CreatedByFilter} declarative component.
+ */
+export type CreatedByFilterProps = Record<never, never>;
 
 /** Preset-to-props mapping for toolbar filters. */
 export interface FilterPresets {
   sort: SortFilterProps;
+  tags: TagFilterProps;
+  starred: StarredFilterProps;
+  createdBy: CreatedByFilterProps;
 }
 
-/**
- * Runtime context passed to filter `resolve` callbacks.
- *
- * Assembled from hooks in `useFilters` and forwarded to each
- * preset's resolver so it can decide whether to render.
- */
+/** Context passed to filter `resolve` callbacks. */
 export interface FilterContext {
   /** Whether sorting is available from the provider. */
   hasSorting: boolean;
+  /** Whether tags filtering is available from the provider. */
+  hasTags: boolean;
+  /** Whether starred filtering is available from the provider. */
+  hasStarred: boolean;
+  /** Whether created by filtering is available from the provider. */
+  hasCreatedBy: boolean;
 }
 
 /** Part factory for toolbar filters. */

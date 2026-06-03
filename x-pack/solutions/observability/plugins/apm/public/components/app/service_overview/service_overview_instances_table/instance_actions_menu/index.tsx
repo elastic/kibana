@@ -61,10 +61,10 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
   }, [metricsDataAccess]);
   const metricsIndices = metricsIndicesAsync.value?.metricIndices;
 
-  const logsLocator = getLogsLocatorFromUrlService(share.url)!;
+  const logsLocator = getLogsLocatorFromUrlService(share?.url)!;
   const assetDetailsLocator =
-    share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+    share?.url?.locators?.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+  const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
   const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
 
   if (isPending(status)) {

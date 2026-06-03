@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import { asyncMap } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -19,8 +20,9 @@ import {
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { VisualizationSavedObject } from '../../common/content_management';
-import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
+import { saveWithConfirmation } from './saved_objects_utils';
 import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
@@ -38,6 +40,7 @@ import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_uti
 import { visualizationsClient } from '../content_management';
 import type { VisualizationSavedObjectAttributes } from '../../common';
 import { urlFor } from './url_utils';
+import { getEmbeddable } from '../services';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -50,7 +53,7 @@ const getDefaults = (opts: GetVisOptions) => ({
   version: 1,
 });
 
-function mapHitSource(
+async function mapHitSource(
   visTypes: Pick<TypesStart, 'get'>,
   { attributes, id, references, updatedAt, managed }: VisualizationSavedObject
 ) {
@@ -86,18 +89,19 @@ function mapHitSource(
     }
   }
 
-  if (!typeName || !visTypes.get(typeName as string)) {
+  const visType = typeName ? await visTypes.get(typeName) : undefined;
+  if (!typeName || !visType) {
     newAttributes.error = 'Unknown visualization type';
     return newAttributes;
   }
 
-  newAttributes.type = visTypes.get(typeName as string);
+  newAttributes.type = visType;
   newAttributes.savedObjectType = 'visualization';
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
   newAttributes.editor = { editUrl: `/edit/${id}` };
-  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
+  newAttributes.readOnly = Boolean(newAttributes.type?.disableEdit);
 
   return newAttributes;
 }
@@ -159,39 +163,41 @@ export async function findListItems(
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
-  const {
-    hits: savedObjects,
-    pagination: { total },
-  } = await visualizationsClient.search(
-    {
-      text: search ? `${search}*` : undefined,
-      limit: size,
+  const embeddableService = getEmbeddable();
+
+  const { hits: savedObjects, total } = await embeddableService.getSavedObjects({
+    type: searchOption('docTypes', 'visualization'),
+    limit: size,
+    ...(search.length && { search: `${search}*` }),
+    ...(references?.length && {
       tags: {
         included: references?.map((r) => r.id),
         excluded: referencesToExclude?.map((r) => r.id),
       },
-    },
-    {
-      types: searchOption('docTypes', 'visualization'),
-      searchFields: searchOption('searchFields', 'title^3', 'description'),
-    }
-  );
+    }),
+  });
 
   return {
     total,
-    hits: savedObjects.map((savedObject: VisualizationSavedObject) => {
+    hits: await asyncMap(savedObjects, async (savedObject: SavedObjectsFindResult) => {
       const config = extensionByType[savedObject.type];
+      const { updated_at, updated_by, created_at, created_by, ...rest } = savedObject;
+      const visObject = {
+        ...rest,
+        updatedAt: updated_at,
+        createdAt: created_at,
+      } as VisualizationSavedObject;
 
       if (config) {
         return {
           // TODO: understand why this SO can take any shape based on type?
           // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
           // See test case titled 'uses type-specific toListItem function, if available'
-          ...config.toListItem(savedObject),
+          ...config.toListItem(visObject),
           references: savedObject.references,
         };
       } else {
-        return mapHitSource(visTypes, savedObject);
+        return await mapHitSource(visTypes, visObject);
       }
     }),
   };
@@ -299,12 +305,7 @@ export async function getSavedVisualization(
 export async function saveVisualization(
   savedObject: ISavedVis &
     Pick<VisSavedObject, 'displayName' | 'lastSavedTitle' | 'searchSource' | 'tags' | 'version'>,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-    copyOnSave = false,
-  }: SaveVisOptions,
+  { confirmOverwrite = false, copyOnSave = false }: SaveVisOptions,
   services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
   },
@@ -364,18 +365,6 @@ export async function saveVisualization(
   }
 
   try {
-    if (onTitleDuplicate) {
-      // Only checks dups if onTitleDuplicate is passed.
-      // The save action is done from multiple places. In some cases like the embeddable,
-      // the title dup check is done before save is called and in other places we need to check.
-      await checkForDuplicateTitle(
-        savedObject,
-        copyOnSave,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate
-      );
-    }
-
     const resp = confirmOverwrite
       ? await saveWithConfirmation(
           attributes,

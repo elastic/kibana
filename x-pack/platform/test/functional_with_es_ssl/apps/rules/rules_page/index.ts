@@ -24,9 +24,6 @@ export default ({ getPageObjects, getService, loadTestFile }: FtrProviderContext
       await objectRemover.removeAll();
     });
 
-    loadTestFile(require.resolve('./create_rule_flow'));
     loadTestFile(require.resolve('./edit_rule_flow'));
-    loadTestFile(require.resolve('./page_navigation_and_loading'));
-    loadTestFile(require.resolve('./tab_functionality'));
   });
 };

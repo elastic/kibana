@@ -90,7 +90,7 @@ export const alertProducersData: Record<AlertsTableSupportedConsumers, AlertProd
   },
   [AlertConsumers.EXAMPLE]: {
     displayName: 'Example',
-    icon: 'beaker',
+    icon: 'flask',
   },
   [AlertConsumers.DISCOVER]: {
     displayName: STACK_DISPLAY_NAME,
@@ -125,6 +125,7 @@ export const mutationKeys = {
   bulkUntrackAlertsByQuery: () => [mutationKeys.root, 'bulkUntrackAlertsByQuery'] as const,
   bulkUpdateAlertTags: () => [mutationKeys.root, 'bulkUpdateAlertTags'] as const,
   bulkUpdateWorkflowStatus: () => [mutationKeys.root, 'bulkUpdateWorkflowStatus'] as const,
+  createCsvReport: () => [mutationKeys.root, 'createCsvReport'] as const,
 };
 
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;

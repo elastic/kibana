@@ -8,6 +8,9 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
 
 export interface ActionSubItem {
   id: string;
@@ -15,6 +18,7 @@ export interface ActionSubItem {
   onClick?: () => void;
   href?: string;
   icon?: string;
+  ebt?: EbtClickAttrs;
 }
 
 export interface Action {
@@ -24,6 +28,7 @@ export interface Action {
   href?: string;
   icon?: string;
   items?: ActionSubItem[];
+  ebt?: EbtClickAttrs;
 }
 
 export interface ActionGroup {
@@ -84,9 +89,9 @@ export function ActionsContextMenu({
       }
 
       for (const action of group.actions) {
-        const hasSubItems = action.items && action.items.length > 0;
-
-        if (hasSubItems) {
+        const validSubItems =
+          action.items?.filter((subItem) => subItem.href != null || subItem.onClick != null) ?? [];
+        if (validSubItems.length > 0) {
           const panelId = subPanelId++;
 
           mainPanelItems.push({
@@ -99,34 +104,34 @@ export function ActionsContextMenu({
           subPanels.push({
             id: panelId,
             title: action.name,
-            items: action.items!.map((subItem) => ({
+            items: validSubItems.map((subItem) => ({
               name: subItem.name,
               icon: subItem.icon,
               ...(subItem.href
-                ? { href: subItem.href, target: '_self' }
+                ? { href: subItem.href, target: '_self' as const }
                 : {
                     onClick: () => {
                       subItem.onClick?.();
                       closePopover();
                     },
                   }),
+              ...(subItem.ebt ? getEbtProps(subItem.ebt) : {}),
               'data-test-subj': `${dataTestSubjPrefix}Item-${subItem.id}`,
             })),
           });
-        } else {
+        } else if (action.href != null || action.onClick != null) {
           mainPanelItems.push({
             name: action.name,
             icon: action.icon,
             ...(action.href
-              ? { href: action.href, target: '_self' }
+              ? { href: action.href, target: '_self' as const }
               : {
-                  onClick: action.onClick
-                    ? () => {
-                        action.onClick!();
-                        closePopover();
-                      }
-                    : undefined,
+                  onClick: () => {
+                    action.onClick!();
+                    closePopover();
+                  },
                 }),
+            ...(action.ebt ? getEbtProps(action.ebt) : {}),
             'data-test-subj': `${dataTestSubjPrefix}Item-${action.id}`,
           });
         }
@@ -139,6 +144,9 @@ export function ActionsContextMenu({
   return (
     <EuiPopover
       id={id}
+      aria-label={i18n.translate('xpack.apm.actionsContextMenu.ariaLabel', {
+        defaultMessage: 'Actions',
+      })}
       button={buttonWithToggle}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

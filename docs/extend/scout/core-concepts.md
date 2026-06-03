@@ -13,3 +13,4 @@ These pages explain Scout’s building blocks and how they fit together:
 - [Global setup hook](./global-setup-hook.md)
 - [Deployment tags](./deployment-tags.md)
 - [Skip tests](./skip-tests.md)
+- [Feature flags](./feature-flags.md)

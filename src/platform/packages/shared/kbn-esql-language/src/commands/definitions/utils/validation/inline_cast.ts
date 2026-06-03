@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InlineCastingType } from '../../..';
-import type { WalkerAstNode } from '../../../../ast';
-import { isLiteral, walk } from '../../../../ast';
-import type { ESQLInlineCast, ESQLMessage } from '../../../../types';
+import type { WalkerAstNode } from '@elastic/esql';
+import { isLiteral, walk } from '@elastic/esql';
+import type { ESQLInlineCast } from '@elastic/esql/types';
+import type { ESQLMessage, InlineCastingType } from '../../..';
 import type { ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
-import { getExpressionType, getMatchingSignatures } from '../expressions';
+import { getExpressionType } from '../expressions';
+import { getMatchingSignatures } from '../signatures';
 import { getFunctionDefinition, getFunctionForInlineCast } from '../functions';
 
 /**

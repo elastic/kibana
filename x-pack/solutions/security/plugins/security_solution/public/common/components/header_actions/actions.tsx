@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
@@ -17,7 +18,7 @@ import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import { getEventType } from '../../../timelines/components/timeline/body/helpers';
 import { isTimelineScope } from '../../../helpers';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
 import type { ActionProps } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -48,8 +49,10 @@ export type ActionsComponentProps = Pick<
   | 'disablePinAction'
   | 'disableTimelineAction'
   | 'ecsData'
+  | 'eventData'
   | 'eventId'
   | 'eventIdToNoteIds'
+  | 'hit'
   | 'isEventViewer'
   | 'onEventDetailsPanelOpened'
   | 'onRuleChange'
@@ -66,8 +69,10 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   disablePinAction = true,
   disableTimelineAction = false,
   ecsData,
+  eventData,
   eventId,
   eventIdToNoteIds,
+  hit,
   isEventViewer = false,
   onEventDetailsPanelOpened,
   onRuleChange,
@@ -158,7 +163,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
 
   // we hide the analyzer icon if the data is not available for the resolver
   // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
-  const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
+  const showAnalyzerIcon = useIsAnalyzerEnabled(hit);
 
   // we hide the session view icon if the session view is not available
   // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
@@ -168,6 +173,11 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
     () => sessionViewConfig !== null && isEnterprisePlus,
 
     [isEnterprisePlus, sessionViewConfig]
+  );
+
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(ecsData._index ?? ''),
+    [ecsData._index]
   );
 
   return (
@@ -180,7 +190,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="expand-event"
-                  iconType="expand"
+                  iconType="maximize"
                   onClick={onExpandEvent}
                   size="s"
                   color="text"
@@ -202,6 +212,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
             key="add-event-note"
             timelineType={timelineType}
             notesCount={documentBasedNotes.length}
+            eventData={eventData}
             eventId={eventId}
             toggleShowNotes={toggleShowNotes}
           />
@@ -227,7 +238,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={false}
+          disabled={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

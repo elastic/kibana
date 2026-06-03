@@ -23,5 +23,8 @@ export const createPublicToolContract = ({
     execute: async ({ toolId, toolParams, connectorId }) => {
       return toolsService.execute({ toolId, toolParams, connectorId });
     },
+    listWorkflows: async ({ page, limit }) => {
+      return toolsService.listWorkflows({ page, limit });
+    },
   };
 };
