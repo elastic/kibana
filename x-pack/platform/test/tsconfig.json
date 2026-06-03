@@ -179,7 +179,5 @@
     "@kbn/core-spaces-common",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
-    "@kbn/agent-builder-plugin",
-    "@kbn/agent-context-layer-plugin",
   ]
 }
