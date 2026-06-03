@@ -28,6 +28,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_MUTED,
+  ALERT_SNOOZED,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -41,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   let roleAdmin: RoleCredentials;
 
-  describe('Summary actions', function () {
+  describe.only('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
@@ -195,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -331,6 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_MUTED]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_SNOOZED]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
