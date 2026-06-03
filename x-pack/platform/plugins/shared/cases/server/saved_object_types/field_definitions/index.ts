@@ -16,15 +16,18 @@ const mappings = {
   properties: {
     fieldDefinitionId: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     name: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     definition: {
       type: 'text',
     },
     owner: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     description: {
       type: 'text',

@@ -6,28 +6,21 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 
-/**
- * Adds the isGlobal field to the case-field-definition SO.
- */
+export const fieldDefinitionSchema = schema.object({
+  fieldDefinitionId: schema.string(),
+  name: schema.string(),
+  definition: schema.string(),
+  owner: schema.string(),
+  description: schema.maybe(schema.string()),
+  isGlobal: schema.maybe(schema.boolean()),
+});
+
 export const modelVersion1: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        isGlobal: {
-          type: 'boolean',
-        },
-      },
-    },
-    {
-      type: 'data_backfill',
-      // Explicitly default to `false` (not `undefined`) so existing documents
-      // behave consistently with newly created ones — no "apply to all" without
-      // an explicit opt-in.
-      backfillFn: (doc) => ({
-        attributes: { isGlobal: doc.attributes.isGlobal ?? false },
-      }),
-    },
-  ],
+  changes: [],
+  schemas: {
+    create: fieldDefinitionSchema,
+    forwardCompatibility: fieldDefinitionSchema.extends({}, { unknowns: 'ignore' }),
+  },
 };
