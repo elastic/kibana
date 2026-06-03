@@ -128,7 +128,8 @@ function setHeaders(response: ResponseObject, headers: ResponseHeaders) {
 
 // NOTE: responseHeaders contains not a full list of response headers, but only explicitly set on a response object.
 // any headers added by hapi internally, like `content-type`, `content-length`, etc. are not present here.
-function findHeadersIntersection(
+/** @internal */
+export function findHeadersIntersection(
   responseHeaders: ResponseHeaders,
   headers: ResponseHeaders,
   log: Logger

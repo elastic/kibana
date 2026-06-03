@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/dev-utils'
+  - '@kbn/es-errors'
   - '@kbn/config'
   - '@kbn/repo-info'
   - '@kbn/hapi-mocks'

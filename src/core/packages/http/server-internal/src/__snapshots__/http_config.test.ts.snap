@@ -70,6 +70,9 @@ Object {
     },
   },
   "excludeRoutes": Array [],
+  "experimental": Object {
+    "framework": "fastify",
+  },
   "host": "localhost",
   "http2": Object {
     "allowUnsecure": false,

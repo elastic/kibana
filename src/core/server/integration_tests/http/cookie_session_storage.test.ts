@@ -22,7 +22,10 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { HttpService, createCookieSessionStorageFactory } from '@kbn/core-http-server-internal';
+import {
+  HttpService,
+  createCookieSessionStorageFactory as createHapiCookieSessionStorageFactory,
+} from '@kbn/core-http-server-internal';
 import { httpServerMock, createConfigService } from '@kbn/core-http-server-mocks';
 
 let server: HttpService;
@@ -125,7 +128,11 @@ describe('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        createRouter,
+        createCookieSessionStorageFactory,
+      } = await server.setup(setupDeps);
       const router = createRouter('');
 
       router.get(
@@ -137,12 +144,7 @@ describe('Cookie based SessionStorage', () => {
         }
       );
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions,
-        true
-      );
+      const factory = await createCookieSessionStorageFactory(cookieOptions);
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
@@ -163,7 +165,11 @@ describe('Cookie based SessionStorage', () => {
   describe('#get()', () => {
     it('reads from session storage', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        createRouter,
+        createCookieSessionStorageFactory,
+      } = await server.setup(setupDeps);
       const router = createRouter('');
 
       router.get(
@@ -179,12 +185,7 @@ describe('Cookie based SessionStorage', () => {
         }
       );
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions,
-        true
-      );
+      const factory = await createCookieSessionStorageFactory(cookieOptions);
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
@@ -203,7 +204,11 @@ describe('Cookie based SessionStorage', () => {
 
     it('returns null for empty session', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        createRouter,
+        createCookieSessionStorageFactory,
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
       router.get(
@@ -215,12 +220,7 @@ describe('Cookie based SessionStorage', () => {
         }
       );
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions,
-        true
-      );
+      const factory = await createCookieSessionStorageFactory(cookieOptions);
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
@@ -231,7 +231,11 @@ describe('Cookie based SessionStorage', () => {
 
     it('returns null for invalid session (expired) & clean cookies', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        createRouter,
+        createCookieSessionStorageFactory,
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -250,12 +254,7 @@ describe('Cookie based SessionStorage', () => {
         }
       );
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions,
-        true
-      );
+      const factory = await createCookieSessionStorageFactory(cookieOptions);
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -281,7 +280,11 @@ describe('Cookie based SessionStorage', () => {
 
     it('returns null for invalid session (incorrect path) & clean cookies accurately', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        createRouter,
+        createCookieSessionStorageFactory,
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -300,12 +303,7 @@ describe('Cookie based SessionStorage', () => {
         }
       );
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions,
-        true
-      );
+      const factory = await createCookieSessionStorageFactory(cookieOptions);
       await server.start();
 
       const response = await supertest(innerServer.listener)
@@ -341,7 +339,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = await createHapiCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions,
@@ -382,7 +380,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = await createHapiCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions,
@@ -422,7 +420,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = await createHapiCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions,
@@ -455,7 +453,7 @@ describe('Cookie based SessionStorage', () => {
 
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      const factory = await createCookieSessionStorageFactory(
+      const factory = await createHapiCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
         cookieOptions,
@@ -475,7 +473,11 @@ describe('Cookie based SessionStorage', () => {
   describe('#clear()', () => {
     it('clears session storage & remove cookies', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        createRouter,
+        createCookieSessionStorageFactory,
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -492,12 +494,7 @@ describe('Cookie based SessionStorage', () => {
         }
       );
 
-      const factory = await createCookieSessionStorageFactory(
-        logger.get(),
-        innerServer,
-        cookieOptions,
-        true
-      );
+      const factory = await createCookieSessionStorageFactory(cookieOptions);
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
@@ -521,18 +518,13 @@ describe('Cookie based SessionStorage', () => {
     describe('#SameSite', () => {
       it('throws an exception if "SameSite: None" set on not Secure connection', async () => {
         await server.preboot(prebootDeps);
-        const { server: innerServer } = await server.setup(setupDeps);
+        const { createCookieSessionStorageFactory } = await server.setup(setupDeps);
 
         await expect(
-          createCookieSessionStorageFactory(
-            logger.get(),
-            innerServer,
-            {
-              ...cookieOptions,
-              sameSite: 'None',
-            },
-            true
-          )
+          createCookieSessionStorageFactory({
+            ...cookieOptions,
+            sameSite: 'None',
+          })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"\\"SameSite: None\\" requires Secure connection"`
         );
@@ -541,7 +533,11 @@ describe('Cookie based SessionStorage', () => {
       for (const sameSite of ['Strict', 'Lax', 'None'] as const) {
         it(`sets and parses SameSite = ${sameSite} correctly`, async () => {
           await server.preboot(prebootDeps);
-          const { server: innerServer, createRouter } = await server.setup(setupDeps);
+          const {
+            server: innerServer,
+            createRouter,
+            createCookieSessionStorageFactory,
+          } = await server.setup(setupDeps);
           const router = createRouter('');
 
           router.get(
@@ -557,17 +553,12 @@ describe('Cookie based SessionStorage', () => {
             }
           );
 
-          const factory = await createCookieSessionStorageFactory(
-            logger.get(),
-            innerServer,
-            {
-              ...cookieOptions,
-              isSecure: true,
-              name: `sid-${sameSite}`,
-              sameSite,
-            },
-            true
-          );
+          const factory = await createCookieSessionStorageFactory({
+            ...cookieOptions,
+            isSecure: true,
+            name: `sid-${sameSite}`,
+            sameSite,
+          });
           await server.start();
 
           const response = await supertest(innerServer.listener).get('/').expect(200);

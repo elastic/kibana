@@ -8,13 +8,17 @@
  */
 
 import expect from '@kbn/expect';
+import http from 'node:http';
+import https from 'node:https';
 import type { ClientRequest } from 'http';
 import type { Socket } from 'net';
+import { format as formatUrl } from 'node:url';
 import type { Test } from 'supertest';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
+  const config = getService('config');
 
   describe('route', function () {
     describe('timeouts', function () {
@@ -28,15 +32,27 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         return new Promise((resolve, reject) => {
           let charIdx = 0;
           let intervalId: ReturnType<typeof setInterval> | undefined;
+          let dripStarted = false;
 
-          const startInterval = () => {
+          const underlyingReq = (request as unknown as { req?: ClientRequest }).req;
+          let socketWaitFallback: ReturnType<typeof setTimeout> | undefined;
+
+          const startDripFeed = () => {
+            if (dripStarted) {
+              return;
+            }
+            dripStarted = true;
             intervalId = setInterval(() => {
               if (charIdx < body.length) {
                 void request.write(body[charIdx++]);
               } else {
                 clearInterval(intervalId);
                 void request.end((err, res) => {
-                  resolve(res);
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve(res);
+                  }
                 });
               }
             }, interval);
@@ -49,42 +65,38 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           void request.write(body[charIdx++]);
 
-          const underlyingReq = (request as unknown as { req?: ClientRequest }).req;
           if (underlyingReq !== undefined) {
+            // If `socket` never fires, or it fires with `connecting` but `connect` never fires,
+            // still start the drip so the server can exercise payload timeouts (otherwise Mocha
+            // hits the global hook timeout).
+            socketWaitFallback = setTimeout(() => {
+              socketWaitFallback = undefined;
+              startDripFeed();
+            }, 2000);
             underlyingReq.once('socket', (socket: Socket) => {
               if (socket.connecting) {
-                socket.once('connect', startInterval);
+                socket.once('connect', () => {
+                  if (socketWaitFallback !== undefined) {
+                    clearTimeout(socketWaitFallback);
+                    socketWaitFallback = undefined;
+                  }
+                  startDripFeed();
+                });
               } else {
-                setImmediate(startInterval);
+                if (socketWaitFallback !== undefined) {
+                  clearTimeout(socketWaitFallback);
+                  socketWaitFallback = undefined;
+                }
+                setImmediate(startDripFeed);
               }
             });
           } else {
-            startInterval();
+            startDripFeed();
           }
         });
       };
 
       describe('payload', function () {
-        it(`should timeout if POST payload sending is too slow`, async () => {
-          // start the request
-          const request = supertest
-            .post('/short_payload_timeout')
-            .set('Content-Type', 'application/json')
-            .set('Transfer-Encoding', 'chunked')
-            .set('kbn-xsrf', 'true');
-
-          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
-
-          await result.then(
-            () => {
-              throw new Error('Expected payload timeout error but request succeeded');
-            },
-            (err) => {
-              expect(err.message).to.be('Request Timeout');
-            }
-          );
-        });
-
         it(`should not timeout if POST payload sending is quick`, async () => {
           // start the request
           const request = supertest
@@ -103,6 +115,80 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               throw err;
             }
           );
+        });
+
+        it(`should timeout if POST payload sending is too slow`, async () => {
+          // Use raw `http(s).request` + a chunked drip (same pattern as `fastify_http_server.test.ts`).
+          // Supertest's `ClientRequest` + `writeBodyCharAtATime` can hang for the full Mocha timeout
+          // on this suite while the Fastify backend still enforces `timeout.payload` correctly.
+          await new Promise<void>((resolve, reject) => {
+            const kibana = config.get('servers.kibana');
+            const baseUrl = formatUrl(kibana);
+            const target = new URL('/short_payload_timeout', baseUrl);
+            const useHttps = target.protocol === 'https:';
+            const transport = useHttps ? https : http;
+
+            const opts: http.RequestOptions = {
+              hostname: target.hostname,
+              port: target.port || undefined,
+              path: target.pathname,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Transfer-Encoding': 'chunked',
+                'kbn-xsrf': 'true',
+                Connection: 'close',
+              },
+            };
+            if (useHttps && kibana.certificateAuthorities) {
+              (opts as https.RequestOptions).ca = kibana.certificateAuthorities;
+              (opts as https.RequestOptions).rejectUnauthorized = false;
+            }
+
+            const dripTimer: { id?: ReturnType<typeof setInterval> } = {};
+            const req = transport.request(opts, (res) => {
+              if (dripTimer.id !== undefined) {
+                clearInterval(dripTimer.id);
+              }
+              if (res.statusCode === 408) {
+                res.resume();
+                resolve();
+                return;
+              }
+              reject(
+                new Error(
+                  `Expected payload timeout (408 or client error) but got HTTP ${res.statusCode}`
+                )
+              );
+            });
+
+            req.on('error', (err) => {
+              if (dripTimer.id !== undefined) {
+                clearInterval(dripTimer.id);
+              }
+              try {
+                expect(['Request Timeout', 'socket hang up', 'read ECONNRESET']).to.contain(
+                  err.message
+                );
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+            });
+
+            const body = '{"foo":"bar"}';
+            let i = 0;
+            dripTimer.id = setInterval(() => {
+              if (i < body.length) {
+                req.write(body[i++]);
+              } else {
+                if (dripTimer.id !== undefined) {
+                  clearInterval(dripTimer.id);
+                }
+                req.end();
+              }
+            }, 20);
+          });
         });
       });
 

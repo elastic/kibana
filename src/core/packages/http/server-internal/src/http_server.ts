@@ -73,7 +73,7 @@ import { type InternalStaticAssets, StaticAssets } from './static_assets';
  * @param path The request path
  * @param log  Logger
  */
-function startEluMeasurement<T>(
+export function startEluMeasurement<T>(
   path: string,
   log: Logger,
   eluMonitorOptions: IHttpEluMonitorConfig | undefined
@@ -167,6 +167,11 @@ export interface HttpServerSetup {
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
+  /**
+   * Fastify only: runs `fastify.ready()` so route lifecycle hooks exist before `listen()`.
+   * No-op on Hapi. Safe to call after `setup` when `registerAuth` has not run yet.
+   */
+  prepareForIncomingRequests: () => Promise<void>;
 }
 
 /** @internal */
@@ -261,6 +266,16 @@ export class HttpServer {
     const config = await firstValueFrom(config$);
     this.config = config;
 
+    if (config.experimental?.framework === 'fastify') {
+      // The Fastify backend is being introduced gradually. This branch only logs intent today,
+      // because the swap is performed in `HttpService` which selects the framework-specific
+      // implementation. Tests assert this log line as a smoke check.
+      this.log.warn(
+        '[experimental] server.experimental.framework is set to "fastify", but this `HttpServer` (Hapi) instance was started. ' +
+          'The Fastify backend is being introduced incrementally; this warning tracks paths that have not yet been migrated.'
+      );
+    }
+
     const serverOptions = getServerOptions(config);
 
     this.server = createServer(serverOptions);
@@ -345,6 +360,7 @@ export class HttpServer {
         port: config.port,
         protocol: this.server!.info.protocol,
       }),
+      prepareForIncomingRequests: async () => {},
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.

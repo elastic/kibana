@@ -1,3 +1,9 @@
+@fastify/compress
+@fastify/cors
+@fastify/multipart
+@hapi/iron
+fastify
+find-my-way
 knip
 safe-stable-stringify
 ajv-draft-04

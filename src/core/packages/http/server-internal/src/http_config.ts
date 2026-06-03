@@ -278,6 +278,25 @@ const configSchema = schema.object(
       /** In production: only allow false, default to false */
       schema.oneOf([schema.literal(false)], { defaultValue: false })
     ),
+
+    /**
+     * Experimental flags for the HTTP server.
+     *
+     * @remark These flags are not part of the public API and may be removed at any time.
+     */
+    experimental: schema.object({
+      /**
+       * Backing HTTP framework. Defaults to Hapi (the long-standing implementation).
+       *
+       * Set to 'fastify' to opt in to the in-progress Fastify backend. The Fastify backend
+       * is incomplete and is intended for the migration workstream only - do not enable in
+       * production.
+       */
+      framework: schema.oneOf([schema.literal('hapi'), schema.literal('fastify')], {
+        // defaultValue: 'hapi',
+        defaultValue: 'fastify', // TODO: remove this before merging
+      }),
+    }),
   },
   {
     validate: (rawConfig) => {
@@ -397,6 +416,7 @@ export class HttpConfig implements IHttpConfig {
   public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
+  public experimental: { framework: 'hapi' | 'fastify' };
 
   /**
    * @internal
@@ -453,6 +473,7 @@ export class HttpConfig implements IHttpConfig {
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
     this.oas = rawHttpConfig.oas;
+    this.experimental = rawHttpConfig.experimental;
   }
 }
 

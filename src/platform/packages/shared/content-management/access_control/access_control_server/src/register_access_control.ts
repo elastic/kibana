@@ -11,6 +11,18 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { schema } from '@kbn/config-schema';
 import type { CheckGlobalAccessControlPrivilegeDependencies } from './types';
 
+/**
+ * When Elasticsearch runs with `xpack.security.enabled=false`, the `_has_privileges`
+ * API is not registered and the client throws (see monitoring plugin checks). Treat as
+ * "cannot evaluate privileges" instead of failing the request.
+ */
+function isElasticsearchSecurityDisabledHasPrivilegesError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes('no handler found for uri [/_security/user/_has_privileges]')
+  );
+}
+
 export const registerAccessControl = async ({
   http,
   isAccessControlEnabled,
@@ -69,15 +81,26 @@ export const registerAccessControl = async ({
         kibana: authorization.actions.savedObject.get(contentTypeId, 'manage_access_control'),
       };
 
-      const { hasAllRequested } = await authorization
-        .checkPrivilegesWithRequest(request)
-        .globally(privileges);
+      try {
+        const { hasAllRequested } = await authorization
+          .checkPrivilegesWithRequest(request)
+          .globally(privileges);
 
-      return response.ok({
-        body: {
-          isGloballyAuthorized: hasAllRequested,
-        },
-      });
+        return response.ok({
+          body: {
+            isGloballyAuthorized: hasAllRequested,
+          },
+        });
+      } catch (error) {
+        if (isElasticsearchSecurityDisabledHasPrivilegesError(error)) {
+          return response.ok({
+            body: {
+              isGloballyAuthorized: false,
+            },
+          });
+        }
+        throw error;
+      }
     }
   );
 

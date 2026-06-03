@@ -15,7 +15,7 @@ import {
 } from './translate_timestamp';
 import { loadData } from './load_data';
 
-export const insertDataIntoIndex = ({
+export const insertDataIntoIndex = async ({
   dataIndexConfig,
   logger,
   esClient,
@@ -27,7 +27,7 @@ export const insertDataIntoIndex = ({
   nowReference: string;
   esClient: IScopedClusterClient;
   logger: Logger;
-}) => {
+}): Promise<number> => {
   const updateTimestamps = (doc: any) => {
     dataIndexConfig.timeFields
       .filter((timeFieldName: string) => doc[timeFieldName])
@@ -71,5 +71,7 @@ export const insertDataIntoIndex = ({
       );
     }
   };
-  return loadData(dataIndexConfig.dataPath, bulkInsert); // this returns a Promise
+  const count = await loadData(dataIndexConfig.dataPath, bulkInsert);
+  await esClient.asCurrentUser.indices.refresh({ index });
+  return count;
 };

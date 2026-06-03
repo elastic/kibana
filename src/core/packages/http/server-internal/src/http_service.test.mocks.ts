@@ -8,6 +8,7 @@
  */
 
 export const mockHttpServer = jest.fn();
+export const mockFastifyHttpServer = jest.fn();
 
 jest.mock('./http_server', () => {
   const realHttpServer = jest.requireActual('./http_server');
@@ -15,6 +16,15 @@ jest.mock('./http_server', () => {
   return {
     ...realHttpServer,
     HttpServer: mockHttpServer,
+  };
+});
+
+jest.mock('./fastify_http_server', () => {
+  const realFastifyHttpServer = jest.requireActual('./fastify_http_server');
+
+  return {
+    ...realFastifyHttpServer,
+    FastifyHttpServer: mockFastifyHttpServer,
   };
 });
 

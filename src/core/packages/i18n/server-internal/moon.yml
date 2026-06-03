@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/repo-packages'
   - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-http-common'
   - '@kbn/core-http-router-server-internal'
 tags:
   - shared-server

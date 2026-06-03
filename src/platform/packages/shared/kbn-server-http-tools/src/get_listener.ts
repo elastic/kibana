@@ -43,6 +43,15 @@ const configureHttp1Listener = (
         keepAliveTimeout: config.keepaliveTimeout,
       });
 
+  // Node 18+ defaults `http.Server.requestTimeout` to 300s; large multipart uploads (e.g.
+  // saved_objects `_import`) can legitimately exceed that while the body streams in.
+  // Align with Kibana's configured socket timeout so Fastify and Hapi share the same cap.
+  listener.requestTimeout = config.socketTimeout;
+  // Keep headers timeout in line with `requestTimeout`. Node adjusts these relative to each
+  // other; leaving the default ~60s headers window while `requestTimeout` is 10m can cap the
+  // effective full-request window and abort slow streamed uploads (API integration `_import`).
+  listener.headersTimeout = config.socketTimeout;
+
   listener.setTimeout(config.socketTimeout);
   listener.on('timeout', (socket) => {
     socket.destroy();

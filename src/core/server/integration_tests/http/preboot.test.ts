@@ -92,7 +92,11 @@ describe('Preboot HTTP server', () => {
       );
     });
 
-    const { createRouter, server: innerStandardServer } = await server.setup(setupDeps);
+    const {
+      createRouter,
+      server: innerStandardServer,
+      prepareForIncomingRequests,
+    } = await server.setup(setupDeps);
     const standardRouter = createRouter('');
     standardRouter.get(
       {
@@ -123,7 +127,9 @@ describe('Preboot HTTP server', () => {
       .post('/standard-post')
       .expect(503, 'Kibana server is not ready yet');
 
-    // Standard HTTP server isn't functional yet.
+    // Standard HTTP server isn't listening yet; seal Fastify so lifecycle hooks exist, then
+    // confirm routes are not registered until `start()`.
+    await prepareForIncomingRequests();
     await supertest(innerStandardServer.listener)
       .get('/standard-get')
       .expect(404, { statusCode: 404, error: 'Not Found', message: 'Not Found' });

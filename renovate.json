@@ -840,12 +840,27 @@
         "@hapi/cookie",
         "@hapi/h2o2",
         "@hapi/hapi",
-        "@hapi/hoek",
         "@hapi/inert",
+        "@hapi/iron",
         "@hapi/wreck",
         "brok",
         "joi",
         "@types/hapi__cookie"
+      ],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Core"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Fastify ecosystem",
+      "matchDepNames": [
+        "fastify",
+        "find-my-way",
+        "@fastify/compress",
+        "@fastify/cors",
+        "@fastify/multipart"
       ],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],

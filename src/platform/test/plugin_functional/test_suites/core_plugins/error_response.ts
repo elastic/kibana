@@ -9,7 +9,21 @@
 
 import expect from '@kbn/expect';
 import '@kbn/core-provider-plugin/types';
+import type { Response } from 'supertest';
 import type { PluginFunctionalProviderContext } from '../../services';
+
+function getWireUtf8Body(res: Response): string {
+  if (typeof res.text === 'string' && res.text.length > 0) {
+    return res.text;
+  }
+  if (Buffer.isBuffer(res.body)) {
+    return res.body.toString('utf8');
+  }
+  if (typeof res.body === 'string') {
+    return res.body;
+  }
+  return res.body?.toString?.() ?? '';
+}
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
@@ -21,8 +35,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .get('/api/core_http/error_stream')
         .expect(501)
         .then((response) => {
-          const res = response.body.toString();
-          expect(res).to.eql('error stream');
+          // `supertest` does not always populate `response.text` for buffered/binary bodies; use
+          // `getWireUtf8Body` so stream + buffer error payloads are asserted consistently.
+          expect(getWireUtf8Body(response)).to.eql('error stream');
         });
     });
 
@@ -31,8 +46,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .get('/api/core_http/error_buffer')
         .expect(501)
         .then((response) => {
-          const res = response.body.toString();
-          expect(res).to.eql('error buffer');
+          expect(getWireUtf8Body(response)).to.eql('error buffer');
         });
     });
   });

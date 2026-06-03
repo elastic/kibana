@@ -10,7 +10,7 @@
 import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { inspect } from 'util';
-import type { Request, RouteOptions } from '@hapi/hapi';
+import type { Request, RouteOptions, RouteOptionsPayload } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs';
 import { isNil, omitBy } from 'lodash';
@@ -51,6 +51,12 @@ patchRequest();
 
 const requestSymbol = Symbol('request');
 
+/**
+ * Resolved underlying HTTP framework request (Hapi until migrated to Fastify).
+ * @internal
+ */
+export type FrameworkRawRequest = Request | FakeRawRequest;
+
 const isRouteSecurityGetter = (
   security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
 ): security is RouteSecurityGetter => {
@@ -83,16 +89,17 @@ export class CoreKibanaRequest<
       | undefined = undefined,
     withoutSecretHeaders: boolean = true
   ) {
+    const fw = req as FrameworkRawRequest;
     let requestParts: { params: P; query: Q; body: B };
-    if (routeSchemas === undefined || isFakeRawRequest(req)) {
+    if (routeSchemas === undefined || isFakeRawRequest(fw)) {
       requestParts = { query: {} as Q, params: {} as P, body: {} as B };
     } else {
       const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-      const rawParts = sanitizeRequest(req);
+      const rawParts = sanitizeRequest(fw);
       requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
     }
     return new CoreKibanaRequest(
-      req,
+      fw,
       requestParts.params,
       requestParts.query,
       requestParts.body,
@@ -158,10 +165,10 @@ export class CoreKibanaRequest<
   public readonly spaceId: string;
 
   /** @internal */
-  protected readonly [requestSymbol]!: Request;
+  protected readonly [requestSymbol]!: FrameworkRawRequest;
 
   constructor(
-    request: RawRequest,
+    request: FrameworkRawRequest,
     public readonly params: Params,
     public readonly query: Query,
     public readonly body: Body,
@@ -243,8 +250,8 @@ export class CoreKibanaRequest<
    * TODO remove this when https://github.com/hapijs/hapi/issues/4560 is addressed
    * @param request the request to 'decorate'
    */
-  injectHostInfo(request: RawRequest) {
-    const r = request as RawRequest & { info: Record<string, any> };
+  injectHostInfo(request: FrameworkRawRequest) {
+    const r = request as FrameworkRawRequest & { info: Record<string, any> };
     if (typeof r.info === 'object' && !r.info.host && r.headers[':authority']) {
       r.info.host = r.headers[':authority'];
     }
@@ -275,7 +282,7 @@ export class CoreKibanaRequest<
     return this.toJSON();
   }
 
-  private getEvents(request: RawRequest): KibanaRequestEvents {
+  private getEvents(request: FrameworkRawRequest): KibanaRequestEvents {
     if (isFakeRawRequest(request)) {
       return {
         aborted$: NEVER,
@@ -293,15 +300,10 @@ export class CoreKibanaRequest<
     } as const;
   }
 
-  private getRouteInfo(request: RawRequest): KibanaRequestRoute<Method> {
+  private getRouteInfo(request: FrameworkRawRequest): KibanaRequestRoute<Method> {
     const method = (request.method as Method) ?? 'get';
-    const {
-      parse,
-      maxBytes,
-      allow,
-      output,
-      timeout: payloadTimeout,
-    } = request.route?.settings?.payload || {};
+    const payload = (request.route?.settings?.payload as RouteOptionsPayload | undefined) ?? {};
+    const { parse, maxBytes, allow, output, timeout: payloadTimeout } = payload;
 
     // the socket is undefined when using @hapi/shot, or when a "fake request" is used
     let socketTimeout: undefined | number;
@@ -353,7 +355,7 @@ export class CoreKibanaRequest<
     };
   }
 
-  private getSecurity(request: RawRequest): RouteSecurity | undefined {
+  private getSecurity(request: FrameworkRawRequest): RouteSecurity | undefined {
     const securityConfig = ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.security;
 
@@ -361,13 +363,13 @@ export class CoreKibanaRequest<
   }
 
   /** set route access to internal if not declared */
-  private getAccess(request: RawRequest): 'internal' | 'public' {
+  private getAccess(request: FrameworkRawRequest): 'internal' | 'public' {
     return (
       ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ?? 'internal'
     );
   }
 
-  private getAuthRequired(request: RawRequest): boolean | 'optional' {
+  private getAuthRequired(request: FrameworkRawRequest): boolean | 'optional' {
     if (isFakeRawRequest(request)) {
       return true;
     }
@@ -388,7 +390,8 @@ export class CoreKibanaRequest<
       return true;
     }
 
-    // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
+    // According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
+    // @ts-expect-error Hapi allows auth on route settings to be boolean false
     if (authOptions === false) {
       return false;
     }
@@ -399,7 +402,7 @@ export class CoreKibanaRequest<
     );
   }
 
-  private isExcludedFromRateLimiter(request: RawRequest): boolean | undefined {
+  private isExcludedFromRateLimiter(request: FrameworkRawRequest): boolean | undefined {
     return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.excludeFromRateLimiter;
   }
@@ -409,8 +412,12 @@ export class CoreKibanaRequest<
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | Request) =>
-  isKibanaRequest(request) ? request[requestSymbol] : (request as Request);
+/**
+ * Returns the underlying framework request. Typed as Hapi `Request` for access to `.raw` etc.;
+ * when forged from a {@link FakeRawRequest}, callers must not assume Hapi-only fields exist.
+ */
+export const ensureRawRequest = (request: KibanaRequest | Request): Request =>
+  isKibanaRequest(request) ? (request[requestSymbol] as Request) : (request as Request);
 
 /**
  * Checks if an incoming request is a {@link KibanaRequest}
@@ -433,7 +440,7 @@ function isRealRawRequest(request: any): request is Request {
   }
 }
 
-function isFakeRawRequest(request: RawRequest): request is FakeRawRequest {
+function isFakeRawRequest(request: FrameworkRawRequest): request is FakeRawRequest {
   return !isRealRawRequest(request);
 }
 
@@ -457,10 +464,19 @@ function isCompleted(request: Request) {
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
 
+  // Hapi leaves GET (and other non-body) payloads as `null` when unset; Fastify often leaves
+  // them `undefined`. After Subtext parses a POST body, an empty `application/json` payload is
+  // `null` (including when the client omits Content-Type and Hapi applies defaultContentType).
+  // Routes with `payload.parse: false` keep the raw buffer/stream.
+  let body: unknown = req.payload;
+  if (body === undefined) {
+    body = null;
+  }
+
   return {
     query,
     params: req.params,
-    body: req.payload,
+    body,
   };
 }
 

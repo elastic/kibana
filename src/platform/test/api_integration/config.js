@@ -41,6 +41,10 @@ export default async function ({ readConfigFile }) {
         '--usageCollection.usageCounters.bufferDuration=0',
         '--coreApp.allowDynamicConfigOverrides=true',
         '--server.oas.enabled=true',
+        // Large saved_objects import/export cases stream multi‑MB bodies longer than the default
+        // 120s socket window (especially with the Fastify backend).
+        '--server.socketTimeout=600000',
+        '--server.payloadTimeout=600000',
       ],
     },
     indexRefreshInterval: '1s',

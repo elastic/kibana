@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Duration } from 'moment';
 import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
@@ -45,6 +46,8 @@ import { permissionsPolicyConfig } from './permissions_policy';
 import type { HttpConfigType } from './http_config';
 import { HttpConfig, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
+import { FastifyHttpServer } from './fastify_http_server';
+import { toPlainQuery } from './fastify/fastify_to_hapi_request';
 import { HttpsRedirectServer } from './https_redirect_server';
 import type {
   InternalHttpServicePreboot,
@@ -67,14 +70,22 @@ export interface SetupDeps {
   userActivity: InternalUserActivityServiceSetup;
 }
 
+/**
+ * Duck-typed surface common to {@link HttpServer} (Hapi) and {@link FastifyHttpServer}.
+ * Used so {@link HttpService} can hold either implementation behind one reference.
+ *
+ * @internal
+ */
+type IHttpServerImpl = HttpServer | FastifyHttpServer;
+
 /** @internal */
 export class HttpService
   implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart>
 {
   private static readonly generateOasSemaphore = new Semaphore(1);
-  private readonly prebootServer: HttpServer;
+  private prebootServer!: IHttpServerImpl;
   private isPrebootServerStopped = false;
-  private readonly httpServer: HttpServer;
+  private httpServer!: IHttpServerImpl;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
@@ -102,8 +113,12 @@ export class HttpService
       )
     );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
-    this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
-    this.httpServer = new HttpServer(coreContext, 'Kibana', shutdownTimeout$);
+    // Server implementations are selected lazily based on the `experimental.framework` flag.
+    // We default to Hapi here so any code path that touches `httpServer` before `setup()`
+    // (e.g. tests) still gets a usable instance; the real choice is applied in
+    // `preboot()`/`setup()` once the config is available.
+    this.prebootServer = createHttpServerImpl('hapi', coreContext, 'Preboot', shutdownTimeout$);
+    this.httpServer = createHttpServerImpl('hapi', coreContext, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -111,6 +126,21 @@ export class HttpService
     this.log.debug('setting up preboot server');
 
     const config = await firstValueFrom(this.config$);
+
+    // Apply the experimental framework selection now that config is available.
+    // The constructor primes both servers with the Hapi default, so we only swap if the
+    // operator opted into a different framework.
+    if (config.experimental.framework !== 'hapi') {
+      this.prebootServer = createHttpServerImpl(
+        config.experimental.framework,
+        this.coreContext,
+        'Preboot',
+        this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout))
+      );
+      this.log.debug(
+        `[experimental] server.experimental.framework: '${config.experimental.framework}' is enabled. The Fastify backend is being introduced incrementally - do not use in production.`
+      );
+    }
 
     const prebootSetup = await this.prebootServer.setup({
       config$: this.config$,
@@ -180,6 +210,20 @@ export class HttpService
 
   public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
+
+    const config = await firstValueFrom(this.config$);
+
+    // Apply the experimental framework selection for the main HTTP server. As in `preboot`,
+    // the constructor primes the server with Hapi so we only swap when explicitly opted in.
+    if (config.experimental.framework !== 'hapi') {
+      this.httpServer = createHttpServerImpl(
+        config.experimental.framework,
+        this.coreContext,
+        'Kibana',
+        this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout))
+      );
+    }
+
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -189,8 +233,6 @@ export class HttpService
         );
       }
     });
-
-    const config = await firstValueFrom(this.config$);
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
@@ -322,7 +364,7 @@ export class HttpService
         let filters: GenerateOpenApiDocumentOptionsFilters;
         let query: TypeOf<typeof querySchema>;
         try {
-          query = querySchema.validate(req.query);
+          query = querySchema.validate(toPlainQuery((req as { query?: unknown }).query));
           filters = {
             ...query,
             excludePathsMatching:
@@ -397,4 +439,25 @@ function getVersionedRouterOptions(config: HttpConfig): RouterOptions['versioned
     useVersionResolutionStrategyForInternalPaths:
       config.versioned.useVersionResolutionStrategyForInternalPaths,
   };
+}
+
+/**
+ * Selects an HTTP server implementation based on the experimental framework flag.
+ *
+ * - `'hapi'` (default): {@link HttpServer}, the long-standing Hapi-based implementation.
+ * - `'fastify'`: {@link FastifyHttpServer}, the in-progress Fastify-based replacement
+ *   (currently a stub that throws on `setup()`).
+ *
+ * @internal
+ */
+function createHttpServerImpl(
+  framework: 'hapi' | 'fastify',
+  coreContext: CoreContext,
+  name: string,
+  shutdownTimeout$: Observable<Duration>
+): IHttpServerImpl {
+  if (framework === 'fastify') {
+    return new FastifyHttpServer(coreContext, name, shutdownTimeout$);
+  }
+  return new HttpServer(coreContext, name, shutdownTimeout$);
 }

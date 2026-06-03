@@ -141,6 +141,7 @@ describe('validateHapiRequest', () => {
     });
     expect(ok).toBeUndefined();
     expect(error?.status).toEqual(400);
+    expect({ status: error?.status, body: error?.payload }).toMatchSnapshot();
     expect(error?.payload).toMatch(/expected value to equal/);
     expect(log.error).toHaveBeenCalledTimes(1);
     expect(log.error).toHaveBeenCalledWith('400 Bad Request', {

@@ -1082,21 +1082,24 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       : {}),
   });
 
-  const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
-    async () => {
-      if (!options.ssl) {
-        return;
-      }
-
-      await ensureSAMLRoleMapping(client);
-
-      log.success(
-        `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
-          MOCK_IDP_REALM_NAME
-        )} realm`
-      );
+  const readyPromise = waitUntilClusterReady({
+    client,
+    expectedStatus: 'green',
+    log,
+    readyTimeout: options.readyTimeout ?? 300_000,
+  }).then(async () => {
+    if (!options.ssl) {
+      return;
     }
-  );
+
+    await ensureSAMLRoleMapping(client);
+
+    log.success(
+      `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
+        MOCK_IDP_REALM_NAME
+      )} realm`
+    );
+  });
 
   if (options.waitForReady) {
     log.info(`[runServerlessCluster] Waiting for ES cluster to be ready (${elapsed()})...`);
@@ -1105,7 +1108,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
       // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
       log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
-      await waitForSecurityIndex({ client, log });
+      await waitForSecurityIndex({ client, log, readyTimeout: options.readyTimeout ?? 300_000 });
       log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
     }
   }

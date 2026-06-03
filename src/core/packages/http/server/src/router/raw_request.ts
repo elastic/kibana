@@ -8,9 +8,17 @@
  */
 
 import type { URL } from 'url';
-import type { Request, RouteOptionsPayload } from '@hapi/hapi';
 import type { KibanaRouteOptions } from './request';
 import type { Headers } from './headers';
+import type { RouteConfigOptionsBody } from './route';
+
+/**
+ * Opaque placeholder for the HTTP framework's native request object.
+ * The concrete type is an implementation detail; do not access it from plugins —
+ * use {@link KibanaRequest} in route handlers.
+ * @public
+ */
+export type OpaqueRawRequest = object;
 
 /**
  * Represents a fake raw request.
@@ -31,9 +39,14 @@ export interface FakeRawRequest {
     settings?: {
       tags?: string[];
       app?: KibanaRouteOptions;
-      payload?: RouteOptionsPayload;
+      payload?: RouteConfigOptionsBody;
     };
   };
 }
 
-export type RawRequest = Request | FakeRawRequest;
+/**
+ * The underlying request passed to the HTTP server framework, or a forged
+ * {@link FakeRawRequest} for tests and background jobs.
+ * @public
+ */
+export type RawRequest = FakeRawRequest | OpaqueRawRequest;

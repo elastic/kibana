@@ -7,15 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import type Boom from '@hapi/boom';
 import type { VersionedRouter } from '../versioning';
+import type { RawRequest } from './raw_request';
 import type { RouteAccess, RouteConfig, RouteDeprecationInfo, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfigOptions } from './route';
 import type { RouteValidator } from './route_validator';
 import type { InternalRouteSecurity } from './request';
+
+/**
+ * Response object returned to the HTTP framework (implementation detail).
+ * @public
+ */
+export type HttpFrameworkResponse = unknown;
+
+/**
+ * Toolkit used to build responses in the HTTP framework (implementation detail).
+ * @public
+ */
+export type HttpFrameworkResponseToolkit = unknown;
 
 /**
  * Route handler common definition
@@ -136,9 +147,9 @@ export interface RouterRoute {
     | RouteValidator<unknown, unknown, unknown>
     | false;
   handler: (
-    req: Request,
-    responseToolkit: ResponseToolkit
-  ) => Promise<ResponseObject | Boom.Boom<any>>;
+    req: RawRequest,
+    responseToolkit: HttpFrameworkResponseToolkit
+  ) => Promise<HttpFrameworkResponse>;
   isVersioned: boolean;
 }
 

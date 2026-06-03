@@ -104,6 +104,13 @@ export const registerCreateRoute = (
             });
           }
         }
+        if (
+          error instanceof Error &&
+          error.message.startsWith('Invalid [slug') &&
+          error.message.endsWith('].')
+        ) {
+          return res.badRequest({ body: error.message });
+        }
         throw error;
       }
     })

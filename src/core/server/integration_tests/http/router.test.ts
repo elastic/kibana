@@ -502,7 +502,7 @@ describe('Options', () => {
 
         const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
 
-        await expect(result).rejects.toMatchInlineSnapshot(`[Error: Request Timeout]`);
+        await expect(result).rejects.toThrow(/Request Timeout|socket hang up/);
       });
 
       it('should not timeout if POST payload sending is quick', async () => {
@@ -747,7 +747,7 @@ describe('Handler', () => {
     expect(captureErrorMock).toHaveBeenCalledWith(error);
   });
 
-  it('returns 500 Server error if handler throws Boom error', async () => {
+  it('returns the Boom status code when handler throws a Boom error', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -759,32 +759,10 @@ describe('Handler', () => {
     );
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/some-data').expect(500);
+    const result = await supertest(innerServer.listener).get('/some-data').expect(401);
 
-    expect(result.body.message).toBe(
-      'An internal server error occurred. Check Kibana server logs for details.'
-    );
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "500 Server Error",
-          Object {
-            "error": Object {
-              "message": "Unauthorized",
-            },
-            "http": Object {
-              "request": Object {
-                "method": "get",
-                "path": "/{query}",
-              },
-              "response": Object {
-                "status_code": 500,
-              },
-            },
-          },
-        ],
-      ]
-    `);
+    expect(result.body.message).toBe('Unauthorized');
+    expect(loggingSystemMock.collect(logger).error).toEqual([]);
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
   });
 

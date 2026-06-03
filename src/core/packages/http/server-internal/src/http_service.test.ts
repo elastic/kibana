@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockHttpServer } from './http_service.test.mocks';
+import { mockFastifyHttpServer, mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
@@ -38,7 +38,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
     {
       getConfig$: () =>
         new BehaviorSubject({
-          server: value,
+          server: { experimental: { framework: 'hapi' }, ...value },
         }),
     },
     env,
@@ -500,4 +500,59 @@ test('passes versioned config to router', async () => {
       },
     })
   );
+});
+
+describe('experimental.framework', () => {
+  test('selects HttpServer (Hapi) by default and never instantiates FastifyHttpServer', async () => {
+    const configService = createConfigService();
+
+    mockHttpServer.mockImplementation(() => ({
+      isListening: () => false,
+      setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+      start: jest.fn(),
+      stop: jest.fn(),
+    }));
+
+    const service = new HttpService({ coreId, configService, env, logger });
+    await service.preboot(prebootDeps);
+    await service.setup(setupDeps);
+    await service.stop();
+
+    expect(mockHttpServer).toHaveBeenCalled();
+    expect(mockFastifyHttpServer).not.toHaveBeenCalled();
+  });
+
+  test('selects FastifyHttpServer when experimental.framework is set to "fastify"', async () => {
+    const configService = createConfigService({
+      experimental: { framework: 'fastify' },
+    });
+
+    // The constructor still creates the default Hapi instances; preboot/setup swap them.
+    mockHttpServer.mockImplementation(() => ({
+      isListening: () => false,
+      setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+      start: jest.fn(),
+      stop: jest.fn(),
+    }));
+    const fastifyInstance = {
+      isListening: () => false,
+      setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+      start: jest.fn(),
+      stop: jest.fn(),
+    };
+    mockFastifyHttpServer.mockImplementation(() => fastifyInstance);
+
+    const service = new HttpService({ coreId, configService, env, logger });
+    await service.preboot(prebootDeps);
+    await service.setup(setupDeps);
+    await service.stop();
+
+    // One Fastify instance per HTTP server (preboot + main).
+    expect(mockFastifyHttpServer).toHaveBeenCalledTimes(2);
+    expect(fastifyInstance.setup).toHaveBeenCalled();
+
+    // The opt-in is logged for observability.
+    const debugLogs = loggingSystemMock.collect(logger).debug.flat();
+    expect(debugLogs.some((line) => /experimental/i.test(String(line)))).toBe(true);
+  });
 });

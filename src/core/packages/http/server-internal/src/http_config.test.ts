@@ -770,6 +770,33 @@ describe('prototypeHardening', () => {
   });
 });
 
+describe('experimental.framework', () => {
+  it('defaults to "fastify" while the migration is in progress', () => {
+    expect(config.schema.validate({}).experimental.framework).toBe('fastify');
+  });
+
+  it('accepts "hapi" as an opt-in for the long-standing implementation', () => {
+    expect(
+      config.schema.validate({ experimental: { framework: 'hapi' } }).experimental.framework
+    ).toBe('hapi');
+  });
+
+  it('accepts "fastify" as an opt-in for the in-progress migration', () => {
+    expect(
+      config.schema.validate({ experimental: { framework: 'fastify' } }).experimental.framework
+    ).toBe('fastify');
+  });
+
+  it('rejects unknown framework values', () => {
+    expect(() => config.schema.validate({ experimental: { framework: 'express' } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[experimental.framework]: types that failed validation:
+      - [experimental.framework.0]: expected value to equal [hapi]
+      - [experimental.framework.1]: expected value to equal [fastify]"
+    `);
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;

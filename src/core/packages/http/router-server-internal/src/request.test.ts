@@ -200,6 +200,51 @@ describe('CoreKibanaRequest', () => {
           })
         ).not.toThrow();
       });
+      it('maps an undefined payload to null for nullable body schemas (Hapi parity)', () => {
+        const request = hapiMocks.createRequest({ payload: undefined });
+        const kibanaRequest = CoreKibanaRequest.from(request, {
+          body: schema.nullable(
+            schema.object({ signature: schema.string(), timestamp: schema.number() })
+          ),
+        });
+        expect(kibanaRequest.body).toBeNull();
+      });
+      it('does not map undefined to {} for unparsed stream routes (avoids stream validation on plain objects)', () => {
+        const request = hapiMocks.createRequest({
+          method: 'put',
+          payload: undefined,
+          route: {
+            settings: {
+              payload: { output: 'stream', parse: false },
+            },
+          },
+        });
+        expect(() => CoreKibanaRequest.from(request, { body: schema.stream() })).toThrow(
+          /expected value of type \[Stream\] but got \[null\]/
+        );
+      });
+      it('rejects a null POST payload for schema.object routes (Hapi Subtext empty JSON)', () => {
+        const request = hapiMocks.createRequest({
+          method: 'post',
+          payload: null as any,
+        });
+        expect(() =>
+          CoreKibanaRequest.from(request, {
+            body: schema.object({ test: schema.maybe(schema.string()) }),
+          })
+        ).toThrow(/expected a plain object value, but found \[null\] instead/);
+      });
+      it('maps an undefined POST payload to null (Fastify unset body)', () => {
+        const request = hapiMocks.createRequest({
+          method: 'post',
+          payload: undefined,
+        });
+        expect(() =>
+          CoreKibanaRequest.from(request, {
+            body: schema.object({ ids: schema.maybe(schema.arrayOf(schema.string())) }),
+          })
+        ).toThrow(/expected a plain object value, but found \[null\] instead/);
+      });
     });
 
     describe('route.httpVersion property', () => {

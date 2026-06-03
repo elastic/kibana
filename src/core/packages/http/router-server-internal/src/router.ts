@@ -54,6 +54,28 @@ export type ContextEnhancer<
 export type InternalRouteHandler = (request: Request) => Promise<IKibanaResponse>;
 
 /**
+ * Symbol attached to a {@link RouterRoute} so framework backends that don't speak Hapi
+ * (e.g. the Fastify backend) can invoke the internal `KibanaResponse`-producing handler
+ * directly without going through {@link HapiResponseAdapter}.
+ *
+ * @internal
+ */
+export const INTERNAL_ROUTE_HANDLER = Symbol('kibana.internalRouteHandler');
+
+/**
+ * Returns the internal `KibanaResponse`-producing handler attached to a {@link RouterRoute}
+ * by {@link Router.registerRoute}, if present. Used by non-Hapi backends to drive route
+ * execution without the public Hapi-shaped handler signature.
+ *
+ * @internal
+ */
+export function getInternalRouteHandler(
+  route: RouterRoute | (RouterRoute & { [INTERNAL_ROUTE_HANDLER]?: InternalRouteHandler })
+): InternalRouteHandler | undefined {
+  return (route as { [INTERNAL_ROUTE_HANDLER]?: InternalRouteHandler })[INTERNAL_ROUTE_HANDLER];
+}
+
+/**
  * We have at least two implementations of InternalRouterRoutes:
  * (1) Router route
  * (2) Versioned router route {@link CoreVersionedRoute}
@@ -183,14 +205,28 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
   /** @internal */
   public registerRoute(route: InternalRouterRoute) {
-    this.routes.push({
+    const internalHandler: InternalRouteHandler = route.handler;
+    const wrapped = {
       ...route,
-      handler: async (request, responseToolkit) => {
+      handler: (async (request, responseToolkit) => {
         return withActiveSpan('route handler', () =>
-          this.handle({ request, responseToolkit, handler: route.handler })
+          this.handle({
+            request: request as Request,
+            responseToolkit: responseToolkit as ResponseToolkit,
+            handler: internalHandler,
+          })
         );
-      },
+      }) as RouterRoute['handler'],
+    } as RouterRoute & { [INTERNAL_ROUTE_HANDLER]: InternalRouteHandler };
+    // Side-channel: expose the internal `KibanaResponse`-producing handler so framework
+    // backends that don't speak Hapi (e.g. `FastifyHttpServer`) can invoke it directly.
+    Object.defineProperty(wrapped, INTERNAL_ROUTE_HANDLER, {
+      value: internalHandler,
+      enumerable: false,
+      configurable: false,
+      writable: false,
     });
+    this.routes.push(wrapped);
   }
 
   private async handle({

@@ -104,22 +104,30 @@ export const fileResponseFactory = {
 
     const responseContentType =
       fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
-    const responseContentLength =
+    const computedContentLength =
       typeof fileContentSize === 'number'
         ? fileContentSize
         : Buffer.isBuffer(responseBody)
         ? responseBody.length
-        : '';
+        : undefined;
+
+    const fileHeaders: Record<string, string> = {
+      'content-type': `${responseContentType}`,
+      'content-disposition': `attachment; filename=${reponseFilename}`,
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+      'x-content-type-options': 'nosniff',
+    };
+    // Omit unknown length: an empty `content-length` breaks chunked streaming under Fastify
+    // (e.g. files plugin `res.file` with a Readable), which leaves `<img>` requests without load/error.
+    if (typeof computedContentLength === 'number' && !Number.isNaN(computedContentLength)) {
+      fileHeaders['content-length'] = String(computedContentLength);
+    }
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,
       headers: {
         ...headers,
-        'content-type': `${responseContentType}`,
-        'content-length': `${responseContentLength}`,
-        'content-disposition': `attachment; filename=${reponseFilename}`,
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
-        'x-content-type-options': 'nosniff',
+        ...fileHeaders,
       },
     });
   },

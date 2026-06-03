@@ -53,7 +53,8 @@ export interface InternalHttpServicePreboot
 
 /** @internal */
 export interface InternalHttpServiceSetup
-  extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext' | 'staticAssets'> {
+  extends Omit<HttpServiceSetup, 'createRouter' | 'registerRouteHandlerContext' | 'staticAssets'>,
+    Pick<HttpServerSetup, 'prepareForIncomingRequests'> {
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   staticAssets: InternalStaticAssets;

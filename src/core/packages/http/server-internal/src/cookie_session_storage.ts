@@ -183,7 +183,7 @@ export async function createCookieSessionStorageFactory<T extends object>(
       return new ScopedCookieSessionStorage<T>(
         log,
         server,
-        ensureRawRequest(request),
+        ensureRawRequest(request) as Request,
         cookieOptions
       );
     },

@@ -8,9 +8,8 @@
  */
 
 import { modifyUrl } from '@kbn/std';
-import type { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { ensureRawRequest, type FrameworkRawRequest } from '@kbn/core-http-router-server-internal';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -18,7 +17,14 @@ import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
+  /**
+   * Request-scoped path segments set by {@link IBasePath.set} (e.g. `/s/my-space`).
+   *
+   * Keys are usually the underlying Node `IncomingMessage` (`frameworkRequest.raw.req`) so that
+   * multiple per-phase framework wrappers (Fastify builds fresh Hapi-shaped compat objects)
+   * still resolve the same entry as Hapi's single `Request` instance per connection.
+   */
+  private readonly basePathCache = new WeakMap<object, string>();
 
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;
@@ -28,20 +34,30 @@ export class BasePath implements IBasePath {
     this.publicBaseUrl = publicBaseUrl;
   }
 
+  private getBasePathCacheKey(frameworkRequest: FrameworkRawRequest): object {
+    const rawReq = (frameworkRequest as { raw?: { req?: unknown } }).raw?.req;
+    if (rawReq !== undefined && rawReq !== null && typeof rawReq === 'object') {
+      return rawReq as object;
+    }
+    return frameworkRequest;
+  }
+
   public get = (request: KibanaRequest) => {
-    const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
+    const key = this.getBasePathCacheKey(ensureRawRequest(request));
+    const requestScopePath = this.basePathCache.get(key) || '';
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
   public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
+    const key = this.getBasePathCacheKey(rawRequest);
 
-    if (this.basePathCache.has(rawRequest)) {
+    if (this.basePathCache.has(key)) {
       throw new Error(
         'Request basePath was previously set. Setting multiple times is not supported.'
       );
     }
-    this.basePathCache.set(rawRequest, requestSpecificBasePath);
+    this.basePathCache.set(key, requestSpecificBasePath);
   };
 
   public prepend = (path: string): string => {

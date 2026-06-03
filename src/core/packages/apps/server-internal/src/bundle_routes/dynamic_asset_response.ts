@@ -89,7 +89,7 @@ export const createDynamicAssetHandler = ({
       }
 
       // If we manually selected a compressed file, specify the encoding header.
-      // Otherwise, let Hapi automatically gzip the response.
+      // Otherwise, let Hapi or `@fastify/compress` on the HTTP server compress the response.
       if (fileEncoding) {
         headers['content-encoding'] = fileEncoding;
       }

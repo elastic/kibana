@@ -14,11 +14,11 @@ import type {
   IAuthHeadersStorage,
   GetAuthHeaders,
 } from '@kbn/core-http-server';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { ensureRawRequest, type FrameworkRawRequest } from '@kbn/core-http-router-server-internal';
 
 /** @internal */
 export class AuthHeadersStorage implements IAuthHeadersStorage {
-  private authHeadersCache = new WeakMap<Request, AuthHeaders>();
+  private authHeadersCache = new WeakMap<FrameworkRawRequest, AuthHeaders>();
 
   public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
     this.authHeadersCache.set(ensureRawRequest(request), headers);

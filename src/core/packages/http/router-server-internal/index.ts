@@ -15,10 +15,17 @@ export {
   unwrapVersionedResponseBodyValidation,
   type HandlerResolutionStrategy,
 } from './src/versioned_router';
-export { Router } from './src/router';
-export type { RouterOptions } from './src/router';
-export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';
+export { Router, INTERNAL_ROUTE_HANDLER, getInternalRouteHandler } from './src/router';
+export type { RouterOptions, InternalRouteHandler } from './src/router';
+export {
+  isKibanaRequest,
+  isRealRequest,
+  ensureRawRequest,
+  CoreKibanaRequest,
+  type FrameworkRawRequest,
+} from './src/request';
 export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';
 export { kibanaResponseFactory, lifecycleResponseFactory, KibanaResponse } from './src/response';
 export { getWarningHeaderMessageFromRouteDeprecation } from './src/get_warning_header_message';
+export { formatErrorMeta } from './src/util';

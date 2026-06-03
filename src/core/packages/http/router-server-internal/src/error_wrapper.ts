@@ -9,12 +9,20 @@
 
 import Boom from '@hapi/boom';
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
+import { isKibanaHttpError } from '@kbn/core-http-server';
 
 export const wrapErrors: RequestHandlerWrapper = (handler) => {
   return async (context, request, response) => {
     try {
       return await handler(context, request, response);
     } catch (e) {
+      if (isKibanaHttpError(e)) {
+        return response.customError({
+          body: e.output.payload,
+          statusCode: e.output.statusCode,
+          headers: e.output.headers,
+        });
+      }
       if (Boom.isBoom(e)) {
         return response.customError({
           body: e.output.payload,
