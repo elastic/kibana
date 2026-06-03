@@ -15,7 +15,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { FlowType } from '../../../hooks/use_wired_streams_status';
 import { useKibana } from '../../../hooks/use_kibana';
