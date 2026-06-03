@@ -23,7 +23,6 @@ import {
   type Observable,
 } from 'rxjs';
 
-import { Parser, Walker } from '@elastic/esql';
 import type { ViewMode } from '../../publishes_view_mode';
 import { apiPublishesViewMode } from '../../publishes_view_mode';
 import { apiHasSections, apiPublishesChildren } from '../presentation_container';
@@ -100,55 +99,15 @@ export const initializeRelatedPanels = ({
                   }))
                 );
               }) ?? [];
-            console.log({ siblingObservables });
+
             return combineLatest(siblingObservables).pipe(
               map((siblings) => {
-                console.log({ siblings });
                 const related: string[] = [];
                 for (const { uuid: siblingUuid, sibling, section: siblingSection } of siblings) {
                   const compatibleScope = section === siblingSection || section === undefined;
                   if (compatibleScope && isRelated(sibling)) {
                     related.push(siblingUuid);
                   }
-
-                  // if (isESQLControl) {
-                  //   const siblingUsesESQLVariable =
-                  //     siblingESQL &&
-                  //     getESQLQueryVariables(siblingESQL).includes(esqlVariable$.value.key);
-
-                  //   if (siblingUsesESQLVariable) {
-                  //     // If a sibling uses this control's ES|QL variable, it's related
-                  //     related.push(siblingUuid);
-                  //     continue;
-                  //   } else if (!isSiblingESQLControl) {
-                  //     // If the sibling does not use this ES|QL control's variable, only bail out if the sibling is not
-                  //     // also an ES|QL control. Otherwise, continue on to check if this control consumes the sibling's variable
-                  //     continue;
-                  //   }
-                  //   continue;
-                  // }
-
-                  // if (isSiblingESQLControl) {
-                  //   // Panels that publish an ES|QL query are related to ES|QL controls that publish variables they use
-                  //   if (!query) continue;
-                  //   const usedVariables = getESQLQueryVariables(query);
-                  //   if (usedVariables.includes(sibling.esqlVariable$.value.key)) {
-                  //     related.push(siblingUuid);
-                  //   }
-                  //   continue;
-                  // }
-
-                  // if (isFilterControl) {
-                  //   // Filter/time controls are related to all siblings in their scope that use global filters
-                  //   if (siblingUseGlobalFilters !== false) related.push(siblingUuid);
-                  //   continue;
-                  // }
-
-                  // if (!isSiblingFilterControl) continue;
-
-                  // // All non-control panels are related to any filter or time-slider control
-                  // // in the same scope
-                  // related.push(siblingUuid);
                 }
 
                 return related;
