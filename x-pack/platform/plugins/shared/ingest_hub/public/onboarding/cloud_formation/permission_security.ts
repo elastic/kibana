@@ -16,12 +16,15 @@ const DENY_LIST_PATTERNS: RegExp[] = [
   /^sts:AssumeRole/,
   /:PassRole$/,
   /:Create/,
+  /:Delete/,
   /:Put/,
   /:Update/,
   /:Attach/,
   /:Write$/,
 ];
 
+// Read-style actions that match a deny pattern but are required and safe.
+// sqs:DeleteMessage is needed to acknowledge consumed messages on SQS-notified S3 inputs.
 const ALLOWED_EXCEPTIONS = new Set(['sqs:DeleteMessage']);
 
 export function isDeniedIamAction(action: string): boolean {
@@ -41,6 +44,14 @@ export function assertActionsAreSecure(actions: string[]): void {
     }
     if (isDeniedIamAction(action)) {
       throw new Error(`Denied IAM action: ${action}`);
+    }
+  }
+}
+
+export function assertManagedPolicyArnsAreValid(managedPolicyArns: string[]): void {
+  for (const arn of managedPolicyArns) {
+    if (!MANAGED_POLICY_ARN_PATTERN.test(arn)) {
+      throw new Error(`Invalid managed policy ARN: ${arn}`);
     }
   }
 }

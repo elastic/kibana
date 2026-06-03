@@ -7,6 +7,7 @@
 
 import { dump } from 'js-yaml';
 
+import { assertActionsAreSecure, assertManagedPolicyArnsAreValid } from './permission_security';
 import { resolveProviderPermissions } from './resolve_provider_permissions';
 
 const ELASTIC_AWS_USER_LOGICAL_ID = 'ElasticAWSUser';
@@ -107,6 +108,11 @@ export function renderAgentlessCft(serviceIds: string[]): string {
   if (actions.length === 0 && managedPolicyArns.length === 0) {
     return '';
   }
+
+  // Fail closed: never emit a malformed or privilege-escalating policy, even if the
+  // permission map or resolver seam regresses.
+  assertActionsAreSecure(actions);
+  assertManagedPolicyArnsAreValid(managedPolicyArns);
 
   const template = createBaseTemplate(generateUserNameSuffix());
   const userResource: IamUserProperties =

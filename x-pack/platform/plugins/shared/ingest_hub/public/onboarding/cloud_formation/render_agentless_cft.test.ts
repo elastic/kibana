@@ -182,7 +182,13 @@ describe('renderAgentlessCft', () => {
 describe('permission_security', () => {
   it('rejects deny-listed actions', () => {
     expect(() => assertActionsAreSecure(['iam:CreateUser'])).toThrow(/Denied IAM action/);
+    expect(() => assertActionsAreSecure(['s3:DeleteObject'])).toThrow(/Denied IAM action/);
     expect(() => assertActionsAreSecure(['s3:GetObject'])).not.toThrow();
+  });
+
+  it('allows the sqs:DeleteMessage exception', () => {
+    expect(isDeniedIamAction('sqs:DeleteMessage')).toBe(false);
+    expect(() => assertActionsAreSecure(['sqs:DeleteMessage'])).not.toThrow();
   });
 
   it('validates IAM action format in matrix permissions', () => {
