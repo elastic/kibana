@@ -116,6 +116,7 @@ export const SharedLists = React.memo(() => {
     exceptionReferenceModalInitialState
   );
   const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
+  const rawSearchInputRef = useRef('');
 
   const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
 
@@ -268,12 +269,20 @@ export const SharedLists = React.memo(() => {
     [exportExceptionList, handleExportError, handleExportSuccess]
   );
 
+  const handleInputChange = useCallback((value: string): void => {
+    rawSearchInputRef.current = value;
+  }, []);
+
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
       setLastUpdated(Date.now());
-      refreshExceptions();
+      if (!rawSearchInputRef.current && filters) {
+        setFilters(undefined);
+      } else {
+        refreshExceptions();
+      }
     }
-  }, [refreshExceptions]);
+  }, [refreshExceptions, filters]);
 
   useEffect(() => {
     if (initLoading && !loading && !loadingExceptions && !loadingTableInfo) {
@@ -630,7 +639,9 @@ export const SharedLists = React.memo(() => {
             <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
           )}
 
-        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
+        {!initLoading && (
+          <ListsSearchBar onSearch={handleSearch} onInputChange={handleInputChange} />
+        )}
         <EuiSpacer size="m" />
         {viewerStatus != null ? (
           <EmptyViewerState

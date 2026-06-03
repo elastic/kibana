@@ -19,11 +19,7 @@ export function createMatcherContext(episode: AlertEpisode, rule: Rule): Matcher
     rule: {
       id: rule.id,
       name: rule.name,
-      description: rule.description,
       tags: rule.tags,
-      enabled: rule.enabled,
-      createdAt: rule.createdAt,
-      updatedAt: rule.updatedAt,
     },
   };
 }

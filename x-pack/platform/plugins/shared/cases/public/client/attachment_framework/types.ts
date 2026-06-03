@@ -94,6 +94,7 @@ export interface UnifiedReferenceAttachmentViewProps<
 > extends CommonAttachmentViewProps {
   attachmentId: UnifiedReferenceAttachmentPayload['attachmentId'];
   metadata?: Metadata;
+  data?: UnifiedReferenceAttachmentPayload['data'];
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;
