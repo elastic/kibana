@@ -63,7 +63,9 @@ export const useGrokExpressions = (patterns: string[]): DraftGrokExpression[] =>
 
     while (newExpressions.length < patterns.length) {
       const idx = newExpressions.length;
-      newExpressions.push(new DraftGrokExpressionClass(grokCollection, patterns[idx]));
+      newExpressions.push(
+        new DraftGrokExpressionClass(grokCollection, patterns[idx], { patternSlotId: idx })
+      );
     }
 
     // Update expressions that have changed
