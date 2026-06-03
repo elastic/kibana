@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
-import { transformDashboardIn } from '../transforms';
-import { getDashboardCRUResponseBody } from '../get_cru_response_body';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
+import { transformDashboardIn } from '../transforms';
+import type { DashboardUpdateResponseBody } from './types';
 
 export async function update(
   requestCtx: RequestHandlerContext,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardUpdateRequestBody,
   isDashboardAppRequest: boolean = false
@@ -47,6 +48,16 @@ export async function update(
   // Validate id at handler level for create requests
   if (isCreateRequest) {
     asCodeIdSchema.validate(id);
+
+    const body = await create(
+      requestCtx,
+      strictValidationSchema,
+      updateBody,
+      serverTiming,
+      isDashboardAppRequest,
+      id
+    );
+    return { body, operation: 'create' };
   }
 
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
@@ -61,10 +72,13 @@ export async function update(
     }
   );
 
-  return getDashboardCRUResponseBody(
-    savedObject,
-    'update',
-    dashboardStateSchema,
-    isDashboardAppRequest
-  );
+  return {
+    body: getDashboardCRUResponseBody(
+      updated,
+      'update',
+      strictValidationSchema,
+      isDashboardAppRequest
+    ),
+    operation: 'update',
+  };
 }

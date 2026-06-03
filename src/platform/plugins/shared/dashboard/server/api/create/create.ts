@@ -7,20 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardCreateRequestBody } from './types';
-import { transformDashboardIn } from '../transforms';
-import { getDashboardCRUResponseBody } from '../get_cru_response_body';
-import type { DashboardCreateResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
+import { transformDashboardIn } from '../transforms';
+import type { DashboardState } from '../types';
+import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  createBody: DashboardCreateRequestBody,
-  isDashboardAppRequest: boolean = false
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  createBody: DashboardState,
+  isDashboardAppRequest: boolean = false,
+  id?: string
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
@@ -51,7 +52,7 @@ export async function create(
   return getDashboardCRUResponseBody(
     savedObject,
     'create',
-    dashboardStateSchema,
+    strictValidationSchema,
     isDashboardAppRequest
   );
 }

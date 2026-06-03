@@ -11,14 +11,25 @@ import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
 import type { EmbeddableSetup, EmbeddableStart } from './plugin';
+import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
 
-export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
-  ...createEmbeddablePersistableStateServiceMock(),
-  registerDrilldown: jest.fn(),
-  registerEmbeddableFactory: jest.fn(),
-  registerEmbeddableServerDefinition: jest.fn(),
-  getAllMigrations: jest.fn().mockReturnValue({}),
-});
+const mockEmbeddableServerDefinitionRegistry: {
+  [type: string]: EmbeddableServerDefinition<any, any>;
+} = {};
+
+export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => {
+  return {
+    ...createEmbeddablePersistableStateServiceMock(),
+    registerDrilldown: jest.fn(),
+    registerEmbeddableFactory: jest.fn(),
+    registerEmbeddableServerDefinition: jest
+      .fn()
+      .mockImplementation((type: string, transforms: EmbeddableServerDefinition<any, any>) => {
+        mockEmbeddableServerDefinitionRegistry[type] = transforms;
+      }),
+    getAllMigrations: jest.fn().mockReturnValue({}),
+  };
+};
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   ...createEmbeddablePersistableStateServiceMock(),
