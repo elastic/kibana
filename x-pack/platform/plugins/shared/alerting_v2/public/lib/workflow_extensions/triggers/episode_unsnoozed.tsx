@@ -7,15 +7,15 @@
 
 import React from 'react';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
-import { episodeAssignedTriggerCommonDefinition } from '../../../../common/workflows/triggers';
+import { episodeUnsnoozedTriggerCommonDefinition } from '../../../../common/workflows/triggers';
 
-const EpisodeAssignedIcon = React.lazy(() =>
-  import('@elastic/eui/es/components/icon/assets/user').then(({ icon }) => ({
+const EpisodeUnsnoozedIcon = React.lazy(() =>
+  import('@elastic/eui/es/components/icon/assets/bell').then(({ icon }) => ({
     default: icon,
   }))
 );
 
-export const episodeAssignedTriggerPublicDefinition: PublicTriggerDefinition = {
-  ...episodeAssignedTriggerCommonDefinition,
-  icon: EpisodeAssignedIcon,
+export const episodeUnsnoozedTriggerPublicDefinition: PublicTriggerDefinition = {
+  ...episodeUnsnoozedTriggerCommonDefinition,
+  icon: EpisodeUnsnoozedIcon,
 };

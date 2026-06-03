@@ -5,8 +5,31 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type {
+  PublicTriggerDefinition,
+  WorkflowsExtensionsPublicPluginSetup,
+} from '@kbn/workflows-extensions/public';
 import { episodeAssignedTriggerPublicDefinition } from './triggers/episode_assigned';
+import { episodeUnassignedTriggerPublicDefinition } from './triggers/episode_unassigned';
+import { episodeAckedTriggerPublicDefinition } from './triggers/episode_acked';
+import { episodeUnackedTriggerPublicDefinition } from './triggers/episode_unacked';
+import { episodeTaggedTriggerPublicDefinition } from './triggers/episode_tagged';
+import { episodeSnoozedTriggerPublicDefinition } from './triggers/episode_snoozed';
+import { episodeUnsnoozedTriggerPublicDefinition } from './triggers/episode_unsnoozed';
+import { episodeActivatedTriggerPublicDefinition } from './triggers/episode_activated';
+import { episodeDeactivatedTriggerPublicDefinition } from './triggers/episode_deactivated';
+
+const triggerDefinitions: PublicTriggerDefinition[] = [
+  episodeAssignedTriggerPublicDefinition,
+  episodeUnassignedTriggerPublicDefinition,
+  episodeAckedTriggerPublicDefinition,
+  episodeUnackedTriggerPublicDefinition,
+  episodeTaggedTriggerPublicDefinition,
+  episodeSnoozedTriggerPublicDefinition,
+  episodeUnsnoozedTriggerPublicDefinition,
+  episodeActivatedTriggerPublicDefinition,
+  episodeDeactivatedTriggerPublicDefinition,
+];
 
 /**
  * Registers all alerting-v2 public workflow trigger definitions (UI metadata).
@@ -15,5 +38,7 @@ import { episodeAssignedTriggerPublicDefinition } from './triggers/episode_assig
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
-  workflowsExtensions.registerTriggerDefinition(episodeAssignedTriggerPublicDefinition);
+  for (const definition of triggerDefinitions) {
+    workflowsExtensions.registerTriggerDefinition(definition);
+  }
 }
