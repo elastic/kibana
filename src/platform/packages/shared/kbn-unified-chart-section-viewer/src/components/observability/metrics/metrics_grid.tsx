@@ -112,8 +112,7 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  // Key by selected names, not `dimensions` reference — parent often passes a new
-  // array with the same breakdown; skip recomputing per-metric lists and ES|QL.
+  // Use dimension names for the key to avoid unnecessary recomputation when the array reference changes.
   const selectedDimensionNamesKey = useMemo(
     () => dimensions.map((dimension) => dimension.name).join('\0'),
     [dimensions]
