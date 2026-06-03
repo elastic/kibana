@@ -30,15 +30,9 @@ import { VisualizeApp } from './visualize_app';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export {
-  ContentListWrapper,
   CopySavedObjectsToSpaceFlyout,
-  DataViewsManagementPage,
-  ListingTable,
   SavedObjectsManagementPage,
-  buildContentListSearch,
-  buildContentListUrlRegex,
 };
-export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
