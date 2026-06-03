@@ -17,6 +17,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   ALERTING_V2_SECTION_ID,
@@ -25,6 +26,7 @@ import {
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
 } from './constants';
+import { EpisodesListLocatorDefinition } from '../common/locators';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
@@ -54,6 +56,9 @@ export const module = new ContainerModule(({ bind }) => {
     ) as WorkflowsExtensionsPublicPluginSetup;
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
+
+    const share = container.get(PluginSetup('share')) as SharePluginSetup;
+    share.url.locators.create(new EpisodesListLocatorDefinition());
 
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
