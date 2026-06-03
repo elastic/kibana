@@ -240,8 +240,7 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
   // to an empty array and the combo box renders no pill, making the selection look
   // like it disappeared.
   const hasSelectionInFetched =
-    instanceId === ALL_VALUE ||
-    fetchedInstanceOptions.some((opt) => opt.value === instanceId);
+    instanceId === ALL_VALUE || fetchedInstanceOptions.some((opt) => opt.value === instanceId);
   const pinnedSelectionOption: EuiComboBoxOptionOption | undefined =
     !hasSelectionInFetched && typeof instanceId === 'string'
       ? { label: instanceId, value: instanceId }
