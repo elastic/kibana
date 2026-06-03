@@ -98,6 +98,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   public start(core: CoreStart): EmbeddableStart {
+    // Changing lens.apiFormat feature flag changes output of lens getSchema, so
+    // we cannot use the cached value.
+    // TODO: remove when lens.apiFormat feature flag is removed.
     core.featureFlags
       .getBooleanValue$('lens.apiFormat', false)
       .pipe(skip(1), distinctUntilChanged())
