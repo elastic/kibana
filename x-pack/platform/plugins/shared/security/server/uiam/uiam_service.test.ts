@@ -49,7 +49,7 @@ describe('UiamService', () => {
         { serverless: true }
       ).uiam,
       {
-        kibanaServerURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+        kibanaServerResourceURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
         elasticsearchUrl: 'https://es.example.com',
       }
     );
@@ -73,7 +73,7 @@ describe('UiamService', () => {
               sharedSecret: 'secret',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test' }
           )
       ).toThrowError('UIAM is not enabled.');
     });
@@ -88,7 +88,7 @@ describe('UiamService', () => {
               sharedSecret: 'secret',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test' }
           )
       ).toThrowError('UIAM URL is not configured.');
     });
@@ -103,7 +103,7 @@ describe('UiamService', () => {
               url: 'https://uiam.service',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test' }
           )
       ).toThrowError('UIAM shared secret is not configured.');
     });
@@ -118,7 +118,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'full' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).not.toHaveBeenCalled();
     });
@@ -133,7 +133,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -156,7 +156,7 @@ describe('UiamService', () => {
             certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -181,7 +181,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -202,7 +202,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'certificate' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -224,7 +224,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'none' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -246,7 +246,7 @@ describe('UiamService', () => {
             key: '/path/to/key.pem',
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -274,7 +274,7 @@ describe('UiamService', () => {
             certificateAuthorities: '/some/ca/path',
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -410,7 +410,7 @@ describe('UiamService', () => {
         token: 'essu_ephemeral_token_value',
         credentials: {
           oauth: {
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243/',
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
           },
         },
       };
@@ -426,7 +426,7 @@ describe('UiamService', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243%2F',
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
         {
           method: 'POST',
           headers: {
@@ -854,7 +854,7 @@ describe('UiamService', () => {
           },
           { serverless: true }
         ).uiam,
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test' }
       );
 
       await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
@@ -907,6 +907,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         })
       ).resolves.toEqual(mockResponse);
@@ -921,6 +922,7 @@ describe('UiamService', () => {
         },
         body: JSON.stringify({
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         }),
         dispatcher: AGENT_MOCK,
@@ -938,6 +940,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrowError('Bad request');
     });
@@ -954,6 +957,7 @@ describe('UiamService', () => {
 
       const body = {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
         client_logo: { media_type: 'image/png', data: 'abc' },
@@ -988,6 +992,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrowError(
         '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'

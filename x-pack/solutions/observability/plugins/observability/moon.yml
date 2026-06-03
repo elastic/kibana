@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/observability-get-padded-alert-time-range-util'
   - '@kbn/share-plugin'
   - '@kbn/data-plugin'
+  - '@kbn/data-forge'
   - '@kbn/alerting-comparators'
   - '@kbn/rison'
   - '@kbn/kibana-utils-plugin'
