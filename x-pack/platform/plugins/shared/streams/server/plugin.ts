@@ -85,6 +85,7 @@ import {
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -320,6 +321,8 @@ export class StreamsPlugin
       ? new StreamsKIsOnboardingClient({ managementApi: plugins.workflowsManagement.management })
       : undefined;
 
+    const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
+
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
@@ -433,6 +436,11 @@ export class StreamsPlugin
         getScopedClients,
         continuousKiExtractionWorkflowService,
         streamsKIsOnboardingClient,
+        workflowClients,
+        getSpaceId: async (request: KibanaRequest) => {
+          const [, pluginsStart] = await core.getStartServices();
+          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        },
       },
       core,
       logger: this.logger,

@@ -12,6 +12,8 @@ import {
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import type { SignificantEventsDiscoveryStatusResult } from '../../../../lib/workflows/significant_events_discovery_client';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
@@ -229,8 +231,107 @@ const readAllSignificantEventsRoute = createServerRoute({
   },
 });
 
+const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
+  params: z.object({
+    body: z.discriminatedUnion('action', [
+      z.object({ action: z.literal('trigger') }),
+      z.object({ action: z.literal('cancel') }),
+    ]),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Manually trigger the Significant Events pipeline',
+    description:
+      'Executes the Significant Events orchestrator workflow for the current space. Runs detection, discovery, and triage in sequence.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+    telemetry,
+  }): Promise<{ executionId: string | null }> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    const { SignificantEventsDiscoveryClient } = workflowClients;
+
+    if (!SignificantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
+    }
+
+    const spaceId = await getSpaceId(request);
+    const { body } = params;
+
+    if (body.action === 'trigger') {
+      const { executionId } = await SignificantEventsDiscoveryClient.run({
+        request,
+        spaceId,
+        triggeredBy: 'manual',
+      });
+      telemetry.trackSignificantEventsDiscoveryTriggered({
+        triggered_by: 'manual',
+        execution_id: executionId,
+        space_id: spaceId,
+      });
+      return { executionId };
+    }
+
+    const executionId = await SignificantEventsDiscoveryClient.cancel({ request, spaceId });
+    return { executionId };
+  },
+});
+
+const SignificantEventsDiscoveryStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/significant_events/discovery/_status',
+  params: z.object({}),
+  options: {
+    access: 'internal',
+    summary: 'Get the status of the Significant Events discovery pipeline',
+    description:
+      'Returns the status of the most recent Significant Events orchestrator workflow execution for the current space.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    request,
+    getScopedClients,
+    workflowClients,
+    getSpaceId,
+    server,
+  }): Promise<SignificantEventsDiscoveryStatusResult> => {
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    if (!workflowClients) {
+      throw new FeatureNotEnabledError(
+        'Significant events discovery requires the workflows feature to be enabled'
+      );
+    }
+
+    const spaceId = await getSpaceId(request);
+    return workflowClients.SignificantEventsDiscoveryClient.getStatus({ spaceId });
+  },
+});
+
 export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
   ...readAllSignificantEventsRoute,
+  ...SignificantEventsDiscoveryExecuteRoute,
+  ...SignificantEventsDiscoveryStatusRoute,
 };

@@ -35,7 +35,7 @@ export enum StreamsKIsOnboardingStep {
   QueriesGeneration = 'queries_generation',
 }
 
-export enum StreamsKIsOnboardingStatus {
+export enum WorkflowStatus {
   NotStarted = 'not_started',
   InProgress = 'in_progress',
   /** Client-only optimistic state; the server never returns this value. */
@@ -45,17 +45,19 @@ export enum StreamsKIsOnboardingStatus {
   Completed = 'completed',
 }
 
-export type StreamsKIsOnboardingStatusResult =
+export type WorkflowStatusResult =
   | {
       status:
-        | StreamsKIsOnboardingStatus.NotStarted
-        | StreamsKIsOnboardingStatus.InProgress
-        | StreamsKIsOnboardingStatus.BeingCanceled
-        | StreamsKIsOnboardingStatus.Canceled;
+        | WorkflowStatus.NotStarted
+        | WorkflowStatus.InProgress
+        | WorkflowStatus.BeingCanceled
+        | WorkflowStatus.Canceled;
     }
-  | { status: StreamsKIsOnboardingStatus.Failed; error: string }
-  | ({ status: StreamsKIsOnboardingStatus.Completed } & StreamsKIsOnboardingResult);
+  | { status: WorkflowStatus.Failed; error: string }
+  | ({ status: WorkflowStatus.Completed } & StreamsKIsOnboardingResult);
 
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
-export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<StreamsKIsOnboardingStatus> =
-  new Set([StreamsKIsOnboardingStatus.InProgress, StreamsKIsOnboardingStatus.BeingCanceled]);
+export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<WorkflowStatus> = new Set([
+  WorkflowStatus.InProgress,
+  WorkflowStatus.BeingCanceled,
+]);

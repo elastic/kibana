@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { WorkflowStatus } from '@kbn/streams-schema';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
@@ -26,7 +26,7 @@ describe('getKiIdentificationStatusToolHandler', () => {
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: null,
-      status: StreamsKIsOnboardingStatus.NotStarted,
+      status: WorkflowStatus.NotStarted,
     });
   });
 });

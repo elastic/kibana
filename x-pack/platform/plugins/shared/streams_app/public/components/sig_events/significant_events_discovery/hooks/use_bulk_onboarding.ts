@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  StreamsKIsOnboardingStep,
-  type StreamsKIsOnboardingStatusResult,
-} from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep, type WorkflowStatusResult } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useState } from 'react';
 import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
@@ -19,10 +16,7 @@ import { getFormattedError } from '../../../../util/errors';
 import type { OnboardingConfig } from '../components/shared/types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
-type StreamStatusUpdateCallback = (
-  streamName: string,
-  result: StreamsKIsOnboardingStatusResult
-) => void;
+type StreamStatusUpdateCallback = (streamName: string, result: WorkflowStatusResult) => void;
 
 interface UseBulkOnboardingOptions {
   onboardingConfig: OnboardingConfig;

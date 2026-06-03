@@ -8,6 +8,42 @@
 import { i18n } from '@kbn/i18n';
 import type { Detection, Discovery } from '@kbn/streams-schema';
 
+export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.findSignificantEventsLabel',
+  {
+    defaultMessage: 'Find Significant Events',
+  }
+);
+
+export const DEFAULT_EMPTY_PROMPT_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.defaultEmptyPromptTitle',
+  {
+    defaultMessage: 'No significant events detected in this time range',
+  }
+);
+
+export const DETECTIONS_EMPTY_PROMPT_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.detectionsEmptyPromptTitle',
+  {
+    defaultMessage: 'No detections collected in this time range',
+  }
+);
+
+export const DISCOVERIES_EMPTY_PROMPT_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.discoveriesEmptyPromptTitle',
+  {
+    defaultMessage: 'No discoveries in this time range',
+  }
+);
+
+export const DEFAULT_EMPTY_PROMPT_BODY = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.defaultEmptyPromptBody',
+  {
+    defaultMessage:
+      'Nothing was collected in the selected time range. Try a wider range, or find significant events to scan your alert data.',
+  }
+);
+
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
   {
