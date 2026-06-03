@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import { privilegesTypeRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 
 export interface CreateAgentKeyResponse {
@@ -17,7 +18,7 @@ export const createAgentKeyRoute = defineRoute<CreateAgentKeyResponse>()({
   params: t.type({
     body: t.type({
       name: t.string,
-      privileges: t.array(t.union([t.literal('event:write'), t.literal('config_agent:read')])),
+      privileges: privilegesTypeRt,
     }),
   }),
 });
