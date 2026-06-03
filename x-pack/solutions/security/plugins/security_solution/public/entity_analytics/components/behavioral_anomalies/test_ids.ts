@@ -8,6 +8,14 @@
 import { PREFIX } from '../../../flyout/shared/test_ids';
 
 export const BEHAVIORAL_ANOMALIES_SECTION_TEST_ID = `${PREFIX}BehavioralAnomaliesSection` as const;
+// Prototype-only selector that toggles between v.1 and v.2 of the section
+// content. Remove this test id along with the selector itself before hand-off.
+export const BEHAVIORAL_ANOMALIES_VERSION_SELECTOR_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesVersionSelector` as const;
+// Prototype-only "Last 1 year" badge rendered on the section title when the
+// v.2 overview is selected. Remove with the v.2 overview.
+export const BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2OverviewTimeframe` as const;
 export const BEHAVIORAL_ANOMALIES_OVERVIEW_TEST_ID = `${PREFIX}BehavioralAnomaliesOverview` as const;
 export const BEHAVIORAL_ANOMALIES_COUNT_TEST_ID = `${PREFIX}BehavioralAnomaliesCount` as const;
 export const BEHAVIORAL_ANOMALIES_HEATMAP_TEST_ID = `${PREFIX}BehavioralAnomaliesHeatmap` as const;

@@ -10,6 +10,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getBehavioralAnomaliesTab,
+  getBehavioralAnomaliesV2Tab,
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
@@ -105,8 +106,19 @@ export const useTabs = ({
         : [];
 
     const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
+    // Prototype: BA-v.2 is a second design version of the behavioral anomalies
+    // tab shown alongside the original. Remove this line (and the import) to
+    // drop v2.
+    const behavioralAnomaliesV2Tab = [getBehavioralAnomaliesV2Tab()];
 
-    return [...riskScoreTab, ...behavioralAnomaliesTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
+    return [
+      ...riskScoreTab,
+      ...behavioralAnomaliesTab,
+      ...behavioralAnomaliesV2Tab,
+      ...insightsTab,
+      ...graphViewTab,
+      ...resolutionTab,
+    ];
   }, [
     isRiskScoreExist,
     hostName,

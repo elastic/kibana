@@ -23,6 +23,7 @@ export type LeftPanelTabsType = Array<{
 export enum EntityDetailsLeftPanelTab {
   RISK_INPUTS = 'risk_inputs',
   BEHAVIORAL_ANOMALIES = 'behavioral_anomalies',
+  BEHAVIORAL_ANOMALIES_V2 = 'behavioral_anomalies_v2',
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',

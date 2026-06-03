@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import {
   getBehavioralAnomaliesTab,
+  getBehavioralAnomaliesV2Tab,
   getRiskInputTab,
   getResolutionGroupTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
@@ -49,7 +50,17 @@ export const useTabs = (
         : [];
 
     const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
+    // Prototype: BA-v.2 is a second design version of the behavioral anomalies
+    // tab shown alongside the original. Remove this line (and the import) to
+    // drop v2.
+    const behavioralAnomaliesV2Tab = [getBehavioralAnomaliesV2Tab()];
 
-    return [...riskTab, ...behavioralAnomaliesTab, ...graphTab, ...resolutionTab];
+    return [
+      ...riskTab,
+      ...behavioralAnomaliesTab,
+      ...behavioralAnomaliesV2Tab,
+      ...graphTab,
+      ...resolutionTab,
+    ];
   }, [name, scopeId, entityStoreEntityId, hasEntityResolutionLicense]);
 };

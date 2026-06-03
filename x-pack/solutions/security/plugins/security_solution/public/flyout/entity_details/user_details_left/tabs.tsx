@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   getBehavioralAnomaliesTab,
+  getBehavioralAnomaliesV2Tab,
   getInsightsInputTab,
   getResolutionGroupTab,
   getRiskInputTab,
@@ -61,6 +62,10 @@ export const useTabs = (
     }
 
     tabs.push(getBehavioralAnomaliesTab());
+    // Prototype: BA-v.2 is a second design version of the behavioral anomalies
+    // tab shown alongside the original. Remove this line (and the import) to
+    // drop v2.
+    tabs.push(getBehavioralAnomaliesV2Tab());
 
     if (oktaManagedUser) {
       tabs.push(getOktaTab(oktaManagedUser));

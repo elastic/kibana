@@ -12,6 +12,16 @@ export const BEHAVIORAL_ANOMALIES_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Behavioral anomalies' }
 );
 
+/**
+ * Prototype "v.2" timeframe indicator rendered as `extraAction` on the
+ * Behavioral anomalies section title when the v.2 overview is selected.
+ * Cleanup: remove this string together with the v.2 selector / overview.
+ */
+export const BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2Overview.timeframeLabel',
+  { defaultMessage: 'Last 1 year' }
+);
+
 export const BEHAVIORAL_ANOMALIES_ALL_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomalies.allAnomaliesLink',
   { defaultMessage: 'All anomalies' }
@@ -29,7 +39,7 @@ export const BEHAVIORAL_ANOMALIES_COUNT_LABEL = i18n.translate(
 
 export const BEHAVIORAL_ANOMALIES_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomalies.tabLabel',
-  { defaultMessage: 'Behavioral anomalies' }
+  { defaultMessage: 'Behavioral anomalies-v.1' }
 );
 
 export const ANOMALY_TIMELINE_TITLE = i18n.translate(
