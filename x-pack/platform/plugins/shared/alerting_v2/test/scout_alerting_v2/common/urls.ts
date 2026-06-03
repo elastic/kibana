@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_API_PATH, ACTION_POLICY_API_PATH, RULE_API_PATH } from './constants';
+import {
+  ALERT_API_PATH,
+  ACTION_POLICY_API_PATH,
+  RULE_API_PATH,
+  EXECUTION_HISTORY_API_PATH,
+  EXECUTION_HISTORY_COUNT_API_PATH,
+} from './constants';
 
 /**
  * URL for a single rule resource: `${RULE_API_PATH}/${encodedId}`.
@@ -79,3 +85,17 @@ export const getDeactivateAlertActionUrl = (groupHash: string) =>
   getAlertActionUrl(groupHash, '_deactivate');
 
 export const BULK_ALERT_ACTION_URL = `${ALERT_API_PATH}/_bulk_action`;
+
+export const getListExecutionHistoryUrl = (query?: Record<string, string | number>): string => {
+  if (!query) return EXECUTION_HISTORY_API_PATH;
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    params.set(key, String(value));
+  }
+  return `${EXECUTION_HISTORY_API_PATH}?${params.toString()}`;
+};
+
+export const getCountNewExecutionHistoryEventsUrl = (query: { since: string }): string => {
+  const params = new URLSearchParams({ since: query.since });
+  return `${EXECUTION_HISTORY_COUNT_API_PATH}?${params.toString()}`;
+};
