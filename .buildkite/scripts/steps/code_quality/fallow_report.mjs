@@ -64,31 +64,21 @@ function percentile(arr, p) {
   return sorted[Math.max(0, idx)];
 }
 
-// Approximation of fallow's health score (100 - penalties) scoped per owner.
-// Uses available per-owner data; skips circular deps / unused deps (package-level, hard to attribute).
-function computeHealthScore(fileScores, complexityFindings, hotspots, unusedFiles, unusedExports) {
+// Complexity-based health score scoped per owner.
+// Dead code penalties are excluded: @kbn/* path aliases are not resolved by fallow,
+// so unused_files/unused_exports counts are unreliable in Kibana's plugin architecture.
+function computeHealthScore(fileScores, complexityFindings, hotspots) {
   const totalFiles = fileScores.length;
   if (!totalFiles) return 0;
 
   const criticalCount = complexityFindings.filter((f) => f.severity === 'critical').length;
   const lowMaintainability = fileScores.filter((f) => f.maintainability_index < 65).length;
 
-  // penalties mirroring fallow's health score formula
-  const penaltyDeadFiles = Math.min((unusedFiles.length / totalFiles) * 15, 15);
-  const penaltyDeadExports = Math.min((unusedExports.length / (totalFiles * 3)) * 15, 15);
   const penaltyCritical = Math.min((criticalCount / totalFiles) * 20, 20);
   const penaltyMaintainability = Math.min((lowMaintainability / totalFiles) * 15, 15);
   const penaltyHotspots = Math.min((hotspots.length / totalFiles) * 10, 10);
 
-  return Math.max(
-    0,
-    100 -
-      penaltyDeadFiles -
-      penaltyDeadExports -
-      penaltyCritical -
-      penaltyMaintainability -
-      penaltyHotspots
-  );
+  return Math.max(0, 100 - penaltyCritical - penaltyMaintainability - penaltyHotspots);
 }
 
 function avgComplexityDensity(fileScores) {
@@ -146,28 +136,12 @@ function addFinding(filePath, category, item) {
   if (targetSet.size > 0 && !targetSet.has(owner)) return;
   if (!ownerData.has(owner)) {
     ownerData.set(owner, {
-      unusedFiles: [],
-      unusedExports: [],
-      unusedTypes: [],
       complexityFindings: [],
       fileScores: [],
       hotspots: [],
     });
   }
   ownerData.get(owner)[category].push(item);
-}
-
-// Dead code
-for (const f of data.check?.unused_files ?? []) {
-  addFinding(f.path, 'unusedFiles', f);
-}
-
-for (const f of data.check?.unused_exports ?? []) {
-  addFinding(f.path, f.is_type_only ? 'unusedTypes' : 'unusedExports', f);
-}
-
-for (const f of data.check?.unused_types ?? []) {
-  addFinding(f.path, 'unusedTypes', f);
 }
 
 // Complexity
@@ -199,13 +173,7 @@ lines.push(
 );
 for (const owner of filteredOwners) {
   const d = ownerData.get(owner);
-  const score = computeHealthScore(
-    d.fileScores,
-    d.complexityFindings,
-    d.hotspots,
-    d.unusedFiles,
-    d.unusedExports
-  );
+  const score = computeHealthScore(d.fileScores, d.complexityFindings, d.hotspots);
   const grade = gradeFromScore(score);
   const density = avgComplexityDensity(d.fileScores);
   const critical = d.complexityFindings.filter((f) => f.severity === 'critical').length;
@@ -224,52 +192,15 @@ for (const owner of filteredOwners) {
   const d = ownerData.get(owner);
   const teamShort = owner.replace('elastic/', '');
 
-  const totalDeadCode = d.unusedFiles.length + d.unusedExports.length + d.unusedTypes.length;
   const critical = d.complexityFindings.filter((f) => f.severity === 'critical');
   const cyclomatics = d.complexityFindings.map((f) => f.cyclomatic);
   const p90 = percentile(cyclomatics, 90);
   const density = avgComplexityDensity(d.fileScores);
-  const score = computeHealthScore(
-    d.fileScores,
-    d.complexityFindings,
-    d.hotspots,
-    d.unusedFiles,
-    d.unusedExports
-  );
+  const score = computeHealthScore(d.fileScores, d.complexityFindings, d.hotspots);
   const grade = gradeFromScore(score);
   const emoji = gradeEmoji(grade);
 
   lines.push(`\n--- @${owner}`);
-
-  // Dead code
-  lines.push(`\nDead code (${totalDeadCode}):`);
-  if (d.unusedFiles.length > 0) {
-    lines.push(`  Unused files (${d.unusedFiles.length}):`);
-    for (const f of d.unusedFiles.slice(0, 15)) {
-      lines.push(`    ${f.path}`);
-    }
-    if (d.unusedFiles.length > 15) {
-      lines.push(`    ... and ${d.unusedFiles.length - 15} more`);
-    }
-  }
-  if (d.unusedExports.length > 0) {
-    lines.push(`  Unused exports (${d.unusedExports.length}):`);
-    for (const f of d.unusedExports.slice(0, 10)) {
-      lines.push(`    ${f.path}:${f.line}  ${f.export_name}`);
-    }
-    if (d.unusedExports.length > 10) {
-      lines.push(`    ... and ${d.unusedExports.length - 10} more`);
-    }
-  }
-  if (d.unusedTypes.length > 0) {
-    lines.push(`  Unused types (${d.unusedTypes.length}):`);
-    for (const f of d.unusedTypes.slice(0, 10)) {
-      lines.push(`    ${f.path}:${f.line}  ${f.export_name}`);
-    }
-    if (d.unusedTypes.length > 10) {
-      lines.push(`    ... and ${d.unusedTypes.length - 10} more`);
-    }
-  }
 
   // Complexity
   lines.push(
