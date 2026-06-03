@@ -67,6 +67,7 @@ jobs:
           status=$(git status --porcelain -- '.github/workflows/*.lock.yml' '.github/aw/actions-lock.json')
           if [[ -n "${status}" ]]; then
             echo "::error::Compiled output is out of date. Run 'gh aw compile --purge --validate' with gh-aw ${GH_AW_VERSION} and commit the resulting lock changes."
+            echo "To install the repo-pinned gh-aw locally, run: node scripts/ensure_gh_aw_version.js"
             echo "Files that differ:"
             echo "${status}"
             echo
