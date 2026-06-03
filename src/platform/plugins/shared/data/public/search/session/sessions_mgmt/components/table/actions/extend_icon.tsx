@@ -10,18 +10,26 @@
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 
-export const ExtendSessionIcon: IconType = ({ title, titleId, ...props }) => (
-  <svg
-    viewBox="0 0 16 16"
-    aria-hidden={title ? undefined : true}
-    aria-labelledby={titleId}
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    {...props}
-  >
-    {title ? <title id={titleId}>{title}</title> : null}
-    <path fill="currentColor" d="m14 5-3-2v1.333H4v1.334h7V7z" />
-    <path fill="currentColor" d="M0 11.5A1.5 1.5 0 0 1 1.5 10h13a1.5 1.5 0 1 1 0 3h-13A1.5 1.5 0 0 1 0 11.5" />
-    <path fill="currentColor" d="M14.5 11H11v1h3.5a.5.5 0 1 0 0-1" />
-  </svg>
-);
+export const ExtendSessionIcon: IconType = ({ title, titleId, ...props }) => {
+  const generatedTitleId = React.useId();
+  const resolvedTitleId = title ? titleId ?? generatedTitleId : undefined;
+
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      aria-hidden={!title}
+      aria-labelledby={resolvedTitleId}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      {...props}
+    >
+      {title ? <title id={resolvedTitleId}>{title}</title> : null}
+      <path fill="currentColor" d="m14 5-3-2v1.333H4v1.334h7V7z" />
+      <path
+        fill="currentColor"
+        d="M0 11.5A1.5 1.5 0 0 1 1.5 10h13a1.5 1.5 0 1 1 0 3h-13A1.5 1.5 0 0 1 0 11.5"
+      />
+      <path fill="currentColor" d="M14.5 11H11v1h3.5a.5.5 0 1 0 0-1" />
+    </svg>
+  );
+};
