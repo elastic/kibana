@@ -12,6 +12,7 @@ import * as allLocationsFn from '../../synthetics_service/get_all_locations';
 import { OverviewStatusService, SUMMARIES_PAGE_SIZE } from './overview_status_service';
 import times from 'lodash/times';
 import { flatten } from 'lodash';
+import moment from 'moment';
 const japanLoc = {
   id: 'asia_japan',
   label: 'Asia/Pacific - Japan',
@@ -1958,6 +1959,166 @@ describe('current status route', () => {
       // Remote field should not be populated when CCS is disabled.
       expect(result.upConfigs.id1).toBeDefined();
       expect(result.upConfigs.id1.remote).toBeUndefined();
+    });
+
+    describe('date range filter (filterByDateRange)', () => {
+      // Only `id1` reports a final summary; `id2` has no bucket in the window.
+      const onlyId1Buckets = [
+        {
+          key: { monitorId: 'id1', locationId: japanLoc.id },
+          status: {
+            key: japanLoc.id,
+            top: [{ metrics: { 'monitor.status': 'up' }, sort: ['2022-09-15T16:19:16.724Z'] }],
+          },
+        },
+      ];
+
+      const buildRouteContext = (query: Record<string, any>, syntheticsEsClient?: any): any => ({
+        request: { query },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      });
+
+      describe('getStatusQueryRange', () => {
+        const DEFAULT_LOOKBACK_TOLERANCE_SECONDS = 5;
+
+        const expectDefaultWindow = (range: { from: string; to: string }) => {
+          expect(range.to).toBe('now');
+          const expectedFrom = moment().subtract(4, 'hours').subtract(20, 'minutes');
+          expect(Math.abs(moment(range.from).diff(expectedFrom, 'seconds'))).toBeLessThanOrEqual(
+            DEFAULT_LOOKBACK_TOLERANCE_SECONDS
+          );
+        };
+
+        it('falls back to the default 4h20m look-back window when the filter is off', () => {
+          const service = new OverviewStatusService(buildRouteContext({}));
+          expectDefaultWindow(service.getStatusQueryRange());
+        });
+
+        it('honors the picker window when the filter is on with a valid range', () => {
+          const service = new OverviewStatusService(
+            buildRouteContext({
+              filterByDateRange: true,
+              dateRangeStart: '2022-01-01T00:00:00.000Z',
+              dateRangeEnd: '2022-01-02T00:00:00.000Z',
+            })
+          );
+          expect(service.getStatusQueryRange()).toEqual({
+            from: '2022-01-01T00:00:00.000Z',
+            to: '2022-01-02T00:00:00.000Z',
+          });
+        });
+
+        it('falls back to the default window when the filter is on but the picker bounds are missing', () => {
+          const service = new OverviewStatusService(
+            buildRouteContext({ filterByDateRange: true, dateRangeStart: 'now-15m' })
+          );
+          expectDefaultWindow(service.getStatusQueryRange());
+        });
+
+        it('falls back to the default window when datemath cannot parse the picker bounds', () => {
+          const service = new OverviewStatusService(
+            buildRouteContext({
+              filterByDateRange: true,
+              dateRangeStart: 'not-a-date',
+              dateRangeEnd: 'also-bad',
+            })
+          );
+          expectDefaultWindow(service.getStatusQueryRange());
+        });
+      });
+
+      it('drops configs with no summary in the window when the filter is enabled', async () => {
+        const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+        esClient.search.mockResponseOnce(getEsResponse({ buckets: onlyId1Buckets }));
+
+        const overviewStatusService = new OverviewStatusService(
+          buildRouteContext(
+            {
+              filterByDateRange: true,
+              dateRangeStart: '2022-09-01T00:00:00.000Z',
+              dateRangeEnd: '2022-09-30T00:00:00.000Z',
+            },
+            syntheticsEsClient
+          )
+        );
+        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+        const result = await overviewStatusService.getOverviewStatus();
+
+        // id2 never reported in the window, so it is excluded entirely.
+        expect(result.allMonitorsCount).toBe(1);
+        expect(result.allIds).toEqual(['id1']);
+        expect(result.upConfigs.id1).toBeDefined();
+        expect(result.pendingConfigs).toEqual({});
+      });
+
+      it('keeps every configured monitor when the filter is disabled (legacy behavior)', async () => {
+        const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+        // Same ES data as the previous test — only the toggle differs.
+        esClient.search.mockResponseOnce(getEsResponse({ buckets: onlyId1Buckets }));
+
+        const overviewStatusService = new OverviewStatusService(
+          buildRouteContext({}, syntheticsEsClient)
+        );
+        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+        const result = await overviewStatusService.getOverviewStatus();
+
+        // Without the toggle, id2 stays in the list as pending rather than being dropped.
+        expect(result.allMonitorsCount).toBe(2);
+        expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
+        expect(result.pendingConfigs.id2).toBeDefined();
+      });
+
+      it('drops the "currently fresh" timespan filter and uses the picker range when enabled', async () => {
+        const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+        esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+        const overviewStatusService = new OverviewStatusService(
+          buildRouteContext(
+            {
+              filterByDateRange: true,
+              dateRangeStart: '2022-01-01T00:00:00.000Z',
+              dateRangeEnd: '2022-01-02T00:00:00.000Z',
+            },
+            syntheticsEsClient
+          )
+        );
+        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+        await overviewStatusService.getOverviewStatus();
+
+        const filters = (esClient.search.mock.calls[0][0] as any).query.bool.filter;
+        expect(filters.find((f: any) => f.range?.['monitor.timespan'])).toBeUndefined();
+        expect(filters.find((f: any) => f.range?.['@timestamp']).range['@timestamp']).toEqual({
+          gte: '2022-01-01T00:00:00.000Z',
+          lte: '2022-01-02T00:00:00.000Z',
+        });
+      });
+
+      it('keeps the timespan filter and default look-back window when disabled', async () => {
+        const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+        esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+        const overviewStatusService = new OverviewStatusService(
+          buildRouteContext({}, syntheticsEsClient)
+        );
+        overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue(testMonitors as any);
+
+        await overviewStatusService.getOverviewStatus();
+
+        const filters = (esClient.search.mock.calls[0][0] as any).query.bool.filter;
+        expect(
+          filters.find((f: any) => f.range?.['monitor.timespan']).range['monitor.timespan']
+        ).toEqual({ gte: 'now-15m', lte: 'now' });
+        expect(filters.find((f: any) => f.range?.['@timestamp']).range['@timestamp'].lte).toBe(
+          'now'
+        );
+      });
     });
   });
 });
