@@ -317,8 +317,6 @@ export const dateHistogramOperation: OperationDefinition<
     const previousColumnInterval = useRef(currentColumn.params.interval);
     const hasExternalIntervalChange =
       previousColumnInterval.current !== currentColumn.params.interval;
-    const nextIntervalValue =
-      interval === AUTO_INTERVAL ? AUTO_INTERVAL : getIntervalParamValue(interval);
 
     useEffect(() => {
       previousColumnInterval.current = currentColumn.params.interval;
@@ -365,7 +363,9 @@ export const dateHistogramOperation: OperationDefinition<
         return;
       }
 
-      if (isValid && nextIntervalValue !== currentColumn.params.interval) {
+      // Compare against the persisted interval string so shorthand saved values
+      // stay stable until the user explicitly edits the control.
+      if (isValid && intervalInput !== currentColumn.params.interval) {
         commitInterval(interval);
       }
     }, [
@@ -373,7 +373,6 @@ export const dateHistogramOperation: OperationDefinition<
       hasExternalIntervalChange,
       intervalInput,
       isValid,
-      nextIntervalValue,
       currentColumn.params.interval,
       commitInterval,
     ]);

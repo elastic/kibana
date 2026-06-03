@@ -736,6 +736,23 @@ describe('date_histogram', () => {
       ).toEqual([expect.objectContaining({ key: '1d' })]);
     });
 
+    it('does not normalize shorthand calendar intervals on mount', () => {
+      const updateLayerSpy = jest.fn();
+      const testLayer = layerWithInterval('M');
+
+      mount(
+        <InlineOptions
+          {...defaultOptions}
+          layer={testLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+
+      expect(updateLayerSpy).not.toHaveBeenCalled();
+    });
+
     it('should not render options if they are restricted', () => {
       const updateLayerSpy = jest.fn();
 
