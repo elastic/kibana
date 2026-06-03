@@ -100,7 +100,7 @@ describe('WorkflowsPage authorization', () => {
         createdBy: [],
         tags: [],
       },
-    } as ReturnType<typeof useWorkflowFiltersOptions>);
+    } as unknown as ReturnType<typeof useWorkflowFiltersOptions>);
   });
 
   it.each([
