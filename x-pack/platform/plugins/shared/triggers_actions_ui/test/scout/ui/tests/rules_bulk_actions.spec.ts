@@ -204,7 +204,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
 
-    await page.testSubj.click('clearSearchButton');
+    // Ensure any prior search text is cleared so all rules are visible.
+    await page.testSubj.locator('searchInput').fill('');
     // Select r1, select-all (both selected), then deselect r2 → only r1 remains
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click('selectAllRulesButton');
