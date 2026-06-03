@@ -25,7 +25,7 @@ plugins:
     - discover_enhanced
     - entity_store
     - error_boundary_example
-    - eventAnnotationListing
+    - event_annotation_listing
     - exploratory_view
     - fleet
     - flyoutSystemExamples
@@ -85,6 +85,7 @@ packages:
   enabled:
     - core
     - kbn-scout
+    - kbn-security-hardening
     - kbn-streamlang-tests
     - user-storage
   disabled:
