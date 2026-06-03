@@ -181,38 +181,57 @@ export const ResizablePanel: React.FunctionComponent<{
         <EuiFlexGroup responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>
             {isCollapsed ? (
-              <EuiButtonIcon
-                key="chevronSingleUp"
-                iconType="chevronSingleUp"
-                aria-label={i18n.translate(
-                  'xpack.fleet.integrationsResizablePanel.collapseButton',
-                  { defaultMessage: 'Collapse panel' }
-                )}
-                color="text"
-                onClick={toggleCollpase}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.integrationsResizablePanel.collapseButton', {
+                  defaultMessage: 'Collapse panel',
+                })}
+              >
+                <EuiButtonIcon
+                  key="chevronSingleUp"
+                  iconType="chevronSingleUp"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.integrationsResizablePanel.collapseButton',
+                    { defaultMessage: 'Collapse panel' }
+                  )}
+                  color="text"
+                  onClick={toggleCollpase}
+                />
+              </EuiToolTip>
             ) : (
-              <EuiButtonIcon
-                key="chevronSingleDown"
-                iconType="chevronSingleDown"
-                aria-label={i18n.translate(
-                  'xpack.fleet.integrationsResizablePanel.collapseButton',
-                  { defaultMessage: 'Collapse panel' }
-                )}
-                color="text"
-                onClick={toggleCollpase}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.integrationsResizablePanel.collapseButton', {
+                  defaultMessage: 'Collapse panel',
+                })}
+              >
+                <EuiButtonIcon
+                  key="chevronSingleDown"
+                  iconType="chevronSingleDown"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.integrationsResizablePanel.collapseButton',
+                    { defaultMessage: 'Collapse panel' }
+                  )}
+                  color="text"
+                  onClick={toggleCollpase}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={i18n.translate('xpack.fleet.integrationsResizablePanel.closeButton', {
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.integrationsResizablePanel.closeButton', {
                 defaultMessage: 'Close panel',
               })}
-              color="text"
-              onClick={onClose}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={i18n.translate('xpack.fleet.integrationsResizablePanel.closeButton', {
+                  defaultMessage: 'Close panel',
+                })}
+                color="text"
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
