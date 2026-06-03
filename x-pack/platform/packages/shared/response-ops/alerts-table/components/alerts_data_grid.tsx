@@ -80,6 +80,7 @@ export const AlertsDataGrid = typedMemo(
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
       height,
+      bulkAddToChatConfig,
       ...euiDataGridProps
     } = props;
     const {
@@ -98,7 +99,14 @@ export const AlertsDataGrid = typedMemo(
       refresh: refreshQueries,
       columns,
       dataGridRef,
-      services: { http, notifications, application, cases: casesService, settings },
+      services: {
+        http,
+        notifications,
+        application,
+        cases: casesService,
+        agentBuilder: agentBuilderService,
+        settings,
+      },
     } = renderContext;
 
     const { colorMode, euiTheme } = useEuiTheme();
@@ -126,6 +134,8 @@ export const AlertsDataGrid = typedMemo(
       notifications,
       application,
       casesService,
+      agentBuilderService,
+      bulkAddToChatConfig,
     });
 
     const refresh = useCallback(() => {

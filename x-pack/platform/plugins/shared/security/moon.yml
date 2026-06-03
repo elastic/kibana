@@ -109,6 +109,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
+  - '@kbn/core-user-profile-common'
 tags:
   - plugin
   - prod
