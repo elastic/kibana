@@ -323,7 +323,6 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
   - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
-  - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts
   - x-pack/platform/test/functional/config.firefox.ts
@@ -440,7 +439,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
-  - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/automatic_import_api_integration/configs/config.stateful.ts
