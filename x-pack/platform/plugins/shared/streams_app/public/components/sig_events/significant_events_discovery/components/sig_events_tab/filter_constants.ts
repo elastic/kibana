@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-export const VERDICT_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
-export type VerdictOption = (typeof VERDICT_OPTIONS)[number];
+import { SIG_EVENT_STATUS_OPTIONS, type SigEventStatus } from '@kbn/streams-schema';
 
-export const VERDICT_COLORS: Record<VerdictOption, string> = {
+export const STATUS_COLORS: Record<SigEventStatus, string> = {
   promoted: 'success',
   acknowledged: 'warning',
   demoted: 'default',
 };
 
-const isVerdict = (v: string): v is VerdictOption =>
-  (VERDICT_OPTIONS as ReadonlyArray<string>).includes(v);
+const isStatusOption = (v: string): v is SigEventStatus =>
+  (SIG_EVENT_STATUS_OPTIONS as ReadonlyArray<string>).includes(v);
 
-export const getVerdictColor = (verdict: string): string =>
-  isVerdict(verdict) ? VERDICT_COLORS[verdict] : 'default';
+export const getStatusColor = (status: string): string =>
+  isStatusOption(status) ? STATUS_COLORS[status] : 'default';

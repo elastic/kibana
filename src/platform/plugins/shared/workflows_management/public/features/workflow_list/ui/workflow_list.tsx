@@ -35,6 +35,7 @@ import { useTelemetry } from '../../../hooks/use_telemetry';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
+import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
 interface WorkflowListProps {
@@ -147,9 +148,14 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, [refetch]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
+    (
+      id: string,
+      event: Record<string, unknown>,
+      triggerTab?: WorkflowTriggerTab,
+      workflowHasCustomEventTrigger?: boolean
+    ) => {
       runWorkflow.mutate(
-        { id, inputs: event, triggerTab },
+        { id, inputs: event, triggerTab, hasCustomEventTrigger: workflowHasCustomEventTrigger },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
@@ -182,7 +188,12 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       if (!executeWorkflow) {
         return;
       }
-      handleRunWorkflow(executeWorkflow.id, data, triggerTab);
+      handleRunWorkflow(
+        executeWorkflow.id,
+        data,
+        triggerTab,
+        hasCustomEventTrigger(executeWorkflow.definition)
+      );
     },
     [executeWorkflow, handleRunWorkflow]
   );
@@ -232,6 +243,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflow: {
             enabled: !item.enabled,
           },
+          workflowDefinition: item.definition ?? undefined,
           skipRefetch: true,
         },
         {

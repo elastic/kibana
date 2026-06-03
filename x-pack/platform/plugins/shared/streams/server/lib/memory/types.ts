@@ -35,6 +35,8 @@ export interface MemoryEntry {
   updated_at: string;
   created_by: string;
   updated_by: string;
+  /** Present and true for soft-deleted tombstone documents */
+  is_deleted?: boolean;
 }
 
 /**
