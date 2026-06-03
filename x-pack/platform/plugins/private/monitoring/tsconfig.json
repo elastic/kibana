@@ -62,13 +62,9 @@
     "@kbn/autoops-promotion-callout",
     "@kbn/react-query",
     "@kbn/response-ops-rule-params",
-<<<<<<< HEAD
-    "@kbn/cloud-connect-plugin"
-=======
     "@kbn/kql",
     "@kbn/cloud-connect-plugin",
     "@kbn/scout"
->>>>>>> cb5cacd6f134 (migrate som / ml / monitoring ui tests to scout (#271394))
   ],
   "exclude": ["target/**/*"]
 }
