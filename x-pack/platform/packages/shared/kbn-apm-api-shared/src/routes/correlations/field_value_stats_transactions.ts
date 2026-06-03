@@ -16,16 +16,18 @@ export const fieldValueStatsTransactionsRoute = defineRoute<FieldValueStatsTrans
   endpoint: 'GET /internal/apm/correlations/field_value_stats/transactions',
   params: t.type({
     query: t.intersection([
-      t.partial({ samplerShardSize: t.string }),
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+        samplerShardSize: t.string,
+      }),
       environmentRt,
       kueryRt,
       rangeRt,
       t.type({
         fieldName: t.string,
         fieldValue: t.union([t.string, t.number]),
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
       }),
     ]),
   }),
