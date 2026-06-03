@@ -15,22 +15,10 @@ import { getNumberOpt } from './scenario_opts_helpers';
 
 export const DEFAULT_HOST_COUNT = 1500;
 
-// Bench-friendly sampling intervals. The real-world defaults are
-// `1m` for OTel hostmetricsreceiver and `30s` for Metricbeat-system,
-// but for the Hosts UI benchmark we only need enough buckets per host
-// to make `BUCKET(@timestamp, auto)` and inventory-model
-// `date_histogram` aggregations representative. The Hosts UI's
-// default time picker (`now-24h`) auto-picks a 30 m to 1 h bucket,
-// so anything denser than 5 m gets re-aggregated by the chart layer
-// anyway.
-//
-// 1500 hosts * 24 h * 1 m  = 2 160 000 docs (~16 min ingest, single
-//                                            worker on a laptop)
-// 1500 hosts * 24 h * 5 m  =   432 000 docs (~3 min ingest, same env)
-//
-// 5 m is the chosen tradeoff — same fleet cardinality and time
-// window, ~5x less data, dramatically faster + more reproducible
-// seeding for benchmark runs.
+// Bench-friendly sampling intervals (production scrapes at 1m/30s). At the
+// Hosts UI's `now-24h` range the chart layer re-aggregates to ~30m–1h buckets,
+// so anything denser than 5m is wasted: 5m yields ~432k docs vs ~2.16M at 1m
+// for 1500 hosts, same cardinality and window, far faster to seed.
 export const BENCH_SEMCONV_INTERVAL = '5m';
 export const BENCH_ECS_INTERVAL = '5m';
 

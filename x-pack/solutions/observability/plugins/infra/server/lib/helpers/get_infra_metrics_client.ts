@@ -57,10 +57,8 @@ export async function getInfraMetricsClient({
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       const startTime = Date.now();
       const collector = request ? inspectableEsQueriesMap.get(request) : undefined;
-      // Only wrap the caller's query in an extra `bool` when there is an
-      // excluded-tier filter to apply; otherwise pass the query straight
-      // through. Saves a redundant Lucene rewrite layer on every infra
-      // search.
+      // Wrap in an extra `bool` only when excluding tiers; otherwise pass the
+      // query through to avoid a redundant Lucene rewrite on every search.
       const wrappedQuery = excludedQuery
         ? {
             bool: {

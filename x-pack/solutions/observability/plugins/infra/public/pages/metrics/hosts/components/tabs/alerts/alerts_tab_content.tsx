@@ -47,11 +47,9 @@ export const AlertsTabContent = () => {
 
   const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
-  // KQL `host.name: (a or b or c)` compiles to a single terms-style clause,
-  // which is materially cheaper than emitting one `match_phrase` per host
-  // name when the table is at 500-host capacity. Same semantics as the
-  // per-host OR'd form it replaces. Host names are wrapped in a quoted KQL
-  // literal, so escape any embedded `\` / `"` to keep the query well-formed.
+  // `host.name: (a or b or c)` compiles to a single terms-style clause, far
+  // cheaper than one `match_phrase` per host at 500-host capacity. Escape the
+  // quoted literals to keep the query well-formed.
   const hostNamesKuery = hostNodes.length
     ? `host.name: (${hostNodes.map((host) => `"${escapeKqlLiteral(host.name)}"`).join(' or ')})`
     : '';

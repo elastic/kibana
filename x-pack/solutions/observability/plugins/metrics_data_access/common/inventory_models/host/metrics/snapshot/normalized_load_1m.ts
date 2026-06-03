@@ -36,9 +36,8 @@ export const normalizedLoad1m: SchemaBasedAggregations = {
   semconv: {
     load_1m: {
       avg: {
-        // OTel hostmetricsreceiver lands these gauges under the `metrics.*`
-        // prefix (matching `formulas/cpu.ts`); the unprefixed fields returned
-        // null and made the `bucket_script` ratio fall back to a flat 0.
+        // OTel lands these gauges under the `metrics.*` prefix; the unprefixed
+        // fields returned null and made the `bucket_script` ratio fall back to 0.
         field: 'metrics.system.cpu.load_average.1m',
       },
     },

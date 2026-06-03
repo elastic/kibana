@@ -12,10 +12,7 @@ describe('use_hosts_kpis_esql query builders', () => {
   it('aggregates per host then averages across the first `limit` hosts (semconv)', () => {
     const query = buildSemconvQuery('metrics-*,metricbeat-*', 100);
 
-    // Reads from the supplied (configured) metrics indices, not a hardcoded one.
     expect(query).toContain('FROM metrics-*,metricbeat-*');
-    // Per-host first stage, then cap to the limit using the same lexical
-    // host-name ordering the table uses, then average across those hosts.
     expect(query).toContain('BY host.name');
     expect(query).toContain('SORT host.name ASC');
     expect(query).toContain('LIMIT 100');
@@ -23,13 +20,19 @@ describe('use_hosts_kpis_esql query builders', () => {
     expect(query).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
     expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
     expect(query).toContain('diskUsage = AVG(host_diskUsage)');
-    // No fleet-wide host count leaks into the result columns.
     expect(query).not.toContain('host_count');
   });
 
   it('threads the limit through the ECS variant', () => {
     expect(buildEcsQuery('metrics-*,metricbeat-*', 500)).toContain('LIMIT 500');
     expect(buildEcsQuery('metrics-*,metricbeat-*', 50)).toContain('FROM metrics-*,metricbeat-*');
+  });
+
+  it('reduces ECS disk usage with a cross-host MAX (mirrors the `max(...)` formula)', () => {
+    const query = buildEcsQuery('metrics-*,metricbeat-*', 100);
+    expect(query).toContain('diskUsage = MAX(host_diskUsage)');
+    expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
   });
 });
 

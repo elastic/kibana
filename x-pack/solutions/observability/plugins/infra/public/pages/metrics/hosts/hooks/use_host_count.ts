@@ -44,8 +44,7 @@ export const useHostCount = () => {
   );
 
   const { data, status, error } = useFetcher(
-    // Return `undefined` (not a Promise) until prerequisites settle so
-    // `useFetcher` skips the initial double-fire. See `useHostsPageReady`.
+    // Returning `undefined` until ready skips useFetcher's initial double-fire.
     (callApi) => {
       if (!isReady) return;
       return (async () => {

@@ -416,7 +416,6 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view_ecs.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view_semconv.ts
-  - x-pack/performance/journeys_e2e/infra_hosts_view_kpi.ts
   # configs migrated to the new Kibana architecture
   - x-pack/platform/test/api_integration/apis/aiops/config.ts
   - x-pack/platform/test/api_integration/apis/cases/config.ts

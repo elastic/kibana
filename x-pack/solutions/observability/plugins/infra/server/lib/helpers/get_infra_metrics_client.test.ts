@@ -22,10 +22,8 @@ const withExcludedDataTiers = (tiers: DataTier[]) => ({
 
 const mockedInfra = { getMetricsIndices: () => Promise.resolve(['*.indices']) };
 
-// Asserts the final `query` shape passed to `callWithRequest('search', …)`.
-// The client only wraps the caller's query in an extra `bool` when there is
-// an excluded-tier filter to apply; otherwise the query is passed through
-// untouched (no redundant Lucene rewrite layer).
+// Asserts the `query` shape passed to `callWithRequest('search', …)`: an extra
+// `bool` only when excluding tiers, otherwise the caller's query untouched.
 const infraMetricsTestHarness =
   (
     tiers: DataTier[],

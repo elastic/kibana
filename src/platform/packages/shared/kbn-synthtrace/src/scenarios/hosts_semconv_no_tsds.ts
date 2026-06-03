@@ -40,10 +40,8 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
       configureNonTsdsOtelTemplate(infraEsClient);
     },
     generate: ({ range, clients: { infraEsClient } }) => {
-      // See hosts_semconv_tsds.ts for the worker-isolation rationale.
-      // For the non-TSDS variant the practical consequence is the
-      // worker would PUT the TSDS-on template by default; we want the
-      // non-TSDS shape here.
+      // See hosts_semconv_tsds.ts for the worker-isolation rationale; here we
+      // reconfigure to keep the non-TSDS template shape on the worker.
       configureNonTsdsOtelTemplate(infraEsClient);
 
       // Bench-friendly interval — see helpers/hosts_benchmark.ts.

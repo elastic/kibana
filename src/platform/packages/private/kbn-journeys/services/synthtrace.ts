@@ -28,8 +28,6 @@ const synthtraceClientMapping: Record<SynthtraceDataType, SynthtraceClientTypes>
   apm: 'apmEsClient',
 };
 
-export type SynthtraceClient = Awaited<ReturnType<typeof getSynthtraceClient>>;
-
 export async function getSynthtraceClient(
   synthClient: SynthtraceDataType,
   options: SynthtraceClientOptions

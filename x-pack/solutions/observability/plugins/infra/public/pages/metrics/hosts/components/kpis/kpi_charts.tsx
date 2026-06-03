@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-// Hosts page KPI strip — four headline tiles (CPU Usage, Normalized Load,
-// Memory Usage, Disk Usage) rendered from a single client-side ES|QL `STATS`
-// query issued over the data plugin (`useHostsKpisEsql`), one variant per
-// schema. The query fires in parallel with the `/host` table fetch (both
-// gated on `useHostsPageReady`), so KPI latency is `max(/host, kpis)` rather
-// than `/host + kpis`. Tiles use the lightweight `<MetricChartWrapper>`
-// (plain Elastic Charts `Metric`) instead of Lens, trading the per-tile
-// sparkline for collapsing four bucketed `date_histogram` round-trips into
-// one un-bucketed `STATS`.
+// Hosts page KPI strip: four headline tiles fed by a single client-side ES|QL
+// query (`useHostsKpisEsql`), rendered with the lightweight
+// `<MetricChartWrapper>` (plain Elastic Charts `Metric`) instead of Lens.
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -69,6 +63,17 @@ const TILE_DEFS: ReadonlyArray<{
 
 const KPI_DECIMALS = 1;
 
+// Subtitle keys off the formula's outer aggregation (mirroring main): a leading
+// `max(...)` reads as "Max", `avg`/`average(...)` as "Average", anything else
+// (e.g. the semconv disk-usage `1 - sum/sum` ratio) gets no subtitle.
+type FormulaAggregation = 'max' | 'average';
+const getFormulaAggregation = (formulaValue?: string): FormulaAggregation | undefined => {
+  if (formulaValue == null) return undefined;
+  if (/^[\s(]*(?:1\s*-\s*)?max\s*\(/i.test(formulaValue)) return 'max';
+  if (/^[\s(]*(?:1\s*-\s*)?(?:avg|average)\s*\(/i.test(formulaValue)) return 'average';
+  return undefined;
+};
+
 const buildFormatter = (format: 'percent' | 'number' | undefined): ((value: number) => string) => {
   if (format === 'number') {
     return (value: number) => value.toFixed(KPI_DECIMALS);
@@ -89,23 +94,31 @@ export const KpiCharts = () => {
     [schema, inventoryModel.metrics]
   );
 
-  // On a failed KPI query, surface a distinct subtitle so the "–" tiles read
-  // as an error rather than as "no data". Otherwise: "Average (of N hosts)"
-  // pegged to `min(hostCount, limit)` — the genuine fleet size when below the
-  // limit, otherwise the user-selected `limit` (the host set the query
-  // averages over and the table renders).
-  const subtitle = useMemo(() => {
-    if (error) {
-      return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.error', {
-        defaultMessage: 'Unable to load',
-      });
-    }
-    const visibleHosts = Math.min(hostCount, searchCriteria.limit);
-    return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
-      defaultMessage: 'Average (of {hosts} hosts)',
-      values: { hosts: visibleHosts },
-    });
-  }, [error, hostCount, searchCriteria.limit]);
+  // Pegged to the host set the query reduces over (and the table renders).
+  const visibleHosts = Math.min(hostCount, searchCriteria.limit);
+  const getSubtitle = useMemo(() => {
+    return (formulaValue?: string): string => {
+      if (error) {
+        return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.error', {
+          defaultMessage: 'Unable to load',
+        });
+      }
+      const aggregation = getFormulaAggregation(formulaValue);
+      if (aggregation === 'max') {
+        return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.maxOfHosts', {
+          defaultMessage: 'Max (of {hosts} hosts)',
+          values: { hosts: visibleHosts },
+        });
+      }
+      if (aggregation === 'average') {
+        return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+          defaultMessage: 'Average (of {hosts} hosts)',
+          values: { hosts: visibleHosts },
+        });
+      }
+      return '';
+    };
+  }, [error, visibleHosts]);
 
   return (
     <>
@@ -120,7 +133,7 @@ export const KpiCharts = () => {
               color={euiTheme.colors.lightestShade}
               value={kpis[tile.key]}
               valueFormatter={formatter}
-              subtitle={subtitle}
+              subtitle={getSubtitle(formula?.value)}
               loading={loading}
               style={{ height: KPI_CHART_HEIGHT }}
               toolTip={

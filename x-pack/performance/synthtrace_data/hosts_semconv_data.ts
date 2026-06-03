@@ -11,16 +11,10 @@ export function generateHostsSemconvData({
   from,
   to,
   count = 1,
-  interval = '30s',
 }: {
   from: Date;
   to: Date;
   count?: number;
-  // Sampling interval between metric documents per host. Defaults to `30s`
-  // (real-world Metricbeat cadence) for short-window journeys. Wider windows
-  // (e.g. the 24 h KPI benchmark) pass a coarser interval like `5m` to keep
-  // the seed volume — and ingest time — manageable.
-  interval?: string;
 }) {
   const range = timerange(from.toISOString(), to.toISOString());
 
@@ -29,7 +23,7 @@ export function generateHostsSemconvData({
     .map((_, idx) => infra.semconvHost(`semconv-host-${idx}`));
 
   return range
-    .interval(interval)
+    .interval('30s')
     .rate(1)
     .generator((timestamp) =>
       hosts.flatMap((host) => {

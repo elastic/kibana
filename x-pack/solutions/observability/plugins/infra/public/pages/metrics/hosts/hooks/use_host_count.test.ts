@@ -17,9 +17,7 @@ jest.mock('../../../../hooks/use_fetcher');
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../containers/plugin_config_context');
 jest.mock('./use_unified_search');
-// The first-paint gate pulls in the metrics data-view + time-range metadata
-// contexts; the fetcher is fully mocked here so the gate value is irrelevant
-// to these assertions — pin it open to avoid mounting those providers.
+// Pin the first-paint gate open so the test needn't mount its upstream contexts.
 jest.mock('./use_hosts_page_ready', () => ({
   useHostsPageReady: () => true,
 }));

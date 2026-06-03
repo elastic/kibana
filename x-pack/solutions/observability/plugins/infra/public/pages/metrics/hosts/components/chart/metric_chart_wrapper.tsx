@@ -18,13 +18,10 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
   loading: boolean;
-  // Accept `null` so KPI tiles can surface "no data" without faking a
-  // numeric value. The default formatter renders "–" in that case.
+  // `null` surfaces "no data" (rendered as "–") without faking a value.
   value: number | null;
   toolTip: React.ReactNode;
   style?: CSSProperties;
-  // Optional value formatter (default: `d.toString()`). KPI tiles use a
-  // percent formatter; the host-count tile keeps the default.
   valueFormatter?: (value: number) => string;
 }
 
@@ -60,9 +57,8 @@ export const MetricChartWrapper = React.memo(
       }
     }, [loading]);
 
-    // `Metric` only renders numbers, so swap `null` → `NaN` and have the
-    // formatter return the placeholder string. Keeps the chart shape intact
-    // (color band, padding) while clearly signalling "no data".
+    // `Metric` only renders numbers: swap `null` → `NaN` and let the formatter
+    // emit the "–" placeholder, keeping the chart shape intact.
     const numericValue = value ?? Number.NaN;
     const format = valueFormatter ?? DEFAULT_FORMATTER;
 

@@ -38,20 +38,13 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts, from, t
       configureTsdsOtelTemplate(infraEsClient, from, to);
     },
     generate: ({ range, clients: { infraEsClient } }) => {
-      // `bootstrap` runs on the main-thread client; this `generate`
-      // function executes on a worker thread that owns a *different*
-      // `InfraSynthtraceEsClient` instance. The bootstrap-side
-      // `setOtelDataStreamTemplateOptions` call therefore does not
-      // reach the worker's client, and the worker's lazy
-      // `ensureOtelDataStreamTemplate` would PUT the template with
-      // default options (no `look_back_time`), letting the TSDS reject
-      // backdated docs. Re-configure here so the worker's first index
-      // call PUTs the template with the correct look-back window.
+      // `generate` runs on a worker thread with a *different* client instance,
+      // so the bootstrap-side template options don't reach it. Re-configure
+      // here so the worker PUTs the template with the right look-back window
+      // (otherwise the TSDS rejects backdated docs).
       configureTsdsOtelTemplate(infraEsClient, from, to);
 
-      // OTel hostmetricsreceiver scrapes every 1m in production; we
-      // ingest at `BENCH_SEMCONV_INTERVAL` for the benchmark fixture
-      // (see helpers/hosts_benchmark.ts for the tradeoff).
+      // Bench-friendly interval — see helpers/hosts_benchmark.ts.
       const metrics = range
         .interval(BENCH_SEMCONV_INTERVAL)
         .rate(1)

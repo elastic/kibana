@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-// User Timing marks/measures for the Hosts page first-paint subsystems. A
-// Playwright performance journey (`x-pack/performance/journeys_e2e/
-// infra_hosts_view_kpi.ts`) reads these via
-// `performance.getEntriesByType('measure')` to regression-gate the KPI
-// render path.
-//
-// `markOnce` is critical: the page hooks re-render on every state change, so
-// we only want one mark per page mount. The marks are namespaced under
-// `infra.hosts.*`:
-//
-//   - `navigationStart`        — set on `HostsPage` mount.
-//   - `hostCountReadyDuration` — `/api/infra/host/count` resolved.
-//   - `tableReadyDuration`     — `/api/metrics/infra/host` resolved.
-//   - `kpiReadyDuration`       — client-side ES|QL KPI query resolved.
+// User Timing marks/measures (`infra.hosts.*`) for the Hosts page first-paint
+// subsystems (table / KPI / host count), exposed via the browser Performance
+// API. `markOnce` dedupes because the page hooks re-render on every state change.
 
 export function markOnce(name: string): void {
   if (typeof performance === 'undefined' || typeof performance.mark !== 'function') {

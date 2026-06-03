@@ -194,9 +194,6 @@ export class JourneyFtrHarness {
         auth: this.auth,
         kbnUrl: this.kbnUrl,
       });
-      if (config.setupClient) {
-        await config.setupClient(client);
-      }
       const generator = config.generator(config.options);
       await client.index(generator);
     }

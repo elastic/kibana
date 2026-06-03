@@ -120,11 +120,8 @@ function createInfraApiClient(
   }) as ApiCallClient;
 }
 
-// The callback may synchronously return `undefined` to signal "do not
-// fetch yet". The runtime already guards on this below; the type widening
-// here makes the contract explicit so consumers can gate the request on
-// async-resolved prerequisites without firing a wasted dispatch. See the
-// `useHostsPageReady` gate consumed by the Hosts page hooks.
+// The callback may synchronously return `undefined` to signal "do not fetch
+// yet", letting consumers gate on async prerequisites (see `useHostsPageReady`).
 export function useFetcher<
   TReturn,
   Fn extends (apiClient: ApiCallClient) => Promise<TReturn> | undefined

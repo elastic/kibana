@@ -65,10 +65,8 @@ export class InfraSynthtraceEsClientImpl
   }
 
   private otelTemplateCreated = false;
-  // Default preserves the historical plain-data-stream template so existing
-  // consumers (e.g. the `generateHostsSemconvData` performance journey) are
-  // unaffected. Benchmark scenarios that need production-shaped TSDS indices
-  // opt in explicitly via `setOtelDataStreamTemplateOptions({ tsds: true })`.
+  // Defaults to the plain-data-stream template so existing consumers are
+  // unaffected; TSDS is opt-in via `setOtelDataStreamTemplateOptions`.
   private otelTemplateOptions: OtelDataStreamTemplateOptions = { tsds: false };
 
   setOtelDataStreamTemplateOptions(options: OtelDataStreamTemplateOptions): void {
@@ -106,10 +104,8 @@ export class InfraSynthtraceEsClientImpl
         }`
       );
     } catch (error) {
-      // Fail loud: a missing/half-applied template silently changes the index
-      // mapping (TSDS vs plain), which would skew anything indexed against it.
-      // Rethrow so `index()` leaves `otelTemplateCreated` false and the caller
-      // sees the failure instead of producing misleading data.
+      // Rethrow: a half-applied template silently flips the index mapping (TSDS
+      // vs plain), so fail loud rather than produce misleading data.
       this.logger.error(`Failed to create index template "${templateName}": ${error}`);
       throw error;
     }
@@ -147,9 +143,7 @@ export class InfraSynthtraceEsClientImpl
 
 type OtelIndexTemplate = NonNullable<IndicesPutIndexTemplateRequest['template']>;
 
-// Historical plain data-stream template. Kept byte-for-byte compatible with
-// the pre-benchmark default so non-opted-in consumers (e.g. existing
-// performance journeys) see no behavior change.
+// Plain data-stream template (the default; unchanged for non-opted-in consumers).
 function buildPlainOtelTemplate(): OtelIndexTemplate {
   return {
     mappings: {
@@ -190,20 +184,12 @@ function buildPlainOtelTemplate(): OtelIndexTemplate {
   };
 }
 
-// Production-shaped TSDS template. Production OTel hostmetricsreceiver data
-// lands as a TSDS, so benchmark scenarios opt into `index.mode: time_series`
-// to keep the seeded data on the same code path the Hosts UI exercises in
-// production.
-//
-// `routing_path` must reference fields declared with
-// `time_series_dimension: true`. `host.name` + `metricset.name` together
-// uniquely partition the fleet's time series; other dimensions (`state`,
-// `direction`, `device.keyword`, …) further discriminate within each
-// partition and are declared as dimensions below but intentionally omitted
-// from `routing_path` to keep shard routing predictable.
-//
-// `lookBackTime` widens the TSDS acceptance window so backdated
-// `--from`/`--to` seed ranges ingest without rejection.
+// Production-shaped TSDS template (`index.mode: time_series`), matching how
+// production OTel hostmetricsreceiver data lands. `routing_path` references
+// only `host.name` + `metricset.name` (both `time_series_dimension: true`),
+// which uniquely partition the fleet; other dimensions are declared below but
+// kept out of `routing_path` for predictable shard routing. `lookBackTime`
+// widens the acceptance window so backdated seed ranges ingest without rejection.
 function buildTsdsOtelTemplate(lookBackTime?: string): OtelIndexTemplate {
   const keyword = { type: 'keyword' as const, time_series_dimension: true };
   const gauge = { type: 'double' as const, time_series_metric: 'gauge' as const };
@@ -234,8 +220,7 @@ function buildTsdsOtelTemplate(lookBackTime?: string): OtelIndexTemplate {
           properties: {
             name: keyword,
             hostname: keyword,
-            // One IP per fleet in the fixture, so the value is constant —
-            // keep as plain `ip` to avoid an unnecessary routing contribution.
+            // Constant per fleet in the fixture; plain `ip`, not a dimension.
             ip: { type: 'ip' },
             os: { properties: { name: keyword } },
           },
@@ -248,11 +233,9 @@ function buildTsdsOtelTemplate(lookBackTime?: string): OtelIndexTemplate {
         state: keyword,
         direction: keyword,
         device: { properties: { keyword } },
-        // Metric fields are explicit so the `strings_as_keyword` dynamic
-        // template doesn't promote a metric to keyword and so each carries
-        // the right `time_series_metric`. The Hosts UI inventory model queries
-        // both `system.*` and the `metrics.system.*` variants, so both shapes
-        // are mapped.
+        // Explicit so `strings_as_keyword` can't promote a metric to keyword and
+        // each carries the right `time_series_metric`. Both `system.*` and
+        // `metrics.system.*` variants are mapped (the inventory model queries both).
         metrics: {
           properties: {
             system: {
@@ -265,9 +248,8 @@ function buildTsdsOtelTemplate(lookBackTime?: string): OtelIndexTemplate {
                   },
                 },
                 filesystem: { properties: { usage: gauge } },
-                // `system.network.io` is a cumulative counter in production,
-                // but the `SemconvHost.network()` generator emits independent
-                // per-sample values, so it behaves like a gauge in the fixture.
+                // A counter in production, but the generator emits independent
+                // per-sample values, so map it as a gauge in the fixture.
                 network: { properties: { io: longGauge } },
               },
             },

@@ -22,10 +22,7 @@ import { SearchBar } from './components/search_bar/search_bar';
 import { markOnce } from './utils/perf_marks';
 
 export const HostsPage = () => {
-  // Anchor for the first-paint performance measures (`tableReadyDuration`,
-  // `hostCountReadyDuration`, `kpiReadyDuration`). The KPI render path is
-  // regression-gated by the `infra_hosts_view_kpi` performance journey,
-  // which reads these `performance.measure` entries.
+  // Anchor (`navigationStart`) for the Hosts page first-paint User Timing measures.
   useEffect(() => {
     markOnce('infra.hosts.navigationStart');
   }, []);

@@ -13,11 +13,8 @@ import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
-// First-paint double-fire gate. The same gate is used by `useHostCount`
-// and `useHostsKpisEsql` so all three fetchers fire once after the unified
-// search context settles instead of twice — and so the `/host` request and
-// the client-side ES|QL KPI query start in the same animation frame (max,
-// not sum).
+// Shared first-paint gate (see `useHostsPageReady`): fires the fetcher once
+// and starts it in the same frame as the KPI ES|QL query.
 import { useHostsPageReady } from './use_hosts_page_ready';
 import { useReadyMark } from './use_ready_mark';
 import type {
@@ -61,8 +58,7 @@ export const useHostsView = () => {
 
   const { data, error, status } = useFetcher(
     (callApi) => {
-      // Return `undefined` until prerequisites settle so `useFetcher`
-      // skips the initial double-fire. See `useHostsPageReady`.
+      // Returning `undefined` until ready skips useFetcher's initial double-fire.
       if (!isReady) return;
       return (async () => {
         const start = performance.now();

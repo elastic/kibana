@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-// First-paint gate shared by the Hosts page fetchers (`useHostsView`,
-// `useHostCount`, `useHostsKpisEsql`). Returns `true` once both upstream
-// prerequisites have settled, so each `useFetcher` fires once instead of
-// twice — and, because all three read the *same* gate, the `/host` request
-// and the client-side ES|QL KPI query start in the same frame (KPI latency
-// is `max(/host, kpis)`, not the sum). Don't reintroduce per-hook readiness
-// checks that would re-serialise the fetches.
-//
-// The two prerequisites both shift the `useFetcher` payload identity on
-// first load (and would otherwise double-fire the endpoints):
-//   1. `metricsView?.dataViewReference` — undefined until the data view
-//      resolves; changes `buildQuery`'s identity once defined.
-//   2. `preferredSchema` — null until the `time_range_metadata` fetch lets
-//      `SearchBar` flip it to a concrete schema.
-//
-// `schemaSettled` also opens when the metadata fetch settled but no schema
-// will ever be set (empty cluster or failed fetch), otherwise the empty /
-// degraded render would block indefinitely on those clusters.
+// First-paint gate shared by the Hosts page fetchers so each `useFetcher` fires
+// once (not twice) and the `/host` request and KPI ES|QL query start in the
+// same frame (KPI latency is `max(/host, kpis)`, not the sum). Don't add
+// per-hook readiness checks — that re-serialises the fetches. The gate opens
+// once the data view resolves and the schema settles, where "settled" also
+// covers an empty/failed metadata fetch so degraded clusters don't hang.
 
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';

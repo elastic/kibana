@@ -25,22 +25,22 @@ jest.mock('../../hooks/use_unified_search', () => ({
   useUnifiedSearchContext: () => mockUseUnifiedSearchContext(),
 }));
 
-// `findInventoryModel('host').metrics.getFormulas` resolves the formula
-// catalogue async; stub it so each KPI key maps to a `percent` formula.
-//
-// The real `findInventoryModel` returns a stable singleton from its catalog,
-// so `inventoryModel.metrics` keeps the same reference across renders. The
-// mock MUST do the same: `KpiCharts` passes `inventoryModel.metrics` into a
-// `useAsync` dependency array, so returning a fresh object per call would
-// change the dep every render and spin an infinite re-render loop.
+// Must be a stable singleton: `KpiCharts` passes `inventoryModel.metrics` into
+// a `useAsync` dep array, so a fresh object per call would loop re-renders.
+// Disk usage is schema-dependent (ECS `max(...)` vs semconv `1 - sum/sum`).
 const mockInventoryModel = {
   metrics: {
-    getFormulas: async () =>
+    getFormulas: async (args?: { schema?: string }) =>
       new Map([
         ['cpuUsage', { format: 'percent', value: 'avg(cpu)' }],
         ['normalizedLoad1m', { format: 'number', value: 'avg(load)' }],
         ['memoryUsage', { format: 'percent', value: 'avg(mem)' }],
-        ['diskUsage', { format: 'percent', value: 'max(disk)' }],
+        [
+          'diskUsage',
+          args?.schema === 'ecs'
+            ? { format: 'percent', value: 'max(system.filesystem.used.pct)' }
+            : { format: 'percent', value: '1 - sum(free) / sum(total)' },
+        ],
       ]),
   },
 };
@@ -56,8 +56,6 @@ jest.mock('../../../../../components/lens', () => ({
   TooltipContent: () => <div data-test-subj="tooltip" />,
 }));
 
-// Capture the props each tile receives so we can assert the value passed
-// through and the formatter the tile would apply.
 jest.mock('../chart/metric_chart_wrapper', () => ({
   MetricChartWrapper: ({
     id,
@@ -124,17 +122,15 @@ describe('KpiCharts', () => {
         '45.7%'
       );
     });
-    // `number` formatted tile keeps the raw scalar, one decimal, no `%`.
     expect(screen.getByTestId('hostsViewKPI-normalizedLoad1m')).toHaveAttribute(
       'data-formatted',
       '1.2'
     );
-    // Null KPI is forwarded as-is so `MetricChartWrapper` renders the "–"
-    // placeholder rather than `0%`.
+    // Null is forwarded as-is so the tile renders "–" rather than `0%`.
     expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-value', 'null');
   });
 
-  it('renders the "Average (of N hosts)" subtitle pegged to min(hostCount, limit)', async () => {
+  it('subtitles avg tiles "Average (of N hosts)" pegged to min(hostCount, limit) and leaves the semconv disk ratio blank', async () => {
     mockUseHostCountContext.mockReturnValue({ loading: false, count: 250 });
     mockUseUnifiedSearchContext.mockReturnValue({
       searchCriteria: { preferredSchema: 'semconv', limit: 100 },
@@ -148,6 +144,27 @@ describe('KpiCharts', () => {
         'Average (of 100 hosts)'
       );
     });
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-subtitle', '');
+  });
+
+  it('subtitles the ECS disk tile "Max (of N hosts)" (mirrors its `max(...)` formula)', async () => {
+    mockUseHostCountContext.mockReturnValue({ loading: false, count: 250 });
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: { preferredSchema: 'ecs', limit: 100 },
+    });
+
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Max (of 100 hosts)'
+      );
+    });
+    expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+      'data-subtitle',
+      'Average (of 100 hosts)'
+    );
   });
 
   it('surfaces a distinct subtitle when the KPI query fails', async () => {

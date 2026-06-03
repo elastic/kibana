@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-// Client-side KPI fetch over the data plugin's ES|QL search strategy.
-//
-// Computes the four headline scalars in a single ES|QL request issued straight
-// from the browser via `data.search` — no custom server route. Two query
-// variants are picked from `searchCriteria.preferredSchema` (semconv OTel vs
-// ECS); the formulas mirror `metrics_data_access/.../formulas/{cpu,memory,disk}.ts`.
-// Both variants read from the configured metrics indices (the resolved metrics
-// data view, same as the table/count) and scope to the right docs via the
-// inventory model's schema `nodeFilter` — no hardcoded index pattern.
-//
-// Each variant aggregates per `host.name`, keeps the first `limit` hosts
-// (`SORT host.name ASC | LIMIT`, matching the table's `terms` host resolution),
-// then averages across those hosts. The result is therefore a genuine
-// "average of min(hostCount, limit) hosts", consistent with the tile subtitle
-// and the host set the table renders. The query fires from the shared
-// `useHostsPageReady` gate in parallel with the `/host` request, so KPI
-// latency is `max(/host, kpis)`, not the sum.
+// Fetches the four headline KPI scalars in a single client-side ES|QL request
+// (one variant per schema), gated on `useHostsPageReady` so it runs in parallel
+// with the `/host` table fetch. Each variant aggregates per `host.name`, caps
+// to the first `limit` hosts (matching the table's `terms` resolution), then
+// reduces across them. Formulas mirror
+// `metrics_data_access/.../formulas/{cpu,memory,disk}.ts`.
 
 import { useMemo } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
@@ -36,13 +25,11 @@ import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
 import { useReadyMark } from './use_ready_mark';
 
-// `observability:searchExcludedDataTiers`. Read as a string literal (mirroring
-// `logs_overview_fetchers.ts`) so the public bundle doesn't take a new package
-// dependency just to reference the key constant.
+// String literal (not the package constant) to avoid a new public-bundle
+// dependency, mirroring `logs_overview_fetchers.ts`.
 const SEARCH_EXCLUDED_DATA_TIERS_SETTING = 'observability:searchExcludedDataTiers';
 
-// Four headline scalars. `null` is the "no data" outcome — kept distinct
-// from `0` so the tile renders "–" rather than "0%".
+// `null` is the "no data" outcome, kept distinct from `0` so tiles render "–".
 export interface HostsKpis {
   cpuUsage: number | null;
   normalizedLoad1m: number | null;
@@ -63,8 +50,7 @@ export interface UseHostsKpisResult {
   error: ReturnType<typeof useFetcher>['error'];
 }
 
-// `searchCriteria.limit` comes from a fixed selector (50/100/500); coerce to a
-// safe integer literal before interpolating it into the query string.
+// Coerce to a safe integer literal before interpolating into the query string.
 const sanitizeLimit = (limit: number): number =>
   Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
 
@@ -95,6 +81,8 @@ export const buildSemconvQuery = (
     diskUsage = AVG(host_diskUsage)
 | KEEP cpuUsage, normalizedLoad1m, memoryUsage, diskUsage`;
 
+// Disk usage reduces across hosts with MAX (not AVG), mirroring the ECS
+// `max(system.filesystem.used.pct)` formula — a fleet-wide worst disk.
 export const buildEcsQuery = (indexPattern: string, limit: number): string => `FROM ${indexPattern}
 | STATS
     host_cpuUsage = AVG(system.cpu.total.norm.pct),
@@ -111,12 +99,10 @@ export const buildEcsQuery = (indexPattern: string, limit: number): string => `F
     cpuUsage = AVG(host_cpuUsage),
     normalizedLoad1m = AVG(host_normalizedLoad1m),
     memoryUsage = AVG(host_memoryUsage),
-    diskUsage = AVG(host_diskUsage)
+    diskUsage = MAX(host_diskUsage)
 | KEEP cpuUsage, normalizedLoad1m, memoryUsage, diskUsage`;
 
-// The final `STATS` collapses to one row; pull each KEEP column by name so we
-// don't rely on positional ordering. Returns all-nulls for an empty/absent
-// response (no docs in range, or columns/values missing) so tiles render "–".
+// Pull each KEEP column by name (not position); all-nulls for an empty response.
 export const parseKpiRow = (response: estypes.EsqlAsyncQueryResponse): HostsKpis => {
   const columns = response.columns ?? [];
   const row = response.values?.[0];
@@ -145,14 +131,11 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const isReady = useHostsPageReady();
 
-  // Only run once the preferred schema is settled. A missing schema means an
-  // empty/degraded cluster (no metrics data) — guessing a schema would issue a
-  // query against indices that don't exist, so we surface a terminal "–" state.
+  // A missing schema (empty/degraded cluster) leaves `esqlQuery` undefined
+  // rather than guessing and querying non-existent indices.
   const schema: DataSchemaFormat | undefined = searchCriteria?.preferredSchema ?? undefined;
-  // Both schemas read from the configured metrics indices (the resolved
-  // metrics data view) rather than a hardcoded pattern, so non-standard source
-  // setups keep working. The schema-specific `nodeFilter` (below) discriminates
-  // OTel vs ECS docs, so a broad pattern is safe.
+  // Configured metrics indices (not a hardcoded pattern); the schema `nodeFilter`
+  // below scopes to the right docs, so the broad pattern is safe.
   const indexPattern = metricsView?.indices;
   const limit = sanitizeLimit(searchCriteria.limit);
 
@@ -177,17 +160,12 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
     if (userQuery) {
       clauses.push(userQuery);
     }
-    // Honor the `searchExcludedDataTiers` advanced setting, mirroring the
-    // `/host` and `/host/count` server routes so KPIs scan the same tiers.
+    // Mirror the `/host` and `/host/count` routes' tier exclusion.
     if (excludedDataTiers.length) {
       clauses.push({ bool: { must_not: [{ terms: { _tier: excludedDataTiers } }] } });
     }
-    // The configured metrics indices pattern (`metrics-*,metricbeat-*` by
-    // default) is broad enough to match both OTel and ECS docs in a mixed
-    // deployment. Scope to the right docs via the inventory model's
-    // schema-specific node filter (OTel `data_stream.dataset` for semconv, the
-    // system integration `event.module`/`metricset.module` for ECS) so the
-    // fleet stats don't bleed across schemas.
+    // Schema-specific node filter keeps OTel/ECS stats from bleeding across
+    // schemas on the shared metrics index pattern.
     if (schema) {
       clauses.push(...(findInventoryModel('host').nodeFilter?.({ schema }) ?? []));
     }
@@ -210,13 +188,10 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
     status,
     error,
   } = useFetcher(() => {
-    // Return `undefined` (not a Promise) until prerequisites settle so
-    // `useFetcher` skips the initial double-fire. See `useHostsPageReady`.
+    // Returning `undefined` (not a Promise) until ready skips useFetcher's
+    // initial double-fire.
     if (!isReady || !esqlQuery) return;
     return (async () => {
-      // Typed `data.search.esql` (search-methods service) over the raw
-      // `esql_async` strategy: it natively accepts the DSL `filter` and
-      // returns a typed `EsqlAsyncQueryResponse` (column/value shape).
       const { rawResponse } = await data.search.esql({ query: esqlQuery, filter });
       return parseKpiRow(rawResponse);
     })();

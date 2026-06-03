@@ -15,20 +15,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
-/**
- * Build a filter that matches when `field` is one of `values` (`field IN
- * values`).
- *
- * We emit a single `terms` clause rather than an `OR` of `match_phrase`
- * filters: at scale (e.g. the Hosts UI with up to 500 host names) the
- * `bool.should` shape forces Elasticsearch to rewrite into a disjunction of
- * N `TermQuery` instances, while a `terms` clause becomes a single
- * `TermInSetQuery` and runs materially faster on keyword fields.
- *
- * The `meta` is built via `buildPhrasesFilter` so the filter bar still
- * renders the familiar "field is one of [...]" pill with the full value
- * list.
- */
+// Emits a single `terms` clause (one `TermInSetQuery`) instead of an OR of
+// `match_phrase` filters, which is materially faster at scale (up to 500 host
+// names). `buildPhrasesFilter` supplies the `meta` so the filter bar still
+// renders the "field is one of [...]" pill.
 export const buildCombinedAssetFilter = ({
   field,
   values,

@@ -9,26 +9,16 @@ import { useEffect, useRef } from 'react';
 import { markOnce, measureSince } from '../utils/perf_marks';
 
 interface UseReadyMarkParams {
-  /** User Timing mark name, e.g. `infra.hosts.tableReady`. */
   mark: string;
-  /** User Timing measure name, e.g. `infra.hosts.tableReadyDuration`. */
   measure: string;
-  /** Whether the underlying fetch is currently in flight. */
   loading: boolean;
-  /**
-   * Whether the fetch settled successfully (data present, no error). Gating on
-   * success keeps a failed request from recording a misleadingly fast "ready"
-   * time.
-   */
+  // Gate on success so a failed request can't record a misleadingly fast time.
   succeeded: boolean;
 }
 
-/**
- * Records a one-shot mark + `measureSince(navigationStart)` the first time a
- * fetch transitions from loading to a successful settle. Shared by the Hosts
- * page fetchers (`/host`, `/host/count`, client-side KPI ES|QL) so their perf
- * marks use identical, success-only semantics.
- */
+// Records a one-shot mark + `measureSince(navigationStart)` the first time a
+// fetch transitions from loading to a successful settle. Shared by the Hosts
+// page fetchers so their perf marks use identical success-only semantics.
 export const useReadyMark = ({ mark, measure, loading, succeeded }: UseReadyMarkParams) => {
   const markedRef = useRef(false);
   const prevLoadingRef = useRef<boolean | null>(null);
