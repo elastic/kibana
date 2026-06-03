@@ -13,10 +13,7 @@ import {
   deriveRecoveryDelayModeFromStateTransition,
 } from './rule_request_mappers';
 
-export interface YamlParseResult {
-  values: FormValues | null;
-  error: string | null;
-}
+export type YamlParseResult = { values: FormValues; error: null } | { values: null; error: string };
 
 const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   if (!Array.isArray(artifacts)) return undefined;

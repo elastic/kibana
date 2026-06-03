@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/otel-telemetry-collection-plugin",
+  "owner": [
+    "@elastic/observability-bi"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Collects per-service OTel resource attributes and ships them via Event-Based Telemetry (EBT).",
+  "plugin": {
+    "id": "otelTelemetryCollection",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "otelTelemetryCollection"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": [
+      "telemetry"
+    ],
+    "extraPublicDirs": []
+  }
+}

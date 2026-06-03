@@ -32,7 +32,7 @@ interface ValidationLatencyTracking {
 
 export interface UseQueryValidationParams {
   code: string;
-  codeWhenSubmitted: string;
+  lastErroredCode: string | undefined;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
@@ -54,7 +54,7 @@ export const VALIDATION_DEBOUNCE_MS = 256;
 
 export const useQueryValidation = ({
   code,
-  codeWhenSubmitted,
+  lastErroredCode,
   editorRef,
   editorModel,
   esqlCallbacks,
@@ -294,7 +294,7 @@ export const useQueryValidation = ({
 
       trackValidationLatencyStart(code);
       try {
-        if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        if (code === lastErroredCode && (serverErrors || serverWarning)) {
           resetValidationTracking();
 
           const parsedErrors = parseErrors(serverErrors || [], code);
@@ -323,7 +323,7 @@ export const useQueryValidation = ({
     },
     { skipFirstRender: false },
     VALIDATION_DEBOUNCE_MS,
-    [serverErrors, serverWarning, code, codeWhenSubmitted]
+    [serverErrors, serverWarning, code, lastErroredCode]
   );
 
   return {
