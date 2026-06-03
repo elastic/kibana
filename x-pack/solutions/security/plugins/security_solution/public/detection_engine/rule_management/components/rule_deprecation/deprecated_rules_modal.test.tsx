@@ -10,17 +10,14 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
-import { useKibana } from '../../../../common/lib/kibana';
 import { DeprecatedRulesModal } from './deprecated_rules_modal';
 import type { DeprecatedRuleForReview } from '../../../../../common/api/detection_engine/prebuilt_rules';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../logic/bulk_actions/use_execute_bulk_action');
-jest.mock('../../../../common/lib/kibana');
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseExecuteBulkAction = useExecuteBulkAction as jest.Mock;
-const mockUseKibana = useKibana as jest.Mock;
 
 // Simplified RuleLink component for testing.
 jest.mock('../../../rule_management_ui/components/rules_table/use_columns', () => ({
@@ -51,12 +48,6 @@ describe('DeprecatedRulesModal', () => {
     });
 
     mockUseExecuteBulkAction.mockReturnValue({ executeBulkAction: mockExecuteBulkAction });
-
-    mockUseKibana.mockReturnValue({
-      services: {
-        telemetry: { reportEvent: jest.fn() },
-      },
-    });
   });
 
   describe('Delete all button is disabled for read-only users', () => {
