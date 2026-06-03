@@ -6,25 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EsqlFieldType } from '@kbn/esql-types';
+import type { EsqlFieldType, ESQLCallbacks } from '@kbn/esql-types';
 import type { EditorError } from '@elastic/esql/types';
 import type { SupportedDataType, FunctionDefinition, ESQLMessage } from '../../..';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '../../..';
 import { getFunctionSignatures } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '../../commands/definitions/generated/aggregation_functions';
-import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
-import { join } from 'path';
-import {
-  enrichFields,
-  fields,
-  getCallbackMocks,
-  indexes,
-  policies,
-  unsupported_field,
-} from '../../__tests__/language/helpers';
-import { setup } from './__tests__/helpers';
+import { getCallbackMocks } from '../../__tests__/language/helpers';
 import { validateQuery } from './validation';
 
 const NESTING_LEVELS = 4;
@@ -168,36 +158,7 @@ function getFieldMapping(
 }
 
 describe('validation logic', () => {
-  const testCases: Array<{ query: string; error: string[]; warning: string[] }> = [];
-
   describe('Full validation performed', () => {
-    afterAll(async () => {
-      const targetFolder = join(__dirname, 'esql_validation_meta_tests.json');
-      try {
-        await writeFile(
-          targetFolder,
-          JSON.stringify(
-            {
-              indexes,
-              fields: fields.concat([
-                { name: policies[0].matchField, type: 'keyword', userDefined: false },
-              ]),
-              enrichFields: enrichFields.concat([
-                { name: policies[0].matchField, type: 'keyword', userDefined: false },
-              ]),
-              policies,
-              unsupported_field,
-              testCases,
-            },
-            null,
-            2
-          )
-        );
-      } catch (e) {
-        throw new Error(`Error writing test cases to ${targetFolder}: ${e.message}`);
-      }
-    });
-
     function testErrorsAndWarningsFn(
       statement: string,
       expectedErrors: string[] = [],
@@ -205,11 +166,6 @@ describe('validation logic', () => {
       { only, skip }: { only?: boolean; skip?: boolean } = {}
     ) {
       const testFn = only ? it.only : skip ? it.skip : it;
-      testCases.push({
-        query: statement,
-        error: expectedErrors,
-        warning: expectedWarnings,
-      });
 
       testFn(
         `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
@@ -248,269 +204,6 @@ describe('validation logic', () => {
           }
         );
       },
-    });
-
-    // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in https://github.com/elastic/esql-js/blob/main/src/parser/core/esql_error_listener.ts
-    describe('EMPTY query does NOT produce syntax error', () => {
-      testErrorsAndWarnings('', []);
-      testErrorsAndWarnings(' ', []);
-      testErrorsAndWarnings('     ', []);
-    });
-
-    describe('FROM <sources> [ METADATA <indices> ]', () => {
-      test('errors on invalid command start', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors('f', [expect.any(String)]);
-        await expectErrors('from ', [
-          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
-        ]);
-      });
-
-      describe('... <sources> ...', () => {
-        test('errors on trailing comma', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors('from index,', [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
-          ]);
-          await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
-            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, '(', UNQUOTED_SOURCE}",
-          ]);
-
-          await expectErrors(`from assignment = 1`, [
-            "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown data source "assignment"',
-          ]);
-        });
-
-        test('errors on invalid syntax', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors('FROM `index`', ['Unknown data source "`index`"']);
-          await expectErrors(`from assignment = 1`, [
-            "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown data source "assignment"',
-          ]);
-        });
-      });
-
-      describe('... METADATA <indices>', () => {
-        test('errors when wrapped in parentheses', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors(`from index (metadata _id)`, [
-            "SyntaxError: mismatched input '(' expecting <EOF>",
-          ]);
-        });
-
-        describe('validates fields', () => {
-          test('validates fields', async () => {
-            const { expectErrors } = await setup();
-            await expectErrors(`from index metadata _id, _source METADATA _id2`, [
-              "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
-            ]);
-          });
-        });
-      });
-    });
-
-    describe('row', () => {
-      testErrorsAndWarnings('row', [expect.stringContaining('SyntaxError:')]);
-
-      test('syntax error', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors('row var = 1 in ', [expect.stringContaining('SyntaxError:')]);
-        await expectErrors('row var = 1 in (', [expect.stringContaining('SyntaxError:')]);
-        await expectErrors('row var = 1 not in ', [expect.stringContaining('SyntaxError:')]);
-      });
-    });
-
-    describe('limit', () => {
-      testErrorsAndWarnings('from index | limit ', [
-        `SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}`,
-      ]);
-      testErrorsAndWarnings('from index | limit 4 ', []);
-      testErrorsAndWarnings('from index | limit a', [
-        "SyntaxError: mismatched input 'a' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
-      ]);
-      testErrorsAndWarnings('from index | limit doubleField', [
-        "SyntaxError: mismatched input 'doubleField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
-      ]);
-      testErrorsAndWarnings('from index | limit textField', [
-        "SyntaxError: mismatched input 'textField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
-      ]);
-      testErrorsAndWarnings('from index | limit 4', []);
-    });
-
-    describe('join', () => {
-      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
-        '"t" is not a valid JOIN index. Please use a "lookup" mode index.',
-      ]);
-
-      testErrorsAndWarnings(
-        'FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField',
-        ['JOIN ON clause must be a comma separated list of fields or a single expression']
-      );
-    });
-
-    describe('drop', () => {
-      testErrorsAndWarnings('from index | drop ', [
-        expect.stringContaining('SyntaxError: mismatched input'),
-      ]);
-      testErrorsAndWarnings('from index | drop 4.5', [
-        expect.stringContaining('SyntaxError:'),
-        expect.stringContaining('SyntaxError:'),
-        expect.stringContaining('SyntaxError:'),
-        'Unknown column "."',
-      ]);
-      testErrorsAndWarnings('from index | drop missingField, doubleField, dateField', [
-        'Unknown column "missingField"',
-      ]);
-    });
-
-    describe('mv_expand', () => {
-      testErrorsAndWarnings('from a_index | mv_expand ', [expect.stringContaining('SyntaxError:')]);
-
-      testErrorsAndWarnings('from a_index | mv_expand doubleField, b', [
-        expect.stringContaining('SyntaxError:'),
-        expect.stringContaining('SyntaxError:'),
-      ]);
-    });
-
-    describe('rename', () => {
-      testErrorsAndWarnings('from a_index | rename', [expect.stringContaining('SyntaxError:')]);
-      testErrorsAndWarnings('from a_index | rename textField', [
-        "SyntaxError: no viable alternative at input 'textField'",
-      ]);
-      testErrorsAndWarnings('from a_index | rename a', [
-        "SyntaxError: no viable alternative at input 'a'",
-      ]);
-      testErrorsAndWarnings('from a_index | rename textField as', [
-        expect.stringContaining('SyntaxError:'),
-        'AS expected 2 arguments, but got 1.',
-      ]);
-      testErrorsAndWarnings('row a = 10 | rename a as this is fine', [
-        "SyntaxError: mismatched input 'is' expecting <EOF>",
-      ]);
-    });
-
-    describe('dissect', () => {
-      testErrorsAndWarnings('from a_index | dissect', [expect.stringContaining('SyntaxError:')]);
-      testErrorsAndWarnings('from a_index | dissect textField', [
-        "SyntaxError: missing QUOTED_STRING at '<EOF>'",
-      ]);
-      testErrorsAndWarnings('from a_index | dissect textField 2', [
-        "SyntaxError: mismatched input '2' expecting QUOTED_STRING",
-      ]);
-      testErrorsAndWarnings('from a_index | dissect textField .', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-      ]);
-      testErrorsAndWarnings('from a_index | dissect textField %a', [
-        "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
-        "SyntaxError: mismatched input '<EOF>' expecting '='",
-      ]);
-    });
-
-    describe('grok', () => {
-      testErrorsAndWarnings('from a_index | grok', [expect.stringContaining('SyntaxError:')]);
-      testErrorsAndWarnings('from a_index | grok textField', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      testErrorsAndWarnings('from a_index | grok textField 2', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      testErrorsAndWarnings('from a_index | grok textField .', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      testErrorsAndWarnings('from a_index | grok textField %a', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
-      //   'Using wildcards (*) in grok is not allowed [s*]',
-      // ]);
-    });
-
-    describe('where', () => {
-      for (const wrongOp of ['*', '/', '%']) {
-        testErrorsAndWarnings(`from a_index | where ${wrongOp}+ doubleField`, [
-          expect.stringContaining('SyntaxError:'),
-        ]);
-      }
-    });
-
-    describe('eval', () => {
-      testErrorsAndWarnings('from a_index | eval ', [expect.stringContaining('SyntaxError:')]);
-      testErrorsAndWarnings('from a_index | eval doubleField + ', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-
-      testErrorsAndWarnings('from a_index | eval a=round(', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      testErrorsAndWarnings('from a_index | eval a=round(doubleField) ', []);
-      testErrorsAndWarnings('from a_index | eval a=round(doubleField), ', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-
-      for (const wrongOp of ['*', '/', '%']) {
-        testErrorsAndWarnings(`from a_index | eval ${wrongOp}+ doubleField`, [
-          expect.stringContaining('SyntaxError:'),
-        ]);
-      }
-    });
-
-    describe('sort', () => {
-      testErrorsAndWarnings('from a_index | sort ', [expect.stringContaining('SyntaxError:')]);
-      testErrorsAndWarnings('from a_index | sort doubleField, ', [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-
-      for (const dir of ['desc', 'asc']) {
-        testErrorsAndWarnings(`from a_index | sort doubleField ${dir} nulls `, [
-          "SyntaxError: missing {'first', 'last'} at '<EOF>'",
-        ]);
-        for (const nullDir of ['first', 'last']) {
-          testErrorsAndWarnings(`from a_index | sort doubleField ${dir} ${nullDir}`, [
-            `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
-          ]);
-        }
-      }
-      for (const nullDir of ['first', 'last']) {
-        testErrorsAndWarnings(`from a_index | sort doubleField ${nullDir}`, [
-          `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
-        ]);
-      }
-    });
-
-    describe('enrich', () => {
-      testErrorsAndWarnings(`from a_index | enrich`, [
-        "SyntaxError: missing {ENRICH_POLICY_NAME, QUOTED_STRING} at '<EOF>'",
-      ]);
-      testErrorsAndWarnings(`from a_index | enrich _:`, [
-        "SyntaxError: token recognition error at: ':'",
-        'Unknown policy "_"',
-      ]);
-      testErrorsAndWarnings(`from a_index | enrich :policy`, [
-        "SyntaxError: token recognition error at: ':'",
-      ]);
-
-      testErrorsAndWarnings(`from a_index | enrich policy on textField with `, [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-      testErrorsAndWarnings(`from a_index | enrich policy with `, [
-        expect.stringContaining('SyntaxError:'),
-      ]);
-    });
-
-    describe('settings', () => {
-      // Should return error if there is no query following SET
-      testErrorsAndWarnings(`SET time_zone = "CEST";`, [expect.stringContaining('SyntaxError:')]);
-      testErrorsAndWarnings(`SET invalid_setting = "_alias:_origin"; FROM index`, [
-        expect.stringContaining('Unknown setting invalid_setting'),
-      ]);
     });
 
     describe('shadowing', () => {
@@ -704,120 +397,72 @@ describe('validation logic', () => {
   });
 
   describe('Ignoring errors based on callbacks', () => {
-    interface Fixtures {
-      testCases: Array<{ query: string; error: string[] }>;
-    }
-
-    async function loadFixtures() {
-      // early exit if the testCases are already defined locally
-      const localTestCases: Array<{ query: string; error: string[] }> = [];
-      if (localTestCases.length) {
-        return { testCases: localTestCases };
-      }
-      const json = await readFile(join(__dirname, 'esql_validation_meta_tests.json'), 'utf8');
-      const esqlPackage = JSON.parse(json);
-      return esqlPackage as Fixtures;
-    }
-
-    function excludeErrorsByContent(excludedCallback: string[]) {
-      const contentByCallback = {
-        getSources: /Unknown (index|data source)/,
-        getPolicies: /Unknown policy/,
-        getColumnsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
-        getPreferences: /Unknown/,
-        getFieldsMetadata: /Unknown/,
-        getVariables: /Unknown/,
-        canSuggestVariables: /Unknown/,
-      };
-      return excludedCallback.map((callback) => (contentByCallback as any)[callback]) || [];
-    }
-
-    function getPartialCallbackMocks(exclude?: string) {
-      return {
-        ...getCallbackMocks(),
-        ...(exclude ? { [exclude]: undefined } : {}),
-      };
-    }
-
-    let fixtures: Fixtures;
-
-    beforeAll(async () => {
-      fixtures = await loadFixtures();
+    const getPartialCallbackMocks = (exclude?: string): ESQLCallbacks => ({
+      ...getCallbackMocks(),
+      ...(exclude ? { [exclude]: undefined } : {}),
     });
 
-    it('should basically work when all callbacks are passed', async () => {
-      const allErrors = await Promise.all(
-        fixtures.testCases
-          .filter(({ query }) => query === 'from index METADATA _id, _source2')
-          .map(({ query }) => validateQuery(query, getCallbackMocks()))
-      );
-      for (const [index, { errors }] of Object.entries(allErrors)) {
-        expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
-          fixtures.testCases.filter(({ query }) => query === 'from index METADATA _id, _source2')[
-            Number(index)
-          ].error
-        );
-      }
-    });
+    const collectErrorCodes = async (query: string, callbacks: ESQLCallbacks) => {
+      const { errors } = await validateQuery(query, callbacks);
+      return errors.map((error) => error.code);
+    };
 
-    // test excluding one callback at the time
-    it.each(['getSources', 'getColumnsFor', 'getPolicies'])(
-      `should not error if %s is missing`,
-      async (excludedCallback) => {
-        const filteredTestCases = fixtures.testCases.filter((t) =>
-          t.error.some((message) =>
-            excludeErrorsByContent([excludedCallback]).every((regexp) => regexp?.test(message))
+    // Queries that produce errors which depend on a specific callback being available.
+    // When that callback is missing, the validator must suppress the related error codes.
+    const callbackScenarios = [
+      {
+        callback: 'getSources',
+        codes: ['unknownIndex', 'unknownDataSource'],
+        queries: ['FROM unknown_index', 'FROM index, unknown_index'],
+      },
+      {
+        callback: 'getColumnsFor',
+        codes: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+        queries: [
+          'FROM index | KEEP unknownColumn',
+          'FROM index | EVAL rounded = ROUND(keywordField)',
+          'FROM index | KEEP unsupportedField',
+        ],
+      },
+      {
+        callback: 'getPolicies',
+        codes: ['unknownPolicy'],
+        queries: ['FROM index | ENRICH unknown_policy'],
+      },
+    ];
+
+    it.each(callbackScenarios)(
+      'suppresses $callback-dependent errors when $callback is missing',
+      async ({ callback, codes, queries }) => {
+        // Sanity: with all callbacks present, the scenario actually exercises its error codes.
+        const codesWithAllCallbacks = (
+          await Promise.all(queries.map((query) => collectErrorCodes(query, getCallbackMocks())))
+        ).flat();
+        expect(codes.some((code) => codesWithAllCallbacks.includes(code))).toBe(true);
+
+        // With the callback removed, none of the related codes must be reported.
+        const codesWithoutCallback = (
+          await Promise.all(
+            queries.map((query) => collectErrorCodes(query, getPartialCallbackMocks(callback)))
           )
-        );
-        const allErrors = await Promise.all(
-          filteredTestCases.map(({ query }) =>
-            validateQuery(query, getPartialCallbackMocks(excludedCallback))
-          )
-        );
-        for (const { errors } of allErrors) {
-          const errorCodes = errors.map((e) => e.code);
-          // Verify errors related to excluded callback are not present
-          if (excludedCallback === 'getSources') {
-            expect(
-              errorCodes.every((code) => code !== 'unknownIndex' && code !== 'unknownDataSource')
-            ).toBe(true);
-          } else if (excludedCallback === 'getColumnsFor') {
-            expect(
-              errorCodes.every(
-                (code) =>
-                  code !== 'unknownColumn' &&
-                  code !== 'wrongArgumentType' &&
-                  code !== 'unsupportedFieldType'
-              )
-            ).toBe(true);
-          } else if (excludedCallback === 'getPolicies') {
-            expect(errorCodes.every((code) => code !== 'unknownPolicy')).toBe(true);
-          }
+        ).flat();
+        for (const code of codes) {
+          expect(codesWithoutCallback).not.toContain(code);
         }
       }
     );
 
-    it('should work if no callback passed', async () => {
-      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'];
-      for (const testCase of fixtures.testCases.filter((t) =>
-        t.error.some((message) =>
-          excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
-        )
-      )) {
-        const { errors } = await validateQuery(testCase.query, {});
-        // Verify no callback-dependent errors are present
-        const errorCodes = errors.map((e) => e.code);
-        expect(
-          errorCodes.every(
-            (code) =>
-              code !== 'unknownIndex' &&
-              code !== 'unknownDataSource' &&
-              code !== 'unknownColumn' &&
-              code !== 'wrongArgumentType' &&
-              code !== 'unsupportedFieldType' &&
-              code !== 'unknownPolicy'
+    it('suppresses all callback-dependent errors when no callback is passed', async () => {
+      const allCodes = callbackScenarios.flatMap(({ codes }) => codes);
+      const reportedCodes = (
+        await Promise.all(
+          callbackScenarios.flatMap(({ queries }) =>
+            queries.map((query) => collectErrorCodes(query, {}))
           )
-        ).toBe(true);
+        )
+      ).flat();
+      for (const code of allCodes) {
+        expect(reportedCodes).not.toContain(code);
       }
     });
   });

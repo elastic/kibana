@@ -37,12 +37,6 @@ jest.mock('./lazy_ecs_mapping_editor_field', () => ({
   ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
 }));
 
-jest.mock('./platforms/platform_icon', () => ({
-  PlatformIcon: ({ platform }: { platform: string }) => (
-    <span data-test-subj={`icon-${platform}`} />
-  ),
-}));
-
 // Track the onChange callback from SavedQueriesDropdown
 let savedQueryOnChange: ((value: Record<string, unknown>) => void) | null = null;
 jest.mock('../../saved_queries/saved_queries_dropdown', () => ({

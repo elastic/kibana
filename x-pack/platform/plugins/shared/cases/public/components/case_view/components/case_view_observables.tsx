@@ -5,17 +5,15 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-
-import type { CaseUI } from '../../../../common/ui/types';
-
+import type { CaseUI, ObservableUI } from '../../../../common/ui/types';
 import { ObservablesTable } from '../../observables/observables_table';
-import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
+import { OBSERVABLES_TAB } from '../../user_actions/translations';
+import { AttachmentAccordion } from './attachment_accordion';
 
 interface CaseViewObservablesProps {
   caseData: CaseUI;
+  observables: ObservableUI[];
   searchTerm?: string;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -23,18 +21,15 @@ interface CaseViewObservablesProps {
 
 export const CaseViewObservables = ({
   caseData,
+  observables,
   searchTerm,
   isLoading,
   onUpdateField,
 }: CaseViewObservablesProps) => {
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
-
-  const caseDataWithFilteredObservables: CaseUI = useMemo(() => {
-    return {
-      ...caseData,
-      observables,
-    };
-  }, [caseData, observables]);
+  const caseDataWithFilteredObservables: CaseUI = useMemo(
+    () => ({ ...caseData, observables }),
+    [caseData, observables]
+  );
 
   const onExtractObservablesChanged = useCallback(
     (isOn: boolean) => {
@@ -46,20 +41,18 @@ export const CaseViewObservables = ({
     [caseData.settings, onUpdateField]
   );
 
+  if (searchTerm && observables.length === 0) {
+    return null;
+  }
+
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ObservablesTable
-              caseData={caseDataWithFilteredObservables}
-              isLoading={isLoading || isLoadingObservables}
-              onExtractObservablesChanged={onExtractObservablesChanged}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AttachmentAccordion id="observables" title={OBSERVABLES_TAB} count={observables.length}>
+      <ObservablesTable
+        caseData={caseDataWithFilteredObservables}
+        isLoading={isLoading}
+        onExtractObservablesChanged={onExtractObservablesChanged}
+      />
+    </AttachmentAccordion>
   );
 };
 

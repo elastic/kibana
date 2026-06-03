@@ -24,7 +24,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  RequestHandlerContext,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -148,7 +148,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    setKibanaServices(plugins, this.logger);
+    setKibanaServices(core, plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(
@@ -183,8 +183,8 @@ export class DashboardPlugin
     return {
       scanDashboards,
       client: {
-        read: async (requestCtx: RequestHandlerContext, id: string) =>
-          (await read(requestCtx, getCachedDashboardStateSchema(), id)).body,
+        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) =>
+          (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body,
       },
     };
   }

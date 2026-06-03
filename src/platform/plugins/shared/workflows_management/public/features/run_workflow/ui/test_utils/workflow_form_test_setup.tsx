@@ -66,6 +66,18 @@ export const createMockSearchBar = () => {
             }
           }}
         />
+        <button
+          type="button"
+          data-test-subj="mock-search-bar-submit"
+          onClick={() =>
+            onQuerySubmit?.({
+              query: { query: query?.query ?? '', language: 'kuery' },
+              dateRange,
+            })
+          }
+        >
+          {'Submit search'}
+        </button>
       </div>
     );
   };
@@ -166,7 +178,7 @@ export const createEventFormKibanaMocks = () => {
     },
     fieldFormats: {
       getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((date) => date.toISOString()),
+        convertToText: jest.fn((date) => date.toISOString()),
       }),
     },
   };
@@ -234,7 +246,7 @@ export const createIndexFormKibanaMocks = () => {
     },
     fieldFormats: {
       getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((value: unknown) => {
+        convertToText: jest.fn((value: unknown) => {
           if (value instanceof Date) {
             return value.toISOString();
           }

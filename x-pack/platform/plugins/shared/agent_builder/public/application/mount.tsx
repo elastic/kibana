@@ -14,7 +14,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { AgentBuilderUiClickTelemetry } from './agent_builder_ui_click_telemetry';
 import { AgentBuilderRoutes } from './routes';
 import type { AgentBuilderInternalService } from '../services';
 import type { AgentBuilderStartDependencies } from '../types';
@@ -53,21 +52,19 @@ export const mountApp = async ({
           <I18nProvider>
             <QueryClientProvider client={queryClient}>
               <AgentBuilderServicesContext.Provider value={services}>
-                <AgentBuilderUiClickTelemetry>
-                  <ActiveSpaceProvider spaceId={activeSpaceId}>
-                    <AppLeaveContext.Provider value={onAppLeave}>
-                      <RedirectAppLinks coreStart={core}>
-                        <PageWrapper>
-                          <Router history={history}>
-                            <StreamingProvider>
-                              <AgentBuilderRoutes />
-                            </StreamingProvider>
-                          </Router>
-                        </PageWrapper>
-                      </RedirectAppLinks>
-                    </AppLeaveContext.Provider>
-                  </ActiveSpaceProvider>
-                </AgentBuilderUiClickTelemetry>
+                <ActiveSpaceProvider spaceId={activeSpaceId}>
+                  <AppLeaveContext.Provider value={onAppLeave}>
+                    <RedirectAppLinks coreStart={core}>
+                      <PageWrapper>
+                        <Router history={history}>
+                          <StreamingProvider>
+                            <AgentBuilderRoutes />
+                          </StreamingProvider>
+                        </Router>
+                      </PageWrapper>
+                    </RedirectAppLinks>
+                  </AppLeaveContext.Provider>
+                </ActiveSpaceProvider>
               </AgentBuilderServicesContext.Provider>
             </QueryClientProvider>
           </I18nProvider>

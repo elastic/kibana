@@ -61,6 +61,14 @@ export const WORKFLOW_BULK_CREATE_SECURITY: RouteSecurity = {
 export const WORKFLOW_UPDATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.update] },
 };
+export const WORKFLOW_MANAGED_UPDATE_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [
+      WorkflowsManagementApiActions.update,
+      WorkflowsManagementApiActions.updateManaged,
+    ],
+  },
+};
 export const WORKFLOW_DELETE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.delete] },
 };
