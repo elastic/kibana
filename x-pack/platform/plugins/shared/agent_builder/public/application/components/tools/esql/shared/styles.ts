@@ -26,7 +26,6 @@ export const visualizationWrapperStyles =
             '.echMetric': {
               border: euiTheme.border.thin,
               borderRadius: euiTheme.border.radius.small,
-              overflow: 'hidden',
             },
           }
         : {}),
@@ -34,6 +33,7 @@ export const visualizationWrapperStyles =
         width: `calc(100% - ${euiTheme.base * 4}px)`,
       },
       '.echChart ul': {
+        listStyleType: 'none',
         marginInlineStart: 0,
       },
 
@@ -43,6 +43,9 @@ export const visualizationWrapperStyles =
 
       '.expExpressionRenderer__expression': {
         padding: `${euiTheme.size.s} 0`,
+        '[class*="metric_vis_renderer"]': {
+          paddingLeft: euiTheme.size.base,
+        },
       },
     });
 
