@@ -177,6 +177,82 @@ describe('test getDataStateContainer', () => {
     dataState.refetch$.next('fetch_more');
   });
 
+  describe('inspector reset behavior', () => {
+    test('inspectorAdapters.requests.reset is called on regular refetch', async () => {
+      mockFetchDocuments.mockResolvedValue({ records: [] });
+
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+        return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      });
+
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      const resetSpy = jest.spyOn(dataState.inspectorAdapters.requests, 'reset');
+
+      const unsubscribe = dataState.subscribe();
+      resetSpy.mockClear();
+
+      dataState.refetch$.next(undefined);
+
+      await waitFor(() => {
+        expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      });
+
+      expect(resetSpy).toHaveBeenCalled();
+      unsubscribe();
+    });
+
+    test('inspectorAdapters.requests.reset is called on reset refetch', async () => {
+      mockFetchDocuments.mockResolvedValue({ records: [] });
+
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
+        return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      });
+
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      const resetSpy = jest.spyOn(dataState.inspectorAdapters.requests, 'reset');
+
+      const unsubscribe = dataState.subscribe();
+      resetSpy.mockClear();
+
+      dataState.refetch$.next('reset');
+
+      await waitFor(() => {
+        expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      });
+
+      expect(resetSpy).toHaveBeenCalled();
+      unsubscribe();
+    });
+
+    test('inspectorAdapters.requests.reset is NOT called on fetch_more', async () => {
+      const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const initialRecords = [records[0], records[1]];
+
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      dataState.data$.documents$ = new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+      }) as DataDocuments$;
+
+      const resetSpy = jest.spyOn(dataState.inspectorAdapters.requests, 'reset');
+
+      const unsubscribe = dataState.subscribe();
+      resetSpy.mockClear();
+
+      // Trigger fetch_more - the inspector reset happens in tap() before the fetch starts
+      dataState.refetch$.next('fetch_more');
+
+      // Wait a tick for the tap() operator to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      unsubscribe();
+    });
+  });
+
   describe('default profile state', () => {
     it('should populate snapshotsByProfileId when the data source profile changes', async () => {
       const toolkit = getDiscoverInternalStateMock();
