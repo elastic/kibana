@@ -11,11 +11,10 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { TimelineId } from '../../../common/types/timeline';
-import { useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import { useUserPrivileges } from '../../common/components/user_privileges';
@@ -26,7 +25,6 @@ import { CASES_FEATURES } from '..';
 
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
-  const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const {
@@ -35,14 +33,6 @@ const CaseContainerComponent: React.FC = () => {
   const { hasAlertsRead, hasAlertsAll } = useAlertsPrivileges();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
-
-  const endpointDetailsHref = (endpointId: string) =>
-    getAppUrl({
-      path: getEndpointDetailsPath({
-        name: 'endpointActivityLog',
-        selected_endpoint: endpointId,
-      }),
-    });
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
 
@@ -82,20 +72,6 @@ const CaseContainerComponent: React.FC = () => {
             events: { enabled: true },
           },
           refreshRef,
-          actionsNavigation: {
-            href: endpointDetailsHref,
-            onClick: (endpointId: string, e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateTo({
-                path: getEndpointDetailsPath({
-                  name: 'endpointActivityLog',
-                  selected_endpoint: endpointId,
-                }),
-              });
-            },
-          },
           timelineIntegration: {
             editor_plugins: {
               parsingPlugin: timelineMarkdownPlugin.parser,

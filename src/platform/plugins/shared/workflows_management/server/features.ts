@@ -65,17 +65,6 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               ui: [WorkflowsManagementUiActions.update],
             },
             {
-              id: 'workflow_update_managed',
-              name: i18n.translate(
-                'platform.plugins.shared.workflows_management.featureRegistry.updateManagedWorkflowsSubFeaturePrivilege',
-                { defaultMessage: 'Update managed workflows' }
-              ),
-              includeIn: 'none',
-              savedObject: { all: [], read: [] },
-              api: [WorkflowsManagementApiActions.updateManaged],
-              ui: [],
-            },
-            {
               id: 'workflow_delete',
               name: i18n.translate(
                 'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',
@@ -129,6 +118,34 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.cancelExecution],
               ui: [WorkflowsManagementUiActions.cancelExecution],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: i18n.translate(
+        'platform.plugins.shared.workflows_management.featureRegistry.managedWorkflowsSubFeatureName',
+        { defaultMessage: 'Managed Workflows Actions' }
+      ),
+      description: i18n.translate(
+        'platform.plugins.shared.workflows_management.featureRegistry.managedWorkflowsSubFeatureDescription',
+        { defaultMessage: 'Managed workflow actions need explicit assignment' }
+      ),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'workflow_update_managed',
+              name: i18n.translate(
+                'platform.plugins.shared.workflows_management.featureRegistry.updateManagedWorkflowsSubFeaturePrivilege',
+                { defaultMessage: 'Update managed workflows' }
+              ),
+              includeIn: 'none',
+              savedObject: { all: [], read: [] },
+              api: [WorkflowsManagementApiActions.updateManaged],
+              ui: [],
             },
           ],
         },
