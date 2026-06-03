@@ -33,6 +33,7 @@ interface Props {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
   ruleId?: string;
   builderType?: string;
 }
@@ -49,6 +50,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
       />
     ),
     validate: (_methods, s) => s.queryCommitted,
@@ -149,6 +151,7 @@ export const ComposeDiscoverForm = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  isEditing,
   ruleId,
   builderType,
 }: Props) => {
@@ -161,6 +164,7 @@ export const ComposeDiscoverForm = ({
     services,
     onRecoveryTypeChange,
     onKindChange,
+    isEditing,
     ruleId,
     renderBuilderRecovery,
   });
