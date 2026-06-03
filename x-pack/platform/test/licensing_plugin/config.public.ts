@@ -15,6 +15,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...commonConfig.getAll(),
     testFiles: [require.resolve('./public')],
+    security: {
+      ...commonConfig.get('security'),
+      cookieLogin: false,
+    },
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
