@@ -139,6 +139,7 @@ export const getAgentPromptStorageState = ({
   // Create a shallow copy to avoid mutating the original conversation state
   const responses = { ...(conversation?.state?.prompt?.responses ?? {}) };
 
+  // Scope authorization responses to the conversation round (subsequent rounds can re-prompt)
   if (!isResumingRound) {
     Object.entries(responses).forEach(([promptId, { response }]) => {
       if (isAuthorizationPromptResponse(response)) {
