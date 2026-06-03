@@ -27,15 +27,7 @@ import { LensApp } from './lens_app';
 import { VisualizeApp } from './visualize_app';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
-export {
-  ContentListWrapper,
-  CopySavedObjectsToSpaceFlyout,
-  DataViewsManagementPage,
-  ListingTable,
-  SavedObjectsManagementPage,
-  buildContentListSearch,
-  buildContentListUrlRegex,
-};
+export { CopySavedObjectsToSpaceFlyout, SavedObjectsManagementPage };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
