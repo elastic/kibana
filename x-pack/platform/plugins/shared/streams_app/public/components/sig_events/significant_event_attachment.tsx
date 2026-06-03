@@ -85,7 +85,6 @@ const SignificantEventInlineContent = ({
   attachment: SignificantEventAttachment;
 }) => {
   const { data } = attachment;
-  const recommendations = data.recommendations.slice(0, 3);
 
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
@@ -139,12 +138,12 @@ const SignificantEventInlineContent = ({
           </Field>
         </EuiFlexItem>
 
-        {recommendations.length > 0 && (
+        {data.recommendations.length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="xs" />
             <Field label={labels.recommendations}>
               <ul>
-                {recommendations.map((recommendation) => (
+                {data.recommendations.map((recommendation) => (
                   <li key={recommendation}>{recommendation}</li>
                 ))}
               </ul>

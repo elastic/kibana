@@ -12,7 +12,6 @@ import type {
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
 import { sigEventSchema, type SigEvent } from '@kbn/streams-schema';
-import deepEqual from 'fast-deep-equal';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
 
@@ -102,7 +101,11 @@ export const createSignificantEventAttachmentType = ({
 
       try {
         const latestEvent = await fetchByDiscoverySlug(attachment.origin, context);
-        return !latestEvent || !deepEqual(latestVersion.data, latestEvent);
+        return (
+          !latestEvent ||
+          latestVersion.data.event_id !== latestEvent.event_id ||
+          latestVersion.data['@timestamp'] !== latestEvent['@timestamp']
+        );
       } catch (error) {
         logger.warn(
           `Failed to check staleness for significant event attachment "${attachment.origin}": ${error}`

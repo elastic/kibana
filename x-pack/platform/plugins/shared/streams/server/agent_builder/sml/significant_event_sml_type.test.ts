@@ -64,7 +64,6 @@ describe('createSignificantEventSmlType', () => {
   it('lists significant events for SML indexing', async () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
-      logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
     });
 
@@ -90,7 +89,6 @@ describe('createSignificantEventSmlType', () => {
   it('indexes a significant event chunk', async () => {
     findByDiscoverySlug.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
-      logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([]),
     });
 
@@ -115,7 +113,6 @@ describe('createSignificantEventSmlType', () => {
 
   it('converts an SML document into an attachment', async () => {
     const smlType = createSignificantEventSmlType({
-      logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event]),
     });
 

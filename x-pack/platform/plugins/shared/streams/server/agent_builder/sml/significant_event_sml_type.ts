@@ -7,7 +7,6 @@
 
 import type { SmlData, SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import type { SigEvent } from '@kbn/streams-schema';
-import type { Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
@@ -15,7 +14,6 @@ import { EventService } from '../../lib/sig_events/events/event_service';
 import type { GetScopedClients } from '../../routes/types';
 
 interface CreateSignificantEventSmlTypeOptions {
-  logger: Logger;
   getScopedClients: GetScopedClients;
 }
 
@@ -40,7 +38,6 @@ const eventToSmlContent = (event: SigEvent): string => {
 };
 
 export const createSignificantEventSmlType = ({
-  logger,
   getScopedClients,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
   const eventService = new EventService();
@@ -75,7 +72,9 @@ export const createSignificantEventSmlType = ({
           }
           page++;
         } catch (error) {
-          logger.warn(`SML significant event: failed to list events: ${(error as Error).message}`);
+          context.logger.warn(
+            `SML significant event: failed to list events: ${(error as Error).message}`
+          );
           return;
         }
       }

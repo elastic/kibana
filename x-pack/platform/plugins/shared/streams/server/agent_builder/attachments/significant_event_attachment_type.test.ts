@@ -110,6 +110,30 @@ describe('createSignificantEventAttachmentType', () => {
     );
   });
 
+  it('reports stale when the latest event timestamp differs from the stored snapshot', async () => {
+    const updatedEvent = { ...event, '@timestamp': '2026-01-01T00:01:00.000Z' };
+    const type = createSignificantEventAttachmentType({
+      logger: loggingSystemMock.createLogger(),
+      getScopedClients: createGetScopedClients([updatedEvent]),
+    });
+
+    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
+      true
+    );
+  });
+
+  it('does not report stale when event identity and timestamp match', async () => {
+    const updatedEvent = { ...event, summary: 'Updated summary.' };
+    const type = createSignificantEventAttachmentType({
+      logger: loggingSystemMock.createLogger(),
+      getScopedClients: createGetScopedClients([updatedEvent]),
+    });
+
+    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
+      false
+    );
+  });
+
   it('formats useful LLM text and exposes attachment metadata', async () => {
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
