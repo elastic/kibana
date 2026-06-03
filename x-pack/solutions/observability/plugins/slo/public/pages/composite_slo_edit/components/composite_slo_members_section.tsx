@@ -245,7 +245,7 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
               return (
                 <EuiComboBox
                   fullWidth
-                  singleSelection={{ asPlainText: true }}
+                  singleSelection={{ asPlainText: false }}
                   isLoading={isLoadingInstances}
                   options={instanceOptions}
                   selectedOptions={selected}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { useForm, FormProvider } from 'react-hook-form';
 import { render } from '../../../utils/test_helper';
@@ -107,6 +107,54 @@ describe('CompositeSloMembersSection', () => {
       await waitFor(() => {
         expect(formValues?.members).toHaveLength(1);
         expect(formValues?.members[0].instanceId).toBe(ALL_VALUE);
+      });
+    });
+
+    it('renders the instance combo box with an editable input separate from the selected pill', async () => {
+      // Regression for: with `singleSelection={{ asPlainText: true }}` the combo box's
+      // input mirrored the selected option's label ("All instances"), so the user could
+      // not backspace it to type a search query. The non-plain-text mode shows the
+      // selected option as a pill and leaves the search input empty/editable.
+      const defaultValues: Partial<CreateCompositeSLOForm> = {
+        members: [
+          {
+            sloId: 'slo-1',
+            sloName: 'SLO One',
+            groupBy: 'env',
+            instanceId: ALL_VALUE,
+            weight: 1,
+          },
+        ],
+      };
+
+      useFetchSloInstancesMock.mockReturnValue({
+        data: { results: [{ instanceId: 'production' }, { instanceId: 'staging' }] },
+        isLoading: false,
+      });
+
+      function Wrapper() {
+        const methods = useForm<CreateCompositeSLOForm>({ defaultValues });
+        return (
+          <FormProvider {...methods}>
+            <CompositeSloMembersSection />
+          </FormProvider>
+        );
+      }
+
+      render(<Wrapper />);
+
+      const combo = await screen.findByTestId('compositeSloMemberInstanceComboBox-0');
+      const input = combo.querySelector('input[role="combobox"]') as HTMLInputElement;
+      expect(input).toBeTruthy();
+      // In plain-text mode EUI sets the input value to the selected label. The fix
+      // switches to non-plain-text so the input starts empty and the selection is
+      // shown as a separate pill.
+      expect(input.value).toBe('');
+      expect(combo.textContent).toContain('All instances');
+
+      fireEvent.change(input, { target: { value: 'prod' } });
+      await waitFor(() => {
+        expect(input.value).toBe('prod');
       });
     });
 
