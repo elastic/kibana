@@ -18,6 +18,7 @@ import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
+import { logger } from '../../../kibana_services';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -82,6 +83,7 @@ export function transformDashboardOut(
    * Handle validating each state key that wasn't already validated above; if any validation fails,
    * just default back to the default state for that key
    */
+  const otherStateWarnings: Warnings = [];
   let validatedState: Partial<
     Pick<
       DashboardState,
@@ -95,7 +97,7 @@ export function transformDashboardOut(
     >
   > = {
     description,
-    options: options as DashboardState['options'], // defaults will be injected, so safe to remove partial. typing
+    options: options as DashboardState['options'], // defaults will be injected, so safe to remove partial typing
     project_routing: projectRouting,
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
@@ -110,7 +112,16 @@ export function transformDashboardOut(
         ...validatedState,
         [key]: strictValidationSchema.validateKey(key, validatedState[key]),
       };
-    } catch (e) {
+    } catch (error) {
+      const warningMessage = `Unexpected error transforming ${key}. Error: ${error.message}`;
+      logger.warn(warningMessage);
+      warnings.push({
+        type: 'dropped_property',
+        message: warningMessage,
+        key,
+        value: validatedState[key],
+      });
+      // fallback to default state
       validatedState = {
         ...validatedState,
         [key]: DEFAULT_DASHBOARD_STATE[key],
