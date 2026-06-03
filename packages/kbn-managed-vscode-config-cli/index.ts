@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Os from 'os';
 import Path from 'path';
 import Fsp from 'fs/promises';
 
@@ -56,30 +55,4 @@ run(async ({ log }) => {
   await Fsp.writeFile(path, updatedJson);
 
   log.success('updated', path);
-
-  // Install the in-repo ES|QL VS Code extension via symlink into any IDE
-  // extensions directory that already exists on this machine (VS Code, Cursor).
-  // The check for an existing directory means this is a no-op on CI.
-  const extName = 'elastic.kibana-esql-0.1.0';
-  const ideExtDirs = [
-    Path.join(Os.homedir(), '.vscode', 'extensions'),
-    Path.join(Os.homedir(), '.cursor', 'extensions'),
-  ];
-
-  for (const extDir of ideExtDirs) {
-    try {
-      await Fsp.access(extDir);
-    } catch {
-      continue;
-    }
-
-    const linkPath = Path.join(extDir, extName);
-    try {
-      await Fsp.lstat(linkPath);
-      // Already exists (symlink or real dir) — leave it alone.
-    } catch {
-      await Fsp.symlink(extSrc, linkPath);
-      log.success('installed kibana-esql extension into', extDir);
-    }
-  }
 });

@@ -124,7 +124,7 @@ export class AlertActionsClient {
     }
 
     const query = esql`
-      | FROM  ${ALERT_EVENTS_DATA_STREAM}
+      FROM ${ALERT_EVENTS_DATA_STREAM}
       | WHERE type == "alert" AND space_id == ${this.spaceId} AND (${whereClause})
       | STATS
         last_event_timestamp = MAX(@timestamp),

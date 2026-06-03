@@ -30,18 +30,28 @@ import { esql } from '@elastic/esql';
 import { isResponseError } from '@kbn/es-errors';
 import { MY_TYPE } from './saved_objects';
 
+// esql.col() produces a correctly-quoted ES|QL identifier.
+// Field names that contain dots (e.g. "my_type.title") must be backtick-quoted
+// in ES|QL — esql.col() handles that automatically.
 const titleCol = esql.col(`${MY_TYPE}.title`);
 const descCol = esql.col(`${MY_TYPE}.description`);
 
-const result = await savedObjectsClient.esql({
-  type: [MY_TYPE],
-  namespaces: ['default'],
-  pipeline: esql`
-    KEEP ${titleCol}, ${descCol}
-    | SORT ${titleCol}
-    | LIMIT 100
-  `,
-});
+try {
+  const result = await savedObjectsClient.esql({
+    type: [MY_TYPE],
+    namespaces: ['default'],
+    pipeline: esql`
+      KEEP ${titleCol}, ${descCol}
+      | SORT ${titleCol}
+      | LIMIT 100
+    `,
+  });
+} catch (e) {
+  if (isResponseError(e)) {
+    log.error(JSON.stringify(e.meta.body, null, 2));
+  }
+  throw e;
+}
 ```
 
 To include `METADATA` fields (e.g. `_id`, `_source`), use the `metadata` option:
@@ -81,7 +91,9 @@ const result = await savedObjectsClient.esql({
 
 ### Execution context
 
-The pipeline executes as the `kibana_system` Elasticsearch user, which has elevated privileges. A user who controls the pipeline could use `ENRICH` to access data they are not authorized to see. Always construct the pipeline server-side; never let user input determine the pipeline structure.
+The pipeline executes as the `kibana_system` Elasticsearch user, which has elevated privileges. Always construct the pipeline server-side; never let user input determine the pipeline structure. For example, a user who controls the pipeline could use `ENRICH` to join against policies whose source data they are not authorised to see directly.
+
+Using `ENRICH` in your own pipeline is fine — the risk is only when the user can influence which policy is used or the pipeline structure.
 
 ### Space and type filtering
 

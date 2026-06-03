@@ -16,8 +16,7 @@
         "timonwong.shellcheck",
         "eamodio.gitlens",
         "github.vscode-pull-request-github",
-        "anthropic.claude-code",
-        "elastic.kibana-esql"
+        "anthropic.claude-code"
       ]
     }
   },
