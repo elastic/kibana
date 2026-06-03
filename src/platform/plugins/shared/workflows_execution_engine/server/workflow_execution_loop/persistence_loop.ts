@@ -58,7 +58,9 @@ export async function persistenceLoop(
       return;
     }
 
-    await flushState(params);
+    await flushState(params, {
+      workflowLogFlushSignal: params.taskAbortController.signal,
+    });
 
     try {
       const waitSpan = apm.startSpan('persistence wait', 'workflow', 'wait');

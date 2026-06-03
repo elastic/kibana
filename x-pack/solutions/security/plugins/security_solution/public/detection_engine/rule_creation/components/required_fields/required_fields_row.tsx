@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
 import { NameComboBox } from './name_combobox';
 import { TypeComboBox } from './type_combobox';
@@ -145,13 +152,18 @@ const RequiredFieldField = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="danger"
-            iconType="trash"
-            onClick={onRemove}
-            aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
-            data-test-subj={`removeRequiredFieldButton-${field.value.name}`}
-          />
+          <EuiToolTip
+            content={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color="danger"
+              iconType="trash"
+              onClick={onRemove}
+              aria-label={i18n.REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL}
+              data-test-subj={`removeRequiredFieldButton-${field.value.name}`}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
