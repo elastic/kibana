@@ -41,3 +41,4 @@ export const spaceTest = spaceBaseTest.extend<ContextTestFixtures, ScoutParallel
 
 export * as testData from './constants';
 export { ContextPage } from './page_objects';
+export { addFilterWithoutStrictCheck } from './helpers';

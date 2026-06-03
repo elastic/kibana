@@ -30,14 +30,14 @@ export class ContextPage {
     this.docTable = page.testSubj.locator('discoverDocTable');
   }
 
-  async navigateTo(indexPattern: string, anchorId: string, overrideInitialState = {}) {
+  async navigateTo(dataViewId: string, anchorId: string, overrideInitialState = {}) {
     const initialState = rison.encode({
       ...DEFAULT_INITIAL_STATE,
       ...overrideInitialState,
     });
 
     await this.page.gotoApp('discover', {
-      hash: `/context/${indexPattern}/${anchorId}?_a=${initialState}`,
+      hash: `/context/${dataViewId}/${anchorId}?_a=${initialState}`,
     });
     await this.waitUntilContextLoadingHasFinished();
   }
@@ -86,7 +86,7 @@ export class ContextPage {
       ? '[data-test-subj="discoverDocTable"] [data-grid-row-index]'
       : '[data-test-subj="discoverDocTable"] [data-grid-row-index]:not([class*="anchorRow"])';
     const rows = this.page.locator(selector);
-    await rows.locator('nth=0').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page.locator(`${selector} >> nth=0`).waitFor({ state: 'visible', timeout: 30_000 });
     return rows.allInnerTexts();
   }
 

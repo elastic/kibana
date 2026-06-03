@@ -9,31 +9,17 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
+import {
+  spaceTest,
+  testData,
+  addFilterWithoutStrictCheck,
+} from '../../../fixtures/surrounding_docs';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
   ['extension.raw', 'jpg'],
   ['geo.src', 'IN'],
 ];
-
-async function addFilterWithoutStrictCheck(page: ScoutPage, field: string, value: string) {
-  await page.testSubj.click('addFilter');
-  await page.testSubj.waitForSelector('addFilterPopover');
-  await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', field);
-  await page.click(`.euiComboBoxOption[title="${field}"]`);
-  await expect(page.testSubj.locator('filterOperatorList')).not.toHaveClass(
-    /euiComboBox-isDisabled/
-  );
-  await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'is');
-  await page.click('.euiComboBoxOption[title="is"]');
-  const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
-  await expect(filterParamsInput).toBeEditable();
-  await filterParamsInput.focus();
-  await page.typeWithDelay('[data-test-subj="filterParams"] input', value);
-  await page.testSubj.click('saveFilter');
-  await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
-}
 
 async function addAllFilters(page: ScoutPage) {
   for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
@@ -156,10 +142,11 @@ spaceTest.describe(
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
-        await pageObjects.discover.saveSearch('my search');
+        const savedSearchName = 'my search';
+        await pageObjects.discover.saveSearch(savedSearchName);
 
         await pageObjects.dashboard.openNewDashboard();
-        await pageObjects.dashboard.addSavedSearch('my-search');
+        await pageObjects.dashboard.addSavedSearch(savedSearchName);
         await pageObjects.dashboard.waitForRenderComplete();
 
         const rowToggle = page.locator(
