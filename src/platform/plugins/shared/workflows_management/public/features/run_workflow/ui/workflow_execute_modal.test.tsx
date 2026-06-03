@@ -154,7 +154,7 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Run Workflow')).toBeInTheDocument();
     });
 
-    it('renders all trigger type buttons', () => {
+    it('renders all trigger type buttons when the workflow definition is missing', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -169,6 +169,26 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Event')).toBeInTheDocument();
       expect(getByText('Manual')).toBeInTheDocument();
       expect(getByText('Historical')).toBeInTheDocument();
+    });
+
+    it('shows only tabs that match triggers declared in the workflow', () => {
+      const { getByText, queryByText } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={{
+            ...baseWorkflowDefinition,
+            triggers: [{ type: 'alert' }],
+          }}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByText('Alert')).toBeInTheDocument();
+      expect(getByText('Manual')).toBeInTheDocument();
+      expect(getByText('Historical')).toBeInTheDocument();
+      expect(queryByText('Document')).not.toBeInTheDocument();
+      expect(queryByText('Event')).not.toBeInTheDocument();
     });
 
     it('uses the test run title and still exposes the full trigger tab set', () => {

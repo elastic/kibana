@@ -40,7 +40,7 @@ export const getTutorials = (
     id: ONBOARDING_TUTORIAL_ID,
     title: 'Onboarding: ingest and search vectors',
     description:
-      'A 3-step walkthrough that creates an index, loads a few documents, and runs your first vector query.',
+      'A 2-step walkthrough that creates an index, loads a few documents, and runs your first vector query.',
     icon: 'rocket',
     href: application.getUrlForApp('vectordb', { path: '/onboarding' }),
     duration: '5 min',
