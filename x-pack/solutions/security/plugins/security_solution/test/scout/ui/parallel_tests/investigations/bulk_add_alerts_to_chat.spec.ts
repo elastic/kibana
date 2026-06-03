@@ -21,7 +21,9 @@ spaceTest.describe(
     // One rule name per created rule; the first is used as the anchor to wait for page readiness.
     const ruleNames: string[] = [];
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }, testInfo) => {
+      // Rule execution can take up to ~90s under load; extend beyond Playwright's 60s default.
+      testInfo.setTimeout(testInfo.timeout + 90_000);
       // Defensive cleanup from any prior failed run.
       // Note: cleanStandardList() is intentionally omitted here — it deletes saved objects
       // of type 'action', which would destroy the .gen-ai connector created by the
@@ -43,7 +45,9 @@ spaceTest.describe(
       // Wait for the task manager to execute each rule and produce at least one alert before
       // opening the browser. Without this, waitForRuleAlert races against the task manager's
       // first-run scheduling (which can take up to ~90s under load) and times out.
-      await Promise.all(ruleNames.map((name) => apiServices.detectionAlerts.waitForAlerts(name)));
+      await Promise.all(
+        ruleNames.map((name) => apiServices.detectionAlerts.waitForAlerts(name, 1, 60_000))
+      );
 
       await browserAuth.loginWithCustomRole(FULL_KIBANA_SECURITY_ROLE);
     });

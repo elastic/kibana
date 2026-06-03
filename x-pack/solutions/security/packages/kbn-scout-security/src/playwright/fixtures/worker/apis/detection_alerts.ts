@@ -13,10 +13,7 @@ const WAIT_FOR_ALERTS_POLL_INTERVAL_MS = 1_000;
 
 export interface DetectionAlertsApiService {
   deleteAll: () => Promise<void>;
-  /**
-   * Polls until at least `minCount` alerts matching `ruleName` exist, or
-   * the `timeout` is exhausted.  Resolves with the matched count; rejects on timeout.
-   */
+  /** Polls until ≥ minCount alerts for ruleName exist; rejects on timeout (default 30s). */
   waitForAlerts: (ruleName: string, minCount?: number, timeout?: number) => Promise<number>;
 }
 
@@ -48,7 +45,7 @@ export const getDetectionAlertsApiService = ({
       });
     },
 
-    waitForAlerts: async (ruleName: string, minCount = 1, timeout = 120_000) => {
+    waitForAlerts: async (ruleName: string, minCount = 1, timeout = 30_000) => {
       return measurePerformanceAsync(log, 'security.detectionAlerts.waitForAlerts', async () => {
         const deadline = Date.now() + timeout;
         const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
