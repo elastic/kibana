@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
@@ -114,7 +115,7 @@ export const useConversationStream = () => {
   ]);
 
   const resumeRound = useCallback(
-    ({ prompts }: { prompts: Record<string, { allow: boolean }> }) => {
+    ({ prompts }: { prompts: Record<string, PromptResponse> }) => {
       if (!conversationId) {
         throw new Error('Cannot resume without a conversation id');
       }
