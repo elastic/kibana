@@ -396,7 +396,9 @@ export function ProgressBarControls({
       </EuiFormRow>
 
       {isCustomRange && (
-        <EuiFormRow display="columnCompressed" fullWidth label={''}>
+        // Reserve the label column so the range inputs line up under the
+        // "Value range" control above instead of starting at the panel edge.
+        <EuiFormRow display="columnCompressed" fullWidth hasEmptyLabelSpace>
           <EuiDualRange
             id={`${idPrefix}valueRangeSlider`}
             min={sliderMin}
