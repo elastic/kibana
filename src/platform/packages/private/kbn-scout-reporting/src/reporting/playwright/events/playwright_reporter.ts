@@ -159,11 +159,11 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (result) {
       testProps.status = result.status;
       testProps.duration = result.duration;
-      const consoleErrorsAttachment = result.attachments.find(
-        (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
-      );
-      if (consoleErrorsAttachment) {
-        testProps.console_errors = consoleErrorsAttachment.body?.toString('utf-8');
+      const consoleErrors = result.attachments
+        .find((a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        ?.body?.toString('utf-8');
+      if (consoleErrors) {
+        testProps.console_errors = consoleErrors;
       }
     }
 
