@@ -1342,6 +1342,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/sec
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -1674,7 +1675,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/services/index.ts @elastic/observability-ui
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/observability-ui
 
 ### Observability Plugins
 
@@ -1734,6 +1734,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/server/routes/rules @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/saved_objects/threshold.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/server/services @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/test/scout/api @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/actionable-obs-team
 
@@ -1913,14 +1914,11 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 
 # Actionable Observability (formerly Observability UX Management) team
 
-/src/platform/test/api_integration/apis/suggestions  @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/observability_api_integration @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/182243
 /x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/slo/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_functional @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration/apis/security/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
@@ -1978,9 +1976,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 # Uptime
 /x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/apps/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
@@ -2208,6 +2203,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/query_bar.ts @elastic/appex-qa
 /src/platform/test/functional/services/menu_toggle.ts @elastic/appex-qa
 /src/platform/test/functional/services/listing_table.ts @elastic/appex-qa
+/src/platform/test/functional/services/content_list.ts @elastic/appex-qa
 /src/platform/test/common/fixtures/plugins/coverage @elastic/appex-qa
 /src/platform/test/functional/services/index.ts @elastic/appex-qa
 /src/platform/test/functional/services/global_nav.ts @elastic/appex-qa
@@ -3265,7 +3261,6 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_anal
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
