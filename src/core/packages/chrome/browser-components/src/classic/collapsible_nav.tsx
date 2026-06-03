@@ -113,13 +113,15 @@ interface Props {
 
 const overviewIDsToHide = [
   'kibanaOverview',
+  'securitySolutionUI:get_started',
   'securitySolutionUI:siem_readiness',
   'securitySolutionUI:siem_migrations',
   'securitySolutionUI:ai_value',
 ];
 const overviewIDs = [
-  'securitySolutionUI:get_started',
+  ...overviewIDsToHide,
   'observability-overview',
+  'securitySolutionUI:launchpad',
   'management',
   'enterpriseSearch',
 ];
