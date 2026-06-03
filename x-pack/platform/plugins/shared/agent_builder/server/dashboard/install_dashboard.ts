@@ -34,21 +34,23 @@ interface DashboardSavedObjectAsset {
 
 const sourceOverviewDashboard = overviewDashboardAsset as DashboardSavedObjectAsset;
 
-// return the id of the dashboard in the given space
+/**
+ * return the id of the dashboard in the given space
+ */
 export function overviewDashboardId(spaceId: string): string {
   return `${AGENT_BUILDER_OVERVIEW_DASHBOARD_ID}-${spaceId}`;
 }
 
-// install the dashboard in the given space using the saved objects importer
+/**
+ * install the dashboard in the given space using the saved objects importer
+ */
 async function installAgentBuilderOverviewDashboard(
   importer: ISavedObjectsImporter,
   logger: Logger,
   spaceId: string,
   namespace: string | undefined
 ): Promise<void> {
-  // Substitute the namespace placeholder everywhere it appears in the saved
-  // object (ES|QL queries, index references, etc.) so the dashboard is fully
-  // scoped to the space before import.
+  // Substitute the namespace placeholder everywhere it appears in the saved object
   const dashboard = JSON.parse(
     JSON.stringify(sourceOverviewDashboard).replaceAll(
       AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
@@ -81,7 +83,9 @@ async function installAgentBuilderOverviewDashboard(
   logger.debug(`Agent Builder overview dashboard installed in space "${spaceId}"`);
 }
 
-// remove the dashboard from the given space
+/**
+ * remove the dashboard from the given space
+ */
 async function removeAgentBuilderOverviewDashboard(
   client: SavedObjectsClientContract,
   logger: Logger,

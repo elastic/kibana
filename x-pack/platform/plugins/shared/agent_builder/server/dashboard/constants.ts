@@ -12,8 +12,10 @@ export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-overview';
 export const AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER = '__AGENT_BUILDER_TRACES_NAMESPACE__';
 
 /**
- * Pin SO versions past legacy Lens migrations.
- * Reference: x-pack/platform/plugins/shared/observability_ai_assistant/server/service/dashboard_manager.ts
+ * Pin the dashboard SO past the legacy embeddable migrations. Without these the SO
+ * migrator runs Lens migrations from 7.13.1 onward, which expect the pre-8.6
+ * `indexpattern` datasource shape and crash on the modern shape we ship.
+ * Reference: x-pack/platform/plugins/shared/inference/server/dashboard/install_dashboard.ts
  */
 export const AGENT_BUILDER_DASHBOARD_CORE_MIGRATION_VERSION = '8.8.0';
 export const AGENT_BUILDER_DASHBOARD_TYPE_MIGRATION_VERSION = '10.3.0';
