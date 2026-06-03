@@ -95,6 +95,7 @@ const PackagePolicyStreamsSchema = {
   condition: schema.maybe(
     schema.nullable(
       schema.string({
+        maxLength: 10000,
         meta: {
           description: 'Agent condition expression to evaluate whether to apply this stream.',
         },
@@ -119,6 +120,7 @@ export const PackagePolicyInputsSchema = {
   condition: schema.maybe(
     schema.nullable(
       schema.string({
+        maxLength: 10000,
         meta: {
           description: 'Agent condition expression to evaluate whether to apply this input.',
         },
@@ -292,6 +294,7 @@ export const PackagePolicyBaseSchema = {
   condition: schema.maybe(
     schema.nullable(
       schema.string({
+        maxLength: 10000,
         meta: {
           description:
             'Agent condition expression to evaluate whether to apply this integration to its inputs.',
@@ -419,6 +422,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       condition: schema.maybe(
         schema.nullable(
           schema.string({
+            maxLength: 10000,
             meta: {
               description: 'Agent condition expression to evaluate whether to apply this input.',
             },
@@ -442,6 +446,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             condition: schema.maybe(
               schema.nullable(
                 schema.string({
+                  maxLength: 10000,
                   meta: {
                     description:
                       'Agent condition expression to evaluate whether to apply this stream.',
@@ -539,6 +544,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
     condition: schema.maybe(
       schema.nullable(
         schema.string({
+          maxLength: 10000,
           meta: {
             description:
               'Agent condition expression to evaluate whether to apply this integration to its inputs.',
