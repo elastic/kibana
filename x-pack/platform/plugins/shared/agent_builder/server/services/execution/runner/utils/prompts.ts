@@ -6,6 +6,7 @@
  */
 
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type {
   PromptManager,
   ToolPromptManager,
@@ -131,10 +132,22 @@ export const getAgentPromptStorageState = ({
   input: ConverseInput;
   conversation?: Conversation;
 }): PromptStorageState => {
+  const rounds = conversation?.rounds ?? [];
+  const lastRound = rounds[rounds.length - 1];
+  const isResumingRound = lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+
   // Create a shallow copy to avoid mutating the original conversation state
-  const state: PromptStorageState = {
-    responses: { ...(conversation?.state?.prompt?.responses ?? {}) },
-  };
+  const responses = { ...(conversation?.state?.prompt?.responses ?? {}) };
+
+  if (!isResumingRound) {
+    Object.entries(responses).forEach(([promptId, { response }]) => {
+      if (isAuthorizationPromptResponse(response)) {
+        delete responses[promptId];
+      }
+    });
+  }
+
+  const state: PromptStorageState = { responses };
 
   if (input.prompts) {
     Object.entries(input.prompts).forEach(([promptId, response]) => {

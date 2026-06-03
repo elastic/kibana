@@ -129,7 +129,7 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    const askForAuthorization = ({
+    const resolveAuthorizationResult = ({
       authMethod,
       connectorName,
     }: {
@@ -141,17 +141,33 @@ export const createExecuteConnectorSubActionTool = ({
       }
       const promptId = `tools.${context.callContext.toolId}.authorization.${connectorId}`;
       const { status } = context.prompts.checkAuthorizationStatus(promptId);
+      const resolvedConnectorName = connectorName ?? connectorId;
 
-      if (status !== AuthorizationStatus.unprompted) {
-        return undefined;
+      if (status === AuthorizationStatus.unprompted) {
+        return context.prompts.askForAuthorization({
+          id: promptId,
+          connector_id: connectorId,
+          connector_name: resolvedConnectorName,
+          connector_type: connectorType,
+          auth_method: authMethod,
+        });
       }
-      return context.prompts.askForAuthorization({
-        id: promptId,
-        connector_id: connectorId,
-        connector_name: connectorName ?? connectorId,
-        connector_type: connectorType,
-        auth_method: authMethod,
-      });
+
+      if (status === AuthorizationStatus.declined) {
+        return {
+          results: [
+            createErrorResult({
+              message:
+                `The user declined to authorize the '${resolvedConnectorName}' connector, so the '${subAction}' sub-action cannot run. ` +
+                'Do not retry this sub-action and do not instruct the user to authorize the connector themselves. ' +
+                'Briefly let the user know the request was not completed because authorization was declined.',
+              metadata: { connectorId, connectorType, subAction, authorizationStatus: status },
+            }),
+          ],
+        };
+      }
+
+      return undefined;
     };
 
     let executeResult;
@@ -183,12 +199,12 @@ export const createExecuteConnectorSubActionTool = ({
         const { errorMeta } = executeResult;
         const connectorName =
           typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
-        const authPrompt = askForAuthorization({
+        const authResult = resolveAuthorizationResult({
           authMethod: errorMeta?.authMethod,
           connectorName,
         });
-        if (authPrompt) {
-          return authPrompt;
+        if (authResult) {
+          return authResult;
         }
       }
       return {

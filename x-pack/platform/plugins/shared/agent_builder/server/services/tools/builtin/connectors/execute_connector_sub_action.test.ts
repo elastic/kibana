@@ -446,7 +446,7 @@ describe('createExecuteConnectorSubActionTool', () => {
       expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
     });
 
-    it('does not re-raise the prompt when authorization was declined', async () => {
+    it('returns an explicit "user declined" error when authorization was declined', async () => {
       mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.declined });
       mockExecute.mockResolvedValue(authErrorResult());
 
@@ -457,7 +457,13 @@ describe('createExecuteConnectorSubActionTool', () => {
       );
 
       expect(mockAskForAuthorization).not.toHaveBeenCalled();
-      expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
+      const errorResult = (result as ToolHandlerStandardReturn).results[0] as ErrorResult;
+      expect(errorResult.type).toBe(ToolResultType.error);
+      expect(errorResult.data.message).toContain('declined to authorize');
+      expect(errorResult.data.message).toContain('My Slack');
+      expect(errorResult.data.metadata).toMatchObject({
+        authorizationStatus: AuthorizationStatus.declined,
+      });
     });
 
     it('does not re-raise the prompt when already authorized but execution still fails', async () => {
