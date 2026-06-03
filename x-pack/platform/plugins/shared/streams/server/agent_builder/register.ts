@@ -19,6 +19,7 @@ import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
+import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
 export const createMemoryToolsOptions = ({
   server,
@@ -62,6 +63,7 @@ export const registerStreamsAgentBuilder = async ({
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerSignificantEventsDiscoveryAgents(agentBuilder);
 
   const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
 
