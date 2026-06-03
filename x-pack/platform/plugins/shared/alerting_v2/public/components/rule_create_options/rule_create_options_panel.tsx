@@ -154,8 +154,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         description: i18n.translate(
           'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
           {
-            defaultMessage:
-              'Create as an ES|QL query with live preview. YAML editor available.',
+            defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.',
           }
         ),
         onClick: onCreateEsqlRule,
@@ -281,9 +280,12 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             titleElement="h3"
             titleSize="xs"
             hasBorder={true}
-            title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle', {
-              defaultMessage: 'Create with AI Agent',
-            })}
+            title={i18n.translate(
+              'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
+              {
+                defaultMessage: 'Create with AI Agent',
+              }
+            )}
             description={i18n.translate(
               'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
               { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
