@@ -131,30 +131,30 @@ spaceTest.describe(
     spaceTest(
       'trendline persists after converting form-based metric to ES|QL',
       async ({ browserAuth, page, pageObjects }) => {
-        const { dashboard } = pageObjects;
+        const { dashboard, lens } = pageObjects;
 
-        // Open the dashboard and verify initial trendline
-        await browserAuth.loginAsPrivilegedUser();
-        await pageObjects.dashboard.openDashboardWithId(dashboardId);
-        await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await spaceTest.step('open dashboard and verify initial trendline', async () => {
+          await browserAuth.loginAsPrivilegedUser();
+          await dashboard.openDashboardWithId(dashboardId);
+          await expect(page.getByTestId('mtrVis')).toBeVisible();
+          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        });
 
-        // Switch to edit mode and open inline editor
-        await dashboard.switchToEditMode();
-        await openInlineEditorAndWaitVisible(pageObjects, panelId);
+        await spaceTest.step('convert to ES|QL via inline editor', async () => {
+          await dashboard.switchToEditMode();
+          await openInlineEditorAndWaitVisible(pageObjects, panelId);
+          await convertToEsqlViaModal({ pageObjects, page });
+        });
 
-        // Convert to ES|QL via modal
-        await convertToEsqlViaModal({ pageObjects, page });
+        await spaceTest.step('verify trendline renders after conversion', async () => {
+          await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        });
 
-        // Verify ES|QL editor is visible and trendline still renders
-        await expect(page.getByTestId('ESQLEditor')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
-
-        // Apply changes
-        await applyLensInlineEditorAndWaitClosed({ lens: pageObjects.lens });
-
-        // Verify trendline persists after applying
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await spaceTest.step('apply changes and verify trendline persists', async () => {
+          await applyLensInlineEditorAndWaitClosed({ lens });
+          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        });
       }
     );
   }

@@ -78,7 +78,6 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
       }),
     });
 
-    // Create dashboard with ES|QL metric WITHOUT trendline
     const body = {
       title: 'ESQL metric trendline toggle test',
       time_range: LOGSTASH_TIME_RANGE,
@@ -117,88 +116,82 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
 
   spaceTest(
     'can enable and disable trendline via dimension editor with persistence',
-    async ({ browserAuth, page, pageObjects, log }) => {
+    async ({ browserAuth, page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
 
-      // 1) Open dashboard — verify NO trendline initially
-      log.info('Step 1: Opening dashboard, verifying no trendline initially');
-      await browserAuth.loginAsPrivilegedUser();
-      await dashboard.openDashboardWithId(dashboardId);
-      await expect(page.getByTestId('mtrVis')).toBeVisible();
-      await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
-
-      // 2) Enable trendline: edit mode → inline editor → dimension editor → click "Line"
-      log.info('Step 2: Enabling trendline via dimension editor');
-      await dashboard.switchToEditMode();
-      await openInlineEditorAndWaitVisible(pageObjects, panelId);
-
-      const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-      const dimensionButton = metricDimensionPanel.getByRole('button', {
-        name: /Edit .* configuration/,
+      await spaceTest.step('open dashboard and verify no trendline initially', async () => {
+        await browserAuth.loginAsPrivilegedUser();
+        await dashboard.openDashboardWithId(dashboardId);
+        await expect(page.getByTestId('mtrVis')).toBeVisible();
+        await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
       });
-      await dimensionButton.click();
-      await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
 
-      await page.getByTestId('lnsMetric_background_chart_line').click();
-      await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
-      log.info('Step 2: Trendline visible, closing dimension editor and applying');
+      await spaceTest.step('enable trendline via dimension editor', async () => {
+        await dashboard.switchToEditMode();
+        await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
-      // Close dimension editor, apply changes
-      await lens.getSecondaryFlyoutBackButton().click();
-      await applyLensInlineEditorAndWaitClosed({ lens });
+        const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
+        const dimensionButton = metricDimensionPanel.getByRole('button', {
+          name: /Edit .* configuration/,
+        });
+        await dimensionButton.click();
+        await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
 
-      // 3) Verify trendline is visible, save dashboard, reload and verify persistence
-      log.info('Step 3: Verifying trendline visible before save');
-      await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await page.getByTestId('lnsMetric_background_chart_line').click();
+        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
 
-      log.info('Step 3: Saving dashboard (quick save)');
-      await dashboard.saveChangesToExistingDashboard();
-      // Wait for save to finish: button goes disabled → enabled again after save completes
-      await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
-      log.info('Step 3: Save complete, verifying trendline still visible');
-      await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
-
-      log.info('Step 3: Full page reload');
-      await page.reload();
-      await dashboard.waitForRenderComplete();
-      await expect(page.getByTestId('mtrVis')).toBeVisible();
-      await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
-      log.info('Step 3: PASSED — trendline persists after reload');
-
-      // 4) Disable trendline: inline editor → dimension editor → click "None"
-      log.info('Step 4: Disabling trendline via dimension editor');
-      await dashboard.ensureEditMode();
-      await openInlineEditorAndWaitVisible(pageObjects, panelId);
-
-      const metricDimensionPanel2 = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
-      const dimensionButton2 = metricDimensionPanel2.getByRole('button', {
-        name: /Edit .* configuration/,
+        await lens.getSecondaryFlyoutBackButton().click();
+        await applyLensInlineEditorAndWaitClosed({ lens });
       });
-      await dimensionButton2.click();
-      await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
 
-      await page.getByTestId('lnsMetric_background_chart_none').click();
-      await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
-      log.info('Step 4: Trendline removed, closing dimension editor and applying');
+      await spaceTest.step(
+        'save dashboard and verify trendline persists after reload',
+        async () => {
+          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
 
-      // Close dimension editor, apply changes
-      await lens.getSecondaryFlyoutBackButton().click();
-      await applyLensInlineEditorAndWaitClosed({ lens });
+          await dashboard.saveChangesToExistingDashboard();
+          await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
+          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
 
-      // 5) Verify trendline is gone, save dashboard, reload and verify persistence
-      log.info('Step 5: Verifying trendline gone before save');
-      await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+          await page.reload();
+          await dashboard.waitForRenderComplete();
+          await expect(page.getByTestId('mtrVis')).toBeVisible();
+          await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        }
+      );
 
-      log.info('Step 5: Saving dashboard (quick save)');
-      await dashboard.saveChangesToExistingDashboard();
-      await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
+      await spaceTest.step('disable trendline via dimension editor', async () => {
+        await dashboard.ensureEditMode();
+        await openInlineEditorAndWaitVisible(pageObjects, panelId);
 
-      log.info('Step 5: Full page reload');
-      await page.reload();
-      await dashboard.waitForRenderComplete();
-      await expect(page.getByTestId('mtrVis')).toBeVisible();
-      await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
-      log.info('Step 5: PASSED — trendline stays removed after reload');
+        const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
+        const dimensionButton = metricDimensionPanel.getByRole('button', {
+          name: /Edit .* configuration/,
+        });
+        await dimensionButton.click();
+        await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+
+        await page.getByTestId('lnsMetric_background_chart_none').click();
+        await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+
+        await lens.getSecondaryFlyoutBackButton().click();
+        await applyLensInlineEditorAndWaitClosed({ lens });
+      });
+
+      await spaceTest.step(
+        'save dashboard and verify trendline stays removed after reload',
+        async () => {
+          await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+
+          await dashboard.saveChangesToExistingDashboard();
+          await expect(page.getByTestId('dashboardQuickSaveMenuItem')).toBeEnabled();
+
+          await page.reload();
+          await dashboard.waitForRenderComplete();
+          await expect(page.getByTestId('mtrVis')).toBeVisible();
+          await expect(page.locator('.echSingleMetricSparkline')).toHaveCount(0);
+        }
+      );
     }
   );
 });
