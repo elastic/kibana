@@ -68,6 +68,10 @@ const createParentLookup = (parentsByCommit: Record<string, string | null>) => {
 };
 
 describe('resolveBaselineBuild', () => {
+  it('looks for the reusable zstd Kibana distributable artifact', () => {
+    expect(KIBANA_REUSABLE_DISTRIBUTABLE_ARTIFACT_FILENAME).toBe('kibana-default.tar.zst');
+  });
+
   it('resolves the merge-base commit on the first attempt', async () => {
     const buildkite = createMockBuildkiteClient({
       buildsByCommit: new Map([[MERGE_BASE_SHA, makeBuild({ commit: MERGE_BASE_SHA })]]),

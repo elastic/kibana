@@ -8,7 +8,7 @@
  */
 
 export const KIBANA_ON_MERGE_PIPELINE_SLUG = 'kibana-on-merge';
-export const KIBANA_REUSABLE_DISTRIBUTABLE_ARTIFACT_FILENAME = 'kibana-default.tar.gz';
+export const KIBANA_REUSABLE_DISTRIBUTABLE_ARTIFACT_FILENAME = 'kibana-default.tar.zst';
 export const BASELINE_ANCESTOR_LOOKUP_LIMIT = 10;
 
 export type BaselineBuildOutcome =
