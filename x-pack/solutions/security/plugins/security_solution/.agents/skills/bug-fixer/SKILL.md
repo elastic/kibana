@@ -9,7 +9,7 @@ description: >
 
 # Bug Fixer
 
-**Scope:** Stateful (ECH) environments only. Decline serverless bugs before starting either step.
+**Scope:** Stateful (ECH) and **local serverless** environments. Cloud serverless (MKI, ECH serverless projects) is not supported — local only.
 
 Two-step process. Slash commands require symlink setup — see Prerequisites.
 

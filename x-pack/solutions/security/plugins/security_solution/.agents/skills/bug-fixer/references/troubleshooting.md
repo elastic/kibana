@@ -14,3 +14,7 @@
 | Browser can't find element | Take fresh `browser_snapshot` after navigation/waits |
 | After server restart, browser redirects to SAML mock IDP | Expected condition — always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`; never rely on the default redirect after a restart |
 | "AI Agent" modal intercepts Playwright clicks | Expected condition — take a `browser_snapshot` to find the modal's selector, then close it with `browser_evaluate('document.querySelector(\'[selector]\')?.remove()')` |
+| Serverless boot: `--domain security` is invalid | Use `security_complete`, `security_essentials`, or `security_ease`; the bare `security` token is not a valid `--domain` value |
+| Serverless ES returns 401 on API calls | Use `elastic_serverless` / `changeme` (not `elastic`); check `kb_user` in `.bug-fixer-session/analysis.json` |
+| Serverless custom role creation (`POST /api/security/role/`) fails | Use predefined Security project roles: `viewer`, `editor`, `soc_manager`, `detections_admin`, `rule_author`, `threat_intelligence_analyst`, `platform_engineer`, `endpoint_operations_analyst`, `endpoint_policy_manager`, `admin` |
+| Serverless native user creation (`POST /internal/security/users/`) fails | Not supported in serverless — switch to a predefined project role instead |

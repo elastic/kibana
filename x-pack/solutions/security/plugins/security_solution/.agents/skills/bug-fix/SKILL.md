@@ -171,14 +171,17 @@ Keep fixes simple — prefer the smallest change that resolves the bug. Stop and
 
 Restart services for a clean environment — stale reproduction state produces false positives:
 
-1. Stop and restart the Scout server. Read `server_args` from `.bug-fixer-session/analysis.json` first:
+1. Stop and restart the Scout server. Read `server_args`, `arch`, `domain`, and `kb_user` from `.bug-fixer-session/analysis.json` first:
 
    **No feature flags** (`server_args` empty):
    ```bash
    pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
-   node scripts/scout.js start-server --arch stateful --domain classic &
+   ARCH=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('arch','stateful'))")
+   DOMAIN=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('domain','classic'))")
+   node scripts/scout.js start-server --arch "${ARCH}" --domain "${DOMAIN}" &
+   KB_USER=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('kb_user','elastic'))")
    TIMEOUT=60; COUNT=0
-   until curl -s -u elastic:changeme http://localhost:5620/api/status \
+   until curl -s -u "${KB_USER}:changeme" http://localhost:5620/api/status \
      | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
      echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
      COUNT=$((COUNT + 1))
@@ -191,9 +194,12 @@ Restart services for a clean environment — stale reproduction state produces f
    pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'
    mkdir -p config_sets/bug_fixer
    # Write kibana.yml from server_args in analysis.json (same content as reproduction session)
-   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet bug_fixer &
+   ARCH=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('arch','stateful'))")
+   DOMAIN=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('domain','classic'))")
+   node scripts/scout.js start-server --arch "${ARCH}" --domain "${DOMAIN}" --serverConfigSet bug_fixer &
+   KB_USER=$(python3 -c "import json; print(json.load(open('.bug-fixer-session/analysis.json')).get('kb_user','elastic'))")
    TIMEOUT=60; COUNT=0
-   until curl -s -u elastic:changeme http://localhost:5620/api/status \
+   until curl -s -u "${KB_USER}:changeme" http://localhost:5620/api/status \
      | python3 -c "import sys,json; s=json.load(sys.stdin); exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" 2>/dev/null; do
      echo "Waiting for Kibana... (${COUNT}/${TIMEOUT})"; sleep 10
      COUNT=$((COUNT + 1))
@@ -204,7 +210,7 @@ Restart services for a clean environment — stale reproduction state produces f
 3. Browser reproduction — bug should not reproduce; `browser_take_screenshot` → `.bug-fixer-session/after.png`
 
    **Known environment conditions** (expected — not failures):
-   - After server restart the browser may redirect to the SAML mock IDP. Always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`.
+   - After server restart the browser may redirect to the SAML mock IDP. Always navigate explicitly to `http://localhost:5620/login?auth_provider_hint=cloud-basic`. Use credentials from `analysis.json` (`kb_user` / `changeme`): `elastic` for stateful, `elastic_serverless` for serverless.
    - An "AI Agent" modal overlay may intercept Playwright clicks on first page load. Take a `browser_snapshot` to locate the modal's selector, then close it with `browser_evaluate('document.querySelector(\'[YOUR_SELECTOR]\')?.remove()')`.
 4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
 5. **Lifecycle edge case** — if the fix involves startup or boot-time seeding, create a new
