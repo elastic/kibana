@@ -93,11 +93,6 @@ export const useTopNavLinks = ({
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
-  const chromeStyle = useObservable(
-    services.chrome.getChromeStyle$(),
-    services.chrome.getChromeStyle()
-  );
-  const isChromeNextProjectHeader = services.chrome.next.isEnabled && chromeStyle === 'project';
   const currentTab = useCurrentTabSelector((tabState) => tabState);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
@@ -223,9 +218,6 @@ export const useTopNavLinks = ({
         onOpenSavedSearch: (discoverSessionId) =>
           dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
       });
-      if (isChromeNextProjectHeader) {
-        openSearchMenuItem.overflow = true;
-      }
       items.push(openSearchMenuItem);
     }
 
@@ -286,7 +278,6 @@ export const useTopNavLinks = ({
     return items;
   }, [
     canSwitchLanguageMode,
-    isChromeNextProjectHeader,
     services,
     discoverParams,
     appId,

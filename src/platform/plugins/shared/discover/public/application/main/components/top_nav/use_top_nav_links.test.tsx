@@ -123,37 +123,10 @@ describe('useTopNavLinks', () => {
     expect(itemIds).toContain('open');
     expect(newItem?.label).toBe('New session');
     expect(openItem?.label).toBe('Open session');
-    expect(openItem?.overflow).toBeUndefined();
 
     // Check primary action item (Save)
     expect(appMenuConfig.primaryActionItem).toBeDefined();
     expect(appMenuConfig.primaryActionItem?.label).toBe('Save');
-  });
-
-  describe('Open session overflow', () => {
-    it('should mark Open session as overflow when Chrome Next project header is active', async () => {
-      const services = createTestServices();
-      services.chrome.next.isEnabled = true;
-      services.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-      services.chrome.getChromeStyle.mockReturnValue('project');
-
-      const appMenuConfig = await setup({ services });
-      const openItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.open);
-
-      expect(openItem?.overflow).toBe(true);
-    });
-
-    it('should not mark Open session as overflow in classic chrome', async () => {
-      const services = createTestServices();
-      services.chrome.next.isEnabled = true;
-      services.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('classic'));
-      services.chrome.getChromeStyle.mockReturnValue('classic');
-
-      const appMenuConfig = await setup({ services });
-      const openItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.open);
-
-      expect(openItem?.overflow).toBeUndefined();
-    });
   });
 
   describe('when ES|QL mode is true', () => {

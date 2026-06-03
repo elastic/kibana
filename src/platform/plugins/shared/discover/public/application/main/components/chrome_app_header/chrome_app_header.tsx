@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppHeader } from '@kbn/app-header';
+import { AppMenuActionId } from '@kbn/discover-utils';
 import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInternalStateSelector } from '../../state_management/redux';
@@ -29,23 +30,27 @@ export const ChromeAppHeader = ({ menu, titleAppend }: ChromeAppHeaderProps) => 
   );
 
   const title = useMemo(() => {
-    if (!isChromeNextProjectHeader) {
-      return '';
-    }
-
     return getChromeHeaderTitle({
       embeddableEditor,
       sessionTitle: persistedDiscoverSession?.title,
     });
-  }, [embeddableEditor, isChromeNextProjectHeader, persistedDiscoverSession?.title]);
+  }, [embeddableEditor, persistedDiscoverSession?.title]);
 
   const back = useMemo(() => {
-    if (!isChromeNextProjectHeader) {
-      return undefined;
-    }
-
     return getChromeHeaderBack(embeddableEditor);
-  }, [embeddableEditor, isChromeNextProjectHeader]);
+  }, [embeddableEditor]);
+
+  const appMenu = useMemo(() => {
+    return {
+      ...menu,
+      items: menu?.items?.map((item) => ({
+        ...item,
+        // We need more space for the tabs as the header is now in the same row. Move all items to the overflow menu.
+        // (Except switch language)
+        overflow: item.id !== AppMenuActionId.switchLanguageMode,
+      })),
+    };
+  }, [menu]);
 
   if (!isChromeNextProjectHeader) {
     return null;
@@ -55,7 +60,7 @@ export const ChromeAppHeader = ({ menu, titleAppend }: ChromeAppHeaderProps) => 
     <AppHeader
       title={title}
       back={back}
-      menu={menu}
+      menu={appMenu}
       sticky={false}
       padding="m"
       titleAppend={titleAppend}

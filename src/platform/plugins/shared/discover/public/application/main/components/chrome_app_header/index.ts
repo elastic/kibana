@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ChromeAppHeader } from './discover_chrome_app_header';
+export { ChromeAppHeader } from './chrome_app_header';
 export { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_header';
 export {
   getChromeHeaderBack,
