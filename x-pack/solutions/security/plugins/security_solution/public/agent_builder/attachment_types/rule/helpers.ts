@@ -28,6 +28,8 @@ export type RuleAttachment = Attachment<
   {
     text: string;
     attachmentLabel?: string;
+    /** Original text of the rule, used to compare with the current text to detect changes. */
+    originalText?: string;
   }
 >;
 

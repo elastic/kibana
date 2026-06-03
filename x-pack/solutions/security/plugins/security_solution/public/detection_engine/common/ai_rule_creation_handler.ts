@@ -107,6 +107,7 @@ export const createAiRuleCreationHandler = ({
             data: {
               text: JSON.stringify(stripServerFields(saved)),
               attachmentLabel: saved.name,
+              originalText: JSON.stringify(stripServerFields(saved)),
             },
           });
 
@@ -126,6 +127,7 @@ export const createAiRuleCreationHandler = ({
 
           // Cleared last so the button stays disabled until origin linking has settled.
           aiRuleCreation.clearSaving(attachmentId);
+          aiRuleCreation.notifyRuleSaved(saved);
         } catch (err) {
           aiRuleCreation.clearSaving(attachmentId);
           const message =

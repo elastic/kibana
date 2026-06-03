@@ -120,6 +120,11 @@ export const useAgentBuilderRuleCreation = ({
   const hasWarnedSyncFailureRef = useRef(false);
   // Saved-rule id the sync targets (see resolveSyncRuleId). Present ⇔ the sync is an update.
   const syncRuleIdRef = useRef<string | undefined>(pageRuleId);
+  // Baseline rule JSON for the diff view. Captured on the first addRuleAttachment call for an
+  // edit-intent attachment, then re-included on every subsequent addAttachment call (which
+  // replaces data) so the frozen baseline survives form syncs. Reset on save (via ruleSaved$)
+  // so the diff always compares against the last saved state, not the original add-to-chat state.
+  const originalTextRef = useRef<string | undefined>(undefined);
   // Last conversation id seen below, to tell a real conversation switch apart from an update
   // within the same conversation (e.g. our own draft gaining an origin once saved).
   const lastConversationIdRef = useRef<string | undefined>(undefined);
@@ -152,9 +157,17 @@ export const useAgentBuilderRuleCreation = ({
       const boundId = aiRuleCreation.getBoundAttachmentId();
       const ruleAttachment = findRuleAttachment(attachments, boundId);
       if (!ruleAttachment) {
+        originalTextRef.current = undefined;
         return;
       }
       const cardRuleId = resolveSyncRuleId(ruleAttachment, pageRuleId);
+      // Restore the frozen baseline from the stored attachment so a page reload doesn't
+      // wipe the diff. The next form sync will re-include this value in the addAttachment payload.
+      const storedOriginalText = (ruleAttachment as { data?: { originalText?: string } }).data
+        ?.originalText;
+      if (storedOriginalText) {
+        originalTextRef.current = storedOriginalText;
+      }
 
       if (pageRuleId) {
         // Edit page: identity is fixed to the URL's rule.
@@ -192,6 +205,12 @@ export const useAgentBuilderRuleCreation = ({
       // `origin` links the card to its saved rule; include it so form syncs never drop the link.
       const ruleId = savedRuleId ?? syncRuleIdRef.current;
       const targetId = aiRuleCreation.getBoundAttachmentId() ?? SECURITY_RULE_ATTACHMENT_ID;
+      const ruleJson = JSON.stringify(ruleData);
+      // Capture the baseline on the first call for an edit-intent attachment. Subsequent calls
+      // re-include the same value so the addAttachment replacement never loses the frozen baseline.
+      if (ruleId && !originalTextRef.current) {
+        originalTextRef.current = ruleJson;
+      }
       const attachment: AttachmentInput = {
         id: targetId,
         type: SecurityAgentBuilderAttachments.rule,
@@ -199,8 +218,9 @@ export const useAgentBuilderRuleCreation = ({
         ...(label ? { description: label } : {}),
         ...(ruleId ? { origin: ruleId } : {}),
         data: {
-          text: JSON.stringify(ruleData),
+          text: ruleJson,
           attachmentLabel: label,
+          ...(originalTextRef.current ? { originalText: originalTextRef.current } : {}),
         },
       };
       agentBuilder.addAttachment(attachment);
@@ -274,6 +294,15 @@ export const useAgentBuilderRuleCreation = ({
         updateFormFromChatRef.current(rule);
         aiRuleCreation.clearAiCreatedRule();
       }
+    });
+    return () => subscription.unsubscribe();
+  }, [aiRuleCreation]);
+
+  // Reset the diff baseline to the newly saved state so subsequent agent edits are compared
+  // against this save, not the original add-to-chat state.
+  useEffect(() => {
+    const subscription = aiRuleCreation.ruleSaved$.subscribe((savedRule) => {
+      originalTextRef.current = JSON.stringify(savedRule);
     });
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
