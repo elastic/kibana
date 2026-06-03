@@ -21,15 +21,15 @@ import {
   type EdgeMouseHandler,
 } from '@xyflow/react';
 import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiScreenReaderLive,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-  keys,
   useEuiTheme,
+  EuiScreenReaderOnly,
+  EuiScreenReaderLive,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiPanel,
+  EuiToolTip,
   useGeneratedHtmlId,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -613,20 +613,18 @@ function GraphInner({
                         css={mapToolbarControlIconCss}
                       />
                     </EuiToolTip>
-                    {!isEmbedded && (
-                      <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
-                        <EuiButtonIcon
-                          display="empty"
-                          color="text"
-                          size="s"
-                          iconType="crosshair"
-                          onClick={() => fitView(getFitViewOptions())}
-                          aria-label={fitViewLabel}
-                          data-test-subj="serviceMapFitViewButton"
-                          css={mapToolbarControlIconCss}
-                        />
-                      </EuiToolTip>
-                    )}
+                    <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="crosshair"
+                        onClick={() => fitView(getFitViewOptions())}
+                        aria-label={fitViewLabel}
+                        data-test-subj="serviceMapFitViewButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    </EuiToolTip>
                     {fullMapHref && (
                       <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
