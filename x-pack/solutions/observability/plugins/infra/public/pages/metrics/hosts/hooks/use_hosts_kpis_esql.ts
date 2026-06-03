@@ -48,105 +48,160 @@ export interface UseHostsKpisResult {
   error: ReturnType<typeof useFetcher>['error'];
 }
 
-// Filesystem metrics are optional (e.g. an OTel collector without the
-// filesystem scraper). ES|QL fails the *whole* query when a referenced column
-// is absent from the mapping, so we gate the disk clauses on the field being
-// present in the data view rather than letting one missing field blank every KPI.
+// OTel/metricbeat fields land incrementally and some are optional (e.g. an
+// OTel collector that scrapes load but not cpu utilization or filesystem).
+// ES|QL fails the *whole* query when a referenced column is absent from the
+// mapping, so each KPI is gated on its source field(s) being present in the
+// data view; a missing field drops that one tile instead of blanking all four.
+const STATE_FIELD = 'state';
+const SEMCONV_CPU_FIELD = 'metrics.system.cpu.utilization';
+const SEMCONV_LOAD_FIELD = 'metrics.system.cpu.load_average.1m';
+const SEMCONV_CORES_FIELD = 'metrics.system.cpu.logical.count';
+const SEMCONV_MEMORY_FIELD = 'system.memory.utilization';
 export const SEMCONV_DISK_FIELD = 'metrics.system.filesystem.usage';
+const ECS_CPU_FIELD = 'system.cpu.total.norm.pct';
+const ECS_LOAD_FIELD = 'system.load.1';
+const ECS_CORES_FIELD = 'system.load.cores';
+const ECS_MEMORY_FIELD = 'system.memory.actual.used.pct';
 export const ECS_DISK_FIELD = 'system.filesystem.used.pct';
+
+type KpiKey = keyof HostsKpis;
+
+interface KpiClause {
+  key: KpiKey;
+  // Per-host `STATS` expression(s) (reduced again across hosts by `fleet`).
+  perHost: string[];
+  // Optional `EVAL` deriving `host_<key>` from the per-host stats above.
+  evalExpr?: string;
+  // Fleet-wide `STATS` expression producing the `<key>` KEEP column.
+  fleet: string;
+}
 
 // Coerce to a safe integer literal before interpolating into the query string.
 const sanitizeLimit = (limit: number): number =>
   Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
 
+const assembleQuery = (
+  indexPattern: string,
+  limit: number,
+  preFilter: string | undefined,
+  clauses: KpiClause[]
+): string | undefined => {
+  if (clauses.length === 0) return undefined;
+  const perHost = clauses.flatMap((clause) => clause.perHost);
+  const evals = clauses.map((clause) => clause.evalExpr).filter((e): e is string => Boolean(e));
+  const fleet = clauses.map((clause) => clause.fleet);
+  const keep = clauses.map((clause) => clause.key);
+
+  return [
+    `FROM ${indexPattern}`,
+    preFilter,
+    `| STATS ${perHost.join(', ')} BY ${HOST_NAME_FIELD}`,
+    evals.length ? `| EVAL ${evals.join(', ')}` : undefined,
+    `| SORT ${HOST_NAME_FIELD} ASC`,
+    `| LIMIT ${limit}`,
+    `| STATS ${fleet.join(', ')}`,
+    `| KEEP ${keep.join(', ')}`,
+  ]
+    .filter((line): line is string => Boolean(line))
+    .join('\n');
+};
+
 export const buildSemconvQuery = (
   indexPattern: string,
   limit: number,
-  includeDisk: boolean = true
-): string => {
-  const perHostStats = [
-    'cpu_idle = AVG(metrics.system.cpu.utilization) WHERE state == "idle"',
-    'load1m = AVG(`metrics.system.cpu.load_average.1m`)',
-    'cores = MAX(metrics.system.cpu.logical.count)',
-    'mem_used = AVG(system.memory.utilization) WHERE state == "used"',
-    ...(includeDisk
-      ? [
-          `disk_free = SUM(${SEMCONV_DISK_FIELD}) WHERE state == "free"`,
-          `disk_total = SUM(${SEMCONV_DISK_FIELD})`,
-        ]
-      : []),
-  ];
-  const perHostEval = [
-    'host_cpuUsage = 1 - cpu_idle',
-    'host_normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL)',
-    'host_memoryUsage = mem_used',
-    ...(includeDisk
-      ? [
-          'host_diskUsage = CASE(disk_total > 0, 1 - TO_DOUBLE(disk_free) / TO_DOUBLE(disk_total), NULL)',
-        ]
-      : []),
-  ];
-  const fleetStats = [
-    'cpuUsage = AVG(host_cpuUsage)',
-    'normalizedLoad1m = AVG(host_normalizedLoad1m)',
-    'memoryUsage = AVG(host_memoryUsage)',
-    ...(includeDisk ? ['diskUsage = AVG(host_diskUsage)'] : []),
-  ];
-  const keep = [
-    'cpuUsage',
-    'normalizedLoad1m',
-    'memoryUsage',
-    ...(includeDisk ? ['diskUsage'] : []),
-  ];
+  availableFields: ReadonlySet<string>
+): string | undefined => {
+  const has = (...fields: string[]): boolean => fields.every((field) => availableFields.has(field));
+  const hasState = availableFields.has(STATE_FIELD);
+  const clauses: KpiClause[] = [];
 
-  return [
-    `FROM ${indexPattern}`,
-    '| WHERE state IN ("idle", "used", "free") OR state IS NULL',
-    `| STATS ${perHostStats.join(', ')} BY ${HOST_NAME_FIELD}`,
-    `| EVAL ${perHostEval.join(', ')}`,
-    `| SORT ${HOST_NAME_FIELD} ASC`,
-    `| LIMIT ${limit}`,
-    `| STATS ${fleetStats.join(', ')}`,
-    `| KEEP ${keep.join(', ')}`,
-  ].join('\n');
+  if (hasState && has(SEMCONV_CPU_FIELD)) {
+    clauses.push({
+      key: 'cpuUsage',
+      perHost: [`cpu_idle = AVG(${SEMCONV_CPU_FIELD}) WHERE state == "idle"`],
+      evalExpr: 'host_cpuUsage = 1 - cpu_idle',
+      fleet: 'cpuUsage = AVG(host_cpuUsage)',
+    });
+  }
+  if (has(SEMCONV_LOAD_FIELD, SEMCONV_CORES_FIELD)) {
+    clauses.push({
+      key: 'normalizedLoad1m',
+      perHost: [`load1m = AVG(\`${SEMCONV_LOAD_FIELD}\`)`, `cores = MAX(${SEMCONV_CORES_FIELD})`],
+      evalExpr: 'host_normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL)',
+      fleet: 'normalizedLoad1m = AVG(host_normalizedLoad1m)',
+    });
+  }
+  if (hasState && has(SEMCONV_MEMORY_FIELD)) {
+    clauses.push({
+      key: 'memoryUsage',
+      perHost: [`host_memoryUsage = AVG(${SEMCONV_MEMORY_FIELD}) WHERE state == "used"`],
+      fleet: 'memoryUsage = AVG(host_memoryUsage)',
+    });
+  }
+  if (hasState && has(SEMCONV_DISK_FIELD)) {
+    clauses.push({
+      key: 'diskUsage',
+      perHost: [
+        `disk_free = SUM(${SEMCONV_DISK_FIELD}) WHERE state == "free"`,
+        `disk_total = SUM(${SEMCONV_DISK_FIELD})`,
+      ],
+      evalExpr:
+        'host_diskUsage = CASE(disk_total > 0, 1 - TO_DOUBLE(disk_free) / TO_DOUBLE(disk_total), NULL)',
+      fleet: 'diskUsage = AVG(host_diskUsage)',
+    });
+  }
+
+  // The `WHERE state` pre-filter only matters for the state-scoped metrics.
+  const usesState = clauses.some((clause) => clause.key !== 'normalizedLoad1m');
+  const preFilter = usesState
+    ? '| WHERE state IN ("idle", "used", "free") OR state IS NULL'
+    : undefined;
+
+  return assembleQuery(indexPattern, limit, preFilter, clauses);
 };
 
-// Disk usage reduces across hosts with MAX (not AVG), mirroring the ECS
-// `max(system.filesystem.used.pct)` formula — a fleet-wide worst disk.
 export const buildEcsQuery = (
   indexPattern: string,
   limit: number,
-  includeDisk: boolean = true
-): string => {
-  const perHostStats = [
-    'host_cpuUsage = AVG(system.cpu.total.norm.pct)',
-    'load1m = AVG(`system.load.1`)',
-    'cores = MAX(system.load.cores)',
-    'host_memoryUsage = AVG(system.memory.actual.used.pct)',
-    ...(includeDisk ? [`host_diskUsage = MAX(${ECS_DISK_FIELD})`] : []),
-  ];
-  const fleetStats = [
-    'cpuUsage = AVG(host_cpuUsage)',
-    'normalizedLoad1m = AVG(host_normalizedLoad1m)',
-    'memoryUsage = AVG(host_memoryUsage)',
-    ...(includeDisk ? ['diskUsage = MAX(host_diskUsage)'] : []),
-  ];
-  const keep = [
-    'cpuUsage',
-    'normalizedLoad1m',
-    'memoryUsage',
-    ...(includeDisk ? ['diskUsage'] : []),
-  ];
+  availableFields: ReadonlySet<string>
+): string | undefined => {
+  const has = (...fields: string[]): boolean => fields.every((field) => availableFields.has(field));
+  const clauses: KpiClause[] = [];
 
-  return [
-    `FROM ${indexPattern}`,
-    `| STATS ${perHostStats.join(', ')} BY ${HOST_NAME_FIELD}`,
-    '| EVAL host_normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL)',
-    `| SORT ${HOST_NAME_FIELD} ASC`,
-    `| LIMIT ${limit}`,
-    `| STATS ${fleetStats.join(', ')}`,
-    `| KEEP ${keep.join(', ')}`,
-  ].join('\n');
+  if (has(ECS_CPU_FIELD)) {
+    clauses.push({
+      key: 'cpuUsage',
+      perHost: [`host_cpuUsage = AVG(${ECS_CPU_FIELD})`],
+      fleet: 'cpuUsage = AVG(host_cpuUsage)',
+    });
+  }
+  if (has(ECS_LOAD_FIELD, ECS_CORES_FIELD)) {
+    clauses.push({
+      key: 'normalizedLoad1m',
+      perHost: [`load1m = AVG(\`${ECS_LOAD_FIELD}\`)`, `cores = MAX(${ECS_CORES_FIELD})`],
+      evalExpr: 'host_normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL)',
+      fleet: 'normalizedLoad1m = AVG(host_normalizedLoad1m)',
+    });
+  }
+  if (has(ECS_MEMORY_FIELD)) {
+    clauses.push({
+      key: 'memoryUsage',
+      perHost: [`host_memoryUsage = AVG(${ECS_MEMORY_FIELD})`],
+      fleet: 'memoryUsage = AVG(host_memoryUsage)',
+    });
+  }
+  // Disk reduces across hosts with MAX (not AVG), mirroring the ECS
+  // `max(system.filesystem.used.pct)` formula — a fleet-wide worst disk.
+  if (has(ECS_DISK_FIELD)) {
+    clauses.push({
+      key: 'diskUsage',
+      perHost: [`host_diskUsage = MAX(${ECS_DISK_FIELD})`],
+      fleet: 'diskUsage = MAX(host_diskUsage)',
+    });
+  }
+
+  return assembleQuery(indexPattern, limit, undefined, clauses);
 };
 
 // Pull each KEEP column by name (not position); all-nulls for an empty response.
@@ -190,8 +245,8 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const indexPattern = metricsView?.indices;
   const limit = sanitizeLimit(searchCriteria.limit);
 
-  // The disk KPI references an optional filesystem field; only query it when the
-  // metrics data view actually maps it (see `SEMCONV_DISK_FIELD`/`ECS_DISK_FIELD`).
+  // Each KPI is built only when its source field(s) are mapped, so an optional
+  // or not-yet-ingested field drops a single tile instead of failing the query.
   const availableFields = useMemo(
     () => new Set((metricsView?.fields ?? []).map((field) => field.name)),
     [metricsView?.fields]
@@ -233,10 +288,10 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const esqlQuery = useMemo(() => {
     if (!limit || !indexPattern) return undefined;
     if (schema === 'semconv') {
-      return buildSemconvQuery(indexPattern, limit, availableFields.has(SEMCONV_DISK_FIELD));
+      return buildSemconvQuery(indexPattern, limit, availableFields);
     }
     if (schema === 'ecs') {
-      return buildEcsQuery(indexPattern, limit, availableFields.has(ECS_DISK_FIELD));
+      return buildEcsQuery(indexPattern, limit, availableFields);
     }
     return undefined;
   }, [schema, indexPattern, limit, availableFields]);
