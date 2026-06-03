@@ -85,11 +85,11 @@ export function fromStoredSearchEmbeddableByRef(
     headerRowHeight,
     density,
     grid,
-    savedObjectId: savedObjectIdFromState,
     selectedTabId,
     ...otherAttrs
   } = storedState;
-  const savedObjectId = referenceId ?? savedObjectIdFromState;
+  const savedObjectId =
+    referenceId ?? ('savedObjectId' in storedState && storedState.savedObjectId);
   if (!savedObjectId) throw new Error(`Missing reference of type "${SavedSearchType}"`);
   return {
     ...otherAttrs,
