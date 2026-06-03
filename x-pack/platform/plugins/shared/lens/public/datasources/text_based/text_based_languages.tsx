@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID, appendTimeBucketToEsqlQuery } from '@kbn/lens-common';
+import {
+  LENS_DATASOURCE_ID,
+  appendTimeBucketToEsqlQuery,
+  buildTrendlineBucketExpression,
+} from '@kbn/lens-common';
 
 import React from 'react';
 
@@ -467,9 +471,11 @@ export function getTextBasedDatasource({
       if (!layer) return state;
       if (autoTimeField && layer.timeField) {
         const tf = layer.timeField;
+        // The fieldName must match the ES|QL result column name, which is the
+        // full BUCKET expression, not the raw field name.
         const timeColumn: TextBasedLayerColumn = {
           columnId,
-          fieldName: tf,
+          fieldName: buildTrendlineBucketExpression(tf),
           meta: { type: 'date' },
         };
 

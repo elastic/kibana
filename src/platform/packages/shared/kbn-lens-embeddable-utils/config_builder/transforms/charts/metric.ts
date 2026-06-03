@@ -10,6 +10,7 @@
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   appendTimeBucketToEsqlQuery,
+  buildTrendlineBucketExpression,
   type FormBasedPersistedState,
   type MetricVisualizationState,
   type PersistedIndexPatternLayer,
@@ -702,9 +703,12 @@ function buildEsqlTrendlineLayer(
   const trendlineQuery = appendTimeBucketToEsqlQuery(dataSource.query, timeField);
 
   // Build trendline columns: time bucket + copies of metric columns from main layer
+  // The fieldName must match the ES|QL result column name, which is the full
+  // BUCKET expression (e.g. "BUCKET(timestamp, 75, ?_tstart, ?_tend)"),
+  // not the raw field name.
   const timeColumn: TextBasedLayerColumn = {
     columnId: HISTOGRAM_COLUMN_NAME,
-    fieldName: timeField,
+    fieldName: buildTrendlineBucketExpression(timeField),
     meta: { type: 'date' },
   };
 
