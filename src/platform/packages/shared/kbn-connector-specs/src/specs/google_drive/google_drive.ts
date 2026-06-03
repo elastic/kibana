@@ -354,9 +354,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
           fileMetadataForError = fileMetadata;
           const isGoogleDoc = fileMetadata.mimeType?.startsWith(GOOGLE_WORKSPACE_MIME_PREFIX);
 
-          const useTextResponse = typedInput.responseType === 'text';
-          const axiosResponseType = useTextResponse ? 'text' : 'arraybuffer';
-
+          let useTextResponse = typedInput.responseType === 'text';
           let contentResponse;
           let resolvedMimeType: string = fileMetadata.mimeType;
 
@@ -371,18 +369,20 @@ export const GoogleDriveConnector: ConnectorSpec = {
                 params: {
                   mimeType: resolvedMimeType,
                 },
-                responseType: axiosResponseType,
+                responseType: useTextResponse ? 'text' : 'arraybuffer',
               }
             );
           } else {
-            // Download native files
+            // For native files, only use text response if the mime type is text/*;
+            // fall back to base64 for binary types even when text was requested.
+            useTextResponse &&= !!fileMetadata.mimeType?.startsWith('text/');
             contentResponse = await ctx.client.get(
               `${GOOGLE_DRIVE_API_BASE}/files/${typedInput.fileId}`,
               {
                 params: {
                   alt: 'media',
                 },
-                responseType: axiosResponseType,
+                responseType: useTextResponse ? 'text' : 'arraybuffer',
               }
             );
           }

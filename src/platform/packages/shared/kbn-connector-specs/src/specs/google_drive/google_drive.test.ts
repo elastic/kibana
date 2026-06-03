@@ -540,6 +540,31 @@ describe('GoogleDriveConnector', () => {
         );
       });
 
+      it('should fall back to base64 when responseType "text" is requested for a binary mime type', async () => {
+        const binaryData = Buffer.from('pdf binary content');
+        mockClient.get
+          .mockResolvedValueOnce({
+            data: { id: 'pdf-1', name: 'report.pdf', mimeType: 'application/pdf', size: '1024' },
+          })
+          .mockResolvedValueOnce({ data: binaryData });
+
+        const result = await GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'pdf-1',
+          responseType: 'text',
+        });
+
+        expect(mockClient.get).toHaveBeenCalledWith(
+          'https://www.googleapis.com/drive/v3/files/pdf-1',
+          { params: { alt: 'media' }, responseType: 'arraybuffer' }
+        );
+        expect(result).toEqual(
+          expect.objectContaining({
+            content: binaryData.toString('base64'),
+            encoding: 'base64',
+          })
+        );
+      });
+
       it.each([
         ['application/vnd.google-apps.document', 'text/markdown'],
         ['application/vnd.google-apps.spreadsheet', 'text/csv'],
