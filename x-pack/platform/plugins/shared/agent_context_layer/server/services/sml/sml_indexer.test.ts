@@ -67,14 +67,16 @@ const createMockRegistry = (definition?: SmlTypeDefinition) => ({
   has: jest.fn().mockReturnValue(!!definition),
 });
 
-const createIndexerParams = (overrides: {
-  originId?: string;
-  attachmentType?: string;
-  spaces?: string[];
-  esClient?: jest.Mocked<ElasticsearchClient>;
-  logger?: ReturnType<typeof createMockLogger>;
-  action?: 'create' | 'update' | 'delete';
-} = {}): SmlIndexerOriginParams => ({
+const createIndexerParams = (
+  overrides: {
+    originId?: string;
+    attachmentType?: string;
+    spaces?: string[];
+    esClient?: jest.Mocked<ElasticsearchClient>;
+    logger?: ReturnType<typeof createMockLogger>;
+    action?: 'create' | 'update' | 'delete';
+  } = {}
+): SmlIndexerOriginParams => ({
   originId: overrides.originId ?? 'att-123',
   attachmentType: overrides.attachmentType ?? 'lens',
   spaces: overrides.spaces ?? ['default'],
@@ -736,14 +738,16 @@ describe('createSmlIndexer', () => {
   });
 
   describe('deleteAttachment', () => {
-    const createDeleteParams = (overrides: {
-      originId?: string;
-      attachmentType?: string;
-      spaces?: string[];
-      esClient?: jest.Mocked<ElasticsearchClient>;
-      logger?: ReturnType<typeof createMockLogger>;
-      ingestionMethod?: 'crawled' | 'manual' | 'all';
-    } = {}) => ({
+    const createDeleteParams = (
+      overrides: {
+        originId?: string;
+        attachmentType?: string;
+        spaces?: string[];
+        esClient?: jest.Mocked<ElasticsearchClient>;
+        logger?: ReturnType<typeof createMockLogger>;
+        ingestionMethod?: 'crawled' | 'manual' | 'all';
+      } = {}
+    ) => ({
       originId: overrides.originId ?? 'att-123',
       attachmentType: overrides.attachmentType ?? 'lens',
       spaces: overrides.spaces ?? ['default'],
@@ -799,7 +803,9 @@ describe('createSmlIndexer', () => {
       // No `ingestionMethod` passed — should behave exactly like the historical
       // `action: 'delete'` call on `indexAttachment` (preserve manual entries,
       // wipe crawled).
-      await indexer.deleteAttachment(createDeleteParams({ originId: 'att-default-scope', esClient }));
+      await indexer.deleteAttachment(
+        createDeleteParams({ originId: 'att-default-scope', esClient })
+      );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
