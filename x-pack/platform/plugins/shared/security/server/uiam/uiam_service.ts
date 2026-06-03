@@ -401,10 +401,7 @@ export class UiamService implements UiamServicePublic {
   async exchangeOAuthToken(accessToken: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    // Temporary workaround for https://github.com/elastic/cp-iam-team/issues/2697
-    const expectedAudience = this.#kibanaServerResourceURL.endsWith('/')
-      ? this.#kibanaServerResourceURL
-      : `${this.#kibanaServerResourceURL}/`;
+    const expectedAudience = this.#kibanaServerResourceURL;
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
