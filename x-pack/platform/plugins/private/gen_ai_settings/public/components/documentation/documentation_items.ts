@@ -38,6 +38,7 @@ const getStatusForResourceType = async <T extends ResourceType>({
 export interface NormalizedDocStatus {
   status: DocumentationStatus;
   updateAvailable?: boolean;
+  failureReason?: string;
 }
 
 export interface DocumentationItemConfig {
@@ -77,7 +78,10 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
         inferenceId,
         resourceType: ResourceTypes.productDoc,
       });
-      return { status: res.overall ?? 'uninstalled' };
+      const failureReason = Object.values(res.perProducts ?? {})
+        .map((p) => p.failureReason)
+        .find(Boolean);
+      return { status: res.overall ?? 'uninstalled', failureReason };
     },
   },
   {
@@ -97,6 +101,7 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
       return {
         status: res.status ?? 'uninstalled',
         updateAvailable: Boolean(res.isUpdateAvailable),
+        failureReason: res.failureReason,
       };
     },
   },
