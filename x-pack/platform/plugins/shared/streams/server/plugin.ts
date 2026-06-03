@@ -22,16 +22,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import {
-  STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
+import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -65,6 +60,7 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import type { FeatureClient } from './lib/streams/feature/feature_client';
 import type { QueryClient } from './lib/streams/assets/query/query_client';
+import { initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -589,6 +585,17 @@ export class StreamsPlugin
       );
     });
 
+    initializeKnowledgeIndicatorsTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize knowledge indicators template: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -651,24 +658,13 @@ export class StreamsPlugin
         STREAMS_MANAGED_WORKFLOW_OWNER
       );
 
-      await Promise.all([
-        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-      ]);
+      await installWorkflows({ client });
+      this.logger.info('Streams managed workflows installed');
 
       await client.ready();
-
-      this.logger.info('Streams KI managed workflows installed');
     } catch (error) {
       this.logger.warn(
-        `Failed to install streams KI managed workflows: ${
+        `Failed to install streams managed workflows: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

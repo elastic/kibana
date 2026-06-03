@@ -164,6 +164,7 @@ export class DispatchStep implements DispatcherStep {
       policyId: group.policyId,
       groupKey: group.groupKey,
       episodes: group.episodes,
+      rules: group.rules,
     };
 
     this.logger.debug({

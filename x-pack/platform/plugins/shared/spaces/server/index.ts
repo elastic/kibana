@@ -16,7 +16,10 @@ import { ConfigSchema } from './config';
 
 // end public contract exports
 
-export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export type {
+  SpacesPluginSetupApi as SpacesPluginSetup,
+  SpacesPluginStartApi as SpacesPluginStart,
+} from './plugin';
 export type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export type {
   ISpacesClient,

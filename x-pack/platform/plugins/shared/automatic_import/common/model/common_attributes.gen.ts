@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { SafeIdentifier, NonEmptyString } from './primitive.gen';
+import { SafeIdentifier, NonEmptyString, SemVer, UUID } from './primitive.gen';
 
 /**
  * The input type object with its settings.
@@ -87,7 +87,7 @@ export const Integration = lazySchema(() =>
       /**
        * The logo of the integration
        */
-      logo: z.string().optional(),
+      logo: z.string().max(100000).optional(),
       /**
        * The description of the integration
        */
@@ -181,7 +181,7 @@ export const IntegrationResponse = lazySchema(() =>
     /**
      * The logo of the integration
      */
-    logo: z.string().optional(),
+    logo: z.string().max(100000).optional(),
     /**
      * The description of the integration
      */
@@ -189,19 +189,19 @@ export const IntegrationResponse = lazySchema(() =>
     /**
      * The version of the integration
      */
-    version: z.string().optional(),
+    version: SemVer.optional(),
     /**
      * The ID of the connector associated with this integration
      */
-    connectorId: z.string().optional(),
+    connectorId: z.string().max(256).optional(),
     /**
      * The username of the user who created the integration
      */
-    createdBy: z.string().optional(),
+    createdBy: z.string().max(512).optional(),
     /**
      * The profile UID of the user who created the integration
      */
-    createdByProfileUid: z.string().optional(),
+    createdByProfileUid: UUID.optional(),
     /**
      * The data streams of the integration
      */
@@ -209,7 +209,7 @@ export const IntegrationResponse = lazySchema(() =>
     /**
      * The categories of the integration
      */
-    categories: z.array(z.string()).optional(),
+    categories: z.array(z.string().max(100)).optional(),
     /**
      * The status of the integration
      */
@@ -234,7 +234,7 @@ export const AllIntegrationsResponseIntegration = lazySchema(() =>
     /**
      * The logo of the integration (base64 encoded SVG)
      */
-    logo: z.string().optional(),
+    logo: z.string().max(100000).optional(),
     /**
      * The number of data streams of the integration
      */
@@ -246,7 +246,7 @@ export const AllIntegrationsResponseIntegration = lazySchema(() =>
     /**
      * The version of the integration
      */
-    version: z.string().optional(),
+    version: SemVer.optional(),
     /**
      * The username of the user who created the integration
      */
@@ -254,7 +254,7 @@ export const AllIntegrationsResponseIntegration = lazySchema(() =>
     /**
      * The profile UID of the user who created the integration
      */
-    createdByProfileUid: z.string().optional(),
+    createdByProfileUid: UUID.optional(),
     /**
      * The status of the integration
      */
@@ -272,11 +272,11 @@ export const LangSmithOptions = lazySchema(() =>
       /**
        * The project name.
        */
-      projectName: z.string(),
+      projectName: z.string().max(512),
       /**
        * The apiKey to use for tracing.
        */
-      apiKey: z.string(),
+      apiKey: z.string().max(256),
     })
     .strict()
 );

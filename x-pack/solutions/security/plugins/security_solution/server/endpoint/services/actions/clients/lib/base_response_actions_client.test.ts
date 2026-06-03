@@ -242,9 +242,9 @@ describe('ResponseActionsClientImpl base class', () => {
           {
             type: 'security.endpoint',
             attachmentId: 'action-123',
+            data: { content: 'this is a case comment' },
             metadata: {
               command: 'isolate',
-              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',

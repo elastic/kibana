@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/shared-ux-router'
   - '@kbn/core-saved-objects-server'

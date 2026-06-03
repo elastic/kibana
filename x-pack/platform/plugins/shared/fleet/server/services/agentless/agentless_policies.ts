@@ -6,11 +6,13 @@
  */
 
 import {
+  type AuthenticatedUser,
   type ElasticsearchClient,
   type KibanaRequest,
   type Logger,
   type RequestHandlerContext,
   type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,6 +30,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
+import { FleetNotFoundError } from '../../errors';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -274,7 +277,18 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 
-    const agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    let agentPolicy;
+    try {
+      agentPolicy = await agentPolicyService.get(this.soClient, policyId);
+    } catch (e) {
+      if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
+        await this.deleteOrphanedAgentlessResources(policyId, user);
+        return;
+      }
+      throw e;
+    }
+
     if (!agentPolicy?.supports_agentless) {
       throw new Error(`Policy ${policyId} is not an agentless policy`);
     }
@@ -284,5 +298,29 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       force: options?.force,
       user,
     });
+  }
+
+  private async deleteOrphanedAgentlessResources(policyId: string, user?: AuthenticatedUser) {
+    const packagePolicies = await this.packagePolicyService.findAllForAgentPolicy(
+      this.soClient,
+      policyId
+    );
+
+    if (packagePolicies.length > 0) {
+      await this.packagePolicyService.delete(
+        this.soClient,
+        this.esClient,
+        packagePolicies.map((pp) => pp.id),
+        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
+      );
+    }
+
+    try {
+      await agentlessAgentService.deleteAgentlessAgent(policyId);
+    } catch (e) {
+      this.logger.warn(
+        `Failed to delete agentless deployment for orphaned policy ${policyId}: ${e.message}`
+      );
+    }
   }
 }

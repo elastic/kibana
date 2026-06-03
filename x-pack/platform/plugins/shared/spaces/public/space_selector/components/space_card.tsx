@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCard, EuiLoadingSpinner, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiLoadingSpinner, EuiTextColor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
@@ -67,9 +67,11 @@ function renderSpaceDescription(space: Space) {
   }
 
   return (
-    <EuiTextColor color="subdued" title={description} className="eui-textBreakWord">
-      {description}
-    </EuiTextColor>
+    <EuiToolTip content={space.description}>
+      <EuiTextColor color="subdued" className="eui-textBreakWord">
+        {description}
+      </EuiTextColor>
+    </EuiToolTip>
   );
 }
 
