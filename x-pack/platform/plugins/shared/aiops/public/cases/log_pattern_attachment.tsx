@@ -8,22 +8,25 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React from 'react';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import type { PatternAnalysisAttachmentData } from '../../common/utils';
 import type {
   PatternAnalysisProps,
   PatternAnalysisSharedComponent,
 } from '../shared_components/pattern_analysis';
 
+type PatternAnalysisViewProps = UnifiedValueAttachmentViewProps<PatternAnalysisAttachmentData>;
+
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, PatternAnalysisComponent: PatternAnalysisSharedComponent) => {
     return React.memo(
-      (props: UnifiedValueAttachmentViewProps) => {
-        const rawState = props.data.state as Record<string, unknown>;
+      (props: PatternAnalysisViewProps) => {
+        const rawState = props.data.state;
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
