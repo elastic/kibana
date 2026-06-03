@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { setup } from './helpers';
+import { runCommandsValidationSuite } from './commands_suite';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('ESQL sync', () => {
-    loadTestFile(require.resolve('./errors'));
-  });
-}
+runCommandsValidationSuite(setup);

@@ -121,6 +121,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
+  'significant-events-management',
   'knowledge-indicators-management',
   'ki-identification-management',
 
