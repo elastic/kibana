@@ -28,3 +28,23 @@ export const makeEsQueryRule = (namePrefix: string) => ({
   schedule: { interval: '1m' },
   tags: [namePrefix],
 });
+
+export const makeIndexThresholdRule = (namePrefix: string) => ({
+  name: `${namePrefix}-rule-${Date.now()}`,
+  ruleTypeId: '.index-threshold',
+  consumer: 'alerts',
+  enabled: true,
+  schedule: { interval: '1m' },
+  actions: [],
+  params: {
+    aggType: 'count',
+    termSize: 5,
+    thresholdComparator: '>',
+    timeWindowSize: 5,
+    timeWindowUnit: 'm',
+    groupBy: 'all',
+    threshold: [1000],
+    index: ['.kibana'],
+    timeField: '@timestamp',
+  },
+});

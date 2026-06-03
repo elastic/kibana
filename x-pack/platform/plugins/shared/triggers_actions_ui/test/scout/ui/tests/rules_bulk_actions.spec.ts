@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/scout';
+import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule } from '../fixtures';
+import { test, makeEsQueryRule, makeIndexThresholdRule } from '../fixtures';
 
 // Migrated from: x-pack/platform/test/functional_with_es_ssl/apps/rules/rules_list/bulk_actions.ts
 // Rule type substitutions:
@@ -55,28 +55,8 @@ const scheduleRuleSnooze = async (kbnClient: KbnClient, ruleId: string) => {
   });
 };
 
-const makeIndexThresholdRule = (namePrefix: string) => ({
-  name: `${namePrefix}-rule-${Date.now()}`,
-  ruleTypeId: '.index-threshold',
-  consumer: 'alerts',
-  enabled: true,
-  schedule: { interval: '1m' },
-  actions: [],
-  params: {
-    aggType: 'count',
-    termSize: 5,
-    thresholdComparator: '>',
-    timeWindowSize: 5,
-    timeWindowUnit: 'm',
-    groupBy: 'all',
-    threshold: [1000],
-    index: ['.kibana'],
-    timeField: '@timestamp',
-  },
-});
-
 // Switch to the Rules tab to trigger a list refresh (mirrors FTR's refreshAlertsList).
-const refreshRulesList = async (page: { testSubj: { click: (subj: string) => Promise<void> } }) => {
+const refreshRulesList = async (page: ScoutPage) => {
   await page.testSubj.click('logsTab');
   await page.testSubj.click('rulesTab');
 };
@@ -121,6 +101,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     // Verify both rules show the snoozed badge
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('searchInput').fill(name as string);
+      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeVisible();
     }
   });
@@ -149,6 +130,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('searchInput').fill(name as string);
+      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeHidden();
     }
   });
@@ -176,6 +158,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('searchInput').fill(name as string);
+      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeVisible();
     }
   });
@@ -207,6 +190,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('searchInput').fill(name as string);
+      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
       await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeHidden();
     }
   });
@@ -278,6 +262,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       { name: r3.data.name as string, expectedStatus: 'Disabled' },
     ]) {
       await page.testSubj.locator('searchInput').fill(name);
+      await expect(page.testSubj.locator('rulesList')).toContainText(name);
       await expect(page.testSubj.locator('statusDropdown')).toContainText(expectedStatus);
     }
 
