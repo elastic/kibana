@@ -6,15 +6,36 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
 import { MemoryServiceImpl } from '../lib/memory';
+import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+
+export const createMemoryToolsOptions = ({
+  server,
+  logger,
+}: {
+  server: StreamsServer;
+  logger: Logger;
+}): MemoryToolsOptions => {
+  const getMemoryService = (esClient: ElasticsearchClient) =>
+    new MemoryServiceImpl({
+      logger: logger.get('memory'),
+      esClient,
+    });
+
+  return {
+    getMemoryService,
+    getSecurity: () => server.core.security,
+  };
+};
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -33,18 +54,20 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+  });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerSignificantEventsDiscoveryAgents(agentBuilder);
 
-  const getMemoryService = () =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient: server.core.elasticsearch.client.asInternalUser,
-    });
+  const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
 
-  // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
+  // The memory skill is registered lazily — only once the significant events memory feature flag is on.
   // This avoids exposing the skill to the agent when memory is not configured.
-  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -52,13 +75,10 @@ export const registerStreamsAgentBuilder = async ({
       return;
     }
     memorySkillRegistered = true;
-    agentBuilder.skills.register(
-      createSigEventsMemorySkill({
-        getMemoryService,
-        getSecurity: () => server.core.security,
-      })
+    agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
+    logger.info(
+      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
     );
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
   };
 
   if (await isMemoryEnabled()) {
@@ -67,14 +87,5 @@ export const registerStreamsAgentBuilder = async ({
 
   return {
     ensureMemorySkillRegistered,
-    /**
-     * Call this from a uiSettings change subscription (e.g. in plugin start)
-     * to auto-register the memory skill when the setting is toggled on.
-     */
-    onMemorySettingChanged: async () => {
-      if (await isMemoryEnabled()) {
-        ensureMemorySkillRegistered();
-      }
-    },
   };
 };

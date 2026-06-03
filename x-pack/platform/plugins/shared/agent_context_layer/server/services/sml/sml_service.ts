@@ -135,7 +135,14 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
       },
       upsertDocument: async ({ id, spaceId, document, esClient }) => {
-        return upsertDocument({ id, spaceId, document, esClient, logger });
+        return upsertDocument({
+          id,
+          spaceId,
+          document,
+          esClient,
+          logger,
+          indexer: this.getIndexer(),
+        });
       },
       deleteDocument: async ({ id, spaceId, esClient }) => {
         return deleteDocument({ id, spaceId, esClient, logger });
@@ -457,6 +464,131 @@ export const buildTypeFilters = (
 };
 
 /**
+ * Fields that must be present in every SML document on disk. Missing any of
+ * these indicates a data-integrity problem (corruption, partial write, schema
+ * drift), not a normal "field is optional" situation — so we drop the hit and
+ * log a warning rather than fabricate empty values that would mask the bug.
+ */
+const REQUIRED_SML_FIELDS = [
+  'id',
+  'type',
+  'title',
+  'origin_id',
+  'created_at',
+  'updated_at',
+] as const;
+
+/**
+ * Fields shared 1:1 by `SmlDocument` and `SmlSearchResult`. Extracted once so
+ * the two converters below don't drift.
+ */
+type SmlBaseFields = Pick<
+  SmlDocument,
+  | 'id'
+  | 'type'
+  | 'title'
+  | 'origin_id'
+  | 'created_at'
+  | 'updated_at'
+  | 'spaces'
+  | 'permissions'
+  | 'ingestion_method'
+>;
+
+/**
+ * Validate that an ES `_source` has every required SML field and pre-build the
+ * base shape shared by `SmlDocument` and `SmlSearchResult`. Returns `undefined`
+ * (and logs `warn`) for malformed sources so callers can simply filter the
+ * result out of the response.
+ */
+const validateSmlSource = (
+  source: Partial<SmlDocument> | undefined,
+  logger: Logger
+): { base: SmlBaseFields; source: Partial<SmlDocument> } | undefined => {
+  if (!source) return undefined;
+
+  for (const field of REQUIRED_SML_FIELDS) {
+    if (!source[field]) {
+      logger.warn(
+        `SML: skipping malformed document (id='${
+          source.id ?? '<unknown>'
+        }', missing required field '${field}')`
+      );
+      return undefined;
+    }
+  }
+
+  return {
+    base: {
+      id: source.id!,
+      type: source.type!,
+      title: source.title!,
+      origin_id: source.origin_id!,
+      created_at: source.created_at!,
+      updated_at: source.updated_at!,
+      spaces: source.spaces ?? [],
+      permissions: source.permissions ?? [],
+      ingestion_method: source.ingestion_method ?? 'crawled',
+    },
+    source,
+  };
+};
+
+/**
+ * Convert an ES `_source` into a complete `SmlDocument`. Returns `undefined`
+ * (with a warn log) for malformed sources or sources missing `content`.
+ *
+ * Use this for `get`/`list` style reads where the full document is expected.
+ * For search hits (which may legitimately omit `content` via `skipContent`),
+ * use {@link esHitToSmlSearchResult} instead.
+ */
+const esSourceToSmlDocument = (
+  source: Partial<SmlDocument> | undefined,
+  logger: Logger
+): SmlDocument | undefined => {
+  const validated = validateSmlSource(source, logger);
+  if (!validated) return undefined;
+
+  if (validated.source.content === undefined) {
+    logger.warn(`SML: skipping document missing 'content' (id='${validated.base.id}')`);
+    return undefined;
+  }
+
+  const doc: SmlDocument = {
+    ...validated.base,
+    content: validated.source.content,
+  };
+  if (validated.source.description !== undefined) doc.description = validated.source.description;
+  if (validated.source.user_id !== undefined) doc.user_id = validated.source.user_id;
+  if (validated.source.references !== undefined) doc.references = validated.source.references;
+  return doc;
+};
+
+/**
+ * Convert an ES search hit into an `SmlSearchResult`. Unlike
+ * {@link esSourceToSmlDocument}, `content` (and `description`) may legitimately
+ * be missing when the search excluded them via `skipContent`, so they are
+ * passed through as-is rather than required.
+ */
+const esHitToSmlSearchResult = (
+  hit: { _source?: Partial<SmlDocument>; _score?: number | null },
+  logger: Logger
+): SmlSearchResult | undefined => {
+  const validated = validateSmlSource(hit._source, logger);
+  if (!validated) return undefined;
+
+  const result: SmlSearchResult = {
+    ...validated.base,
+    score: hit._score ?? 0,
+  };
+  if (validated.source.content !== undefined) result.content = validated.source.content;
+  if (validated.source.description !== undefined) result.description = validated.source.description;
+  if (validated.source.user_id !== undefined) result.user_id = validated.source.user_id;
+  if (validated.source.references !== undefined) result.references = validated.source.references;
+  return result;
+};
+
+/**
  * Search the SML index. When the index hasn't been created yet,
  * the function returns empty results silently.
  */
@@ -519,25 +651,8 @@ const searchSml = async ({
         : response.hits.total?.value ?? 0;
 
     const results: SmlSearchResult[] = response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: source.origin_id ?? '',
-          content: source.content,
-          description: source.description,
-          references: source.references,
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
-          user_id: source.user_id,
-          score: hit._score ?? 0,
-        };
-      });
+      .map((hit) => esHitToSmlSearchResult(hit, logger))
+      .filter((result): result is SmlSearchResult => result !== undefined);
 
     logger.debug(`SML search: returned ${results.length} result(s), total=${total}`);
 
@@ -591,28 +706,8 @@ const getDocumentsByIds = async ({
     });
 
     for (const hit of response.hits.hits) {
-      if (!hit._source) continue;
-      const source = hit._source;
-      const doc: SmlDocument = {
-        id: source.id ?? '',
-        type: source.type ?? '',
-        title: source.title ?? '',
-        origin_id: source.origin_id ?? '',
-        content: source.content ?? '',
-        created_at: source.created_at ?? '',
-        updated_at: source.updated_at ?? '',
-        spaces: source.spaces ?? [],
-        permissions: source.permissions ?? [],
-      };
-      if (source.description !== undefined) {
-        doc.description = source.description;
-      }
-      if (source.user_id !== undefined) {
-        doc.user_id = source.user_id;
-      }
-      if (source.references !== undefined) {
-        doc.references = source.references;
-      }
+      const doc = esSourceToSmlDocument(hit._source, logger);
+      if (!doc) continue;
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -660,21 +755,7 @@ const getDocumentById = async ({
       },
     });
 
-    const hit = response.hits.hits[0];
-    if (!hit?._source) return undefined;
-
-    const source = hit._source;
-    return {
-      id: source.id ?? '',
-      type: source.type ?? '',
-      title: source.title ?? '',
-      origin_id: source.origin_id ?? '',
-      content: source.content ?? '',
-      created_at: source.created_at ?? '',
-      updated_at: source.updated_at ?? '',
-      spaces: source.spaces ?? [],
-      permissions: source.permissions ?? [],
-    };
+    return esSourceToSmlDocument(response.hits.hits[0]?._source, logger);
   } catch (error) {
     if (isNotFoundError(error)) {
       return undefined;
@@ -744,21 +825,8 @@ const listDocuments = async ({
         : response.hits.total?.value ?? 0;
 
     const results: SmlDocument[] = response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: source.origin_id ?? '',
-          content: source.content ?? '',
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
-        };
-      });
+      .map((hit) => esSourceToSmlDocument(hit._source, logger))
+      .filter((doc): doc is SmlDocument => doc !== undefined);
 
     return { total, results };
   } catch (error) {
@@ -795,12 +863,14 @@ const upsertDocument = async ({
   document,
   esClient,
   logger,
+  indexer,
 }: {
   id: string;
   spaceId: string;
   document: SmlDocumentInput;
   esClient: IScopedClusterClient;
   logger: Logger;
+  indexer: SmlIndexer;
 }): Promise<SmlUpsertResult | null> => {
   // TODO: Implement optimistic concurrency using _seq_no/_primary_term to prevent lost-update
   // races. The current get-then-index pattern allows two concurrent upserts to silently overwrite
@@ -845,9 +915,22 @@ const upsertDocument = async ({
     updated_at: now,
     spaces: existing?.spaces ?? [spaceId],
     permissions: document.permissions ?? [],
+    // HTTP upserts are by definition manual writes; tagging here lets the crawler
+    // (and origin-mode indexAttachment) skip these entries to avoid clobbering them.
+    ingestion_method: 'manual',
   };
 
   await smlClient.index({ id, document: fullDocument });
+
+  // Manual upserts supersede crawler output for the same `origin_id`: any chunks the
+  // crawler previously indexed would otherwise linger forever, since the crawler now
+  // sees the manual entry and skips re-indexing the origin. Wipe only crawled chunks
+  // so other manual entries (including ours, and any from content-mode writes) survive.
+  await indexer.deleteChunks({
+    originId: fullDocument.origin_id,
+    esClient: internalEsClient,
+    ingestionMethod: 'crawled',
+  });
 
   return { document: fullDocument, created };
 };
