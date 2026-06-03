@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
@@ -28,6 +27,7 @@ import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
+import { mainTranslations } from './main_i18n';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
@@ -145,18 +145,14 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     () => [
       {
         field: 'name',
-        name: i18n.translate('dataSets.table.columnName', {
-          defaultMessage: 'name',
-        }),
+        name: mainTranslations.columns.dataSources.name,
         sortable: true,
         width: '22%',
         'data-test-subj': 'dataSetsColName',
       },
       {
         field: 'type',
-        name: i18n.translate('dataSets.table.columnType', {
-          defaultMessage: 'Type',
-        }),
+        name: mainTranslations.columns.dataSources.type,
         sortable: true,
         width: '18%',
         render: (value: DataSource['type']) => getDataSourceTypeVerbose(value),
@@ -164,26 +160,18 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
       },
       {
         field: 'description',
-        name: i18n.translate('dataSets.table.columnDescription', {
-          defaultMessage: 'Description',
-        }),
+        name: mainTranslations.columns.dataSources.description,
         sortable: true,
         truncateText: true,
         'data-test-subj': 'dataSetsColDescription',
       },
       {
-        name: i18n.translate('dataSets.table.columnActions', {
-          defaultMessage: 'Actions',
-        }),
+        name: mainTranslations.columns.dataSources.actions,
         width: '8%',
         actions: [
           {
-            name: i18n.translate('dataSets.table.editAction', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate('dataSets.table.editActionDescription', {
-              defaultMessage: 'Edit data source',
-            }),
+            name: mainTranslations.columns.dataSources.editAction,
+            description: mainTranslations.columns.dataSources.editActionDescription,
             icon: 'pencil',
             type: 'icon',
             onClick: (item) => {
@@ -201,68 +189,50 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     () => [
       {
         field: 'name',
-        name: i18n.translate('dataSets.setsTable.columnName', {
-          defaultMessage: 'Name',
-        }),
+        name: mainTranslations.columns.dataSets.name,
         sortable: true,
         width: '18%',
         'data-test-subj': 'dataSetsSetsColName',
       },
       {
         field: 'data_source',
-        name: i18n.translate('dataSets.setsTable.columnDataSourceId', {
-          defaultMessage: 'Data source',
-        }),
+        name: mainTranslations.columns.dataSets.dataSourceId,
         sortable: true,
         width: '18%',
         'data-test-subj': 'dataSetsSetsColDataSourceId',
       },
       {
         field: 'type',
-        name: i18n.translate('dataSets.setsTable.columnDataSourceType', {
-          defaultMessage: 'Data source type',
-        }),
+        name: mainTranslations.columns.dataSets.dataSourceType,
         render: (type: DataSetListRow['type']) =>
           type
             ? getDataSourceTypeVerbose(type)
-            : i18n.translate('dataSets.setsTable.dataSourceTypeMissing', {
-                defaultMessage: 'Unknown',
-              }),
+            : mainTranslations.columns.dataSets.dataSourceTypeMissing,
         sortable: true,
         width: '18%',
         'data-test-subj': 'dataSetsSetsColDataSourceType',
       },
       {
         field: 'resource',
-        name: i18n.translate('dataSets.setsTable.columnResource', {
-          defaultMessage: 'Resource',
-        }),
+        name: mainTranslations.columns.dataSets.resource,
         sortable: true,
         width: '22%',
         'data-test-subj': 'dataSetsSetsColResource',
       },
       {
         field: 'description',
-        name: i18n.translate('dataSets.setsTable.columnDescription', {
-          defaultMessage: 'Description',
-        }),
+        name: mainTranslations.columns.dataSets.description,
         sortable: true,
         truncateText: true,
         'data-test-subj': 'dataSetsSetsColDescription',
       },
       {
-        name: i18n.translate('dataSets.setsTable.columnActions', {
-          defaultMessage: 'Actions',
-        }),
+        name: mainTranslations.columns.dataSets.actions,
         width: '8%',
         actions: [
           {
-            name: i18n.translate('dataSets.setsTable.editAction', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate('dataSets.setsTable.editActionDescription', {
-              defaultMessage: 'Edit data set',
-            }),
+            name: mainTranslations.columns.dataSets.editAction,
+            description: mainTranslations.columns.dataSets.editActionDescription,
             icon: 'pencil',
             type: 'icon',
             onClick: (item) => {
@@ -280,10 +250,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     () => [
       {
         id: 'sets',
-        name: i18n.translate('dataSets.tabs.setsWithCount', {
-          defaultMessage: 'Sets ({count})',
-          values: { count: dataSetItems.length },
-        }),
+        name: mainTranslations.tabs.sets(dataSetItems.length),
         content: (
           <>
             <EuiSpacer size="m" />
@@ -294,9 +261,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
               search={{
                 box: {
                   incremental: true,
-                  placeholder: i18n.translate('dataSets.setsSearch.placeholder', {
-                    defaultMessage: 'Search data sets…',
-                  }),
+                  placeholder: mainTranslations.columns.dataSets.searchPlaceholder,
                   'data-test-subj': 'dataSetsSetsSearch',
                   schema: {
                     fields: {
@@ -322,9 +287,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                         })();
                       }}
                     >
-                      {i18n.translate('dataSets.deleteButtonLabel', {
-                        defaultMessage: 'Delete',
-                      })}
+                      {mainTranslations.actions.deleteButtonLabel}
                     </EuiButton>
                   ) : undefined,
                 toolsRight: (
@@ -334,9 +297,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                     iconType="plusInCircle"
                     onClick={() => setDataSetFlyout({ kind: 'create' })}
                   >
-                    {i18n.translate('dataSets.setsAddButtonLabel', {
-                      defaultMessage: 'Add',
-                    })}
+                    {mainTranslations.columns.dataSets.addButtonLabel}
                   </EuiButton>
                 ),
               }}
@@ -351,12 +312,8 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                 initialPageSize: 10,
               }}
               data-test-subj="dataSetsSetsTable"
-              tableCaption={i18n.translate('dataSets.setsTable.caption', {
-                defaultMessage: 'Data sets',
-              })}
-              noItemsMessage={i18n.translate('dataSets.setsTable.noItems', {
-                defaultMessage: 'No data sets found',
-              })}
+              tableCaption={mainTranslations.columns.dataSets.caption}
+              noItemsMessage={mainTranslations.columns.dataSets.noItems}
               tableLayout="auto"
               responsiveBreakpoint={false}
             />
@@ -365,10 +322,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
       },
       {
         id: 'sources',
-        name: i18n.translate('dataSets.tabs.sourcesWithCount', {
-          defaultMessage: 'Sources ({count})',
-          values: { count: items.length },
-        }),
+        name: mainTranslations.tabs.sources(items.length),
         content: (
           <>
             <EuiSpacer size="m" />
@@ -379,9 +333,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
               search={{
                 box: {
                   incremental: true,
-                  placeholder: i18n.translate('dataSets.search.placeholder', {
-                    defaultMessage: 'Search data sources…',
-                  }),
+                  placeholder: mainTranslations.columns.dataSources.searchPlaceholder,
                   'data-test-subj': 'dataSetsSearch',
                   schema: {
                     fields: {
@@ -405,9 +357,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                         })();
                       }}
                     >
-                      {i18n.translate('dataSets.deleteButtonLabel', {
-                        defaultMessage: 'Delete',
-                      })}
+                      {mainTranslations.actions.deleteButtonLabel}
                     </EuiButton>
                   ) : undefined,
                 toolsRight: (
@@ -419,9 +369,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                       setDataSourceFlyout({ kind: 'create' });
                     }}
                   >
-                    {i18n.translate('dataSets.addButtonLabel', {
-                      defaultMessage: 'Add',
-                    })}
+                    {mainTranslations.actions.addButtonLabel}
                   </EuiButton>
                 ),
               }}
@@ -436,12 +384,8 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                 initialPageSize: 10,
               }}
               data-test-subj="dataSetsTable"
-              tableCaption={i18n.translate('dataSets.table.caption', {
-                defaultMessage: 'Data sources',
-              })}
-              noItemsMessage={i18n.translate('dataSets.table.noItems', {
-                defaultMessage: 'No data sources found',
-              })}
+              tableCaption={mainTranslations.columns.dataSources.caption}
+              noItemsMessage={mainTranslations.columns.dataSources.noItems}
               tableLayout="auto"
               responsiveBreakpoint={false}
             />
