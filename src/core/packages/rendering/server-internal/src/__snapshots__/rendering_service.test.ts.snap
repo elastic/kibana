@@ -52,7 +52,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -150,7 +150,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -244,7 +244,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -342,7 +342,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -436,7 +436,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -530,7 +530,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -628,7 +628,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -722,7 +722,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -816,7 +816,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -910,7 +910,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1009,7 +1009,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1109,7 +1109,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1208,7 +1208,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1311,7 +1311,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1405,7 +1405,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1504,7 +1504,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1607,7 +1607,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1706,7 +1706,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1807,7 +1807,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1908,7 +1908,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
