@@ -8,7 +8,7 @@
 version: "1"
 name: ".streams-ki-onboarding"
 enabled: true
-description: "Orchestrates KI feature identification, query generation, and memory synthesis for a stream."
+description: "Orchestrates KI feature identification and query generation for a stream."
 tags:
   - observability
   - streams
