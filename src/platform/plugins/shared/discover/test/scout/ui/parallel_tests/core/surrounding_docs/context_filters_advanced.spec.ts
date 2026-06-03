@@ -107,7 +107,7 @@ spaceTest.describe(
         await filterBadge.click();
         await page.testSubj.click('editFilter');
         const preview = page.testSubj.locator('filter-preview');
-        await expect(preview).toContainText('extension: png OR bytes: 1,000 to 2,000');
+        await expect(preview).toContainText('extension: png OR bytes: 1,000B to 2KB');
       });
     });
 
@@ -154,7 +154,7 @@ spaceTest.describe(
         await page.testSubj.click('editFilter');
         const preview = page.testSubj.locator('filter-preview');
         await expect(preview).toContainText(
-          'extension: is one of png, jpeg AND bytes: 1,000 to 2,000'
+          'extension: is one of png, jpeg AND bytes: 1,000B to 2KB'
         );
       });
     });
@@ -217,7 +217,7 @@ spaceTest.describe(
         await page.testSubj.click('editFilter');
         const preview = page.testSubj.locator('filter-preview');
         await expect(preview).toContainText(
-          '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000 to 2,000'
+          '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
         );
       });
     });

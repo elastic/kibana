@@ -17,7 +17,7 @@ export const LOGSTASH_DATA_VIEW = 'logstash-*';
 
 export const LOGSTASH_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 
-export const KBN_ARCHIVE_VISUALIZE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
+export const KBN_ARCHIVE_VISUALIZE = 'src/platform/test/functional/fixtures/kbn_archiver/visualize';
 
 export const ES_ARCHIVE_DATE_NANOS = 'src/platform/test/functional/fixtures/es_archiver/date_nanos';
 
