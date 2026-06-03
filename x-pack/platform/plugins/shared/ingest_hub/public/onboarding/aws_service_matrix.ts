@@ -297,7 +297,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     policyTemplate: 'guardduty',
     defaultEnabled: true,
     showInUI: true,
-    identityFederationSupported: true,
+    identityFederationSupported: false,
   },
   {
     id: 'inspector',

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AWS_SERVICES_MATRIX } from '../../aws_service_matrix';
-import type { AwsServiceMatrixEntry, SignalType, DeliveryMethod } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, SignalType } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { ServiceRow } from './service_row';
 import type { ServiceGroupData } from './service_row';
@@ -56,7 +56,6 @@ function buildServiceGroups(entries: AwsServiceMatrixEntry[]): ServiceGroupData[
     {
       name: string;
       signalTypes: Set<SignalType>;
-      deliveryMethods: Map<DeliveryMethod, { method: DeliveryMethod; preferred?: boolean }>;
       entryIds: string[];
     }
   >();
@@ -67,17 +66,11 @@ function buildServiceGroups(entries: AwsServiceMatrixEntry[]): ServiceGroupData[
       groupMap.set(key, {
         name: entry.name,
         signalTypes: new Set([entry.signalType]),
-        deliveryMethods: new Map(entry.deliveryMethods.map((dm) => [dm.method, dm])),
         entryIds: [entry.id],
       });
     } else {
       const group = groupMap.get(key)!;
       group.signalTypes.add(entry.signalType);
-      for (const dm of entry.deliveryMethods) {
-        if (!group.deliveryMethods.has(dm.method)) {
-          group.deliveryMethods.set(dm.method, dm);
-        }
-      }
       group.entryIds.push(entry.id);
     }
   }
@@ -86,7 +79,6 @@ function buildServiceGroups(entries: AwsServiceMatrixEntry[]): ServiceGroupData[
     key,
     name: g.name,
     signalTypes: Array.from(g.signalTypes),
-    deliveryMethods: Array.from(g.deliveryMethods.values()),
     entryIds: g.entryIds,
   }));
 }

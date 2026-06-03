@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import type { SignalType, DeliveryMethodEntry } from '../../aws_service_matrix';
+import type { SignalType } from '../../aws_service_matrix';
 import { SignalTypeBadge } from './signal_type_badge';
-import { DeliveryMethodBadge } from './delivery_method_badge';
 
 export interface ServiceGroupData {
   /** policyTemplate when present, otherwise the data stream id */
@@ -18,7 +17,6 @@ export interface ServiceGroupData {
   /** Display name taken from the group's first entry */
   name: string;
   signalTypes: SignalType[];
-  deliveryMethods: DeliveryMethodEntry[];
   /** Individual data stream ids that belong to this group */
   entryIds: string[];
 }
@@ -48,14 +46,6 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({ group, isSelected, onTog
                     <SignalTypeBadge signalType={signalType} />
                   </EuiFlexItem>
                 ))}
-                {/* firehose not supported for V1 */}
-                {group.deliveryMethods
-                  .filter((entry) => entry.method !== 'firehose')
-                  .map((entry) => (
-                    <EuiFlexItem key={entry.method} grow={false}>
-                      <DeliveryMethodBadge method={entry.method} preferred={entry.preferred} />
-                    </EuiFlexItem>
-                  ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
