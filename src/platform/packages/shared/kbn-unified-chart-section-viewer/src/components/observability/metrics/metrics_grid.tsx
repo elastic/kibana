@@ -43,6 +43,10 @@ const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
+const haveSameDimensionNames = (previous: Dimension[], next: Dimension[]): boolean =>
+  previous.length === next.length &&
+  previous.every((dimension, index) => dimension.name === next[index].name);
+
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
@@ -89,8 +93,7 @@ export const MetricsGrid = ({
   isTabSelected,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const dimensionsRef = useRef(dimensions);
-  dimensionsRef.current = dimensions;
+  const applicableDimensionsByMetricKeyRef = useRef<Map<string, Dimension[]>>(new Map());
   const { euiTheme } = useEuiTheme();
   const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
 
@@ -112,25 +115,44 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  // Use dimension names for the key to avoid unnecessary recomputation when the array reference changes.
-  const selectedDimensionNamesKey = useMemo(
-    () => dimensions.map((dimension) => dimension.name).join('\0'),
+  const dimensionNameSet = useMemo(
+    () => new Set(dimensions.map((dimension) => dimension.name)),
     [dimensions]
   );
 
-  const applicableDimensionsPerItem = useMemo(
-    () =>
-      metricItems.map((item) => {
-        const metricFieldNames = new Set(item.dimensionFields.map((field) => field.name));
-        const nextApplicableDimensions = dimensionsRef.current.filter((dimension) =>
-          metricFieldNames.has(dimension.name)
-        );
-        return nextApplicableDimensions.length === 0
+  const applicableDimensionsPerItem = useMemo(() => {
+    const currentMetricKeys = new Set(metricItems.map((item) => getMetricUniqueKey(item)));
+
+    for (const metricKey of applicableDimensionsByMetricKeyRef.current.keys()) {
+      if (!currentMetricKeys.has(metricKey)) {
+        applicableDimensionsByMetricKeyRef.current.delete(metricKey);
+      }
+    }
+
+    return metricItems.map((item) => {
+      const nextApplicableDimensions = item.dimensionFields.filter((dimensionField) =>
+        dimensionNameSet.has(dimensionField.name)
+      );
+      const metricKey = getMetricUniqueKey(item);
+      const previousApplicableDimensions =
+        applicableDimensionsByMetricKeyRef.current.get(metricKey);
+
+      if (
+        previousApplicableDimensions &&
+        haveSameDimensionNames(previousApplicableDimensions, nextApplicableDimensions)
+      ) {
+        return previousApplicableDimensions;
+      }
+
+      const stabilizedApplicableDimensions =
+        nextApplicableDimensions.length === 0
           ? EMPTY_APPLICABLE_DIMENSIONS
           : nextApplicableDimensions;
-      }),
-    [metricItems, selectedDimensionNamesKey]
-  );
+
+      applicableDimensionsByMetricKeyRef.current.set(metricKey, stabilizedApplicableDimensions);
+      return stabilizedApplicableDimensions;
+    });
+  }, [metricItems, dimensionNameSet]);
 
   const flyoutData = useMemo(() => {
     if (!flyoutState) {
