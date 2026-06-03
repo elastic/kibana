@@ -17,8 +17,6 @@ import {
   INFERENCE_FEATURES_API_PATH,
 } from '../constants';
 
-const TEST_PREFIX = 'inference-features-authz';
-
 const toBasicAuthHeader = (username: string, password: string): Record<string, string> => {
   const token = Buffer.from(`${username}:${password}`).toString('base64');
   return { Authorization: `Basic ${token}` };
@@ -28,18 +26,18 @@ apiTest.describe('Inference features authorization', { tag: [...INFERENCE_LOCAL_
   const testRunId = randomUUID();
 
   const allUser = {
-    roleName: `${TEST_PREFIX}-all-role-${testRunId}`,
-    username: `${TEST_PREFIX}-all-user-${testRunId}`,
+    roleName: `inference-features-all-role-${testRunId}`,
+    username: `inference-features-all-user-${testRunId}`,
     password: 'all-user-password',
   };
   const readUser = {
-    roleName: `${TEST_PREFIX}-read-role-${testRunId}`,
-    username: `${TEST_PREFIX}-read-user-${testRunId}`,
+    roleName: `inference-features-read-role-${testRunId}`,
+    username: `inference-features-read-user-${testRunId}`,
     password: 'read-user-password',
   };
   const noPrivUser = {
-    roleName: `${TEST_PREFIX}-no-priv-role-${testRunId}`,
-    username: `${TEST_PREFIX}-no-priv-user-${testRunId}`,
+    roleName: `inference-features-no-priv-role-${testRunId}`,
+    username: `inference-features-no-priv-user-${testRunId}`,
     password: 'no-priv-user-password',
   };
 
