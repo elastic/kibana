@@ -93,6 +93,18 @@ function getPolicyOrVersionSpecificKuery(policyId: string): string {
   )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
 }
 
+interface AssignedAgentsCountAggregation {
+  buckets: Record<
+    string,
+    {
+      doc_count: number;
+      unprivileged?: { doc_count: number };
+      fips?: { doc_count: number };
+      versions?: { buckets: Array<{ key: string; doc_count: number }> };
+    }
+  >;
+}
+
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
@@ -138,19 +150,18 @@ export async function populateAssignedAgentsCount(
     },
   });
 
-  const buckets = (aggregations?.policies as any)?.buckets ?? {};
+  const buckets =
+    (aggregations?.policies as AssignedAgentsCountAggregation | undefined)?.buckets ?? {};
 
   for (const agentPolicy of agentPolicies as GetAgentPoliciesResponseItem[]) {
     const bucket = buckets[agentPolicy.id];
     agentPolicy.agents = bucket?.doc_count ?? 0;
     agentPolicy.unprivileged_agents = bucket?.unprivileged?.doc_count ?? 0;
     agentPolicy.fips_agents = bucket?.fips?.doc_count ?? 0;
-    agentPolicy.agents_per_version = (
-      (bucket?.versions?.buckets ?? []) as Array<{
-        key: string;
-        doc_count: number;
-      }>
-    ).map((version) => ({ version: version.key, count: version.doc_count }));
+    agentPolicy.agents_per_version = (bucket?.versions?.buckets ?? []).map((version) => ({
+      version: version.key,
+      count: version.doc_count,
+    }));
   }
 }
 
