@@ -158,7 +158,10 @@ export const runAgent = async ({
     { agent, conversationId: agentParams.conversation?.id, providerName },
     async () => {
       const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
-      const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
+      const agentHandlerContext = await createAgentHandlerContext({
+        agentExecutionParams,
+        manager,
+      });
       return await agentHandler(
         {
           runId: manager.context.runId,

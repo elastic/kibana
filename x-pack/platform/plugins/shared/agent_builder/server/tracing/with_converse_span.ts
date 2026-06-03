@@ -30,7 +30,14 @@ interface WithConverseSpanOptions {
 }
 
 export function withConverseSpan(
-  { agentId, agentName, providerName, conversationId, spaceId, opikHeaders }: WithConverseSpanOptions,
+  {
+    agentId,
+    agentName,
+    providerName,
+    conversationId,
+    spaceId,
+    opikHeaders,
+  }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
   return withAgentBuilderContext(

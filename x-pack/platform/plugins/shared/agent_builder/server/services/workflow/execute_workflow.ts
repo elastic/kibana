@@ -8,7 +8,11 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SpanKind } from '@opentelemetry/api';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ElasticGenAIAttributes, GenAISemanticConventions, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import {
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 import type { WorkflowExecutionResult } from './types';
 
