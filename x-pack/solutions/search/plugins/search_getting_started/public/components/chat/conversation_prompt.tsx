@@ -5,94 +5,77 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiToolTip, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { ConversationInputShell } from '@kbn/agent-builder-plugin/public';
-import { useKibana } from '../../hooks/use_kibana';
 
-import {
-  NewConversationTextArea,
-  NewConversationSendButton,
-  NewConversationContainer,
-} from './styles';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { useOpenAgentBuilder } from '../../hooks/use_open_agent_builder';
+import { NewConversationTextArea, NewConversationSendButton } from './styles';
 
 export const ConversationPrompt = () => {
-  const {
-    services: { application },
-  } = useKibana();
+  const openAgentBuilder = useOpenAgentBuilder();
+  const usageTracker = useUsageTracker();
   const [initialMessage, setInitialMessage] = useState<string>('');
-  const openConversation = useCallback(() => {
+  const openConversation = () => {
     if (initialMessage.trim().length === 0) return;
-    application.navigateToApp(AGENT_BUILDER_APP_ID, {
-      path: `/agents/${agentBuilderDefaultAgentId}/conversations/new`,
-      state: {
-        initialMessage,
-        entryPointSource: 'search_getting_started',
-      },
-    });
-  }, [application, initialMessage]);
-  const onInputKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.key === keys.ENTER && !event.shiftKey) {
-        event.preventDefault();
-        openConversation();
-      }
-    },
-    [openConversation]
-  );
+    usageTracker.click(AnalyticsEvents.startChat);
+    openAgentBuilder(initialMessage);
+  };
+  const onInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === keys.ENTER && !event.shiftKey) {
+      event.preventDefault();
+
+      openConversation();
+    }
+  };
 
   return (
-    <div css={NewConversationContainer}>
-      <ConversationInputShell>
-        <textarea
-          css={NewConversationTextArea}
-          name="searchGettingStartedChatPromptInput"
-          data-test-subj="searchGettingStartedChatPromptInput"
-          placeholder={i18n.translate(
-            'xpack.search.gettingStarted.chat.conversationPrompt.placeholder',
-            { defaultMessage: 'How can I help you get started today?' }
-          )}
-          aria-label={i18n.translate(
-            'xpack.search.gettingStarted.chat.conversationPrompt.input.aria',
+    <ConversationInputShell>
+      <textarea
+        css={NewConversationTextArea}
+        name="searchGettingStartedChatPromptInput"
+        data-test-subj="searchGettingStartedChatPromptInput"
+        placeholder={i18n.translate(
+          'xpack.searchGettingStarted.chat.conversationPrompt.placeholder',
+          { defaultMessage: 'How can I help you get started today?' }
+        )}
+        aria-label={i18n.translate(
+          'xpack.searchGettingStarted.chat.conversationPrompt.input.aria',
+          {
+            defaultMessage: 'Ask the AI assistant a question to get started',
+          }
+        )}
+        rows={3}
+        value={initialMessage}
+        onChange={(e) => setInitialMessage(e.currentTarget.value)}
+        onKeyDown={onInputKeyDown}
+      />
+      <div css={NewConversationSendButton}>
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.searchGettingStarted.chat.conversationPrompt.send.tooltip',
             {
-              defaultMessage: 'Ask the AI assistant a question to get started',
+              defaultMessage: 'Open the AI assistant chat',
             }
           )}
-          rows={3}
-          value={initialMessage}
-          onChange={(e) => setInitialMessage(e.currentTarget.value)}
-          onKeyDown={onInputKeyDown}
-        />
-        <div css={NewConversationSendButton}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.search.gettingStarted.chat.conversationPrompt.send.tooltip',
-              {
-                defaultMessage: 'Open the AI assistant chat',
-              }
-            )}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="kqlFunction"
-              display="fill"
-              size="m"
-              disabled={initialMessage.trim().length === 0}
-              onClick={openConversation}
-              aria-label={i18n.translate(
-                'xpack.search.gettingStarted.chat.conversationPrompt.send',
-                {
-                  defaultMessage: 'Open the AI assistant chat',
-                }
-              )}
-              data-test-subj="searchGettingStartedChatPromptSend"
-            />
-          </EuiToolTip>
-        </div>
-      </ConversationInputShell>
-    </div>
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="kqlFunction"
+            display="fill"
+            size="m"
+            disabled={initialMessage.trim().length === 0}
+            onClick={openConversation}
+            aria-label={i18n.translate('xpack.searchGettingStarted.chat.conversationPrompt.send', {
+              defaultMessage: 'Open the AI assistant chat',
+            })}
+            data-test-subj="searchGettingStartedChatPromptSend"
+          />
+        </EuiToolTip>
+      </div>
+    </ConversationInputShell>
   );
 };
