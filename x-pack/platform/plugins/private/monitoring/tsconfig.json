@@ -62,7 +62,6 @@
     "@kbn/autoops-promotion-callout",
     "@kbn/react-query",
     "@kbn/response-ops-rule-params",
-    "@kbn/kql",
     "@kbn/cloud-connect-plugin",
     "@kbn/scout"
   ],
