@@ -5,15 +5,15 @@ info:
   title: List Entity Relationships Schema
   version: '1'
 paths:
-  /api/security/entity_store/observations/relationships/{entityId}:
+  /api/security/entity_store/entities/{entityId}/relationships:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ListEntityRelationships
-      summary: List entity relationship observations
+      summary: List entity relationships
       description: >-
-        List paginated relationship observations from the entity metadata
-        history datastream for a given entity. Implicit filter on
+        List paginated relationship records from the entity metadata
+        datastream for a given entity. Implicit filter on
         event.action=relationship_observed.
       parameters:
         - name: entityId
@@ -22,7 +22,7 @@ paths:
           schema:
             type: string
             minLength: 1
-          description: The EUID of the entity to list relationship observations for.
+          description: The EUID of the entity to list relationships for.
           example: 'user:alice@corp'
         - name: page
           in: query
@@ -38,7 +38,7 @@ paths:
           schema:
             type: integer
             minimum: 1
-          description: Number of observations per page.
+          description: Number of records per page.
           example: 10
         - name: sort_field
           in: query
@@ -95,7 +95,7 @@ paths:
           example: '2026-05-27T23:59:59.999Z'
       responses:
         '200':
-          description: Relationship observations returned successfully
+          description: Relationship records returned successfully
           content:
             application/json:
               schema:

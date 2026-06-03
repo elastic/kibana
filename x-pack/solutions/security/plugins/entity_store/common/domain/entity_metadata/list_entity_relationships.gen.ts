@@ -23,7 +23,7 @@ export const ListEntityRelationshipsRequestQuery = lazySchema(() =>
      */
     page: z.coerce.number().int().min(1).optional(),
     /**
-     * Number of observations per page.
+     * Number of records per page.
      */
     per_page: z.coerce.number().int().min(1).optional(),
     /**
@@ -72,7 +72,7 @@ export type ListEntityRelationshipsRequestQueryInput = z.input<
 export const ListEntityRelationshipsRequestParams = lazySchema(() =>
   z.object({
     /**
-     * The EUID of the entity to list relationship observations for.
+     * The EUID of the entity to list relationships for.
      */
     entityId: z.string().min(1),
   })
