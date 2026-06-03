@@ -146,6 +146,12 @@ const createStartContractMock = () => {
           };
         }),
       }),
+      userMenu: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject<ReactNode>(null)),
+        set: jest.fn((content?: ReactNode) => {
+          new BehaviorSubject<ReactNode>(null).next(content ?? null);
+        }),
+      }),
       getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
       registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
       getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),

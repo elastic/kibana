@@ -167,6 +167,13 @@ export interface ChromeNext {
      */
     set(config: AppHeaderConfig): () => void;
   };
+  userMenu: {
+    /**
+     * Set the user menu content for the Chrome-Next global header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   /**
    * Register a handler that opens the feedback UI in the Chrome Next help menu.
    *

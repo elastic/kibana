@@ -210,6 +210,10 @@ export function createChromeApi({
           };
         },
       },
+      userMenu: {
+        get$: () => state.userMenu.$,
+        set: (content) => state.userMenu.set(content),
+      },
       registerFeedbackHandler: (handler: () => void) => {
         state.feedbackHandler.set(handler);
         return () => {

@@ -144,4 +144,7 @@ export interface InternalChromeNext extends ChromeNext {
   appHeader: ChromeNext['appHeader'] & {
     get$(): Observable<AppHeaderConfig | undefined>;
   };
+  userMenu: ChromeNext['userMenu'] & {
+    get$(): Observable<ReactNode>;
+  };
 }
