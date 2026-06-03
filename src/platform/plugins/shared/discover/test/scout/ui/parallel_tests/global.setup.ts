@@ -41,7 +41,7 @@ globalSetupHook(
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
 
-    // Date nanos data for context app tests
+    // Date nanos data for surrounding_docs/context app tests.
     log.debug('[setup:date_nanos] loading date_nanos ES data (only if it does not exist)...');
     await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos');
     log.debug('[setup:date_nanos] date_nanos ES data ready');

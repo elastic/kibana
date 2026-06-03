@@ -91,11 +91,7 @@ spaceTest.describe(
           `~filter & ~filter-key-${TEST_ANCHOR_FILTER_FIELD}`
         );
         await filterBadge.click();
-
-        const disableButton = page.testSubj.locator('disableFilter');
-        if (await disableButton.isVisible()) {
-          await disableButton.click();
-        }
+        await page.testSubj.click('disableFilter');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         expect(

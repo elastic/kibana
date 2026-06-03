@@ -55,16 +55,10 @@ spaceTest.describe(
           `~filter & ~filter-key-${TEST_ANCHOR_FILTER_FIELD}`
         );
         await filterBadge.click();
-        const pinButton = page.testSubj.locator('pinFilter');
-        if (await pinButton.isVisible()) {
-          await pinButton.click();
-        }
+        await page.testSubj.click('pinFilter');
 
         await filterBadge.click();
-        const negateButton = page.testSubj.locator('negateFilter');
-        if (await negateButton.isVisible()) {
-          await negateButton.click();
-        }
+        await page.testSubj.click('negateFilter');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         const dataRows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
