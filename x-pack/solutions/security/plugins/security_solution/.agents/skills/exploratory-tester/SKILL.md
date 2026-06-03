@@ -24,6 +24,8 @@ Explore a Kibana Security Solution feature area through a real browser, collect 
 
 ## How to invoke
 
+**Mode:** Single for new areas (investigation chains to any depth). Parallel when `knowledge/` is populated and speed matters — investigation limited to one level (`phases/2-explore.md`).
+
 ```
 Read and follow exploratory-tester/SKILL.md [in parallel mode] [for issue/PR #N]
 Area: <feature area>
@@ -37,17 +39,17 @@ Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
 ```
-`Specs:`, `Session-timeout:`, and `isolate:` are optional. User-provided environments: append an `Environment:` block (see `phases/0-setup.md`).
+`Specs:`, `Session-timeout:`, `isolate:` optional. User-provided: append `Environment:` block (`phases/0-setup.md`).
 
 ## Red Flags
 
 | Thought | Reality |
 |---|---|
 | "This area looks fine — I didn't find anything" | Did you attempt every checklist step? Did step 3 use the noise index? |
-| "All my test data is well-formed ECS" | Real customer data has non-ECS field types. Use the noise index for data-view flows. |
+| "All my test data is well-formed ECS" | Real customer data has non-ECS types. Use the noise index for data-view flows. |
 | "Let me check the source code / test file selectors" | **Hard stop.** The implementation may be wrong. Navigate from what's visible in the browser. |
-| "I don't know how this feature works" | Check specs (`config.json → specs`) → official docs → UI → test files for user flows. |
-| "This error is expected" | Document it. The user decides — then add to `knowledge/<area-slug>.md`. |
+| "I don't know how this feature works" | Check specs → official docs → UI → test files for user flows. |
+| "This error is expected" | Document it. User decides — then add to `knowledge/<area-slug>.md`. |
 | "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
 ## Phases
 
@@ -60,4 +62,4 @@ Execute in order — read each file before starting it:
 | `phases/2-explore.md` | Explore loop, checklist, mini-probe, findings |
 | `phases/3-report.md` | Merge, filter noise, report, update knowledge |
 
-Supporting files in `templates/`, `scripts/`, and `knowledge/` are referenced inline from the phase files — read them when instructed.
+Supporting files in `templates/`, `scripts/`, `knowledge/` — referenced inline from phase files.

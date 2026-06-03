@@ -31,10 +31,22 @@ For each flow in `config.json` in order, run the session cap check then the Expl
 
 ## Parallel mode
 
+**When to use parallel mode:**
+- Use when `knowledge/<area_slug>.md` is populated — you already know the noise, so speed matters more than depth.
+- Use for areas you've tested before where cascading bugs are unlikely.
+- Avoid for new or complex areas: sub-agents are isolated and cannot follow investigation chains beyond Wave 2. A Level 1 bug found during an investigation flow gets deferred, not immediately followed.
+
+**Two-wave execution:** parallel mode runs in two waves to support reactive investigation:
+- **Wave 1** — all `specified` and `agent` flows run concurrently.
+- **Orchestrator reads Wave 1 findings** — collects any Level 1 bugs that need scope investigation (i.e., mini-probe was insufficient).
+- **Wave 2** — all `investigation` flows (one per unresolved Level 1 bug) run concurrently.
+- Any Level 1 bugs found *during* Wave 2 are recorded as `deferred_flows` — there is no Wave 3.
+
 The orchestrator dispatches one sub-agent per flow concurrently.
 
+**Wave 1:**
 1. Read `config.json` — confirm `mode` is `parallel`
-2. Assign each flow an index N (1-based)
+2. Collect all flows where `source` is `"specified"` or `"agent"`. Assign each an index N (1-based).
 3. Dispatch sub-agents concurrently via the Agent tool. Each sub-agent prompt must begin by reading the skill:
 
 ```
@@ -57,7 +69,7 @@ Do NOT write to the knowledge file.
 Exit when the flow is complete or the timebox expires.
 ```
 
-4. Wait for all sub-agents to complete.
+4. Wait for all Wave 1 sub-agents to complete.
 5. If a sub-agent crashes or produces no findings file, create `findings-flow-<N>.md` with:
    ```markdown
    ## Finding: Sub-agent failure
@@ -65,7 +77,13 @@ Exit when the flow is complete or the timebox expires.
    ### Current behavior
    Sub-agent did not complete. No findings collected.
    ```
-6. Proceed to Phase 3.
+
+**Wave 2 (investigation flows):**
+
+6. Read all Wave 1 findings files. For each Level 1 finding where the mini-probe left scope unresolved, create an `investigation` flow in `config.json` (see investigation flow rules in the Explore Loop section below).
+7. If any investigation flows were created, dispatch them as a second concurrent wave using the same sub-agent prompt pattern. Assign indices continuing from Wave 1 (e.g. if Wave 1 had flows 1–5, Wave 2 starts at 6).
+8. Wait for all Wave 2 sub-agents to complete. Any Level 1 bugs found during Wave 2 → record as `deferred_flows`, do not open a Wave 3.
+9. Proceed to Phase 3.
 
 **Sub-agent rules:** stateless — reads `config.json` + knowledge file, writes findings file, exits. Never writes to the knowledge file. One crash does not block other sub-agents.
 
