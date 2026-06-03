@@ -140,8 +140,7 @@ export const MetricsGrid = ({
     return metricItems.map((item) => {
       const metricFieldNames = new Set(item.dimensionFields.map((field) => field.name));
       const nextApplicableDimensions = dimensions.filter(
-        (dimension) =>
-          dimensionNameSet.has(dimension.name) && metricFieldNames.has(dimension.name)
+        (dimension) => dimensionNameSet.has(dimension.name) && metricFieldNames.has(dimension.name)
       );
       const metricKey = getMetricUniqueKey(item);
       const previousApplicableDimensions =
