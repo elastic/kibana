@@ -374,6 +374,7 @@ const ActionsConnectorsList = ({
                 tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
                 color="warning"
                 size="s"
+                alignment="middle"
               />
             </EuiFlexItem>
             {isLLMConnectorTypeId(item.actionTypeId) && (
