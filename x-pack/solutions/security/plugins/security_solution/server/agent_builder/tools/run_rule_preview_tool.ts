@@ -79,7 +79,7 @@ export function runRulePreviewTool(
     type: ToolType.builtin,
     description: `Runs a security detection rule preview over a time range without saving the rule, then stores the result as a rule preview attachment.
 
-Use this to preview a rule (for example one produced by the create_detection_rule tool) and inspect the alerts it would have generated. The timeframe defaults to the last hour but can be overridden with datemath via timeframeStart and timeframeEnd.
+Call this whenever a detection rule is created or modified (for example a rule produced or edited by the create_detection_rule tool) to validate the change before saving, and inspect the alerts it would have generated. The timeframe defaults to the last hour but can be overridden with datemath via timeframeStart and timeframeEnd.
 
 The tool returns the generated previewId and the attachment metadata. Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.`,
     schema: runRulePreviewSchema,
