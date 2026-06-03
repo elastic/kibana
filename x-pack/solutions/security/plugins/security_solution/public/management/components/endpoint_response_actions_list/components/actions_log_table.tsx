@@ -10,6 +10,7 @@ import {
   type CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
+  type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFacetButton,
   EuiHorizontalRule,
@@ -28,7 +29,7 @@ import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
+import type { ActionDetails, ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/api/endpoint';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
@@ -53,206 +54,6 @@ const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
 interface ExpandedRowMapType {
   [k: string]: React.ReactNode;
 }
-
-const getResponseActionListTableColumns = ({
-  getTestId,
-  expandedRowMap,
-  showHostNames,
-  onClickCallback,
-}: {
-  getTestId: (suffix?: string | undefined) => string | undefined;
-  expandedRowMap: ExpandedRowMapType;
-  showHostNames: boolean;
-  onClickCallback: (actionListDataItem: ActionListApiResponse['data'][number]) => () => void;
-}) => {
-  const columns = [
-    {
-      field: 'startedAt',
-      name: TABLE_COLUMN_NAMES.time,
-      width: !showHostNames ? '21%' : '15%',
-      truncateText: true,
-      render: (startedAt: ActionListApiResponse['data'][number]['startedAt']) => {
-        return (
-          <FormattedDate
-            fieldName={TABLE_COLUMN_NAMES.time}
-            value={startedAt}
-            className="eui-textTruncate"
-          />
-        );
-      },
-    },
-    {
-      field: 'command',
-      name: TABLE_COLUMN_NAMES.command,
-      width: !showHostNames ? '21%' : '10%',
-      truncateText: true,
-      render: (_command: ActionListApiResponse['data'][number]['command']) => {
-        const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
-        return (
-          <EuiToolTip content={command} anchorClassName="eui-textTruncate">
-            <EuiText
-              size="s"
-              className="eui-textTruncate eui-fullWidth"
-              data-test-subj={getTestId('column-command')}
-              tabIndex={0}
-            >
-              {command}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      name: TABLE_COLUMN_NAMES.user,
-      width: !showHostNames ? '21%' : '14%',
-      truncateText: true,
-      render: ({ createdBy, ruleId }: ActionListApiResponse['data'][number]) => {
-        if (createdBy === 'unknown' && ruleId) {
-          return (
-            <EuiToolTip content={UX_MESSAGES.triggeredByRule} anchorClassName="eui-textTruncate">
-              <SecuritySolutionLinkAnchor
-                data-test-subj="ruleName"
-                deepLinkId={SecurityPageName.rules}
-                path={getRuleDetailsUrl(ruleId)}
-              >
-                <EuiText
-                  size="s"
-                  className="eui-textTruncate eui-fullWidth"
-                  data-test-subj={getTestId('column-user-name')}
-                >
-                  {UX_MESSAGES.triggeredByRule}
-                </EuiText>
-              </SecuritySolutionLinkAnchor>
-            </EuiToolTip>
-          );
-        }
-        return (
-          <StyledFacetButton
-            icon={
-              <EuiAvatar
-                // We've a EuiTooltip that shows for createdBy below,
-                // Thus we don't need to add a title tooltip as well.
-                aria-hidden={true}
-                title=""
-                name={createdBy}
-                data-test-subj={getTestId('column-user-avatar')}
-                size="s"
-              />
-            }
-          >
-            <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
-              <EuiText
-                size="s"
-                className="eui-textTruncate eui-fullWidth"
-                data-test-subj={getTestId('column-user-name')}
-                tabIndex={0}
-              >
-                {createdBy}
-              </EuiText>
-            </EuiToolTip>
-          </StyledFacetButton>
-        );
-      },
-    },
-    // conditional hostnames column
-    {
-      field: 'hosts',
-      name: TABLE_COLUMN_NAMES.hosts,
-      width: '20%',
-      truncateText: true,
-      render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
-        const hostnames = Object.entries(_hosts)
-          .reduce<string[]>((acc, [agentId, { name: hostName }]) => {
-            acc.push(hostName || `${agentId} (${UX_MESSAGES.unenrolled.host})`);
-            return acc;
-          }, [])
-          .join(', ');
-
-        return (
-          <EuiToolTip content={hostnames} anchorClassName="eui-textTruncate">
-            <EuiText
-              size="s"
-              className="eui-textTruncate eui-fullWidth"
-              data-test-subj={getTestId('column-hostname')}
-              tabIndex={0}
-            >
-              {hostnames}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      field: 'comment',
-      name: TABLE_COLUMN_NAMES.comments,
-      width: !showHostNames ? '21%' : '30%',
-      truncateText: true,
-      render: (comment: ActionListApiResponse['data'][number]['comment']) => {
-        return (
-          <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
-            <EuiText
-              size="s"
-              className="eui-textTruncate eui-fullWidth"
-              data-test-subj={getTestId('column-comments')}
-              tabIndex={0}
-            >
-              {comment ?? emptyValue}
-            </EuiText>
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      field: 'status',
-      name: TABLE_COLUMN_NAMES.status,
-      width: !showHostNames ? '15%' : '10%',
-      render: (_status: ActionListApiResponse['data'][number]['status']) => {
-        const status = getActionStatus(_status);
-
-        return (
-          <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-            <ResponseActionStatusBadge
-              color={
-                _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
-              }
-              data-test-subj={getTestId('column-status')}
-              status={status}
-              tabIndex={0}
-            />
-          </EuiToolTip>
-        );
-      },
-    },
-    {
-      field: '',
-      align: RIGHT_ALIGNMENT as HorizontalAlignment,
-      width: '40px',
-      isExpander: true,
-      name: (
-        <EuiScreenReaderOnly>
-          <span>{UX_MESSAGES.screenReaderExpand}</span>
-        </EuiScreenReaderOnly>
-      ),
-      render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
-        const actionId = actionListDataItem.id;
-        return (
-          <EuiButtonIcon
-            data-test-subj={getTestId('expand-button')}
-            onClick={onClickCallback(actionListDataItem)}
-            aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
-            iconType={expandedRowMap[actionId] ? 'chevronSingleUp' : 'chevronSingleDown'}
-          />
-        );
-      },
-    },
-  ];
-  // filter out the `hosts` column
-  // if showHostNames is FALSE
-  if (!showHostNames) {
-    return columns.filter((column) => column.field !== 'hosts');
-  }
-  return columns;
-};
 
 interface ActionsLogTableProps {
   error?: string;
@@ -403,16 +204,243 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       [getTestId, pagedResultsCount.fromCount, pagedResultsCount.toCount, totalItemCount]
     );
 
-    const columns = useMemo(
-      () =>
-        getResponseActionListTableColumns({
-          getTestId,
-          expandedRowMap,
-          onClickCallback,
-          showHostNames,
-        }),
-      [expandedRowMap, getTestId, onClickCallback, showHostNames]
-    );
+    const columns = useMemo(() => {
+      const columnDef: EuiBasicTableColumn<ActionDetails>[] = [
+        {
+          field: 'startedAt',
+          name: TABLE_COLUMN_NAMES.time,
+          width: !showHostNames ? '21%' : '15%',
+          truncateText: true,
+          render: (startedAt: ActionListApiResponse['data'][number]['startedAt']) => {
+            return (
+              <FormattedDate
+                fieldName={TABLE_COLUMN_NAMES.time}
+                value={startedAt}
+                className="eui-textTruncate"
+              />
+            );
+          },
+        },
+        {
+          field: 'command',
+          name: TABLE_COLUMN_NAMES.command,
+          width: !showHostNames ? '21%' : '10%',
+          truncateText: true,
+          render: (_command: ActionListApiResponse['data'][number]['command']) => {
+            const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
+            return (
+              <EuiToolTip content={command} anchorClassName="eui-textTruncate">
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-command')}
+                  tabIndex={0}
+                >
+                  {command}
+                </EuiText>
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          name: TABLE_COLUMN_NAMES.user,
+          width: !showHostNames ? '21%' : '14%',
+          truncateText: true,
+          render: ({ createdBy, ruleId }: ActionListApiResponse['data'][number]) => {
+            if (createdBy === 'unknown' && ruleId) {
+              return (
+                <EuiToolTip
+                  content={UX_MESSAGES.triggeredByRule}
+                  anchorClassName="eui-textTruncate"
+                >
+                  <SecuritySolutionLinkAnchor
+                    data-test-subj="ruleName"
+                    deepLinkId={SecurityPageName.rules}
+                    path={getRuleDetailsUrl(ruleId)}
+                  >
+                    <EuiText
+                      size="s"
+                      className="eui-textTruncate eui-fullWidth"
+                      data-test-subj={getTestId('column-user-name')}
+                    >
+                      {UX_MESSAGES.triggeredByRule}
+                    </EuiText>
+                  </SecuritySolutionLinkAnchor>
+                </EuiToolTip>
+              );
+            }
+            return (
+              <StyledFacetButton
+                icon={
+                  <EuiAvatar
+                    // We've a EuiTooltip that shows for createdBy below,
+                    // Thus we don't need to add a title tooltip as well.
+                    aria-hidden={true}
+                    title=""
+                    name={createdBy}
+                    data-test-subj={getTestId('column-user-avatar')}
+                    size="s"
+                  />
+                }
+              >
+                <EuiToolTip content={createdBy} anchorClassName="eui-textTruncate">
+                  <EuiText
+                    size="s"
+                    className="eui-textTruncate eui-fullWidth"
+                    data-test-subj={getTestId('column-user-name')}
+                    tabIndex={0}
+                  >
+                    {createdBy}
+                  </EuiText>
+                </EuiToolTip>
+              </StyledFacetButton>
+            );
+          },
+        },
+        // conditional hostnames column
+        {
+          field: 'hosts',
+          name: TABLE_COLUMN_NAMES.hosts,
+          width: '20%',
+          truncateText: true,
+          render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
+            const hostnames = Object.entries(_hosts)
+              .reduce<string[]>((acc, [agentId, { name: hostName }]) => {
+                acc.push(hostName || `${agentId} (${UX_MESSAGES.unenrolled.host})`);
+                return acc;
+              }, [])
+              .join(', ');
+
+            return (
+              <EuiToolTip content={hostnames} anchorClassName="eui-textTruncate">
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-hostname')}
+                  tabIndex={0}
+                >
+                  {hostnames}
+                </EuiText>
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          field: 'comment',
+          name: TABLE_COLUMN_NAMES.comments,
+          width: !showHostNames ? '21%' : '30%',
+          truncateText: true,
+          render: (comment: ActionListApiResponse['data'][number]['comment']) => {
+            return (
+              <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
+                <EuiText
+                  size="s"
+                  className="eui-textTruncate eui-fullWidth"
+                  data-test-subj={getTestId('column-comments')}
+                  tabIndex={0}
+                >
+                  {comment ?? emptyValue}
+                </EuiText>
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          field: 'status',
+          name: TABLE_COLUMN_NAMES.status,
+          width: !showHostNames ? '15%' : '10%',
+          render: (_status: ActionListApiResponse['data'][number]['status']) => {
+            const status = getActionStatus(_status);
+
+            return (
+              <EuiToolTip content={status} anchorClassName="eui-textTruncate">
+                <ResponseActionStatusBadge
+                  color={
+                    _status === 'failed'
+                      ? 'danger'
+                      : _status === 'successful'
+                      ? 'success'
+                      : 'warning'
+                  }
+                  data-test-subj={getTestId('column-status')}
+                  status={status}
+                  tabIndex={0}
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          field: '',
+          width: '65px',
+          name: UX_MESSAGES.userActions,
+          actions: [
+            {
+              render: (actionDetailsItem: ActionDetails) => {
+                return (
+                  // FIXME:PT implement EuiPopover menu
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.securitySolution.actionsLogTable.cancelUserAction',
+                      {
+                        // FIXME:PT implement custom tooltips based on use cases
+                        defaultMessage: 'Cancel',
+                      }
+                    )}
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="endpointTableRowActions"
+                      iconType="stop"
+                      onClick={
+                        // FIXME:PT implement
+                        () => {}
+                      }
+                      aria-label={i18n.translate(
+                        'xpack.securitySolution.actionsLogTable.cancelUserAction',
+                        { defaultMessage: 'Cancel' }
+                      )}
+                    />
+                  </EuiToolTip>
+                );
+              },
+            },
+          ],
+        },
+        {
+          field: '',
+          align: RIGHT_ALIGNMENT as HorizontalAlignment,
+          width: '40px',
+          isExpander: true,
+          name: (
+            <EuiScreenReaderOnly>
+              <span>{UX_MESSAGES.screenReaderExpand}</span>
+            </EuiScreenReaderOnly>
+          ),
+          render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
+            const actionId = actionListDataItem.id;
+            return (
+              <EuiToolTip
+                content={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj={getTestId('expand-button')}
+                  onClick={onClickCallback(actionListDataItem)}
+                  aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+                  iconType={expandedRowMap[actionId] ? 'chevronSingleUp' : 'chevronSingleDown'}
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+      ];
+      // filter out the `hosts` column
+      // if showHostNames is FALSE
+      if (!showHostNames) {
+        return columnDef.filter((column) => 'field' in column && column.field !== 'hosts');
+      }
+      return columnDef;
+    }, [expandedRowMap, getTestId, onClickCallback, showHostNames]);
 
     return (
       <>

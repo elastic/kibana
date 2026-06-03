@@ -190,6 +190,9 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Triggered by rule',
     }
   ),
+  userActions: i18n.translate('xpack.securitySolution.responseActionsList.list.userActions', {
+    defaultMessage: 'Actions',
+  }),
 });
 
 export const FILTER_NAMES = Object.freeze({
