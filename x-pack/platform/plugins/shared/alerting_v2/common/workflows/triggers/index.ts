@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { episodeActionEnvelopeShape, episodeActionEnvelopeSchema } from './episode_action_envelope';
+export { episodeActionEnvelopeSchema } from './episode_action_envelope';
 export type { EpisodeActionEnvelopePayload } from './episode_action_envelope';
 
 export {

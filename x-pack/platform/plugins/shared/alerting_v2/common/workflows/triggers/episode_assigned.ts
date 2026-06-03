@@ -8,24 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeShape } from './episode_action_envelope';
+import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_ASSIGNED_TRIGGER_ID = 'alerting.episodeAssigned' as const;
 
-export const episodeAssignedPayloadSchema = z
-  .object({
-    ...episodeActionEnvelopeShape,
-    assigneeUid: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.assigneeUid', {
-          defaultMessage: 'User-profile uid of the new assignee.',
-        })
-      ),
-  })
-  .strict();
+export const episodeAssignedPayloadSchema = episodeActionEnvelopeSchema.extend({
+  assigneeUid: z
+    .string()
+    .min(1)
+    .max(256)
+    .describe(
+      i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.assigneeUid', {
+        defaultMessage: 'User-profile uid of the new assignee.',
+      })
+    ),
+});
 
 export type EpisodeAssignedPayload = z.infer<typeof episodeAssignedPayloadSchema>;
 

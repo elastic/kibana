@@ -8,24 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeShape } from './episode_action_envelope';
+import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_SNOOZED_TRIGGER_ID = 'alerting.episodeSnoozed' as const;
 
-export const episodeSnoozedPayloadSchema = z
-  .object({
-    ...episodeActionEnvelopeShape,
-    expiry: z.iso
-      .datetime()
-      .nullable()
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeSnoozed.schema.expiry', {
-          defaultMessage:
-            'ISO datetime when the snooze expires, or null when the snooze has no expiry.',
-        })
-      ),
-  })
-  .strict();
+export const episodeSnoozedPayloadSchema = episodeActionEnvelopeSchema.extend({
+  expiry: z.iso
+    .datetime()
+    .nullable()
+    .describe(
+      i18n.translate('xpack.alertingVTwo.triggers.episodeSnoozed.schema.expiry', {
+        defaultMessage:
+          'ISO datetime when the snooze expires, or null when the snooze has no expiry.',
+      })
+    ),
+});
 
 export type EpisodeSnoozedPayload = z.infer<typeof episodeSnoozedPayloadSchema>;
 

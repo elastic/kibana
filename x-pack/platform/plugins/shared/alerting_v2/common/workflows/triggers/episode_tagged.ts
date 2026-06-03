@@ -8,20 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { episodeActionEnvelopeShape } from './episode_action_envelope';
+import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_TAGGED_TRIGGER_ID = 'alerting.episodeTagged' as const;
 
-export const episodeTaggedPayloadSchema = z
-  .object({
-    ...episodeActionEnvelopeShape,
-    tags: z.array(z.string()).describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeTagged.schema.tags', {
-        defaultMessage: 'Tags added to the alerting episode.',
-      })
-    ),
-  })
-  .strict();
+export const episodeTaggedPayloadSchema = episodeActionEnvelopeSchema.extend({
+  tags: z.array(z.string()).describe(
+    i18n.translate('xpack.alertingVTwo.triggers.episodeTagged.schema.tags', {
+      defaultMessage: 'Tags added to the alerting episode.',
+    })
+  ),
+});
 
 export type EpisodeTaggedPayload = z.infer<typeof episodeTaggedPayloadSchema>;
 
