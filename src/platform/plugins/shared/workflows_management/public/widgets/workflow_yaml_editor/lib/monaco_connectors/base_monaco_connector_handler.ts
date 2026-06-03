@@ -9,6 +9,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import type { StepStabilityLevel } from '@kbn/workflows';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getCachedAllConnectors } from '../connectors_cache';
 import { getStabilityBadgeHtml } from '../get_stability_note';
 import type {
@@ -157,12 +158,9 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
   }
 
   protected getConnectorStabilityFromCache(connectorType: string): StepStabilityLevel | undefined {
-    const connectors = getCachedAllConnectors();
-    if (!connectors?.length) {
-      return undefined;
-    }
-    const connector = connectors.find((c) => c.type === connectorType);
-    const stability = connector?.stability;
+    const mapStability = getCachedAllConnectorsMap()?.get(connectorType)?.stability;
+    const listStability = getCachedAllConnectors().find((c) => c.type === connectorType)?.stability;
+    const stability = mapStability ?? listStability;
     if (stability === 'tech_preview' || stability === 'beta') {
       return stability;
     }

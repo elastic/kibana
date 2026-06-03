@@ -33,8 +33,17 @@ jest.mock('@kbn/workflows', () => ({
   }),
 }));
 
-jest.mock('../../get_stability_note', () => ({
-  getExtensionStepStability: jest.fn(() => 'tech_preview'),
+jest.mock('../../get_stability_note', () => {
+  const actual = jest.requireActual('../../get_stability_note');
+  return {
+    getExtensionStepStability: actual.getExtensionStepStability,
+  };
+});
+
+jest.mock('../../../../../../common/step_schemas', () => ({
+  stepSchemas: {
+    getAllRegisteredStepDefinitions: jest.fn(() => []),
+  },
 }));
 
 jest.mock('../../../../../../common/step_schemas', () => ({
@@ -43,6 +52,7 @@ jest.mock('../../../../../../common/step_schemas', () => ({
   },
 }));
 
+import { stepSchemas } from '../../../../../../common/step_schemas';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 import { getCachedAllConnectors } from '../../connectors_cache';
 
@@ -92,5 +102,17 @@ describe('collectTechPreviewSuggestAriaPrefixes', () => {
 
     expect(prefixes).toContain('my.custom.connector');
     expect(prefixes).toContain('My Custom');
+  });
+
+  it('includes extension step ids marked tech preview', () => {
+    (stepSchemas.getAllRegisteredStepDefinitions as jest.Mock).mockReturnValue([
+      { id: 'custom.stable', stability: 'stable' },
+      { id: 'custom.experimental' },
+    ]);
+
+    const prefixes = collectTechPreviewSuggestAriaPrefixes();
+
+    expect(prefixes).toContain('custom.experimental');
+    expect(prefixes).not.toContain('custom.stable');
   });
 });

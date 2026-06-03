@@ -14,7 +14,7 @@ const MOCK_STABILITY_BADGE_THEME: UseEuiTheme = {
   euiTheme: {
     colors: {
       backgroundBasePlain: '#111111',
-      textPrimary: '#eeeeee',
+      textParagraph: '#eeeeee',
     },
     components: {
       badgeBorderColorHollow: '#444444',

@@ -10,12 +10,17 @@
 import type { monaco } from '@kbn/monaco';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getCachedAllConnectors } from '../connectors_cache';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 jest.mock('../connectors_cache', () => ({
   getCachedAllConnectors: jest.fn(),
+}));
+
+jest.mock('../../../../../common/schema', () => ({
+  getCachedAllConnectorsMap: jest.fn(),
 }));
 
 /**
@@ -86,6 +91,8 @@ describe('BaseMonacoConnectorHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockStabilityBadgeThemeForTests();
+    (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+    (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(null);
     handler = new TestHandler();
   });
 
@@ -302,8 +309,38 @@ describe('BaseMonacoConnectorHandler', () => {
       );
     });
 
-    it('should return undefined when connector cache is empty', () => {
+    it('should return beta stability from cached connectors', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        { type: 'elasticsearch.search', stability: 'beta' },
+      ]);
+      expect(handler.exposedGetConnectorStabilityFromCache('elasticsearch.search')).toBe('beta');
+    });
+
+    it('should return stability from connectors map when static list is empty', () => {
       (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+      (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
+        new Map([
+          ['my.dynamic.connector', { type: 'my.dynamic.connector', stability: 'tech_preview' }],
+        ])
+      );
+      expect(handler.exposedGetConnectorStabilityFromCache('my.dynamic.connector')).toBe(
+        'tech_preview'
+      );
+    });
+
+    it('should prefer connectors map stability over static list', () => {
+      (getCachedAllConnectors as jest.Mock).mockReturnValue([
+        { type: 'slack.postMessage', stability: 'beta' },
+      ]);
+      (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
+        new Map([['slack.postMessage', { type: 'slack.postMessage', stability: 'tech_preview' }]])
+      );
+      expect(handler.exposedGetConnectorStabilityFromCache('slack.postMessage')).toBe(
+        'tech_preview'
+      );
+    });
+
+    it('should return undefined when connector cache is empty', () => {
       expect(handler.exposedGetConnectorStabilityFromCache('slack.postMessage')).toBeUndefined();
     });
   });
