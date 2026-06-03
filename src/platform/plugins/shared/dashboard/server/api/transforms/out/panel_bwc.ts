@@ -28,11 +28,25 @@ export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjec
     return matchingReference ? matchingReference.type : 'unknown';
   }
 
+  // Legacy by-reference panels stored the target saved object id both inline
+  // (`embeddableConfig.savedObjectId`) and as a panel reference. Only the reference is rewritten
+  // on import / copy-to-space, so a stale inline id can survive and override the (correctly
+  // remapped) reference in the embeddable transforms. When a by-reference reference exists, drop
+  // the inline id so the reference remains authoritative.
+  const hasByRefSavedObjectReference =
+    panelRefName !== undefined &&
+    panelReferences.some(
+      (reference) => reference.name === panelRefName && BY_REF_TYPES.includes(reference.type)
+    );
+  const { savedObjectId, ...embeddableConfigWithoutSavedObjectId } = panel.embeddableConfig;
+
   return {
     panel: {
       ...rest,
       embeddableConfig: {
-        ...panel.embeddableConfig,
+        ...(hasByRefSavedObjectReference
+          ? embeddableConfigWithoutSavedObjectId
+          : panel.embeddableConfig),
         // <8.19 title stored as siblings to embeddableConfig
         ...(title !== undefined && { title }),
       },
