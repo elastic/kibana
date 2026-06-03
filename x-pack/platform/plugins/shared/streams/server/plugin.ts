@@ -22,9 +22,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import {
-  STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
+import { STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
