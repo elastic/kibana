@@ -50,37 +50,6 @@ const detectionsSearchRoute = createServerRoute({
   },
 });
 
-const detectionsHistoryRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/detections/{id}/history',
-  options: {
-    access: 'internal',
-    summary: 'Get detection history',
-    description: 'Get all historical versions of a detection entity.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string(),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ hits: Detection[] }> => {
-    const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    return getDetectionClient().findById(params.path.id);
-  },
-});
-
 const detectionsBulkCreateRoute = createServerRoute({
   endpoint: 'POST /internal/sig_events/detections',
   options: {
@@ -107,6 +76,5 @@ const detectionsBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsDetectionsRoutes = {
   ...detectionsSearchRoute,
-  ...detectionsHistoryRoute,
   ...detectionsBulkCreateRoute,
 };

@@ -907,6 +907,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         })
       ).resolves.toEqual(mockResponse);
@@ -921,6 +922,7 @@ describe('UiamService', () => {
         },
         body: JSON.stringify({
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         }),
         dispatcher: AGENT_MOCK,
@@ -938,6 +940,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrowError('Bad request');
     });
@@ -954,6 +957,7 @@ describe('UiamService', () => {
 
       const body = {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
         client_logo: { media_type: 'image/png', data: 'abc' },
@@ -988,6 +992,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrowError(
         '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'

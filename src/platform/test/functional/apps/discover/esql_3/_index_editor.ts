@@ -285,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await dataGrid.getDocTableRows()).length).to.be(2);
 
       // Filter rows
-      await indexEditor.search('Elyssa');
+      await indexEditor.search('customer_first_name: Elyssa');
       await retry.tryForTime(6000, async () => {
         expect((await dataGrid.getDocTableRows()).length).to.be(1);
       });

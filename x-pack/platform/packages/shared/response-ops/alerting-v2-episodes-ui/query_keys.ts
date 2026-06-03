@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
 
 export const queryKeys = {
@@ -23,6 +24,9 @@ export const queryKeys = {
     sortState?: EpisodesSortState,
     timeRange?: { from: string; to: string } | null
   ) => [...queryKeys.listAll(), spaceId, pageSize, filterState, sortState, timeRange] as const,
+  episodeAll: () => [...queryKeys.all, 'episode'] as const,
+  episode: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeAll(), spaceId, episodeId] as const,
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
@@ -67,6 +71,14 @@ export const queryKeys = {
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
+  fetchRule: (id: string) => [...queryKeys.all, 'fetch-rule', id] as const,
+  histogramAll: () => [...queryKeys.all, 'histogram'] as const,
+  histogram: (
+    spaceId: string | undefined,
+    filterState: EpisodesFilterState,
+    timeRange: TimeRange | undefined,
+    breakdownField: string | undefined
+  ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
   kpisCurrentUser: () => [...queryKeys.all, 'kpis-current-user'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
   kpis: (
