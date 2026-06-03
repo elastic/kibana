@@ -11,6 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import type { IDslPagination } from '@kbn/search-types';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
@@ -135,14 +136,31 @@ describe('test getDataStateContainer', () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
     const moreRecords = [records[2], records[3]];
+    const moreHits = [esHitsMockWithSort[2], esHitsMockWithSort[3]];
 
     mockFetchDocuments.mockResolvedValue({ records: moreRecords });
+
+    const mockPagination: IDslPagination = {
+      hasNextPage: true,
+      nextPage: jest.fn().mockResolvedValue({
+        rawResponse: {
+          hits: {
+            hits: moreHits,
+          },
+        },
+        pagination: {
+          hasNextPage: false,
+          nextPage: jest.fn(),
+        } as IDslPagination,
+      }),
+    };
 
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
     dataState.data$.documents$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: initialRecords,
+      pagination: mockPagination,
     }) as DataDocuments$;
 
     const unsubscribe = dataState.subscribe();
