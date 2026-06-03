@@ -152,6 +152,22 @@ Before moving to the next checklist step:
 - Log new findings immediately (same flow, same step label, suffix "— mini-probe").
 - Do **not** claim a new flow's timebox. If the parent flow's timebox fires during a mini-probe, stop and log remaining steps as `skipped: time budget exhausted`.
 
+### Investigation flow (Level 1 finding only)
+
+After the mini-probe, if a **Level 1** finding still has unresolved scope — for example, you don't know whether the bug is isolated to this flow's path or is a cross-feature blocker — open an investigation flow:
+
+1. Finish the current flow (or log remaining steps as skipped if the timebox has fired).
+2. Add a new entry to `config.json → flows` with:
+   - `source: "investigation"`
+   - `triggered_by: "<exact title of the Level 1 finding>"`
+   - `entry:` pointing at the area most likely to reveal scope
+   - `expected:` stating what you're trying to determine (e.g. "Does this 500 appear on all entity analytics sub-pages or only on the main dashboard?")
+   - `timeout_minutes: 6` (default; adjust up if the scope question requires more steps)
+3. Run the investigation flow immediately after the current flow completes, before moving to the next specified flow.
+4. Log findings in a new `findings-flow-<N>.md`. The report will group investigation flows with the Level 1 finding that triggered them.
+
+**When NOT to open an investigation flow:** if the mini-probe already answered the scope question (e.g. confirmed the bug is page-specific), or if the finding is Level 2 — Level 2 findings get mini-probes, not investigation flows. Reserve investigation flows for confirmed bugs where scope determines whether the issue is a blocker.
+
 ### When uncertain about expected behavior
 
 Consult in order — stop when you have enough to proceed:

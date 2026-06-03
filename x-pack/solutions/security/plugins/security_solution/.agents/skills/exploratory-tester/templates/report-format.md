@@ -31,7 +31,7 @@ Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <IS
 
 | Flow | Source | Started | Duration | Budget | Over? | Status |
 |---|---|---|---|---|---|---|
-| <flow name> | specified / agent | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost / cap reached |
+| <flow name> | specified / agent / investigation (↳ <finding title>) | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost / cap reached |
 | **Total session** | — | <session_started_at> | **<Xh Ym>** | <session_timeout_minutes>m cap | ✓ / ⚠️ over cap | — |
 
 **Status definitions:**

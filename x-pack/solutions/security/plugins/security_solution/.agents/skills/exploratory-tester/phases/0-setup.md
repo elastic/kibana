@@ -69,7 +69,8 @@ For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (min
 
 **Assigning `source` to each flow:**
 - `"specified"` — came from the invocation `Flows:` block or from `## Exploratory testing scope` on a GitHub issue/PR.
-- `"agent"` — added by the agent (adjacent paths, edge cases, regression checks). Max **2–3** agent flows per session. Prefer: permission boundary checks, adjacent pages sharing a component, error recovery paths. Never duplicate a specified flow's intent.
+- `"agent"` — added **before exploration starts** based on the agent's assessment of what's worth covering. Max **5** agent flows per session. Prefer: permission boundary checks, adjacent pages sharing a component, error recovery paths not already listed. Never duplicate a specified flow's intent.
+- `"investigation"` — opened **reactively during Phase 2** when a Level 1 finding cannot be adequately scoped by the 2-minute mini-probe and the agent judges that missing its scope could mean missing a blocker. No cap — the agent opens as many investigation flows as Level 1 findings justify. Each investigation flow must record `triggered_by: "<finding title from findings-flow-N.md>"` in config.json. Investigation flows count against the session time cap but not the opportunistic agent cap.
 
 **GitHub mode:**
 ```bash
@@ -179,7 +180,8 @@ Write `.exploratory-session/config.json`:
       "entry": "<entry path or null>",
       "expected": "<expected outcome or null>",
       "timeout_minutes": 4,
-      "source": "<specified | agent>",
+      "source": "<specified | agent | investigation>",
+      "triggered_by": "<Level 1 finding title — only for investigation flows, null otherwise>",
       "isolate": true,
       "space_id": null
     }
