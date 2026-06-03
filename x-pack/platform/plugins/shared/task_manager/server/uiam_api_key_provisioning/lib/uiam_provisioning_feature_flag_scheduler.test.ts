@@ -38,6 +38,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
     const taskScheduling = {
       ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      runSoon: jest.fn().mockResolvedValue(undefined),
     } as unknown as TaskScheduling;
     const removeIfExists = jest.fn().mockResolvedValue(undefined);
 
@@ -62,6 +63,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
     const taskScheduling = {
       ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      runSoon: jest.fn().mockResolvedValue(undefined),
     } as unknown as TaskScheduling;
     const removeIfExists = jest.fn().mockResolvedValue(undefined);
 
@@ -75,6 +77,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     await new Promise<void>((resolve) => setImmediate(resolve));
 
     expect(taskScheduling.ensureScheduled).not.toHaveBeenCalled();
+    expect(taskScheduling.runSoon).not.toHaveBeenCalled();
     expect(removeIfExists).not.toHaveBeenCalled();
     expect(logger.info).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
@@ -85,6 +88,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
     const taskScheduling = {
       ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      runSoon: jest.fn().mockResolvedValue(undefined),
     } as unknown as TaskScheduling;
     const removeIfExists = jest.fn().mockResolvedValue(undefined);
 
@@ -103,5 +107,79 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(removeIfExists).toHaveBeenCalledTimes(1);
     expect(logger.info).toHaveBeenCalledTimes(2);
+  });
+
+  it('nudges a prompt run via runSoon after scheduling on enable', async () => {
+    const flag$ = new Subject<boolean>();
+    const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
+    const taskScheduling = {
+      ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      runSoon: jest.fn().mockResolvedValue(undefined),
+    } as unknown as TaskScheduling;
+    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+
+    scheduler.start({
+      core: makeCore(flag$),
+      taskScheduling,
+      removeIfExists,
+      schedule: { interval: '1d' },
+    });
+
+    flag$.next(true);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(taskScheduling.runSoon).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not throw and skips runSoon when scheduling fails', async () => {
+    const flag$ = new Subject<boolean>();
+    const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
+    const taskScheduling = {
+      ensureScheduled: jest.fn().mockRejectedValue(new Error('boom')),
+      runSoon: jest.fn().mockResolvedValue(undefined),
+    } as unknown as TaskScheduling;
+    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+
+    scheduler.start({
+      core: makeCore(flag$),
+      taskScheduling,
+      removeIfExists,
+      schedule: { interval: '1d' },
+    });
+
+    flag$.next(true);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(taskScheduling.runSoon).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('swallows runSoon failures without surfacing an error', async () => {
+    const flag$ = new Subject<boolean>();
+    const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
+    const taskScheduling = {
+      ensureScheduled: jest.fn().mockResolvedValue(undefined),
+      runSoon: jest.fn().mockRejectedValue(new Error('not found')),
+    } as unknown as TaskScheduling;
+    const removeIfExists = jest.fn().mockResolvedValue(undefined);
+
+    scheduler.start({
+      core: makeCore(flag$),
+      taskScheduling,
+      removeIfExists,
+      schedule: { interval: '1d' },
+    });
+
+    flag$.next(true);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(taskScheduling.runSoon).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledTimes(1);
   });
 });
