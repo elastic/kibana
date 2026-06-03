@@ -104,6 +104,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       attachmentData: {
         text: JSON.stringify(formattedRule),
         attachmentLabel,
+        ...(linkedRuleId ? { originalText: JSON.stringify(formattedRule) } : {}),
       },
       ...(linkedRuleId ? { origin: linkedRuleId } : {}),
       attachmentDescription: attachmentLabel,

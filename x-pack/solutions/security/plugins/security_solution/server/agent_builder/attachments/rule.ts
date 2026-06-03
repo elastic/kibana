@@ -24,6 +24,9 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string().max(500_000),
   attachmentLabel: z.string().max(1_000).optional(),
+  ruleId: z.string().max(500).optional(),
+  intent: z.enum(['create', 'update']).optional(),
+  originalText: z.string().max(500_000).optional(),
 });
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
