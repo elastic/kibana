@@ -29,9 +29,9 @@ import { registerBurnRateEmbeddable } from './lib/embeddables/register_burn_rate
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
-import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
-import { registerServerRoutes } from './routes/register_routes';
-import type { SLORoutesDependencies } from './routes/types';
+import { getSloServerRouteRepository } from './routes/utils/get_slo_server_route_repository';
+import { registerServerRoutes } from './routes/utils/register_routes';
+import type { SLORoutesDependencies } from './routes/utils/types';
 import {
   slo,
   sloComposite,

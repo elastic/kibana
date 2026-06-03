@@ -32,6 +32,12 @@ export const DISPATCH_PAYLOAD_VARIABLES: readonly PayloadVariable[] = [
     detail: 'AlertEpisode[]',
     documentation: 'Alert episodes included in this dispatch.',
   },
+  {
+    path: 'rules',
+    detail: 'Record<string, { name: string }>',
+    documentation:
+      'Rule metadata keyed by rule id. Covers all rules present in `episodes`. Access via `rules[episode.rule_id].name`.',
+  },
 ];
 
 // Mirrors `AlertEpisode` from server/lib/dispatcher/types.ts — keep in sync.
