@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/as-code-data-views-transforms'
   - '@kbn/config-schema'
   - '@kbn/kibana-utils-plugin'
+  - '@kbn/as-code-shared-schemas'
 tags:
   - plugin
   - prod
