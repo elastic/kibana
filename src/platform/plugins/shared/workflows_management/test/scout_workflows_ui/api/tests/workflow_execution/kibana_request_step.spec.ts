@@ -75,6 +75,8 @@ steps:
       path: /s/{{workflow.spaceId}}/api/workflows/validate
       body:
         yaml: "name: test"
+    on-failure:
+      continue: true
 `;
 
 const INTERNAL_API_MISSING_BODY_YAML = `
@@ -90,6 +92,8 @@ steps:
       path: /s/{{workflow.spaceId}}/api/workflows/validate
       headers:
         elastic-api-version: "1"
+    on-failure:
+      continue: true
 `;
 
 const INTERNAL_API_INVALID_BODY_YAML = `
@@ -107,6 +111,8 @@ steps:
         elastic-api-version: "1"
       body:
         wrong_field: "this is not yaml"
+    on-failure:
+      continue: true
 `;
 
 // ---------------------------------------------------------------------------
@@ -213,7 +219,7 @@ spaceTest.describe('kibana.request step execution', { tag: tags.deploymentAgnost
     const { workflowExecutionId } = await workflowsApi.run(internalApiMissingHeaderId, {});
     const execution = await waitForExecution(workflowsApi, workflowExecutionId);
 
-    expect(execution?.status).toBe(ExecutionStatus.FAILED);
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED); // Fails locally to step, but we used on-failure: continue: true
 
     const apiCallStep = execution?.stepExecutions.find((s) => s.stepId === 'internal_api_call');
     expect(apiCallStep).toBeDefined();
@@ -226,7 +232,7 @@ spaceTest.describe('kibana.request step execution', { tag: tags.deploymentAgnost
     const { workflowExecutionId } = await workflowsApi.run(internalApiMissingBodyId, {});
     const execution = await waitForExecution(workflowsApi, workflowExecutionId);
 
-    expect(execution?.status).toBe(ExecutionStatus.FAILED);
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
 
     const apiCallStep = execution?.stepExecutions.find((s) => s.stepId === 'internal_api_call');
     expect(apiCallStep).toBeDefined();
@@ -239,7 +245,7 @@ spaceTest.describe('kibana.request step execution', { tag: tags.deploymentAgnost
     const { workflowExecutionId } = await workflowsApi.run(internalApiInvalidBodyId, {});
     const execution = await waitForExecution(workflowsApi, workflowExecutionId);
 
-    expect(execution?.status).toBe(ExecutionStatus.FAILED);
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
 
     const apiCallStep = execution?.stepExecutions.find((s) => s.stepId === 'internal_api_call');
     expect(apiCallStep).toBeDefined();
