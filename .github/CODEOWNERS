@@ -1914,7 +1914,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 
 # Actionable Observability (formerly Observability UX Management) team
 
-/src/platform/test/api_integration/apis/suggestions  @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_api_integration @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/182243
 /x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
@@ -2208,6 +2207,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/query_bar.ts @elastic/appex-qa
 /src/platform/test/functional/services/menu_toggle.ts @elastic/appex-qa
 /src/platform/test/functional/services/listing_table.ts @elastic/appex-qa
+/src/platform/test/functional/services/content_list.ts @elastic/appex-qa
 /src/platform/test/common/fixtures/plugins/coverage @elastic/appex-qa
 /src/platform/test/functional/services/index.ts @elastic/appex-qa
 /src/platform/test/functional/services/global_nav.ts @elastic/appex-qa

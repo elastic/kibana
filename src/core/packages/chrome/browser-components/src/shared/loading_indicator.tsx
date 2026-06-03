@@ -8,6 +8,7 @@
  */
 
 import { Global, css } from '@emotion/react';
+import type { EuiIconProps } from '@elastic/eui';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -16,7 +17,7 @@ import { useIsLoading } from './chrome_hooks';
 export interface LoadingIndicatorProps {
   showAsBar?: boolean;
   customLogo?: string;
-  elasticLogoColor?: string;
+  elasticLogoColor?: EuiIconProps['color'];
 }
 
 export const LoadingIndicator = ({

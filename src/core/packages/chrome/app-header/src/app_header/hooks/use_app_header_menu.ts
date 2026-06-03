@@ -141,7 +141,7 @@ export function useAppHeaderMenu(
 }
 
 export interface ShareAction {
-  onClick: () => void;
+  onClick: (triggerElement: HTMLElement) => void;
   tooltipContent?: string;
   tooltipTitle?: string;
   testId?: string;
@@ -161,7 +161,9 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
     });
 
     return {
-      onClick: () => run(),
+      onClick: (triggerElement: HTMLElement) => {
+        run({ triggerElement, returnFocus: () => triggerElement.focus() });
+      },
       tooltipContent: content,
       tooltipTitle: title,
       testId,

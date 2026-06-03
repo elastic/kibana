@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import React from 'react';
 import { useProjectHome, useBasePath, useCustomBranding } from '../../shared/chrome_hooks';
 import { LoadingIndicator } from '../../shared/loading_indicator';
 import { headerButtonBaseStyles, useHeaderButtonStyleVars } from './header_action_button';

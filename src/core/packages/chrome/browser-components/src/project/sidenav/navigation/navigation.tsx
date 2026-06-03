@@ -70,20 +70,10 @@ const useNavigationItems = (): NavigationState | null => {
     const panelStateManager = new PanelStateManager(basePath.get());
 
     return chrome.project.getNavigation$().pipe(
-      map((nav) => {
-        const { navItems, logoItem, activeItemId } = toNavigationItems(
-          nav.navigationTree,
-          nav.activeNodes,
-          panelStateManager,
-          isNextChrome
-        );
-        return {
-          solutionId: nav.solutionId,
-          logoItem: isNextChrome ? logoItem : logoItem,
-          activeItemId,
-          navItems,
-        };
-      })
+      map((nav) => ({
+        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager, isNextChrome),
+        solutionId: nav.solutionId,
+      }))
     );
   }, [chrome, basePath, isNextChrome]);
 

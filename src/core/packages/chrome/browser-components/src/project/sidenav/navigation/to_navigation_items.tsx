@@ -21,11 +21,16 @@ import type {
 } from '@kbn/ui-side-navigation/types';
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
+import { i18n } from '@kbn/i18n';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
 import { isActiveFromUrl } from './utils/is_active_from_url';
 
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
+
+const HOME_TITLE = i18n.translate('core.ui.chrome.sideNavigation.homeItemTitle', {
+  defaultMessage: 'Home',
+});
 
 export interface NavigationItems {
   logoItem?: SideNavLogo;
@@ -54,6 +59,7 @@ export interface NavigationItems {
  * @param navLinks
  * @param activeNodes
  * @param panelStateManager - Manager for panel opener state
+ * @param isNextChrome - Whether the navigation is in the next chrome
  */
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
@@ -109,7 +115,10 @@ export const toNavigationItems = (
     maybeMarkActive(homeNode, 0);
 
     if (isNextChrome) {
-      primaryNodes[homeNodeIndex] = { ...homeNode, title: 'Home', icon: 'home' };
+      // TODO: https://github.com/elastic/kibana/issues/272291
+      primaryNodes = primaryNodes.map((node, i) =>
+        i === homeNodeIndex ? { ...node, title: HOME_TITLE, icon: 'home' } : node
+      );
     } else {
       primaryNodes = primaryNodes.filter((_, i) => i !== homeNodeIndex);
       logoItem = {
