@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
  */
 export type EsqlConversionFailureReason =
   | 'multi_layer_not_supported'
-  | 'trend_line_not_supported'
   | 'formula_not_supported'
   | 'time_shift_not_supported'
   | 'runtime_field_not_supported'
@@ -32,13 +31,6 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: Multi-layer visualizations will be supported in an upcoming update.',
-    }
-  ),
-  trend_line_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTrendLineTooltip',
-    {
-      defaultMessage:
-        'Cannot convert to ES|QL: Metric visualizations with trend lines will be supported in an upcoming update.',
     }
   ),
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormulaTooltip', {
