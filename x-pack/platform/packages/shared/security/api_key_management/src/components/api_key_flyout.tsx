@@ -105,6 +105,18 @@ interface CommonApiKeyFlyoutProps {
   defaultMetadata?: string;
   defaultRoleDescriptors?: string;
   defaultExpiration?: string;
+  /**
+   * Override the underlying `EuiFlyout`'s `type`. Defaults to
+   * `'overlay'` (the original behaviour: modal-style backdrop and
+   * focus trap).
+   *
+   * Set to `'push'` when embedding the flyout into a surface that
+   * needs to stay interactive — e.g. a conversation panel that lives
+   * alongside the form. Push mode disables `ownFocus`, removes the
+   * overlay backdrop, and enforces push behaviour at every viewport
+   * size via `pushMinBreakpoint="xs"`.
+   */
+  flyoutType?: 'overlay' | 'push';
 }
 
 interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
@@ -184,6 +196,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   readOnly = false,
   currentUser,
   isLoadingCurrentUser,
+  flyoutType = 'overlay',
 }) => {
   const { euiTheme } = useEuiTheme();
   const isFullWidth = useIsWithinBreakpoints(['xs', 's', 'm']);
@@ -329,7 +342,21 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
   return (
     <FormikProvider value={formik}>
-      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size={flyoutSize} ownFocus>
+      <EuiFlyout
+        onClose={onCancel}
+        aria-labelledby={titleId}
+        size={flyoutSize}
+        type={flyoutType}
+        /*
+         * Push mode: don't trap focus or render the modal backdrop,
+         * and force push behaviour at every viewport size (default
+         * `pushMinBreakpoint="l"` would silently fall back to overlay
+         * below `l`). Overlay mode keeps the original modal-style
+         * focus trap.
+         */
+        ownFocus={flyoutType !== 'push'}
+        pushMinBreakpoint={flyoutType === 'push' ? 'xs' : undefined}
+      >
         <Form
           onSubmit={formik.handleSubmit}
           style={{ display: 'flex', flexDirection: 'column', height: '100%' }}

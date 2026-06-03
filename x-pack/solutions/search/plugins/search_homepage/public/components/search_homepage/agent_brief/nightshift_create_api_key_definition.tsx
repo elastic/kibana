@@ -160,9 +160,8 @@ export const createNightshiftCreateApiKeyDefinition =
     getActionButtons: ({ attachment }) => [
       {
         label: i18n.translate('xpack.searchHomepage.nightshift.createApiKey.openCta', {
-          defaultMessage: 'Open flyout',
+          defaultMessage: 'Open',
         }),
-        icon: 'popout',
         type: ActionButtonType.PRIMARY,
         handler: () =>
           openCreateApiKeyFlyout({

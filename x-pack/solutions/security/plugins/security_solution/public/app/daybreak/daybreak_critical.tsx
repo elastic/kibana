@@ -286,7 +286,7 @@ const SEVERITY_BADGE: Record<EventSeverity, { color: 'danger' | 'warning' | 'hol
  */
 const TYPE_BADGE: Record<EventType, { iconType: IconType; label: string }> = {
   attack: {
-    iconType: 'bug',
+    iconType: 'bolt',
     label: i18n.translate('xpack.securitySolution.daybreak.critical.type.attack', {
       defaultMessage: 'Attack',
     }),

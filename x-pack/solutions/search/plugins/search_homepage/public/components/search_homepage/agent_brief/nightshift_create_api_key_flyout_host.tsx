@@ -87,6 +87,14 @@ const CreateApiKeyFlyoutHost: React.FC<CreateApiKeyFlyoutHostProps> = ({ core })
             onSuccess={onSuccess}
             onCancel={onCancel}
             defaultName={target.defaultName}
+            /*
+             * Push mode: don't show a modal backdrop or trap focus —
+             * the conversation surface stays interactive while the
+             * user fills in the form, matching the rest of the
+             * Nightshift agent-brief flyouts (e.g. the per-row API
+             * key details flyout in `nightshift_expiring_keys_summary`).
+             */
+            flyoutType="push"
           />
         </KibanaContextProvider>
       </I18nProvider>
