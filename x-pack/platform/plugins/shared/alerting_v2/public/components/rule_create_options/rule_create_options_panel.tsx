@@ -44,7 +44,6 @@ const listEmptyStateStyles = {
   }),
   template: css({
     backgroundColor: 'inherit',
-    paddingBlockStart: '0 !important',
     marginInline: 'auto',
     maxInlineSize: LIST_EMPTY_STATE_MAX_INLINE_SIZE,
     width: '100%',
@@ -52,7 +51,6 @@ const listEmptyStateStyles = {
   widgetContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.xl,
-      paddingTop: '0 !important',
       borderRadius: euiTheme.border.radius.medium,
       '.euiEmptyPrompt__icon': {
         marginBottom: euiTheme.size.l,
@@ -74,6 +72,7 @@ const listEmptyStateStyles = {
       cursor: 'pointer',
       minWidth: 0,
     }),
+  actionPanelTextWrapper: css({ minWidth: 0 }),
 };
 
 interface RuleCreateOptionItem {
@@ -85,11 +84,42 @@ interface RuleCreateOptionItem {
   'data-test-subj'?: string;
 }
 
+const ESQL_RULE_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle',
+  { defaultMessage: 'Create ES|QL rule' }
+);
+const ESQL_RULE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
+  { defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.' }
+);
+const AI_AGENT_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
+  { defaultMessage: 'Create with AI Agent' }
+);
+const AI_AGENT_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
+  { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
+);
+const THRESHOLD_ALERT_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle',
+  { defaultMessage: 'Threshold Alert' }
+);
+const THRESHOLD_ALERT_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
+  {
+    defaultMessage:
+      'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
+  }
+);
+
+const noop = () => undefined;
+
 const RuleCreateOptionActionPanel: React.FC<{
   item: RuleCreateOptionItem;
   actionPanelStyle: React.ComponentProps<typeof EuiPanel>['css'];
 }> = ({ item, actionPanelStyle }) => (
   <EuiPanel
+    element="button"
     hasBorder
     paddingSize="none"
     onClick={item.onClick}
@@ -100,7 +130,7 @@ const RuleCreateOptionActionPanel: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiIcon type={item.iconType} size="m" color="text" aria-hidden={true} />
       </EuiFlexItem>
-      <EuiFlexItem css={css({ minWidth: 0 })}>
+      <EuiFlexItem css={listEmptyStateStyles.actionPanelTextWrapper}>
         <EuiText size="s">
           <strong>{item.title}</strong>
         </EuiText>
@@ -148,28 +178,16 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
       {
         id: 'create-esql-rule',
         iconType: 'productDiscover',
-        title: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle', {
-          defaultMessage: 'Create ES|QL rule',
-        }),
-        description: i18n.translate(
-          'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-          {
-            defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.',
-          }
-        ),
+        title: ESQL_RULE_TITLE,
+        description: ESQL_RULE_DESCRIPTION,
         onClick: onCreateEsqlRule,
         'data-test-subj': 'createEsqlRuleCard',
       },
       {
         id: 'create-with-agent',
         iconType: 'productAgent',
-        title: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle', {
-          defaultMessage: 'Create with AI Agent',
-        }),
-        description: i18n.translate(
-          'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
-          { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
-        ),
+        title: AI_AGENT_TITLE,
+        description: AI_AGENT_DESCRIPTION,
         onClick: onCreateWithAgent,
         'data-test-subj': 'createWithAgentCard',
       },
@@ -181,17 +199,9 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
     () => ({
       id: 'create-threshold-alert',
       iconType: 'chartThreshold',
-      title: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
-        defaultMessage: 'Threshold Alert',
-      }),
-      description: i18n.translate(
-        'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
-        {
-          defaultMessage:
-            'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
-        }
-      ),
-      onClick: onCreateThresholdAlert ?? (() => undefined),
+      title: THRESHOLD_ALERT_TITLE,
+      description: THRESHOLD_ALERT_DESCRIPTION,
+      onClick: onCreateThresholdAlert ?? noop,
       'data-test-subj': 'createThresholdAlertCard',
     }),
     [onCreateThresholdAlert]
@@ -199,8 +209,9 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
 
   return (
     <div css={listEmptyStateStyles.parent} data-test-subj="ruleCreateOptionsPanel">
-      <EuiPageTemplate grow={false} css={styles.template}>
+      <EuiPageTemplate grow={false} offset={0} css={styles.template}>
         <EuiPageTemplate.EmptyPrompt
+          paddingSize="none"
           icon={
             <EuiImage
               size="fullWidth"
@@ -258,16 +269,8 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             titleElement="h3"
             titleSize="xs"
             hasBorder={true}
-            title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle', {
-              defaultMessage: 'Create ES|QL rule',
-            })}
-            description={i18n.translate(
-              'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-              {
-                defaultMessage:
-                  'Create as an ES|QL query with live preview. YAML editor available.',
-              }
-            )}
+            title={ESQL_RULE_TITLE}
+            description={ESQL_RULE_DESCRIPTION}
             onClick={onCreateEsqlRule}
             icon={<EuiIcon type="productDiscover" color="text" size="l" aria-hidden={true} />}
             data-test-subj="createEsqlRuleCard"
@@ -280,16 +283,8 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             titleElement="h3"
             titleSize="xs"
             hasBorder={true}
-            title={i18n.translate(
-              'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
-              {
-                defaultMessage: 'Create with AI Agent',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
-              { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
-            )}
+            title={AI_AGENT_TITLE}
+            description={AI_AGENT_DESCRIPTION}
             onClick={onCreateWithAgent}
             icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
           />
@@ -328,17 +323,9 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         titleElement="h3"
         titleSize="xs"
         hasBorder={true}
-        title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
-          defaultMessage: 'Threshold Alert',
-        })}
-        description={i18n.translate(
-          'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
-          {
-            defaultMessage:
-              'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
-          }
-        )}
-        onClick={onCreateThresholdAlert}
+        title={THRESHOLD_ALERT_TITLE}
+        description={THRESHOLD_ALERT_DESCRIPTION}
+        onClick={onCreateThresholdAlert ?? noop}
         icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
       />
     </>
