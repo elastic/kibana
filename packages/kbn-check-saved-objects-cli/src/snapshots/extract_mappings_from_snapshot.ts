@@ -9,28 +9,41 @@
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { unflattenObject } from '@kbn/object-utils';
+import { isPlainObject } from 'lodash';
 import type { MigrationSnapshot } from '../types';
 
 const isFlattenedMapping = (mappings: Record<string, unknown>): boolean =>
   Object.keys(mappings).some((key) => key.includes('.'));
 
-const normalizeRootMappingProperties = (
-  mappings: SavedObjectsTypeMappingDefinitions[string]
-): SavedObjectsTypeMappingDefinitions[string] => {
-  if (!Object.hasOwn(mappings, 'properties')) {
-    return { ...mappings, properties: {} };
+const normalizeMappingProperties = (node: Record<string, unknown>): Record<string, unknown> => {
+  if (!Object.hasOwn(node, 'type') && !Object.hasOwn(node, 'properties')) {
+    return { ...node, properties: {} };
   }
-  return mappings;
+
+  if (isPlainObject(node.properties)) {
+    const properties = node.properties as Record<string, Record<string, unknown>>;
+    return {
+      ...node,
+      properties: Object.fromEntries(
+        Object.entries(properties).map(([field, child]) => [
+          field,
+          normalizeMappingProperties(child),
+        ])
+      ),
+    };
+  }
+
+  return node;
 };
 
 export const unflattenSnapshotMappings = (
   mappings: Record<string, unknown>
 ): SavedObjectsTypeMappingDefinitions[string] => {
-  const nestedMappings = isFlattenedMapping(mappings)
-    ? (unflattenObject(mappings) as unknown as SavedObjectsTypeMappingDefinitions[string])
-    : (mappings as unknown as SavedObjectsTypeMappingDefinitions[string]);
+  const nestedMappings = isFlattenedMapping(mappings) ? unflattenObject(mappings) : mappings;
 
-  return normalizeRootMappingProperties(nestedMappings);
+  return normalizeMappingProperties(
+    nestedMappings
+  ) as unknown as SavedObjectsTypeMappingDefinitions[string];
 };
 
 export const extractMappingsFromSnapshot = (

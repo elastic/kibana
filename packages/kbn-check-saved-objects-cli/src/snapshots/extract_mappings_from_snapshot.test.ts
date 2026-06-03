@@ -80,6 +80,16 @@ const roundTripMappingFixtures: Array<{
       },
     },
   },
+  {
+    name: 'nested empty-object field',
+    mappings: {
+      dynamic: false,
+      properties: {
+        title: { type: 'text' },
+        meta: { dynamic: false, properties: {} },
+      },
+    },
+  },
 ];
 
 const flattenSnapshotMappings = (
@@ -128,6 +138,19 @@ describe('unflattenSnapshotMappings', () => {
     expect(unflattenSnapshotMappings(flattened)).toEqual({
       dynamic: false,
       properties: {},
+    });
+  });
+
+  it('restores empty properties of nested object fields omitted by flattening', () => {
+    const flattened = getFlattenedObject({
+      dynamic: false,
+      properties: { meta: { dynamic: false, properties: {} } },
+    });
+
+    expect(flattened).toEqual({ dynamic: false, 'properties.meta.dynamic': false });
+    expect(unflattenSnapshotMappings(flattened)).toEqual({
+      dynamic: false,
+      properties: { meta: { dynamic: false, properties: {} } },
     });
   });
 
