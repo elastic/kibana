@@ -211,13 +211,10 @@ for (const owner of filteredOwners) {
   if (critical.length > 0) {
     lines.push(`  Critical functions (${critical.length}):`);
     const sorted = [...critical].sort((a, b) => b.cyclomatic - a.cyclomatic);
-    for (const f of sorted.slice(0, 10)) {
+    for (const f of sorted) {
       lines.push(
         `    ${f.path}:${f.line}  ${f.name}  cyclomatic=${f.cyclomatic} cognitive=${f.cognitive}`
       );
-    }
-    if (critical.length > 10) {
-      lines.push(`    ... and ${critical.length - 10} more`);
     }
   }
 
