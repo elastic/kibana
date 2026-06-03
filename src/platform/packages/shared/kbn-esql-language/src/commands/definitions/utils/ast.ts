@@ -60,12 +60,49 @@ function findHeaderCommand(
   return targetHeader.incomplete ? targetHeader : undefined;
 }
 
+function cleanArray<T>(items: T[]): T[] {
+  let nextItems: T[] | undefined;
+
+  items.forEach((item, index) => {
+    if (isMarkerNode(item as ESQLAstItem | PromQLAstNode | undefined)) {
+      nextItems ??= items.slice(0, index);
+      return;
+    }
+
+    const nextItem = removeAutocompleteMarkers(item);
+
+    if (nextItems) {
+      nextItems.push(nextItem);
+    } else if (nextItem !== item) {
+      nextItems = items.slice(0, index);
+      nextItems.push(nextItem);
+    }
+  });
+
+  return nextItems ?? items;
+}
+
+function cleanObject<T extends object>(value: T): T {
+  let nextValue: Partial<T> | undefined;
+
+  for (const key of Object.keys(value) as Array<keyof T>) {
+    const child = value[key];
+    const nextChild = removeAutocompleteMarkers(child);
+
+    if (nextValue) {
+      nextValue[key] = nextChild;
+    } else if (nextChild !== child) {
+      nextValue = { ...value, [key]: nextChild };
+    }
+  }
+
+  return (nextValue ?? value) as T;
+}
+
 // Removes parser-only autocomplete markers while preserving parser locations for cursor math.
 export function removeAutocompleteMarkers<T>(value: T): T {
   if (Array.isArray(value)) {
-    return value
-      .filter((item) => !isMarkerNode(item))
-      .map((item) => removeAutocompleteMarkers(item)) as T;
+    return cleanArray(value) as T;
   }
 
   // Strip the marker from any string value, not only `text` (e.g. inline cast `castType`).
@@ -81,13 +118,7 @@ export function removeAutocompleteMarkers<T>(value: T): T {
     return undefined as T;
   }
 
-  const cleanedValue = { ...value };
-
-  for (const [key, child] of Object.entries(value)) {
-    cleanedValue[key as keyof typeof cleanedValue] = removeAutocompleteMarkers(child);
-  }
-
-  return cleanedValue;
+  return cleanObject(value);
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
