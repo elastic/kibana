@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ColumnCellDecorationMode, CellDecorationFillMode } from '@kbn/lens-common';
+import type {
+  ColumnCellDecorationMode,
+  CellDecorationFillMode,
+  CellDecorationFillConfig,
+} from '@kbn/lens-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 /**
@@ -199,4 +203,21 @@ export function getAlignmentLabel(alignment: CellAlignment): string {
 /** Default fill color a decoration seeds when none is set (or `undefined`). */
 export function getDecorationDefaultColor(mode: ColumnCellDecorationMode): string | undefined {
   return getCellDecorationCapabilities(mode).defaultColor;
+}
+
+/**
+ * Reads the decoration fill config carried on the expression args. The value is
+ * either an already-deserialized object or the JSON string it is serialized to
+ * by the expression builder; malformed JSON degrades to `undefined` so the cell
+ * falls back to plain formatting.
+ */
+export function parseCellDecorationFillConfig(raw: unknown): CellDecorationFillConfig | undefined {
+  if (raw == null) return undefined;
+  if (typeof raw === 'object') return raw as CellDecorationFillConfig;
+  if (typeof raw !== 'string') return undefined;
+  try {
+    return JSON.parse(raw) as CellDecorationFillConfig;
+  } catch {
+    return undefined;
+  }
 }

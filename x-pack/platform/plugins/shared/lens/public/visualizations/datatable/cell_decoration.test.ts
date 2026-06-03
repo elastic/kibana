@@ -16,6 +16,7 @@ import {
   getUnsupportedColumnKindReason,
   isAlignmentSupported,
   isColumnKindSupported,
+  parseCellDecorationFillConfig,
 } from './cell_decoration';
 
 describe('cell decoration capabilities', () => {
@@ -121,5 +122,28 @@ describe('cell decoration capabilities', () => {
     for (const mode of ['none', 'cell', 'badge', 'text', 'progress'] as const) {
       expect(getCellDecorationCapabilities(mode).mode).toBe(mode);
     }
+  });
+
+  describe('parseCellDecorationFillConfig', () => {
+    it('parses a JSON-serialized fill config', () => {
+      const raw = JSON.stringify({ fillMode: 'single', color: '#abcdef' });
+      expect(parseCellDecorationFillConfig(raw)).toEqual({ fillMode: 'single', color: '#abcdef' });
+    });
+
+    it('returns an already-deserialized object as-is', () => {
+      const obj = { fillMode: 'gradient' as const };
+      expect(parseCellDecorationFillConfig(obj)).toBe(obj);
+    });
+
+    it('degrades malformed JSON to undefined', () => {
+      expect(parseCellDecorationFillConfig('{not json')).toBeUndefined();
+    });
+
+    it('returns undefined for null/undefined and non-string primitives', () => {
+      expect(parseCellDecorationFillConfig(null)).toBeUndefined();
+      expect(parseCellDecorationFillConfig(undefined)).toBeUndefined();
+      expect(parseCellDecorationFillConfig(42)).toBeUndefined();
+      expect(parseCellDecorationFillConfig(true)).toBeUndefined();
+    });
   });
 });

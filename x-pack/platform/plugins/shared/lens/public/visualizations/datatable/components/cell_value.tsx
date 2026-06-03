@@ -13,8 +13,7 @@ import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { safeJsonParse } from '@kbn/std';
-import type { DataGridDensity, CellDecorationFillConfig } from '@kbn/lens-common';
+import type { DataGridDensity } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -24,6 +23,7 @@ import {
   getProgressBarPaletteStops,
   DEFAULT_PROGRESS_BAR_COLOR,
 } from '../utils';
+import { parseCellDecorationFillConfig } from '../cell_decoration';
 import {
   buildColumnConfigLookup,
   getRenderMode,
@@ -40,14 +40,6 @@ import {
   getProgressBarSize,
   toMeterColorStops,
 } from './progress_bar_cell';
-
-/** Safely parses the JSON-serialized decoration fill config carried on the expression args. */
-const parseFillConfig = (raw: unknown): CellDecorationFillConfig | undefined => {
-  if (raw == null) return undefined;
-  if (typeof raw === 'object') return raw as CellDecorationFillConfig;
-  if (typeof raw !== 'string') return undefined;
-  return safeJsonParse<CellDecorationFillConfig | undefined>(raw, () => undefined);
-};
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -107,7 +99,7 @@ export const createGridCell = (
       [colorMode, columnId, palette, colorMapping, rawValue]
     );
 
-    const fillStyle = useMemo(() => parseFillConfig(rawFillStyle), [rawFillStyle]);
+    const fillStyle = useMemo(() => parseCellDecorationFillConfig(rawFillStyle), [rawFillStyle]);
 
     const progressBarProps = useMemo(() => {
       if (renderMode !== 'progress' || !fillStyle || typeof rawValue !== 'number') {
