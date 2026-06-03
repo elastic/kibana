@@ -37,7 +37,9 @@ export const appendHumanMessage$ = ({
       message,
       attachment_refs,
     })
-  ).pipe(switchMap((updated) => of(createConversationUpdatedEvent(updated))));
+  ).pipe(
+    switchMap(({ conversation: updated }) => of(createConversationUpdatedEvent(updated)))
+  );
 };
 
 export const updateCollaborativeConversation$ = ({

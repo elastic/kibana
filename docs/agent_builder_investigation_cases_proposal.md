@@ -1,6 +1,6 @@
 # Investigation / Cases in Agent Builder — Architecture (in-repo)
 
-**Status:** Draft — architecture exploration  
+**Status:** Active — B0 + B5.1–B5.4 + B1 implemented; B5.5 in progress  
 **Revisions:** 2026-06-01 — Added §4.3.4 Threads (SOC pair; child conversations); B5 before B4; resolved §9 #2 (copy-on-create).  
 **Related:** [Appendix G — Threads](./agent_builder_investigation_threads_extension.md) (API detail, risks, metrics)  
 **Implementation plan:** [agent_builder_option_b_implementation_plan.md](./agent_builder_option_b_implementation_plan.md) (B0–B6 execution)  
@@ -36,7 +36,7 @@ Conversation is the collaboration and investigation unit — like a Case saved o
 | Mockup | Option B |
 |--------|----------|
 | Breadcrumb `PROJ-42 > CASE-4821` | `Conversations > {template} > CONV-{id} > {case chip}` |
-| Tabs: Activity / Attachments / Conversations / Knowledge | Activity / Attachments / **Threads** / Knowledge |
+| Tabs: Activity / Attachments / Conversations / Knowledge | Activity / Attachments / **Threads** (placeholder) |
 | Sidebar: fields, assignees, workflows, Jira, agent | `custom_fields`, `assignees`, `workflow_ids`, `itsm`, `agent_id` |
 | Created from template | `template_id` (B0); + `template_snapshot` on create (B2) |
 | Thread child | Breadcrumb: `… > {parent} > Thread: {thread_title}` |
@@ -185,7 +185,7 @@ Threads replace “many chats under Project” for investigation under Option B.
 | Phase | Deliverable |
 |-------|-------------|
 | **B0** | `template_id`, `custom_fields` (metadata); evidence via attachments (`pinned`, types) |
-| **B1** | Conversation detail shell (Activity, Attachments, **Threads tab placeholder**, Knowledge) |
+| **B1** | Conversation detail shell (Activity, Attachments, **Threads tab placeholder**) |
 | **B2** | `ConversationTemplate` + create-from-template |
 | **B3** | Federate Cases UserActions when case attached |
 | **B5** | **Collaborative chat** + space ACL + `events[]` ([#259692](https://github.com/elastic/kibana/pull/259692)) — [access model](./agent_builder_option_b_access_model.md) |

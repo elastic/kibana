@@ -23,6 +23,7 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
+  normalizeEventsFromEs,
   type Document as ConversationDocument,
 } from './converters';
 import { expect } from '@kbn/scout/ui';
@@ -461,6 +462,65 @@ describe('conversation model converters', () => {
 
       expect(deserialized.state).toBeUndefined();
     });
+
+    it('deserializes agent execution events with object tool results in timeline events', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds = [];
+      serialized._source!.events = [
+        {
+          id: 'msg-1',
+          timestamp: creationDate,
+          type: TimelineEventType.user_message,
+          user: { id: 'user_id', username: 'user_name' },
+          message: '@agent triage',
+        },
+        {
+          id: 'round-1',
+          timestamp: roundCreationDate,
+          type: TimelineEventType.agentExecution,
+          agent_id: 'agent_id',
+          status: ConversationRoundStatus.completed,
+          input: { message: '@agent triage' },
+          response: { message: 'done' },
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_call_id: 'call-1',
+              tool_id: 'tool_id',
+              params: { q: 'test' },
+              results: [
+                {
+                  tool_result_id: 'result-1',
+                  type: ToolResultType.other,
+                  data: { ok: true },
+                },
+              ],
+            },
+          ],
+          started_at: roundCreationDate,
+          time_to_first_token: 1,
+          time_to_last_token: 2,
+          model_usage: {
+            llm_calls: 1,
+            input_tokens: 1,
+            output_tokens: 1,
+          },
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+      const toolResults = deserialized.rounds[0].steps
+        .filter(isToolCallStep)
+        .flatMap((step) => step.results);
+
+      expect(toolResults).toEqual([
+        {
+          tool_result_id: 'result-1',
+          type: ToolResultType.other,
+          data: { ok: true },
+        },
+      ]);
+    });
   });
 
   describe('toEs', () => {
@@ -645,6 +705,65 @@ describe('conversation model converters', () => {
       expect(serialized.custom_fields).toEqual({ severity: 'high', status: 'open' });
     });
 
+    it('normalizes stringified tool results in timeline events before indexing', () => {
+      const conversation: Conversation = {
+        ...conversationBase(),
+        events: [
+          {
+            id: 'round-1',
+            timestamp: roundCreationDate,
+            type: TimelineEventType.agentExecution,
+            agent_id: 'agent_id',
+            status: ConversationRoundStatus.completed,
+            steps: [
+              {
+                type: ConversationRoundStepType.toolCall,
+                tool_call_id: 'call-1',
+                tool_id: 'tool_id',
+                params: { q: 'test' },
+                results: JSON.stringify([
+                  {
+                    tool_result_id: 'result-1',
+                    type: ToolResultType.other,
+                    data: { ok: true },
+                  },
+                ]),
+              },
+            ],
+            response: { message: 'done' },
+            started_at: roundCreationDate,
+            time_to_first_token: 1,
+            time_to_last_token: 2,
+            model_usage: {
+              llm_calls: 1,
+              input_tokens: 1,
+              output_tokens: 1,
+            },
+          },
+        ],
+      };
+
+      const serialized = toEs(conversation, 'space');
+      const agentEvent = serialized.events?.[0];
+      expect(agentEvent && 'steps' in agentEvent).toBe(true);
+      if (agentEvent && 'steps' in agentEvent) {
+        const toolStep = agentEvent.steps.find(
+          (step) => step.type === ConversationRoundStepType.toolCall
+        );
+        expect(toolStep && 'results' in toolStep).toBe(true);
+        if (toolStep && 'results' in toolStep) {
+          expect(typeof toolStep.results).not.toBe('string');
+          expect(toolStep.results).toEqual([
+            {
+              tool_result_id: 'result-1',
+              type: ToolResultType.other,
+              data: { ok: true },
+            },
+          ]);
+        }
+      }
+    });
+
     it('round-trips group events with per-message authors', () => {
       const conversation: Conversation = {
         ...conversationBase(),
@@ -686,6 +805,103 @@ describe('conversation model converters', () => {
       if (isUserMessageEvent(second)) {
         expect(second.user.username).toBe('analyst_b');
       }
+    });
+  });
+
+  describe('normalizeEventsFromEs', () => {
+    it('returns arrays unchanged', () => {
+      const events = [
+        {
+          id: 'msg-1',
+          timestamp: creationDate,
+          type: TimelineEventType.user_message,
+          user: { username: 'analyst_a' },
+          message: 'first note',
+        },
+      ];
+
+      expect(normalizeEventsFromEs(events)).toEqual(events);
+    });
+
+    it('normalizes object maps keyed by index', () => {
+      const normalized = normalizeEventsFromEs({
+        '0': {
+          id: 'msg-1',
+          timestamp: creationDate,
+          type: TimelineEventType.user_message,
+          user: { username: 'analyst_a' },
+          message: 'first note',
+        },
+        '1': {
+          id: 'msg-2',
+          timestamp: creationDate,
+          type: TimelineEventType.user_message,
+          user: { username: 'analyst_a' },
+          message: 'second note',
+        },
+      });
+
+      expect(normalized).toHaveLength(2);
+      expect(normalized[0]?.message).toBe('first note');
+      expect(normalized[1]?.message).toBe('second note');
+    });
+
+    it('normalizes a single persisted event object', () => {
+      const normalized = normalizeEventsFromEs({
+        id: 'msg-1',
+        timestamp: creationDate,
+        type: TimelineEventType.user_message,
+        user: { username: 'analyst_a' },
+        message: 'solo note',
+      });
+
+      expect(normalized).toHaveLength(1);
+      expect(normalized[0]?.message).toBe('solo note');
+    });
+
+    it('restores multiple human notes from ES object-shaped events on read', () => {
+      const conversation: Conversation = {
+        id: 'conv-1',
+        agent_id: 'agent_id',
+        user: { id: 'user_id', username: 'user_name' },
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: updateDate,
+        conversation_mode: 'group',
+        events: [
+          {
+            id: 'msg-1',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { username: 'analyst_a' },
+            message: 'first note',
+          },
+          {
+            id: 'msg-2',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { username: 'analyst_a' },
+            message: 'second note',
+          },
+        ],
+        rounds: [],
+      };
+      const serialized = toEs(conversation, 'space');
+
+      const restored = fromEs({
+        _id: 'conv-1',
+        _source: {
+          ...serialized,
+          events: {
+            '0': serialized.events![0],
+            '1': serialized.events![1],
+          },
+        },
+      } as ConversationDocument);
+
+      expect(restored.events).toHaveLength(2);
+      expect(restored.events?.[0]?.message).toBe('first note');
+      expect(restored.events?.[1]?.message).toBe('second note');
     });
   });
 

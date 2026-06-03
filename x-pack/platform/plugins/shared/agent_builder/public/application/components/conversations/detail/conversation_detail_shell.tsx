@@ -22,7 +22,6 @@ enum ConversationDetailTab {
   activity = 'activity',
   attachments = 'attachments',
   threads = 'threads',
-  knowledge = 'knowledge',
   details = 'details',
 }
 
@@ -32,14 +31,11 @@ const labels = {
   }),
   attachments: (count: number) =>
     i18n.translate('xpack.agentBuilder.conversationDetail.tabs.attachments', {
-      defaultMessage: 'Attachments ({count})',
+      defaultMessage: 'Attachments {count}',
       values: { count },
     }),
   threads: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.threads', {
     defaultMessage: 'Threads',
-  }),
-  knowledge: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.knowledge', {
-    defaultMessage: 'Knowledge',
   }),
   details: i18n.translate('xpack.agentBuilder.conversationDetail.tabs.details', {
     defaultMessage: 'Details',
@@ -52,12 +48,6 @@ const labels = {
     'xpack.agentBuilder.conversationDetail.tabs.threadsPlaceholder',
     {
       defaultMessage: 'Parallel threads will appear here in a follow-up release.',
-    }
-  ),
-  knowledgePlaceholder: i18n.translate(
-    'xpack.agentBuilder.conversationDetail.tabs.knowledgePlaceholder',
-    {
-      defaultMessage: 'Knowledge base links and notes will appear here in a follow-up release.',
     }
   ),
 };
@@ -136,7 +126,6 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
         label: labels.attachments(attachmentCount),
       },
       { id: ConversationDetailTab.threads, label: labels.threads },
-      { id: ConversationDetailTab.knowledge, label: labels.knowledge },
     ];
 
     if (showDetailsTab) {
@@ -213,7 +202,10 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
             )}
 
             {selectedTab === ConversationDetailTab.attachments && conversation && (
-              <ConversationDetailAttachmentsTab attachments={conversation.attachments} />
+              <ConversationDetailAttachmentsTab
+                attachments={conversation.attachments}
+                conversation={conversation}
+              />
             )}
 
             {selectedTab === ConversationDetailTab.threads && (
@@ -221,14 +213,6 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
                 iconType="branch"
                 title={labels.threads}
                 body={labels.threadsPlaceholder}
-              />
-            )}
-
-            {selectedTab === ConversationDetailTab.knowledge && (
-              <ConversationDetailPlaceholderTab
-                iconType="documents"
-                title={labels.knowledge}
-                body={labels.knowledgePlaceholder}
               />
             )}
 

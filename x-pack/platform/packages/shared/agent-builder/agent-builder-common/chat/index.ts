@@ -127,15 +127,35 @@ export {
   type TimelineConversation,
   isUserMessageEvent,
   isAgentExecutionEvent,
+  isUserActionEvent,
   getLastExecutionEvent,
   isTimelineConversation,
+  UserActionType,
+  createFieldChangedUserActionEvents,
+  serializeAuditValue,
+  deserializeAuditValue,
+  type UserActionEvent,
+  type FieldChangedUserActionPayload,
 } from './conversation';
+export { shouldInvokeAgentForCollaborativeMessage } from './collaborative_triggers';
 export {
+  type ConversationMemberRef,
+  getConversationMemberKey,
+  userIdAndNameToMemberRef,
+  getConversationParticipantsFromEvents,
+  mergeConversationMemberRefs,
+  getConversationMembers,
+} from './conversation_members';
+export { canDeleteConversation, isCollaborativeConversation, isConversationOwner } from './conversation_access';
+export {
+  mergeLegacyRoundsWithPersistedEvents,
   roundsToTimelineEvents,
   timelineEventsToRounds,
   timelineEventsToRoundEntries,
+  timelineEventsToActivityEntries,
   isHumanNoteRound,
   type ConversationRoundEntry,
+  type ConversationActivityEntry,
   conversationToTimelineConversation,
   resolveConversationEvents,
   timelineConversationToConversation,

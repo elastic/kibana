@@ -20,6 +20,7 @@ import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
 import type { ConversationMetadataFields } from './conversation_metadata';
 import type { ConversationCollaborationFields } from './collaboration';
+import type { UserActionEvent } from './user_action_events';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -444,6 +445,8 @@ export type ConversationAction = 'regenerate';
 export enum TimelineEventType {
   user_message = 'user_message',
   agentExecution = 'agent_execution',
+  /** Investigation metadata / workflow audit (POC; B3 federates Cases UserActions). */
+  user_action = 'user_action',
 }
 
 export type TimelineEventTypeValue = `${TimelineEventType}`;
@@ -485,10 +488,18 @@ export interface AgentExecutionEvent extends BaseTimelineEvent<'agent_execution'
   agent_id: string;
 }
 
+export type { UserActionEvent, FieldChangedUserActionPayload } from './user_action_events';
+export {
+  UserActionType,
+  createFieldChangedUserActionEvents,
+  serializeAuditValue,
+  deserializeAuditValue,
+} from './user_action_events';
+
 /**
  * Union of all timeline event types.
  */
-export type TimelineEvent = UserMessageEvent | AgentExecutionEvent;
+export type TimelineEvent = UserMessageEvent | AgentExecutionEvent | UserActionEvent;
 
 /**
  * Type guard: is this event a UserMessageEvent?
@@ -502,6 +513,10 @@ export const isUserMessageEvent = (event: TimelineEvent): event is UserMessageEv
  */
 export const isAgentExecutionEvent = (event: TimelineEvent): event is AgentExecutionEvent => {
   return event.type === TimelineEventType.agentExecution;
+};
+
+export const isUserActionEvent = (event: TimelineEvent): event is UserActionEvent => {
+  return event.type === TimelineEventType.user_action;
 };
 
 /**

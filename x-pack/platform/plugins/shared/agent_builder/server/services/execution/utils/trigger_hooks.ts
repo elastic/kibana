@@ -5,7 +5,7 @@
  * 2.0.
  */
 
+import { shouldInvokeAgentForCollaborativeMessage } from '@kbn/agent-builder-common';
+
 /** POC: invoke agent when collaborative message contains `@agent`. */
-export const shouldInvokeAgentForMessage = (message: string): boolean => {
-  return message.includes('@agent');
-};
+export const shouldInvokeAgentForMessage = shouldInvokeAgentForCollaborativeMessage;

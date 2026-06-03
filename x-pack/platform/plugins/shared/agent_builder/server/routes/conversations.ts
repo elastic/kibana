@@ -14,7 +14,6 @@ import type {
   DeleteConversationResponse,
   AppendConversationMessageResponse,
 } from '../../common/http_api/conversations';
-import { isUserMessageEvent } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 
@@ -175,27 +174,16 @@ export function registerConversationRoutes({
         const { message, attachment_refs: attachmentRefs } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
-        const updated = await client.appendMessage({
+        const { conversation, event } = await client.appendMessage({
           conversationId,
           message,
           attachment_refs: attachmentRefs,
         });
 
-        const userMessageEvent = [...(updated.events ?? [])]
-          .reverse()
-          .find(isUserMessageEvent);
-
-        if (!userMessageEvent) {
-          return response.customError({
-            statusCode: 500,
-            body: { message: 'Failed to append message event' },
-          });
-        }
-
         return response.ok<AppendConversationMessageResponse>({
           body: {
-            conversation_id: updated.id,
-            event: userMessageEvent,
+            conversation_id: conversation.id,
+            event,
           },
         });
       })

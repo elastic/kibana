@@ -15,11 +15,8 @@ import { shouldShowTemplateDetailShell } from './detail/template_conversation_ut
 import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
 import { conversationBackgroundStyles, headerHeight } from './conversation.styles';
 import { ConversationHeader } from './conversation_header/conversation_header';
-import {
-  useConversation,
-  useConversationId,
-  useHasPersistedConversation,
-} from '../../hooks/use_conversation';
+import { useConversationId } from '../../context/conversation/use_conversation_id';
+import { useConversation, useHasPersistedConversation } from '../../hooks/use_conversation';
 import { useConversationStream } from '../../hooks/use_conversation_stream';
 
 const LocationErrorClearer: React.FC<{}> = () => {

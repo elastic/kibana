@@ -13,20 +13,25 @@ import type {
   UserMessageEvent,
   AgentExecutionEvent,
   TimelineConversation,
+  UserActionEvent,
 } from './conversation';
 import {
   TimelineEventType,
   ConversationRoundStatus,
   isUserMessageEvent,
   isAgentExecutionEvent,
+  isUserActionEvent,
   isTimelineConversation,
 } from './conversation';
-import type { UserIdAndName } from '../base/users';
 
 export interface ConversationRoundEntry {
   round: ConversationRound;
   author?: UserIdAndName;
 }
+
+export type ConversationActivityEntry =
+  | { type: 'round'; round: ConversationRound; author?: UserIdAndName }
+  | { type: 'user_action'; event: UserActionEvent };
 
 /**
  * Converts a list of conversation rounds to timeline events.
@@ -136,15 +141,45 @@ export const isHumanNoteRound = (round: ConversationRound): boolean =>
   round.response.message === '' &&
   round.model_usage.llm_calls === 0;
 
-export const timelineEventsToRoundEntries = (events: TimelineEvent[]): ConversationRoundEntry[] => {
-  const entries: ConversationRoundEntry[] = [];
+const pendingHumanNoteEntry = (
+  pendingUserMessage: UserMessageEvent | undefined
+): ConversationActivityEntry | undefined => {
+  if (!pendingUserMessage) {
+    return undefined;
+  }
+
+  return {
+    type: 'round',
+    author: pendingUserMessage.user,
+    round: buildHumanNoteRound(pendingUserMessage),
+  };
+};
+
+export const timelineEventsToActivityEntries = (
+  events: TimelineEvent[]
+): ConversationActivityEntry[] => {
+  const entries: ConversationActivityEntry[] = [];
   let pendingUserMessage: UserMessageEvent | undefined;
 
   for (const event of events) {
+    if (isUserActionEvent(event)) {
+      const humanNote = pendingHumanNoteEntry(pendingUserMessage);
+      if (humanNote) {
+        entries.push(humanNote);
+      }
+      pendingUserMessage = undefined;
+      entries.push({ type: 'user_action', event });
+      continue;
+    }
+
     if (isUserMessageEvent(event)) {
       pendingUserMessage = event;
-    } else if (isAgentExecutionEvent(event)) {
+      continue;
+    }
+
+    if (isAgentExecutionEvent(event)) {
       entries.push({
+        type: 'round',
         author: pendingUserMessage?.user,
         round: buildRoundFromAgentExecution(event, pendingUserMessage),
       });
@@ -154,6 +189,7 @@ export const timelineEventsToRoundEntries = (events: TimelineEvent[]): Conversat
 
   if (pendingUserMessage) {
     entries.push({
+      type: 'round',
       author: pendingUserMessage.user,
       round: buildHumanNoteRound(pendingUserMessage),
     });
@@ -162,16 +198,72 @@ export const timelineEventsToRoundEntries = (events: TimelineEvent[]): Conversat
   return entries;
 };
 
+export const timelineEventsToRoundEntries = (events: TimelineEvent[]): ConversationRoundEntry[] => {
+  return timelineEventsToActivityEntries(events).flatMap((entry) =>
+    entry.type === 'round' ? [{ round: entry.round, author: entry.author }] : []
+  );
+};
+
 /**
  * Converts a Conversation (rounds-based) to a TimelineConversation (events-based).
  */
+export const mergeLegacyRoundsWithPersistedEvents = ({
+  legacyRounds,
+  persistedEvents,
+  user,
+  agentId,
+}: {
+  legacyRounds: ConversationRound[];
+  persistedEvents: TimelineEvent[];
+  user: UserIdAndName;
+  agentId: string;
+}): TimelineEvent[] => {
+  if (!persistedEvents.length) {
+    return legacyRounds.length ? roundsToTimelineEvents(legacyRounds, user, agentId) : [];
+  }
+  if (!legacyRounds.length) {
+    return persistedEvents;
+  }
+
+  // Collaborative conversations persist agent runs in `events` while legacy
+  // `conversation_rounds` may still contain the same rounds — skip duplicates.
+  const legacyEvents = roundsToTimelineEvents(legacyRounds, user, agentId);
+  const persistedEventIds = new Set(persistedEvents.map((event) => event.id));
+  const uniqueLegacyEvents = legacyEvents.filter((event) => !persistedEventIds.has(event.id));
+
+  return [...uniqueLegacyEvents, ...persistedEvents];
+};
+
+const asTimelineEvents = (events: TimelineEvent[] | undefined): TimelineEvent[] =>
+  Array.isArray(events) ? events : [];
+
+/**
+ * Resolves chat events for agent execution from either conversation shape.
+ * Prefers persisted `events` when present (already merged on read in `fromEs`).
+ */
+export const resolveConversationEvents = (
+  conversation: Conversation | TimelineConversation
+): TimelineEvent[] => {
+  if (isTimelineConversation(conversation)) {
+    return asTimelineEvents(conversation.events);
+  }
+
+  const persistedEvents = asTimelineEvents(conversation.events);
+  if (persistedEvents.length > 0) {
+    return persistedEvents;
+  }
+
+  return roundsToTimelineEvents(
+    conversation.rounds ?? [],
+    conversation.user,
+    conversation.agent_id
+  );
+};
+
 export const conversationToTimelineConversation = (
   conversation: Conversation
 ): TimelineConversation => {
-  const events =
-    conversation.events && conversation.events.length > 0
-      ? conversation.events
-      : roundsToTimelineEvents(conversation.rounds, conversation.user, conversation.agent_id);
+  const events = resolveConversationEvents(conversation);
 
   return {
     id: conversation.id,
@@ -184,24 +276,6 @@ export const conversationToTimelineConversation = (
     state: conversation.state,
     events,
   };
-};
-
-/**
- * Resolves chat events for agent execution from either conversation shape.
- * Prefers persisted `events` when present on a rounds-based Conversation.
- */
-export const resolveConversationEvents = (
-  conversation: Conversation | TimelineConversation
-): TimelineEvent[] => {
-  if (isTimelineConversation(conversation)) {
-    return conversation.events;
-  }
-
-  return (
-    conversation.events && conversation.events.length > 0
-      ? conversation.events
-      : roundsToTimelineEvents(conversation.rounds, conversation.user, conversation.agent_id)
-  );
 };
 
 /**

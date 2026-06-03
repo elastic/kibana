@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/agent-builder-common';
+import { isCollaborativeConversation, type Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateProfile } from '@kbn/agent-builder-common/chat/conversation_metadata';
 
 export type TemplateFieldRender = 'default' | 'badge' | 'severity_badge';
@@ -13,7 +13,7 @@ export type TemplateFieldRender = 'default' | 'badge' | 'severity_badge';
 export interface TemplateFieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'select';
+  type: 'text' | 'select' | 'assignees';
   options?: readonly string[];
   render?: TemplateFieldRender;
   show_in_header?: boolean;
@@ -69,6 +69,7 @@ const POC_TEMPLATE_REGISTRY: Record<string, PocTemplateDefinition> = {
         type: 'select',
         options: ['open', 'in progress', 'closed'],
       },
+      { key: 'assignees', label: 'Assignees', type: 'assignees' },
       { key: 'mitre_technique', label: 'MITRE technique', type: 'text' },
       {
         key: 'affected_host',
@@ -183,16 +184,9 @@ export const shouldShowTemplateDetailShell = (
 };
 
 export const isCollaborativeTemplateConversation = (
-  conversation?: Pick<Conversation, 'template_snapshot' | 'conversation_mode'>
+  conversation?: Pick<Conversation, 'template_snapshot' | 'conversation_mode' | 'chat_mode'>
 ): boolean => {
-  if (!conversation) {
-    return false;
-  }
-
-  return (
-    conversation.template_snapshot?.chat_mode === 'collaborative' ||
-    conversation.conversation_mode === 'group'
-  );
+  return isCollaborativeConversation(conversation);
 };
 
 export const getTemplateLabel = (

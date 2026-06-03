@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import { isCollaborativeConversation } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -23,7 +24,12 @@ import {
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
-import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import {
+  MessageEditor,
+  useMessageEditor,
+  CommandBadgeSerializationError,
+} from './message_editor';
+import { CommandId } from './message_editor/command_menu';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -105,12 +111,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const conversationId = useConversationId();
   const { conversation } = useConversation();
 
-  const isCollaborativeConversation =
-    conversation?.template_snapshot?.chat_mode === 'collaborative' ||
-    conversation?.conversation_mode === 'group';
+  const isCollaborative = isCollaborativeConversation(conversation);
 
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
     onEditorFocus,
+    excludeCommandIds: isCollaborative ? [CommandId.Sml] : undefined,
   });
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
@@ -129,7 +134,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const placeholder = isAgentDeleted
     ? disabledPlaceholder(agentId)
-    : isCollaborativeConversation
+    : isCollaborative
       ? collaborativePlaceholder
       : enabledPlaceholder;
 

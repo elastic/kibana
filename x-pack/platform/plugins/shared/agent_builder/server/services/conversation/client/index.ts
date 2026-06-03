@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { type ConversationClient, createClient } from './client';
+export { type AppendMessageResult, type ConversationClient, createClient } from './client';

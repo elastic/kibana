@@ -19,9 +19,17 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  TimelineEventType,
   ToolOrigin,
   ToolResultType,
+  mergeLegacyRoundsWithPersistedEvents,
   timelineEventsToRounds,
+} from '@kbn/agent-builder-common';
+import type { TimelineEvent } from '@kbn/agent-builder-common';
+import {
+  isAgentExecutionEvent,
+  isUserActionEvent,
+  isUserMessageEvent,
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -39,7 +47,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { resolveTemplateSnapshotOnCreate } from './conversation_access';
+import { resolveChatMode, resolveTemplateSnapshotOnCreate } from './conversation_access';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -47,11 +55,14 @@ export type Document = Pick<
 >;
 
 const convertMetadataFromEs = (source: ConversationProperties) => {
+  const chatMode = resolveChatMode(source);
+
   return {
     ...(source.template_id !== undefined && { template_id: source.template_id }),
     ...(source.template_snapshot !== undefined && {
       template_snapshot: source.template_snapshot,
     }),
+    ...(chatMode !== undefined && { chat_mode: chatMode }),
     ...(source.custom_fields !== undefined && { custom_fields: source.custom_fields }),
   };
 };
@@ -69,10 +80,59 @@ const convertMetadataToEs = (conversation: Conversation): Partial<ConversationPr
   };
 };
 
+const isTimelineEvent = (value: unknown): value is TimelineEvent => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as TimelineEvent;
+  return (
+    isUserMessageEvent(candidate) ||
+    isAgentExecutionEvent(candidate) ||
+    isUserActionEvent(candidate)
+  );
+};
+
+/**
+ * ES may return `events` as an array or, with object mapping, as a map keyed by index.
+ * A single stored event can also come back as a bare object. Normalize to a sorted array.
+ */
+export const normalizeEventsFromEs = (events: unknown): TimelineEvent[] => {
+  if (events == null) {
+    return [];
+  }
+
+  if (Array.isArray(events)) {
+    return events.filter(isTimelineEvent);
+  }
+
+  if (typeof events === 'object') {
+    if (isTimelineEvent(events)) {
+      return [events];
+    }
+
+    return Object.entries(events as Record<string, unknown>)
+      .filter(([, value]) => isTimelineEvent(value))
+      .sort(([leftKey], [rightKey]) => {
+        const leftIndex = Number(leftKey);
+        const rightIndex = Number(rightKey);
+        if (!Number.isNaN(leftIndex) && !Number.isNaN(rightIndex)) {
+          return leftIndex - rightIndex;
+        }
+        return leftKey.localeCompare(rightKey);
+      })
+      .map(([, value]) => value as TimelineEvent);
+  }
+
+  return [];
+};
+
 const convertCollaborationFromEs = (source: ConversationProperties) => {
+  const events = normalizeEventsFromEs(source.events);
+
   return {
     ...(source.conversation_mode !== undefined && { conversation_mode: source.conversation_mode }),
-    ...(source.events !== undefined && source.events.length > 0 && { events: source.events }),
+    ...(events.length > 0 && { events }),
   };
 };
 
@@ -82,7 +142,9 @@ const convertCollaborationToEs = (conversation: Conversation): Partial<Conversat
       conversation_mode: conversation.conversation_mode,
     }),
     ...(conversation.events !== undefined &&
-      conversation.events.length > 0 && { events: conversation.events }),
+      conversation.events.length > 0 && {
+        events: normalizeTimelineEventsForEs(conversation.events),
+      }),
   };
 };
 
@@ -108,19 +170,24 @@ const convertBaseFromEs = (document: Document) => {
   };
 };
 
+export const serializeRoundSteps = (
+  steps: ConversationRoundStep[]
+): PersistentConversationRoundStep[] => {
+  return steps.map<PersistentConversationRoundStep>((step) => {
+    if (step.type === ConversationRoundStepType.toolCall) {
+      return {
+        ...step,
+        results: JSON.stringify(step.results),
+      };
+    }
+    return step;
+  });
+};
+
 function serializeStepResults(rounds: ConversationRound[]): PersistentConversationRound[] {
   return rounds.map<PersistentConversationRound>((round) => ({
     ...round,
-    steps: round.steps.map<PersistentConversationRoundStep>((step) => {
-      if (step.type === ConversationRoundStepType.toolCall) {
-        return {
-          ...step,
-          results: JSON.stringify(step.results),
-        };
-      } else {
-        return step;
-      }
-    }),
+    steps: serializeRoundSteps(round.steps),
   }));
 }
 
@@ -137,6 +204,48 @@ const migrateToolResultType = (result: ToolResult): ToolResult => {
     };
   }
   return result;
+};
+
+/** Tool results in `conversation_rounds` are JSON strings; timeline `events` may store arrays. */
+const deserializeToolResults = (results: string | ToolResult[]): ToolResult[] => {
+  const parsed: ToolResult[] = typeof results === 'string' ? JSON.parse(results) : results;
+  return parsed.map((result) =>
+    migrateToolResultType({
+      ...result,
+      tool_result_id: result.tool_result_id ?? getToolResultId(),
+    })
+  );
+};
+
+/**
+ * Timeline `events` must store tool `results` as objects/arrays for ES dynamic mapping.
+ * Only `conversation_rounds` JSON-stringifies results (legacy storage).
+ */
+export const normalizeTimelineEventsForEs = (events: TimelineEvent[]): TimelineEvent[] => {
+  return events.map((event) => {
+    if (event.type !== TimelineEventType.agentExecution) {
+      return event;
+    }
+
+    return {
+      ...event,
+      steps: event.steps.map((step) => {
+        if (step.type !== ConversationRoundStepType.toolCall) {
+          return step;
+        }
+
+        const { results } = step;
+        if (typeof results === 'string') {
+          return {
+            ...step,
+            results: deserializeToolResults(results),
+          };
+        }
+
+        return step;
+      }),
+    };
+  });
 };
 
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
@@ -163,12 +272,9 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
         if (step.type === ConversationRoundStepType.toolCall) {
           return {
             ...step,
-            results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
-              return migrateToolResultType({
-                ...result,
-                tool_result_id: result.tool_result_id ?? getToolResultId(),
-              });
-            }),
+            results: deserializeToolResults(
+              step.results as string | ToolResult[]
+            ),
             progression: step.progression ?? [],
             tool_origin: step.tool_origin ?? inferToolOrigin(step.tool_id),
           };
@@ -214,27 +320,32 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
   const collaboration = convertCollaborationFromEs(document._source!);
+  const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds ?? [];
+  const persistedEvents = normalizeEventsFromEs(document._source!.events);
+  const legacyRounds = deserializeStepResults(rawRounds);
 
-  // Group / events-first: derive rounds for legacy execution paths
-  if (collaboration.events && collaboration.events.length > 0) {
-    const deserializedRounds = deserializeStepResults(
-      timelineEventsToRounds(collaboration.events)
-    );
+  if (persistedEvents.length > 0) {
+    const mergedEvents = mergeLegacyRoundsWithPersistedEvents({
+      legacyRounds,
+      persistedEvents,
+      user: base.user,
+      agentId: base.agent_id,
+    });
+    const deserializedRounds = deserializeStepResults(timelineEventsToRounds(mergedEvents));
     return buildConversationFromRounds({
       base,
       deserializedRounds,
       source: document._source!,
-      collaboration,
+      collaboration: {
+        ...collaboration,
+        events: mergedEvents,
+      },
     });
   }
 
-  // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
-  const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
-  const deserializedRounds = deserializeStepResults(rawRounds);
-
   return buildConversationFromRounds({
     base,
-    deserializedRounds,
+    deserializedRounds: legacyRounds,
     source: document._source!,
     collaboration,
   });
@@ -331,9 +442,27 @@ export const updateConversation = ({
   space: string;
   updateDate: Date;
 }) => {
+  let templateSnapshot = conversation.template_snapshot;
+
+  if (update.template_id !== undefined) {
+    const resolvedSnapshot = resolveTemplateSnapshotOnCreate({
+      conversation: {
+        template_id: update.template_id,
+        ...(update.template_id === conversation.template_id && conversation.template_snapshot
+          ? { template_snapshot: conversation.template_snapshot }
+          : {}),
+      },
+      creationDate: updateDate,
+    });
+    if (resolvedSnapshot !== undefined) {
+      templateSnapshot = resolvedSnapshot;
+    }
+  }
+
   const updated = {
     ...conversation,
     ...update,
+    ...(templateSnapshot !== undefined && { template_snapshot: templateSnapshot }),
     space,
     updated_at: updateDate.toISOString(),
   };

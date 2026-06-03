@@ -10,8 +10,12 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
+  type UserMessageEvent,
   type Conversation,
   createConversationNotFoundError,
+  createFieldChangedUserActionEvents,
+  resolveConversationEvents,
+  timelineEventsToRounds,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationCreateRequest,
@@ -28,6 +32,7 @@ import {
   toEs,
   createRequestToEs,
   updateConversation,
+  normalizeEventsFromEs,
   type Document,
 } from './converters';
 import { createUserMessageEvent } from './append_message';
@@ -36,6 +41,11 @@ import {
   hasReadAccess,
   hasWriteAccess,
 } from './conversation_access';
+
+export interface AppendMessageResult {
+  conversation: Conversation;
+  event: UserMessageEvent;
+}
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
@@ -50,7 +60,7 @@ export interface ConversationClient {
     conversationId: string;
     message: string;
     attachment_refs?: AttachmentVersionRef[];
-  }): Promise<Conversation>;
+  }): Promise<AppendMessageResult>;
   getCurrentUser(): UserIdAndName;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
@@ -111,6 +121,7 @@ class ConversationClientImpl implements ConversationClient {
         'template_id',
         'template_snapshot',
         'chat_mode',
+        'conversation_mode',
         'status',
         'read',
       ],
@@ -123,6 +134,7 @@ class ConversationClientImpl implements ConversationClient {
           should: [
             ...ownerShouldClauses,
             { term: { chat_mode: 'collaborative' } },
+            { term: { 'template_snapshot.chat_mode': 'collaborative' } },
             { term: { conversation_mode: 'group' } },
           ],
           minimum_should_match: 1,
@@ -185,7 +197,7 @@ class ConversationClientImpl implements ConversationClient {
     conversationId: string;
     message: string;
     attachment_refs?: AttachmentVersionRef[];
-  }): Promise<Conversation> {
+  }): Promise<AppendMessageResult> {
     const document = await this._get(conversationId);
     if (!document?._source) {
       throw createConversationNotFoundError({ conversationId });
@@ -201,12 +213,21 @@ class ConversationClientImpl implements ConversationClient {
       user: this.user,
       attachment_refs,
     });
-    const events = [...(conversation.events ?? []), userEvent];
+    const persistedFromSource = normalizeEventsFromEs(document._source.events);
+    const existingEvents =
+      persistedFromSource.length > 0 ? persistedFromSource : resolveConversationEvents(conversation);
+    const events = [...existingEvents, userEvent];
 
-    return this.update({
+    const updatedConversation = await this.update({
       id: conversationId,
       events,
+      rounds: timelineEventsToRounds(events),
     });
+
+    return {
+      conversation: updatedConversation,
+      event: userEvent,
+    };
   }
 
   async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
@@ -222,9 +243,33 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     const storedConversation = fromEs(document);
+    let events = conversationUpdate.events ?? storedConversation.events ?? [];
+
+    if (conversationUpdate.custom_fields !== undefined) {
+      const previousFields = storedConversation.custom_fields ?? {};
+      const nextFields = conversationUpdate.custom_fields;
+      const auditEvents = createFieldChangedUserActionEvents({
+        previousFields,
+        nextFields,
+        user: this.user,
+        timestamp: now.toISOString(),
+      });
+
+      if (auditEvents.length > 0) {
+        events = [...events, ...auditEvents];
+      }
+    }
+
     const updatedConversation = updateConversation({
       conversation: storedConversation,
-      update: conversationUpdate,
+      update: {
+        ...conversationUpdate,
+        events,
+        ...(conversationUpdate.events !== undefined &&
+          conversationUpdate.rounds === undefined && {
+            rounds: timelineEventsToRounds(events),
+          }),
+      },
       updateDate: now,
       space: this.space,
     });

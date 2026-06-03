@@ -10,6 +10,10 @@ import type {
   TemplateSnapshot,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
+import {
+  canDeleteConversation as canDeleteConversationForUser,
+  isConversationOwner as isConversationOwnerForUser,
+} from '@kbn/agent-builder-common';
 import type { ConversationCreateRequest } from './types';
 import type { ConversationProperties } from './storage';
 
@@ -94,10 +98,10 @@ export const isConversationOwner = ({
   source: Pick<ConversationProperties, 'user_id' | 'user_name'>;
   user: UserIdAndName;
 }): boolean => {
-  if (user.id && source.user_id === user.id) {
-    return true;
-  }
-  return source.user_name === user.username;
+  return isConversationOwnerForUser({
+    owner: { id: source.user_id, username: source.user_name },
+    user,
+  });
 };
 
 /** List / get — owner-only personal chats, or any user in space for collaborative investigations. */
@@ -125,5 +129,10 @@ export const canDeleteConversation = ({
   source: ConversationProperties;
   user: UserIdAndName;
 }): boolean => {
-  return isConversationOwner({ source, user });
+  return canDeleteConversationForUser({
+    conversation: {
+      user: { id: source.user_id, username: source.user_name },
+    },
+    user,
+  });
 };

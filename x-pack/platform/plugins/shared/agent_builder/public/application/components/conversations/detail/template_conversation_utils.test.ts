@@ -102,6 +102,7 @@ describe('template_conversation_utils', () => {
       expect(definitions.map((field) => field.key)).toEqual([
         'severity',
         'status',
+        'assignees',
         'mitre_technique',
         'affected_host',
       ]);

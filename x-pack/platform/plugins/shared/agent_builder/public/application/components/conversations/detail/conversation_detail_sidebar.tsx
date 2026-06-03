@@ -6,11 +6,8 @@
  */
 
 import {
-  EuiAvatar,
   EuiBadge,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -22,8 +19,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import { useAgentId } from '../../../hooks/use_conversation';
 import { usePatchConversationMetadata } from '../../../hooks/use_patch_conversation_metadata';
+import { ConversationMembers } from './conversation_members';
 import { TemplateFieldRow } from './template_field_row';
 import {
   getTemplateFieldDefinitions,
@@ -35,15 +32,6 @@ const labels = {
   templateFields: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.templateFields', {
     defaultMessage: 'Template fields',
   }),
-  assignees: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.assignees', {
-    defaultMessage: 'Assignees',
-  }),
-  assigneesPlaceholder: i18n.translate(
-    'xpack.agentBuilder.conversationDetail.sidebar.assigneesPlaceholder',
-    {
-      defaultMessage: 'Assignee management is coming in a follow-up.',
-    }
-  ),
   external: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.external', {
     defaultMessage: 'External',
   }),
@@ -53,12 +41,6 @@ const labels = {
       defaultMessage: 'No external references linked.',
     }
   ),
-  agent: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.agent', {
-    defaultMessage: 'Agent',
-  }),
-  agentTrigger: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.agentTrigger', {
-    defaultMessage: 'Trigger: @agent in collaborative mode',
-  }),
   workflows: i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.workflows', {
     defaultMessage: 'Workflows',
   }),
@@ -79,11 +61,6 @@ const labels = {
       defaultMessage: 'Shared conversation',
     }
   ),
-  creator: (name: string) =>
-    i18n.translate('xpack.agentBuilder.conversationDetail.sidebar.creator', {
-      defaultMessage: 'Created by {name}',
-      values: { name },
-    }),
 };
 
 interface ConversationDetailSidebarProps {
@@ -94,7 +71,6 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
   conversation,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const agentId = useAgentId();
   const { mutate, isLoading } = usePatchConversationMetadata();
   const fieldDefinitions = getTemplateFieldDefinitions(conversation);
   const templateLabel = getTemplateLabel(conversation);
@@ -108,7 +84,7 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
   `;
 
   const handleFieldChange = useCallback(
-    (key: string, value: string) => {
+    (key: string, value: unknown) => {
       mutate({ [key]: value });
     },
     [mutate]
@@ -147,23 +123,12 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
         />
       ))}
 
-      <EuiHorizontalRule margin="m" />
-
-      <EuiTitle size="xxs">
-        <h3>{labels.assignees}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiAvatar name={conversation.user.username} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">{labels.creator(conversation.user.username)}</EuiText>
-          <EuiText size="xs" color="subdued">
-            {labels.assigneesPlaceholder}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isCollaborative && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <ConversationMembers conversation={conversation} />
+        </>
+      )}
 
       <EuiHorizontalRule margin="m" />
 
@@ -174,21 +139,6 @@ export const ConversationDetailSidebar: React.FC<ConversationDetailSidebarProps>
       <EuiText size="s" color="subdued">
         {labels.externalPlaceholder}
       </EuiText>
-
-      <EuiHorizontalRule margin="m" />
-
-      <EuiTitle size="xxs">
-        <h3>{labels.agent}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        <strong>{agentId}</strong>
-      </EuiText>
-      {isCollaborative && (
-        <EuiText size="xs" color="subdued">
-          {labels.agentTrigger}
-        </EuiText>
-      )}
 
       <EuiHorizontalRule margin="m" />
 

@@ -16,12 +16,13 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { TemplateFieldDefinition } from './template_conversation_utils';
 import { getFieldBadgeColor } from './template_conversation_utils';
+import { TemplateAssigneesField } from './template_assignees_field';
 
 interface TemplateFieldRowProps {
   definition: TemplateFieldDefinition;
   value: unknown;
   isSaving: boolean;
-  onChange: (key: string, value: string) => void;
+  onChange: (key: string, value: unknown) => void;
 }
 
 export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
@@ -67,10 +68,28 @@ export const TemplateFieldRow: React.FC<TemplateFieldRowProps> = ({
     }
   }, [definition.key, draftValue, onChange, stringValue]);
 
+  const handleAssigneesChange = useCallback(
+    (assignees: Array<{ uid: string; username: string }>) => {
+      onChange(definition.key, assignees);
+    },
+    [definition.key, onChange]
+  );
+
   const badgePreview =
     stringValue && (renderType === 'badge' || renderType === 'severity_badge') ? (
       <EuiBadge color={getFieldBadgeColor(definition, stringValue)}>{stringValue}</EuiBadge>
     ) : null;
+
+  if (definition.type === 'assignees') {
+    return (
+      <TemplateAssigneesField
+        label={definition.label}
+        value={value}
+        isSaving={isSaving}
+        onChange={handleAssigneesChange}
+      />
+    );
+  }
 
   if (definition.type === 'select') {
     return (

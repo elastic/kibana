@@ -73,6 +73,8 @@ export interface ConversationMetadataFields {
   template_id?: string;
   /** Immutable template config at create time (B2 / B5.2). */
   template_snapshot?: TemplateSnapshot;
+  /** Denormalized from template_snapshot.chat_mode for list/get responses. */
+  chat_mode?: ConversationChatMode;
   custom_fields?: Record<string, unknown>;
 }
 

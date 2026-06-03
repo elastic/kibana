@@ -147,6 +147,16 @@ export interface HeaderData {
 }
 
 /**
+ * Link to the original object an attachment references (e.g. a Security alert).
+ */
+export interface AttachmentSourceLink {
+  /** Destination URL for the source object. */
+  href: string;
+  /** When true, the link opens in a new browser tab. */
+  openInNewTab?: boolean;
+}
+
+/**
  * Badge definition for rendering in the attachment header next to the title.
  * Maps directly onto `EuiBadge`'s props.
  */
@@ -177,6 +187,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * subtitle, no badges).
    */
   getHeader?: (params: GetHeaderParams<TAttachment>) => HeaderData;
+  /**
+   * Optional link to the original object this attachment references.
+   * Used by conversation detail surfaces (e.g. attachments tab list items).
+   */
+  getSourceLink?: (params: GetHeaderParams<TAttachment>) => AttachmentSourceLink | undefined;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

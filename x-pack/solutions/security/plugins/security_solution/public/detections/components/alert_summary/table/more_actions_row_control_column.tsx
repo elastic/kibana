@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { useAlertTagsActions } from '../../alerts_table/timeline_actions/use_alert_tags_actions';
 import { useAddToCaseActions } from '../../alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAddToInvestigationActions } from '../../../../agent_builder/hooks/use_add_to_investigation_actions';
 
 export const MORE_ACTIONS_BUTTON_TEST_ID = 'alert-summary-table-row-action-more-actions';
 
@@ -79,6 +80,13 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
     ariaLabel: ADD_TO_CASE_ARIA_LABEL,
   });
 
+  const { addToInvestigationActionItems, selectInvestigationModal } = useAddToInvestigationActions({
+    ecsData: ecsAlert,
+    nonEcsData,
+    onMenuItemClick: closePopover,
+    ariaLabel: ADD_TO_CASE_ARIA_LABEL,
+  });
+
   const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
     closePopover,
     ecsRowData: ecsAlert,
@@ -88,23 +96,26 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
     () => [
       {
         id: 0,
-        items: [...addToCaseActionItems, ...alertTagsItems],
+        items: [...addToCaseActionItems, ...addToInvestigationActionItems, ...alertTagsItems],
       },
       ...alertTagsPanels,
     ],
-    [addToCaseActionItems, alertTagsItems, alertTagsPanels]
+    [addToCaseActionItems, addToInvestigationActionItems, alertTagsItems, alertTagsPanels]
   );
 
   return (
-    <EuiPopover
-      aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
-      button={button}
-      closePopover={togglePopover}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <>
+      {selectInvestigationModal}
+      <EuiPopover
+        aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
+        button={button}
+        closePopover={togglePopover}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+    </>
   );
 });
 

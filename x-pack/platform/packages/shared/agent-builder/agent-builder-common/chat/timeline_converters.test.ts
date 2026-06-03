@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound, UserMessageEvent, AgentExecutionEvent } from '.';
-import { ConversationRoundStatus, TimelineEventType } from '.';
+import type {
+  Conversation,
+  ConversationRound,
+  UserMessageEvent,
+  AgentExecutionEvent,
+  TimelineConversation,
+} from '.';
+import { ConversationRoundStatus, TimelineEventType, UserActionType } from '.';
 import {
   roundsToTimelineEvents,
   timelineEventsToRounds,
   timelineEventsToRoundEntries,
+  timelineEventsToActivityEntries,
+  mergeLegacyRoundsWithPersistedEvents,
   isHumanNoteRound,
   conversationToTimelineConversation,
   resolveConversationEvents,
@@ -93,6 +101,44 @@ describe('timeline_converters', () => {
       expect((events[1] as AgentExecutionEvent).id).toBe('r1');
       expect((events[2] as UserMessageEvent).message).toBe('second');
       expect((events[3] as AgentExecutionEvent).id).toBe('r2');
+    });
+  });
+
+  describe('mergeLegacyRoundsWithPersistedEvents', () => {
+    it('deduplicates legacy rounds already present in persisted events', () => {
+      const round = createTestRound({ id: 'e8e867d7-c1e9-4cb4-a1f8-892b82d8a697' });
+      const legacyEvents = roundsToTimelineEvents([round], testUser, testAgentId);
+      const persistedEvents = [...legacyEvents];
+
+      const merged = mergeLegacyRoundsWithPersistedEvents({
+        legacyRounds: [round],
+        persistedEvents,
+        user: testUser,
+        agentId: testAgentId,
+      });
+
+      expect(merged).toEqual(persistedEvents);
+      expect(timelineEventsToActivityEntries(merged)).toHaveLength(1);
+    });
+
+    it('prepends legacy-only rounds before persisted events', () => {
+      const legacyRound = createTestRound({ id: 'legacy-round' });
+      const persistedEvents = roundsToTimelineEvents(
+        [createTestRound({ id: 'persisted-round', input: { message: 'new' } })],
+        testUser,
+        testAgentId
+      );
+
+      const merged = mergeLegacyRoundsWithPersistedEvents({
+        legacyRounds: [legacyRound],
+        persistedEvents,
+        user: testUser,
+        agentId: testAgentId,
+      });
+
+      expect(merged).toHaveLength(4);
+      expect((merged[1] as AgentExecutionEvent).id).toBe('legacy-round');
+      expect((merged[3] as AgentExecutionEvent).id).toBe('persisted-round');
     });
   });
 
@@ -252,6 +298,19 @@ describe('timeline_converters', () => {
       expect(events).toHaveLength(1);
       expect((events[0] as UserMessageEvent).user.username).toBe('analyst_b');
     });
+
+    it('returns an empty array when timeline conversation events are missing', () => {
+      const timelineConversation = {
+        id: 'conv-1',
+        agent_id: testAgentId,
+        user: testUser,
+        title: 'test',
+        created_at: '2024-01-01T00:00:00.000Z',
+        updated_at: '2024-01-01T00:00:00.000Z',
+      } as TimelineConversation;
+
+      expect(resolveConversationEvents(timelineConversation)).toEqual([]);
+    });
   });
 
   describe('timelineConversationToConversation', () => {
@@ -273,6 +332,33 @@ describe('timeline_converters', () => {
       expect(restored.rounds).toHaveLength(1);
       expect(restored.rounds[0].input.message).toBe('hello');
       expect(restored.rounds[0].response.message).toBe('world');
+    });
+  });
+
+  describe('timelineEventsToActivityEntries', () => {
+    it('interleaves user_action audit rows with chat rounds in order', () => {
+      const userMsg: UserMessageEvent = {
+        id: 'msg-1',
+        timestamp: '2024-01-01T00:00:00.000Z',
+        type: TimelineEventType.user_message,
+        user: testUser,
+        message: 'note',
+      };
+      const auditEvent = {
+        id: 'ua-1',
+        timestamp: '2024-01-01T00:01:00.000Z',
+        type: TimelineEventType.user_action as const,
+        user: testUser,
+        action: UserActionType.field_changed,
+        payload: { field: 'severity', previous_value: 'low', new_value: 'high' },
+      };
+
+      const entries = timelineEventsToActivityEntries([userMsg, auditEvent]);
+
+      expect(entries).toHaveLength(2);
+      expect(entries[0].type).toBe('round');
+      expect(entries[1]).toEqual({ type: 'user_action', event: auditEvent });
+      expect(timelineEventsToRoundEntries([userMsg, auditEvent])).toHaveLength(1);
     });
   });
 

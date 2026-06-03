@@ -1,6 +1,6 @@
 # Option B — Implementation Plan (Conversation as Case)
 
-**Status:** Active  
+**Status:** Active — B0 + B5.1–B5.4 + B1 shell done; B5.5 UI in progress  
 **Architecture:** [agent_builder_investigation_cases_proposal.md](./agent_builder_investigation_cases_proposal.md)  
 **Threads:** [agent_builder_investigation_threads_extension.md](./agent_builder_investigation_threads_extension.md)  
 **PRD:** [agent-builder-projects-prd.docx](./agent-builder-projects-prd.docx)
@@ -30,16 +30,19 @@ N1 case attachment · B2 templates · B4 threads · B3/B6
 
 ---
 
-## Current baseline
+## Current state (`option-b-poc`)
 
-| Area | `main` | `pr-259692-multi-user` |
-|------|--------|-------------------------|
-| Single-user chat + `rounds[]` | ✅ | ✅ (legacy compat) |
-| `TimelineEvent` / `UserMessageEvent.user` | ❌ | ✅ |
-| Execution on timeline | ❌ | ✅ (`agents/modes/…`) |
-| ES persist timeline + group ACL | ❌ | ❌ (removed in PR cleanup) |
-| Conversation metadata | B0 WIP on `main` | **On `option-b-poc`** |
-| Multi-user UI | ❌ | ❌ |
+| Area | State |
+|------|-------|
+| Single-user chat + `rounds[]` | ✅ (legacy compat preserved) |
+| `TimelineEvent` / `UserMessageEvent.user` | ✅ |
+| Execution on timeline (`agents/modes/…`) | ✅ |
+| ES persist `events[]` + group ACL | ✅ (B5.1–B5.2) |
+| Conversation metadata (`template_id`, `custom_fields`) | ✅ (B0) |
+| `@agent` trigger hook | ✅ (B5.4) |
+| Append-only route (`POST …/messages`) | ✅ (B5.3) |
+| Detail shell (tabs + sidebar + assignees) | ✅ (B1) |
+| UI author labels + group composer | 🔄 (B5.5) |
 
 ---
 
@@ -101,7 +104,7 @@ Build the POC **on branch `option-b-poc` from `pr-259692-multi-user`**, not from
 | Item | Detail |
 |------|--------|
 | Layout | Two-column: main tabs + sidebar (fields, assignees placeholder, agent) |
-| Tabs | Activity · Attachments · Threads (placeholder) · Knowledge (placeholder) |
+| Tabs | Activity · Attachments · Threads (placeholder) · Details (embedded context only) |
 | Activity | Merge `events[]` + `rounds[]` in one feed (rounds-only OK until B5) |
 | Route | Extend `/agents/:agentId/conversations/:conversationId` or new `/investigations/:id` |
 | Reuse | Existing `ConversationRounds`, attachment panels, header |
@@ -149,7 +152,7 @@ Build the POC **on branch `option-b-poc` from `pr-259692-multi-user`**, not from
 
 **Exit criteria:** Two analysts in same space post in shared investigation; reload preserves message authors; agent runs on `@agent` only; wrong space denied.
 
-**Sub-phases:** B5.1 persist events → **B5.2 space ACL** ✅ → B5.3 append → B5.4 hooks → B5.5 UI.
+**Sub-phases:** B5.1 persist events ✅ → B5.2 space ACL ✅ → B5.3 append ✅ → B5.4 hooks ✅ → B5.5 UI 🔄.
 
 ### B4 — Threads
 
@@ -174,7 +177,8 @@ See §4.3.4 in architecture doc. Copy-on-create child conversations; `POST …/t
 3. ✅ B0 metadata types (no parallel `events[]`) — on `option-b-poc`
 4. ✅ `option-b-poc` from `pr-259692-multi-user` + B0 diff
 5. ✅ [B5 design](./agent_builder_option_b_b5_design.md)
-6. 🔄 **E2E POC build** — B5.1→B5.5 + thin B1 (see below)
+6. ✅ B5.1–B5.4 + B1 shell implemented
+7. 🔄 **B5.5** — UI author labels + group composer
 
 ---
 
@@ -202,13 +206,13 @@ B2 templates · B4 threads · B3 Cases federation · B6 ITSM · full cases-proje
 ### Build order
 
 ```
-B5.1 persist events  ← in progress
+B5.1 persist events  ✅
   → B5.2 space ACL (+ template snapshot fields) ✅
-  → B5.3 POST /messages
-  → B5.4 trigger hooks + group converse
-  → B5.5 UI authors (required for demo, not stretch)
-  → B1-min shell (Activity + sidebar + Attachments tab)
-  → N1 (if time)
+  → B5.3 POST /messages ✅
+  → B5.4 trigger hooks + group converse ✅
+  → B5.5 UI authors (required for demo) 🔄
+  → B1 shell (Activity + sidebar + Attachments + Threads placeholder) ✅
+  → N1 (stretch)
 ```
 
 ### Demo script (target)
@@ -265,11 +269,15 @@ B5.1 persist events  ← in progress
 
 Use GitHub issues/epics aligned to B0–B6 + N1–N3. Link PRs to phase labels.
 
-| Phase | Issue (create) | PR |
-|-------|----------------|-----|
-| B0 | TBD | In progress |
-| B1 | TBD | — |
+| Phase | Issue (create) | Status |
+|-------|----------------|--------|
+| B0 | TBD | ✅ Done |
+| B5.1–B5.4 | TBD | ✅ Done |
+| B1 | TBD | ✅ Done |
+| B5.5 | TBD | 🔄 In progress |
 | N1 | TBD | — |
+| B2 | TBD | — |
+| B4 | TBD | — |
 
 ---
 

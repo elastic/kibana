@@ -17,6 +17,7 @@ import {
   createBadRequestError,
   createInternalError,
   isUserMessageEvent,
+  isUserActionEvent,
   isAgentExecutionEvent,
 } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -267,9 +268,13 @@ export const prepareConversation = async ({
     formatContext,
   });
 
+  const executionEvents = effectiveEvents.filter(
+    (event) => !isUserActionEvent(event)
+  );
+
   // Process each event: UserMessageEvent → ProcessedUserMessageEvent, AgentExecutionEvent → pass through
   const processedEvents: ProcessedTimelineEvent[] = await Promise.all(
-    effectiveEvents.map(async (event) => {
+    executionEvents.map(async (event) => {
       if (isUserMessageEvent(event)) {
         const strippedEvent: UserMessageEvent = { ...event, attachments: [] };
         const processedInput = await prepareInput({

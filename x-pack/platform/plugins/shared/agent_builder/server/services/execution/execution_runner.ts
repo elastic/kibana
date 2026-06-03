@@ -137,6 +137,10 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
+  const connectorProvider = getConnectorProvider(
+    (await modelProvider.getDefaultModel()).chatModel.getConnector()
+  );
+
   // Get conversation
   const conversation = await getConversation({
     agentId,
@@ -172,7 +176,7 @@ const handleConversationExecution = async ({
         logger,
         analyticsService,
         trackingService,
-        modelProvider: getConnectorProvider(chatModel.getConnector()),
+        modelProvider: connectorProvider,
         conversationId: conversation.id,
         executionId: execution.executionId,
       })
@@ -223,9 +227,6 @@ const handleConversationExecution = async ({
   // Merge all event streams
   const effectiveConversationId =
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
-
-  const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-  const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
   const { headers } = request;
   const opikTraceId = headers.opik_trace_id as string | undefined;

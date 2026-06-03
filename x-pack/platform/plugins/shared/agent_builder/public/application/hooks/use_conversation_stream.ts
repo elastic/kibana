@@ -6,7 +6,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  isCollaborativeConversation,
+  shouldInvokeAgentForCollaborativeMessage,
+} from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -68,11 +72,9 @@ export const useConversationStream = () => {
       if (!agentId) {
         throw new Error('agentId is required to send a message');
       }
-      const isCollaborativeConversation =
-        conversation?.template_snapshot?.chat_mode === 'collaborative' ||
-        conversation?.conversation_mode === 'group';
       const invokesAgent =
-        !isCollaborativeConversation || message.includes('@agent');
+        !isCollaborativeConversation(conversation) ||
+        shouldInvokeAgentForCollaborativeMessage(message);
 
       mutateSendMessage({
         message,
@@ -94,6 +96,7 @@ export const useConversationStream = () => {
       conversation?.attachments,
       resetAttachments,
       browserApiTools,
+      conversation,
     ]
   );
 

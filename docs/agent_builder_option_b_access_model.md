@@ -1,6 +1,6 @@
 # Option B — Access model (space + templates, no `members[]`)
 
-**Status:** Draft — replaces `members[]` / per-conversation ACL in B5  
+**Status:** Implemented — space + template ACL in place; `members[]` dropped  
 **Related:** [B5 design](./agent_builder_option_b_b5_design.md) · [implementation plan](./agent_builder_option_b_implementation_plan.md) · [architecture](./agent_builder_investigation_cases_proposal.md)
 
 ---
@@ -126,7 +126,7 @@ Enforcement uses **live** privileges at request time; snapshot is for display an
 
 ## 5. ConversationClient ACL (B5.2 target)
 
-**Implemented (POC):** `conversation_access.ts` + `client.ts` list/get/update/delete.
+**Implemented:** `conversation_access.ts` + `client.ts` list/get/update/delete.
 
 ```typescript
 function isCollaborative(conversation): boolean {
@@ -189,15 +189,17 @@ minimum_should_match: 1
 
 ## 7. Phasing (updated)
 
-| Phase | Access work |
-|-------|-------------|
-| **B0** ✅ | Metadata only |
-| **B5.1** | Persist `events` + per-message `user` |
-| **B5.2** | **Collaborative ⇒ team-visible** in space; **no `members[]`** |
-| **B5.3–B5.5** | Append route, `@agent` hook, UI authors |
-| **B2** | `ConversationTemplate` CRUD + privilege fields + create-from-template + **`template_snapshot`** |
-| **B2.1** | Register investigation template privileges; filter template picker by role |
-| **N1** | Case attachment; optional copy case assignees into **metadata** only (not ACL) |
+| Phase | Access work | Status |
+|-------|-------------|--------|
+| **B0** | Metadata only | ✅ |
+| **B5.1** | Persist `events` + per-message `user` | ✅ |
+| **B5.2** | **Collaborative ⇒ team-visible** in space; **no `members[]`** | ✅ |
+| **B5.3** | Append route (`POST …/messages`) | ✅ |
+| **B5.4** | `@agent` trigger hook | ✅ |
+| **B5.5** | UI author labels + group composer | 🔄 |
+| **B2** | `ConversationTemplate` CRUD + privilege fields + create-from-template + **`template_snapshot`** | — |
+| **B2.1** | Register investigation template privileges; filter template picker by role | — |
+| **N1** | Case attachment; optional copy case assignees into **metadata** only (not ACL) | — |
 
 **POC without full B2:** hardcode one investigation template (`incident-triage-v2`) in seed/config; on create set `template_id` + inline snapshot `{ chat_mode: 'collaborative', profile: 'incident' }`.
 

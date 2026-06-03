@@ -1,6 +1,6 @@
 # B5 — Multi-user chat design (Option B POC)
 
-**Status:** Draft — for review with Agent Builder platform (#259692)  
+**Status:** Implemented (B5.1–B5.4 done; B5.5 UI authors in progress)  
 **Branch:** `option-b-poc`  
 **Related:** [implementation plan](./agent_builder_option_b_implementation_plan.md) · [#259692 integration](./agent_builder_option_b_259692_integration.md) · [architecture](./agent_builder_investigation_cases_proposal.md)
 
@@ -8,22 +8,22 @@
 
 ---
 
-## 1. Problem
+## 1. State (implemented)
 
-After **B0**, `option-b-poc` has:
+`option-b-poc` after B5.1–B5.4:
 
 | Layer | State |
 |-------|--------|
 | Execution | Timeline-native ([#259692](https://github.com/elastic/kibana/pull/259692)): `UserMessageEvent.user`, `prepare_conversation`, agent modes |
-| Persistence | **`conversation_rounds` only** — reload loses per-user message identity |
-| ACL | **Owner-only** (`user_id` / `user_name`) |
-| Converse | Every message **runs the agent** (no group append / `@agent` gate) |
+| Persistence | **`events` canonical** for collaborative conversations; `conversation_rounds` dual-written for single-user compat (read path uses `events` when present) |
+| ACL | **Space + template `chat_mode`** — collaborative investigations visible to all privileged users in space; personal convs owner-only |
+| Converse | **`@agent` trigger hook wired** in `execution_runner.ts` — collaborative append-only when message lacks `@agent`; agent runs on `@agent` only |
 
-**SOC pair goal:** two analysts share one investigation; human messages persist with author; agent runs only on `@agent`.
+**SOC pair goal achieved:** two analysts share one investigation; human messages persist with author; agent runs only on `@agent`.
 
 ---
 
-## 2. What #259692 removed (do not restore verbatim)
+## 2. What #259692 removed (historical context — already reimplemented)
 
 Commits on Pierre’s branch (reference only):
 
@@ -41,7 +41,7 @@ Commits on Pierre’s branch (reference only):
 | No per-record ACL on AB conv | Option B uses **space + template privileges** (Cases-aligned) — [access model](./agent_builder_option_b_access_model.md) |
 | Hooks deleted separately | Restoring persistence alone doesn’t deliver group converse |
 
-**Reuse the ideas** (persist `TimelineEvent[]`, mode, `@agent`). **Reimplement** on a cleaner contract below — including **`user` on persisted `user_message` events** (gap in removed nested schema).
+**These ideas are now reimplemented** (persist `TimelineEvent[]`, mode, `@agent`) on the cleaner contract described below — including **`user` on persisted `user_message` events** (gap that existed in the removed nested schema).
 
 ---
 
@@ -272,13 +272,13 @@ No required ES reindex for existing conversations in POC.
 
 ## 11. Implementation phases (within B5)
 
-| Sub-phase | Deliverable | Validates |
-|-----------|-------------|-----------|
-| **B5.1** | ES **`events`** + converters round-trip **`user` on user_message** | Reload preserves authors |
-| **B5.2** | Space ACL for template-backed investigations — [access model](./agent_builder_option_b_access_model.md) | Cross-analyst open by URL in same space |
-| **B5.3** | Append message route + persist without agent | Two users, two messages, no agent |
-| **B5.4** | Trigger hooks + converse invokes agent on `@agent` only | SOC pair lab script |
-| **B5.5** | UI author labels + group composer + poll/refresh | **Required for E2E POC demo** |
+| Sub-phase | Deliverable | Status |
+|-----------|-------------|--------|
+| **B5.1** | ES **`events`** + converters round-trip **`user` on user_message** | ✅ Done |
+| **B5.2** | Space ACL for template-backed investigations — [access model](./agent_builder_option_b_access_model.md) | ✅ Done |
+| **B5.3** | Append message route + persist without agent (`POST …/messages`) | ✅ Done |
+| **B5.4** | Trigger hooks + converse invokes agent on `@agent` only | ✅ Done |
+| **B5.5** | UI author labels + group composer + poll/refresh | 🔄 In progress |
 
 **Exit criteria (B5 done):** Two analysts in **same space**; both append messages; reload shows correct authors; agent runs only when message contains `@agent`; wrong space / missing write privilege denied.
 

@@ -30,6 +30,7 @@ import type { HostIsolationAction } from '../../../../common/components/endpoint
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAddToInvestigationActions } from '../../../../agent_builder/hooks/use_add_to_investigation_actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
@@ -320,13 +321,21 @@ export const TakeActionDropdown = memo(
       ]
     );
 
+    const nonEcsData =
+      dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values })) ?? [];
+
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData: dataAsNestedObject,
-      nonEcsData:
-        dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values })) ?? [],
+      nonEcsData,
       onMenuItemClick,
       onSuccess: refetchFlyoutData,
       refetch,
+    });
+
+    const { addToInvestigationActionItems, selectInvestigationModal } = useAddToInvestigationActions({
+      ecsData: dataAsNestedObject,
+      nonEcsData,
+      onMenuItemClick,
     });
 
     // responder action items
@@ -365,6 +374,7 @@ export const TakeActionDropdown = memo(
           ? [...investigateInTimelineActionItems]
           : [
               ...addToCaseActionItems,
+              ...addToInvestigationActionItems,
               ...alertsActionItems,
               ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
               ...hostIsolationActionItems,
@@ -374,6 +384,7 @@ export const TakeActionDropdown = memo(
             ],
       [
         addToCaseActionItems,
+        addToInvestigationActionItems,
         alertsActionItems,
         isAlert,
         isRemoteDocument,
@@ -413,7 +424,9 @@ export const TakeActionDropdown = memo(
     );
 
     return items.length && dataAsNestedObject ? (
-      <EuiPopover
+      <>
+        {selectInvestigationModal}
+        <EuiPopover
         id="AlertTakeActionPanel"
         aria-label={TAKE_ACTION}
         button={takeActionButton}
@@ -425,6 +438,7 @@ export const TakeActionDropdown = memo(
       >
         <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
       </EuiPopover>
+      </>
     ) : null;
   }
 );
