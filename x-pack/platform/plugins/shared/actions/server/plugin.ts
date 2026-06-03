@@ -56,7 +56,7 @@ import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
-import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace } from './lib';
+import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace, LeasePool } from './lib';
 import type {
   Services,
   ActionType,
@@ -139,6 +139,9 @@ export interface PluginSetupContract {
   ): void;
 
   getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
+
+  /** PoC: process-wide pool for reusable connector clients (MCP, future DB/gRPC). */
+  getClientLeasePool(): LeasePool<unknown>;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -272,6 +275,9 @@ export class ActionsPlugin
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
+  // PoC: process-wide pool. Warm MCP/DB sessions must outlive a single action; the plugin
+  // instance is the owner (ActionContext dies when the action returns).
+  private clientLeasePool?: LeasePool<unknown>;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -482,6 +488,7 @@ export class ActionsPlugin
         actionsConfigUtils,
         plugins.cloud
       ),
+      getClientLeasePool: () => this.clientLeasePool!,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -520,6 +527,8 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+    this.clientLeasePool = new LeasePool<unknown>();
+
     const {
       logger,
       licenseState,

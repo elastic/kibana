@@ -7,7 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createMcpClientFromAxios } from './create_mcp_client_from_axios';
-export type { CreateMcpClientFromAxiosOpts } from './create_mcp_client_from_axios';
-export { createFetchFromAxios } from './create_fetch_from_axios';
-export { parseJsonTextFromContentParts, callToolContent, callToolJson } from './call_tool_helpers';
+import type { AxiosInstance } from 'axios';
+import type { Logger } from '@kbn/logging';
+
+export interface BuildContext {
+  logger: Logger;
+  axiosInstance: AxiosInstance;
+  config?: Record<string, unknown>;
+}
+
+export interface ClientTypeSpec<TClient> {
+  id: string;
+  build(ctx: BuildContext): Promise<TClient>;
+  /** Called when evicting a pooled instance (connector delete, TTL, etc.); not wired in PoC. */
+  terminate(client: TClient): Promise<void>;
+}

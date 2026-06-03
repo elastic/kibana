@@ -10,13 +10,17 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
+  clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
+import type { ActionContext, ClientTypeSpec } from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+import type { LeasePool } from '../lease_pool';
+import { buildClientLeaseKey } from './build_client_lease_key';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -65,9 +69,13 @@ const getErrorMeta = ({
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  getClientLeasePool,
+  clientTypes = defaultClientTypes,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  getClientLeasePool: () => LeasePool<unknown>;
+  clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -107,11 +115,23 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
+    const pool = getClientLeasePool();
+    const getClient = (id: string): Promise<unknown> => {
+      const clientType = clientTypes[id];
+      if (!clientType) {
+        throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
+      }
+      return pool.lease(buildClientLeaseKey(connectorId, id), () =>
+        clientType.build({ logger, axiosInstance, config })
+      );
+    };
+
     const actionContext = {
       log: logger,
       client: axiosInstance,
       secrets,
       config,
+      getClient: getClient as ActionContext['getClient'],
     };
 
     try {
