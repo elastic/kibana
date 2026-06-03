@@ -16,20 +16,28 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import {
+  EPISODE_ACKED_EVENT_TYPE,
+  EPISODE_ACTIVATED_EVENT_TYPE,
   EPISODE_ASSIGNED_EVENT_TYPE,
+  EPISODE_DEACTIVATED_EVENT_TYPE,
+  EPISODE_SNOOZED_EVENT_TYPE,
+  EPISODE_TAGGED_EVENT_TYPE,
+  EPISODE_UNACKED_EVENT_TYPE,
+  EPISODE_UNASSIGNED_EVENT_TYPE,
+  EPISODE_UNSNOOZED_EVENT_TYPE,
+  type AlertActionEvent,
   type AlertActionEventEnvelope,
-  type EpisodeAssignedEvent,
 } from './events';
 
 /**
  * Public contract for the alert-action event publisher.
  *
  * Persistence callers ({@link AlertActionsClient}) use
- * {@link AlertActionEventPublisherContract.emitEpisodeAction} as the single
- * entry point. The publisher dispatches by `action_type` to typed `emit*`
- * methods that build the canonical bus event shape.
+ * {@link AlertActionEventPublisherContract.emitEpisodeActions} as the single
+ * entry point. The publisher dispatches by `action_type` to build the
+ * canonical bus event shape for each action.
  *
- * Every method takes the publishing call site's `KibanaRequest` as its
+ * The method takes the publishing call site's `KibanaRequest` as its
  * first argument. The request is propagated on the bus as
  * {@link AlertingPublisherContext} so request-scoped subscribers (e.g.
  * the workflow subscriber, which needs a user-scoped workflows client)
@@ -39,11 +47,6 @@ import {
 export interface AlertActionEventPublisherContract {
   /** Convenience batch wrapper over the possible emit methods. */
   emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void;
-  /**
-   * Publishes an `episode.assigned` domain event for a persisted assign action.
-   * No-op when `assignee_uid` is null (unassign).
-   */
-  emitEpisodeAssigned(request: KibanaRequest, action: AlertAction): void;
 }
 
 /**
@@ -51,7 +54,7 @@ export interface AlertActionEventPublisherContract {
  * {@link EventBus}.
  *
  * Owns the construction of the canonical event shape (envelope + payload).
- * Each `emit*` method builds the event-specific shape and publishes it
+ * Each action type is mapped to its event-specific shape and published
  * alongside the publishing `KibanaRequest` as the bus's
  * {@link AlertingPublisherContext}.
  *
@@ -73,31 +76,67 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   ) {}
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void {
+    const context = { request };
     for (const action of actions) {
-      switch (action.action_type) {
-        case ALERT_EPISODE_ACTION_TYPE.ASSIGN:
-          this.emitEpisodeAssigned(request, action);
-          return;
-        default:
-          return;
+      const event = this.buildEvent(action);
+      if (event) {
+        this.eventBus.publish(event, context);
       }
     }
   }
 
-  public emitEpisodeAssigned(request: KibanaRequest, action: AlertAction): void {
-    if (action.assignee_uid == null) {
-      return;
+  /**
+   * Maps a persisted alert action to its canonical bus event, or `undefined`
+   * for action types that do not (yet) publish a domain event.
+   *
+   * The `assign` action fans out to two distinct events depending on whether
+   * an assignee was set (`episode.assigned`) or cleared (`episode.unassigned`).
+   */
+  private buildEvent(action: AlertAction): AlertActionEvent | undefined {
+    const envelope = this.buildEnvelopeFromAction(action);
+
+    switch (action.action_type) {
+      case ALERT_EPISODE_ACTION_TYPE.ASSIGN:
+        return action.assignee_uid == null
+          ? { type: EPISODE_UNASSIGNED_EVENT_TYPE, ...envelope, payload: {} }
+          : {
+              type: EPISODE_ASSIGNED_EVENT_TYPE,
+              ...envelope,
+              payload: { assigneeUid: action.assignee_uid },
+            };
+      case ALERT_EPISODE_ACTION_TYPE.ACK:
+        return { type: EPISODE_ACKED_EVENT_TYPE, ...envelope, payload: {} };
+      case ALERT_EPISODE_ACTION_TYPE.UNACK:
+        return { type: EPISODE_UNACKED_EVENT_TYPE, ...envelope, payload: {} };
+      case ALERT_EPISODE_ACTION_TYPE.TAG:
+        return {
+          type: EPISODE_TAGGED_EVENT_TYPE,
+          ...envelope,
+          payload: { tags: action.tags ?? [] },
+        };
+      case ALERT_EPISODE_ACTION_TYPE.SNOOZE:
+        return {
+          type: EPISODE_SNOOZED_EVENT_TYPE,
+          ...envelope,
+          payload: { expiry: action.expiry ?? null },
+        };
+      case ALERT_EPISODE_ACTION_TYPE.UNSNOOZE:
+        return { type: EPISODE_UNSNOOZED_EVENT_TYPE, ...envelope, payload: {} };
+      case ALERT_EPISODE_ACTION_TYPE.ACTIVATE:
+        return {
+          type: EPISODE_ACTIVATED_EVENT_TYPE,
+          ...envelope,
+          payload: { reason: action.reason ?? '' },
+        };
+      case ALERT_EPISODE_ACTION_TYPE.DEACTIVATE:
+        return {
+          type: EPISODE_DEACTIVATED_EVENT_TYPE,
+          ...envelope,
+          payload: { reason: action.reason ?? '' },
+        };
+      default:
+        return undefined;
     }
-
-    const event: EpisodeAssignedEvent = {
-      type: EPISODE_ASSIGNED_EVENT_TYPE,
-      ...this.buildEnvelopeFromAction(action),
-      payload: {
-        assigneeUid: action.assignee_uid,
-      },
-    };
-
-    this.eventBus.publish(event, { request });
   }
 
   private buildEnvelopeFromAction(action: AlertAction): AlertActionEventEnvelope {
