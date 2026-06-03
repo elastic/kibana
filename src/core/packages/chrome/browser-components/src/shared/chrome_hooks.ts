@@ -29,6 +29,8 @@ import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
 
+export { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
  * Used by `ClassicHeader`.

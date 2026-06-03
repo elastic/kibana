@@ -9,18 +9,18 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
 import equal from 'fast-deep-equal';
 import { EuiContextMenuItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { useIsServerless } from '@kbn/react-env';
 import { css } from '@emotion/react';
 import type { HelpLinks, HelpMenuLinkItem } from './help_menu_links';
 import { buildHelpLinks, toContextMenuItem } from './help_menu_links';
-import { useNavigateToUrl } from './chrome_hooks';
+import { useNavigateToUrl, useIsNextChrome } from './chrome_hooks';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -43,16 +43,17 @@ export function useHelpLinks$(): Observable<HelpLinks> {
         chrome.getHelpExtension$(),
         chrome.getHelpSupportUrl$(),
         chrome.getGlobalHelpExtensionMenuLinks$(),
-        chrome.getFeedbackHandler$(),
-        chrome
-          .getNewsfeedHandler$()
-          .pipe(
-            switchMap((handler) =>
-              handler
-                ? handler.hasNew$.pipe(map((hasNew) => ({ open: handler.open, hasNew })))
-                : of(undefined)
-            )
-          ),
+        chrome.next.getFeedbackHandler$(),
+        chrome.next.getNewsfeedHandler$().pipe(
+          switchMap((handler) =>
+            handler
+              ? handler.hasNew$.pipe(
+                  map((hasNew) => ({ open: handler.open, hasNew })),
+                  startWith({ open: handler.open, hasNew: false })
+                )
+              : of(undefined)
+          )
+        ),
       ]).pipe(
         map(
           ([

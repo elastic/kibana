@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay, map } from 'rxjs';
+import { shareReplay, map, tap } from 'rxjs';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { FetchResult } from './types';
@@ -23,15 +23,16 @@ export const registerNewsfeedHandler = ({
   api: NewsfeedApi;
   isServerless: boolean;
 }) => {
-  const handlerResults$ = api.fetchResults$.pipe(shareReplay(1));
+  let lastFetchResult: FetchResult | null | void = null;
+  const handlerResults$ = api.fetchResults$.pipe(
+    tap((result) => {
+      lastFetchResult = result;
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
   const handlerApi: NewsfeedApi = { ...api, fetchResults$: handlerResults$ };
 
-  let lastFetchResult: FetchResult | null | void = null;
-  handlerResults$.subscribe((result) => {
-    lastFetchResult = result;
-  });
-
-  core.chrome.registerNewsfeedHandler({
+  return core.chrome.next.registerNewsfeedHandler({
     open: () => {
       if (lastFetchResult) {
         handlerApi.markAsRead(lastFetchResult.feedItems.map((item) => item.hash));

@@ -160,9 +160,9 @@ export class WorkflowApi {
     });
   }
 
-  async getAggs({ fields }: GetAggsParams): Promise<WorkflowAggsDto> {
+  async getAggs({ fields, managed }: GetAggsParams): Promise<WorkflowAggsDto> {
     return this.http.get(`${BASE}/aggs`, {
-      query: { fields },
+      query: { fields, ...(managed ? { managed } : {}) },
       version: API_VERSION,
     });
   }
