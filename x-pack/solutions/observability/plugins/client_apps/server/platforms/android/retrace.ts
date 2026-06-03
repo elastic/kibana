@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AndroidClassMap } from '../../lib/retracer_android';
+import { RetracerAndroid } from '../../lib/retracer_android';
 
 interface RetraceParams {
   esClient: ElasticsearchClient;
@@ -14,16 +17,24 @@ interface RetraceParams {
   logger: Logger;
 }
 
-/**
- * Deobfuscates an Android stacktrace using R8 mapping data from Elasticsearch.
- *
- * TODO: Implement the full retrace algorithm:
- * 1. Parse stacktrace frames to extract obfuscated method keys
- * 2. Fetch mapping documents from ES filtered by buildId
- * 3. Range-match obfuscated line numbers against mapping entries
- * 4. Interpolate original line numbers
- * 5. Handle inline chains, default mappings, and unmapped frames
- */
-export async function retrace(_params: RetraceParams): Promise<string> {
-  return _params.stacktrace;
+export async function retrace({ esClient, stacktrace, buildId, logger }: RetraceParams): Promise<string> {
+  const index = `android-r8-mappings-${buildId}`;
+
+  const retracer = new RetracerAndroid(
+    stacktrace,
+    {
+      fetch: async (classNames) => {
+        const ids = classNames.map((cls) =>
+          crypto.createHash('sha256').update(cls).digest('hex')
+        );
+        const response = await esClient.mget<AndroidClassMap>({ index, ids });
+        return response.docs
+          .filter((doc) => 'found' in doc && doc.found && '_source' in doc)
+          .map((doc) => (doc as { _source: AndroidClassMap })._source);
+      },
+    },
+    { logger }
+  );
+
+  return (await retracer.retrace()) ?? stacktrace;
 }

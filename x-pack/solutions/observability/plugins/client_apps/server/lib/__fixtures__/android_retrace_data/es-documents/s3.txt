@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "s3",
+  "original_class": "com.example.synthetic.OutlineCaller",
+  "source_file": "OutlineCaller.kt",
+  "methods": {
+    "a": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            1
+          ],
+          "orig_range": [
+            42,
+            42
+          ],
+          "method": "inlinee"
+        },
+        {
+          "obf_range": [
+            4,
+            4
+          ],
+          "orig_range": [
+            98,
+            98
+          ],
+          "method": "caller"
+        },
+        {
+          "obf_range": [
+            5,
+            5
+          ],
+          "orig_range": [
+            99,
+            99
+          ],
+          "method": "caller"
+        },
+        {
+          "obf_range": [
+            27,
+            27
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "caller",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.outlineCallsite",
+              "positions": {
+                "1": 4,
+                "2": 5
+              },
+              "outline": "Ls2;a(II)I"
+            }
+          ]
+        }
+      ]
+    },
+    "b": {
+      "mappings": [
+        {
+          "obf_range": [
+            10,
+            10
+          ],
+          "orig_range": [
+            200,
+            200
+          ],
+          "method": "normalMethod"
+        }
+      ]
+    }
+  }
+}

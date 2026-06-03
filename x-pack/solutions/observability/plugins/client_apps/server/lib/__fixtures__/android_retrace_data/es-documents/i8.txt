@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "i8",
+  "original_class": "co.elastic.otel.android.integration.CrashActivity$$ExternalSyntheticLambda0",
+  "source_file": "R8$$SyntheticClass",
+  "methods": {
+    "run": {
+      "mappings": [
+        {
+          "obf_range": [
+            10,
+            10
+          ],
+          "orig_range": [
+            53,
+            53
+          ],
+          "method": "setUpInitialPolicy",
+          "class": "co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager",
+          "source_file": "SampleRateManager.kt"
+        },
+        {
+          "obf_range": [
+            10,
+            10
+          ],
+          "orig_range": [
+            47,
+            47
+          ],
+          "method": "initialize$lambda$0",
+          "class": "co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager",
+          "source_file": "SampleRateManager.kt",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.rewriteFrame",
+              "conditions": [
+                "throws(Ljava/lang/NullPointerException;)"
+              ],
+              "actions": [
+                "removeInnerFrames(1)"
+              ]
+            }
+          ]
+        },
+        {
+          "obf_range": [
+            10,
+            10
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "run",
+          "class": "CrashActivity$$ExternalSyntheticLambda0",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.synthesized"
+            }
+          ]
+        },
+        {
+          "obf_range": [
+            11,
+            12
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "run",
+          "class": "CrashActivity$$ExternalSyntheticLambda0"
+        },
+        {
+          "obf_range": [
+            13,
+            24
+          ],
+          "orig_range": [
+            31,
+            31
+          ],
+          "method": "onCreate$lambda$0",
+          "class": "co.elastic.otel.android.integration.CrashActivity",
+          "source_file": "CrashActivity.kt"
+        },
+        {
+          "obf_range": [
+            13,
+            24
+          ],
+          "orig_range": [
+            0,
+            0
+          ],
+          "method": "run",
+          "class": "CrashActivity$$ExternalSyntheticLambda0"
+        }
+      ]
+    }
+  }
+}
