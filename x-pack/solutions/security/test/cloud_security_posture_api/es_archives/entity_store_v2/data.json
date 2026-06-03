@@ -1635,3 +1635,76 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "40",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "id": "host:over-split-actor-1",
+        "name": "over-split-actor-1",
+        "type": "Host",
+        "sub_type": "Linux Host",
+        "source": "manual",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:over-split-target"]
+          }
+        },
+        "EngineMetadata": { "Type": "host" }
+      },
+      "host": { "name": "over-split-actor-1", "ip": ["10.0.1.1"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "41",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "id": "host:over-split-actor-2",
+        "name": "over-split-actor-2",
+        "type": "Host",
+        "sub_type": "Linux Host",
+        "source": "manual",
+        "relationships": {
+          "communicates_with": {
+            "ids": ["host:over-split-target"]
+          }
+        },
+        "EngineMetadata": { "Type": "host" }
+      },
+      "host": { "name": "over-split-actor-2", "ip": ["10.0.1.2"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "42",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2024-09-01T12:00:00.000Z",
+      "entity": {
+        "id": "host:over-split-target",
+        "name": "over-split-target",
+        "type": "Host",
+        "sub_type": "Linux Host",
+        "source": "manual",
+        "EngineMetadata": { "Type": "host" }
+      },
+      "host": { "name": "over-split-target", "ip": ["10.0.1.9"] },
+      "event": { "ingested": "2024-09-01T12:00:00.000Z" }
+    }
+  }
+}
