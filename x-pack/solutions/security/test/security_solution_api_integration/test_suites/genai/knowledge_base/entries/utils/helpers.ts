@@ -115,7 +115,9 @@ export const waitForInferenceEndpoint = async ({
   }
 
   throw new Error(
-    `Inference endpoint ${TINY_ELSER_INFERENCE_ID} was not ready after ${(maxAttempts * delayMs) / 1000}s`
+    `Inference endpoint ${TINY_ELSER_INFERENCE_ID} was not ready after ${
+      (maxAttempts * delayMs) / 1000
+    }s`
   );
 };
 
