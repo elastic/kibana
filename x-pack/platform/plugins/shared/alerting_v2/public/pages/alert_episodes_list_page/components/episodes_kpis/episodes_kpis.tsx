@@ -55,7 +55,7 @@ export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisP
           <EuiTitle size="xxs">
             <h3>{EPISODES_KPIS_ALERTS_PANEL_TITLE}</h3>
           </EuiTitle>
-          <EuiFlexGroup gutterSize="m" responsive={false}>
+          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem>
               <EuiStat
                 title={data?.alertsCount ?? 0}
@@ -91,7 +91,7 @@ export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisP
           <EuiTitle size="xxs">
             <h3>{EPISODES_KPIS_ALERT_ACTIONS_PANEL_TITLE}</h3>
           </EuiTitle>
-          <EuiFlexGroup gutterSize="m" responsive={false}>
+          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem>
               <EuiStat
                 title={data?.unassigned ?? 0}
