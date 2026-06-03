@@ -15,6 +15,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiImage,
+  EuiToolTip,
   useIsWithinBreakpoints,
   useResizeObserver,
 } from '@elastic/eui';
@@ -126,16 +127,18 @@ export function ImageViewer({
         />
       )}
       {onClear && (
-        <EuiButtonIcon
-          css={{ position: 'absolute', top: '-4px', right: '-4px' }}
-          display="fill"
-          iconType="cross"
-          aria-label="Clear"
-          color="danger"
-          onClick={() => {
-            if (onClear) onClear();
-          }}
-        />
+        <EuiToolTip content="Clear" disableScreenReaderOutput>
+          <EuiButtonIcon
+            css={{ position: 'absolute', top: '-4px', right: '-4px' }}
+            display="fill"
+            iconType="cross"
+            aria-label="Clear"
+            color="danger"
+            onClick={() => {
+              if (onClear) onClear();
+            }}
+          />
+        </EuiToolTip>
       )}
     </div>
   );

@@ -5,30 +5,59 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiCallOut,
+  EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiText,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
 import type { SigEvent } from '@kbn/streams-schema';
-import {
-  useFetchSigEvents,
-  useFetchSigEventHistory,
-} from '../../../../../hooks/sig_events/use_fetch_sig_events';
+import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
-import { EntityDetailFlyout } from '../entity_detail_flyout';
+import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { FilterPopover } from './filter_popover';
+import { getStatusColor } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
-const MAX_VISIBLE_RULES = 2;
+
+const clickableRowCss = css`
+  cursor: pointer;
+`;
+
+const SEARCH_PLACEHOLDER = i18n.translate('xpack.streams.sigEventsTab.searchPlaceholder', {
+  defaultMessage: 'Search events...',
+});
+const FETCH_ERROR_TITLE = i18n.translate('xpack.streams.sigEventsTab.fetchError', {
+  defaultMessage: 'Failed to load significant events',
+});
+const TABLE_CAPTION = i18n.translate('xpack.streams.sigEventsTab.tableCaption', {
+  defaultMessage: 'Significant Events',
+});
+const LOADING_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.loadingMessage', {
+  defaultMessage: 'Loading events...',
+});
+const EMPTY_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
+  defaultMessage: 'No significant events found.',
+});
+const MORE_LABEL = i18n.translate('xpack.streams.sigEventsTab.moreLabel', {
+  defaultMessage: 'more',
+});
 
 const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   {
@@ -36,8 +65,17 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     name: i18n.translate('xpack.streams.sigEventsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
-    sortable: true,
+    width: '200px',
     render: (timestamp: string) => formatTimestamp(timestamp),
+  },
+  {
+    // TODO: rename field binding to 'status' once the data stream field is renamed
+    field: 'verdict',
+    name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '110px',
+    render: (status: string) => <EuiBadge color={getStatusColor(status)}>{status}</EuiBadge>,
   },
   {
     field: 'title',
@@ -45,75 +83,147 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
       defaultMessage: 'Title',
     }),
     truncateText: true,
-  },
-  {
-    field: 'verdict',
-    name: i18n.translate('xpack.streams.sigEventsTab.verdictColumn', {
-      defaultMessage: 'Verdict',
-    }),
-  },
-  {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
-    }),
-    render: (value: number | undefined) => (value ? String(value) : '-'),
+    width: '40%',
   },
   {
     field: 'stream_names',
     name: i18n.translate('xpack.streams.sigEventsTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
-    render: (streamNames: string[]) => (
-      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-        {(streamNames ?? []).slice(0, MAX_VISIBLE_STREAMS).map((name) => (
-          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
-            <EuiBadge color="hollow">{name}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {(streamNames ?? []).length > MAX_VISIBLE_STREAMS && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">+{streamNames.length - MAX_VISIBLE_STREAMS}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
+    width: '150px',
+    render: (streamNames: string[]) => {
+      const names = streamNames ?? [];
+      const visible = names.slice(0, MAX_VISIBLE_STREAMS);
+      const remaining = names.length - visible.length;
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {visible.map((name, idx) => (
+            <EuiFlexItem grow={false} key={`${name}-${idx}`}>
+              <EuiBadge color="hollow">{name}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+          {remaining > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                +{remaining} {MORE_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    },
   },
   {
-    field: 'rule_names',
-    name: i18n.translate('xpack.streams.sigEventsTab.rulesColumn', {
-      defaultMessage: 'Rules',
+    field: 'criticality',
+    name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
+      defaultMessage: 'Criticality',
     }),
-    render: (ruleNames: string[]) => (
-      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-        {(ruleNames ?? []).slice(0, MAX_VISIBLE_RULES).map((name) => (
-          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
-            <EuiBadge color="hollow">{name}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {(ruleNames ?? []).length > MAX_VISIBLE_RULES && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">+{ruleNames.length - MAX_VISIBLE_RULES}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
+    width: '90px',
+    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
+  },
+  {
+    field: 'recommended_action',
+    name: i18n.translate('xpack.streams.sigEventsTab.actionColumn', {
+      defaultMessage: 'Action',
+    }),
+    width: '100px',
+    render: (action?: string) =>
+      action ? (
+        <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
+      ) : (
+        '-'
+      ),
   },
 ];
+
+const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>
+  options.filter((opt) => opt.checked === 'on').map((opt) => opt.key ?? opt.label);
+
+const buildSelectableOptions = <T extends string>({
+  values,
+  selected,
+  getLabel = capitalize,
+}: {
+  values: readonly T[];
+  selected: T[];
+  getLabel?: (value: T) => string;
+}): EuiSelectableOption[] =>
+  values.map((v) => ({
+    label: getLabel(v),
+    key: v,
+    checked: selected.includes(v) ? ('on' as const) : undefined,
+  }));
 
 export const SigEventsTab = () => {
   const { timeState } = useTimefilter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
+  const { filteredStreams } = useKiGeneration();
 
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchSigEvents({
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [streamFilter, setStreamFilter] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
+
+  const streamOptions = useMemo(
+    () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
+    [filteredStreams]
+  );
+
+  const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchSigEvents({
     from: timeState.start,
     to: timeState.end,
+    status: statusFilter.length > 0 ? statusFilter : undefined,
+    stream: streamFilter.length > 0 ? streamFilter : undefined,
+    search: debouncedSearch || undefined,
   });
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
-  const { data: historyData, isLoading: isHistoryLoading } = useFetchSigEventHistory(
-    selectedEvent?.event_id
+  const onStatusChange = useCallback(
+    (opts: EuiSelectableOption[]) => setStatusFilter(extractCheckedKeys(opts)),
+    []
+  );
+
+  const onStreamChange = useCallback(
+    (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
+    []
+  );
+
+  const filters = useMemo(
+    () => [
+      {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.status', {
+          defaultMessage: 'Status',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.statusAriaLabel', {
+          defaultMessage: 'Filter by status',
+        }),
+        options: buildSelectableOptions({
+          values: SIG_EVENT_STATUS_OPTIONS,
+          selected: statusFilter,
+        }),
+        numFilters: SIG_EVENT_STATUS_OPTIONS.length,
+        numActiveFilters: statusFilter.length,
+        onChange: onStatusChange,
+      },
+      {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
+          defaultMessage: 'Stream',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.streamAriaLabel', {
+          defaultMessage: 'Filter by stream',
+        }),
+        options: buildSelectableOptions({
+          values: streamOptions,
+          selected: streamFilter,
+          getLabel: (s) => s,
+        }),
+        numFilters: streamOptions.length,
+        numActiveFilters: streamFilter.length,
+        onChange: onStreamChange,
+      },
+    ],
+    [statusFilter, streamFilter, streamOptions, onStatusChange, onStreamChange]
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -122,152 +232,78 @@ export const SigEventsTab = () => {
     }
   };
 
-  const euiPagination = {
-    pageIndex: pagination.page - 1,
-    pageSize: pagination.perPage,
-    totalItemCount: data?.total ?? 0,
-    pageSizeOptions: [10, 25, 50],
-  };
-
-  const flyoutDetails = selectedEvent
-    ? [
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.eventId', {
-            defaultMessage: 'Event ID',
-          }),
-          description: selectedEvent.event_id,
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.title', {
-            defaultMessage: 'Title',
-          }),
-          description: selectedEvent.title,
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.verdict', {
-            defaultMessage: 'Verdict',
-          }),
-          description: selectedEvent.verdict,
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.criticality', {
-            defaultMessage: 'Criticality',
-          }),
-          description: selectedEvent.criticality ? String(selectedEvent.criticality) : '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.confidence', {
-            defaultMessage: 'Confidence',
-          }),
-          description: selectedEvent.confidence ? String(selectedEvent.confidence) : '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.summary', {
-            defaultMessage: 'Summary',
-          }),
-          description: selectedEvent.summary,
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.rootCause', {
-            defaultMessage: 'Root Cause',
-          }),
-          description: selectedEvent.root_cause,
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.impact', {
-            defaultMessage: 'Impact',
-          }),
-          description: selectedEvent.impact ?? '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.recommendedAction', {
-            defaultMessage: 'Recommended Action',
-          }),
-          description: selectedEvent.recommended_action ?? '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.streams', {
-            defaultMessage: 'Streams',
-          }),
-          description: (selectedEvent.stream_names ?? []).join(', ') || '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.sigEventsTab.flyout.rules', {
-            defaultMessage: 'Rules',
-          }),
-          description: (selectedEvent.rule_names ?? []).join(', ') || '-',
-        },
-      ]
-    : [];
-
-  const historyEntries = useMemo(
-    () =>
-      (historyData?.hits ?? []).map((entry) => ({
-        timestamp: formatTimestamp(entry['@timestamp']),
-        summary: entry.criticality
-          ? i18n.translate('xpack.streams.sigEventsTab.historySummaryWithCriticality', {
-              defaultMessage: '{verdict}: {title} (criticality: {criticality})',
-              values: {
-                verdict: entry.verdict,
-                title: entry.title,
-                criticality: String(entry.criticality),
-              },
-            })
-          : i18n.translate('xpack.streams.sigEventsTab.historySummary', {
-              defaultMessage: '{verdict}: {title}',
-              values: { verdict: entry.verdict, title: entry.title },
-            }),
-      })),
-    [historyData]
-  );
-
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow>
+            <EuiFieldSearch
+              placeholder={SEARCH_PLACEHOLDER}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              isClearable
+              fullWidth
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              {filters.map((f) => (
+                <FilterPopover
+                  key={f.label}
+                  label={f.label}
+                  ariaLabel={f.ariaLabel}
+                  options={f.options}
+                  numFilters={f.numFilters}
+                  numActiveFilters={f.numActiveFilters}
+                  onChange={f.onChange}
+                />
+              ))}
+            </EuiFilterGroup>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
               start={rangeFrom}
               end={rangeTo}
               onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
               onRefresh={() => refetch()}
-              compressed
               showUpdateButton="iconOnly"
-              updateButtonProps={{ size: 's', fill: false }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={FETCH_ERROR_TITLE}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.streams.sigEventsTab.tableCaption', {
-            defaultMessage: 'Significant Events',
-          })}
+        <EuiBasicTable<SigEvent>
+          tableCaption={TABLE_CAPTION}
           items={data?.hits ?? []}
           columns={columns}
-          pagination={euiPagination}
+          pagination={{
+            pageIndex: pagination.page - 1,
+            pageSize: pagination.perPage,
+            totalItemCount: data?.total ?? 0,
+            pageSizeOptions: [10, 25, 50],
+          }}
           onChange={onTableChange}
           loading={isLoading}
-          noItemsMessage={i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
-            defaultMessage: 'No significant events found.',
-          })}
           rowProps={(item) => ({
             onClick: () => setSelectedEvent(item),
-            css: css`
-              cursor: pointer;
-            `,
+            css: clickableRowCss,
           })}
+          noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
         />
       </EuiFlexItem>
       {selectedEvent && (
-        <EntityDetailFlyout
-          title={selectedEvent.title}
-          entityId={selectedEvent.event_id}
-          details={flyoutDetails}
-          history={historyEntries}
-          isHistoryLoading={isHistoryLoading}
-          onClose={() => setSelectedEvent(undefined)}
-        />
+        <SigEventFlyout event={selectedEvent} onClose={() => setSelectedEvent(undefined)} />
       )}
     </EuiFlexGroup>
   );

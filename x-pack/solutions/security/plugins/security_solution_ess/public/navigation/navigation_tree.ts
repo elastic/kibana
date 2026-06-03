@@ -224,7 +224,7 @@ export const createNavigationTree = (
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [
-              { id: 'stackRules', link: 'rules' },
+              { id: 'stackRules', link: 'management:triggersActions' },
               { link: 'management:cases' },
               { link: 'management:triggersActionsConnectors' },
               { link: 'management:reporting' },

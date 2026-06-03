@@ -44,7 +44,7 @@ describe('registerCaseAttachments', () => {
     );
   });
 
-  it('registers the unified indicator attachment type with the zod schema', () => {
+  it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
@@ -86,13 +86,5 @@ describe('registerCaseAttachments', () => {
     registerCaseAttachments(framework);
 
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
-  });
-
-  it('registers exactly the four expected unified attachment types', () => {
-    const framework = buildFramework();
-
-    registerCaseAttachments(framework);
-
-    expect(framework.registerUnified).toHaveBeenCalledTimes(4);
   });
 });

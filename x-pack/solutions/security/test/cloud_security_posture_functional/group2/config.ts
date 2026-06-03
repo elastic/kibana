@@ -13,6 +13,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig.getAll(),
     testFiles: [require.resolve('.')],
+    security: {
+      ...baseConfig.get('security'),
+      cookieLogin: false, // tests rely on localStorage column state between steps; loginByCookie clears it
+    },
     junit: {
       reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 2 (Findings)',
     },

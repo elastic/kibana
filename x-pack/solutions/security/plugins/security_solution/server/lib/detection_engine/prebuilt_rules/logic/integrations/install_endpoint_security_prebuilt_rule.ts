@@ -81,8 +81,15 @@ export const installEndpointSecurityPrebuiltRule = async ({
       );
       return;
     }
-    const ruleAssetsToInstall = await ruleAssetsClient.fetchAssetsByVersion(latestRuleVersion);
-    await createPrebuiltRules(detectionRulesClient, ruleAssetsToInstall, logger);
+    const { assets: ruleAssetsToInstall } = await ruleAssetsClient.fetchAssetsByVersion(
+      latestRuleVersion
+    );
+    const changeTracking = {
+      metadata: {
+        bulkCount: ruleAssetsToInstall.length,
+      },
+    };
+    await createPrebuiltRules(detectionRulesClient, ruleAssetsToInstall, changeTracking, logger);
   } catch (err) {
     logger.error(
       `Unable to create Endpoint Security rule automatically (${err.statusCode}): ${err.message}`

@@ -1,5 +1,5 @@
 {
-  "sha1": "61f1f4a26f98394e2539a6412bb00a4c37004dcd",
+  "sha1": "faaf69206ec04dc841e27f8cca5aa5481630963b",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -303,6 +303,22 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
         "line": 165,
+        "column": 9
+      }
+    },
+    {
+      "id": "72321f7b67c15f4-083706ce01b6201",
+      "title": "Stream data processing - fetch more matching samples should show fetch more button when condition match rate is below threshold, clicking it should fetch more documents until the threshold is reached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/fetch_more_matching_samples.spec.ts",
+        "line": 49,
         "column": 9
       }
     },

@@ -58,7 +58,6 @@ import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { getLazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
-import { LazyEndpointPolicyCreateMultiStepExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_multi_step_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
@@ -334,13 +333,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    // Enable CPS picker only for individual dashboard views (not the listing page).
-    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
-    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      /security\/dashboards\/[^?]+/.test(location)
-        ? ProjectRoutingAccess.EDITABLE
-        : ProjectRoutingAccess.DISABLED
-    );
+    // Enable CPS picker in READ_ONLY mode for all Security Solution pages
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, () => ProjectRoutingAccess.READONLY);
 
     return this.contract.getStartContract(core);
   }
@@ -813,12 +807,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       package: 'endpoint',
       view: 'package-policy-create',
       Component: getLazyEndpointPolicyCreateExtension(registerOptions),
-    });
-
-    registerExtension({
-      package: 'endpoint',
-      view: 'package-policy-create-multi-step',
-      Component: LazyEndpointPolicyCreateMultiStepExtension,
     });
 
     registerExtension({

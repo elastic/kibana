@@ -202,6 +202,21 @@ export interface EsWorkflowStepExecution {
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
+
+  /**
+   * Optional Human-In-The-Loop audit envelope, populated only by
+   * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
+   * every property inside it are optional and MUST be treated as such
+   * by readers — the engine itself remains field-agnostic.
+   */
+  hitl?: {
+    /** Server-resolved username (or API-key principal) that submitted the response. */
+    respondedBy?: string;
+    /** ISO-8601 timestamp the response was recorded server-side. */
+    respondedAt?: string;
+    /** Free-form channel slug identifying the surface that submitted the response. */
+    channel?: string;
+  };
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -778,6 +793,7 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  managed?: 'all' | 'managed' | 'unmanaged';
 }
 
 export interface RequestOptions {
