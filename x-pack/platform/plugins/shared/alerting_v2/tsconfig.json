@@ -110,7 +110,6 @@
     "@kbn/core-user-profile-browser",
     "@kbn/workflows-ui",
     "@kbn/datemath",
-    "@kbn/triggers-actions-ui-plugin",
     "@kbn/css-utils"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
