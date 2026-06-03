@@ -926,5 +926,115 @@ describe('partitionStream', () => {
 
       expect(captured.input).not.toHaveProperty('processing_summary');
     });
+
+    it('excludes fields unconditionally removed after being created', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      // A grok step creates `attributes.temp` and `attributes.service.name`,
+      // then an unconditional remove deletes `attributes.temp`. Only
+      // `attributes.service.name` should appear in the summary.
+      const definition = definitionWithProcessing([
+        {
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{WORD:attributes.temp} %{WORD:attributes.service.name}'],
+          ignore_failure: true,
+        },
+        { action: 'remove', from: 'attributes.temp', ignore_failure: true },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      expect(summary).toContain('- attributes.service.name');
+      expect(summary).not.toContain('attributes.temp');
+    });
+
+    it('excludes fields removed by remove_by_prefix after being created', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      // Grok creates several `temp.*` fields plus a keeper field.
+      // remove_by_prefix with `from: "temp."` wipes the temp ones.
+      const definition = definitionWithProcessing([
+        {
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{WORD:temp.host} %{WORD:temp.port} %{WORD:attributes.service.name}'],
+          ignore_failure: true,
+        },
+        { action: 'remove_by_prefix', from: 'temp.' },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      expect(summary).toContain('- attributes.service.name');
+      expect(summary).not.toContain('temp.host');
+      expect(summary).not.toContain('temp.port');
+    });
+
+    it('excludes the renamed-away source field and includes the destination field', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      // Grok creates `attributes.raw_ip`, then rename moves it to
+      // `attributes.source.ip`. Only the destination should appear.
+      const definition = definitionWithProcessing([
+        {
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{IP:attributes.raw_ip}'],
+          ignore_failure: true,
+        },
+        {
+          action: 'rename',
+          from: 'attributes.raw_ip',
+          to: 'attributes.source.ip',
+          ignore_failure: true,
+        },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      expect(summary).toContain('- attributes.source.ip');
+      expect(summary).not.toContain('attributes.raw_ip');
+    });
+
+    it('keeps conditionally removed fields in the summary', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      // A grok step creates `attributes.temp`. The remove step has a `where`
+      // condition — the field still exists for documents that don't match, so
+      // it must remain a valid partition target.
+      const definition = definitionWithProcessing([
+        {
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{WORD:attributes.temp} %{WORD:attributes.service.name}'],
+          ignore_failure: true,
+        },
+        {
+          action: 'remove',
+          from: 'attributes.temp',
+          ignore_failure: true,
+          where: { field: 'severity_text', eq: 'DEBUG' },
+        },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      // Both fields should appear: temp is only conditionally removed.
+      expect(summary).toContain('- attributes.temp');
+      expect(summary).toContain('- attributes.service.name');
+    });
   });
 });

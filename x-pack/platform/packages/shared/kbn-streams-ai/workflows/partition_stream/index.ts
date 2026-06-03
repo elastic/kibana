@@ -299,6 +299,13 @@ const summarizeProcessingPipeline = (definition: Streams.WiredStream.Definition)
  * summary stays in sync with how Streamlang itself reasons about modified
  * fields, and recurses into condition blocks (`if/then/else`) which the
  * single-step helper does not handle.
+ *
+ * Deletion tracking: unconditional `remove`, `remove_by_prefix`, and `rename`
+ * steps erase their source field(s) from the accumulator so the LLM summary
+ * only lists fields that are actually present after the full pipeline runs.
+ * Conditional removals (steps with a `where` clause) are intentionally left
+ * in the set — the field still exists for documents that don't match the
+ * predicate, so it remains a valid partition target.
  */
 const collectProducedFields = (steps: StreamlangStep[], acc: Set<string>): void => {
   for (const step of steps) {
@@ -311,6 +318,28 @@ const collectProducedFields = (steps: StreamlangStep[], acc: Set<string>): void 
     }
 
     if (!isActionBlock(step)) continue;
+
+    // Only track deletions for unconditional steps — a step with a `where`
+    // clause only runs for matching documents so its source field may still
+    // be present elsewhere and remain a valid partition target.
+    const isUnconditional = !('where' in step) || !step.where;
+
+    if (isUnconditional) {
+      if (step.action === 'remove' && step.from) {
+        acc.delete(step.from);
+      } else if (step.action === 'remove_by_prefix' && step.from) {
+        const prefix = step.from;
+        for (const field of acc) {
+          if (field.startsWith(prefix)) {
+            acc.delete(field);
+          }
+        }
+      } else if (step.action === 'rename' && step.from) {
+        // The source field is moved — delete it; extractModifiedFields will
+        // add the destination field to the accumulator below.
+        acc.delete(step.from);
+      }
+    }
 
     for (const field of extractModifiedFields(step)) {
       acc.add(field);
