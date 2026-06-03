@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPortal,
+  EuiToolTip,
   useEuiPaddingCSS,
   useEuiTheme,
 } from '@elastic/eui';
