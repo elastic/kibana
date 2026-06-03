@@ -9,7 +9,7 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, map, merge, of, startWith } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, of } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
@@ -66,15 +66,17 @@ export const getESQLControlFactory = <
         'variableName'
       );
 
-      const tooltipLabel$ = combineLatest([
+      const tooltipLabel$ = new BehaviorSubject<string>(state.title ?? '');
+      const tooltipLabelSubscription = combineLatest([
         selections.api.esqlVariable$,
         labelManager.api.label$,
-      ]).pipe(
-        map(([{ key: variableName, type: variableType }, label]) => {
-          return getTooltipTitle(variableName, variableType, label);
-        }),
-        startWith(state.title)
-      );
+      ])
+        .pipe(
+          map(([{ key: variableName, type: variableType }, label]) => {
+            return getTooltipTitle(variableName, variableType, label);
+          })
+        )
+        .subscribe((next) => tooltipLabel$.next(next));
 
       const stateApi = initializeStateApi<typeof initialState>({
         uuid,
@@ -251,6 +253,7 @@ export const getESQLControlFactory = <
             return () => {
               selections.cleanup();
               labelManager.cleanup();
+              tooltipLabelSubscription.unsubscribe();
             };
           }, []);
 
