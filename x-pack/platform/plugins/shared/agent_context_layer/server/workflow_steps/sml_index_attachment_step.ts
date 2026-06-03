@@ -22,11 +22,13 @@ import type { AgentContextLayerPluginStart } from '../types';
  * pair the start contract internally allows for content-mode writes
  * (neither would actually fail-if-exists / fail-if-not-found here).
  *
- * For `delete`, the handler dispatches the AGL contract's delete variant
+ * For `delete`, the handler calls `deleteAttachment` (a sibling method on
+ * the AGL contract, distinct from `indexAttachment({ action: 'delete' })`)
  * with `ingestionMethod: 'all'`, which wipes every chunk for the
  * `origin_id` regardless of how it was produced (manual + crawled). This
- * matches the "workflow owns this origin" semantic — opposite of the
- * crawler's default delete, which keeps curated manuals around.
+ * matches the "workflow owns this origin" semantic — opposite of
+ * `indexAttachment`'s delete, which keeps curated manuals around so
+ * crawler / event-driven CRUD callers don't clobber pinned content.
  *
  * The `getTypeDefinition` guard intentionally only fires on the `upsert`
  * branch: writes against an unregistered type are nonsensical (no
@@ -60,11 +62,10 @@ export const createSmlIndexAttachmentStepDefinition = ({
           // We do NOT gate on `getTypeDefinition` here: a workflow must be
           // able to clean up chunks it previously wrote even if the
           // plugin that registered the type has since been disabled.
-          await startContract.indexAttachment({
+          await startContract.deleteAttachment({
             request,
             originId,
             attachmentType,
-            action: 'delete',
             // Workflow steps "own" the origin they wrote — wipe every chunk,
             // not just the crawler-default 'crawled'-only subset.
             ingestionMethod: 'all',

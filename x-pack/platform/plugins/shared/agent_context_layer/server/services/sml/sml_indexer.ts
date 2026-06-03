@@ -17,6 +17,7 @@ import type {
   SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
+  SmlIndexerDeleteAttachmentParams,
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
@@ -30,29 +31,35 @@ export interface SmlIndexer {
   /**
    * Index, update, or delete SML data for a specific item.
    *
-   * In origin mode (`action: 'create' | 'update'`, no `content`), the indexer
-   * resolves the type's `getSmlData` hook and writes the produced chunks tagged
-   * `ingestion_method: 'crawled'`. If any existing chunks for this `origin_id`
-   * carry `ingestion_method: 'manual'`, the call is a no-op unless `force: true`
-   * is passed.
+   * In origin mode (no `content`), the indexer resolves the type's `getSmlData`
+   * hook and writes the produced chunks tagged `ingestion_method: 'crawled'`.
+   * If any existing chunks for this `origin_id` carry
+   * `ingestion_method: 'manual'`, the call is a no-op unless `force: true` is
+   * passed.
    *
-   * In content mode (`action: 'create' | 'update'`, `content` provided),
-   * `getSmlData` is skipped and the provided chunks are written directly,
-   * tagged `ingestion_method: 'manual'`. The write always overwrites any
-   * existing chunks for the `origin_id`.
+   * In content mode (`content` provided), `getSmlData` is skipped and the
+   * provided chunks are written directly, tagged `ingestion_method: 'manual'`.
+   * The write always overwrites any existing chunks for the `origin_id`.
    *
-   * For `action: 'delete'`, the `ingestionMethod` field on the params selects
-   * which chunks to remove:
-   *   - `'crawled'` (default) — remove crawler output only; preserve curated
-   *     manual entries. Used by the crawler itself and by event-driven callers
-   *     (e.g. the connector lifecycle handler) so curators don't lose pins
-   *     when an upstream object goes away.
-   *   - `'manual'` — remove curated manual entries only.
-   *   - `'all'` — remove every chunk for the `origin_id` regardless of method.
-   *     Used by callers that "own" the origin (e.g. a workflow that wrote the
-   *     chunks and is now retiring them).
+   * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are
+   * removed — manual entries for the same `origin_id` are preserved. This keeps
+   * curated content around even when the upstream object goes away (e.g.
+   * transient blip, or a curator pinning standalone context to a deleted
+   * dashboard). Callers that need to wipe `'manual'` or `'all'` chunks should
+   * use {@link SmlIndexer.deleteAttachment} instead.
    */
   indexAttachment: (params: SmlIndexerParams) => Promise<void>;
+
+  /**
+   * Delete chunks for an origin, with explicit control over which ingestion
+   * method(s) are removed.
+   *
+   * The default scope (`'crawled'`) matches `indexAttachment({ action: 'delete' })`
+   * for back-compat with the crawler and event-driven CRUD callers; pass
+   * `'manual'` to wipe curated entries only, or `'all'` to fully retire the
+   * origin (used by workflow steps that "own" their origin).
+   */
+  deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
 
   /**
    * Delete chunks for a given `origin_id` from the SML index.
@@ -94,25 +101,6 @@ class SmlIndexerImpl implements SmlIndexer {
       savedObjectsClient,
       logger: contextLogger,
     } = params;
-
-    if (action === 'delete') {
-      const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
-      this.logger.info(
-        `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='delete', scope='${scope}', spaces=[${spaces.join(
-          ', '
-        )}]`
-      );
-      // `'all'` translates to "no ingestion_method filter" on the underlying
-      // helper — that's the way `SmlIndexer.deleteChunks` distinguishes
-      // "wipe everything for this origin" from "wipe a single method".
-      await this.deleteChunks({
-        originId,
-        esClient,
-        ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
-      });
-      return;
-    }
-
     const isContentMode = params.content !== undefined;
 
     this.logger.info(
@@ -120,6 +108,14 @@ class SmlIndexerImpl implements SmlIndexer {
         isContentMode ? 'content' : 'origin'
       }', spaces=[${spaces.join(', ')}]`
     );
+
+    if (action === 'delete') {
+      this.logger.info(
+        `SML indexer: deleting crawled chunks for origin '${originId}' (manual entries preserved)`
+      );
+      await this.deleteChunks({ originId, esClient, ingestionMethod: 'crawled' });
+      return;
+    }
 
     if (isContentMode) {
       await this.indexManualChunks({
@@ -200,6 +196,26 @@ class SmlIndexerImpl implements SmlIndexer {
     );
 
     await this.executeBulk({ bulkOps, esClient, originId, chunkCount: smlData.chunks.length });
+  }
+
+  async deleteAttachment(params: SmlIndexerDeleteAttachmentParams): Promise<void> {
+    const { originId, attachmentType, esClient, spaces } = params;
+    const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
+
+    this.logger.info(
+      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}', spaces=[${spaces.join(
+        ', '
+      )}]`
+    );
+
+    // `'all'` translates to "no ingestion_method filter" on the underlying
+    // helper — that's the way `SmlIndexer.deleteChunks` distinguishes "wipe
+    // everything for this origin" from "wipe a single method".
+    await this.deleteChunks({
+      originId,
+      esClient,
+      ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
+    });
   }
 
   /**

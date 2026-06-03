@@ -72,6 +72,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
 
 const mockIndexer = {
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  deleteAttachment: jest.fn().mockResolvedValue(undefined),
   deleteChunks: jest.fn().mockResolvedValue(undefined),
 };
 

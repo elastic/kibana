@@ -176,35 +176,35 @@ export class AgentContextLayerPlugin
         const base = {
           originId: params.originId,
           attachmentType: params.attachmentType,
+          action: params.action,
           spaces: [spaceId],
           esClient: elasticsearch.client.asInternalUser,
           savedObjectsClient: soClient,
           logger: this.logger.get('sml'),
         };
-        // Route by `action` (the discriminator). Each branch reconstructs the
-        // exact internal variant — TypeScript widens the union away during the
-        // shared `base` spread above, so the discriminant must be re-asserted
-        // per branch for the internal service to typecheck.
-        if (params.action === 'delete') {
-          return smlService.indexAttachment({
-            ...base,
-            action: 'delete',
-            ...(params.ingestionMethod !== undefined
-              ? { ingestionMethod: params.ingestionMethod }
-              : {}),
-          });
-        }
         if (params.content !== undefined) {
-          return smlService.indexAttachment({
-            ...base,
-            action: params.action,
-            content: params.content,
-          });
+          return smlService.indexAttachment({ ...base, content: params.content });
         }
-        return smlService.indexAttachment({
-          ...base,
-          action: params.action,
-          force: params.force,
+        return smlService.indexAttachment({ ...base, force: params.force });
+      },
+      deleteAttachment: async (params) => {
+        const soClient = savedObjects.getScopedClient(params.request, {
+          ...(params.includedHiddenTypes?.length
+            ? { includedHiddenTypes: params.includedHiddenTypes }
+            : {}),
+        });
+        const spaceId =
+          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
+        return smlService.deleteAttachment({
+          originId: params.originId,
+          attachmentType: params.attachmentType,
+          spaces: [spaceId],
+          esClient: elasticsearch.client.asInternalUser,
+          savedObjectsClient: soClient,
+          logger: this.logger.get('sml'),
+          ...(params.ingestionMethod !== undefined
+            ? { ingestionMethod: params.ingestionMethod }
+            : {}),
         });
       },
     };

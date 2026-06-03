@@ -22,9 +22,10 @@ import type {
   SmlSearchResult,
   SmlSearchFilters,
   SmlDocument,
+  SmlIndexAction,
+  SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
   SmlIndexAttachmentContentMode,
-  SmlIndexAttachmentDeleteMode,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
@@ -82,21 +83,22 @@ export interface AgentContextLayerPluginStart {
   }) => Promise<SmlResolvedItemResult[]>;
 
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
+  deleteAttachment: (params: SmlDeleteAttachmentParams) => Promise<void>;
 }
 
 /**
- * Common params shared by every variant of `AgentContextLayerPluginStart.indexAttachment`.
+ * Common params shared by both modes of `AgentContextLayerPluginStart.indexAttachment`.
  *
- * `action` is intentionally NOT here — it lives in each mode mixin so the
- * resulting union discriminates on `action`, making invalid combinations
- * (e.g. `{ action: 'delete', content: [...] }`) compile errors. The mode
- * mixins are shared with the internal `SmlIndexerParams` so the public and
- * internal unions cannot drift on the discriminator.
+ * The mode is selected by the discriminator fields from
+ * {@link SmlIndexAttachmentOriginMode} / {@link SmlIndexAttachmentContentMode}, which are
+ * shared with the internal `SmlIndexerParams` so the public and internal unions cannot
+ * drift on the discriminator.
  */
 interface SmlIndexAttachmentBaseParams {
   request: KibanaRequest;
   originId: string;
   attachmentType: string;
+  action: SmlIndexAction;
   spaceId?: string;
   includedHiddenTypes?: string[];
 }
@@ -107,16 +109,31 @@ export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
 export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
   SmlIndexAttachmentContentMode;
 
-export type SmlIndexAttachmentDeleteParams = SmlIndexAttachmentBaseParams &
-  SmlIndexAttachmentDeleteMode;
-
 /**
- * Discriminated union — `action` selects the variant:
- * - `action: 'create' | 'update'`, no `content` → origin mode (calls `getSmlData`, marks `'crawled'`)
- * - `action: 'create' | 'update'`, `content` provided → content mode (skips `getSmlData`, marks `'manual'`)
- * - `action: 'delete'` → delete mode (`ingestionMethod?` selects scope, defaults to `'crawled'`)
+ * Discriminated union — `content` selects the mode:
+ * - omitted → origin mode (calls `getSmlData`, marks `'crawled'`)
+ * - provided → content mode (skips `getSmlData`, marks `'manual'`)
+ *
+ * `action: 'delete'` is valid on either variant; the indexer ignores
+ * `content` and `force` when deleting and removes only `'crawled'` chunks.
  */
 export type SmlIndexAttachmentParams =
   | SmlIndexAttachmentOriginParams
-  | SmlIndexAttachmentContentParams
-  | SmlIndexAttachmentDeleteParams;
+  | SmlIndexAttachmentContentParams;
+
+/**
+ * Params for `AgentContextLayerPluginStart.deleteAttachment`.
+ *
+ * Distinct from `indexAttachment({ action: 'delete' })` only in that callers
+ * can choose to wipe `'manual'` or `'all'` chunks via `ingestionMethod`. With
+ * the default (`'crawled'`) the two are equivalent.
+ */
+export interface SmlDeleteAttachmentParams {
+  request: KibanaRequest;
+  originId: string;
+  attachmentType: string;
+  /** Defaults to `'crawled'`. Pass `'all'` to fully retire the origin. */
+  ingestionMethod?: SmlDeleteScope;
+  spaceId?: string;
+  includedHiddenTypes?: string[];
+}

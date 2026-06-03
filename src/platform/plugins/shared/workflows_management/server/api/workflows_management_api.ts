@@ -239,18 +239,12 @@ export class WorkflowsManagementApi {
     if (!this.smlIndexAttachment) {
       return;
     }
-    // `SmlIndexAttachmentParams` is a discriminated union on `action` — we can't
-    // pass a widened `'create' | 'update' | 'delete'` literal as-is. Branch on
-    // the action so each call site lands in the correct variant. The delete
-    // path intentionally omits `ingestionMethod` so the AGL indexer applies
-    // its default of `'crawled'`; that matches the historical event-driven
-    // behavior (delete crawled output, preserve curated manual entries).
-    const fn = this.smlIndexAttachment;
-    const call =
-      action === 'delete'
-        ? fn({ request, originId, attachmentType: WORKFLOW_SML_TYPE, action: 'delete' })
-        : fn({ request, originId, attachmentType: WORKFLOW_SML_TYPE, action });
-    call.catch((error) => {
+    this.smlIndexAttachment({
+      request,
+      originId,
+      attachmentType: WORKFLOW_SML_TYPE,
+      action,
+    }).catch((error) => {
       this.smlLogger?.warn(
         `Failed to ${action} SML index for workflow '${originId}': ${(error as Error).message}`
       );

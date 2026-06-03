@@ -19,6 +19,7 @@ const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   getTypeDefinition: jest.fn().mockImplementation((id: string) => ({ id } as any)),
   resolveSmlAttachItems: jest.fn(),
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  deleteAttachment: jest.fn().mockResolvedValue(undefined),
 });
 
 // Reuse the Zod schema as the source of truth for the test input shape so
@@ -178,7 +179,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     });
   });
 
-  it('handles delete by issuing a wipe-all (ingestionMethod="all") and reports requestedChunkCount = 0', async () => {
+  it('handles delete by calling deleteAttachment with ingestionMethod="all" and reports requestedChunkCount = 0', async () => {
     const startContract = buildStartContract();
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
@@ -193,20 +194,19 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
     const result = await definition.handler(context as any);
 
-    expect(startContract.indexAttachment).toHaveBeenCalledWith({
+    expect(startContract.deleteAttachment).toHaveBeenCalledWith({
       request: expect.anything(),
       originId: 'doc-1',
       attachmentType: 'custom',
-      action: 'delete',
       // Workflow steps "own" the origin they wrote → wipe everything.
       // 'all' tells the AGL indexer to skip the ingestion_method filter
       // and remove every chunk for the origin (manual + crawled).
       ingestionMethod: 'all',
     });
-    // The previous misleading `content: []` workaround MUST NOT be sent —
-    // it was a no-op (the indexer's `action === 'delete'` branch fires
-    // before the content-mode check) and would confuse the union types.
-    expect(startContract.indexAttachment.mock.calls[0][0]).not.toHaveProperty('content');
+    // Delete uses the dedicated `deleteAttachment` method on the contract,
+    // not `indexAttachment` — keeps "delete with custom scope" out of the
+    // index-mutation API surface.
+    expect(startContract.indexAttachment).not.toHaveBeenCalled();
     expect(result).toEqual({
       output: expect.objectContaining({
         action: 'delete',
@@ -236,10 +236,9 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
     const result = await definition.handler(context as any);
 
-    expect(startContract.indexAttachment).toHaveBeenCalledWith(
+    expect(startContract.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
         attachmentType: 'unregistered-but-was-written-before',
-        action: 'delete',
         ingestionMethod: 'all',
       })
     );

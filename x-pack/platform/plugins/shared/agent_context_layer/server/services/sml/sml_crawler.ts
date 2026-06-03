@@ -392,23 +392,15 @@ export class SmlCrawlerImpl implements SmlCrawler {
               `SML crawler: processing '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id})`
             );
 
-            // The indexer params union discriminates on `action`, so we have to
-            // pick the variant per action value rather than spreading a shared
-            // base object with a widened `action: 'create' | 'update' | 'delete'`.
-            // For delete, omit `ingestionMethod` so the indexer applies its
-            // default of `'crawled'` — the crawler's historical "delete what I
-            // produced, keep curated manual entries" semantics are preserved.
-            const baseParams = {
+            await this.indexer.indexAttachment({
               originId: doc.origin_id,
               attachmentType: doc.type_id,
+              action,
               spaces: doc.spaces,
               esClient,
               savedObjectsClient,
               logger: this.logger,
-            };
-            await this.indexer.indexAttachment(
-              action === 'delete' ? { ...baseParams, action: 'delete' } : { ...baseParams, action }
-            );
+            });
 
             if (action === 'delete') {
               stateAckOps.push({ delete: { _id: hit._id! } });

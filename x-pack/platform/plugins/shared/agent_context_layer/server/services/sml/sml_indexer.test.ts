@@ -12,9 +12,7 @@ import { createSmlIndexer } from './sml_indexer';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import type {
   SmlChunk,
-  SmlDeleteScope,
   SmlIndexerContentParams,
-  SmlIndexerDeleteParams,
   SmlIndexerOriginParams,
   SmlTypeDefinition,
 } from './types';
@@ -69,56 +67,22 @@ const createMockRegistry = (definition?: SmlTypeDefinition) => ({
   has: jest.fn().mockReturnValue(!!definition),
 });
 
-// Discriminate-aware so tests can spread the result into the indexer's union
-// without TypeScript widening `action` to `'create' | 'update' | 'delete'` —
-// which would no longer satisfy any single variant of `SmlIndexerParams`.
-function createIndexerParams(overrides: {
+const createIndexerParams = (overrides: {
   originId?: string;
   attachmentType?: string;
   spaces?: string[];
   esClient?: jest.Mocked<ElasticsearchClient>;
   logger?: ReturnType<typeof createMockLogger>;
-  action: 'delete';
-  ingestionMethod?: SmlDeleteScope;
-}): SmlIndexerDeleteParams;
-function createIndexerParams(overrides?: {
-  originId?: string;
-  attachmentType?: string;
-  spaces?: string[];
-  esClient?: jest.Mocked<ElasticsearchClient>;
-  logger?: ReturnType<typeof createMockLogger>;
-  action?: 'create' | 'update';
-}): SmlIndexerOriginParams;
-function createIndexerParams(
-  overrides: {
-    originId?: string;
-    attachmentType?: string;
-    spaces?: string[];
-    esClient?: jest.Mocked<ElasticsearchClient>;
-    logger?: ReturnType<typeof createMockLogger>;
-    action?: 'create' | 'update' | 'delete';
-    ingestionMethod?: SmlDeleteScope;
-  } = {}
-): SmlIndexerOriginParams | SmlIndexerDeleteParams {
-  const base = {
-    originId: overrides.originId ?? 'att-123',
-    attachmentType: overrides.attachmentType ?? 'lens',
-    spaces: overrides.spaces ?? ['default'],
-    esClient: overrides.esClient ?? createMockEsClient(),
-    savedObjectsClient: {} as unknown as ISavedObjectsRepository,
-    logger: overrides.logger ?? createMockLogger(),
-  };
-  if (overrides.action === 'delete') {
-    return {
-      ...base,
-      action: 'delete',
-      ...(overrides.ingestionMethod !== undefined
-        ? { ingestionMethod: overrides.ingestionMethod }
-        : {}),
-    };
-  }
-  return { ...base, action: overrides.action ?? 'create' };
-}
+  action?: 'create' | 'update' | 'delete';
+} = {}): SmlIndexerOriginParams => ({
+  originId: overrides.originId ?? 'att-123',
+  attachmentType: overrides.attachmentType ?? 'lens',
+  spaces: overrides.spaces ?? ['default'],
+  esClient: overrides.esClient ?? createMockEsClient(),
+  savedObjectsClient: {} as unknown as ISavedObjectsRepository,
+  logger: overrides.logger ?? createMockLogger(),
+  action: overrides.action ?? 'create',
+});
 
 // Content-mode params can't be derived from `createIndexerParams` via spread
 // because the origin-mode return type carries `force?: boolean`, which conflicts
@@ -129,7 +93,7 @@ const createContentIndexerParams = (overrides: {
   spaces?: string[];
   esClient?: jest.Mocked<ElasticsearchClient>;
   logger?: ReturnType<typeof createMockLogger>;
-  action?: 'create' | 'update';
+  action?: 'create' | 'update' | 'delete';
   content: SmlChunk[];
 }): SmlIndexerContentParams => ({
   originId: overrides.originId ?? 'att-123',
@@ -739,86 +703,110 @@ describe('createSmlIndexer', () => {
         expect(bulkMock).not.toHaveBeenCalled();
       });
 
-      // Note: the prior test "delete action removes chunks even with content
-      // provided" has been removed. That combination
-      // (`{ action: 'delete', content: [...] }`) is now a compile error — the
-      // SmlIndexerDeleteParams variant has `content?: undefined`. Delete-mode
-      // semantics are exercised by the `describe('delete (ingestionMethod
-      // selector)', ...)` block below.
-    });
-
-    describe('delete (ingestionMethod selector)', () => {
-      it('omits ingestion_method filter when ingestionMethod is "all" (wipes every chunk for the origin)', async () => {
+      it('delete action removes only crawled chunks (manual entries preserved)', async () => {
+        // `indexAttachment({ action: 'delete' })` is a back-compat shape used
+        // by the crawler and event-driven CRUD callers; it always defaults to
+        // wiping `'crawled'` chunks. Callers that need to wipe `'manual'` or
+        // `'all'` chunks use `deleteAttachment` (covered in its own block).
         const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
         const logger = createMockLogger();
         const esClient = createMockEsClient();
         const indexer = createSmlIndexer({ registry, logger });
 
         await indexer.indexAttachment(
-          createIndexerParams({
-            originId: 'att-wipe-all',
+          createContentIndexerParams({
+            originId: 'att-delete-with-content',
             attachmentType: 'lens',
             action: 'delete',
-            ingestionMethod: 'all',
             esClient,
-          })
-        );
-
-        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-        // Filter must contain ONLY the origin_id term — no ingestion_method
-        // term means deleteByQuery removes manual + crawled.
-        expect(callArgs.query.bool.filter).toEqual([{ term: { origin_id: 'att-wipe-all' } }]);
-      });
-
-      it('filters on ingestion_method=manual when ingestionMethod is "manual"', async () => {
-        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
-        const logger = createMockLogger();
-        const esClient = createMockEsClient();
-        const indexer = createSmlIndexer({ registry, logger });
-
-        await indexer.indexAttachment(
-          createIndexerParams({
-            originId: 'att-wipe-manual',
-            attachmentType: 'lens',
-            action: 'delete',
-            ingestionMethod: 'manual',
-            esClient,
+            // `content` is ignored in delete mode — the early `action === 'delete'`
+            // check fires before the content-mode branch.
+            content: [{ type: 'lens', title: 'ignored', content: 'ignored' }],
           })
         );
 
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
         const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
         expect(callArgs.query.bool.filter).toEqual([
-          { term: { origin_id: 'att-wipe-manual' } },
-          { term: { ingestion_method: 'manual' } },
-        ]);
-      });
-
-      it('defaults to ingestionMethod="crawled" when omitted (back-compat with crawler/connector lifecycle callers)', async () => {
-        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
-        const logger = createMockLogger();
-        const esClient = createMockEsClient();
-        const indexer = createSmlIndexer({ registry, logger });
-
-        // No `ingestionMethod` passed — should behave exactly like the historical
-        // `action: 'delete'` call (preserve manual entries, wipe crawled).
-        await indexer.indexAttachment(
-          createIndexerParams({
-            originId: 'att-default-scope',
-            attachmentType: 'lens',
-            action: 'delete',
-            esClient,
-          })
-        );
-
-        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-        expect(callArgs.query.bool.filter).toEqual([
-          { term: { origin_id: 'att-default-scope' } },
+          { term: { origin_id: 'att-delete-with-content' } },
           { term: { ingestion_method: 'crawled' } },
         ]);
       });
+    });
+  });
+
+  describe('deleteAttachment', () => {
+    const createDeleteParams = (overrides: {
+      originId?: string;
+      attachmentType?: string;
+      spaces?: string[];
+      esClient?: jest.Mocked<ElasticsearchClient>;
+      logger?: ReturnType<typeof createMockLogger>;
+      ingestionMethod?: 'crawled' | 'manual' | 'all';
+    } = {}) => ({
+      originId: overrides.originId ?? 'att-123',
+      attachmentType: overrides.attachmentType ?? 'lens',
+      spaces: overrides.spaces ?? ['default'],
+      esClient: overrides.esClient ?? createMockEsClient(),
+      savedObjectsClient: {} as unknown as ISavedObjectsRepository,
+      logger: overrides.logger ?? createMockLogger(),
+      ...(overrides.ingestionMethod !== undefined
+        ? { ingestionMethod: overrides.ingestionMethod }
+        : {}),
+    });
+
+    it('omits ingestion_method filter when ingestionMethod is "all" (wipes every chunk for the origin)', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.deleteAttachment(
+        createDeleteParams({ originId: 'att-wipe-all', ingestionMethod: 'all', esClient })
+      );
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      // Filter must contain ONLY the origin_id term — no ingestion_method
+      // term means deleteByQuery removes manual + crawled.
+      expect(callArgs.query.bool.filter).toEqual([{ term: { origin_id: 'att-wipe-all' } }]);
+    });
+
+    it('filters on ingestion_method=manual when ingestionMethod is "manual"', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.deleteAttachment(
+        createDeleteParams({ originId: 'att-wipe-manual', ingestionMethod: 'manual', esClient })
+      );
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query.bool.filter).toEqual([
+        { term: { origin_id: 'att-wipe-manual' } },
+        { term: { ingestion_method: 'manual' } },
+      ]);
+    });
+
+    it('defaults to ingestionMethod="crawled" when omitted (back-compat with crawler/connector lifecycle callers)', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      // No `ingestionMethod` passed — should behave exactly like the historical
+      // `action: 'delete'` call on `indexAttachment` (preserve manual entries,
+      // wipe crawled).
+      await indexer.deleteAttachment(createDeleteParams({ originId: 'att-default-scope', esClient }));
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query.bool.filter).toEqual([
+        { term: { origin_id: 'att-default-scope' } },
+        { term: { ingestion_method: 'crawled' } },
+      ]);
     });
   });
 });
