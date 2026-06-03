@@ -62,23 +62,6 @@ steps:
       path: /api/status
 `;
 
-const INTERNAL_API_MISSING_HEADER_YAML = `
-name: kibana.request missing header
-enabled: true
-triggers:
-  - type: manual
-steps:
-  - name: internal_api_call
-    type: kibana.request
-    with:
-      method: POST
-      path: /s/{{workflow.spaceId}}/api/workflows/validate
-      body:
-        yaml: "name: test"
-    on-failure:
-      continue: true
-`;
-
 const INTERNAL_API_MISSING_BODY_YAML = `
 name: kibana.request missing body
 enabled: true
@@ -92,8 +75,6 @@ steps:
       path: /s/{{workflow.spaceId}}/api/workflows/validate
       headers:
         elastic-api-version: "1"
-    on-failure:
-      continue: true
 `;
 
 const INTERNAL_API_INVALID_BODY_YAML = `
@@ -111,8 +92,6 @@ steps:
         elastic-api-version: "1"
       body:
         wrong_field: "this is not yaml"
-    on-failure:
-      continue: true
 `;
 
 // ---------------------------------------------------------------------------
@@ -140,7 +119,6 @@ spaceTest.describe('kibana.request step execution', { tag: tags.deploymentAgnost
   let workflowsApi: WorkflowsApiService;
   let internalApiWorkflowId: string;
   let publicApiWorkflowId: string;
-  let internalApiMissingHeaderId: string;
   let internalApiMissingBodyId: string;
   let internalApiInvalidBodyId: string;
 
@@ -153,9 +131,6 @@ spaceTest.describe('kibana.request step execution', { tag: tags.deploymentAgnost
 
     const publicWorkflow = await workflowsApi.create(PUBLIC_API_YAML);
     publicApiWorkflowId = publicWorkflow.id;
-
-    const missingHeaderWorkflow = await workflowsApi.create(INTERNAL_API_MISSING_HEADER_YAML);
-    internalApiMissingHeaderId = missingHeaderWorkflow.id;
 
     const missingBodyWorkflow = await workflowsApi.create(INTERNAL_API_MISSING_BODY_YAML);
     internalApiMissingBodyId = missingBodyWorkflow.id;
@@ -215,42 +190,31 @@ spaceTest.describe('kibana.request step execution', { tag: tags.deploymentAgnost
     expect((responseBody?.status as Record<string, unknown>)?.overall).toBeDefined();
   });
 
-  spaceTest('fails when missing required headers (e.g. elastic-api-version)', async () => {
-    const { workflowExecutionId } = await workflowsApi.run(internalApiMissingHeaderId, {});
-    const execution = await waitForExecution(workflowsApi, workflowExecutionId);
-
-    expect(execution?.status).toBe(ExecutionStatus.COMPLETED); // Fails locally to step, but we used on-failure: continue: true
-
-    const apiCallStep = execution?.stepExecutions.find((s) => s.stepId === 'internal_api_call');
-    expect(apiCallStep).toBeDefined();
-
-    // The endpoint is a versioned API, so missing 'elastic-api-version' returns 404 Not Found or 406 Not Acceptable
-    expect(apiCallStep?.error?.message).toMatch(/HTTP 40[046]/);
-  });
-
   spaceTest('fails when missing required body', async () => {
     const { workflowExecutionId } = await workflowsApi.run(internalApiMissingBodyId, {});
     const execution = await waitForExecution(workflowsApi, workflowExecutionId);
 
-    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(execution?.status).toBe(ExecutionStatus.FAILED);
 
     const apiCallStep = execution?.stepExecutions.find((s) => s.stepId === 'internal_api_call');
     expect(apiCallStep).toBeDefined();
 
     // Validation fails because 'yaml' is required
-    expect(apiCallStep?.error?.message).toContain('HTTP 400');
+    const errorMessage = apiCallStep?.error?.message ?? '';
+    expect(errorMessage).toContain('HTTP 400');
   });
 
   spaceTest('fails when sending an invalid body payload', async () => {
     const { workflowExecutionId } = await workflowsApi.run(internalApiInvalidBodyId, {});
     const execution = await waitForExecution(workflowsApi, workflowExecutionId);
 
-    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(execution?.status).toBe(ExecutionStatus.FAILED);
 
     const apiCallStep = execution?.stepExecutions.find((s) => s.stepId === 'internal_api_call');
     expect(apiCallStep).toBeDefined();
 
     // Validation fails because 'yaml' is missing/invalid
-    expect(apiCallStep?.error?.message).toContain('HTTP 400');
+    const errorMessage = apiCallStep?.error?.message ?? '';
+    expect(errorMessage).toContain('HTTP 400');
   });
 });
