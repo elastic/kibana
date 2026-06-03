@@ -107,21 +107,27 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'filter for presence should be addable via filter popover',
+      'filter for presence should be addable via expanded data grid rows',
       async ({ page, pageObjects }) => {
-        await page.testSubj.click('addFilter');
-        await page.testSubj.waitForSelector('addFilterPopover', { state: 'visible' });
+        const anchorExpandBtn = page.testSubj.locator('docTableExpandToggleColumnAnchor');
+        await anchorExpandBtn.click();
 
-        await page.testSubj
-          .locator('filterFieldSuggestionList >> comboBoxSearchInput')
-          .fill(TEST_ANCHOR_FILTER_FIELD);
-        await page.locator(`.euiComboBoxOption[title="${TEST_ANCHOR_FILTER_FIELD}"]`).click();
+        const flyout = page.testSubj.locator('docViewerFlyout');
+        await expect(flyout).toBeVisible({ timeout: 10_000 });
 
-        await page.testSubj.locator('filterOperatorList >> comboBoxSearchInput').fill('exists');
-        await page.locator('.euiComboBoxOption[title="exists"]').click();
+        const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
+        await searchInput.fill(TEST_ANCHOR_FILTER_FIELD);
 
-        await page.testSubj.click('saveFilter');
-        await page.testSubj.waitForSelector('addFilterPopover', { state: 'hidden' });
+        const nameCell = flyout.locator(
+          '[data-gridcell-column-id="name"][data-gridcell-visible-row-index="0"]'
+        );
+        await expect(nameCell).toBeVisible({ timeout: 10_000 });
+        await nameCell.hover();
+
+        const addExistsBtn = page.testSubj.locator(
+          `addExistsFilterButton-${TEST_ANCHOR_FILTER_FIELD}`
+        );
+        await addExistsBtn.click();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         expect(
