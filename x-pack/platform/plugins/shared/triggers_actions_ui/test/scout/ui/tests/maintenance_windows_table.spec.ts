@@ -16,8 +16,12 @@ import { test, MAINTENANCE_WINDOWS_APP_PATH } from '../fixtures';
 // FTR page objects (searchMaintenanceWindows, getMaintenanceWindowsList) are
 // replaced with direct page locators.
 
+// When MWs exist the table is shown; when none exist the page renders the empty
+// prompt instead and the table element is never added to the DOM. Wait for
+// whichever state the page lands in.
 const TABLE_LOADED_CSS =
   '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
+const PAGE_READY_SELECTOR = `${TABLE_LOADED_CSS}, [data-test-subj="mw-empty-prompt"]`;
 const TABLE_LOAD_TIMEOUT = 30_000;
 const TOAST_TITLE = 'euiToastHeader__title';
 
@@ -71,7 +75,7 @@ const searchMws = async (page: ScoutPage, text: string) => {
   const searchBox = page.testSubj.locator('maintenance-window-search');
   await searchBox.fill(text);
   await searchBox.press('Enter');
-  await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
+  await page.locator(PAGE_READY_SELECTOR).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
 };
 
 // Read status text from the <td data-test-subj="maintenance-windows-column-status"> cell
@@ -113,7 +117,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
-    await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
+    await page.locator(PAGE_READY_SELECTOR).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
   });
 
   test.afterEach(async ({ kbnClient }) => {
@@ -266,7 +270,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await page.testSubj.click('status-filter-button');
     await page.testSubj.click('status-filter-upcoming');
 
-    await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
+    await page.locator(PAGE_READY_SELECTOR).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
     const filteredStatuses = await getMwRowStatuses(page);
     expect(filteredStatuses).toStrictEqual(['Upcoming']);
   });
@@ -311,7 +315,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     // Filter to show only archived
     await page.testSubj.click('status-filter-button');
     await page.testSubj.click('status-filter-archived');
-    await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
+    await page.locator(PAGE_READY_SELECTOR).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
 
     statuses = await getMwRowStatuses(page);
     expect(statuses).toStrictEqual(['Archived']);
