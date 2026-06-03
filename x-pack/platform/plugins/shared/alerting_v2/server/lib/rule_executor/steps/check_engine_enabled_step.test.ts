@@ -9,11 +9,14 @@ import { ALERTING_V2_ENABLED_SETTING_ID } from '../../../../common/advanced_sett
 import { CheckEngineEnabledStep } from './check_engine_enabled_step';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { createSettingsService } from '../../services/settings_service/settings_service.mock';
+import {
+  createSettingsService,
+  type MockUiSettingsClient,
+} from '../../services/settings_service/settings_service.mock';
 
 describe('CheckEngineEnabledStep', () => {
   let step: CheckEngineEnabledStep;
-  let mockUiSettingsClient: ReturnType<typeof createSettingsService>['mockUiSettingsClient'];
+  let mockUiSettingsClient: MockUiSettingsClient;
 
   beforeEach(() => {
     const { loggerService } = createLoggerService();

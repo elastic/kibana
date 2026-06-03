@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { SettingsService } from './settings_service';
 
+export type MockUiSettingsClient = jest.Mocked<IUiSettingsClient>;
+
 export function createSettingsService(): {
   settingsService: SettingsService;
-  mockUiSettingsClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+  mockUiSettingsClient: MockUiSettingsClient;
 } {
   const mockUiSettingsClient = uiSettingsServiceMock.createClient();
   const settingsService = new SettingsService(mockUiSettingsClient);
