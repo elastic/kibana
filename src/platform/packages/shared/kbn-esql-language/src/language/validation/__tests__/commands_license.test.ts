@@ -8,6 +8,6 @@
  */
 
 import { setup } from './helpers';
-import { runColumnExistenceValidationSuite } from './column_existence_suite';
+import { runValidationCommandsLicenseSuite } from './commands_license_suite';
 
-runColumnExistenceValidationSuite(setup);
+runValidationCommandsLicenseSuite(setup);
