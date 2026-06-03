@@ -16,7 +16,6 @@ import { useUnifiedSearchContext } from './use_unified_search';
 // Shared first-paint gate (see `useHostsPageReady`): fires the fetcher once
 // and starts it in the same frame as the KPI ES|QL query.
 import { useHostsPageReady } from './use_hosts_page_ready';
-import { useReadyMark } from './use_ready_mark';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
@@ -83,13 +82,6 @@ export const useHostsView = () => {
   );
 
   const loading = isPending(status);
-
-  useReadyMark({
-    mark: 'infra.hosts.tableReady',
-    measure: 'infra.hosts.tableReadyDuration',
-    loading,
-    succeeded: !!data && !error,
-  });
 
   return {
     loading,

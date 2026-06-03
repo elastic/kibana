@@ -16,7 +16,6 @@ import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
-import { useReadyMark } from './use_ready_mark';
 
 export const useHostCount = () => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
@@ -75,13 +74,6 @@ export const useHostCount = () => {
   }, [data, error, payload, searchCriteria, telemetry, timeRangeMetadataStatus, schemas]);
 
   const loading = isPending(status);
-
-  useReadyMark({
-    mark: 'infra.hosts.hostCountReady',
-    measure: 'infra.hosts.hostCountReadyDuration',
-    loading,
-    succeeded: !!data && !error,
-  });
 
   return {
     errors: error,

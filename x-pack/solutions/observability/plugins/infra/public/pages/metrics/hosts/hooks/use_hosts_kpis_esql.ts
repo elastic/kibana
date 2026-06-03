@@ -23,8 +23,6 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
-import { useReadyMark } from './use_ready_mark';
-
 // String literal (not the package constant) to avoid a new public-bundle
 // dependency, mirroring `logs_overview_fetchers.ts`.
 const SEARCH_EXCLUDED_DATA_TIERS_SETTING = 'observability:searchExcludedDataTiers';
@@ -198,13 +196,6 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   }, [isReady, esqlQuery, filter, data.search]);
 
   const loading = isPending(status);
-
-  useReadyMark({
-    mark: 'infra.hosts.kpiReady',
-    measure: 'infra.hosts.kpiReadyDuration',
-    loading,
-    succeeded: !!result && !error,
-  });
 
   return {
     kpis: result ?? EMPTY_KPIS,
