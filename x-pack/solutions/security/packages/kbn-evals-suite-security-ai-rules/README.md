@@ -102,3 +102,158 @@ node scripts/evals start \
   --model openai-connector \
   --judge openai-connector
 ```
+
+## Evaluation metrics
+
+The suite runs 12 evaluators (10 deterministic CODE evaluators, 1 LLM-as-judge evaluator, and 1
+rejection evaluator), all defined in `src/evaluate_dataset.ts`. In the summary table they are grouped
+into columns for readability.
+
+### Structural validity (CODE)
+
+Six binary evaluators that check whether the generated rule is well-formed:
+
+- **Query Syntax Validity**: Validates ES|QL syntax using the `@elastic/esql` parser. Also rejects
+  bare `FROM *` queries, which are disallowed in alerting rules. Score: 1 (valid) or 0 (invalid).
+- **Rule Type & Language**: Checks `type === 'esql'` and `language === 'esql'`. Score: 1 or 0.
+- **Severity Validity**: Severity must be one of `low`, `medium`, `high`, `critical`. Score: 1 or 0.
+- **Risk Score Validity**: Risk score must be a number in the 0–100 range. Score: 1 or 0.
+- **Interval Format**: Schedule interval must be a valid duration string (e.g. `5m`, `30s`, `1h`).
+  Score: 1 or 0.
+- **Lookback Gap**: The `from` field must be >= the `interval` to avoid lookback gaps. Score: 1 (no
+  gap) or 0 (gap present).
+
+### Field coverage (CODE — 0–1 scale)
+
+Measures the fraction of required rule fields present: `name`, `description`, `query`, `severity`,
+`tags`, `riskScore`. A score of 0.83 means 5 of 6 fields are present.
+
+### Reference match (CODE)
+
+Three evaluators that compare the generated rule against the expected reference:
+
+- **MITRE Accuracy** (F1 score, 0–1): Compares MITRE ATT&CK technique IDs (including subtechnique
+  IDs) between the generated and reference rules using precision, recall, and F1. Metadata includes a
+  per-technique breakdown.
+- **Severity Match** (binary): 1 if the generated severity exactly matches the reference, else 0.
+- **Risk Score Match** (0, 0.5, or 1): Exact match = 1.0, within 10 points = 0.5, else 0.
+
+### ES|QL functional equivalence (LLM-as-judge — binary: 0 or 1)
+
+Uses the built-in `createEsqlEquivalenceEvaluator` from `@kbn/evals` to assess whether the generated
+ES|QL query would produce the same detection results as the reference query, regardless of syntax
+differences. For non-ES|QL reference rules that have an `esqlQuery` translation, the evaluator
+compares against the translation. Returns N/A when no ES|QL ground truth is available.
+
+### Rejection (CODE — binary: 0 or 1)
+
+Scores whether the model correctly refused to generate a rule for a negative case (a prompt where the
+available data source cannot support the requested detection). Returns N/A for positive cases.
+Score: 1 (correctly refused) or 0 (incorrectly generated a rule).
+
+### Rule Name / Rule Description (LLM-as-judge — disabled by default)
+
+These two evaluators use `criteria` to check semantic equivalence for the rule name and description
+fields. They are intentionally disabled in the default evaluator list because they add significant
+latency per example. Re-enable them in `src/evaluate_dataset.ts` (uncomment
+`createRuleNameEvaluator` / `createRuleDescriptionEvaluator`) when running thorough multi-model
+comparisons.
+
+### Skip wrappers
+
+Evaluators are composed with wrappers that return N/A instead of penalizing scores in situations
+where a comparison is not meaningful:
+
+- `skipNegativeCases` — N/A for negative test examples (applied to everything except `Rejection`).
+- `skipMissingIndexFailures` — N/A when the rule-creation tool failed because no matching index was
+  found (see [Seeding data](#seeding-data)).
+- `skipAgentErrors` — N/A when the agent call itself errored.
+- `skipNonEsqlReferences` — applied to the ES|QL equivalence evaluator to avoid meaningless
+  comparisons when no ES|QL ground truth exists.
+
+## Datasets reference
+
+Domains covered across the datasets include:
+
+- **Collection**: File encryption with WinRAR/7z
+- **Credential Access**: LSASS access, Mimikatz usage
+- **Defense Evasion**: Windows Defender tampering, event log clearing, UAC bypass
+- **Command & Control**: Remote file copy, network connections
+- **Privilege Escalation**: UAC bypass, IAM role grants
+- **Cloud Security**: AWS S3 policy changes, Azure AD, GCP IAM, O365 audit
+- **Execution**: Container creation, npm scripts, GitHub Actions runner tampering
+
+### Adding more rules
+
+To expand the dataset, add entries to the appropriate file in `datasets/`:
+
+```typescript
+export const sampleRules: ReferenceRule[] = [
+  // ... existing rules
+  {
+    id: 'your-rule-id',
+    name: 'Your New Rule',
+    prompt: 'Describe the detection...\n\nAvailable data: logs-endpoint.events.*',
+    description: 'Detects XYZ behavior',
+    query: 'process where ...', // reference query (EQL or ES|QL)
+    threat: [{ technique: 'T1234', tactic: 'TA0001' }],
+    severity: 'high',
+    tags: ['Domain: Endpoint', 'OS: Windows'],
+    riskScore: 73,
+    from: 'now-9m',
+    category: 'execution',
+    esqlQuery: 'FROM logs-endpoint.events.* ...', // optional: ES|QL translation for non-ES|QL rules
+  },
+];
+```
+
+## Troubleshooting
+
+### "API endpoint not found" / evals plugin errors
+
+Confirm the evals plugin is enabled (`xpack.evals.enabled: true`) and the Agent Builder route
+(`/api/agent_builder/converse`) is reachable, then restart Kibana. The Scout-managed server enables
+these automatically; a self-managed dev server must set them in `config/kibana.dev.yml`.
+
+### Many examples skipped ("Could not discover a suitable index")
+
+The required index for a prompt's data source does not exist, so those examples return N/A. Seed
+representative data (see [Seeding data](#seeding-data)) to get real scores.
+
+### Low scores on all evaluators
+
+Likely causes: the connector/model is returning errors, the model is a poor fit for the task, or the
+agent never invoked `security.create_detection_rule`. Check the Kibana server logs and the
+`chat_client.ts` diagnostics (logged at `warning` level), and try a different connector.
+
+## Development
+
+```bash
+# Unit tests
+node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/src/helpers.test.ts
+
+# Type check
+node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/tsconfig.json
+
+# Lint
+node scripts/eslint x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules
+```
+
+## Contributing
+
+When adding new evaluators or modifying existing ones:
+
+1. Add evaluator factory functions in `src/evaluate_dataset.ts` following the existing
+   `createQuerySyntaxValidityEvaluator` pattern.
+2. Wrap with `skipNegativeCases` / `skipMissingIndexFailures` as appropriate.
+3. Add unit tests for any new helper functions in `src/helpers.test.ts`.
+4. Test with multiple connectors.
+5. Update this README with new metrics and interpretations.
+6. Consider statistical significance (run with `--repetitions 3` or more).
+
+## References
+
+- [Elastic Detection Rules Repository](https://github.com/elastic/detection-rules)
+- [@kbn/evals documentation](../../../../platform/packages/shared/kbn-evals/README.md)
+- [MITRE ATT&CK Framework](https://attack.mitre.org/)
+- [ES|QL Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html)
