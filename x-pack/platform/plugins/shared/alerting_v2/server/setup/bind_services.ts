@@ -32,7 +32,6 @@ import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { AlertingDomainEventBus, EventBusToken } from '../lib/events/event_bus';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
   MaintenanceWindowSavedObjectsClientToken,
@@ -68,11 +67,8 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
-import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
-import {
-  WorkflowExtensionsServiceToken,
-  WorkflowsClientToken,
-} from '../lib/services/workflow_extensions_service/tokens';
+import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
+import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -141,22 +137,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(AlertingDomainEventBus).toSelf().inSingletonScope();
-  bind(EventBusToken).toService(AlertingDomainEventBus);
-
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
-  bind(WorkflowsClientToken)
-    .toResolvedValue(
-      async (workflowsExtensionsStart, request) => workflowsExtensionsStart.getClient(request),
-      [
-        PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions'),
-        Request,
-      ]
-    )
-    .inRequestScope();
-  bind(WorkflowExtensionsService).toSelf().inRequestScope();
-  bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
+  bind(WorkflowService).toSelf().inSingletonScope();
+  bind(WorkflowServiceToken).toService(WorkflowService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)

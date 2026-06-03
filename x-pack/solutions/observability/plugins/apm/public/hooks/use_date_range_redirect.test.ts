@@ -77,6 +77,20 @@ describe('useDateRangeRedirect', () => {
 
       expect(result.current.isDateRangeSet).toBe(true);
     });
+
+    it('returns isDateRangeSet as true for commonly used rounded ranges', () => {
+      setLocation('?rangeFrom=now%2Fd&rangeTo=now%2Fd');
+
+      const { result: todayResult } = renderHook(() => useDateRangeRedirect());
+
+      expect(todayResult.current.isDateRangeSet).toBe(true);
+
+      setLocation('?rangeFrom=now%2Fw&rangeTo=now%2Fw');
+
+      const { result: thisWeekResult } = renderHook(() => useDateRangeRedirect());
+
+      expect(thisWeekResult.current.isDateRangeSet).toBe(true);
+    });
   });
 
   describe('when rangeFrom is missing', () => {

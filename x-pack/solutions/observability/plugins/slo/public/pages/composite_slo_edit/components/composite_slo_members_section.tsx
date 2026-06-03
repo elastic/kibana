@@ -25,13 +25,37 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
-import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH } from '../constants';
+import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH, MIN_COMPOSITE_MEMBERS } from '../constants';
 import type { CreateCompositeSLOForm } from '../types';
 
 export function CompositeSloMembersSection() {
-  const { control, watch } = useFormContext<CreateCompositeSLOForm>();
-  const { fields, append, remove } = useFieldArray({ control, name: 'members' });
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<CreateCompositeSLOForm>();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'members',
+    rules: {
+      required: {
+        value: true,
+        message: i18n.translate('xpack.slo.compositeSloEdit.members.requiredError', {
+          defaultMessage: 'A composite SLO requires at least {min} member SLOs.',
+          values: { min: MIN_COMPOSITE_MEMBERS },
+        }),
+      },
+      minLength: {
+        value: MIN_COMPOSITE_MEMBERS,
+        message: i18n.translate('xpack.slo.compositeSloEdit.members.minError', {
+          defaultMessage: 'A composite SLO requires at least {min} member SLOs.',
+          values: { min: MIN_COMPOSITE_MEMBERS },
+        }),
+      },
+    },
+  });
   const members = watch('members');
+  const minMembersError = errors.members?.root?.message;
 
   const [sloSearch, setSloSearch] = useState('');
   const { data: sloDefinitions, isLoading: isLoadingSlos } = useFetchSloDefinitionsWithRemote({
@@ -87,6 +111,8 @@ export function CompositeSloMembersSection() {
 
         <EuiFormRow
           fullWidth
+          isInvalid={Boolean(minMembersError)}
+          error={minMembersError}
           label={i18n.translate('xpack.slo.compositeSloEdit.members.addSlo.label', {
             defaultMessage: 'Add member SLOs',
           })}
@@ -97,6 +123,7 @@ export function CompositeSloMembersSection() {
         >
           <EuiComboBox
             fullWidth
+            isInvalid={Boolean(minMembersError)}
             isDisabled={atMax}
             isLoading={isLoadingSlos}
             options={sloOptions}
@@ -115,7 +142,7 @@ export function CompositeSloMembersSection() {
         {fields.length > 0 && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" color="subdued">
                   <strong>
@@ -201,7 +228,7 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
   ];
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
         <EuiText size="s" style={{ paddingTop: 8 }}>
           {sloName}
