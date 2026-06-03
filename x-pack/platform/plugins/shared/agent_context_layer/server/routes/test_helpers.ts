@@ -65,6 +65,7 @@ export const sampleDocument: SmlDocument = {
   updated_at: '2024-01-02',
   spaces: ['test-space'],
   permissions: [],
+  ingestion_method: 'crawled',
 };
 
 export { httpServerMock, httpServiceMock };

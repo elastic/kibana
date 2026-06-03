@@ -45,6 +45,7 @@ export class ServerlessVectordbPlugin
           title: i18n.translate('xpack.serverlessVectordb.tutorials.title', {
             defaultMessage: 'Tutorials',
           }),
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
       ],
       async mount(params) {
