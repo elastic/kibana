@@ -215,68 +215,72 @@ const SkillInstructions = ({
           </EuiFlexItem>
           {hasPreviousVersion && (
             <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend={i18n.translate(
-                  'xpack.agentBuilderPlatform.attachments.skill.instructions.viewToggleLegend',
-                  { defaultMessage: 'Instructions view' }
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                {showDiff && hasOriginalDiff && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      color="primary"
+                      onClick={() => {
+                        setDiffBase((prev) => (prev === 'original' ? 'previous' : 'original'));
+                      }}
+                    >
+                      {diffBase === 'original' ? (
+                        <FormattedMessage
+                          id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsPrevious"
+                          defaultMessage="vs previous version"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsOriginal"
+                          defaultMessage="vs original content"
+                        />
+                      )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
                 )}
-                options={[
-                  {
-                    id: 'current',
-                    label: i18n.translate(
-                      'xpack.agentBuilderPlatform.attachments.skill.instructions.currentOption',
-                      { defaultMessage: 'Current' }
-                    ),
-                  },
-                  {
-                    id: 'diff',
-                    label: i18n.translate(
-                      'xpack.agentBuilderPlatform.attachments.skill.instructions.changesOption',
-                      { defaultMessage: 'Changes' }
-                    ),
-                  },
-                ]}
-                idSelected={showDiff ? 'diff' : 'current'}
-                onChange={(id) => {
-                  setShowDiff(id === 'diff');
-                }}
-                buttonSize="compressed"
-                color="text"
-              />
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={i18n.translate(
+                      'xpack.agentBuilderPlatform.attachments.skill.instructions.viewToggleLegend',
+                      { defaultMessage: 'Instructions view' }
+                    )}
+                    options={[
+                      {
+                        id: 'current',
+                        label: i18n.translate(
+                          'xpack.agentBuilderPlatform.attachments.skill.instructions.currentOption',
+                          { defaultMessage: 'Current' }
+                        ),
+                      },
+                      {
+                        id: 'diff',
+                        label: i18n.translate(
+                          'xpack.agentBuilderPlatform.attachments.skill.instructions.changesOption',
+                          { defaultMessage: 'Changes' }
+                        ),
+                      },
+                    ]}
+                    idSelected={showDiff ? 'diff' : 'current'}
+                    onChange={(id) => {
+                      setShowDiff(id === 'diff');
+                    }}
+                    buttonSize="compressed"
+                    color="text"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem css={showFullContent && minHeightZeroStyles}>
         {showDiff && hasPreviousVersion && beforeContent ? (
-          <>
-            <SkillDiffViewer
-              beforeContent={beforeContent}
-              afterContent={content}
-              showFullContent={showFullContent}
-            />
-            {hasOriginalDiff && (
-              <EuiButtonEmpty
-                size="xs"
-                color="primary"
-                onClick={() => {
-                  setDiffBase((prev) => (prev === 'original' ? 'previous' : 'original'));
-                }}
-              >
-                {diffBase === 'original' ? (
-                  <FormattedMessage
-                    id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsPrevious"
-                    defaultMessage="vs previous version"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.agentBuilderPlatform.attachments.skill.instructions.vsOriginal"
-                    defaultMessage="vs original content"
-                  />
-                )}
-              </EuiButtonEmpty>
-            )}
-          </>
+          <SkillDiffViewer
+            beforeContent={beforeContent}
+            afterContent={content}
+            showFullContent={showFullContent}
+          />
         ) : (
           <EuiCodeBlock
             language="markdown"
