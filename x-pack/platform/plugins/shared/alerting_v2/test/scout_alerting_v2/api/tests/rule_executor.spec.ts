@@ -828,6 +828,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           // Signal rules cannot configure recovery, so omit it. They must
           // also opt out of state_transition (schema forbids it for "signal").
           state_transition: undefined,
+          recovery_strategy: undefined,
         })
       );
 
@@ -870,6 +871,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           kind: 'alert',
           metadata: { name: 'executor-alert-no-recovery-query' },
+          recovery_strategy: 'none',
           query: {
             format: 'standalone',
             breach: {

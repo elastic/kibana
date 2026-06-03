@@ -72,6 +72,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         },
         // state_transition is forbidden by the schema when kind is "signal".
         state_transition: undefined,
+        recovery_strategy: undefined,
       })
     );
 

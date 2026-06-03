@@ -457,6 +457,32 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects recovery_strategy "no_breach" when query.recovery is also provided', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'no_breach',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovery_strategy "none" when query.recovery is also provided', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'none',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a signal rule with no_data_strategy "emit"', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,

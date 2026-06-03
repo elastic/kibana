@@ -378,6 +378,15 @@ export const isSignalQueryBreachOnly = (data: {
   return recoveryOk && noDataOk;
 };
 
+/** query.recovery is only meaningful when recovery_strategy is "query". */
+export const isRecoveryQueryConsistentWithStrategy = (data: {
+  recovery_strategy?: RecoveryStrategy | null;
+  query?: { recovery?: unknown };
+}): boolean => {
+  if (data.query?.recovery == null) return true;
+  return data.recovery_strategy === recoveryStrategy.query;
+};
+
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
@@ -390,6 +399,10 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isSignalQueryBreachOnly, {
     message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
     path: ['recovery_strategy'],
+  })
+  .refine(isRecoveryQueryConsistentWithStrategy, {
+    message: 'query.recovery is only allowed when recovery_strategy is "query".',
+    path: ['query', 'recovery'],
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;

@@ -295,8 +295,12 @@ describe('executeRuleOperations', () => {
 
     it('throws when signal rule has recovery_strategy set', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'signal' }];
+      const initial: Partial<RuleAttachmentData> = {
+        recovery_strategy: 'query',
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      };
 
-      await expect(executeRuleOperations({ recovery_strategy: 'query' }, ops)).rejects.toThrow(
+      await expect(executeRuleOperations(initial, ops)).rejects.toThrow(
         'Signal rules cannot set recovery_strategy or no_data_strategy'
       );
     });
@@ -380,9 +384,13 @@ describe('executeRuleOperations', () => {
 
     it('wraps recovery_strategy error on signal kind', async () => {
       await expectValidationError(
-        executeRuleOperations({ recovery_strategy: 'query' }, [
-          { operation: 'set_kind', kind: 'signal' },
-        ])
+        executeRuleOperations(
+          {
+            recovery_strategy: 'query',
+            query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+          },
+          [{ operation: 'set_kind', kind: 'signal' }]
+        )
       );
     });
   });
