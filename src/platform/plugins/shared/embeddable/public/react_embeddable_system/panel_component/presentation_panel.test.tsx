@@ -246,6 +246,22 @@ describe('Presentation panel', () => {
       });
     });
 
+    it('does not render a hover description icon when the visible title comes from the default title', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        defaultTitle$: new BehaviorSubject<string | undefined>('Library Title'),
+        description$: new BehaviorSubject<string | undefined>('Panel description'),
+      };
+      await renderPresentationPanel({
+        ...defaultProps,
+        componentApi: api,
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleDescriptionIcon')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('embeddablePanelDescriptionTooltip')).not.toBeInTheDocument();
+    });
+
     it('does not render a title when in view mode when the provided title is blank', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',

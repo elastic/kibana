@@ -114,6 +114,8 @@ export const PresentationPanelHoverActions = ({
   const [
     title,
     description,
+    defaultTitle,
+    defaultDescription,
     hidePanelTitle,
     hasLockedHoverActions,
     parentHideTitle,
@@ -121,14 +123,19 @@ export const PresentationPanelHoverActions = ({
   ] = useBatchedPublishingSubjects(
     api.title$ ?? new BehaviorSubject(undefined),
     api.description$ ?? new BehaviorSubject(undefined),
+    api.defaultTitle$ ?? new BehaviorSubject(undefined),
+    api.defaultDescription$ ?? new BehaviorSubject(undefined),
     api.hideTitle$ ?? new BehaviorSubject(false),
     api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
     (api.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
     api.disabledActionIds$ ?? new BehaviorSubject(undefined)
   );
 
+  const panelTitle = title ?? defaultTitle;
+  const panelDescription = description ?? defaultDescription;
   const hideTitle = hidePanelTitle || parentHideTitle;
-  const showDescription = description && (!title || hideTitle);
+  // Match PresentationPanelTitle: only show the hover description icon when there is no visible title.
+  const showDescription = panelDescription && (!panelTitle || hideTitle);
 
   const contextQuickActions = useContext(EmbeddableRendererContext)?.quickActions;
   const quickActionIds = useMemo(() => {
@@ -377,18 +384,20 @@ export const PresentationPanelHoverActions = ({
   });
 
   const ContextMenuButton = (
-    <EuiButtonIcon
-      color="text"
-      data-test-subj="embeddablePanelToggleMenuIcon"
-      aria-label={getContextMenuAriaLabel(title, index)}
-      onClick={() => {
-        setIsContextMenuOpen(!isContextMenuOpen);
-        if (apiCanLockHoverActions(api)) {
-          api.lockHoverActions(!hasLockedHoverActions);
-        }
-      }}
-      iconType="boxesVertical"
-    />
+    <EuiToolTip content={getContextMenuAriaLabel(panelTitle, index)} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        data-test-subj="embeddablePanelToggleMenuIcon"
+        aria-label={getContextMenuAriaLabel(panelTitle, index)}
+        onClick={() => {
+          setIsContextMenuOpen(!isContextMenuOpen);
+          if (apiCanLockHoverActions(api)) {
+            api.lockHoverActions(!hasLockedHoverActions);
+          }
+        }}
+        iconType="boxesVertical"
+      />
+    </EuiToolTip>
   );
 
   const dragHandle = useMemo(
@@ -445,8 +454,8 @@ export const PresentationPanelHoverActions = ({
             {showDescription && (
               <EuiIconTip
                 size="m"
-                title={!hideTitle ? title || undefined : undefined}
-                content={description}
+                title={!hideTitle ? panelTitle || undefined : undefined}
+                content={panelDescription}
                 position="top"
                 data-test-subj="embeddablePanelDescriptionTooltip"
                 type="info"
@@ -483,7 +492,7 @@ export const PresentationPanelHoverActions = ({
                 isOpen={isContextMenuOpen}
                 className={contextMenuClasses}
                 closePopover={onClose}
-                aria-label={getContextMenuAriaLabel(title, index)}
+                aria-label={getContextMenuAriaLabel(panelTitle, index)}
                 data-test-subj={
                   isContextMenuOpen
                     ? 'embeddablePanelContextMenuOpen'
