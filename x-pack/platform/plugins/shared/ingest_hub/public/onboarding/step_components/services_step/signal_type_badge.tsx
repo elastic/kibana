@@ -21,8 +21,8 @@ const LABELS: Record<SignalType, string> = {
 };
 
 const COLORS: Record<SignalType, string> = {
-  logs: 'hollow',
-  metrics: 'hollow',
+  logs: 'primary',
+  metrics: 'success',
 };
 
 interface SignalTypeBadgeProps {

@@ -18,17 +18,16 @@ export type AuthType = 'identity_federation' | 'api_key';
 export type Badge = 'technical_preview' | 'beta';
 
 export type ServiceCategory =
-  | 'AI / ML'
-  | 'Cost & Billing'
+  | 'Analytics'
+  | 'Application Integration'
+  | 'Cloud Financial Management'
+  | 'Compute'
+  | 'Containers'
   | 'Databases'
-  | 'Infrastructure'
-  | 'Messaging'
-  | 'Monitoring'
-  | 'Networking'
-  | 'Networking / CDN'
-  | 'Security'
-  | 'Security / Networking'
-  | 'Serverless & Compute'
+  | 'Machine Learning'
+  | 'Management and Governance'
+  | 'Networking and Content Delivery'
+  | 'Security, Identity and Compliance'
   | 'Storage';
 
 export interface DeliveryMethodEntry {
@@ -64,11 +63,11 @@ export interface AwsServiceMatrixEntry {
 }
 
 export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
-  // ── aws package — Serverless & Compute ─────────────────────────────────
+  // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
     name: 'AWS API Gateway',
-    category: 'Serverless & Compute',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -81,7 +80,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'apigateway_metrics',
     name: 'AWS API Gateway',
-    category: 'Serverless & Compute',
+    category: 'Networking and Content Delivery',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -94,7 +93,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'lambda',
     name: 'AWS Lambda',
-    category: 'Serverless & Compute',
+    category: 'Compute',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -107,7 +106,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'lambda_logs',
     name: 'AWS Lambda',
-    category: 'Serverless & Compute',
+    category: 'Compute',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-cloudwatch'],
@@ -118,11 +117,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Infrastructure ────────────────────────────────────────
+  // ── aws package — Compute ───────────────────────────────────────────────
   {
     id: 'ec2_logs',
     name: 'AWS EC2',
-    category: 'Infrastructure',
+    category: 'Compute',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -135,7 +134,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'ec2_metrics',
     name: 'AWS EC2',
-    category: 'Infrastructure',
+    category: 'Compute',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -148,7 +147,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'ecs_metrics',
     name: 'AWS ECS',
-    category: 'Infrastructure',
+    category: 'Compute',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -161,7 +160,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'emr_logs',
     name: 'AWS EMR',
-    category: 'Infrastructure',
+    category: 'Compute',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }, { method: 'cloud_forwarder' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -174,7 +173,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'emr_metrics',
     name: 'AWS EMR',
-    category: 'Infrastructure',
+    category: 'Compute',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -185,11 +184,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Monitoring ────────────────────────────────────────────
+  // ── aws package — Management and Governance ──────────────────────────────
   {
     id: 'awshealth',
     name: 'AWS Health',
-    category: 'Monitoring',
+    category: 'Management and Governance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -202,7 +201,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'cloudwatch_logs',
     name: 'AWS CloudWatch',
-    category: 'Monitoring',
+    category: 'Management and Governance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-cloudwatch'],
@@ -215,7 +214,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'cloudwatch_metrics',
     name: 'AWS CloudWatch',
-    category: 'Monitoring',
+    category: 'Management and Governance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -226,11 +225,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Cost & Billing ────────────────────────────────────────
+  // ── aws package — Cloud Financial Management ────────────────────────────
   {
     id: 'billing',
     name: 'AWS Billing',
-    category: 'Cost & Billing',
+    category: 'Cloud Financial Management',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -243,7 +242,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'usage',
     name: 'AWS Usage',
-    category: 'Cost & Billing',
+    category: 'Cloud Financial Management',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -254,11 +253,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Security ──────────────────────────────────────────────
+  // ── aws package — Management and Governance / Security, Identity and Compliance ──
   {
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
-    category: 'Security',
+    category: 'Management and Governance',
     signalType: 'logs',
     deliveryMethods: [
       { method: 'agentless', preferred: true },
@@ -275,7 +274,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'config',
     name: 'AWS Config',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['cel'],
@@ -288,7 +287,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'guardduty',
     name: 'AWS GuardDuty',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-s3', 'httpjson'],
@@ -302,7 +301,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'inspector',
     name: 'AWS Inspector',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
@@ -315,7 +314,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'firewall_logs',
     name: 'AWS Network Firewall',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -328,7 +327,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'firewall_metrics',
     name: 'AWS Network Firewall',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -341,7 +340,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'securityhub_findings',
     name: 'AWS Security Hub',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
@@ -354,7 +353,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'securityhub_findings_full_posture',
     name: 'AWS Security Hub (Full Posture / CSPM)',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
@@ -367,7 +366,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'securityhub_insights',
     name: 'AWS Security Hub (Insights)',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
@@ -380,7 +379,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'waf',
     name: 'AWS WAF',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -391,11 +390,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Networking ────────────────────────────────────────────
+  // ── aws package — Networking and Content Delivery ─────────────────────────
   {
     id: 'cloudfront_logs',
     name: 'AWS CloudFront',
-    category: 'Networking / CDN',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3'],
@@ -408,7 +407,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'elb_logs',
     name: 'AWS ELB',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -421,7 +420,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'elb_metrics',
     name: 'AWS ELB',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -434,7 +433,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'natgateway',
     name: 'AWS NAT Gateway',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -447,7 +446,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'route53_public_logs',
     name: 'AWS Route 53 Public DNS',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }, { method: 'firehose' }],
     inputs: ['aws-cloudwatch'],
@@ -460,7 +459,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'route53_resolver_logs',
     name: 'AWS Route 53 Resolver',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }, { method: 'cloud_forwarder' }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -473,7 +472,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'transitgateway',
     name: 'AWS Transit Gateway',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -486,7 +485,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'vpcflow',
     name: 'AWS VPC Flow',
-    category: 'Security / Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [
       { method: 'agentless', preferred: true },
@@ -503,7 +502,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'vpn',
     name: 'AWS VPN',
-    category: 'Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -581,7 +580,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Databases ─────────────────────────────────────────────
+  // ── aws package — Databases ──────────────────────────────────────────────
   {
     id: 'dynamodb',
     name: 'AWS DynamoDB',
@@ -622,11 +621,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws package — Messaging ─────────────────────────────────────────────
+  // ── aws package — Analytics / Application Integration ───────────────────
   {
     id: 'kafka_metrics',
     name: 'AWS MSK (Kafka)',
-    category: 'Messaging',
+    category: 'Management and Governance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -639,7 +638,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'kinesis',
     name: 'AWS Kinesis',
-    category: 'Messaging',
+    category: 'Management and Governance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -652,7 +651,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'sns',
     name: 'AWS SNS',
-    category: 'Messaging',
+    category: 'Management and Governance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -665,7 +664,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'sqs',
     name: 'AWS SQS',
-    category: 'Messaging',
+    category: 'Management and Governance',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -676,11 +675,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 
-  // ── aws_bedrock package — AI / ML ───────────────────────────────────────
+  // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'guardrails',
     name: 'AWS Bedrock (Guardrails)',
-    category: 'AI / ML',
+    category: 'Machine Learning',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -693,7 +692,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'invocation',
     name: 'AWS Bedrock (Invocation)',
-    category: 'AI / ML',
+    category: 'Machine Learning',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -706,7 +705,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'runtime',
     name: 'AWS Bedrock (Runtime)',
-    category: 'AI / ML',
+    category: 'Machine Learning',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
@@ -720,7 +719,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'bedrock_agentcore',
     name: 'AWS Bedrock AgentCore',
-    category: 'AI / ML',
+    category: 'Machine Learning',
     signalType: 'logs',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: [],
@@ -731,11 +730,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     policyTemplate: 'aws_bedrock_agentcore',
   },
 
-  // ── awsfargate package — Infrastructure ─────────────────────────────────
+  // ── awsfargate package — Containers ─────────────────────────────────────
   {
     id: 'fargate',
     name: 'AWS Fargate',
-    category: 'Infrastructure',
+    category: 'Containers',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['awsfargate/metrics'],
@@ -746,12 +745,12 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     policyTemplate: 'awsfargate',
   },
 
-  // ── aws_mq package — Messaging ──────────────────────────────────────────
+  // ── aws_mq package — Application Integration ────────────────────────────
   // TODO(PM): delivery method and signal type TBD — awaiting PM ratification
   {
     id: 'mq',
     name: 'AWS MQ',
-    category: 'Messaging',
+    category: 'Application Integration',
     signalType: 'metrics',
     deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: [],
@@ -766,7 +765,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'cloudtrail_otel',
     name: 'AWS CloudTrail (OTel)',
-    category: 'Security',
+    category: 'Management and Governance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: [],
@@ -779,7 +778,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'vpcflow_otel',
     name: 'AWS VPC Flow (OTel)',
-    category: 'Security / Networking',
+    category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: [],
@@ -792,7 +791,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
   {
     id: 'waf_otel',
     name: 'AWS WAF (OTel)',
-    category: 'Security',
+    category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: [],
@@ -803,11 +802,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     badge: 'technical_preview',
   },
 
-  // ── aws_logs package — Monitoring ───────────────────────────────────────
+  // ── aws_logs package — Management and Governance ──────────────────────────
   {
     id: 'aws_logs',
     name: 'AWS Logs (Generic)',
-    category: 'Monitoring',
+    category: 'Management and Governance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
@@ -818,11 +817,11 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     policyTemplate: 'aws_logs',
   },
 
-  // ── awsfirehose package — Monitoring ────────────────────────────────────
+  // ── awsfirehose package — Analytics ─────────────────────────────────────
   {
     id: 'firehose',
     name: 'AWS Firehose (Receiver)',
-    category: 'Monitoring',
+    category: 'Analytics',
     signalType: 'logs',
     deliveryMethods: [{ method: 'firehose', preferred: true }],
     inputs: [],

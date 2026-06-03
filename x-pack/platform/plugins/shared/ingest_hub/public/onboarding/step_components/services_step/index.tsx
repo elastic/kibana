@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiComboBox,
   EuiFieldSearch,
-  EuiFlexGroup,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiHealth,
+  EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AWS_SERVICES_MATRIX } from '../../aws_service_matrix';
-import type { SignalType } from '../../aws_service_matrix';
+import type { ServiceCategory, SignalType } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { ServiceRow } from './service_row';
 
@@ -48,14 +54,44 @@ const SIGNAL_FILTER_OPTIONS = [
   },
 ];
 
-/** Groups an array of matrix entries by policyTemplate (falling back to id). */
+const AWS_REGION_OPTIONS = [
+  'ap-southeast-1',
+  'ap-southeast-2',
+  'eu-west-1',
+  'eu-west-2',
+  'us-east-1',
+  'us-east-2',
+  'us-west-1',
+  'us-west-2',
+].map((r) => ({ label: r }));
+
+const CATEGORY_ORDER: ServiceCategory[] = [
+  'Security, Identity and Compliance',
+  'Compute',
+  'Networking and Content Delivery',
+  'Storage',
+  'Databases',
+  'Analytics',
+  'Cloud Financial Management',
+  'Management and Governance',
+  'Application Integration',
+  'Machine Learning',
+  'Containers',
+];
+
+function categoryColor(category: string): string {
+  const index = CATEGORY_ORDER.indexOf(category as ServiceCategory);
+  const hue = Math.round((Math.max(0, index) * 137.508) % 360);
+  return `hsl(${hue}, 60%, 42%)`;
+}
 
 export function ServicesStep({ onNext }: ServicesStepProps) {
-  const { servicesStep, setSelectedServiceIds } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const { servicesStep, setSelectedServiceIds, setDefaultRegion } = useOnboardingFlow();
+  const { selectedServiceIds, defaultRegion } = servicesStep;
 
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
 
   const filteredServices = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -67,15 +103,35 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
     );
   }, [signalFilter, searchQuery]);
 
-  // Groups derived from currently visible (filtered) entries.
+  const categories = useMemo(() => {
+    const present = new Set(filteredServices.map((s) => s.category));
+    return CATEGORY_ORDER.filter((cat) => present.has(cat));
+  }, [filteredServices]);
+
+  useEffect(() => {
+    if (!selectedCategory || !categories.includes(selectedCategory)) {
+      setSelectedCategory(categories[0] ?? null);
+    }
+  }, [categories, selectedCategory]);
+
+  const activeCategory = selectedCategory ?? categories[0] ?? null;
+
+  const servicesInCategory = useMemo(
+    () => filteredServices.filter((s) => s.category === activeCategory),
+    [filteredServices, activeCategory]
+  );
+
+  const duplicateNamesInCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of servicesInCategory) {
+      counts.set(s.name, (counts.get(s.name) ?? 0) + 1);
+    }
+    return new Set([...counts.entries()].filter(([, n]) => n > 1).map(([name]) => name));
+  }, [servicesInCategory]);
 
   const selectedSet = useMemo(() => new Set(selectedServiceIds), [selectedServiceIds]);
 
-  const isReady = useMemo(() => {
-    return selectedServiceIds.length > 0;
-  }, [selectedServiceIds]);
-
-  // A group is selected when all of its entries are in the selection.
+  const isReady = selectedServiceIds.length > 0;
 
   const handleToggle = useCallback(
     (serviceId: string, checked: boolean) => {
@@ -87,16 +143,20 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
     [selectedServiceIds, setSelectedServiceIds]
   );
 
-  const handleSelectAll = useCallback(() => {
-    const filteredIdSet = new Set(filteredServices.map((s) => s.id));
-    const existing = selectedServiceIds.filter((id) => !filteredIdSet.has(id));
-    setSelectedServiceIds([...existing, ...filteredIdSet]);
-  }, [filteredServices, selectedServiceIds, setSelectedServiceIds]);
+  const allInCategorySelected = useMemo(
+    () => servicesInCategory.length > 0 && servicesInCategory.every((s) => selectedSet.has(s.id)),
+    [servicesInCategory, selectedSet]
+  );
 
-  const handleDeselectAll = useCallback(() => {
-    const filteredIds = new Set(filteredServices.map((s) => s.id));
-    setSelectedServiceIds(selectedServiceIds.filter((id) => !filteredIds.has(id)));
-  }, [filteredServices, selectedServiceIds, setSelectedServiceIds]);
+  const handleSelectAllInCategory = useCallback(() => {
+    const ids = servicesInCategory.map((s) => s.id);
+    setSelectedServiceIds([...new Set([...selectedServiceIds, ...ids])]);
+  }, [servicesInCategory, selectedServiceIds, setSelectedServiceIds]);
+
+  const handleDeselectAllInCategory = useCallback(() => {
+    const ids = new Set(servicesInCategory.map((s) => s.id));
+    setSelectedServiceIds(selectedServiceIds.filter((id) => !ids.has(id)));
+  }, [servicesInCategory, selectedServiceIds, setSelectedServiceIds]);
 
   const handleNext = useCallback(() => {
     if (!isReady) return;
@@ -105,6 +165,45 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
 
   return (
     <div data-test-subj="onboardingStep-services">
+      <EuiTitle size="l">
+        <h2>
+          <FormattedMessage
+            id="xpack.ingestHub.servicesStep.title"
+            defaultMessage="Which AWS services do you want to monitor?"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.ingestHub.servicesStep.subtitle"
+            defaultMessage="Select the services you use. Elastic will set up everything needed to start collecting data from your AWS account."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate('xpack.ingestHub.servicesStep.defaultRegion.label', {
+          defaultMessage: 'Default AWS region',
+        })}
+        helpText={i18n.translate('xpack.ingestHub.servicesStep.defaultRegion.help', {
+          defaultMessage:
+            'Used for services that require a region. You can also type a region not in the list.',
+        })}
+      >
+        <EuiComboBox
+          singleSelection={{ asPlainText: true }}
+          options={AWS_REGION_OPTIONS}
+          selectedOptions={defaultRegion ? [{ label: defaultRegion }] : []}
+          onChange={(selected) => setDefaultRegion(selected[0]?.label ?? '')}
+          onCreateOption={(value) => setDefaultRegion(value.trim())}
+          compressed
+          style={{ maxWidth: 320 }}
+          data-test-subj="servicesStep-regionComboBox"
+        />
+      </EuiFormRow>
+      <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
@@ -134,59 +233,107 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.ingestHub.servicesStep.selectedCount"
-              defaultMessage="{count} {count, plural, one {service} other {services}} selected"
-              values={{ count: selectedServiceIds.length }}
-            />
-          </EuiText>
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false} style={{ width: 240 }}>
+          {categories.map((cat) => {
+            const isActive = cat === activeCategory;
+            const catServices = filteredServices.filter((s) => s.category === cat);
+            const catSelectedCount = catServices.filter((s) => selectedSet.has(s.id)).length;
+            const uniqueNames = [...new Set(catServices.map((s) => s.name))];
+            const preview =
+              uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
+
+            return (
+              <EuiPanel
+                key={cat}
+                paddingSize="s"
+                hasBorder={false}
+                hasShadow={false}
+                color={isActive ? 'subdued' : 'transparent'}
+                onClick={() => setSelectedCategory(cat)}
+                style={{ cursor: 'pointer' }}
+                data-test-subj={`servicesStep-category-${cat}`}
+              >
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiHealth color={categoryColor(cat)} textSize="s">
+                      {cat}
+                    </EuiHealth>
+                    <EuiText size="xs" color="subdued" style={{ paddingLeft: 20 }}>
+                      {preview}
+                    </EuiText>
+                  </EuiFlexItem>
+                  {catSelectedCount > 0 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">{catSelectedCount}</EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiPanel>
+            );
+          })}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={handleSelectAll}
-                data-test-subj="servicesStep-selectAllButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.servicesStep.selectAll"
-                  defaultMessage="Select all"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={handleDeselectAll}
-                data-test-subj="servicesStep-deselectAllButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.servicesStep.deselectAll"
-                  defaultMessage="Deselect all"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+
+        <EuiFlexItem>
+          <EuiPanel paddingSize="m" hasBorder>
+            {activeCategory ? (
+              <>
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <h3>{activeCategory}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {allInCategorySelected ? (
+                      <EuiButtonEmpty
+                        size="s"
+                        onClick={handleDeselectAllInCategory}
+                        data-test-subj="servicesStep-deselectAllButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.ingestHub.servicesStep.deselectAll"
+                          defaultMessage="Deselect all"
+                        />
+                      </EuiButtonEmpty>
+                    ) : (
+                      <EuiButtonEmpty
+                        size="s"
+                        onClick={handleSelectAllInCategory}
+                        data-test-subj="servicesStep-selectAllButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.ingestHub.servicesStep.selectAll"
+                          defaultMessage="Select all"
+                        />
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiFlexGrid columns={2} gutterSize="s">
+                  {servicesInCategory.map((service) => (
+                    <EuiFlexItem key={service.id}>
+                      <ServiceRow
+                        service={service}
+                        isSelected={selectedSet.has(service.id)}
+                        onToggle={handleToggle}
+                        displayName={
+                          duplicateNamesInCategory.has(service.name)
+                            ? `${service.name} ${
+                                service.signalType === 'logs' ? 'Logs' : 'Metrics'
+                              }`
+                            : undefined
+                        }
+                      />
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGrid>
+              </>
+            ) : null}
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiFlexGrid columns={2} gutterSize="s">
-        {filteredServices.map((service) => (
-          <EuiFlexItem key={service.id}>
-            <ServiceRow
-              service={service}
-              isSelected={selectedSet.has(service.id)}
-              onToggle={handleToggle}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
 
       <EuiSpacer size="l" />
 

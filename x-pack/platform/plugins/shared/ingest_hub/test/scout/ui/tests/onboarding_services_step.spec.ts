@@ -11,8 +11,8 @@ import { test } from '../fixtures';
 
 // 54 services have showInUI: true. 7 of those have defaultEnabled: false:
 // cloudwatch_logs, cloudwatch_metrics, cloudtrail_otel, vpcflow_otel, waf_otel, aws_logs, firehose.
-const TOTAL_SERVICES = 54;
-const DEFAULT_SELECTED_COUNT = 47;
+// Services are grouped by category; only the active category's rows are rendered in the DOM.
+// Default active category: Security, Identity and Compliance (first in CATEGORY_ORDER).
 
 test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
@@ -31,40 +31,62 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     });
   });
 
-  test('renders all services with matrix-driven defaults', async ({ browserAuth, page }) => {
+  test('renders step header, region field, and default category view', async ({
+    browserAuth,
+    page,
+  }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    const rows = page.locator('[data-test-subj^="servicesStep-serviceRow-"]');
-    await expect(rows).toHaveCount(TOTAL_SERVICES);
+    // title and region field are present
+    await expect(page.getByText('Which AWS services do you want to monitor?')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-regionComboBox')).toBeVisible();
 
-    // services with defaultEnabled: false are unchecked
-    await expect(page.testSubj.locator('servicesStep-toggle-cloudwatch_logs')).not.toBeChecked();
-    await expect(page.testSubj.locator('servicesStep-toggle-cloudwatch_metrics')).not.toBeChecked();
-    await expect(page.testSubj.locator('servicesStep-toggle-cloudtrail_otel')).not.toBeChecked();
-    await expect(page.testSubj.locator('servicesStep-toggle-firehose')).not.toBeChecked();
+    // Security, Identity and Compliance is the default active category
+    await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeVisible();
 
-    // a defaultEnabled service is checked
+    // guardduty (defaultEnabled: true) is checked
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).toBeChecked();
 
-    // selected count text reflects defaults
-    await expect(page.getByText(`${DEFAULT_SELECTED_COUNT} services selected`)).toBeVisible();
+    // waf_otel (defaultEnabled: false) is visible but unchecked
+    await expect(page.testSubj.locator('servicesStep-serviceRow-waf_otel')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).not.toBeChecked();
   });
 
   test('deselect and reselect a service', async ({ page }) => {
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    // deselect guardduty
+    // guardduty is in Security (active by default)
     await page.testSubj.locator('servicesStep-toggle-guardduty').click();
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).not.toBeChecked();
-    await expect(page.getByText(`${DEFAULT_SELECTED_COUNT - 1} services selected`)).toBeVisible();
 
-    // reselect it
     await page.testSubj.locator('servicesStep-toggle-guardduty').click();
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).toBeChecked();
-    await expect(page.getByText(`${DEFAULT_SELECTED_COUNT} services selected`)).toBeVisible();
+  });
+
+  test('per-category select all and deselect all', async ({ browserAuth, page }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws#services');
+    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+
+    // waf_otel is unchecked by default → "Select all" is shown for Security
+    await expect(page.testSubj.locator('servicesStep-selectAllButton')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-deselectAllButton')).toBeHidden();
+
+    // select all in the active category → waf_otel gets checked
+    await page.testSubj.locator('servicesStep-selectAllButton').click();
+    await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).toBeChecked();
+
+    // all selected → button flips to "Deselect all"
+    await expect(page.testSubj.locator('servicesStep-deselectAllButton')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-selectAllButton')).toBeHidden();
+
+    // deselect all → all Security services unchecked
+    await page.testSubj.locator('servicesStep-deselectAllButton').click();
+    await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).not.toBeChecked();
+    await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).not.toBeChecked();
   });
 
   test('Next is disabled when no services are selected', async ({ browserAuth, page }) => {
@@ -72,41 +94,52 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    // Next is enabled while services are selected (defaults have selections)
+    // defaults have selections — Next is enabled
     await expect(page.testSubj.locator('servicesStep-nextButton')).toBeEnabled();
 
-    // deselect all services via "Deselect all"
-    await page.testSubj.locator('servicesStep-deselectAllButton').click();
-    await expect(page.getByText('0 services selected')).toBeVisible();
+    // clear all selections via session storage and reload
+    await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: [], defaultRegion: 'us-east-1' })
+      );
+    });
+    await page.reload();
+    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
     // Next must be disabled with nothing selected
     await expect(page.testSubj.locator('servicesStep-nextButton')).toBeDisabled();
 
-    // re-selecting any service re-enables Next
-    await page.testSubj.locator(`servicesStep-toggle-cloudtrail`).click();
+    // selecting any service re-enables Next (Security is active, guardduty is visible)
+    await page.testSubj.locator('servicesStep-toggle-guardduty').click();
     await expect(page.testSubj.locator('servicesStep-nextButton')).toBeEnabled();
   });
 
-  test('signal-type filter shows only matching services', async ({ browserAuth, page }) => {
+  test('signal-type filter hides categories with no matching services', async ({
+    browserAuth,
+    page,
+  }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    // switch to Logs filter
+    // Databases is visible in "All" mode (dynamodb, rds are metrics-only)
+    await expect(page.locator('[data-test-subj="servicesStep-category-Databases"]')).toBeVisible();
+
+    // switch to Logs — Databases has no log-signal services, so it disappears from sidebar
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Logs').click();
+    await expect(page.locator('[data-test-subj="servicesStep-category-Databases"]')).toBeHidden();
 
-    // wait for a known metrics-only row to disappear before counting (ensures DOM has settled)
-    await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeHidden();
-
-    const rows = page.locator('[data-test-subj^="servicesStep-serviceRow-"]');
-    // only log-signal services are shown; metrics rows are hidden
-    const count = await rows.count();
-    expect(count).toBeLessThan(TOTAL_SERVICES);
-
-    // switch to Metrics
+    // switch to Metrics — Databases reappears; navigate to it
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();
+    await expect(page.locator('[data-test-subj="servicesStep-category-Databases"]')).toBeVisible();
+    await page.locator('[data-test-subj="servicesStep-category-Databases"]').click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeVisible();
-    // a logs-only row must not be visible
+
+    // navigate to Security — guardduty is logs-only so it is not rendered with Metrics filter
+    await page
+      .locator('[data-test-subj="servicesStep-category-Security, Identity and Compliance"]')
+      .click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeHidden();
   });
 });

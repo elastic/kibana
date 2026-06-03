@@ -15,9 +15,15 @@ interface ServiceRowProps {
   service: AwsServiceMatrixEntry;
   isSelected: boolean;
   onToggle: (key: string, checked: boolean) => void;
+  displayName?: string;
 }
 
-export const ServiceRow: React.FC<ServiceRowProps> = ({ service, isSelected, onToggle }) => {
+export const ServiceRow: React.FC<ServiceRowProps> = ({
+  service,
+  isSelected,
+  onToggle,
+  displayName,
+}) => {
   return (
     <div data-test-subj={`servicesStep-serviceRow-${service.id}`}>
       <EuiCheckableCard
@@ -26,7 +32,7 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({ service, isSelected, onT
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             <EuiFlexItem>
               <EuiText size="s">
-                <strong>{service.name}</strong>
+                <strong>{displayName ?? service.name}</strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
