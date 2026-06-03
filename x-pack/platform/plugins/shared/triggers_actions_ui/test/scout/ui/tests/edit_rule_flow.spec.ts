@@ -69,7 +69,12 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('ruleDetailsNameInput')).toHaveValue(testRuleName);
   });
 
-  test('Edit from rules list: returns to rules list after saving', async ({ page }) => {
+  test('Edit from rules list: returns to rules list after saving', async ({
+    page,
+    apiServices,
+  }) => {
+    const updatedName = `${testRuleName}-updated`;
+
     await page.gotoApp('rules');
     await expect(page.testSubj.locator('rulesList')).toBeVisible();
 
@@ -77,9 +82,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('editActionHoverButton');
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
-    // Minor name change to make the form dirty
-    const nameInput = page.testSubj.locator('ruleDetailsNameInput');
-    await nameInput.fill(`${testRuleName}-updated`);
+    await page.testSubj.locator('ruleDetailsNameInput').fill(updatedName);
 
     // Edit saves directly — the create-confirmation modal only appears for new rules.
     await page.testSubj.click('rulePageFooterSaveButton');
@@ -87,6 +90,13 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.waitForURL(RULES_LIST_URL_RE);
     expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
     await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
+
+    // Verify the name was actually persisted (matches FTR's getRuleById assertion).
+    const saved = await apiServices.alerting.rules.get(testRuleId);
+    expect(saved.data.name).toBe(updatedName);
+
+    // Reset the name so subsequent tests start from a known state.
+    await apiServices.alerting.rules.update(testRuleId, { name: testRuleName });
   });
 
   test('Edit from rules list: returns to rules list after clicking cancel', async ({
@@ -123,8 +133,11 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
   test('Edit from rule details page: returns to rule details page after saving', async ({
     page,
     kbnUrl,
+    apiServices,
   }) => {
-    // Navigate via details page so the edit page has the correct return path
+    const updatedName = `${testRuleName}-details-v2`;
+
+    // Navigate via details page so the edit page has the correct return path.
     await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
@@ -132,9 +145,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('openEditRuleFlyoutButton');
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
-    const nameInput = page.testSubj.locator('ruleDetailsNameInput');
-    const currentName = await nameInput.inputValue();
-    await nameInput.fill(`${currentName}-details-v2`);
+    await page.testSubj.locator('ruleDetailsNameInput').fill(updatedName);
 
     // Edit saves directly — the create-confirmation modal only appears for new rules.
     await page.testSubj.click('rulePageFooterSaveButton');
@@ -142,6 +153,13 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.waitForURL(RULES_DETAILS_URL_RE);
     expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+
+    // Verify the name was actually persisted (matches FTR's getRuleById assertion).
+    const saved = await apiServices.alerting.rules.get(testRuleId);
+    expect(saved.data.name).toBe(updatedName);
+
+    // Reset the name so subsequent tests start from a known state.
+    await apiServices.alerting.rules.update(testRuleId, { name: testRuleName });
   });
 
   test('Edit from rule details page: returns to rule details page after clicking cancel', async ({
