@@ -264,6 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // by `infra.semconvHost(...).cpu()` / `.memory()`.
         expect(metricsByName.cpuV2).to.be.a('number');
         expect(metricsByName.memory).to.be.a('number');
+        expect(metricsByName.normalizedLoad1m).to.be.a('number');
       });
 
       // Mirrors the exact error thrown by `UNSUPPORTED_SEMCONV_METRICS` in

@@ -14,11 +14,15 @@ import type {
   EsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
+import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
+import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
+import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows } from '../api/lib/workflow_disable_all';
@@ -30,10 +34,9 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
-  prepareWorkflowDocument,
+  prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
-import { workflowSpaceFilter } from '../api/lib/workflow_query_filters';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -60,8 +63,177 @@ const isVersionConflictError = (error: unknown): boolean => {
   return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
 };
 
+export interface VersionedWorkflowDocument {
+  source: WorkflowProperties;
+  seqNo: number;
+  primaryTerm: number;
+}
+
+export interface IndexWorkflowDocumentOptions {
+  create?: boolean;
+  ifPrimaryTerm?: number;
+  ifSeqNo?: number;
+}
+
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  async getWorkflowDocumentSource(
+    id: string,
+    spaceId: string,
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
+  ): Promise<WorkflowProperties | null> {
+    const { must, must_not } = buildWorkflowFilters({
+      ids: [id],
+      space: { id: spaceId, includeGlobal: options?.includeGlobal },
+      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+    });
+    const searchResponse = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      size: 1,
+      track_total_hits: false,
+    });
+
+    const hit = searchResponse.hits.hits[0];
+    return (hit?._source as WorkflowProperties | undefined) ?? null;
+  }
+
+  async getWorkflowDocumentWithVersion(
+    id: string,
+    spaceId: string,
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
+  ): Promise<VersionedWorkflowDocument | null> {
+    const { must, must_not } = buildWorkflowFilters({
+      ids: [id],
+      space: { id: spaceId, includeGlobal: options?.includeGlobal },
+      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+    });
+    const searchResponse = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      seq_no_primary_term: true,
+      size: 1,
+      track_total_hits: false,
+    });
+
+    const hit = searchResponse.hits.hits[0];
+    if (!hit?._source || hit._seq_no == null || hit._primary_term == null) {
+      return null;
+    }
+
+    return {
+      source: hit._source as WorkflowProperties,
+      seqNo: hit._seq_no,
+      primaryTerm: hit._primary_term,
+    };
+  }
+
+  async indexWorkflowDocument(
+    id: string,
+    document: WorkflowProperties,
+    options?: IndexWorkflowDocumentOptions
+  ): Promise<void> {
+    await this.deps.workflowStorage.getClient().index({
+      id,
+      document,
+      ...(options?.create ? { op_type: 'create' as const } : {}),
+      ...(options?.ifSeqNo != null && options?.ifPrimaryTerm != null
+        ? { if_seq_no: options.ifSeqNo, if_primary_term: options.ifPrimaryTerm }
+        : {}),
+      refresh: true,
+    });
+  }
+
+  async prepareWorkflowDocumentForStorage(params: {
+    actor: string;
+    id?: string;
+    lightweightValidation?: boolean;
+    now: Date;
+    spaceId: string;
+    request?: KibanaRequest;
+    yaml: string;
+  }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
+    const registeredTriggerIds =
+      this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
+    let zodSchema: z.ZodType;
+    if (params.lightweightValidation) {
+      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds, { lightweight: true });
+    } else if (params.request) {
+      zodSchema = await this.deps.validationService.getWorkflowZodSchema(
+        { loose: false },
+        params.spaceId,
+        params.request
+      );
+    } else {
+      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds);
+    }
+    const triggerDefinitions = params.lightweightValidation
+      ? undefined
+      : this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+
+    return prepareWorkflowDocumentFromYaml({
+      id: params.id,
+      yaml: params.yaml,
+      zodSchema,
+      authenticatedUser: params.actor,
+      now: params.now,
+      spaceId: params.spaceId,
+      triggerDefinitions,
+    });
+  }
+
+  async getManagedWorkflowDocuments(
+    spaceId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<Array<{ id: string; source: WorkflowProperties }>> {
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId },
+      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+      managed: 'managed',
+    });
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      size: 1000,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+        Boolean(hit._id && hit._source)
+      )
+      .map((hit) => ({
+        id: hit._id,
+        source: hit._source,
+      }));
+  }
+
+  async getManagedWorkflowDocumentsAllSpaces(options?: {
+    includeDeleted?: boolean;
+    pluginId?: string;
+  }): Promise<Array<{ id: string; source: WorkflowProperties }>> {
+    const { must, must_not } = buildWorkflowFilters({
+      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
+      managed: 'managed',
+    });
+    if (options?.pluginId) {
+      must.push({ term: { managedBy: options.pluginId } });
+    }
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      size: 1000,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits
+      .filter((hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
+        Boolean(hit._id && hit._source)
+      )
+      .map((hit) => ({
+        id: hit._id,
+        source: hit._source,
+      }));
+  }
 
   async getWorkflow(
     id: string,
@@ -69,22 +241,14 @@ export class WorkflowCrudService {
     options?: { includeDeleted?: boolean }
   ): Promise<WorkflowDetailDto | null> {
     try {
-      const { must, must_not } = workflowSpaceFilter(spaceId, {
+      const source = await this.getWorkflowDocumentSource(id, spaceId, {
         includeDeleted: options?.includeDeleted ?? false,
+        includeGlobal: true,
       });
-      must.push({ ids: { values: [id] } });
-      const response = await this.deps.workflowStorage.getClient().search({
-        query: { bool: { must, must_not } },
-        size: 1,
-        track_total_hits: false,
-      });
-
-      if (response.hits.hits.length === 0) {
+      if (!source) {
         return null;
       }
-
-      const document = response.hits.hits[0];
-      return transformStorageDocumentToWorkflowDto(document._id, document._source);
+      return transformStorageDocumentToWorkflowDto(id, source);
     } catch (error) {
       if (isNotFoundError(error)) {
         return null;
@@ -96,16 +260,17 @@ export class WorkflowCrudService {
   async getWorkflowsByIds(
     ids: string[],
     spaceId: string,
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowDetailDto[]> {
     if (ids.length === 0) {
       return [];
     }
 
-    const { must, must_not } = workflowSpaceFilter(spaceId, {
-      includeDeleted: options?.includeDeleted ?? false,
+    const { must, must_not } = buildWorkflowFilters({
+      ids,
+      space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
+      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
     });
-    must.push({ ids: { values: ids } });
 
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must, must_not } },
@@ -122,16 +287,17 @@ export class WorkflowCrudService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowPartialDetailDto[]> {
     if (ids.length === 0) {
       return [];
     }
 
-    const { must, must_not } = workflowSpaceFilter(spaceId, {
-      includeDeleted: options?.includeDeleted ?? false,
+    const { must, must_not } = buildWorkflowFilters({
+      ids,
+      space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
+      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
     });
-    must.push({ ids: { values: ids } });
 
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must, must_not } },
@@ -167,8 +333,9 @@ export class WorkflowCrudService {
       id: baseId,
       workflowData,
       definition,
-    } = prepareWorkflowDocument({
-      workflow,
+    } = prepareWorkflowDocumentFromYaml({
+      id: workflow.id,
+      yaml: workflow.yaml,
       zodSchema,
       authenticatedUser,
       now,
@@ -207,6 +374,8 @@ export class WorkflowCrudService {
     await scheduleWorkflowTriggers({
       workflowId: id,
       definition,
+      enabled: workflowData.enabled,
+      valid: workflowData.valid,
       spaceId,
       request,
       taskScheduler: this.deps.getTaskScheduler(),
@@ -241,8 +410,9 @@ export class WorkflowCrudService {
         if (customId) {
           validateWorkflowId(customId);
         }
-        const prepared = prepareWorkflowDocument({
-          workflow: workflows[i],
+        const prepared = prepareWorkflowDocumentFromYaml({
+          id: workflows[i].id,
+          yaml: workflows[i].yaml,
           zodSchema,
           authenticatedUser,
           now,
@@ -359,6 +529,8 @@ export class WorkflowCrudService {
           scheduleWorkflowTriggers({
             workflowId: vw.id,
             definition: vw.definition,
+            enabled: vw.workflowData.enabled,
+            valid: vw.workflowData.valid,
             spaceId,
             request,
             taskScheduler,
@@ -431,11 +603,7 @@ export class WorkflowCrudService {
         finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
       }
 
-      await this.deps.workflowStorage.getClient().index({
-        id,
-        document: finalData,
-        refresh: true,
-      });
+      await this.indexWorkflowDocument(id, finalData);
 
       const taskScheduler = this.deps.getTaskScheduler();
       if (shouldUpdateScheduler && taskScheduler) {
@@ -497,8 +665,10 @@ export class WorkflowCrudService {
   }
 
   private async getEsWorkflowForScheduler(id: string, spaceId: string): Promise<EsWorkflow | null> {
-    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
-    must.push({ ids: { values: [id] } });
+    const { must } = buildWorkflowFilters({
+      ids: [id],
+      space: { id: spaceId },
+    });
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must } },
       size: 1,
@@ -530,23 +700,14 @@ export class WorkflowCrudService {
     id: string,
     spaceId: string
   ): Promise<{ source: WorkflowProperties }> {
-    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
-    must.push({ ids: { values: [id] } });
-    const searchResponse = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must } },
-      size: 1,
-      track_total_hits: false,
+    const source = await this.getWorkflowDocumentSource(id, spaceId, {
+      includeDeleted: true,
+      includeGlobal: true,
     });
-
-    if (searchResponse.hits.hits.length === 0) {
+    if (!source) {
       throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
     }
-
-    const hit = searchResponse.hits.hits[0];
-    if (!hit._source) {
-      throw new Error(`Workflow with id ${id} not found`);
-    }
-    return { source: hit._source as WorkflowProperties };
+    return { source };
   }
 
   private async resolveAndDeduplicateBulkIds(
@@ -610,12 +771,7 @@ export class WorkflowCrudService {
 
     for (let attempt = 0; attempt <= TOCTOU_MAX_RETRIES; attempt++) {
       try {
-        await this.deps.workflowStorage.getClient().index({
-          id,
-          document,
-          op_type: 'create',
-          refresh: true,
-        });
+        await this.indexWorkflowDocument(id, document, { create: true });
         return id;
       } catch (error) {
         if (!isVersionConflictError(error)) {

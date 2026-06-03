@@ -72,10 +72,6 @@ import type {
 } from '../routes/get_oauth_access_token';
 import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
-import type {
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   getOAuthAuthorizationCodeAccessToken,
@@ -444,8 +440,9 @@ export class ActionsClient {
           logger: this.context.logger,
           configurationUtilities,
           credentials: {
-            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
-            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+            type: 'client_secret',
+            config: { clientId: tokenOpts.config.clientId },
+            secrets: { clientSecret: tokenOpts.secrets.clientSecret },
           },
           tokenUrl: tokenOpts.tokenUrl,
           oAuthScope: tokenOpts.scope,

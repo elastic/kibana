@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
+import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
+import {
+  WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS,
+  WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS,
+} from '../../../hooks/polling_constants';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-
-const EXECUTIONS_LIST_REFETCH_INTERVAL = 5000;
-const EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE = 1000;
 
 export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
@@ -43,7 +45,6 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const telemetry = useTelemetry();
   const showExecutor =
     uiSettings?.get<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, false) ?? false;
-  const [refetchInterval, setRefetchInterval] = useState(EXECUTIONS_LIST_REFETCH_INTERVAL);
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
 
@@ -56,42 +57,33 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
     refetch,
-  } = useWorkflowExecutions(
-    {
-      workflowId,
-      statuses: filters.statuses,
-      executionTypes: filters.executionTypes,
-      executedBy: filters.executedBy,
+  } = useWorkflowExecutions({
+    workflowId,
+    statuses: filters.statuses,
+    executionTypes: filters.executionTypes,
+    executedBy: filters.executedBy,
+  });
+
+  const workflowExecutionsRef = useRef(workflowExecutions);
+  workflowExecutionsRef.current = workflowExecutions;
+
+  useSerialPolling({
+    poll: () => refetch(),
+    enabled: workflowId !== null,
+    immediate: false,
+    intervalMs: () => {
+      if (
+        workflowExecutionsRef.current?.results.some((execution) =>
+          isInProgressStatus(execution.status)
+        )
+      ) {
+        return WORKFLOW_EXECUTIONS_LIST_POLL_ACTIVE_INTERVAL_MS;
+      }
+
+      return WORKFLOW_EXECUTIONS_LIST_POLL_INTERVAL_MS;
     },
-    {
-      refetchInterval,
-    }
-  );
-
-  useEffect(() => {
-    if (!workflowExecutions) {
-      return;
-    }
-    const activeExecutions = workflowExecutions.results.some((execution) =>
-      [
-        ExecutionStatus.PENDING,
-        ExecutionStatus.QUEUED,
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.WAITING_FOR_CHILD,
-      ].includes(execution.status)
-    );
-
-    if (activeExecutions) {
-      setRefetchInterval(EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE);
-    } else {
-      setRefetchInterval(EXECUTIONS_LIST_REFETCH_INTERVAL);
-    }
-  }, [workflowExecutions]);
-
-  useEffect(() => {
-    // Reset to default when workflow changes
-  }, [filters.statuses, filters.executionTypes, filters.executedBy]);
+    pollKey: workflowId,
+  });
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 

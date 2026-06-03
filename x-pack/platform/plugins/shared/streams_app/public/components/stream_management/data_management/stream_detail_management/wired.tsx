@@ -29,7 +29,7 @@ const wiredStreamManagementSubTabs = [
   'partitioning',
   'processing',
   'schema',
-  'retention',
+  'lifecycle',
   'advanced',
   'significantEvents',
   'dataQuality',
@@ -40,7 +40,7 @@ type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number]
 
 const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
@@ -166,7 +166,7 @@ export function WiredStreamDetailManagement({
     },
     ...(!isDraft
       ? {
-          retention: {
+          lifecycle: {
             content: (
               <StreamDetailLifecycle
                 definition={definition}
@@ -183,7 +183,7 @@ export function WiredStreamDetailManagement({
               >
                 <span data-test-subj="retentionTab" tabIndex={0}>
                   {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Retention',
+                    defaultMessage: 'Data lifecycle',
                   })}
                 </span>
               </EuiToolTip>
@@ -272,7 +272,7 @@ export function WiredStreamDetailManagement({
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
-  if (isDraft && (tab === 'retention' || tab === 'dataQuality')) {
+  if (isDraft && (tab === 'lifecycle' || tab === 'dataQuality')) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );

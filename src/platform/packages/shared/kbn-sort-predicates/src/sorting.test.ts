@@ -12,7 +12,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 function getMockFormatter() {
-  return { convert: (v: unknown) => `${v as string}` } as FieldFormat;
+  return { convertToText: (v: unknown) => `${v as string}` } as FieldFormat;
 }
 
 function testSorting({

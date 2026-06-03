@@ -62,8 +62,25 @@ jest.mock(
   })
 );
 
+jest.mock('../../hooks/use_compose_discover_flyout', () => ({
+  useComposeDiscoverFlyout: () => ({
+    flyout: null,
+    openCreateFlyout: jest.fn(),
+    openEditFlyout: jest.fn(),
+    openCloneFlyout: jest.fn(),
+  }),
+}));
+
 jest.mock('../../components/rule/flyouts/rule_summary_flyout_container', () => ({
-  RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
+  RuleSummaryFlyoutContainer: ({
+    ruleId,
+    onClose,
+  }: {
+    ruleId: string;
+    onClose: () => void;
+    onEdit: () => void;
+    onClone: () => void;
+  }) => (
     <div data-test-subj={`mockRuleFlyout-${ruleId}`}>
       <button data-test-subj="mockRuleFlyoutClose" onClick={onClose} type="button">
         close

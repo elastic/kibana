@@ -11,8 +11,12 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { extractReferencedStepIds } from './extract_referenced_step_ids';
+import {
+  extractReferencedStepIds,
+  extractReferencedStepIdsFromVariables,
+} from './extract_referenced_step_ids';
 import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -323,6 +327,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
+    // Fresh in-memory output is authoritative — do not let a subsequent
+    // prepareForRead rehydrate from ES and overwrite with a stale doc
+    // (common when a deferred step completes on resume before flush).
+    this.clearEvicted(stepExecutionId);
+
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
     }
@@ -613,12 +622,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // Static analysis ambiguous (dynamic bracket access).
       fallbackToPredecessors();
     } else {
-      for (const stepId of referencedStepIds) {
-        const latestExec = this.state.getLatestStepExecution(stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
-        }
-      }
+      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds);
       // If the analysis found nothing but a predecessor is actually evicted,
       // the analysis missed a reference. Fall back conservatively rather
       // than trust an empty set.
@@ -635,10 +639,47 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     while (!currentScope.isEmpty()) {
       const frame = currentScope.getCurrentScope();
       currentScope = currentScope.exitScope();
-      neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
+      const scopeStepExecutionId = buildStepExecutionId(
+        executionId,
+        frame.stepId,
+        currentScope.stackFrames
+      );
+      neededIds.add(scopeStepExecutionId);
+
+      const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
+      if (scopeStepExecution?.stepType === 'foreach') {
+        const scopeInputStepIds = this.extractReferencedStepIdsFromValue(
+          this.getStepInput(scopeStepExecutionId)
+        );
+        if (scopeInputStepIds === null) {
+          fallbackToPredecessors();
+        } else {
+          this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
+        }
+      }
     }
 
     return neededIds;
+  }
+
+  private addLatestExecutionIdsForStepIds(
+    neededIds: Set<string>,
+    referencedStepIds: ReadonlySet<string>
+  ): void {
+    for (const stepId of referencedStepIds) {
+      const latestExec = this.state.getLatestStepExecution(stepId);
+      if (latestExec) {
+        neededIds.add(latestExec.id);
+      }
+    }
+  }
+
+  private extractReferencedStepIdsFromValue(value: unknown): Set<string> | null {
+    try {
+      return extractReferencedStepIdsFromVariables(scanForTemplateVariables(value));
+    } catch {
+      return null;
+    }
   }
 
   private hasEvictedPredecessor(

@@ -56,6 +56,7 @@ export function isInProgressStatus(status: ExecutionStatus) {
   return (
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.PENDING ||
+    status === ExecutionStatus.QUEUED ||
     status === ExecutionStatus.WAITING ||
     status === ExecutionStatus.WAITING_FOR_INPUT ||
     status === ExecutionStatus.WAITING_FOR_CHILD
@@ -75,17 +76,6 @@ export function isFailedBeforeSteps(
   stepExecutions: WorkflowStepExecutionDto[]
 ) {
   return status === ExecutionStatus.FAILED && stepExecutions.length === 0;
-}
-
-export function isCancelableStatus(status: ExecutionStatus) {
-  return (
-    status === ExecutionStatus.RUNNING ||
-    status === ExecutionStatus.WAITING ||
-    status === ExecutionStatus.WAITING_FOR_INPUT ||
-    status === ExecutionStatus.WAITING_FOR_CHILD ||
-    status === ExecutionStatus.PENDING ||
-    status === ExecutionStatus.QUEUED
-  );
 }
 
 // Type guards for steps types

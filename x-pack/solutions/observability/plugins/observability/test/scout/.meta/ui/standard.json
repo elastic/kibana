@@ -1,5 +1,5 @@
 {
-  "sha1": "73758a0cb6495d1ff4853ff30309f1b4ea147cc3",
+  "sha1": "48110f6a99f309a05715cb8d32546ef54e07bf8f",
   "tests": [
     {
       "id": "08ad6c943106b9a-e97f149531b91cd",
@@ -26,6 +26,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
         "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "b997ef31f0ad15f-e93e7fc15d6406a",
+      "title": "Nightshift navigation from Significant Events Discovery navigates to Nightshift page from Streams discovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
+        "line": 38,
         "column": 9
       }
     }

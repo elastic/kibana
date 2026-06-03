@@ -19,11 +19,14 @@ import type {
   CreateSkillResponse,
   UpdateSkillResponse,
 } from '../../common/http_api/skills';
-import { publicApiPath } from '../../common/constants';
+import {
+  SKILL_USED_BY_AGENTS_ERROR_CODE,
+  SKILLS_API_PATH,
+  SKILL_BY_ID_API_PATH,
+} from '../../common/http_api/skills';
 import { internalToPublicDefinition, internalToPublicSummary } from '../services/skills/utils';
 import { AGENT_BUILDER_READ_SECURITY, SKILLS_WRITE_SECURITY } from './route_security';
 import { asError } from '../utils/as_error';
-import { SKILL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/skills';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -59,7 +62,7 @@ export function registerSkillsRoutes({
   // list skills API
   router.versioned
     .get({
-      path: `${publicApiPath}/skills`,
+      path: SKILLS_API_PATH,
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List skills',
@@ -107,7 +110,7 @@ export function registerSkillsRoutes({
   // get skill by ID
   router.versioned
     .get({
-      path: `${publicApiPath}/skills/{skillId}`,
+      path: SKILL_BY_ID_API_PATH,
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a skill by id',
@@ -154,7 +157,7 @@ export function registerSkillsRoutes({
   // create skill
   router.versioned
     .post({
-      path: `${publicApiPath}/skills`,
+      path: SKILLS_API_PATH,
       security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a skill',
@@ -229,7 +232,7 @@ export function registerSkillsRoutes({
   // update skill
   router.versioned
     .put({
-      path: `${publicApiPath}/skills/{skillId}`,
+      path: SKILL_BY_ID_API_PATH,
       security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a skill',
@@ -308,7 +311,7 @@ export function registerSkillsRoutes({
   // delete skill
   router.versioned
     .delete({
-      path: `${publicApiPath}/skills/{skillId}`,
+      path: SKILL_BY_ID_API_PATH,
       security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a skill',

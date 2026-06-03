@@ -40,7 +40,8 @@ export class HostsPage {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
     this.tableLoading = this.page.getByTestId('hostsView-table-loading');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');
-    this.tableNoData = this.page.getByTestId('hostsViewTableNoData');
+    // EuiBasicTable renders noItemsMessage in both caption (a11y) and body cell; scope to cell.
+    this.tableNoData = this.page.getByRole('cell').getByTestId('hostsViewTableNoData');
     this.searchBar = this.page.getByTestId('queryInput');
     this.querySubmitButton = this.page.getByTestId('querySubmitButton');
     this.errorCallout = this.page.getByTestId('hostsViewErrorCallout');
@@ -78,7 +79,11 @@ export class HostsPage {
     await this.searchBar.clear();
     await this.searchBar.fill(query);
     await this.querySubmitButton.click();
-    await this.waitForTableToLoad();
+    await Promise.race([
+      this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT }),
+      this.errorCallout.waitFor({ timeout: EXTENDED_TIMEOUT }),
+      this.tableNoData.waitFor({ timeout: EXTENDED_TIMEOUT }),
+    ]);
   }
 
   public async goToPage({
@@ -297,6 +302,61 @@ export class HostsPage {
   public async visitLogsTab() {
     await this.logsTab.scrollIntoViewIfNeeded();
     await this.logsTab.click();
+  }
+
+  // Alerts tab
+
+  public async visitAlertsTab() {
+    await this.alertsTab.scrollIntoViewIfNeeded();
+    await this.alertsTab.click();
+    await this.page
+      .getByTestId('hostsView-alerts')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async getAlertsCount(): Promise<string> {
+    await this.alertsTabCountBadge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    return (await this.alertsTabCountBadge.textContent()) ?? '0';
+  }
+
+  public async setAlertStatusFilter(status?: 'active' | 'recovered' | 'untracked'): Promise<void> {
+    const testIds: Record<string, string> = {
+      active: 'hostsView-alert-status-filter-active-button',
+      recovered: 'hostsView-alert-status-filter-recovered-button',
+      untracked: 'hostsView-alert-status-filter-untracked-button',
+      all: 'hostsView-alert-status-filter-show-all-button',
+    };
+    const testId = status ? testIds[status] : testIds.all;
+    const button = this.page.getByTestId(testId);
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+    await this.waitForAlertsTableToLoad();
+  }
+
+  public getAlertsTable(): Locator {
+    return this.page.getByTestId('alertsTableIsLoaded');
+  }
+
+  public getAlertsTableRows(): Locator {
+    return this.getAlertsTable().locator('.euiDataGridRow');
+  }
+
+  public getAlertsTableCells(): Locator {
+    return this.getAlertsTable().locator('[data-test-subj="dataGridRowCell"]');
+  }
+
+  public async getAlertsTableRowCount(): Promise<number> {
+    const rows = this.getAlertsTableRows();
+    await this.page.waitForFunction(
+      (selector) => document.querySelectorAll(selector).length > 0,
+      '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
+      { timeout: EXTENDED_TIMEOUT }
+    );
+    return rows.count();
+  }
+
+  public async waitForAlertsTableToLoad(): Promise<void> {
+    await this.getAlertsTable().waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   // Pagination

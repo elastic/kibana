@@ -22,12 +22,14 @@ export function filterForFeatureAvailability(
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
   showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
@@ -480,7 +482,11 @@ export const createNavigationTree = ({
               defaultMessage: 'Access',
             }),
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+            children: [
+              { link: 'management:api_keys' },
+              { link: 'management:application_connections' },
+              { link: 'management:roles' },
+            ],
           },
           {
             id: 'cloud_link_org_settings',
@@ -530,7 +536,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts' },
-              { link: 'rules' },
+              { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],

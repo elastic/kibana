@@ -15,7 +15,7 @@ import {
 } from './log_pagination_probe_query_builder';
 
 describe('buildLogPaginationCursorProbeEsql', () => {
-  it('adds sort, cap, inline count, and slice-end row after the probe WHERE', () => {
+  it('sorts ASC, limits, then aggregates MAX(timestamp) and COUNT(*)', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
       type: 'user',
@@ -32,10 +32,10 @@ describe('interpretLogPaginationCursorRows', () => {
     expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ hasLogsToProcess: false });
   });
 
-  it('returns isLastLogsPage false when more matching logs remain than one page', () => {
+  it('returns isLastLogsPage false when sliceDocCount equals maxLogsPerPage (full page, more may follow)', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
-      missingLogsToProcess: 101,
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
+      sliceDocCount: 100,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
@@ -45,23 +45,23 @@ describe('interpretLogPaginationCursorRows', () => {
     });
   });
 
-  it('returns isLastLogsPage true when exactly maxLogsPerPage logs remain (last full page)', () => {
+  it('returns isLastLogsPage true when sliceDocCount is less than maxLogsPerPage (partial page = last)', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
-      missingLogsToProcess: 100,
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
+      sliceDocCount: 99,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: true,
-      sliceLogCount: 100,
+      sliceLogCount: 99,
     });
   });
 
   it('returns isLastLogsPage true when fewer than maxLogsPerPage logs remain', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
-      missingLogsToProcess: 3,
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
+      sliceDocCount: 3,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
@@ -77,22 +77,21 @@ describe('parseLogPaginationCursorRow', () => {
     const resp: ESQLSearchResponse = {
       columns: [
         { name: TIMESTAMP_FIELD, type: 'date' },
-        { name: '_id', type: 'keyword' },
         { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
       ],
-      values: [['2024-01-01T00:00:00.000Z', 'doc1', 42]],
+      values: [['2024-01-01T00:00:00.000Z', 42]],
     };
     expect(parseLogPaginationCursorRow(resp)).toEqual({
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'doc1' },
-      missingLogsToProcess: 42,
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
+      sliceDocCount: 42,
     });
   });
 
-  it('returns undefined when there are no values without requiring total_logs column', () => {
+  it('returns undefined when there are no values', () => {
     const resp: ESQLSearchResponse = {
       columns: [
         { name: TIMESTAMP_FIELD, type: 'date' },
-        { name: '_id', type: 'keyword' },
+        { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
       ],
       values: [],
     };

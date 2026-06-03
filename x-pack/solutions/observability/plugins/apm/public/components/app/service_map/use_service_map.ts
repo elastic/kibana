@@ -6,6 +6,7 @@
  */
 import { useMemo } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { BoolQuery } from '@kbn/es-query';
 import type {
   ReactFlowServiceMapResponse,
   ServiceMapResponse,
@@ -51,6 +52,7 @@ export const useServiceMap = ({
   serviceGroupId,
   kuery,
   strictEnvironmentScope,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
@@ -60,6 +62,12 @@ export const useServiceMap = ({
   serviceName?: string;
   /** Drop cross-env spans before transforming when `environment` is a specific env. */
   strictEnvironmentScope?: boolean;
+  /**
+   * Pre-built ES query from buildEsQuery() (filter bar + Controls API selections).
+   * `null` = search bar mounted but query not yet computed (gate fetch).
+   * `undefined` = no search bar provider (embeddable — fetch immediately).
+   */
+  esQuery?: { bool: BoolQuery } | null;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -67,6 +75,10 @@ export const useServiceMap = ({
   const fetcherResult = useFetcher(
     (callApmApi) => {
       if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
+        return;
+      }
+      // esQuery === null means search bar hasn't computed yet — wait.
+      if (esQuery === null) {
         return;
       }
 
@@ -79,6 +91,7 @@ export const useServiceMap = ({
             serviceName,
             serviceGroup: serviceGroupId,
             kuery,
+            ...(esQuery ? { esQuery: JSON.stringify(esQuery) } : {}),
           },
         },
       });
@@ -91,6 +104,7 @@ export const useServiceMap = ({
       end,
       serviceGroupId,
       kuery,
+      esQuery,
       config.serviceMapEnabled,
     ],
     { preservePreviousData: false }

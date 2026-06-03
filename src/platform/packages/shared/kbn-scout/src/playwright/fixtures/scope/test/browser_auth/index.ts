@@ -41,6 +41,25 @@ export interface BrowserAuthFixture {
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginWithCustomRole: (role: KibanaRole) => Promise<void>;
+  /**
+   * Logs in as a SAML user whose privileges match the named Elasticsearch role
+   * (e.g. `'kibana_admin'`, `'superuser'`, `'monitoring_user'`).
+   *
+   * Fetches the role descriptor from Elasticsearch and provisions it into the
+   * worker's custom role slot — works on both local and Cloud environments.
+   * No entry in `roles.yml` is required.
+   *
+   * @param roleName - The name of the ES role to look up and log in as.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   *
+   * @example
+   * test('kibana_admin cannot see CCR link', async ({ browserAuth, page }) => {
+   *   await browserAuth.loginWithBuiltInRole('kibana_admin');
+   *   await page.goto('/app/management');
+   *   await expect(page.locator('[data-test-subj="cross_cluster_replication"]')).toBeHidden();
+   * });
+   */
+  loginWithBuiltInRole: (roleName: string) => Promise<void>;
 }
 
 /**
@@ -76,6 +95,11 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       return loginAs(samlAuth.customRoleName);
     };
 
+    const loginWithBuiltInRole = async (roleName: string) => {
+      await samlAuth.setBuiltInRole(roleName);
+      return loginAs(samlAuth.customRoleName);
+    };
+
     const loginAsAdmin = () => loginAs('admin');
     const loginAsViewer = () => loginAs('viewer');
     const loginAsPrivilegedUser = () =>
@@ -90,6 +114,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       loginAsPrivilegedUser,
       loginAs,
       loginWithCustomRole,
+      loginWithBuiltInRole,
     });
   },
 });

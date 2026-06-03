@@ -193,32 +193,6 @@ export function UnifiedDocViewerFlyout({
     [activePage, onClose, setPage]
   );
 
-  const addColumn = useCallback(
-    (columnName: string) => {
-      onAddColumn(columnName);
-      services.toastNotifications?.addSuccess(
-        i18n.translate('unifiedDocViewer.flyout.toastColumnAdded', {
-          defaultMessage: `Column ''{columnName}'' was added`,
-          values: { columnName },
-        })
-      );
-    },
-    [onAddColumn, services.toastNotifications]
-  );
-
-  const removeColumn = useCallback(
-    (columnName: string) => {
-      onRemoveColumn(columnName);
-      services.toastNotifications?.addSuccess(
-        i18n.translate('unifiedDocViewer.flyout.toastColumnRemoved', {
-          defaultMessage: `Column ''{columnName}'' was removed`,
-          values: { columnName },
-        })
-      );
-    },
-    [onRemoveColumn, services.toastNotifications]
-  );
-
   const docViewRenderProps = useMemo<DocViewRenderProps>(
     () => ({
       hit: actualHit,
@@ -227,8 +201,8 @@ export function UnifiedDocViewerFlyout({
       columnsMeta,
       textBasedHits: isEsqlQuery ? hits : undefined,
       filter: onFilter,
-      onAddColumn: addColumn,
-      onRemoveColumn: removeColumn,
+      onAddColumn,
+      onRemoveColumn,
       docViewsRegistry,
       decreaseAvailableHeightBy: isProjectStyle
         ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
@@ -243,8 +217,8 @@ export function UnifiedDocViewerFlyout({
       isEsqlQuery,
       hits,
       onFilter,
-      addColumn,
-      removeColumn,
+      onAddColumn,
+      onRemoveColumn,
       docViewsRegistry,
       isProjectStyle,
       euiTheme.base,

@@ -153,7 +153,7 @@ export async function canUseOutputForIntegration(
 }
 
 export function canDeployCustomPackageAsAgentlessOrThrow(
-  packagePolicy: NewPackagePolicy,
+  packagePolicy: Pick<NewPackagePolicy, 'supports_agentless'>,
   packageInfo: PackageInfo
 ) {
   const installSource =

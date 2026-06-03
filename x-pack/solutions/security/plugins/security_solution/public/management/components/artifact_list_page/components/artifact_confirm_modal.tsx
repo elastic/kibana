@@ -23,12 +23,17 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isOperator, matchesOperator } from '@kbn/securitysolution-list-utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { ArtifactConfirmModalLabelProps } from '../types';
 
 export const CONFIRM_WARNING_MODAL_LABELS = (
   entryType: string,
-  warnings: Partial<{ hasWildcardWithWrongOperator: boolean; hasUnnecessaryEscaping: boolean }>,
+  warnings: Partial<{
+    hasWildcardWithWrongOperator: boolean;
+    hasUnnecessaryEscaping: boolean;
+    hasMalformedMatchesValue: string[];
+  }>,
   links: DocLinks
 ): ArtifactConfirmModalLabelProps => {
   const listOfWarnings: ArtifactConfirmModalLabelProps['listOfWarnings'] = [
@@ -38,7 +43,25 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
             'xpack.securitySolution.artifacts.confirmWarningModal.wildcardWithWrongOperator',
             {
               defaultMessage:
-                'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.',
+                'Using a "*" or a "?" in the value with the "{is}" operator can make the entry ineffective. Change the operator to "{matches}" to ensure wildcards run properly.',
+              values: { matches: matchesOperator.message, is: isOperator.message },
+            }
+          ),
+        ]
+      : []),
+
+    ...((warnings.hasMalformedMatchesValue ?? []).length > 0
+      ? [
+          i18n.translate(
+            'xpack.securitySolution.artifacts.confirmWarningModal.malformedMatchesValue',
+            {
+              defaultMessage:
+                'The following fields use the "{matches}" operator with an escape sequence (e.g. "\\*", "\\?"): {fields}. These match literal characters, not wildcard patterns. If you intended an exact match, use "{is}" instead.',
+              values: {
+                matches: matchesOperator.message,
+                is: isOperator.message,
+                fields: (warnings.hasMalformedMatchesValue ?? []).join(', '),
+              },
             }
           ),
         ]

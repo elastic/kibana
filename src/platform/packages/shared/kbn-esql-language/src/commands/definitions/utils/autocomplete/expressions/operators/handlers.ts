@@ -13,7 +13,7 @@ import type { ISuggestionItem } from '../../../../../registry/types';
 import {
   listCompleteItem,
   commaCompleteItem,
-  buildSubqueryCompleteItem,
+  buildSubqueryCompleteItems,
   likePatternItems,
   rlikePatternItems,
 } from '../../../../../registry/complete_items';
@@ -47,7 +47,7 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   // No list yet: suggest opening parenthesis
   if (shouldSuggestRightOperandStart(rightOperand)) {
     if (allowSubqueryOperand) {
-      return [listCompleteItem, buildSubqueryCompleteItem()];
+      return [listCompleteItem, ...buildSubqueryCompleteItems()];
     }
 
     return [listCompleteItem];
@@ -57,7 +57,7 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   if (isSubQuery(rightOperand)) {
     const cursorAfterSubquery = innerText.length > rightOperand.location.max;
 
-    if (allowSubqueryOperand && cursorAfterSubquery) {
+    if (cursorAfterSubquery) {
       return getLogicalContinuationSuggestions();
     }
 

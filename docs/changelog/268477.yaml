@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/268477
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+title: Add 'unnecessary escaping' warning to Endpoint artifacts
+description: A warning callout and a confirmation modal added to Endpoint exceptions, Trusted applications and Event filters form to warn the users against escaping special characters.

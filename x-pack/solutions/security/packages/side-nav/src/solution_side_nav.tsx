@@ -117,7 +117,6 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
                 items={topItems}
                 categories={categories}
                 selectedId={selectedId}
-                activePanelNavId={activePanelNavId}
                 isMobileSize={isMobileSize}
                 onOpenPanelNav={openPanelNav}
                 onClosePanelNav={onClosePanelNav}
@@ -128,7 +127,6 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
               <SolutionSideNavItems
                 items={bottomItems}
                 selectedId={selectedId}
-                activePanelNavId={activePanelNavId}
                 isMobileSize={isMobileSize}
                 onOpenPanelNav={openPanelNav}
                 onClosePanelNav={onClosePanelNav}
@@ -153,7 +151,6 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
 interface SolutionSideNavItemsProps {
   items: SolutionSideNavItem[];
   selectedId: string;
-  activePanelNavId: ActivePanelNav;
   isMobileSize: boolean;
   onOpenPanelNav: (id: string) => void;
   onClosePanelNav: () => void;
@@ -169,7 +166,6 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
     items,
     categories,
     selectedId,
-    activePanelNavId,
     isMobileSize,
     onOpenPanelNav,
     onClosePanelNav,
@@ -182,7 +178,6 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
               key={item.id}
               item={item}
               isSelected={selectedId === item.id}
-              isActive={activePanelNavId === item.id}
               isMobileSize={isMobileSize}
               onOpenPanelNav={onOpenPanelNav}
               onClosePanelNav={onClosePanelNav}
@@ -215,7 +210,6 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
                   key={item.id}
                   item={item}
                   isSelected={selectedId === item.id}
-                  isActive={activePanelNavId === item.id}
                   isMobileSize={isMobileSize}
                   onOpenPanelNav={onOpenPanelNav}
                   onClosePanelNav={onClosePanelNav}
@@ -233,7 +227,6 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
 interface SolutionSideNavItemProps {
   item: SolutionSideNavItem;
   isSelected: boolean;
-  isActive: boolean;
   onOpenPanelNav: (id: string) => void;
   onClosePanelNav: () => void;
   isMobileSize: boolean;
@@ -244,7 +237,7 @@ interface SolutionSideNavItemProps {
  * and it adds a button to open the item secondary panel if needed.
  */
 const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
-  function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
+  function SolutionSideNavItem({ item, isSelected, isMobileSize, onOpenPanelNav }) {
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 

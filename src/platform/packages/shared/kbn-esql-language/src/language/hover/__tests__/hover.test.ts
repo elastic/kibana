@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { ESQLVariableType } from '@kbn/esql-types';
 import { getFunctionDefinition } from '../../../commands/definitions/utils';
 import { getPromqlFunctionDefinition } from '../../../commands/definitions/utils/promql';
 
@@ -192,5 +193,22 @@ describe('PromQL literals', () => {
     await assertGetHoverItem('PROMQL step="5m" rate(http_requests[5m])', '5m]', [
       '**5m**: duration',
     ]);
+  });
+});
+
+describe('PromQL control variables', () => {
+  test('hover on control variable in label matcher shows its value', async () => {
+    const statement = 'PROMQL step="5m" sum(bytes{agent=?env})';
+    const offset = statement.indexOf('?env') + 1;
+    const callbacks = {
+      getVariables: () => [
+        { key: 'env', value: 'prod', type: ESQLVariableType.VALUES },
+        { key: 'other', value: 'staging', type: ESQLVariableType.VALUES },
+      ],
+    };
+
+    const { contents } = await getHoverItem(statement, offset, callbacks);
+
+    expect(contents.map(({ value }) => value)).toEqual(['**env**: prod']);
   });
 });

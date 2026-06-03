@@ -24,7 +24,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { getTimeZone } from '../../shared/charts/helper/timezone';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
-import { sliceApmTimeseriesToValidYRange } from '../../shared/charts/utils/split_line_series_for_edge_dots';
+import { sliceTimeseriesToValidYRange } from '../../shared/charts/utils/timeseries_gap_handling';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { asDynamicBytes } from '../../../../common/utils/formatters';
@@ -73,7 +73,7 @@ export function StorageChart() {
         };
       }) ?? [];
     return storageTimeSeries.length
-      ? sliceApmTimeseriesToValidYRange(storageTimeSeries)
+      ? sliceTimeseriesToValidYRange(storageTimeSeries)
       : storageTimeSeries;
   }, [data, euiPaletteColorBlindRotations, groupedPalette]);
 

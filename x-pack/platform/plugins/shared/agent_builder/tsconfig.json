@@ -22,6 +22,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/core-http-server",
     "@kbn/agent-builder-common",
+    "@kbn/ebt-click",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-server",
     "@kbn/logging-mocks",
@@ -135,6 +136,8 @@
     "@kbn/repo-info",
     "@kbn/test",
     "@kbn/test-es-server",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/user-profile-components",
+    "@kbn/telemetry"
   ]
 }

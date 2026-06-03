@@ -95,9 +95,9 @@ export const postFleetServerHost: RequestHandler<
     { ...data, is_preconfigured: false },
     { id }
   );
-  if (FleetServerHost.is_default) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  }
+  await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, FleetServerHost.id, {
+    isDefault: FleetServerHost.is_default,
+  });
 
   const body = {
     item: FleetServerHost,
@@ -178,11 +178,9 @@ export const putFleetServerHostHandler: RequestHandler<
       item,
     };
 
-    if (item.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, item.id);
-    }
+    await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, item.id, {
+      isDefault: item.is_default,
+    });
 
     return response.ok({ body });
   } catch (error) {
