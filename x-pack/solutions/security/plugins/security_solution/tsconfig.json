@@ -296,6 +296,7 @@
     "@kbn/anonymization-common",
     "@kbn/workflows-extensions",
     "@kbn/shared-ux-ai-components",
+    "@kbn/shared-ux-markdown",
     "@kbn/controls-schemas",
     "@kbn/search-inference-endpoints",
     "@kbn/evals-plugin",

@@ -5,12 +5,21 @@
  * 2.0.
  */
 import React, { useState, useRef, useMemo } from 'react';
-import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContext,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
-import { EXPORT_REPORT } from '../components/ai_value/translations';
+import {
+  EXPORT_REPORT,
+  SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+} from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueReport } from '../components/ai_value';
@@ -58,6 +67,7 @@ const BaseComponent = () => {
 
   const [hasReportData, setHasReportData] = useState(false);
   const [isDatePickerDisabled, setIsDatePickerDisabled] = useState(true);
+  const [isSampleMode, setIsSampleMode] = useState(false);
   const exportPDFRef = useRef<(() => void) | null>(null);
 
   const { serverless } = useKibana().services;
@@ -145,13 +155,32 @@ const BaseComponent = () => {
           rightSideItems={[
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <SuperDatePicker
-                  id={InputsModelId.valueReport}
-                  showUpdateButton="iconOnly"
-                  width="auto"
-                  compressed
-                  disabled={isSourcererLoading || isDatePickerDisabled}
-                />
+                {isSampleMode ? (
+                  <EuiContext
+                    i18n={{
+                      mapping: {
+                        'euiSuperUpdateButton.cannotUpdateTooltip':
+                          SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+                      },
+                    }}
+                  >
+                    <SuperDatePicker
+                      id={InputsModelId.valueReport}
+                      showUpdateButton="iconOnly"
+                      width="auto"
+                      compressed
+                      disabled={isSourcererLoading || isDatePickerDisabled}
+                    />
+                  </EuiContext>
+                ) : (
+                  <SuperDatePicker
+                    id={InputsModelId.valueReport}
+                    showUpdateButton="iconOnly"
+                    width="auto"
+                    compressed
+                    disabled={isSourcererLoading || isDatePickerDisabled}
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{exportButton}</EuiFlexItem>
             </EuiFlexGroup>,
@@ -171,6 +200,7 @@ const BaseComponent = () => {
                   to={to}
                   setHasReportData={setHasReportData}
                   setIsDatePickerDisabled={setIsDatePickerDisabled}
+                  setIsSampleMode={setIsSampleMode}
                   isSourcererLoading={isSourcererLoading}
                 />
               );

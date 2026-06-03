@@ -359,6 +359,13 @@ export const SAMPLE_DATA_BADGE = i18n.translate(
   }
 );
 
+export const SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.sampleReportDatePickerDisabledTooltip',
+  {
+    defaultMessage: 'Disabled for sample report',
+  }
+);
+
 export const WHAT_REPORT_WILL_LOOK_LIKE_TEXT = i18n.translate(
   'xpack.securitySolution.reports.aiValue.whatReportWillLookLike',
   {

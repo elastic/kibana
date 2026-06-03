@@ -106,7 +106,9 @@ const LiveCostSavingsMetricContent: React.FC<LiveContentProps> = ({
 
 const SampleCostSavingsMetricContent: React.FC = () => {
   const {
-    euiTheme: { colors },
+    euiTheme: {
+      colors: { backgroundBaseSuccess },
+    },
   } = useEuiTheme();
   return (
     <SampleMetric
@@ -115,7 +117,7 @@ const SampleCostSavingsMetricContent: React.FC = () => {
       value={SAMPLE_VALUE_METRICS.costSavings}
       valueFormatter={formatDollars}
       icon="rocket"
-      color={colors.backgroundBaseSuccess}
+      color={backgroundBaseSuccess}
     />
   );
 };
@@ -135,7 +137,9 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
   analystHourlyRate,
 }) => {
   const {
-    euiTheme: { colors },
+    euiTheme: {
+      colors: { backgroundBaseSuccess, success },
+    },
   } = useEuiTheme();
 
   return (
@@ -146,22 +150,22 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.success};
+          fill: ${success};
         }
         .echMetricText {
           padding: 8px 16px 60px;
         }
         p.echMetricText__value {
-          color: ${colors.success};
+          color: ${success};
           font-size: 48px !important;
           padding: 10px 0;
         }
         .euiPanel,
         .embPanel__hoverActions > span {
-          background: ${colors.backgroundBaseSuccess};
+          background: ${backgroundBaseSuccess};
         }
         .embPanel__hoverActionsAnchor {
-          --internalBorderStyle: 1px solid ${colors.success}!important;
+          --internalBorderStyle: 1px solid ${success}!important;
         }
       `}
     >

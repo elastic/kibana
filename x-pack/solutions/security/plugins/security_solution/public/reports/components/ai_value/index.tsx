@@ -37,6 +37,7 @@ import * as i18n from './translations';
 interface Props {
   setHasReportData: React.Dispatch<boolean>;
   setIsDatePickerDisabled: React.Dispatch<boolean>;
+  setIsSampleMode: React.Dispatch<boolean>;
   isSourcererLoading: boolean;
   from: string;
   to: string;
@@ -47,6 +48,7 @@ type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
 const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   setHasReportData,
   setIsDatePickerDisabled,
+  setIsSampleMode,
   from: propFrom,
   to: propTo,
 }) => {
@@ -106,6 +108,10 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
   useEffect(() => {
     setIsDatePickerDisabled(data.isLoading || data.isSample);
   }, [data.isLoading, data.isSample, setIsDatePickerDisabled]);
+
+  useEffect(() => {
+    setIsSampleMode(data.isSample);
+  }, [data.isSample, setIsSampleMode]);
 
   if (data.isLoading) {
     return <PageLoader />;
@@ -213,6 +219,7 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
 export const AIValueReport: React.FC<Props> = ({
   setHasReportData,
   setIsDatePickerDisabled,
+  setIsSampleMode,
   isSourcererLoading,
   from,
   to,
@@ -222,8 +229,9 @@ export const AIValueReport: React.FC<Props> = ({
       // safety check: clear stale parent flags as soon as loading starts.
       setHasReportData(false);
       setIsDatePickerDisabled(true);
+      setIsSampleMode(false);
     }
-  }, [isSourcererLoading, setHasReportData, setIsDatePickerDisabled]);
+  }, [isSourcererLoading, setHasReportData, setIsDatePickerDisabled, setIsSampleMode]);
 
   if (isSourcererLoading) {
     return <PageLoader />;
@@ -233,6 +241,7 @@ export const AIValueReport: React.FC<Props> = ({
     <AIValueReportContent
       setHasReportData={setHasReportData}
       setIsDatePickerDisabled={setIsDatePickerDisabled}
+      setIsSampleMode={setIsSampleMode}
       from={from}
       to={to}
     />

@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { MessageRole } from '@kbn/inference-common';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
@@ -156,8 +156,9 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight }) => {
       {insight ? (
         <Markdown
           onRender={handleMarkdownRender}
-          markdown={insight}
+          markdownContent={insight}
           className="keyInsightMarkdown"
+          readOnly
         />
       ) : (
         <EuiSkeletonText lines={3} size="s" isLoading={true} />
