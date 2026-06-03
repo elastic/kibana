@@ -18,7 +18,7 @@ import {
 import { getMetadataComponentTemplateName } from './metadata_component_templates';
 import { getMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
 
-const DATA_RETENTION_PERIOD = '90d';
+const DATA_RETENTION_PERIOD = '365d';
 
 export const getMetadataIndexTemplateId = (namespace: string) =>
   `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_METADATA}_security_${namespace}_index_template` as const;

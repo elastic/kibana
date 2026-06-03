@@ -36,12 +36,12 @@ describe('getMetadataEntityIndexTemplateConfig', () => {
       expect(config.index_patterns).toContain('.entities.v2.metadata.security_default');
     });
 
-    it('applies DSL data_retention (not ILM) with a 90-day default', () => {
+    it('applies DSL data_retention (not ILM) with a 365-day default', () => {
       const lifecycle = config.template?.lifecycle as { data_retention?: string } | undefined;
       expect(lifecycle).toBeDefined();
       expect(lifecycle?.data_retention).toBeDefined();
-      // Architect mandates: DSL `data_retention`, not ILM, 90-day default for POC.
-      expect(lifecycle?.data_retention).toMatch(/^90d$/);
+      // DSL `data_retention`, not ILM; 1-year retention for relationship history.
+      expect(lifecycle?.data_retention).toMatch(/^365d$/);
     });
 
     it('does NOT configure an ILM policy on the template settings', () => {
