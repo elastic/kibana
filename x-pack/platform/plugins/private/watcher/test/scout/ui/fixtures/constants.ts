@@ -8,8 +8,12 @@
 export const WATCHER_TAGS = ['@local-stateful-classic', '@cloud-stateful-classic'];
 
 /**
- * Mirrors the built-in `watcher_admin` Elasticsearch role.
- * Grants full cluster watcher management + all Kibana features.
+ * Replaces the original FTR's `setRoles(['kibana_admin', 'watcher_admin'])`.
+ * Defined as a single custom role because `loginWithBuiltInRole` provisions only
+ * one built-in role at a time, and `watcher_admin` alone carries no Kibana
+ * privileges (so the user couldn't reach Stack Management). This combines the
+ * `watcher_admin` cluster/index privileges with Kibana `base: ['all']` (the
+ * `kibana_admin` half) to exercise the same access the FTR did.
  */
 export const WATCHER_ADMIN_ROLE = {
   elasticsearch: {
