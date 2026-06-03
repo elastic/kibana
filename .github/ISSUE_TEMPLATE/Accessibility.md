@@ -18,7 +18,17 @@ Reporting guidelines:
 -->
 
 **What is broken?**
-<!-- Provide a short, action-oriented summary of the accessibility problem: describe the incorrect behavior and its impact on the user. -->
+<!--
+Provide a short, action-oriented summary of the accessibility problem:
+1. What the user is trying to do.
+2. What happens instead.
+3. Why it prevents or hinders access.
+-->
+
+| Behavior     | Details |
+|--------------|---------|
+| **Actual**   |         |
+| **Expected** |         |
 
 **Context**
 - **Breadcrumbs (if applicable):** <!-- Breadcrumbs of the page where the issue is detected. -->
@@ -32,15 +42,12 @@ Reporting guidelines:
 **Screenshot / recording**
 <!-- Attach a screenshot, recording, DOM snippet, axe output, or screen reader transcript that demonstrates the issue. Clear axe results or a screen reader transcript are especially useful. -->
 
-**Actual vs. expected**
-| Behavior     | Details |
-|--------------|---------|
-| **Actual**   |         |
-| **Expected** |         |
+**WCAG criterion (if known)**
+<!--
+Optional. If you are familiar with WCAG, include the relevant WCAG 2.2 success criterion.
+If you are unsure, leave this section unchanged and the Accessibility team can triage it.
+-->
 
-
-**WCAG criterion**
-<!-- Link to the applicable WCAG success criterion. Kibana's accessibility baseline is WCAG 2.2. -->
 - [Understanding SC #.#.# Criterion Name](https://www.w3.org/WAI/WCAG22/Understanding/<criterion-slug>.html)
 
 **Potential solution / additional context (optional)**
@@ -51,4 +58,5 @@ Reporting guidelines:
 |-----------------------------------|-------|
 | **Kibana version**                | -     |
 | **Browser (optional)**            | -     |
+| **Operating system (optional)**   | -     |
 | **Screen reader (if applicable)** | -     |
