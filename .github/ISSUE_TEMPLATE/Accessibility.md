@@ -11,18 +11,18 @@ Glossary:
 - `user impact`: What a user cannot do, cannot perceive, or experiences incorrectly because of the issue.
 
 Reporting guidelines:
-- This template is for accessibility issues only.
-- Do not report multiple issues in a single ticket.
-- Provide a concise and specific description of the problem.
-- Remove any sections that are not applicable before submitting.
+- This template is intended for reporting accessibility issues only.
+- Submit separate tickets for separate issues; do not combine multiple issues into one report.
+- Where possible, include screenshots, recordings, or error messages to help with investigation.
+- If you are unsure whether something is an accessibility issue, feel free to submit it anyway—the Accessibility team will triage it.
 -->
 
 **What is broken?**
 <!--
-Provide a short, action-oriented summary of the accessibility problem:
-1. What the user is trying to do.
-2. What happens instead.
-3. Why it prevents or hinders access.
+Provide a concise description of the accessibility issue:
+- What the user is trying to do.
+- What happens instead.
+- How the issue affects the user's ability to use the application.
 -->
 
 | Behavior     | Details |
@@ -40,7 +40,7 @@ Provide a short, action-oriented summary of the accessibility problem:
 3. Observe `[specific accessibility failure]`.
 
 **Screenshot / recording**
-<!-- Attach a screenshot, recording, DOM snippet, axe output, or screen reader transcript that demonstrates the issue. Clear axe results or a screen reader transcript are especially useful. -->
+<!-- Attach evidence that demonstrates the issue, such as a screenshot, recording, DOM snippet, axe output, or screen reader transcript. axe results and screen reader transcripts are especially helpful. -->
 
 **WCAG criterion (if known)**
 <!--
