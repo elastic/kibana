@@ -158,8 +158,10 @@ export class WorkflowCrudService {
           params.spaceId,
           params.request
         )
-      : getWorkflowZodSchema({}, registeredTriggerIds);
-    const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+      : getWorkflowZodSchema({}, registeredTriggerIds, { lightweight: true });
+    const triggerDefinitions = params.request
+      ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
+      : undefined;
 
     return prepareWorkflowDocumentFromYaml({
       id: params.id,
