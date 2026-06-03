@@ -97,6 +97,7 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/product-doc-common",
     "@kbn/kbn-client",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/apm-types"
   ]
 }
