@@ -70,6 +70,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isSidebar: boolean;
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
+  /** Id of the agent the current conversation is using, when known. */
+  agentId?: string;
   /** Function to update the attachment's origin reference */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
@@ -237,6 +239,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /**
+   * Optional max-width (in px) for the inline attachment panel.
+   * When provided, the outer panel will not exceed this width.
+   */
+  getMaxWidth?: (attachment: TAttachment) => number | undefined;
 }
 
 /**

@@ -7,11 +7,11 @@
 
 import {
   EuiButtonIcon,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
