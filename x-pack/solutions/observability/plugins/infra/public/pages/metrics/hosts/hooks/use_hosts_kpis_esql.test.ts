@@ -10,8 +10,10 @@ import { buildSemconvQuery, buildEcsQuery, parseKpiRow } from './use_hosts_kpis_
 
 describe('use_hosts_kpis_esql query builders', () => {
   it('aggregates per host then averages across the first `limit` hosts (semconv)', () => {
-    const query = buildSemconvQuery(100);
+    const query = buildSemconvQuery('metrics-*,metricbeat-*', 100);
 
+    // Reads from the supplied (configured) metrics indices, not a hardcoded one.
+    expect(query).toContain('FROM metrics-*,metricbeat-*');
     // Per-host first stage, then cap to the limit using the same lexical
     // host-name ordering the table uses, then average across those hosts.
     expect(query).toContain('BY host.name');

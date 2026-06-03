@@ -11,6 +11,9 @@
 // from the browser via `data.search` — no custom server route. Two query
 // variants are picked from `searchCriteria.preferredSchema` (semconv OTel vs
 // ECS); the formulas mirror `metrics_data_access/.../formulas/{cpu,memory,disk}.ts`.
+// Both variants read from the configured metrics indices (the resolved metrics
+// data view, same as the table/count) and scope to the right docs via the
+// inventory model's schema `nodeFilter` — no hardcoded index pattern.
 //
 // Each variant aggregates per `host.name`, keeps the first `limit` hosts
 // (`SORT host.name ASC | LIMIT`, matching the table's `terms` host resolution),
@@ -32,8 +35,6 @@ import { useMetricsDataViewContext } from '../../../../containers/metrics_source
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
 import { useReadyMark } from './use_ready_mark';
-
-const SEMCONV_INDEX_PATTERN = 'metrics-hostmetricsreceiver.otel-*';
 
 // `observability:searchExcludedDataTiers`. Read as a string literal (mirroring
 // `logs_overview_fetchers.ts`) so the public bundle doesn't take a new package
@@ -67,7 +68,10 @@ export interface UseHostsKpisResult {
 const sanitizeLimit = (limit: number): number =>
   Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
 
-export const buildSemconvQuery = (limit: number): string => `FROM ${SEMCONV_INDEX_PATTERN}
+export const buildSemconvQuery = (
+  indexPattern: string,
+  limit: number
+): string => `FROM ${indexPattern}
 | WHERE state IN ("idle", "used", "free") OR state IS NULL
 | STATS
     cpu_idle = AVG(metrics.system.cpu.utilization) WHERE state == "idle",
@@ -145,7 +149,11 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   // empty/degraded cluster (no metrics data) — guessing a schema would issue a
   // query against indices that don't exist, so we surface a terminal "–" state.
   const schema: DataSchemaFormat | undefined = searchCriteria?.preferredSchema ?? undefined;
-  const ecsIndexPattern = schema === 'ecs' ? metricsView?.indices : undefined;
+  // Both schemas read from the configured metrics indices (the resolved
+  // metrics data view) rather than a hardcoded pattern, so non-standard source
+  // setups keep working. The schema-specific `nodeFilter` (below) discriminates
+  // OTel vs ECS docs, so a broad pattern is safe.
+  const indexPattern = metricsView?.indices;
   const limit = sanitizeLimit(searchCriteria.limit);
 
   const excludedDataTiers = useMemo<DataTier[]>(
@@ -174,28 +182,28 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
     if (excludedDataTiers.length) {
       clauses.push({ bool: { must_not: [{ terms: { _tier: excludedDataTiers } }] } });
     }
-    // The ECS `FROM metrics-*,metricbeat-*` pattern is broad enough to also
-    // match the semconv OTel data stream in a mixed deployment. Scope it to
-    // ECS system docs via the inventory model's node filter so the fleet
-    // stats don't bleed in semconv hosts. The semconv path's `FROM` is already
-    // pinned to `metrics-hostmetricsreceiver.otel-*`, so it needs no extra
-    // discriminator.
-    if (schema === 'ecs') {
+    // The configured metrics indices pattern (`metrics-*,metricbeat-*` by
+    // default) is broad enough to match both OTel and ECS docs in a mixed
+    // deployment. Scope to the right docs via the inventory model's
+    // schema-specific node filter (OTel `data_stream.dataset` for semconv, the
+    // system integration `event.module`/`metricset.module` for ECS) so the
+    // fleet stats don't bleed across schemas.
+    if (schema) {
       clauses.push(...(findInventoryModel('host').nodeFilter?.({ schema }) ?? []));
     }
     return { bool: { filter: clauses } };
   }, [buildQuery, parsedDateRange.from, parsedDateRange.to, schema, excludedDataTiers]);
 
   const esqlQuery = useMemo(() => {
-    if (!limit) return undefined;
+    if (!limit || !indexPattern) return undefined;
     if (schema === 'semconv') {
-      return buildSemconvQuery(limit);
+      return buildSemconvQuery(indexPattern, limit);
     }
     if (schema === 'ecs') {
-      return ecsIndexPattern ? buildEcsQuery(ecsIndexPattern, limit) : undefined;
+      return buildEcsQuery(indexPattern, limit);
     }
     return undefined;
-  }, [schema, ecsIndexPattern, limit]);
+  }, [schema, indexPattern, limit]);
 
   const {
     data: result,
