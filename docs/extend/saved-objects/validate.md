@@ -224,12 +224,14 @@ Use this when the feature and its plugin are only enabled in dedicated dev or QA
 
 1. Open a PR adding the type name to `src/core/packages/saved-objects/server-internal/wip_types.json` (reviewed by `@elastic/kibana-core`). This file is the gate that Core team reviews.
 
-2. Add the type name to `migrations.allowWipTypes` in every `kibana.yml` where the plugin is enabled. Kibana will fail to start if the type is registered but absent from this list:
+2. Add the type name to `migrations.allowWipTypes` in every **production** `kibana.yml` where the plugin is enabled. On distributable builds Kibana will fail to start if the type is registered but absent from this list:
 
    ```yaml
    migrations.allowWipTypes:
      - my_new_type
    ```
+
+   On non-distributable builds (local development and CI test harnesses) this acknowledgement is not required: Kibana logs a warning and starts normally, so the existing CI checks and test runners pick up WIP types without any extra configuration.
 
 3. Iterate freely. The CI SO check treats the type as perpetually new on every PR — the same checks that apply when first introducing a type always apply, but history-based immutability constraints (e.g. "existing model versions cannot change") are never enforced.
 

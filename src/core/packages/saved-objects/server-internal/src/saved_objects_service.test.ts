@@ -29,6 +29,7 @@ import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import type {
   SavedObjectsClientFactoryProvider,
@@ -60,6 +61,9 @@ import * as SavedObjectsImportExportModule from '@kbn/core-saved-objects-import-
 
 jest.mock('./object_types');
 jest.mock('./deprecations');
+
+jest.mock('../wip_types.json', () => []);
+const mockWipTypes = jest.requireMock('../wip_types.json') as string[];
 
 // Mock the importer and exporter constructors
 jest.mock('@kbn/core-saved-objects-import-export-server-internal', () => {
@@ -1240,6 +1244,71 @@ describe('SavedObjectsService', () => {
           );
         });
       });
+    });
+  });
+
+  describe('WIP saved object types gate', () => {
+    const WIP_TYPE = 'my_wip_type';
+
+    const createContextForWipGate = ({
+      dist,
+      allowWipTypes,
+      logger,
+    }: {
+      dist: boolean;
+      allowWipTypes?: string[];
+      logger?: ReturnType<typeof loggerMock.create>;
+    }) => {
+      const configService = configServiceMock.create();
+      configService.atPath.mockImplementation((path) => {
+        if (path === 'migrations') {
+          return new BehaviorSubject({ skip: true, allowWipTypes });
+        }
+        return new BehaviorSubject({
+          maxImportPayloadBytes: new ByteSizeValue(0),
+          maxImportExportSize: 10000,
+          enableAccessControl: true,
+        });
+      });
+      const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dist } }));
+      return mockCoreContext.create({ configService, env, logger });
+    };
+
+    beforeEach(() => {
+      mockWipTypes.length = 0;
+      mockWipTypes.push(WIP_TYPE);
+      typeRegistryInstanceMock.getAllTypes.mockReturnValue([createType({ name: WIP_TYPE })]);
+    });
+
+    it('throws on a distributable build when a registered WIP type is not allowed', async () => {
+      const coreContext = createContextForWipGate({ dist: true, allowWipTypes: [] });
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      await expect(soService.start(createStartDeps())).rejects.toThrow(
+        `The following WIP saved object types are registered but not listed in 'migrations.allowWipTypes': [${WIP_TYPE}]`
+      );
+    });
+
+    it('starts on a distributable build when the registered WIP type is allowed', async () => {
+      const coreContext = createContextForWipGate({ dist: true, allowWipTypes: [WIP_TYPE] });
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      await expect(soService.start(createStartDeps())).resolves.toBeDefined();
+    });
+
+    it('warns instead of throwing on a non-distributable build when the WIP type is not allowed', async () => {
+      const logger = loggerMock.create();
+      const coreContext = createContextForWipGate({ dist: false, allowWipTypes: [], logger });
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      await expect(soService.start(createStartDeps())).resolves.toBeDefined();
+      const { warn } = loggerMock.collect(logger);
+      expect(warn).toContainEqual([
+        `The following WIP saved object types are registered but not listed in 'migrations.allowWipTypes': [${WIP_TYPE}]. Add each type name to 'migrations.allowWipTypes' to acknowledge the risk.`,
+      ]);
     });
   });
 });

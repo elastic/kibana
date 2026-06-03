@@ -223,7 +223,9 @@ Kibana cannot start because the following WIP saved object types are registered 
 
 **Problem:** A type listed in `wip_types.json` is registered by a plugin but has not been explicitly allowed in the Kibana configuration.
 
-**Fix:** Add the type name to `migrations.allowWipTypes` in `kibana.yml` for every environment where the plugin is enabled:
+This hard failure only happens on **distributable builds** (production, including Serverless). On non-distributable builds (local development and CI test harnesses), Kibana logs a warning and starts normally, so you do not need to mirror `wip_types.json` into `migrations.allowWipTypes` just to run tests or develop locally.
+
+**Fix:** Add the type name to `migrations.allowWipTypes` in `kibana.yml` for every production environment where the plugin is enabled:
 
 ```yaml
 migrations.allowWipTypes:

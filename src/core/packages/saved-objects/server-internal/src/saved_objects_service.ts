@@ -494,11 +494,18 @@ export class SavedObjectsService
 
     const notAllowed = registeredWipTypes.filter((name) => !allowedWipTypes.has(name));
     if (notAllowed.length > 0) {
-      throw new Error(
-        `Kibana cannot start because the following WIP saved object types are registered ` +
-          `but not listed in 'migrations.allowWipTypes': [${notAllowed.join(', ')}]. ` +
-          `Add each type name to 'migrations.allowWipTypes' to acknowledge the risk.`
-      );
+      // The allowlist is a deliberate production safeguard: operators must explicitly acknowledge
+      // each WIP type. Outside of distributable builds (local dev, CI test harnesses, etc.) WIP
+      // types are expected to be registered freely, so we relax the gate to a warning to avoid
+      // forcing every harness to mirror 'wip_types.json' into 'migrations.allowWipTypes'.
+      const reason =
+        `The following WIP saved object types are registered ` +
+        `but not listed in 'migrations.allowWipTypes': [${notAllowed.join(', ')}]. ` +
+        `Add each type name to 'migrations.allowWipTypes' to acknowledge the risk.`;
+      if (this.coreContext.env.cliArgs.dist) {
+        throw new Error(reason);
+      }
+      this.logger.warn(reason);
     }
     if (registeredWipTypes.length > 0) {
       this.logger.warn(
