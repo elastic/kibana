@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { UserStorageDefinition } from '@kbn/core-user-storage-common';
 import { UserStorageClient } from './user_storage_client';
@@ -195,15 +196,76 @@ describe('UserStorageClient.getForInjection()', () => {
 });
 
 describe('UserStorageClient.set()', () => {
-  it('returns the schema-validated value', async () => {
-    const definitions = new Map<string, UserStorageDefinition>([
+  const spaceDefinitions = () =>
+    new Map<string, UserStorageDefinition>([
       ['space:a', { schema: z.string().trim(), defaultValue: '', scope: 'space' }],
     ]);
-    const { client, savedObjectsClient } = buildClient(definitions);
+
+  it('returns the schema-validated value', async () => {
+    const { client, savedObjectsClient } = buildClient(spaceDefinitions());
     savedObjectsClient.update.mockResolvedValue({} as any);
 
     const result = await client.set('space:a', '  hello  ');
 
     expect(result).toBe('hello');
+  });
+
+  it('creates the document when it does not exist yet', async () => {
+    const { client, savedObjectsClient } = buildClient(spaceDefinitions());
+    savedObjectsClient.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(USER_STORAGE_SO_TYPE, PROFILE_UID)
+    );
+    savedObjectsClient.create.mockResolvedValue({} as any);
+
+    const result = await client.set('space:a', 'hello');
+
+    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(result).toBe('hello');
+  });
+
+  it('recovers from a same-space concurrent create by retrying the update', async () => {
+    const { client, savedObjectsClient } = buildClient(spaceDefinitions());
+    savedObjectsClient.update
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(USER_STORAGE_SO_TYPE, PROFILE_UID)
+      )
+      .mockResolvedValueOnce({} as any);
+    savedObjectsClient.create.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError(USER_STORAGE_SO_TYPE, PROFILE_UID)
+    );
+
+    const result = await client.set('space:a', 'hello');
+
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(result).toBe('hello');
+  });
+
+  it('throws and logs an explicit error when the document is owned by another space', async () => {
+    // Reproduces the cross-space failure: the user already has a (namespace-isolated,
+    // globally-unique) document in a different space. update -> NotFound, create ->
+    // Conflict (id exists elsewhere), retry update -> NotFound (not visible here).
+    const { client, savedObjectsClient, logger } = buildClient(spaceDefinitions());
+    savedObjectsClient.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(USER_STORAGE_SO_TYPE, PROFILE_UID)
+    );
+    savedObjectsClient.create.mockRejectedValue(
+      SavedObjectsErrorHelpers.createConflictError(USER_STORAGE_SO_TYPE, PROFILE_UID)
+    );
+
+    await expect(client.set('space:a', 'hello')).rejects.toThrowError();
+
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error.mock.calls[0][0]).toMatch(/different space/);
+  });
+
+  it('logs and rethrows unexpected errors from the initial update', async () => {
+    const { client, savedObjectsClient, logger } = buildClient(spaceDefinitions());
+    savedObjectsClient.update.mockRejectedValue(new Error('transport boom'));
+
+    await expect(client.set('space:a', 'hello')).rejects.toThrow('transport boom');
+
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
   });
 });

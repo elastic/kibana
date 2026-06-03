@@ -18,6 +18,9 @@ interface UserStorageAttributes {
   data?: Record<string, unknown>;
 }
 
+const getErrorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : String(err);
+
 interface UserStorageClientOpts {
   savedObjectsClient: SavedObjectsClientContract;
   profileUid: string;
@@ -129,24 +132,69 @@ export class UserStorageClient implements IUserStorageClient {
     try {
       await this.soClient.update(soType, this.profileUid, dataUpdate);
     } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        try {
-          await this.soClient.create(
-            soType,
-            { userId: this.profileUid, data: { [key]: validated } },
-            { id: this.profileUid }
-          );
-        } catch (createErr) {
-          // Conflict means a concurrent first-write for this user beat us to create().
-          // The doc now exists but our key isn't in it yet — retry as update().
-          if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
-            await this.soClient.update(soType, this.profileUid, dataUpdate);
-          } else {
-            throw createErr;
-          }
-        }
-      } else {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        this.logger.error(
+          `Failed to update userStorage key [${key}] for user [${this.profileUid}] ` +
+            `(type: ${soType}, scope: ${definition.scope}): ${getErrorMessage(err)}`
+        );
         throw err;
+      }
+
+      this.logger.debug(
+        `No existing userStorage document [${soType}/${this.profileUid}]; creating one for key [${key}].`
+      );
+
+      try {
+        await this.soClient.create(
+          soType,
+          { userId: this.profileUid, data: { [key]: validated } },
+          { id: this.profileUid }
+        );
+      } catch (createErr) {
+        // A conflict here can mean one of two things:
+        //  1. A concurrent first-write for this user (same space) beat us to create().
+        //  2. The user already owns a `${soType}` document in a DIFFERENT space.
+        //     `${soType}` documents use a globally-unique id (the profile uid), so
+        //     the same id cannot be (re)created in this space.
+        // We can only recover from (1) by retrying the update; (2) is unrecoverable
+        // from this space and is surfaced with an explicit, actionable error.
+        if (!SavedObjectsErrorHelpers.isConflictError(createErr)) {
+          this.logger.error(
+            `Failed to create userStorage document [${soType}/${this.profileUid}] for key [${key}] ` +
+              `(scope: ${definition.scope}): ${getErrorMessage(createErr)}`
+          );
+          throw createErr;
+        }
+
+        this.logger.debug(
+          `Conflict creating userStorage document [${soType}/${this.profileUid}] for key [${key}]; ` +
+            `retrying as update.`
+        );
+
+        try {
+          await this.soClient.update(soType, this.profileUid, dataUpdate);
+        } catch (retryErr) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(retryErr)) {
+            // The create reported a conflict but the document is not visible in this
+            // space, so the retry update cannot find it. This happens when the user
+            // already has a `${soType}` document owned by another space (its id is
+            // globally unique and namespace-isolated), which cannot be written here.
+            this.logger.error(
+              `Unable to persist userStorage key [${key}] for user [${this.profileUid}] ` +
+                `(type: ${soType}, scope: ${definition.scope}): create reported a conflict but the ` +
+                `document is not present in this space, so it likely belongs to a different space. ` +
+                `"${soType}" uses a globally-unique, namespace-isolated document id, so it cannot be ` +
+                `written from more than one space. Underlying error: ${getErrorMessage(retryErr)}`
+            );
+          } else {
+            this.logger.error(
+              `Failed to persist userStorage key [${key}] for user [${this.profileUid}] ` +
+                `(type: ${soType}, scope: ${definition.scope}) after create-conflict retry: ` +
+                `${getErrorMessage(retryErr)}`
+            );
+          }
+          throw retryErr;
+        }
       }
     }
 
