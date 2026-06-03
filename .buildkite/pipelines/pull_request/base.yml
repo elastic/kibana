@@ -214,3 +214,12 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
+    label: 'Run Renovate helper'
+    key: renovate_helper
+    timeout_in_minutes: 20
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
