@@ -18,6 +18,7 @@ import { test, MAINTENANCE_WINDOWS_APP_PATH } from '../fixtures';
 
 const TABLE_LOADED_CSS =
   '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
+const TABLE_LOAD_TIMEOUT = 30_000;
 const TOAST_TITLE = 'euiToastHeader__title';
 
 // ── API helpers ──────────────────────────────────────────────────────────────
@@ -70,7 +71,7 @@ const searchMws = async (page: ScoutPage, text: string) => {
   const searchBox = page.testSubj.locator('maintenance-window-search');
   await searchBox.fill(text);
   await searchBox.press('Enter');
-  await page.locator(TABLE_LOADED_CSS).waitFor();
+  await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
 };
 
 // Read status text from the <td data-test-subj="maintenance-windows-column-status"> cell
@@ -88,7 +89,7 @@ const getMwRowStatuses = async (page: ScoutPage): Promise<string[]> => {
 // Dismiss all visible toasts to prevent accumulation across actions in a single test.
 const dismissToasts = async (page: ScoutPage) => {
   for (const btn of await page.testSubj.locator('toastCloseButton').all()) {
-    await btn.click({ force: true });
+    if (await btn.isVisible()) await btn.click();
   }
 };
 
@@ -112,7 +113,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
-    await page.locator(TABLE_LOADED_CSS).waitFor();
+    await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
   });
 
   test.afterEach(async ({ kbnClient }) => {
@@ -265,7 +266,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await page.testSubj.click('status-filter-button');
     await page.testSubj.click('status-filter-upcoming');
 
-    await page.locator(TABLE_LOADED_CSS).waitFor();
+    await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
     const filteredStatuses = await getMwRowStatuses(page);
     expect(filteredStatuses).toStrictEqual(['Upcoming']);
   });
@@ -310,7 +311,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     // Filter to show only archived
     await page.testSubj.click('status-filter-button');
     await page.testSubj.click('status-filter-archived');
-    await page.locator(TABLE_LOADED_CSS).waitFor();
+    await page.locator(TABLE_LOADED_CSS).waitFor({ timeout: TABLE_LOAD_TIMEOUT });
 
     statuses = await getMwRowStatuses(page);
     expect(statuses).toStrictEqual(['Archived']);
