@@ -148,7 +148,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    setKibanaServices(plugins, this.logger);
+    setKibanaServices(core, plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(
