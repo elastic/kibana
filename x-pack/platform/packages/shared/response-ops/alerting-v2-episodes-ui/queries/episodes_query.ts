@@ -13,6 +13,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
   PAGE_SIZE_ESQL_VARIABLE,
+  HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
 
 export interface AlertEpisode {
@@ -140,6 +141,21 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  if (filterState.status) {
+    query.where`effective_status == ${filterState.status}`;
+  }
+  if (filterState.ruleId) {
+    query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState.tags?.length) {
+    addTagsFilter(query, filterState.tags);
+  }
+  if (filterState.assigneeUid) {
+    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+};
+
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
  * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
@@ -188,23 +204,38 @@ export const buildEpisodesQuery = (
 
   const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
-  if (filterState?.status) {
-    query.where`effective_status == ${filterState.status}`;
-  }
-
-  if (filterState?.ruleId) {
-    query.where`rule.id == ${filterState.ruleId}`;
-  }
-
-  if (filterState?.tags?.length) {
-    addTagsFilter(query, filterState.tags);
-  }
-
-  if (filterState?.assigneeUid) {
-    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  if (filterState) {
+    applyFilterState(query, filterState);
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
   );
+};
+
+/**
+ * Builds a lightweight ESQL query for histogram data.
+ * Returns only the fields needed for overlap counting; no SORT.
+ * Time range is applied by the caller via executeEsqlQuery's input.timeRange.
+ */
+export const buildEpisodesHistogramQuery = (
+  spaceId: string,
+  filterState?: EpisodesFilterState,
+  breakdownField?: string
+): ComposerQuery => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  const keepFields: string[] = [
+    'first_timestamp',
+    'last_timestamp',
+    'episode.status',
+    'effective_status',
+  ];
+  if (breakdownField) keepFields.push(breakdownField);
+
+  return query.keep(...(keepFields as [string, ...string[]])).limit(HISTOGRAM_EPISODE_LIMIT);
 };

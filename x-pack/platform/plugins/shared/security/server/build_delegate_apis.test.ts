@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
 import { auditServiceMock } from './audit/mocks';
@@ -263,7 +264,7 @@ describe('buildUserProfileApi', () => {
   describe('update', () => {
     it('properly delegates to the service', async () => {
       const updated = { foo: 'bar' };
-      await api.update('foo', updated);
+      await api.update('foo', updated as unknown as UserProfileData);
 
       expect(userProfile.update).toHaveBeenCalledTimes(1);
       expect(userProfile.update).toHaveBeenCalledWith('foo', updated);
