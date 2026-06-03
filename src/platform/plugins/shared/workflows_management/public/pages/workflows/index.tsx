@@ -90,7 +90,10 @@ const getManagedFilterValue = (
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
   const showManagedWorkflowsFilter = useShowManagedWorkflowsSetting();
-  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy', 'tags']);
+  const { data: filtersData } = useWorkflowFiltersOptions(
+    ['enabled', 'createdBy', 'tags'],
+    showManagedWorkflowsFilter ? 'all' : undefined
+  );
   const { euiTheme } = useEuiTheme();
   const location = useLocation();
   const history = useHistory();
@@ -115,7 +118,6 @@ export function WorkflowsPage() {
 
     return nextSearch;
   }, [location.search, filters, showManagedWorkflowsFilter]);
-
   // Update search: sync query/page/size to URL, keep filters in state
   const setSearch = useCallback(
     (newSearch: WorkflowsSearchParams) => {

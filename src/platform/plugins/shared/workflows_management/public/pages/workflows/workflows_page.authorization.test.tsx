@@ -14,6 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useShowManagedWorkflowsSetting, useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsPage } from '.';
+import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { TestWrapper } from '../../shared/test_utils/test_wrapper';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -36,13 +37,7 @@ jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () =>
 }));
 
 jest.mock('../../entities/workflows/model/use_workflow_stats', () => ({
-  useWorkflowFiltersOptions: () => ({
-    data: {
-      enabled: [],
-      createdBy: [],
-      tags: [],
-    },
-  }),
+  useWorkflowFiltersOptions: jest.fn(),
 }));
 
 jest.mock('../../features/workflow_list', () => ({
@@ -52,6 +47,9 @@ jest.mock('../../features/workflow_list', () => ({
 const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
 const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as jest.MockedFunction<
   typeof useShowManagedWorkflowsSetting
+>;
+const mockUseWorkflowFiltersOptions = useWorkflowFiltersOptions as jest.MockedFunction<
+  typeof useWorkflowFiltersOptions
 >;
 
 const emptyWorkflowsResult = {
@@ -96,6 +94,13 @@ describe('WorkflowsPage authorization', () => {
     jest.clearAllMocks();
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
+    mockUseWorkflowFiltersOptions.mockReturnValue({
+      data: {
+        enabled: [],
+        createdBy: [],
+        tags: [],
+      },
+    } as ReturnType<typeof useWorkflowFiltersOptions>);
   });
 
   it.each([
@@ -192,6 +197,32 @@ describe('WorkflowsPage authorization', () => {
     await waitFor(() => {
       expect(mockUseWorkflows).toHaveBeenLastCalledWith(
         expect.objectContaining({ managed: 'all' })
+      );
+    });
+  });
+
+  it('loads workflow filter options for all visible workflow types when managed workflows are visible', async () => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
+      ['enabled', 'createdBy', 'tags'],
+      'all'
+    );
+
+    fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
+    fireEvent.click(screen.getByText('Managed'));
+
+    await waitFor(() => {
+      expect(mockUseWorkflowFiltersOptions).toHaveBeenLastCalledWith(
+        ['enabled', 'createdBy', 'tags'],
+        'all'
       );
     });
   });
