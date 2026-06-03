@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '../../../../common/advanced_settings';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
 import {
   LoggerServiceToken,

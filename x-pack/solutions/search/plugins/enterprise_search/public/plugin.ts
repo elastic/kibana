@@ -7,6 +7,7 @@
 
 import { BehaviorSubject, firstValueFrom, type Subscription } from 'rxjs';
 
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -304,7 +305,10 @@ export class EnterpriseSearchPlugin implements Plugin {
         getNavigationTreeDefinition({
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
-          showAlertingV2: Boolean(core.application.capabilities.alertingVTwo),
+          showAlertingV2: core.settings.globalClient.get<boolean>(
+            ALERTING_V2_ENABLED_SETTING_ID,
+            false
+          ),
         })
       );
     });

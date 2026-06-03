@@ -8,13 +8,13 @@
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerTelemetryTask } from '../lib/usage/task_definition';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '../../common/advanced_settings';
 import { alertingAdvancedSettings } from '../settings/advanced_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
@@ -57,9 +57,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       logger,
     });
 
-    container.get(CoreSetup('capabilities')).registerProvider(() => ({
-      alertingVTwo: {},
-    }));
+    const getStartServices = container.get(CoreSetup('getStartServices'));
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
@@ -125,7 +123,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
         );
       }
 
-      const getStartServices = container.get(CoreSetup('getStartServices'));
       getStartServices()
         .then(([coreStart]) => {
           const soClient = coreStart.savedObjects.createInternalRepository();

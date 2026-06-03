@@ -12,6 +12,7 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -741,7 +742,10 @@ export const createDefinition = (
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
+        showAlertingV2: coreStart.settings.globalClient.get<boolean>(
+          ALERTING_V2_ENABLED_SETTING_ID,
+          false
+        ),
         ingestHubAvailable,
       })
     )

@@ -10,7 +10,7 @@ import type { IKibanaResponse, RouteConfigOptions, RouteMethod } from '@kbn/core
 import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { injectable } from 'inversify';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '../../common/advanced_settings';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ERROR_CODES } from '../lib/errors/error_codes';
 import type { AlertingRouteContext } from './alerting_route_context';
 import { deepMergeRouteOptions } from './deep_merge_route_options';

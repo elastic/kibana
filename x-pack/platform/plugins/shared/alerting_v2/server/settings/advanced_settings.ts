@@ -12,7 +12,7 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
-} from '../../common/advanced_settings';
+} from '@kbn/alerting-v2-constants';
 
 const ALERTING_V2_CATEGORY = 'alertingV2';
 

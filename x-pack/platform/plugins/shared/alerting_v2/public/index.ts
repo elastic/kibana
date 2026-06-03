@@ -18,6 +18,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -25,7 +26,6 @@ import {
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
 } from './constants';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ENABLED_SETTING_ID } from '../../../../common/advanced_settings';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { CheckEngineEnabledStep } from './check_engine_enabled_step';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';

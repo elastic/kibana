@@ -6,7 +6,7 @@
  */
 
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '../../../../common/advanced_settings';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { SettingsService } from './settings_service';
 
 describe('SettingsService', () => {

@@ -10,7 +10,7 @@ import { inject, injectable } from 'inversify';
 import type {
   AlertingAdvancedSettingId,
   AlertingAdvancedSettingValue,
-} from '../../../../common/advanced_settings';
+} from '@kbn/alerting-v2-constants';
 import { UiSettingsClientToken } from './tokens';
 
 export interface SettingsServiceContract {

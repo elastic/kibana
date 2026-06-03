@@ -15,6 +15,7 @@ import {
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 
 import { type Services } from '../common/services';
 import { createManagementFooterItemsTree } from './management_footer_items';
@@ -28,7 +29,10 @@ export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): Promise<NavigationTreeDefinition> => {
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
+  const showAlertingV2 = services.settings.globalClient.get<boolean>(
+    ALERTING_V2_ENABLED_SETTING_ID,
+    false
+  );
   return {
     body: [
       {
