@@ -45,15 +45,9 @@ export * from './src/playwright/ui_components';
 
 // Page-object wrappers and helpers for shared Kibana surfaces.
 export {
-  ContentListWrapper,
   CopySavedObjectsToSpaceFlyout,
-  buildContentListSearch,
-  buildContentListUrlRegex,
-  DataViewsManagementPage,
-  ListingTable,
   SavedObjectsManagementPage,
 } from './src/playwright/page_objects';
-export type { ContentListUrlState } from './src/playwright/page_objects';
 
 // Scout core types
 export type {
