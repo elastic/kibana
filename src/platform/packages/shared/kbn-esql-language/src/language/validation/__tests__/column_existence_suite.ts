@@ -43,6 +43,17 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       );
     });
 
+    it('warns when accessing an unsupported field', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'from a_index | keep unsupportedField',
+        [],
+        [
+          'Field "unsupportedField" cannot be retrieved, it is unsupported or not indexed; returning null',
+        ]
+      );
+    });
+
     it('returns one warning for each instance of the same unmapped column', async () => {
       const { expectErrors } = await setup();
       await expectErrors(
