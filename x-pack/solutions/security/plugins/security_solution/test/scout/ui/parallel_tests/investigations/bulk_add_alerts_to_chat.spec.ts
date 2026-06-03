@@ -39,6 +39,12 @@ spaceTest.describe(
           rule_id: `scout-bulk-chat-${scoutSpace.id}-${i}`,
         });
       }
+
+      // Wait for the task manager to execute each rule and produce at least one alert before
+      // opening the browser. Without this, waitForRuleAlert races against the task manager's
+      // first-run scheduling (which can take up to ~90s under load) and times out.
+      await Promise.all(ruleNames.map((name) => apiServices.detectionAlerts.waitForAlerts(name)));
+
       await browserAuth.loginWithCustomRole(FULL_KIBANA_SECURITY_ROLE);
     });
 

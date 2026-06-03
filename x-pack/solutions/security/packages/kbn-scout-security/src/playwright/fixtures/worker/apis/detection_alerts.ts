@@ -9,9 +9,15 @@ import type { EsClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/sc
 import { measurePerformanceAsync } from '@kbn/scout';
 
 const DEFAULT_ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
+const WAIT_FOR_ALERTS_POLL_INTERVAL_MS = 1_000;
 
 export interface DetectionAlertsApiService {
   deleteAll: () => Promise<void>;
+  /**
+   * Polls until at least `minCount` alerts matching `ruleName` exist, or
+   * the `timeout` is exhausted.  Resolves with the matched count; rejects on timeout.
+   */
+  waitForAlerts: (ruleName: string, minCount?: number, timeout?: number) => Promise<number>;
 }
 
 export const getDetectionAlertsApiService = ({
@@ -39,6 +45,35 @@ export const getDetectionAlertsApiService = ({
           scroll_size: 10000,
           refresh: true,
         });
+      });
+    },
+
+    waitForAlerts: async (ruleName: string, minCount = 1, timeout = 120_000) => {
+      return measurePerformanceAsync(log, 'security.detectionAlerts.waitForAlerts', async () => {
+        const deadline = Date.now() + timeout;
+        const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
+
+        while (Date.now() < deadline) {
+          try {
+            await esClient.indices.refresh({ index });
+            const result = await esClient.count({
+              index,
+              query: {
+                term: { 'kibana.alert.rule.name': ruleName },
+              },
+            });
+            if (result.count >= minCount) {
+              return result.count;
+            }
+          } catch {
+            // index not yet created — keep polling
+          }
+          await new Promise((resolve) => setTimeout(resolve, WAIT_FOR_ALERTS_POLL_INTERVAL_MS));
+        }
+
+        throw new Error(
+          `waitForAlerts timed out after ${timeout}ms: expected >=${minCount} alert(s) for rule "${ruleName}" in space "${space}"`
+        );
       });
     },
   };
