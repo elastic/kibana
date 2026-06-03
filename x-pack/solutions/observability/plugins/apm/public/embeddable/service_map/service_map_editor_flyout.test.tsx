@@ -197,6 +197,59 @@ describe('<ServiceMapEditorFlyout/>', () => {
     });
   });
 
+  describe('preview-until-save (live preview)', () => {
+    it('does not call onPreview on initial mount', async () => {
+      const onPreview = jest.fn();
+      await renderFlyout({ onPreview });
+
+      expect(onPreview).not.toHaveBeenCalled();
+    });
+
+    it('calls onPreview when a control changes', async () => {
+      const onPreview = jest.fn();
+      await renderFlyout({ onPreview });
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSyncFiltersToggle'));
+
+      await waitFor(() => {
+        expect(onPreview).toHaveBeenCalledWith(
+          expect.objectContaining({ sync_with_dashboard_filters: true })
+        );
+      });
+    });
+
+    it('reverts on unmount when the flyout was not saved', async () => {
+      const onRevert = jest.fn();
+      const { unmount } = await renderFlyout({ onRevert });
+
+      unmount();
+
+      expect(onRevert).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not revert on unmount after saving', async () => {
+      const onRevert = jest.fn();
+      const onSave = jest.fn();
+      const { unmount } = await renderFlyout({ onRevert, onSave });
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+      unmount();
+
+      expect(onRevert).not.toHaveBeenCalled();
+    });
+
+    it('shows the preview hint only when live preview is enabled', async () => {
+      const { unmount } = await renderFlyout();
+      expect(screen.queryByTestId('apmServiceMapEditorPreviewHint')).not.toBeInTheDocument();
+      unmount();
+
+      await renderFlyout({ onPreview: jest.fn() });
+      expect(screen.getByTestId('apmServiceMapEditorPreviewHint')).toBeInTheDocument();
+    });
+  });
+
   describe('when timeRange is provided', () => {
     it('uses the provided time range for suggestions API calls', async () => {
       const timeRange = { from: '2021-10-10T00:00:00.000Z', to: '2021-10-10T00:15:00.000Z' };

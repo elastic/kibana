@@ -19,11 +19,13 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSkeletonText,
+  EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
@@ -64,10 +66,12 @@ import {
 interface KueryInputProps {
   kuery: string;
   onChange: (kuery: string) => void;
+  /** Fired on submit / auto-submit (debounced), not on every keystroke. */
+  onSubmit?: (kuery: string) => void;
   deps: EmbeddableDeps;
 }
 
-function KueryInput({ kuery, onChange, deps }: KueryInputProps) {
+function KueryInput({ kuery, onChange, onSubmit, deps }: KueryInputProps) {
   const { QueryStringInput } = deps.pluginsStart.kql;
   const { dataView } = useAdHocApmDataView();
   const isLoading = !dataView;
@@ -79,6 +83,13 @@ function KueryInput({ kuery, onChange, deps }: KueryInputProps) {
       onChange(String(newQuery.query));
     },
     [onChange]
+  );
+
+  const handleSubmit = useCallback(
+    (newQuery: Query) => {
+      (onSubmit ?? onChange)(String(newQuery.query));
+    },
+    [onSubmit, onChange]
   );
 
   const kqlDocsUrl = deps.coreStart.docLinks.links.query.kueryQuerySyntax;
@@ -128,7 +139,7 @@ function KueryInput({ kuery, onChange, deps }: KueryInputProps) {
         indexPatterns={dataView ? [dataView] : []}
         query={query}
         onChange={handleChange}
-        onSubmit={handleChange}
+        onSubmit={handleSubmit}
         placeholder={i18n.translate('xpack.apm.serviceMapEditor.kueryPlaceholder', {
           defaultMessage: 'Filter service map using KQL syntax',
         })}
@@ -143,6 +154,13 @@ function KueryInput({ kuery, onChange, deps }: KueryInputProps) {
 export interface ServiceMapEditorFlyoutProps {
   onCancel: () => void;
   onSave: (state: ServiceMapEmbeddableState) => void;
+  /**
+   * Apply the in-progress edits to the panel live (preview), without persisting. Only
+   * provided when editing an existing panel — the add flow has no panel to preview on.
+   */
+  onPreview?: (state: ServiceMapEmbeddableState) => void;
+  /** Revert the panel to its pre-edit state when the flyout closes without saving. */
+  onRevert?: () => void;
   initialState?: ServiceMapEmbeddableState;
   ariaLabelledBy: string;
   deps: EmbeddableDeps;
@@ -235,6 +253,8 @@ function FlyoutFilterOptionCountsResolver({
 export function ServiceMapEditorFlyout({
   onCancel,
   onSave,
+  onPreview,
+  onRevert,
   initialState,
   ariaLabelledBy,
   deps,
@@ -246,6 +266,9 @@ export function ServiceMapEditorFlyout({
     initialState?.environment ?? ENVIRONMENT_ALL.value
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
+  // KQL applied to the live preview — only updated on submit / auto-submit (not per
+  // keystroke) so typing doesn't trigger a service-map refetch on every character.
+  const [previewKuery, setPreviewKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
   const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
     initialState?.sync_with_dashboard_filters ?? false
@@ -391,10 +414,10 @@ export function ServiceMapEditorFlyout({
     }
   };
 
-  const handleSave = useCallback(() => {
-    const state: ServiceMapEmbeddableState = {
+  const buildState = useCallback(
+    (kueryValue: string): ServiceMapEmbeddableState => ({
       environment,
-      kuery: kuery.trim() ? kuery : undefined,
+      kuery: kueryValue.trim() ? kueryValue : undefined,
       service_name: serviceName || undefined,
       sync_with_dashboard_filters: syncWithDashboardFilters,
       // Empty arrays drop to undefined so they're omitted from the saved object payload.
@@ -403,20 +426,52 @@ export function ServiceMapEditorFlyout({
       connection_filter: connectionFilter.length ? connectionFilter : undefined,
       anomaly_severity_filter: anomalySeverityFilter.length ? anomalySeverityFilter : undefined,
       map_orientation: mapOrientation,
+    }),
+    [
+      environment,
+      serviceName,
+      syncWithDashboardFilters,
+      alertStatusFilter,
+      sloStatusFilter,
+      connectionFilter,
+      anomalySeverityFilter,
+      mapOrientation,
+    ]
+  );
+
+  // Tracks whether the flyout closed via Save, so the unmount cleanup knows whether to revert.
+  const savedRef = useRef(false);
+
+  const handleSave = useCallback(() => {
+    savedRef.current = true;
+    // Use the current input text (not just the last-submitted preview) so unsubmitted KQL
+    // edits are still saved.
+    onSave(buildState(kuery));
+  }, [buildState, kuery, onSave]);
+
+  // Preview-until-save: push the in-progress state onto the panel live whenever a control
+  // changes (KQL only on submit, via `previewKuery`). Skip the initial mount so opening the
+  // flyout doesn't re-apply the unchanged state.
+  const didApplyInitialRef = useRef(false);
+  useEffect(() => {
+    if (!didApplyInitialRef.current) {
+      didApplyInitialRef.current = true;
+      return;
+    }
+    onPreview?.(buildState(previewKuery));
+  }, [buildState, previewKuery, onPreview]);
+
+  // Revert the live preview on any close-without-save (Cancel, Esc, outside-click, X), all of
+  // which unmount the flyout. A ref keeps the latest `onRevert` without re-running the effect.
+  const onRevertRef = useRef(onRevert);
+  onRevertRef.current = onRevert;
+  useEffect(() => {
+    return () => {
+      if (!savedRef.current) {
+        onRevertRef.current?.();
+      }
     };
-    onSave(state);
-  }, [
-    environment,
-    kuery,
-    serviceName,
-    syncWithDashboardFilters,
-    alertStatusFilter,
-    sloStatusFilter,
-    connectionFilter,
-    anomalySeverityFilter,
-    mapOrientation,
-    onSave,
-  ]);
+  }, []);
 
   return (
     <div style={serviceMapFlyoutShellStyle}>
@@ -514,7 +569,15 @@ export function ServiceMapEditorFlyout({
             />
           </EuiFormRow>
 
-          <KueryInput kuery={kuery} onChange={setKuery} deps={deps} />
+          <KueryInput
+            kuery={kuery}
+            onChange={setKuery}
+            onSubmit={(value) => {
+              setKuery(value);
+              setPreviewKuery(value);
+            }}
+            deps={deps}
+          />
 
           <EuiFormRow
             label={i18n.translate('xpack.apm.serviceMapEditor.dependenciesFilterLabel', {
@@ -698,6 +761,19 @@ export function ServiceMapEditorFlyout({
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
+        {onPreview && (
+          <>
+            <EuiText size="xs" color="subdued" data-test-subj="apmServiceMapEditorPreviewHint">
+              <p>
+                {i18n.translate('xpack.apm.serviceMapEditor.previewHint', {
+                  defaultMessage:
+                    'Changes preview on the panel as you edit. Click Save to keep them — closing without saving discards them.',
+                })}
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

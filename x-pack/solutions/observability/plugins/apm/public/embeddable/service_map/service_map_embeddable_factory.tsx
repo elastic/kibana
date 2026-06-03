@@ -220,32 +220,42 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              // Snapshot of the panel's state when the editor opens, used to revert any
+              // live-preview changes if the flyout is closed without saving.
+              const editorInitialState = stateApi.serializeState();
+              // Push a full state onto the panel via the live setters so the map updates
+              // immediately. Shared by the live preview (`onPreview`) and `onSave`.
+              const applyCustomState = (newState: ServiceMapEmbeddableState) => {
+                if (newState.environment !== undefined) {
+                  customStateManager.api.setEnvironment(newState.environment);
+                }
+                customStateManager.api.setKuery(newState.kuery);
+                customStateManager.api.setServiceName(newState.service_name);
+                customStateManager.api.setMapOrientation(newState.map_orientation);
+                customStateManager.api.setSyncWithDashboardFilters(
+                  newState.sync_with_dashboard_filters
+                );
+                // View filters live in the edit flyout per product direction: the
+                // in-graph options panel only renders layout controls in dashboard panels.
+                customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);
+                customStateManager.api.setSloStatusFilter(newState.slo_status_filter);
+                customStateManager.api.setConnectionFilter(newState.connection_filter);
+                customStateManager.api.setAnomalySeverityFilter(newState.anomaly_severity_filter);
+              };
               return (
                 <ApmEmbeddableContext deps={deps}>
                   <ServiceMapEditorFlyout
                     ariaLabelledBy={ariaLabelledBy}
                     deps={deps}
                     timeRange={timeRangeManager.api.timeRange$.getValue()}
-                    initialState={stateApi.serializeState()}
+                    initialState={editorInitialState}
                     onCancel={closeFlyout}
+                    // Preview-until-save: apply changes to the panel live while editing,
+                    // and revert to the pre-edit snapshot if the flyout closes unsaved.
+                    onPreview={applyCustomState}
+                    onRevert={() => stateApi.applySerializedState(editorInitialState)}
                     onSave={(newState: ServiceMapEmbeddableState) => {
-                      if (newState.environment !== undefined) {
-                        customStateManager.api.setEnvironment(newState.environment);
-                      }
-                      customStateManager.api.setKuery(newState.kuery);
-                      customStateManager.api.setServiceName(newState.service_name);
-                      customStateManager.api.setMapOrientation(newState.map_orientation);
-                      customStateManager.api.setSyncWithDashboardFilters(
-                        newState.sync_with_dashboard_filters
-                      );
-                      // View filters live in the edit flyout per product direction: the
-                      // in-graph options panel only renders layout controls in dashboard panels.
-                      customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);
-                      customStateManager.api.setSloStatusFilter(newState.slo_status_filter);
-                      customStateManager.api.setConnectionFilter(newState.connection_filter);
-                      customStateManager.api.setAnomalySeverityFilter(
-                        newState.anomaly_severity_filter
-                      );
+                      applyCustomState(newState);
                       closeFlyout();
                     }}
                   />
