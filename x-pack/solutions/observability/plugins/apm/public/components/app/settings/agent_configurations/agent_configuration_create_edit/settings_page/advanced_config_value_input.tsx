@@ -96,7 +96,7 @@ export function AdvancedConfigValueInput({
                 }
               )}
               iconType="trash"
-              color={'danger'}
+              color="danger"
               onClick={() => onDelete(configKey, id)}
             />
           </EuiToolTip>
