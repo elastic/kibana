@@ -40,7 +40,7 @@ Provide a concise description of the accessibility issue:
 3. Observe `[specific accessibility failure]`.
 
 **Screenshot / recording**
-<!-- Attach evidence that demonstrates the issue, such as a screenshot, recording, DOM snippet, axe output, or screen reader transcript. axe results and screen reader transcripts are especially helpful. -->
+<!-- Attach evidence that demonstrates the issue, such as a screenshot, recording, DOM snippet, axe-core output, or screen reader transcript. -->
 
 **WCAG criterion (if known)**
 <!--
