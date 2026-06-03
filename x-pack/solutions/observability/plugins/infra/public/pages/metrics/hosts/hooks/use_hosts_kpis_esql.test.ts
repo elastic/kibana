@@ -34,6 +34,20 @@ describe('use_hosts_kpis_esql query builders', () => {
     expect(query).toContain('cpuUsage = AVG(host_cpuUsage)');
     expect(query).toContain('memoryUsage = AVG(host_memoryUsage)');
   });
+
+  it('omits the disk clauses when the filesystem field is absent (avoids unknown-column failure)', () => {
+    const semconv = buildSemconvQuery('metrics-*', 100, false);
+    expect(semconv).not.toContain('metrics.system.filesystem.usage');
+    expect(semconv).not.toContain('diskUsage');
+    expect(semconv).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(semconv).toContain('memoryUsage = AVG(host_memoryUsage)');
+
+    const ecs = buildEcsQuery('metrics-*', 100, false);
+    expect(ecs).not.toContain('system.filesystem.used.pct');
+    expect(ecs).not.toContain('diskUsage');
+    expect(ecs).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(ecs).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
+  });
 });
 
 describe('parseKpiRow', () => {
