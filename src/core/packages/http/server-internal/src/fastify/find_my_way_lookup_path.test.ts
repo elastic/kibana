@@ -9,12 +9,16 @@
 
 import type { FastifyRequest } from 'fastify';
 
+import FindMyWay from 'find-my-way';
+
 import {
+  findMyWayRouteMatch,
   getFindMyWayLookupPath,
   redirectLocationWithoutTrailingSlash,
   restoreTrailingSlashInWildcardParam,
   routeMatchHasEmptyNamedPathParam,
   stripTrailingSlashForFindMyWayLookup,
+  type GlobalCatchAllRoute,
 } from './find_my_way_lookup_path';
 
 function makeReq(url: string): FastifyRequest {
@@ -47,5 +51,31 @@ describe('find_my_way_lookup_path', () => {
     expect(routeMatchHasEmptyNamedPathParam({ alert_id: '' })).toBe(true);
     expect(routeMatchHasEmptyNamedPathParam({ alert_id: 'x' })).toBe(false);
     expect(routeMatchHasEmptyNamedPathParam({ path: '' }, 'path')).toBe(false);
+  });
+
+  it('rejects empty named capture on trailing-slash URL then matches catch-all via slashless path', () => {
+    const fmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
+    fmw.on('GET', '/api/cases/:case_id', () => 'case', {});
+    fmw.on('GET', '/api/cases/alerts/:alert_id', () => 'alerts', {});
+    fmw.on('GET', '/*', () => 'wildcard', { wildcardName: 'path' });
+
+    const req = makeReq('/api/cases/alerts/');
+    const match = findMyWayRouteMatch(fmw, 'GET', req, {
+      handler: (() => 'wildcard') as GlobalCatchAllRoute['handler'],
+      wildcardName: 'path',
+    });
+
+    expect((match?.handler as () => string)()).toBe('wildcard');
+    expect(match?.params).toEqual({ '*': 'api/cases/alerts' });
+  });
+
+  it('prefers trailing-slash pathname for routes registered only with a slash', () => {
+    const fmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
+    fmw.on('GET', '/only/trailing/', () => 'slashRoute', {});
+
+    const req = makeReq('/only/trailing/');
+    const match = findMyWayRouteMatch(fmw, 'GET', req);
+
+    expect((match?.handler as () => string)()).toBe('slashRoute');
   });
 });

@@ -106,7 +106,7 @@ describe('populateMatchedRouteFromFindMyWay', () => {
     expect((req as any).app?.matchedKibanaRouteOptions?.security).toEqual(appRoute.security);
   });
 
-  it('does not stash a matched route for a trailing-slash path (lookup is normalized)', () => {
+  it('does not stash the alerts route for a trailing-slash path when a catch-all exists', () => {
     const alertsFmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
     const alertsRoute = {
       method: 'get',
@@ -114,19 +114,48 @@ describe('populateMatchedRouteFromFindMyWay', () => {
       options: { tags: [] },
       security: kibanaRouteOptions.security,
     } as unknown as RouterRoute;
+    const catchAllRoute = {
+      method: 'get',
+      path: '/{path*}',
+      options: { tags: [] },
+      security: kibanaRouteOptions.security,
+    } as unknown as RouterRoute;
+    alertsFmw.on('GET', '/api/cases/:case_id', () => undefined, {
+      kibanaRoute: {
+        method: 'get',
+        path: '/api/cases/{case_id}',
+        options: { tags: [] },
+        security: kibanaRouteOptions.security,
+      },
+      kibanaRouteOptions,
+    });
     alertsFmw.on('GET', '/api/cases/alerts/:alert_id', () => undefined, {
       kibanaRoute: alertsRoute,
       kibanaRouteOptions,
+    });
+    alertsFmw.on('GET', '/*', () => undefined, {
+      kibanaRoute: catchAllRoute,
+      kibanaRouteOptions,
+      wildcardName: 'path',
     });
 
     const req = makeReq('/api/cases/alerts/');
     populateMatchedRouteFromFindMyWay(req, makeReply(), {
       ...lookupOptions,
       fmw: alertsFmw,
+      globalCatchAll: {
+        handler: () => undefined,
+        store: {
+          kibanaRoute: catchAllRoute,
+          kibanaRouteOptions,
+          wildcardName: 'path',
+        },
+        wildcardName: 'path',
+      },
     });
 
-    expect((req as any).app?.matchedRoute).toBeUndefined();
-    expect((req as any).app?.matchedKibanaRouteOptions).toBeUndefined();
+    expect((req as any).app?.matchedRoute).toBe(catchAllRoute);
+    expect((req as any).app?.matchedRouteParams?.path).toBe('api/cases/alerts/');
   });
 
   it('matches after rewrite and exposes security on KibanaRequest', () => {

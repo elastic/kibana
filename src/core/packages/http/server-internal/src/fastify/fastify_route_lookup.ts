@@ -17,6 +17,7 @@ import {
   findMyWayRouteMatch,
   restoreTrailingSlashInWildcardParam,
   routeMatchHasEmptyNamedPathParam,
+  type GlobalCatchAllRoute,
 } from './find_my_way_lookup_path';
 import { toPlainRouteParams } from './fastify_to_hapi_request';
 import { attachFastifyPayloadReceiveTimeout } from './register_fastify_payload_timeout_pre_parsing';
@@ -46,6 +47,7 @@ export type FastifyStaticDirectoryRouteOptions = KibanaRouteOptions;
 export interface PopulateMatchedRouteFromFindMyWayOptions {
   fmw: FmwInstance<FmwHTTPVersion.V1>;
   getLookupPath: FastifyRouteLookupPathResolver;
+  globalCatchAll?: GlobalCatchAllRoute;
   staticDirectoryRouteInfo: FastifyStaticDirectoryRouteInfo;
   staticDirectoryRouteOptions: FastifyStaticDirectoryRouteOptions;
   pathnameMatchesWildcardPattern: (pathname: string, pattern: string) => boolean;
@@ -71,6 +73,7 @@ export function populateMatchedRouteFromFindMyWay(
   const {
     fmw,
     getLookupPath,
+    globalCatchAll,
     staticDirectoryRouteInfo,
     staticDirectoryRouteOptions,
     pathnameMatchesWildcardPattern,
@@ -78,7 +81,7 @@ export function populateMatchedRouteFromFindMyWay(
   } = options;
 
   const lookupPath = getLookupPath(req);
-  const match = findMyWayRouteMatch(fmw, String(req.method ?? 'GET'), req);
+  const match = findMyWayRouteMatch(fmw, String(req.method ?? 'GET'), req, globalCatchAll);
   const app = ((req as any).app = (req as any).app ?? {});
   let matchedKibanaRoute: RouterRoute | undefined;
 

@@ -423,6 +423,98 @@ describe('FastifyHttpServer', () => {
       expect(res.headers.location).toBe('/app/home');
     }, 15000);
 
+    it('redirects trailing-slash URLs via catch-all when a named param would be empty (cases alerts/)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const catchAllRouter = new Router('', ctx.logger.get('catch-all'), enhanceHandler, { env });
+      catchAllRouter.get(
+        {
+          path: '/{path*}',
+          validate: {
+            params: schema.object({
+              path: schema.maybe(schema.string()),
+            }),
+            query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          },
+          security: {
+            authz: { enabled: false, reason: 'test' },
+            authc: { enabled: false, reason: 'test' },
+          },
+          options: { access: 'public' },
+        },
+        async (_context, req, res) => {
+          const { path } = req.params as { path?: string };
+          if (!path || !path.endsWith('/') || path.startsWith('/')) {
+            return res.notFound();
+          }
+          return res.redirected({
+            headers: { location: `/${path.slice(0, -1)}` },
+          });
+        }
+      );
+
+      const casesRouter = new Router('', ctx.logger.get('cases'), enhanceHandler, { env });
+      casesRouter.get(
+        {
+          path: '/api/cases/{case_id}',
+          validate: {
+            params: schema.object({
+              case_id: schema.string({ minLength: 1 }),
+            }),
+          },
+          security: {
+            authz: { enabled: false, reason: 'test' },
+            authc: { enabled: false, reason: 'test' },
+          },
+          options: { access: 'public' },
+        },
+        async () => {
+          throw new Error('should not treat alerts/ as case_id=alerts');
+        }
+      );
+
+      const alertsRouter = new Router('', ctx.logger.get('alerts'), enhanceHandler, { env });
+      alertsRouter.get(
+        {
+          path: '/api/cases/alerts/{alert_id}',
+          validate: {
+            params: schema.object({
+              alert_id: schema.string({ minLength: 1 }),
+            }),
+          },
+          security: {
+            authz: { enabled: false, reason: 'test' },
+            authc: { enabled: false, reason: 'test' },
+          },
+          options: { access: 'public' },
+        },
+        async () => {
+          throw new Error('should not reach alerts handler for trailing-slash-only path');
+        }
+      );
+
+      setup.registerRouter(catchAllRouter);
+      setup.registerRouter(casesRouter);
+      setup.registerRouter(alertsRouter);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const res = await httpRequest(listenPort, '/api/cases/alerts/', 'GET');
+      expect(res.statusCode).toBe(302);
+      expect(res.headers.location).toBe('/api/cases/alerts');
+    }, 15000);
+
     it('keeps application/json as a Readable for routes with body output stream + parse false (Console proxy parity)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

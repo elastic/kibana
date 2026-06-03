@@ -182,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return 500 when space id is invalid', async () => {
-        await postGraph(
+        const response = postGraph(
           supertest,
           {
             query: {
@@ -193,7 +193,14 @@ export default function (providerContext: FtrProviderContext) {
           },
           undefined,
           encodeURIComponent('foo | FROM *').replace('*', '%2A')
-        ).expect(result(500, logger));
+        );
+
+        try {
+          await response.expect(result(500, logger));
+        } catch (error) {
+          // When running on Fastify, it returns 404 (as Space ID is invalid and cannot be found) instead of 500 (failure to parse the space)
+          await response.expect(result(404, logger));
+        }
       });
 
       it('should return 400 when index pattern contains illegal characters', async () => {

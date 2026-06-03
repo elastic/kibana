@@ -96,6 +96,7 @@ import {
   getFindMyWayLookupPath,
   restoreTrailingSlashInWildcardParam,
   routeMatchHasEmptyNamedPathParam,
+  type GlobalCatchAllRoute,
 } from './fastify/find_my_way_lookup_path';
 import { extractHapiWildcardName, translateHapiPathToFastify } from './fastify/translate_path';
 import { HapiCompatServer } from './fastify/hapi_compat_server';
@@ -233,6 +234,7 @@ export class FastifyHttpServer {
   private server?: { listener: ReturnType<typeof getServerListener> };
   private fastify?: FastifyInstance;
   private fmw?: FmwInstance<FmwHTTPVersion.V1>;
+  private globalCatchAllRoute?: GlobalCatchAllRoute;
   private fallbackHandler?: FmwHandler;
   private config?: HttpConfig;
   private listening = false;
@@ -947,6 +949,18 @@ export class FastifyHttpServer {
       | 'OPTIONS';
     const routeHandler = ((req: FastifyRequest, reply: FastifyReply) =>
       handler(req, reply)) as unknown as any;
+    const wildcardName = extractHapiWildcardName(route.path);
+    if (route.path === '/{path*}' && wildcardName) {
+      this.globalCatchAllRoute = {
+        handler: routeHandler as GlobalCatchAllRoute['handler'],
+        store: {
+          kibanaRoute: route,
+          kibanaRouteOptions,
+          wildcardName,
+        },
+        wildcardName,
+      };
+    }
     this.registerFindMyWayRoute(
       method,
       url,
@@ -961,7 +975,7 @@ export class FastifyHttpServer {
       {
         kibanaRoute: route,
         kibanaRouteOptions,
-        wildcardName: extractHapiWildcardName(route.path),
+        wildcardName,
       }
     );
     // Hapi automatically serves HEAD for GET routes; find-my-way requires an explicit entry.
@@ -1027,7 +1041,12 @@ export class FastifyHttpServer {
       ) {
         return;
       }
-      const match = findMyWayRouteMatch(fmw, String(req.method ?? 'GET'), req);
+      const match = findMyWayRouteMatch(
+        fmw,
+        String(req.method ?? 'GET'),
+        req,
+        this.globalCatchAllRoute
+      );
       if (!match) {
         if (this.fallbackHandler) {
           (req as { params: unknown }).params = {};
@@ -1101,6 +1120,7 @@ export class FastifyHttpServer {
     const lookupOptions = {
       fmw,
       getLookupPath: getFindMyWayLookupPath,
+      globalCatchAll: this.globalCatchAllRoute,
       staticDirectoryRouteInfo: this.staticDirectoryRouteInfo,
       staticDirectoryRouteOptions: STATIC_DIRECTORY_ROUTE_OPTIONS,
       pathnameMatchesWildcardPattern: pathnameMatchesFastifyWildcardPattern,

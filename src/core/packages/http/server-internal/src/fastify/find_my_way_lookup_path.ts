@@ -53,27 +53,105 @@ export function getFindMyWayLookupPath(req: FastifyRequest): string {
   return stripTrailingSlashForFindMyWayLookup(getRequestPathname(req));
 }
 
+type FindMyWayMatch = NonNullable<ReturnType<FmwInstance<HTTPVersion.V1>['find']>>;
+
 /**
- * find-my-way lookup with Hapi-style trailing-slash normalization: try the slashless path
- * first (avoids empty named captures on `/alerts/{id}`), then the raw pathname (routes
- * registered as `/prefix/` only match with the slash).
+ * Core `httpResources.register({ path: '/{path*}' })` catch-all used when a trailing-slash URL
+ * would otherwise match a more specific slashless route (e.g. `/api/cases/alerts/` →
+ * `/api/cases/:case_id` with `case_id: 'alerts'`).
+ *
+ * @internal
+ */
+export interface GlobalCatchAllRoute {
+  handler: FindMyWayMatch['handler'];
+  store?: FindMyWayMatch['store'];
+  wildcardName: string;
+}
+
+/** @internal */
+export function buildGlobalCatchAllMatch(
+  lookupPath: string,
+  globalCatchAll: GlobalCatchAllRoute
+): FindMyWayMatch {
+  const capture = lookupPath.startsWith('/') ? lookupPath.slice(1) : lookupPath;
+  const params: Record<string, string> = { '*': capture };
+  return {
+    handler: globalCatchAll.handler,
+    params,
+    store: { ...globalCatchAll.store, wildcardName: globalCatchAll.wildcardName },
+  } as FindMyWayMatch;
+}
+
+function isValidFindMyWayMatch(match: FindMyWayMatch): boolean {
+  const params: Record<string, string | undefined> = { ...(match.params ?? {}) };
+  const wildcardName = (match as { store?: { wildcardName?: string } }).store?.wildcardName;
+  return !routeMatchHasEmptyNamedPathParam(params, wildcardName);
+}
+
+function isCatchAllFindMyWayMatch(match: FindMyWayMatch): boolean {
+  const wildcardName = (match as { store?: { wildcardName?: string } }).store?.wildcardName;
+  if (wildcardName) {
+    return true;
+  }
+  return match.params != null && Object.prototype.hasOwnProperty.call(match.params, '*');
+}
+
+function findIfValid(
+  fmw: FmwInstance<HTTPVersion.V1>,
+  method: string,
+  path: string
+): FindMyWayMatch | undefined {
+  const match = fmw.find(method as any, path);
+  if (!match || !isValidFindMyWayMatch(match)) {
+    return undefined;
+  }
+  return match;
+}
+
+/**
+ * find-my-way lookup with Hapi-style trailing-slash normalization.
+ *
+ * When the client sends a trailing slash, find-my-way prefers the more specific route and can
+ * yield an empty named capture (e.g. `/alerts/` → `/alerts/:alert_id` with `alert_id: ''`).
+ * We reject that and fall back to slashless lookup on catch-alls only (`/*`). A slashless path
+ * like `/api/cases/alerts` must not match `/api/cases/:case_id` when the client sent
+ * `/api/cases/alerts/` (Hapi serves the core `/{path*}` redirect instead). Downstream code
+ * restores the slash on the wildcard param for core `/{path*}` redirects.
+ *
+ * Routes registered only with a trailing slash (e.g. `/prefix/`) are tried on the raw pathname
+ * first so they still match.
  *
  * @internal
  */
 export function findMyWayRouteMatch(
   fmw: FmwInstance<HTTPVersion.V1>,
   method: string,
-  req: FastifyRequest
-) {
+  req: FastifyRequest,
+  globalCatchAll?: GlobalCatchAllRoute
+): FindMyWayMatch | undefined {
   const pathname = getRequestPathname(req);
   const lookupPath = stripTrailingSlashForFindMyWayLookup(pathname);
+
   if (pathname !== lookupPath) {
-    const slashMatch = fmw.find(method as any, pathname);
-    if (slashMatch) {
-      return slashMatch;
+    const trailingSlashMatch = findIfValid(fmw, method, pathname);
+    if (trailingSlashMatch) {
+      return trailingSlashMatch;
     }
+    const slashlessMatch = fmw.find(method as any, lookupPath);
+    if (
+      slashlessMatch &&
+      isCatchAllFindMyWayMatch(slashlessMatch) &&
+      isValidFindMyWayMatch(slashlessMatch)
+    ) {
+      return slashlessMatch;
+    }
+    if (globalCatchAll) {
+      return buildGlobalCatchAllMatch(lookupPath, globalCatchAll);
+    }
+    return undefined;
   }
-  return fmw.find(method as any, lookupPath);
+
+  return findIfValid(fmw, method, lookupPath);
 }
 
 /**
