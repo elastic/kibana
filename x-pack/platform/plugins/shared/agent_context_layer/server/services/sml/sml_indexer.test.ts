@@ -134,7 +134,11 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { term: { origin_id: 'att-1' } },
+        query: {
+          bool: {
+            filter: [{ term: { origin_id: 'att-1' } }, { term: { ingestion_method: 'crawled' } }],
+          },
+        },
         refresh: false,
       });
       expect(getSmlData).not.toHaveBeenCalled();
@@ -177,7 +181,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { term: { origin_id: 'att-2' } },
+        query: { bool: { filter: [{ term: { origin_id: 'att-2' } }] } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -433,7 +437,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to delete chunks'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to delete crawled chunks'));
     });
 
     it('bulk index errors are logged', async () => {
