@@ -6,15 +6,21 @@
  */
 import pMap from 'p-map';
 import semverGt from 'semver/functions/gt';
-import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  LoggerFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { nodeBuilder } from '@kbn/es-query';
 
 import type { DiscoveryDataset } from '../../common/types';
 
@@ -23,19 +29,26 @@ import { appContextService, dataStreamService } from '../services';
 import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.1.0';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
+const DEFAULT_RECENT_INSTALL_INTERVAL = '1m';
+const DEFAULT_RECENT_INSTALL_WINDOW = '30m';
 const TIMEOUT = '5m';
 const CONTENT_PACKAGES_CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
+export const AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID = `${TYPE}:${VERSION}`;
+
 interface AutoInstallContentPackagesTaskConfig {
   taskInterval?: string;
+  recentInstallTaskInterval?: string;
+  recentInstallWindow?: string;
 }
 
 interface AutoInstallContentPackagesTaskSetupContract {
@@ -59,6 +72,8 @@ export class AutoInstallContentPackagesTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private taskInterval: string;
+  private recentInstallTaskInterval: string;
+  private recentInstallWindowMs: number;
   private discoveryMap?: DiscoveryMap;
   private discoveryMapLastFetched: number = 0;
   private lastPrerelease: boolean = false;
@@ -67,6 +82,11 @@ export class AutoInstallContentPackagesTask {
     const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
     this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.recentInstallTaskInterval =
+      config.recentInstallTaskInterval ?? DEFAULT_RECENT_INSTALL_INTERVAL;
+    this.recentInstallWindowMs = parseWindowToMs(
+      config.recentInstallWindow ?? DEFAULT_RECENT_INSTALL_WINDOW
+    );
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -92,7 +112,7 @@ export class AutoInstallContentPackagesTask {
 
     this.wasStarted = true;
     this.logger.info(
-      `[AutoInstallContentPackagesTask] Started with interval of [${this.taskInterval}]`
+      `[AutoInstallContentPackagesTask] Started with steady-state interval [${this.taskInterval}], recent-install interval [${this.recentInstallTaskInterval}], recent-install window [${this.recentInstallWindowMs}ms]`
     );
 
     try {
@@ -115,7 +135,7 @@ export class AutoInstallContentPackagesTask {
   };
 
   private get taskId(): string {
-    return `${TYPE}:${VERSION}`;
+    return AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID;
   }
 
   private endRun(msg: string = '') {
@@ -191,7 +211,13 @@ export class AutoInstallContentPackagesTask {
         await this.installPackages(packageClient, packagesToInstall);
       }
 
+      const recentInstalls = await this.hasRecentInstalls(soClient);
+      const nextInterval = recentInstalls ? this.recentInstallTaskInterval : this.taskInterval;
+      this.logger.debug(
+        `[AutoInstallContentPackagesTask] Scheduling next run with interval [${nextInterval}] (recentInstalls=${recentInstalls})`
+      );
       this.endRun('success');
+      return { state: {}, schedule: { interval: nextInterval } };
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
         this.logger.warn(`[AutoInstallContentPackagesTask] request aborted due to timeout: ${err}`);
@@ -287,6 +313,20 @@ export class AutoInstallContentPackagesTask {
     return Object.entries(packagesToInstall).map(([name, version]) => ({ name, version }));
   }
 
+  private async hasRecentInstalls(soClient: SavedObjectsClientContract): Promise<boolean> {
+    const since = new Date(Date.now() - this.recentInstallWindowMs).toISOString();
+    const result = await soClient.find({
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      filter: nodeBuilder.range(
+        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_started_at`,
+        'gte',
+        since
+      ),
+    });
+    return result.total > 0;
+  }
+
   private async getDatasetsWithData(
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
@@ -323,3 +363,21 @@ export class AutoInstallContentPackagesTask {
     return discoveryMap;
   }
 }
+
+/**
+ * Parses a simple interval string (e.g. '30m', '1h', '90s') into milliseconds.
+ * Supports 's' (seconds), 'm' (minutes), and 'h' (hours).
+ */
+export const parseWindowToMs = (interval: string): number => {
+  const match = interval.match(/^(\d+)(s|m|h)$/);
+  if (!match) {
+    throw new Error(
+      `Invalid recentInstallWindow format "${interval}". Expected a value like "30m", "1h", or "90s".`
+    );
+  }
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+  if (unit === 's') return value * 1000;
+  if (unit === 'm') return value * 60 * 1000;
+  return value * 60 * 60 * 1000; // 'h'
+};
