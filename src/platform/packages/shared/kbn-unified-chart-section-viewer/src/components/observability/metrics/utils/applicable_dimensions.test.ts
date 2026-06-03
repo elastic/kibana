@@ -15,10 +15,7 @@ import {
   stabilizeApplicableDimensionsPerItem,
 } from './applicable_dimensions';
 
-const createMetricItem = (
-  metricName: string,
-  dimensionNames: string[]
-): ParsedMetricItem => ({
+const createMetricItem = (metricName: string, dimensionNames: string[]): ParsedMetricItem => ({
   metricName,
   indexName: 'metrics-test',
   units: ['ms'],
@@ -32,7 +29,10 @@ describe('stabilizeApplicableDimensionsPerItem', () => {
   const containerMetric = createMetricItem('k8s.container.cpu', ['container.id']);
 
   it('returns only dimension fields included in the selected breakdown set', () => {
-    const cache = new Map<string, ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]>();
+    const cache = new Map<
+      string,
+      ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]
+    >();
     const result = stabilizeApplicableDimensionsPerItem(
       [hostMetric, containerMetric],
       new Set(['host.name', 'service.name']),
@@ -44,7 +44,10 @@ describe('stabilizeApplicableDimensionsPerItem', () => {
   });
 
   it('reuses EMPTY_APPLICABLE_DIMENSIONS when a metric stays at no applicable breakdown', () => {
-    const cache = new Map<string, ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]>();
+    const cache = new Map<
+      string,
+      ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]
+    >();
     const emptySelection = new Set<string>();
 
     const firstResult = stabilizeApplicableDimensionsPerItem(
@@ -63,7 +66,10 @@ describe('stabilizeApplicableDimensionsPerItem', () => {
   });
 
   it('reuses the previous non-empty reference when dimension names are unchanged', () => {
-    const cache = new Map<string, ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]>();
+    const cache = new Map<
+      string,
+      ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]
+    >();
     const hostSelection = new Set(['host.name']);
 
     const firstResult = stabilizeApplicableDimensionsPerItem(
@@ -81,7 +87,10 @@ describe('stabilizeApplicableDimensionsPerItem', () => {
   });
 
   it('returns a new reference when applicable dimension names change', () => {
-    const cache = new Map<string, ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]>();
+    const cache = new Map<
+      string,
+      ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]
+    >();
 
     const firstResult = stabilizeApplicableDimensionsPerItem(
       [hostMetric],
@@ -100,8 +109,15 @@ describe('stabilizeApplicableDimensionsPerItem', () => {
   });
 
   it('prunes cache entries for metrics no longer on the page', () => {
-    const cache = new Map<string, ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]>();
-    stabilizeApplicableDimensionsPerItem([hostMetric, containerMetric], new Set(['host.name']), cache);
+    const cache = new Map<
+      string,
+      ReturnType<typeof stabilizeApplicableDimensionsPerItem>[number]
+    >();
+    stabilizeApplicableDimensionsPerItem(
+      [hostMetric, containerMetric],
+      new Set(['host.name']),
+      cache
+    );
 
     expect(cache.size).toBe(2);
 
