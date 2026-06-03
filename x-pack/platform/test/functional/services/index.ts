@@ -8,7 +8,7 @@
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { ReportingFunctionalProvider } from '../../reporting_functional/services';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services/reporting_functional_provider';
 import { AceEditorProvider } from './ace_editor';
 import { ActionsServiceProvider } from './actions';
 import { AiopsProvider } from './aiops';
@@ -16,13 +16,13 @@ import { CanvasElementProvider } from './canvas_element';
 import { CasesServiceProvider } from './cases';
 import { DataStreamProvider } from './data_stream';
 import { GrokDebuggerProvider } from './grok_debugger';
+import { LensServiceProvider } from './lens';
 import { MachineLearningProvider } from './ml';
 import { PipelineEditorProvider } from './pipeline_editor';
 import { PipelineListProvider } from './pipeline_list';
 import { RandomProvider } from './random';
 import { RulesServiceProvider } from './rules';
 import { SampleDataServiceProvider } from './sample_data';
-import { SearchSessionsService } from './search_sessions';
 import { TransformProvider } from './transform';
 import { UserMenuProvider } from './user_menu';
 
@@ -78,7 +78,6 @@ export const services = {
   rules: RulesServiceProvider,
   sampleData: SampleDataServiceProvider,
   grokDebugger: GrokDebuggerProvider,
-  searchSessions: SearchSessionsService,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
@@ -115,4 +114,5 @@ export const services = {
   monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
   monitoringAlerts: MonitoringAlertsProvider,
+  lens: LensServiceProvider,
 };

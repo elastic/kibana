@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
@@ -111,7 +111,7 @@ export class FeatureTable extends Component<Props, State> {
         >
           {category.euiIconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={category.euiIconType} />
+              <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={1}>
@@ -156,7 +156,7 @@ export class FeatureTable extends Component<Props, State> {
             <EuiSpacer size="s" />
             {helpText && (
               <>
-                <EuiCallOut size="s" title={helpText} />
+                <EuiCallOut announceOnMount={false} size="s" title={helpText} />
                 <EuiSpacer size="s" />
               </>
             )}
@@ -240,7 +240,13 @@ export class FeatureTable extends Component<Props, State> {
               }}
             >
               <EuiSpacer size="s" />
-              <EuiPanel color="subdued" paddingSize="s" className="subFeaturePanel">
+              <EuiPanel
+                color="subdued"
+                paddingSize="s"
+                css={({ euiTheme }) => css`
+                  margin-left: calc(${euiTheme.size.l} + ${euiTheme.size.xs});
+                `}
+              >
                 <FeatureTableExpandedRow
                   feature={feature}
                   privilegeIndex={this.props.privilegeIndex}
@@ -265,9 +271,7 @@ export class FeatureTable extends Component<Props, State> {
     const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
 
     if (feature.reserved && primaryFeaturePrivileges.length === 0) {
-      const buttonContent = (
-        <FeatureTableCell className="noSubFeaturePrivileges" feature={feature} />
-      );
+      const buttonContent = <FeatureTableCell feature={feature} />;
 
       const extraAction = (
         <EuiText css={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
@@ -275,7 +279,11 @@ export class FeatureTable extends Component<Props, State> {
         </EuiText>
       );
 
-      return renderFeatureMarkup(buttonContent, extraAction, <EuiIcon type="empty" />);
+      return renderFeatureMarkup(
+        buttonContent,
+        extraAction,
+        <EuiIcon type="empty" aria-hidden={true} />
+      );
     }
 
     if (primaryFeaturePrivileges.length === 0) {
@@ -333,10 +341,7 @@ export class FeatureTable extends Component<Props, State> {
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
     const buttonContent = (
-      <FeatureTableCell
-        className={classNames({ noSubFeaturePrivileges: !hasSubFeaturePrivileges })}
-        feature={feature}
-      />
+      <FeatureTableCell hasSubFeaturePrivileges={hasSubFeaturePrivileges} feature={feature} />
     );
 
     const extraAction = (

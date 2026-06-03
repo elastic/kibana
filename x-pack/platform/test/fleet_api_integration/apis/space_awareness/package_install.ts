@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, createFleetAgent } from './helpers';
+import { cleanFleetIndices, createFleetAgent, createTestSpace } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -18,6 +18,8 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
+
+  const NGINX_PACKAGE_VERSION = '2.3.2';
 
   describe('package install', function () {
     skipIfNoDockerRegistry(providerContext);
@@ -30,7 +32,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {
@@ -51,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
           await cleanFleetIndices(esClient);
           await apiClient.installPackage({
             pkgName: 'nginx',
-            pkgVersion: '1.20.0',
+            pkgVersion: NGINX_PACKAGE_VERSION,
             force: true, // To avoid package verification
           });
         });
@@ -87,9 +89,15 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should allow to install kibana assets in default space', async () => {
-          await apiClient.installPackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          await apiClient.installPackageKibanaAssets({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -100,11 +108,14 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should allow to install kibana assets in another space', async () => {
           await apiClient.installPackageKibanaAssets(
-            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
             TEST_SPACE_1
           );
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -114,16 +125,39 @@ export default function (providerContext: FtrProviderContext) {
             Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
           ).eql([TEST_SPACE_1]);
 
-          const dashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
+          const overviewDashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
             TEST_SPACE_1
-          ]!.find((asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519');
-          expect(dashboard).not.eql(undefined);
+          ]!.find((asset) => asset.originId === 'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519');
+          expect(overviewDashboard).not.eql(undefined);
+
+          const accessAndErrorLogsDashboard =
+            res.item.installationInfo!.additional_spaces_installed_kibana?.[TEST_SPACE_1]!.find(
+              (asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519'
+            );
+          expect(accessAndErrorLogsDashboard).not.eql(undefined);
+          // Assert that markdown link to dashboard have been updated
+
+          const overviewDashboardSO = await kibanaServer.savedObjects.get({
+            space: TEST_SPACE_1,
+            type: 'dashboard',
+            id: overviewDashboard!.id,
+          });
+
+          expect(overviewDashboardSO.attributes.panelsJSON).not.to.contain(
+            accessAndErrorLogsDashboard!.originId
+          );
+          expect(overviewDashboardSO.attributes.panelsJSON).to.contain(
+            accessAndErrorLogsDashboard!.id
+          );
         });
 
         it('should not allow to delete kibana assets from default space', async () => {
           let err: Error | undefined;
           try {
-            await apiClient.deletePackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+            await apiClient.deletePackageKibanaAssets({
+              pkgName: 'nginx',
+              pkgVersion: NGINX_PACKAGE_VERSION,
+            });
           } catch (_err) {
             err = _err;
           }
@@ -133,11 +167,14 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should allow to delete kibana assets from test space', async () => {
           await apiClient.deletePackageKibanaAssets(
-            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
             TEST_SPACE_1
           );
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -149,11 +186,14 @@ export default function (providerContext: FtrProviderContext) {
         it('should allow to install kibana in another space from the default space', async () => {
           await apiClient.installPackageKibanaAssets({
             pkgName: 'nginx',
-            pkgVersion: '1.20.0',
+            pkgVersion: NGINX_PACKAGE_VERSION,
             spaceIds: [TEST_SPACE_1],
           });
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -175,7 +215,7 @@ export default function (providerContext: FtrProviderContext) {
           await apiClient.installPackage(
             {
               pkgName: 'nginx',
-              pkgVersion: '1.20.0',
+              pkgVersion: NGINX_PACKAGE_VERSION,
               force: true, // To avoid package verification
             },
             TEST_SPACE_1
@@ -214,11 +254,14 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should allow to install kibana assets in test space', async () => {
           await apiClient.installPackageKibanaAssets(
-            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
             TEST_SPACE_1
           );
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -228,9 +271,15 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should allow to install kibana assets in default space', async () => {
-          await apiClient.installPackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          await apiClient.installPackageKibanaAssets({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -253,7 +302,7 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await apiClient.installPackage({
           pkgName: 'nginx',
-          pkgVersion: '1.20.0',
+          pkgVersion: NGINX_PACKAGE_VERSION,
           force: true, // To avoid package verification
         });
         const agentPolicyRes = await apiClient.createAgentPolicy();
@@ -264,7 +313,7 @@ export default function (providerContext: FtrProviderContext) {
           description: 'test',
           package: {
             name: 'nginx',
-            version: '1.20.0',
+            version: NGINX_PACKAGE_VERSION,
           },
           inputs: {},
         });
@@ -277,7 +326,7 @@ export default function (providerContext: FtrProviderContext) {
         try {
           await apiClient.uninstallPackage({
             pkgName: 'nginx',
-            pkgVersion: '1.20.0',
+            pkgVersion: NGINX_PACKAGE_VERSION,
             force: true, // To avoid package verification
           });
         } catch (_err) {
@@ -292,7 +341,7 @@ export default function (providerContext: FtrProviderContext) {
           await apiClient.uninstallPackage(
             {
               pkgName: 'nginx',
-              pkgVersion: '1.20.0',
+              pkgVersion: NGINX_PACKAGE_VERSION,
               force: true, // To avoid package verification
             },
             TEST_SPACE_1
@@ -302,6 +351,164 @@ export default function (providerContext: FtrProviderContext) {
         }
         expect(err).to.be.an(Error);
         expect(err?.message).to.match(/400 "Bad Request"/);
+      });
+    });
+
+    describe('multispace upgrade correctness', () => {
+      describe('with package installed in default space and kibana assets installed in an additional space', () => {
+        before(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+          await apiClient.installPackageKibanaAssets(
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
+            TEST_SPACE_1
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+        });
+
+        it('should preserve additional_spaces_installed_kibana refs after reinstall from primary space', async () => {
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('package not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
+
+          const additionalSpaceKeys = Object.keys(
+            res.item.installationInfo?.additional_spaces_installed_kibana ?? {}
+          );
+          expect(additionalSpaceKeys).to.contain(TEST_SPACE_1);
+          expect(additionalSpaceKeys).not.to.contain('default');
+
+          const dashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
+            TEST_SPACE_1
+          ]?.find((asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519');
+          expect(dashboard).not.eql(undefined);
+        });
+      });
+
+      describe('with package installed in default space', () => {
+        before(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+        });
+
+        it('should route refs to additional_spaces_installed_kibana when installing from a non-primary space', async () => {
+          await apiClient.installPackage(
+            {
+              pkgName: 'nginx',
+              pkgVersion: NGINX_PACKAGE_VERSION,
+              force: true,
+            },
+            TEST_SPACE_1
+          );
+
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('package not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql('default');
+
+          const primaryDashboard = res.item.installationInfo!.installed_kibana.find(
+            (asset) =>
+              asset.id === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519' &&
+              asset.type === 'dashboard'
+          );
+          expect(primaryDashboard).not.eql(undefined);
+
+          const additionalSpaceKeys = Object.keys(
+            res.item.installationInfo?.additional_spaces_installed_kibana ?? {}
+          );
+          expect(additionalSpaceKeys).to.contain(TEST_SPACE_1);
+        });
+      });
+
+      describe('with package installed in a non-default space', () => {
+        before(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+          await apiClient.installPackage(
+            {
+              pkgName: 'nginx',
+              pkgVersion: NGINX_PACKAGE_VERSION,
+              force: true,
+            },
+            TEST_SPACE_1
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+          await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
+          await cleanFleetIndices(esClient);
+        });
+
+        it('should route refs to additional_spaces_installed_kibana when reinstalling from a non-primary space', async () => {
+          await apiClient.installPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+            force: true,
+          });
+
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
+          if (!('installationInfo' in res.item)) {
+            throw new Error('package not installed');
+          }
+
+          expect(res.item.installationInfo?.installed_kibana_space_id).eql(TEST_SPACE_1);
+
+          const additionalSpaceKeys = Object.keys(
+            res.item.installationInfo?.additional_spaces_installed_kibana ?? {}
+          );
+          expect(additionalSpaceKeys).to.contain('default');
+          expect(additionalSpaceKeys).not.to.contain(TEST_SPACE_1);
+
+          const dashboard =
+            res.item.installationInfo!.additional_spaces_installed_kibana?.default?.find(
+              (asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519'
+            );
+          expect(dashboard).not.eql(undefined);
+        });
       });
     });
   });

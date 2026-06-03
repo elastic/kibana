@@ -6,20 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const securityService = getService('security');
-  const { common, header, dashboard, security, searchSessionsManagement } = getPageObjects([
+  const { common, header, dashboard, security } = getPageObjects([
     'common',
     'header',
     'dashboard',
     'security',
-    'searchSessionsManagement',
   ]);
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
@@ -32,39 +29,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Saves and restores a session', async () => {
         await common.navigateToApp('dashboard', { basePath: 's/another-space' });
-        await dashboard.loadSavedDashboard('A Dashboard in another space');
+        await dashboard.loadSavedDashboard('A Dashboard in another space + Delay 5s');
 
         await dashboard.waitForRenderComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.save();
-        await searchSessions.expectState('backgroundCompleted');
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'A Pie in another space'
-        );
+        await searchSessions.save({ withRefresh: true, isSubmitButton: true });
+        // Dismiss the "Background search created" toast
+        await toasts.dismissAll();
+        await searchSessions.openCompletedSearchFromToast();
 
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
-
-        // purge client side search cache
-        // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
-        await browser.refresh();
-
-        const searchSessionList = await searchSessionsManagement.getList();
-        const searchSessionItem = searchSessionList.find(
-          (session) => session.id === savedSessionId
-        );
-
-        if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
-
-        // navigate to discover
-        await searchSessionItem.view();
-
+        // Wait for the dashboard to load
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
         // Check that session is restored
-        await searchSessions.expectState('restored');
         await dashboardExpect.noErrorEmbeddablesPresent();
         expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
@@ -78,8 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.disabledOrFail();
+        await searchSessions.missingOrFail();
       });
     });
   });

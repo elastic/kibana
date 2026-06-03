@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '../../../types';
+import type { ExpressionFunctionDefinition } from '../../../types';
 import { help as strings, errors, ImageMode } from '../../../i18n/functions/dict/image';
 
 interface Arguments {

@@ -7,17 +7,16 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { TestProviders, mockGlobalState, createMockStore } from '../../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
-import { getLayerList } from './map_config';
 import { useIsFieldInIndexPattern } from '../../../containers/fields';
 
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
 jest.mock('./map_config');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../containers/fields');
+jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('./index_patterns_missing_prompt', () => ({
   IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
 }));
@@ -133,27 +132,6 @@ describe('EmbeddedMapComponent', () => {
     });
   });
 
-  test('renders IndexPatternsMissingPrompt', async () => {
-    const state = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        kibanaDataViews: [],
-      },
-    };
-    const store = createMockStore(state);
-
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders store={store}>
-        <EmbeddedMapComponent {...testProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(queryByTestId('MapPanel')).not.toBeInTheDocument();
-      expect(getByTestId('IndexPatternsMissingPrompt')).toBeInTheDocument();
-    });
-  });
-
   test('map hidden on close', async () => {
     mockGetStorage.mockReturnValue(false);
     const { getByTestId, queryByTestId } = render(
@@ -184,56 +162,6 @@ describe('EmbeddedMapComponent', () => {
     await waitFor(() => {
       expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
       expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
-    });
-  });
-
-  test('On mount, selects existing Kibana data views that match any selected index pattern', async () => {
-    const state = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        kibanaDataViews: [filebeatDataView],
-      },
-    };
-    const store = createMockStore(state);
-    render(
-      <TestProviders store={store}>
-        <EmbeddedMapComponent {...testProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][1];
-      expect(dataViewArg).toEqual([filebeatDataView]);
-    });
-  });
-
-  test('On rerender with new selected patterns, selects existing Kibana data views that match any selected index pattern', async () => {
-    const state = {
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        kibanaDataViews: [filebeatDataView],
-      },
-    };
-    const store = createMockStore(state);
-    const { rerender } = render(
-      <TestProviders store={store}>
-        <EmbeddedMapComponent {...testProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][1];
-      expect(dataViewArg).toEqual([filebeatDataView]);
-    });
-    rerender(
-      <TestProviders store={defaultMockStore}>
-        <EmbeddedMapComponent {...testProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      // data view is updated with the returned embeddable.setLayerList callback, which is passesd getLayerList(dataViews)
-      const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][1];
-      expect(dataViewArg).toEqual([filebeatDataView, packetbeatDataView]);
     });
   });
 });

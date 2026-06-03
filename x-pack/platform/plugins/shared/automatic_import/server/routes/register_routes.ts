@@ -5,25 +5,15 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import { registerEcsRoutes } from './ecs_routes';
-import { registerIntegrationBuilderRoutes } from './build_integration_routes';
-import { registerCategorizationRoutes } from './categorization_routes';
-import { registerRelatedRoutes } from './related_routes';
-import { registerPipelineRoutes } from './pipeline_routes';
-import type { AutomaticImportRouteHandlerContext } from '../plugin';
-import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
-import { registerCelInputRoutes } from './cel_routes';
-import { registerApiAnalysisRoutes } from './analyze_api_route';
+import type { IRouter, Logger } from '@kbn/core/server';
+import type { AutomaticImportPluginRequestHandlerContext } from '../types';
+import { registerIntegrationRoutes } from './integrations_route';
+import { registerDataStreamRoutes } from './data_stream_routes';
 
-export function registerRoutes(router: IRouter<AutomaticImportRouteHandlerContext>) {
-  registerAnalyzeLogsRoutes(router);
-  registerEcsRoutes(router);
-  registerIntegrationBuilderRoutes(router);
-  registerCategorizationRoutes(router);
-  registerRelatedRoutes(router);
-  registerPipelineRoutes(router);
-
-  registerApiAnalysisRoutes(router);
-  registerCelInputRoutes(router);
+export function registerRoutes(
+  router: IRouter<AutomaticImportPluginRequestHandlerContext>,
+  logger: Logger
+) {
+  registerIntegrationRoutes(router, logger);
+  registerDataStreamRoutes(router, logger);
 }

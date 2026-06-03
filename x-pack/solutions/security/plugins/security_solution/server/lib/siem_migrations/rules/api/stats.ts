@@ -6,16 +6,16 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   GetRuleMigrationStatsRequestParams,
   type GetRuleMigrationStatsResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from '../../common/utils/authz';
-import { withLicense } from '../../common/utils/with_license';
-import { withExistingMigration } from './util/with_existing_migration_id';
+import { authz } from './util/authz';
+import { withLicense } from '../../common/api/util/with_license';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -44,7 +44,7 @@ export const registerSiemRuleMigrationsStatsRoute = (
 
               const stats = await ruleMigrationsClient.task.getStats(migrationId);
 
-              if (stats.rules.total === 0) {
+              if (stats.items.total === 0) {
                 return res.noContent();
               }
               return res.ok({ body: stats });

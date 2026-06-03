@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, omit, pick, take } from 'lodash';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concat,
@@ -15,28 +16,29 @@ import {
   from,
   isObservable,
   map,
-  Observable,
   of,
-  OperatorFunction,
   shareReplay,
   switchMap,
+  tap,
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
+import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { type InferenceConnector, isToolValidationError } from '@kbn/inference-common';
+import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
+import type { ToolCallEvent } from '../../../analytics/tool_call';
+import { toolCallEventType } from '../../../analytics/tool_call';
+import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
-  CompatibleJSONSchema,
-  createFunctionNotFoundError,
-  Message,
-  MessageAddEvent,
+  CONTEXT_FUNCTION_NAME,
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
-import {
-  createFunctionLimitExceededError,
-  MessageOrChatEvent,
-} from '../../../../common/conversation_complete';
-import { Instruction } from '../../../../common/types';
+import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
+import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
+import type { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../../chat_function_client';
@@ -49,7 +51,7 @@ const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
 const EXIT_LOOP_FUNCTION_NAME = 'exit_loop';
 
-function executeFunctionAndCatchError({
+export function executeFunctionAndCatchError({
   name,
   args,
   functionClient,
@@ -59,6 +61,9 @@ function executeFunctionAndCatchError({
   logger,
   connectorId,
   simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   name: string;
   args: string | undefined;
@@ -69,6 +74,9 @@ function executeFunctionAndCatchError({
   logger: Logger;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: InferenceConnector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {
     // hide token count events from functions to prevent them from
@@ -93,9 +101,26 @@ function executeFunctionAndCatchError({
     );
 
     return executeFunctionResponse$.pipe(
+      tap(() => {
+        const connectorInfo = getInferenceConnectorInfo(connector);
+        analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
+          toolName: name,
+          connector: connectorInfo,
+          scopes,
+        });
+      }),
       catchError((error) => {
         span?.recordException(error);
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
+
+        if (isToolValidationError(error)) {
+          return of(
+            createFunctionResponseMessage({
+              name,
+              content: { message: error.message, errors: error.meta },
+            })
+          );
+        }
         // We want to catch the error only when a promise occurs
         // if it occurs in the Observable, we cannot easily recover
         // from it because the function may have already emitted
@@ -199,6 +224,9 @@ export function continueConversation({
   disableFunctions,
   connectorId,
   simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -211,6 +239,9 @@ export function continueConversation({
   disableFunctions: boolean;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: InferenceConnector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -300,7 +331,10 @@ export function continueConversation({
       return of(
         createServerSideFunctionResponseError({
           name: functionCallName,
-          error: createFunctionNotFoundError(functionCallName),
+          error: createToolNotFoundError({
+            name: functionCallName,
+            args: lastMessage.function_call!.arguments ?? '',
+          }),
         })
       );
     }
@@ -315,6 +349,9 @@ export function continueConversation({
       logger,
       connectorId,
       simulateFunctionCalling,
+      analytics,
+      connector,
+      scopes,
     });
   }
 
@@ -367,6 +404,9 @@ export function continueConversation({
               disableFunctions,
               connectorId,
               simulateFunctionCalling,
+              analytics,
+              connector,
+              scopes,
             });
           })
         )

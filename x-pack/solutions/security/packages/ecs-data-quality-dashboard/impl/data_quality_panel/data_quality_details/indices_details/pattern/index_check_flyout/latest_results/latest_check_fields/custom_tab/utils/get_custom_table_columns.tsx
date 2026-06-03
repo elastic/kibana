@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
 import { FIELD } from '../../../../../../../../translations';
-import { CustomFieldMetadata } from '../../../../../../../../types';
+import type { CustomFieldMetadata } from '../../../../../../../../types';
 import { INDEX_MAPPING_TYPE } from '../translations';
 
 export const getCustomTableColumns = (): Array<

@@ -21,12 +21,16 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreStartMock() {
-  const startDeps = {
+  const startDeps = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -38,12 +42,15 @@ export function createInternalCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
+    userActivity: userActivityServiceMock.createInternalStartContract(),
     deprecations: deprecationsServiceMock.createInternalStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
     security: securityServiceMock.createInternalStart(),
     userProfile: userProfileServiceMock.createInternalStart(),
     pricing: pricingServiceMock.createStartContract(),
     injection: injectionServiceMock.createInternalStartContract(),
-  };
+    dataStreams: dataStreamServiceMock.createStartContract(),
+    userStorage: userStorageServiceMock.createStartContract(),
+  });
   return startDeps;
 }

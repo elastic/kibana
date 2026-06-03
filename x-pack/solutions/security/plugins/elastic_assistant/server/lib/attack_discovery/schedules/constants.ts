@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import type { AttackDiscoveryAlertDocument } from '@kbn/elastic-assistant-common';
 import { attackDiscoveryAlertFieldMap } from './fields';
-import { AttackDiscoveryAlertDocument } from './types';
 
 export const SECURITY_APP_PATH = `/app/security` as const;
 

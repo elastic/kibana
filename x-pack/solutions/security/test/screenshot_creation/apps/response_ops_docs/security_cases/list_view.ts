@@ -8,7 +8,7 @@
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { createAndUploadFile } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { SECURITY_SOLUTION_FILE_KIND } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject, getService, getPageObjects }: FtrProviderContext) {
   const cases = getService('cases');
@@ -78,8 +78,9 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
       });
       await commonScreenshots.takeScreenshot('cases-ui-open', screenshotDirectories, 1400, 1024);
 
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
+      const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
+      await attachmentsTab.click();
+      await testSubjects.existOrFail('case-view-attachment-accordion-file');
       await commonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
     });
   });

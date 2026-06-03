@@ -10,19 +10,19 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiButtonIcon } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
-import { IOCPanelKey } from '../../../../flyout/ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
 
 export const ROW_ACTION_FLYOUT_ICON_TEST_ID = 'alert-summary-table-row-action-flyout-icon';
 
 export interface ActionsCellProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
 }
 
 /**
- * Renders a icon to open the AI for SOC alert summary flyout.
+ * Renders a icon to open EASE alert summary flyout.
  */
 export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
@@ -30,7 +30,7 @@ export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => 
     () =>
       openFlyout({
         right: {
-          id: IOCPanelKey,
+          id: EasePanelKey,
           params: {
             id: alert._id,
             indexName: alert._index,
@@ -47,7 +47,7 @@ export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => 
       })}
       color="primary"
       data-test-subj={ROW_ACTION_FLYOUT_ICON_TEST_ID}
-      iconType="expand"
+      iconType="maximize"
       onClick={onOpenFlyout}
       size="xs"
     />

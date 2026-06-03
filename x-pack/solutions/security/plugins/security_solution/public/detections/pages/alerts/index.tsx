@@ -7,24 +7,30 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { AlertsPage } from './alerts';
 import { ALERTS_PATH, SecurityPageName } from '../../../../common/constants';
 import { NotFoundPage } from '../../../app/404';
-import * as i18n from './translations';
-import { DetectionEnginePage } from './detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useReadonlyHeader } from '../../../use_readonly_header';
 
+const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertsPage.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to update alerts',
+  }
+);
+
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
-    <DetectionEnginePage />
+    <AlertsPage />
     <SpyRoute pageName={SecurityPageName.alerts} />
   </TrackApplicationView>
 );
 
-const AlertsContainerComponent: React.FC = () => {
-  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
+export const AlertsContainerComponent: React.FC = () => {
+  useReadonlyHeader(READ_ONLY_BADGE_TOOLTIP);
   return (
     <Routes>
       <Route path={ALERTS_PATH} exact component={AlertsRoute} />

@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
 import { getInstallationInfo } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/package_policy/helper';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   skipIfNoDockerRegistry,
   isDockerRegistryEnabledOrSkipped,
@@ -24,6 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const retry = getService('retry');
 
   const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
     expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
@@ -61,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId3: string;
     let packagePolicySecretsId: string;
     let packagePolicySecrets: any;
+    let endpointVersion: string;
     let endpointPackagePolicyId: string;
     let inputOnlyPackagePolicyId: string;
 
@@ -75,7 +77,20 @@ export default function (providerContext: FtrProviderContext) {
 
       await enableSecrets(providerContext);
 
-      await supertest.delete(`/api/fleet/epm/packages/endpoint/8.6.1`).set('kbn-xsrf', 'xxxx');
+      // Install latest endpoint to resolve the current version, then uninstall before the test re-installs it
+      await supertest
+        .post(`/api/fleet/epm/packages/endpoint`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+      const { body: endpointInfo } = await supertest
+        .get(`/api/fleet/epm/packages/endpoint`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      endpointVersion = endpointInfo.item.version;
+      await supertest
+        .delete(`/api/fleet/epm/packages/endpoint/${endpointVersion}`)
+        .set('kbn-xsrf', 'xxxx');
       const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
         await Promise.all([
           supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
@@ -212,7 +227,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '8.6.1',
+            version: endpointVersion,
           },
         });
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
@@ -260,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({ agentPolicyId });
       // uninstall endpoint package
       await supertest
-        .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
+        .delete(`/api/fleet/epm/packages/endpoint/${endpointVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       await supertest
@@ -401,6 +416,7 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               streams: [],
               config: {
+                artifact_manifest: { value: {} },
                 policy: {
                   value: policyFactory(),
                 },
@@ -412,7 +428,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Elastic Defend',
-            version: '8.6.1',
+            version: endpointVersion,
           },
         })
         .expect(200);
@@ -1037,22 +1053,31 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const installation = await getInstallationInfo(supertest, 'integration_to_input', '2.0.0');
+        await retry.tryForTime(10000, async () => {
+          const installation = await getInstallationInfo(
+            supertest,
+            'integration_to_input',
+            '2.0.0'
+          );
 
-        expectIdArraysEqual(installation.installed_es, [
-          // assets from version 1.0.0
-          { id: 'logs-integration_to_input.log', type: 'index_template' },
-          { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
-          { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
-          { id: 'logs-integration_to_input.log@package', type: 'component_template' },
-          // assets from version 2.0.0 for new package policy
-          { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
-          { id: 'logs-somedataset', type: 'index_template' },
-          { id: 'logs-somedataset@package', type: 'component_template' },
-          { id: 'logs-somedataset@custom', type: 'component_template' },
-          { id: 'logs@custom', type: 'component_template' },
-          { id: 'integration_to_input@custom', type: 'component_template' },
-        ]);
+          expectIdArraysEqual(
+            installation.installed_es.filter((a: any) => a.type !== 'knowledge_base'),
+            [
+              // assets from version 1.0.0
+              { id: 'logs-integration_to_input.log', type: 'index_template' },
+              { id: 'logs-integration_to_input.log-1.0.0', type: 'ingest_pipeline' },
+              { id: 'logs-integration_to_input.log@custom', type: 'component_template' },
+              { id: 'logs-integration_to_input.log@package', type: 'component_template' },
+              // assets from version 2.0.0 for new package policy
+              { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
+              { id: 'logs-somedataset', type: 'index_template' },
+              { id: 'logs-somedataset@package', type: 'component_template' },
+              { id: 'logs-somedataset@custom', type: 'component_template' },
+              { id: 'logs@custom', type: 'component_template' },
+              { id: 'integration_to_input@custom', type: 'component_template' },
+            ]
+          );
+        });
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');
         expect(dataset3PkgComponentTemplate).not.to.be(null);

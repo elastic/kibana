@@ -7,8 +7,8 @@
 import moment from 'moment';
 import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
-import { IBasePath } from '@kbn/core/server';
-import {
+import type { IBasePath } from '@kbn/core/server';
+import type {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -19,30 +19,31 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import {
+import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import {
+import type {
   SyntheticsMonitorStatusRuleParams as StatusRuleParams,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
-import {
-  MonitorStatusActionGroup,
-  SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-} from '../../common/constants/synthetics_alerts';
-import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
-import { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
-import { SyntheticsEsClient } from '../lib';
+import type { MonitorStatusActionGroup } from '../../common/constants/synthetics_alerts';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
+import type { IndexPatternTitleAndFields } from '../queries/get_index_pattern';
+import { getUptimeIndexPattern } from '../queries/get_index_pattern';
+import type { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
+import type { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
-import {
+import type {
   AlertOverviewStatus,
   SyntheticsCommonState,
-  SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
@@ -137,6 +138,19 @@ export const getRelativeViewInAppUrl = ({
   });
 };
 
+/**
+ * For ungrouped alerts, the alert ID is just the configId (no location suffix),
+ * but config maps are keyed by `${configId}-${locationId}`. This helper tries
+ * an exact match first, then falls back to a prefix match.
+ */
+function findConfigKeyByAlertId<T>(
+  configs: Record<string, T>,
+  alertId: string
+): string | undefined {
+  if (configs[alertId]) return alertId;
+  return Object.keys(configs).find((key) => key.startsWith(`${alertId}-`));
+}
+
 export const setRecoveredAlertsContext = ({
   alertsClient,
   basePath,
@@ -214,14 +228,14 @@ export const setRecoveredAlertsContext = ({
       monitorSummary.locationId = formattedLocationIds;
     }
 
-    if (
-      recoveredAlertId &&
-      locationIds &&
-      (staleDownConfigs[recoveredAlertId] || stalePendingConfigs[recoveredAlertId])
-    ) {
+    const staleDownKey = findConfigKeyByAlertId(staleDownConfigs, recoveredAlertId);
+    const stalePendingKey = findConfigKeyByAlertId(stalePendingConfigs, recoveredAlertId);
+
+    if (recoveredAlertId && locationIds && (staleDownKey || stalePendingKey)) {
+      const effectiveKey = (staleDownKey || stalePendingKey)!;
       const summary = getDeletedMonitorOrLocationSummary({
-        staleConfigs: staleDownConfigs[recoveredAlertId] ? staleDownConfigs : stalePendingConfigs,
-        recoveredAlertId,
+        staleConfigs: staleDownKey ? staleDownConfigs : stalePendingConfigs,
+        recoveredAlertId: effectiveKey,
         locationIds,
         dateFormat,
         tz,
@@ -241,10 +255,12 @@ export const setRecoveredAlertsContext = ({
       linkMessage = '';
     }
 
-    if (configId && recoveredAlertId && locationIds && upConfigs[recoveredAlertId]) {
+    const upConfigKey = findConfigKeyByAlertId(upConfigs, recoveredAlertId);
+
+    if (configId && recoveredAlertId && locationIds && upConfigKey) {
       const summary = getUpMonitorRecoverySummary({
         upConfigs,
-        recoveredAlertId,
+        recoveredAlertId: upConfigKey,
         alertHit,
         locationIds,
         configId,
@@ -255,10 +271,12 @@ export const setRecoveredAlertsContext = ({
         params,
       });
       if (summary) {
-        monitorSummary = {
-          ...monitorSummary,
-          ...summary.monitorSummary,
-        };
+        if (groupByLocation) {
+          monitorSummary = {
+            ...monitorSummary,
+            ...summary.monitorSummary,
+          };
+        }
         recoveryStatus = summary.recoveryStatus;
         recoveryReason = summary.recoveryReason;
         isUp = summary.isUp;
@@ -286,6 +304,7 @@ export const setRecoveredAlertsContext = ({
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
+      grouping: alertHit?.[ALERT_GROUPING],
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
@@ -558,9 +577,20 @@ export const syntheticsRuleTypeFieldMap = {
   ...legacyExperimentalFieldMap,
 };
 
+const stringAsKeywords: MappingDynamicTemplate = {
+  path_match: `${ALERT_GROUPING}.*`,
+  match_mapping_type: 'string',
+  mapping: { type: 'keyword', ignore_above: 1024 },
+};
+const dynamicTemplates = [
+  {
+    strings_as_keywords: stringAsKeywords,
+  },
+];
+
 export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<MonitorStatusAlertDocument> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap, dynamicTemplates },
   useLegacyAlerts: true,
   shouldWrite: true,
 };

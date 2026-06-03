@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
@@ -69,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows canvas navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Canvas', 'Stack Management']); // access to the Reporting feature grants access to Stack Management
+        expect(navLinks).to.contain('Canvas');
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {

@@ -11,10 +11,8 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import {
-  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
-  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
-} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_DASHBOARDS_LENGTH } from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
@@ -506,12 +504,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         );
 
       expect(response.status).to.eql(400);
-      expect(response.body).to.eql({
-        statusCode: 400,
-        error: 'Bad Request',
-        message:
-          '[request body.actions.0.alerts_filter.timeframe.timezone]: string is not a valid timezone: invalid',
-      });
+      expect(response.body.error).to.eql('Bad Request');
+      expect(response.body.message).to.contain('string is not a valid timezone: invalid');
     });
 
     describe('system actions', () => {
@@ -672,6 +666,41 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should allow multiple instances of the same system action if allowMultipleSystemActions is true', async () => {
+        const multipleSystemAction = {
+          id: 'system-connector-test.system-action-allow-multiple',
+          params: {},
+        };
+
+        const response = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [multipleSystemAction, multipleSystemAction],
+            })
+          );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.actions.length).to.eql(2);
+
+        objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+        const action1 = response.body.actions[0];
+        const action2 = response.body.actions[1];
+
+        expect(action1.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action1.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action1.uuid).to.not.be(undefined);
+
+        expect(action2.id).to.eql('system-connector-test.system-action-allow-multiple');
+        expect(action2.connector_type_id).to.eql('test.system-action-allow-multiple');
+        expect(action2.uuid).to.not.be(undefined);
+
+        // UUIDs should be different
+        expect(action1.uuid).to.not.eql(action2.uuid);
+      });
+
       describe('create rule flapping', () => {
         afterEach(async () => {
           await resetRulesSettings(supertest, 'space1');
@@ -684,6 +713,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 flapping: {
+                  enabled: false,
                   look_back_window: 5,
                   status_change_threshold: 5,
                 },
@@ -694,12 +724,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
           expect(response.body.flapping).to.eql({
+            enabled: false,
             look_back_window: 5,
             status_change_threshold: 5,
           });
         });
 
-        it('should throw if flapping is created when global flapping is off', async () => {
+        it('should not throw if flapping is created when global flapping is off', async () => {
           await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -715,16 +746,21 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 flapping: {
+                  enabled: true,
                   look_back_window: 5,
                   status_change_threshold: 5,
                 },
               })
             );
 
-          expect(response.statusCode).eql(400);
-          expect(response.body.message).eql(
-            'Error creating rule: can not create rule with flapping if global flapping is disabled'
-          );
+          expect(response.status).to.eql(200);
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body.flapping).to.eql({
+            enabled: true,
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
         });
 
         it('should throw if flapping is invalid', async () => {
@@ -758,42 +794,38 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      describe('create rule with dashboards artifacts correctly', function () {
+      const artifacts = {
+        dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+        investigation_guide: { blob: 'Sample investigation guide' },
+      };
+
+      describe('create rule with artifacts correctly', function () {
         this.tags('skipFIPS');
 
-        it('should not return dashboards artifacts in the rule response', async () => {
+        it('should return artifacts in the rule response', async () => {
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestRuleData({
-                artifacts: {
-                  dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
-                  investigation_guide: { blob: 'Sample investigation guide' },
-                },
+                artifacts,
               })
             );
+
           expect(response.status).to.eql(200);
+
           objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
-          expect(response.body.artifacts).to.be(undefined);
+          expect(response.body.artifacts).to.eql(artifacts);
         });
 
-        it('should store references correctly for dashboard artifacts', async () => {
-          const dashboardId = 'dashboard-1';
+        it('should store references correctly for artifacts', async () => {
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestRuleData({
-                artifacts: {
-                  dashboards: [
-                    {
-                      id: dashboardId,
-                    },
-                  ],
-                  investigation_guide: { blob: 'Sample investigation guide' },
-                },
+                artifacts,
               })
             );
           expect(response.status).to.eql(200);
@@ -826,6 +858,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             execution_status: response.body.execution_status,
             ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
             ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+            artifacts,
           });
 
           const esResponse = await es.get<SavedObject<RawRule>>(
@@ -841,61 +874,26 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             {
               refId: 'dashboard_0',
             },
+            {
+              refId: 'dashboard_1',
+            },
           ]);
 
           const references = esResponse.body._source?.references ?? [];
 
-          expect(references.length).to.eql(1);
+          expect(references.length).to.eql(2);
+
           expect(references[0]).to.eql({
-            id: dashboardId,
+            id: artifacts.dashboards[0].id,
             name: 'dashboard_0',
             type: 'dashboard',
           });
-        });
-      });
-      describe('create rule with investigation guide artifacts', () => {
-        it('should not return investigation guide artifacts in the rule response', async () => {
-          const response = await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                artifacts: {
-                  investigation_guide: { blob: 'Sample investigation guide' },
-                },
-              })
-            )
-            .expect(200);
-          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
-          expect(response.body.artifacts).to.be(undefined);
-        });
-
-        it('should store investigation guide in the artifacts field', async () => {
-          const expectedArtifacts = {
-            artifacts: {
-              investigation_guide: { blob: 'Sample investigation guide' },
-            },
-          };
-          const createResponse = await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestRuleData(expectedArtifacts))
-            .expect(200);
-          objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
-
-          const esResponse = await es.get<SavedObject<RawRule>>(
-            {
-              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-              id: `alert:${createResponse.body.id}`,
-            },
-            { meta: true }
-          );
-
-          const rawInvestigationGuide =
-            (esResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {};
-
-          expect(rawInvestigationGuide).to.eql(expectedArtifacts.artifacts.investigation_guide);
+          expect(references[1]).to.eql({
+            id: artifacts.dashboards[1].id,
+            name: 'dashboard_1',
+            type: 'dashboard',
+          });
         });
 
         it('should deny creating a rule with an investigation guide that exceeds size limits', () =>

@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, EuiFlyoutHeader, EuiFlyoutHeaderProps, euiTextBreakWord } from '@elastic/eui';
+import type { EuiFlyoutHeaderProps } from '@elastic/eui';
+import { EuiSpacer, EuiFlyoutHeader, euiTextBreakWord } from '@elastic/eui';
 
 export const PanelHeader: React.FunctionComponent<
   { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>

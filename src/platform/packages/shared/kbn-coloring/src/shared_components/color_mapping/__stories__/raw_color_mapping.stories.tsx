@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
 import type { StoryFn } from '@storybook/react';
 import { css } from '@emotion/react';
-import {
-  MultiFieldKey,
-  RawValue,
-  SerializedValue,
-  deserializeField,
-} from '@kbn/data-plugin/common';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
+import { i18n } from '@kbn/i18n';
+import type { MultiFieldKey, RawValue, SerializedValue } from '@kbn/data-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ColorMappingProps } from '../categorical_color_mapping';
+import { CategoricalColorMapping } from '../categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
-import { ColorMapping } from '../config';
+import type { ColorMapping } from '../config';
 import { getColorFactory } from '../color/color_handling';
 import { getValidColor } from '../color/color_math';
 
@@ -32,7 +31,7 @@ export default {
 };
 
 const formatter = {
-  convert: (value: MultiFieldKey) => {
+  convertToText: (value: MultiFieldKey) => {
     return value.keys.join(' - ');
   },
 } as IFieldFormat;
@@ -71,12 +70,15 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
                   font-weight: ${match ? 'bold' : 'normal'};
                 `}
               >
-                {formatter.convert(value)}
+                {formatter.convertToText(value)}
               </li>
             );
           })}
       </ol>
       <EuiFlyout
+        aria-label={i18n.translate('coloring.colorMapping.stories.rawFlyoutAriaLabel', {
+          defaultMessage: 'Color mapping',
+        })}
         css={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
         onClose={() => {}}
         hideCloseButton

@@ -10,9 +10,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
-import { MetricExpression } from '../types';
+import type { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {
@@ -32,6 +33,7 @@ describe('ExpressionRow', () => {
         ]}
         remove={() => {}}
         addExpression={() => {}}
+        kql={{} as KqlPluginStart}
         key={1}
         expressionId={1}
         setRuleParams={() => {}}
@@ -103,5 +105,31 @@ describe('ExpressionRow', () => {
           '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">0.5</span>'
         ) ?? [];
     expect(valueMatch).toBeTruthy();
+  });
+
+  it('should include inclusive range comparators in threshold options', async () => {
+    const expression = {
+      comparator: COMPARATORS.GREATER_THAN,
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          field: 'system.load.1',
+        },
+      ],
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+    };
+    const { wrapper, update } = await setup(expression as MetricExpression);
+    wrapper.find('button[data-test-subj="thresholdPopover"]').simulate('click');
+    await update();
+
+    const comparatorOptionValues = wrapper
+      .find('select[data-test-subj="comparatorOptionsComboBox"] option')
+      .map((option) => option.prop('value'));
+
+    expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
+    expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
   });
 });

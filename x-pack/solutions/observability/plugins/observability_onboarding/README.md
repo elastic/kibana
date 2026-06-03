@@ -50,44 +50,22 @@ node scripts/functional_tests_server --config x-pack/solutions/observability/tes
 node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/index.ts
 ```
 
-### API integration tests
-
-#### Basic config
-
-```sh
-# start server
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/basic/config.ts
-
-# run tests
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/basic/config.ts --include ./x-pack/solutions/observability/test/observability_onboarding_api_integration/tests/index.ts
-```
-
-#### Cloud config
-
-```sh
-# start server
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/cloud/config.ts
-
-# run tests
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/cloud/config.ts --include ./x-pack/solutions/observability/test/observability_onboarding_api_integration/tests/index.ts
-```
-
 ### Functional Tests
 
 #### Start server and run test (serverless)
 
 ```sh
 # start server
-yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
 
 # run tests
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/onboarding/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts
 ```
 
 ##### Running Individual Tests
 
 ```sh
-yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/onboarding/index.ts/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/onboarding/index.ts/$1
 ```
 
 ### Playwright tests (Scout)

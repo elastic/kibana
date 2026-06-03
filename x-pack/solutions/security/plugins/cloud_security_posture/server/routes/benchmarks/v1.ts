@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ListResult, PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { ListResult, PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { Logger } from '@kbn/core/server';
-import {
+import type {
   PackagePolicyClient,
   AgentPolicyServiceInterface,
   AgentService,
 } from '@kbn/fleet-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, POSTURE_TYPE_ALL } from '../../../common/constants';
 import { isNonNullable, getBenchmarkFromPackagePolicy } from '../../../common/utils/helpers';
-import { AgentStatusByAgentPolicyMap } from '../../lib/fleet_util';
+import type { AgentStatusByAgentPolicyMap } from '../../lib/fleet_util';
 import {
   getCspPackagePolicies,
   getCspAgentPolicies,
   getAgentStatusesByAgentPolicies,
 } from '../../lib/fleet_util';
 import { getRulesCountForPolicy } from './utilities';
-import { Benchmark } from '../../../common/types/benchmarks/v1';
+import type { Benchmark } from '../../../common/types/benchmarks/v1';
 
 export const getBenchmarksData = (
   soClient: SavedObjectsClientContract,

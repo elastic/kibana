@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { SO_SEARCH_LIMIT } from '@kbn/fleet-plugin/common/constants';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -29,7 +30,7 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter, lo
       path: GET_ALL_INTEGRATIONS_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -71,6 +72,7 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter, lo
 
           return response.ok({ body });
         } catch (err) {
+          logger.error(`getAllIntegrationsRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

@@ -10,111 +10,26 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { run } from '@kbn/dev-cli-runner';
-import { z } from '@kbn/zod';
-import { listPackages } from '../tools/list_packages';
-import { generatePackage } from '../tools/generate_package';
-import { listTeams } from '../tools/list_teams';
-import { runUnitTests } from '../tools/run_unit_tests';
+
+import { addTool } from '../utils';
+import { listKibanaPackagesTool } from '../tools/list_packages';
+import { generateKibanaPackageTool } from '../tools/generate_package';
+import { listKibanaTeamsTool } from '../tools/list_teams';
+import { runUnitTestsTool } from '../tools/run_unit_tests';
+import { runCiChecksTool } from '../tools/run_ci_checks';
+import { searchByCodeownerTool } from '../tools/search_by_codeowner';
+import { findDependencyReferencesTool } from '../tools/find_dependency_references';
 
 run(async () => {
-  const server = new McpServer({ name: 'demo-server', version: '1.0.0' });
+  const server = new McpServer({ name: 'mcp-dev-server', version: '1.0.0' });
 
-  server.registerTool(
-    'list_kibana_packages',
-    {
-      description: 'List Kibana packages and Kibana application plugins',
-      inputSchema: {
-        excludePlugins: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe('Exclude all plugins. Defaults to false'),
-        owner: z
-          .string()
-          .optional()
-          .default('')
-          .describe(
-            'Optional: only include packages/plugins from the specified Kibana Github team. Use list_teams to get the teams if needed'
-          ),
-      },
-    },
-    ({ excludePlugins }) => {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(listPackages({ excludePlugins })),
-          },
-        ],
-      };
-    }
-  );
-
-  server.registerTool(
-    'generate_kibana_package',
-    {
-      description: 'Generate a Kibana package',
-      inputSchema: {
-        name: z
-          .string()
-          .describe('The name of the package. Must start with @kbn/ and contain no spaces'),
-        owner: z
-          .string()
-          .describe(
-            'The owning Github team of the package. Use list_teams before this to find the appropriate owner'
-          ),
-        group: z.enum(['chat', 'search', 'observability', 'security', 'platform']),
-      },
-    },
-    async ({ name, owner, group }) => {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: await generatePackage({
-              name,
-              owner,
-              group,
-            }),
-          },
-        ],
-      };
-    }
-  );
-
-  server.registerTool(
-    'list_kibana_teams',
-    {
-      description: 'List Kibana Github teams',
-    },
-    () => {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(listTeams()),
-          },
-        ],
-      };
-    }
-  );
-
-  server.registerTool(
-    'run_unit_tests',
-    {
-      description: 'Run unit tests for changed files',
-    },
-    async () => {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(await runUnitTests()),
-          },
-        ],
-      };
-    }
-  );
+  addTool(server, listKibanaPackagesTool);
+  addTool(server, generateKibanaPackageTool);
+  addTool(server, listKibanaTeamsTool);
+  addTool(server, runUnitTestsTool);
+  addTool(server, runCiChecksTool);
+  addTool(server, searchByCodeownerTool);
+  addTool(server, findDependencyReferencesTool);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

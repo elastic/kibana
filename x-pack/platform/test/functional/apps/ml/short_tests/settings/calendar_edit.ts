@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach, createJobConfig } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
-  const esArchiver = getService('esArchiver');
   const comboBox = getService('comboBox');
 
   const calendarId = 'test_edit_calendar_id';
@@ -23,7 +22,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('calendar edit', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
 
       await asyncForEach(jobConfigs, async (jobConfig) => {

@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { ScoutPage, createLazyPageObject, ObltPageObjects } from '@kbn/scout-oblt';
+import type { ScoutPage, ObltPageObjects, ScoutTestConfig } from '@kbn/scout-oblt';
+import { createLazyPageObject } from '@kbn/scout-oblt';
 import { AnnotationsApp } from './annotations_app';
 import { SLOApp } from './slo_app';
+import { SLOEmbeddable } from './slo_embeddable';
 
 export interface SLOPageObjects extends ObltPageObjects {
   slo: SLOApp;
+  sloEmbeddable: SLOEmbeddable;
   annotations: AnnotationsApp;
 }
 
-export function extendPageObjects(pageObjects: ObltPageObjects, page: ScoutPage): SLOPageObjects {
+export function extendPageObjects(
+  pageObjects: ObltPageObjects,
+  page: ScoutPage,
+  config: ScoutTestConfig
+): SLOPageObjects {
   return {
     ...pageObjects,
-    slo: createLazyPageObject(SLOApp, page),
+    slo: createLazyPageObject(SLOApp, page, config),
+    sloEmbeddable: createLazyPageObject(SLOEmbeddable, page),
     annotations: createLazyPageObject(AnnotationsApp, page),
   };
 }

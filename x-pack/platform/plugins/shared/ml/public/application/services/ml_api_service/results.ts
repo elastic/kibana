@@ -12,20 +12,25 @@ import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
 import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
-import type { SeverityThreshold } from '../../../../common/types/anomalies';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   GetAnomaliesTableDataResult,
-} from '../../../../common/types/results';
-import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { ExplorerChartsData } from '../../../../common/types/results';
+  ViewByResponse,
+} from '@kbn/ml-common-types/results';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { PartitionFieldsConfig } from '@kbn/ml-common-types/storage';
+import type {
+  ExplorerChartsData,
+  GetTopInfluencersRequest,
+  InfluencersByFieldResponse,
+} from '@kbn/ml-common-types/results';
 
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
-import type { CriteriaField } from '../results_service';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export interface CategoryDefinition {
@@ -235,6 +240,56 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
     return httpService.http$<{ success: boolean; records: MlAnomalyRecordDoc[] }>({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_records`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getTopInfluencers(payload: GetTopInfluencersRequest) {
+    const body = JSON.stringify(payload);
+    return httpService.http<InfluencersByFieldResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/top_influencers`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getScoresByBucket(payload: {
+    jobIds: string[];
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+    perPage?: number;
+    fromPage?: number;
+    swimLaneSeverity?: Array<{ min: number; max?: number }>;
+  }) {
+    const body = JSON.stringify(payload);
+    return httpService.http<ViewByResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getInfluencerValueMaxScoreByTime(payload: {
+    jobIds: string[];
+    influencerFieldName: string;
+    influencerFieldValues?: string[];
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+    maxResults?: number;
+    perPage?: number;
+    fromPage?: number;
+    influencersFilterQuery?: unknown;
+    swimLaneSeverity?: Array<{ min: number; max?: number }>;
+  }) {
+    const body = JSON.stringify(payload);
+    return httpService.http<ViewByResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
       method: 'POST',
       body,
       version: '1',

@@ -11,9 +11,10 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../common/servicenow/constants';
-import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
-import { ServiceNowSIRActionParams } from './types';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/connector-schemas/servicenow/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/servicenow_sir/constants';
+import type { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
+import type { ServiceNowSIRActionParams } from './types';
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from '../lib/servicenow/helpers';
 import { validateJSON } from '../lib/validate_json';
 
@@ -24,23 +25,16 @@ export const SERVICENOW_SIR_DESC = i18n.translate(
   }
 );
 
-export const SERVICENOW_SIR_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.serviceNowSIR.connectorTypeTitle',
-  {
-    defaultMessage: 'ServiceNow SecOps',
-  }
-);
-
 export function getServiceNowSIRConnectorType(): ConnectorTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
   ServiceNowSIRActionParams
 > {
   return {
-    id: '.servicenow-sir',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: SERVICENOW_SIR_DESC,
-    actionTypeTitle: SERVICENOW_SIR_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     actionConnectorFields: lazy(() => import('../lib/servicenow/servicenow_connectors')),
     validateParams: async (
       actionParams: ServiceNowSIRActionParams

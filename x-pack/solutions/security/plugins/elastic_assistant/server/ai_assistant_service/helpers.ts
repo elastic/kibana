@@ -9,14 +9,14 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
-import { GetElser } from '../types';
+import type { GetElser } from '../types';
 
 /**
  * Creates a function that returns the ELSER model ID
@@ -27,8 +27,12 @@ export const createGetElserId =
   (trainedModelsProvider: MlPluginSetup['trainedModelsProvider']): GetElser =>
   async () =>
     // Force check to happen as internal user
-    (await trainedModelsProvider({} as KibanaRequest, {} as SavedObjectsClientContract).getELSER())
-      .model_id;
+    (
+      await trainedModelsProvider(
+        {} as KibanaRequest,
+        { getCurrentNamespace: () => undefined } as SavedObjectsClientContract
+      ).getELSER()
+    ).model_id;
 
 interface PipelineExistsParams {
   esClient: ElasticsearchClient;

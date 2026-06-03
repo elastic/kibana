@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { esqlResponseToRecords } from '../../../common/utils/esql';
 import { useKibana } from '../../../common/lib/kibana';
@@ -15,7 +15,7 @@ const FIELD = 'event.ingested';
 
 export interface UseIntegrationsLastAlertIngestedParams {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   integrationName: string;
 }
@@ -37,7 +37,7 @@ export interface UseIntegrationsLastAlertIngestedResult {
 
 /**
  * Hook that fetches the last alert ingested time for a specific integration.
- * We use the index pattern `logs-{integrationName}.alert-default` to query.
+ * We use the index pattern `logs-{integrationName}.*-*` to query.
  */
 export const useIntegrationLastAlertIngested = ({
   integrationName,
@@ -46,8 +46,10 @@ export const useIntegrationLastAlertIngested = ({
 
   // ESQL query to get the last alert ingested in the index
   // We only keep the event.ingested field as it contains the time we want to display on the Integration card.
+  // The first * is to support `alert` and `offense`.
+  // The second * is to support all the datastream namespaces tied to the integration.
   const query = useMemo(
-    () => `FROM ${`logs-${integrationName}.alert-default`}
+    () => `FROM ${`logs-${integrationName}.*-*`}
     | WHERE event.kind == "alert" OR event.kind == "event"
     | SORT ${FIELD} DESC
     | KEEP ${FIELD}

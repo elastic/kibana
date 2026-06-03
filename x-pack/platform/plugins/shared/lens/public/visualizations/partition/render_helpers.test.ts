@@ -8,7 +8,7 @@
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
 import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
-import { PieLayerState } from '../../../common/types';
+import type { LensPartitionLayerState } from '@kbn/lens-common';
 import { PieChartTypes } from '../../../common/constants';
 import { LegendValue } from '@elastic/charts';
 
@@ -72,24 +72,30 @@ describe('render helpers', () => {
   describe('#getLegendStats', () => {
     it('should firstly read the state value', () => {
       expect(
-        getLegendStats({ legendStats: [LegendValue.Value] } as PieLayerState, PieChartTypes.WAFFLE)
+        getLegendStats(
+          { legendStats: [LegendValue.Value] } as LensPartitionLayerState,
+          PieChartTypes.WAFFLE
+        )
       ).toEqual([LegendValue.Value]);
 
       expect(
-        getLegendStats({ legendStats: [] as LegendValue[] } as PieLayerState, PieChartTypes.WAFFLE)
+        getLegendStats(
+          { legendStats: [] as LegendValue[] } as LensPartitionLayerState,
+          PieChartTypes.WAFFLE
+        )
       ).toEqual([]);
     });
 
     it('should read value from meta in case of value in state is undefined', () => {
-      expect(getLegendStats({} as PieLayerState, PieChartTypes.WAFFLE)).toEqual([
+      expect(getLegendStats({} as LensPartitionLayerState, PieChartTypes.WAFFLE)).toEqual([
         LegendValue.Value,
       ]);
 
       expect(
-        getLegendStats({ legendStats: undefined } as PieLayerState, PieChartTypes.WAFFLE)
+        getLegendStats({ legendStats: undefined } as LensPartitionLayerState, PieChartTypes.WAFFLE)
       ).toEqual([LegendValue.Value]);
 
-      expect(getLegendStats({} as PieLayerState, PieChartTypes.PIE)).toEqual(undefined);
+      expect(getLegendStats({} as LensPartitionLayerState, PieChartTypes.PIE)).toEqual(undefined);
     });
   });
 });

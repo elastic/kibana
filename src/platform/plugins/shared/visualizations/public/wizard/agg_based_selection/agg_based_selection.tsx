@@ -10,7 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { orderBy } from 'lodash';
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 import {
   EuiFieldSearch,
@@ -140,7 +141,14 @@ class AggBasedSelection extends React.Component<AggBasedSelectionProps, AggBased
           description={visType.type.description || ''}
           layout="horizontal"
           isDisabled={isDisabled}
-          icon={<EuiIcon type={visType.type.icon || 'empty'} size="l" color="success" />}
+          icon={
+            <EuiIcon
+              type={visType.type.icon || 'empty'}
+              size="l"
+              color="success"
+              aria-hidden={true}
+            />
+          }
           className="aggBasedDialog__card"
           hasBorder={true}
         />

@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'dashboard', 'header']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
@@ -25,19 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getPaginationConfig', () => {
     before(async () => {
-      // To load more than 500 records
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${currentTimeFrame.from}", "to": "${currentTimeFrame.to}"}`,
       });
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await PageObjects.common.unsetTime();
     });
 
@@ -116,6 +111,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('unifiedDataTableFooter');
         await testSubjects.missingOrFail('dscGridSampleSizeFetchMoreLink');
+      });
+    });
+
+    describe('saved search embeddable', () => {
+      const from = 'Sep 22, 2015 @ 00:00:00.000';
+      const to = 'Sep 23, 2015 @ 00:00:00.000';
+
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+        );
+        await kibanaServer.importExport.load(
+          'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        );
+        await kibanaServer.uiSettings.replace({
+          defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        });
+
+        await PageObjects.common.setTime({
+          from,
+          to,
+        });
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+      });
+
+      after(async () => {
+        await PageObjects.common.unsetTime();
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      const addSearchEmbeddableToDashboard = async () => {
+        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        const rows = await dataGrid.getDocTableRows();
+        expect(rows.length).to.be.above(0);
+      };
+
+      it('should render content with singlePage pagination mode', async () => {
+        await addSearchEmbeddableToDashboard();
+
+        // Pagination toolbar should not be visible
+        await testSubjects.missingOrFail('tablePaginationPopoverButton');
+        await testSubjects.missingOrFail('pagination-button-previous');
+        await testSubjects.missingOrFail('pagination-button-next');
+
+        // Scroll to the bottom of the page
+        await dataGrid.scrollTo(500, 1500); // Ugly hack to add 1500 to the current scroll position due to virtualized table adding unexpected ordered rows
+
+        // Check the pagination footer loads
+        await testSubjects.existOrFail('unifiedDataTableFooter');
       });
     });
   });

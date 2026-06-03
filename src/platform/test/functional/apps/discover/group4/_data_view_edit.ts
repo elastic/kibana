@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const es = getService('es');
@@ -32,9 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
 
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -43,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await es.transport.request({
         path: '/data-view-index-000001',
         method: 'DELETE',
@@ -131,7 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         });
       }
-      await dataViews.editFromSearchBar({ newName: updatedPattern, newTimeField: 'timestamp' });
+      await dataViews.editFromSearchBar({
+        newIndexPattern: updatedPattern,
+        newTimeField: 'timestamp',
+      });
       await retry.try(async () => {
         expect(await discover.getHitCountInt()).to.be(3);
       });

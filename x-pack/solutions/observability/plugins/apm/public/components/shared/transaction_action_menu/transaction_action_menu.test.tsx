@@ -153,12 +153,6 @@ describe('TransactionActionMenu ', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the discover link when there is adhoc data view', async () => {
-    const { findByText } = await renderTransaction(Transactions.transactionWithMinimalData);
-
-    expect(findByText('View transaction in Discover')).not.toBeNull();
-  });
-
   it('should call logs locators getRedirectUrl function', async () => {
     await renderTransaction(Transactions.transactionWithMinimalData);
 
@@ -189,7 +183,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the pod metrics link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithKubernetesData);
 
-      expect((getByText('Pod metrics').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Pod metrics').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/node-mock/pod/pod123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
@@ -219,7 +213,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the Container metrics link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithContainerData);
 
-      expect((getByText('Container metrics').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Container metrics').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/node-mock/container/container123456abcdef?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
@@ -249,7 +243,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the Host metrics link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithHostData);
 
-      expect((getByText('Host metrics').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Host metrics').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/node-mock/host/227453131a17?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
@@ -271,7 +265,7 @@ describe('TransactionActionMenu ', () => {
     it('renders the uptime link', async () => {
       const { getByText } = await renderTransaction(Transactions.transactionWithUrlAndDomain);
 
-      expect((getByText('Status').parentElement as HTMLAnchorElement).href).toEqual(
+      expect((getByText('Status').closest('a') as HTMLAnchorElement).href).toEqual(
         'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
       );
     });

@@ -58,6 +58,7 @@ import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
@@ -156,6 +157,7 @@ describe('Task Runner Cancel', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {
@@ -233,6 +235,11 @@ describe('Task Runner Cancel', () => {
       `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
       { tags: ['1', 'test'] }
     );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      7,
+      `skipping updating alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      { tags: ['1', 'test'] }
+    );
 
     testAlertingEventLogCalls({ status: 'ok' });
 
@@ -272,8 +279,8 @@ describe('Task Runner Cancel', () => {
                   metrics: {
                     duration: 0,
                     gap_duration_s: null,
-                    // TODO: uncomment after intermidiate release
-                    // gap_range: null,
+                    gap_range: null,
+                    gap_reason: null,
                     total_alerts_created: null,
                     total_alerts_detected: null,
                     total_indexing_duration_ms: null,
@@ -581,6 +588,7 @@ describe('Task Runner Cancel', () => {
         rule_type_run_duration_ms: 0,
         total_run_duration_ms: 0,
         trigger_actions_duration_ms: 0,
+        update_alerts_duration_ms: 0,
       },
     });
 

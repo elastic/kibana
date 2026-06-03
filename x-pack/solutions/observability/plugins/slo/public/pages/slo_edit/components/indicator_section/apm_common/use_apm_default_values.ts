@@ -6,14 +6,17 @@
  */
 
 import { useFormContext } from 'react-hook-form';
-import { ALL_VALUE, APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
+import type { APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useEffect } from 'react';
-import { useFetchApmIndex } from '../../../../../hooks/use_fetch_apm_indices';
-import { CreateSLOForm } from '../../../types';
+import { useFetchApmIndices } from '../../../../../hooks/use_fetch_apm_indices';
+import type { CreateSLOForm } from '../../../types';
 
 export const useApmDefaultValues = () => {
   const { watch, setValue } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndices();
 
   const [serviceName = '', environment = '', transactionType = '', transactionName = ''] = watch([
     'indicator.params.service',

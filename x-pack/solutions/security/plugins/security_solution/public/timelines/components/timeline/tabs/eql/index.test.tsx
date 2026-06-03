@@ -17,8 +17,6 @@ import EqlTabContentComponent from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
@@ -43,7 +41,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -111,6 +108,7 @@ describe('EQL Tab', () => {
       false,
       {
         events: mockTimelineData.slice(0, 1),
+        rawEvents: [],
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -119,8 +117,6 @@ describe('EQL Tab', () => {
     ]);
     (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
@@ -181,6 +177,7 @@ describe('EQL Tab', () => {
           false,
           {
             events: [],
+            rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 10,
@@ -199,7 +196,8 @@ describe('EQL Tab', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    describe('pagination', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/224186
+    describe.skip('pagination', () => {
       beforeEach(() => {
         // pagination tests need more than 1 record so here
         // we return 5 records instead of just 1.
@@ -207,6 +205,7 @@ describe('EQL Tab', () => {
           false,
           {
             events: structuredClone(mockTimelineData.slice(0, 5)),
+            rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 5,

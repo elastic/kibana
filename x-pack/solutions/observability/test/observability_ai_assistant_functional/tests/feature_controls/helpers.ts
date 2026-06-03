@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InheritedFtrProviderContext } from '../../ftr_provider_context';
+import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 const AI_ASSISTANT_ROLE_NAME = 'ai_assistant_role';
 const AI_ASSISTANT_USER_NAME = 'ai_assistant_user';

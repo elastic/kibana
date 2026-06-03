@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ProvidedType } from '@kbn/test';
+import type { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export type CasesCommon = ProvidedType<typeof CasesCommonServiceProvider>;
 
@@ -94,8 +94,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async expectToasterToContain(content: string) {
-      const toast = await toasts.getElementByIndex(1);
-      expect(await toast.getVisibleText()).to.contain(content);
+      await retry.try(async () => {
+        const toast = await toasts.getElementByIndex(1);
+        const text = await toast.getVisibleText();
+        expect(text).to.contain(content);
+      });
     },
 
     async assertCaseModalVisible(expectVisible = true) {

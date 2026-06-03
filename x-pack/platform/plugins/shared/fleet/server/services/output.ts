@@ -5,18 +5,18 @@
  * 2.0.
  */
 import { v5 as uuidv5 } from 'uuid';
+import { escapeQuotes } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
 import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import _ from 'lodash';
 
@@ -35,7 +35,8 @@ import type {
   AgentPolicy,
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
-  PolicySecretReference,
+  SecretReference,
+  OutputSoBaseAttributes,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -52,6 +53,7 @@ import {
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
+  kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
@@ -59,7 +61,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -83,6 +85,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+
 import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
@@ -93,21 +96,6 @@ type Nullable<T> = { [P in keyof T]: T[P] | null };
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 // differentiate
 function isUUID(val: string) {
@@ -135,7 +123,6 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
   } catch (e) {
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
-    logger.warn(`ssl value: ${ssl}`);
   }
   return {
     id: outputId ?? so.id,
@@ -149,12 +136,19 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
+  let packagePoliciesKuery: string | undefined;
   if (outputId) {
+    packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escapeQuotes(
+      outputId
+    )}"`;
     if (isDefault) {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}"`;
     }
   } else {
     if (isDefault) {
@@ -175,11 +169,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   // Get package policies using output and derive agent policies from that which
   // are not already identfied above. The IDs cannot be used as part of the kuery
   // above since the underlying saved object client .find() only filters on attributes
-  const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
-    kuery: packagePoliciesKuery,
-    perPage: SO_SEARCH_LIMIT,
-    spaceId: '*',
-  });
+  const packagePolicySOs = packagePoliciesKuery
+    ? await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
+        kuery: packagePoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        spaceId: '*',
+      })
+    : undefined;
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
       packagePolicySOs?.items.reduce((acc: string[], packagePolicy) => {
@@ -387,12 +383,16 @@ async function remoteSyncIntegrationsCheck(
 }
 
 class OutputService {
+  private get soClient() {
+    return appContextService.getInternalUserSOClient();
+  }
+
   private get encryptedSoClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getEncryptedSavedObjects();
   }
 
   private async _getDefaultDataOutputsSO() {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
@@ -410,8 +410,8 @@ class OutputService {
     return outputs;
   }
 
-  private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+  private async _getDefaultMonitoringOutputsSO() {
+    const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
@@ -430,12 +430,11 @@ class OutputService {
   }
 
   private async _updateDefaultOutput(
-    soClient: SavedObjectsClientContract,
     defaultDataOutputId: string,
     updateData: { is_default: boolean } | { is_default_monitoring: boolean },
     fromPreconfiguration: boolean
   ) {
-    const originalOutput = await this.get(soClient, defaultDataOutputId);
+    const originalOutput = await this.get(defaultDataOutputId);
     this._validateFieldsAreEditable(
       originalOutput,
       updateData,
@@ -450,7 +449,7 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    return await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
+    return await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(defaultDataOutputId),
       updateData
@@ -474,6 +473,14 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
+            // Allow ssl to differ if set to default empty values
+            if (
+              key === 'ssl' &&
+              originalOutput[key] === undefined &&
+              deepEqual(data[key], { certificate: '', certificate_authorities: [] })
+            ) {
+              continue;
+            }
             throw new OutputUnauthorizedError(
               `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
             );
@@ -487,7 +494,7 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list(soClient);
+    const outputs = await this.list();
 
     const defaultOutput = outputs.items.find((o) => o.is_default);
     const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
@@ -522,7 +529,7 @@ class OutputService {
     return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
+  public async getDefaultDataOutputId() {
     const outputs = await this._getDefaultDataOutputsSO();
 
     if (!outputs.saved_objects.length) {
@@ -532,8 +539,8 @@ class OutputService {
     return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
-  public async getDefaultMonitoringOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
+  public async getDefaultMonitoringOutputId() {
+    const outputs = await this._getDefaultMonitoringOutputsSO();
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -556,12 +563,14 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new output`);
 
+    validateFleetSavedObjectId(options?.id);
+
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
 
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -571,7 +580,7 @@ class OutputService {
       }
     }
 
-    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+    const defaultDataOutputId = await this.getDefaultDataOutputId();
 
     if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(undefined, data.is_default);
@@ -600,7 +609,6 @@ class OutputService {
     if (data.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== options?.id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultDataOutputId,
           { is_default: false },
           options?.fromPreconfiguration ?? false
@@ -608,10 +616,9 @@ class OutputService {
       }
     }
     if (data.is_default_monitoring) {
-      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== options?.id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           options?.fromPreconfiguration ?? false
@@ -640,11 +647,11 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     if (output.config_yaml) {
-      const configJs = load(output.config_yaml);
+      const configJs = parse(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -696,6 +703,14 @@ class OutputService {
         // required_acks can be 0
         data.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
       }
+      // Clear fields that are only valid for specific auth_type values
+      if (output.auth_type !== kafkaAuthType.None) {
+        data.connection_type = undefined;
+      }
+      if (output.auth_type !== kafkaAuthType.Userpass) {
+        data.username = undefined;
+        data.password = undefined;
+      }
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -736,43 +751,75 @@ class OutputService {
       name: data.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-    const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+    const newSo = await this.soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
     logger.debug(`Created new output ${id}`);
-    return outputSavedObjectToOutput(newSo);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo = await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      newSo.id
+    );
+    return outputSavedObjectToOutput(retrievedSo);
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
-    const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
-      ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
+    if (ids.length === 0) {
+      return [];
+    }
+    const decryptedSavedObjects = await pMap(
+      ids,
+      async (id) => {
+        try {
+          const decryptedSo =
+            await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
+              SAVED_OBJECT_TYPE,
+              outputIdToUuid(id)
+            );
+          return outputSavedObjectToOutput(decryptedSo);
+        } catch (error: any) {
+          if (ignoreNotFound && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return undefined;
+          }
+          throw error;
+        }
+      },
+      { concurrency: 50 } // Match the concurrency used in x-pack/platform/plugins/shared/encrypted_saved_objects/server/saved_objects/index.ts#L172
     );
 
-    return res.saved_objects
-      .map((so) => {
-        if (so.error) {
-          if (!ignoreNotFound || so.error.statusCode !== 404) {
-            throw so.error;
-          }
-          return undefined;
-        }
-
-        return outputSavedObjectToOutput(so);
-      })
-      .filter((output): output is Output => typeof output !== 'undefined');
+    return decryptedSavedObjects.filter(
+      (output): output is Output => typeof output !== 'undefined'
+    );
   }
 
-  public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
-      type: SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      sortField: 'is_default',
-      sortOrder: 'desc',
-    });
+  public async list() {
+    const outputsFinder =
+      await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<OutputSOAttributes>(
+        {
+          type: SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+          sortField: 'is_default',
+          sortOrder: 'desc',
+        }
+      );
 
-    for (const output of outputs.saved_objects) {
+    let outputs: SavedObject<OutputSOAttributes>[] = [];
+    let total = 0;
+    let page = 0;
+    let perPage = 0;
+
+    for await (const result of outputsFinder.find()) {
+      outputs = result.saved_objects;
+      total = result.total;
+      page = result.page;
+      perPage = result.per_page;
+      break; // Return first page;
+    }
+
+    await outputsFinder.close();
+
+    for (const output of outputs) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
@@ -782,15 +829,15 @@ class OutputService {
     }
 
     return {
-      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
-      total: outputs.total,
-      page: outputs.page,
-      perPage: outputs.per_page,
+      items: outputs.map<Output>(outputSavedObjectToOutput),
+      total,
+      page,
+      perPage,
     };
   }
 
-  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
-    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+  public async listAllForProxyId(proxyId: string) {
+    const outputs = await this.soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -815,8 +862,8 @@ class OutputService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+  public async get(id: string): Promise<Output> {
+    const outputSO = await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
@@ -836,7 +883,6 @@ class OutputService {
   }
 
   public async delete(
-    soClient: SavedObjectsClientContract,
     id: string,
     { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
       fromPreconfiguration: false,
@@ -845,7 +891,7 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting output ${id}`);
 
-    const originalOutput = await this.get(soClient, id);
+    const originalOutput = await this.get(id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(
@@ -880,7 +926,7 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const soDeleteResult = this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const soDeleteResult = this.soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     await deleteOutputSecrets({
       esClient: appContextService.getInternalUserESClient(),
@@ -905,8 +951,8 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Updating output ${id}`);
 
-    let secretsToDelete: PolicySecretReference[] = [];
-    const originalOutput = await this.get(soClient, id);
+    let secretsToDelete: SecretReference[] = [];
+    const originalOutput = await this.get(id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
     if (
@@ -923,7 +969,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', parse)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -935,7 +981,7 @@ class OutputService {
 
     const mergedType = data.type ?? originalOutput.type;
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
-    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+    const defaultDataOutputId = await this.getDefaultDataOutputId();
     if (mergedType !== originalOutput.type || originalOutput.is_default !== mergedIsDefault) {
       await validateTypeChanges(
         esClient,
@@ -980,12 +1026,24 @@ class OutputService {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
+      if (originalOutput.type === outputType.RemoteElasticsearch) {
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
+      }
+
+      if (
+        originalOutput.type === outputType.Elasticsearch ||
+        originalOutput.type === outputType.RemoteElasticsearch
+      ) {
+        (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_disable_beatsauth = null;
+      }
+
       if (data.type === outputType.Logstash) {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
-        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
-        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
@@ -1040,6 +1098,14 @@ class OutputService {
           // required_acks can be 0
           updateData.required_acks = kafkaAcknowledgeReliabilityLevel.Commit;
         }
+        // Clear fields that are only valid for specific auth_type values
+        if (data.auth_type && data.auth_type !== kafkaAuthType.None) {
+          updateData.connection_type = null;
+        }
+        if (data.auth_type && data.auth_type !== kafkaAuthType.Userpass) {
+          updateData.username = null;
+          updateData.password = null;
+        }
       }
     }
 
@@ -1069,7 +1135,6 @@ class OutputService {
     if (data.is_default) {
       if (defaultDataOutputId && defaultDataOutputId !== id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultDataOutputId,
           { is_default: false },
           fromPreconfiguration
@@ -1077,11 +1142,10 @@ class OutputService {
       }
     }
     if (data.is_default_monitoring) {
-      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId();
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
         await this._updateDefaultOutput(
-          soClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           fromPreconfiguration
@@ -1109,7 +1173,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -1117,7 +1181,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = load(data.config_yaml);
+      const configJs = parse(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1164,7 +1228,7 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
+    const outputSO = await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
@@ -1188,12 +1252,12 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list(soClient);
+    const outputs = await this.list();
 
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
         await outputService.update(
           soClient,
@@ -1202,7 +1266,10 @@ class OutputService {
           { preset },
           { fromPreconfiguration: true }
         );
-        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+          isDefault: output.is_default,
+          isDefaultMonitoring: output.is_default_monitoring,
+        });
       },
       {
         concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
@@ -1250,7 +1317,7 @@ class OutputService {
   }
 
   async getOutputLastUpdateTime(id: string): Promise<string | undefined> {
-    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+    const outputSO = await this.soClient.get<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );

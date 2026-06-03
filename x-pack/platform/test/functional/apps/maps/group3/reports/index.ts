@@ -6,10 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const REPORTS_FOLDER = __dirname;
 
+/**
+ * Purpose: Reporting smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { reporting, dashboard } = getPageObjects(['reporting', 'dashboard']);
   const browser = getService('browser');

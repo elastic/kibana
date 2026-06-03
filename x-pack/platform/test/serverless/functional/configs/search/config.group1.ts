@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../../config.search.base.ts'));
@@ -15,7 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../test_suites/home_page'),
       require.resolve('../../test_suites/management'),
-      require.resolve('../../test_suites/dev_tools'),
       require.resolve('../../test_suites/platform_security'),
       require.resolve('../../test_suites/reporting'),
       require.resolve('../../test_suites/console'),

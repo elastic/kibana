@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart, IBasePath } from '@kbn/core/public';
+import type { ApplicationStart, IBasePath } from '@kbn/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import moment from 'moment';
+import type {
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  QueryType,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -23,18 +29,14 @@ import {
   EuiSwitch,
   EuiFormRow,
   EuiText,
-  EuiTableFieldDataColumnType,
-  EuiTableActionsColumnType,
-  QueryType,
-  CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
-import { SavedObjectWithMetadata } from '../../../types';
-import {
+import type { SavedObjectWithMetadata } from '../../../types';
+import type {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
@@ -147,7 +149,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             )}
           >
-            <span>-</span>
+            <span tabIndex={0}>-</span>
           </EuiToolTip>
         );
       }
@@ -156,7 +158,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
           <EuiToolTip content={updatedAt.format('LL LT')}>
-            <span>
+            <span tabIndex={0}>
               <FormattedRelative value={new Date(dateTime).getTime()} />
             </span>
           </EuiToolTip>
@@ -164,7 +166,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       }
       return (
         <EuiToolTip content={updatedAt.format('LL LT')}>
-          <span>{updatedAt.format('LL')}</span>
+          <span tabIndex={0}>{updatedAt.format('LL')}</span>
         </EuiToolTip>
       );
     };
@@ -327,7 +329,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             ),
             type: 'icon',
-            icon: 'kqlSelector',
+            icon: 'querySelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
@@ -373,7 +375,7 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const button = (
       <EuiButton
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
         isDisabled={selectedSavedObjects.length === 0}
@@ -449,6 +451,10 @@ export class Table extends PureComponent<TableProps, TableState> {
               button={button}
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
+              aria-label={i18n.translate(
+                'savedObjectsManagement.objectsTable.table.exportPopoverAriaLabel',
+                { defaultMessage: 'Export options' }
+              )}
             >
               <EuiFormRow
                 label={
@@ -471,7 +477,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiButton key="exportSO" iconType="upload" onClick={this.onExportClick} fill>
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
@@ -507,6 +513,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             onChange={onTableChange}
             rowProps={(item) => ({
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
+            })}
+            tableCaption={i18n.translate('savedObjectsManagement.objectsTable.table.tableCaption', {
+              defaultMessage: 'Saved objects list',
             })}
           />
         </div>

@@ -39,7 +39,7 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       })}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
+        <EuiIcon type={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div
@@ -49,8 +49,10 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
             transform: 'translate(0, -50%)',
           }}
         >
-          <EuiToolTip content={childrenCount} delay="long">
-            <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
+          <EuiToolTip content={childrenCount}>
+            <EuiText size="xs" tabIndex={0}>
+              {asBigNumber(childrenCount)}
+            </EuiText>
           </EuiToolTip>
         </div>
       </EuiFlexItem>

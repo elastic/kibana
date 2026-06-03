@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { DEFINITION_DETAILS, SUPPRESS_BY_DETAILS } from '../../../../../screens/rule_details';
 
@@ -31,11 +32,10 @@ import { getNewRule } from '../../../../../objects/rule';
 
 const queryRule = getNewRule({ rule_id: '1', name: 'Query rule', enabled: false });
 
-// skipInServerlessMKI because of experiment feature flag
 describe(
   'Bulk Edit - Alert Suppression, Essentials Serverless tier',
   {
-    tags: ['@serverless', '@skipInServerlessMKI'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
@@ -43,6 +43,10 @@ describe(
     },
   },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

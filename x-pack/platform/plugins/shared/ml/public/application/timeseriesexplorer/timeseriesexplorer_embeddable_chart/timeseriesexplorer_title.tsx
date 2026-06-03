@@ -19,10 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type MlEntityFieldOperation, ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
 
+import { SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useMlKibana } from '../../contexts/kibana';
 import type { MlEntity, SingleMetricViewerEmbeddableApi } from '../../../embeddables/types';
 import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
-import { SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../../ui_actions/triggers';
 
 const FilterButton: FC<{
   api: SingleMetricViewerEmbeddableApi;
@@ -35,8 +35,7 @@ const FilterButton: FC<{
   const isAddFilter = operation === ML_ENTITY_FIELD_OPERATIONS.ADD;
 
   const onClick = useCallback(() => {
-    const trigger = uiActions.getTrigger(SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER);
-    trigger.exec({
+    uiActions.executeTriggerActions(SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER, {
       embeddable: api,
       data: [
         {
@@ -68,7 +67,7 @@ const FilterButton: FC<{
       <EuiButtonIcon
         size="xs"
         onClick={onClick}
-        iconType={isAddFilter ? 'plusInCircle' : 'minusInCircle'}
+        iconType={isAddFilter ? 'plusCircle' : 'minusCircle'}
         aria-label={
           isAddFilter
             ? i18n.translate('xpack.ml.timeSeriesExplorer.title.addFilterAriaLabel', {
@@ -80,6 +79,47 @@ const FilterButton: FC<{
         }
       />
     </EuiToolTip>
+  );
+};
+
+export const EntityFieldNamesAndFilterButtons: FC<{
+  api?: SingleMetricViewerEmbeddableApi;
+  entityData: { entities: MlEntity[]; count: number };
+}> = ({ api, entityData }) => {
+  return (
+    <EuiFlexGroup alignItems="center">
+      {entityData.entities.map((entity, i) => {
+        return (
+          <EuiFlexItem grow={false} key={`${entity.fieldName}.${entity.fieldValue}`}>
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color="accentSecondary" component="span">
+                  {`${entity.fieldName}: ${entity.fieldValue}`}
+                </EuiTextColor>
+              </EuiFlexItem>
+              {api !== undefined ? (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <FilterButton
+                      api={api}
+                      entity={entity}
+                      operation={ML_ENTITY_FIELD_OPERATIONS.ADD}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FilterButton
+                      api={api}
+                      entity={entity}
+                      operation={ML_ENTITY_FIELD_OPERATIONS.REMOVE}
+                    />
+                  </EuiFlexItem>
+                </>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 };
 
@@ -116,39 +156,7 @@ export const SingleMetricViewerTitle: FC<SingleMetricViewerTitleProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          {entityData.entities.map((entity, i) => {
-            return (
-              <EuiFlexItem grow={false} key={`${entity.fieldName}.${entity.fieldValue}`}>
-                <EuiFlexGroup gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiTextColor color="accentSecondary" component="span">
-                      {`${entity.fieldName}: ${entity.fieldValue}`}
-                    </EuiTextColor>
-                  </EuiFlexItem>
-                  {api !== undefined ? (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <FilterButton
-                          api={api}
-                          entity={entity}
-                          operation={ML_ENTITY_FIELD_OPERATIONS.ADD}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <FilterButton
-                          api={api}
-                          entity={entity}
-                          operation={ML_ENTITY_FIELD_OPERATIONS.REMOVE}
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
+        <EntityFieldNamesAndFilterButtons api={api} entityData={entityData} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

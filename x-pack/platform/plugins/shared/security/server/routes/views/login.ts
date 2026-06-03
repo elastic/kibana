@@ -43,6 +43,7 @@ export function defineLoginRoutes({
       security: {
         authc: {
           enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users.',
         },
         authz: {
           enabled: false,
@@ -69,14 +70,18 @@ export function defineLoginRoutes({
     {
       path: '/internal/security/login_state',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route provides login page configuration and must be accessible to unauthenticated users.',
+        },
         authz: {
           enabled: false,
           reason:
-            'This route is opted out from authorization because it only provides non-sensative information about authentication provider configuration',
+            'This route is opted out from authorization because it only provides non-sensitive information about authentication provider configuration',
         },
       },
       validate: false,
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       const { allowLogin, layout = 'form' } = license.getFeatures();
@@ -85,7 +90,9 @@ export function defineLoginRoutes({
       const providers = sortedProviders.map(({ type, name }) => {
         // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
         // be sure that config is present for every provider in `config.authc.sortedProviders`.
-        const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
+
+        const { showInSelector, description, hint, icon, origin } =
+          config.authc.providers[type]?.[name]!;
         const usesLoginForm = shouldProviderUseLoginForm(type);
         return {
           type,
@@ -95,6 +102,7 @@ export function defineLoginRoutes({
           description,
           hint,
           icon,
+          origin,
         };
       });
 

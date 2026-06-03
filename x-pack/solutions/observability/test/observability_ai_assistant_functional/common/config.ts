@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
-import { UrlObject } from 'url';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import type { UrlObject } from 'url';
 import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
@@ -14,7 +14,7 @@ import {
 import path from 'path';
 import { secondaryEditor, editor, viewer } from './users/users';
 import { getScopedApiClient } from '../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
-import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
+import type { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider } from './ui';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 
@@ -107,6 +107,8 @@ async function getTestConfig({
       ...testConfig.get('kbnTestServer'),
       serverArgs: [
         ...testConfig.get('kbnTestServer.serverArgs'),
+        // Contextual insights UI is hidden when chat experience is Agent (see insight.tsx).
+        '--uiSettings.overrides.aiAssistant:preferredChatExperience=classic',
         ...(kibanaConfig
           ? Object.entries(kibanaConfig).map(([key, value]) =>
               Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`

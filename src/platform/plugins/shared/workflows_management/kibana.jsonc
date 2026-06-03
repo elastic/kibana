@@ -10,15 +10,30 @@
     "configPath": ["workflowsManagement"],
     "browser": true,
     "server": true,
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "data"],
     "requiredPlugins": [
-      "kibanaReact",
       "navigation",
       "taskManager",
       "actions",
       "workflowsExecutionEngine",
+      "workflowsExtensions",
       "features",
       "security",
-      "spaces"
-    ]
+      "triggersActionsUi",
+      "spaces",
+      "esUiShared",
+      "share",
+      "stackConnectors",
+      "data",
+      "dataViews",
+      "kql",
+      "fieldFormats",
+      "unifiedSearch",
+      "embeddable",
+      "licensing"
+    ],
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
+    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer"],
+    "extraPublicDirs": ["common"]
   }
 }

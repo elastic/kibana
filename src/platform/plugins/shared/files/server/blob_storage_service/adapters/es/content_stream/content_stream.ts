@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createId } from '@paralleldrive/cuid2';
+import { randomUUID } from 'crypto';
 import { encode, decode } from '@kbn/cbor';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
-import { Duplex, Writable, Readable } from 'stream';
+import type { Writable, Readable } from 'stream';
+import { Duplex } from 'stream';
 
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { inspect } from 'util';
 import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';
@@ -133,7 +134,10 @@ export class ContentStream extends Duplex {
         },
         {
           asStream: true, // This tells the ES client to not process the response body in any way.
-          headers: { accept: 'application/cbor' },
+          headers: {
+            accept: 'application/cbor',
+            'accept-encoding': 'identity', // Disable response compression: asStream bypasses decompression, so gzipped bytes would break CBOR decoding
+          },
         }
       );
 
@@ -171,6 +175,9 @@ export class ContentStream extends Duplex {
           this.logger.error(`File not found (id: ${this.getHeadChunkId()}).`);
         }
       }
+      this.logger.error(
+        `Error reading chunk #${this.chunksRead} with id [${id}] from index [${chunkIndex}]: ${e.message}`
+      );
       throw e;
     }
   }
@@ -224,7 +231,7 @@ export class ContentStream extends Duplex {
 
   private getId(): string {
     if (!this.id) {
-      this.id = createId();
+      this.id = randomUUID();
     }
     return this.id;
   }

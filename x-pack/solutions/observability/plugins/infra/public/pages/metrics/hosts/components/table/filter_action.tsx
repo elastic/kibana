@@ -35,7 +35,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
 
   return (
     <div
-      css={css`
+      className={css`
         position: relative;
         height: ${euiTheme.size.m};
       `}
@@ -66,7 +66,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
             size="xs"
             flush="left"
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
           >
             {selectedHostsLabel(selectedItemsCount)}

@@ -20,14 +20,14 @@ import {
   type RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { isArray } from 'lodash';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import { INDEX } from '../../../../common/es_fields';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { RuleConditionChart } from './rule_condition_chart';
@@ -71,7 +71,7 @@ export const RuleForm: React.FunctionComponent<
   );
 
   const updateProperty = useCallback(
-    (property: keyof DegradedDocsRuleParams, value?: any) => {
+    <K extends keyof DegradedDocsRuleParams>(property: K, value?: DegradedDocsRuleParams[K]) => {
       setRuleParams(property, value);
     },
     [setRuleParams]
@@ -192,6 +192,10 @@ export const RuleForm: React.FunctionComponent<
   };
 
   const selectedOptions = [...getPreSelectedOptions(), ...getUserSelectedOptions(groupBy)];
+  const normalizedThreshold = threshold ?? defaultRuleParams.threshold!;
+  const normalizedComparator = (comparator ?? defaultRuleParams.comparator) as COMPARATORS;
+  const normalizedTimeSize = timeSize || defaultRuleParams.timeSize!;
+  const normalizedTimeUnit = (timeUnit ?? defaultRuleParams.timeUnit) as TimeUnitChar;
 
   return (
     <>
@@ -247,8 +251,8 @@ export const RuleForm: React.FunctionComponent<
       />
 
       <ThresholdExpression
-        thresholdComparator={comparator ?? defaultRuleParams.comparator}
-        threshold={threshold}
+        thresholdComparator={normalizedComparator}
+        threshold={normalizedThreshold}
         onChangeSelectedThresholdComparator={(value) => updateProperty('comparator', value)}
         onChangeSelectedThreshold={(value) => updateProperty('threshold', value)}
         errors={errors}
@@ -257,20 +261,20 @@ export const RuleForm: React.FunctionComponent<
       />
 
       <RuleConditionChart
-        threshold={threshold}
-        comparator={comparator as COMPARATORS}
-        timeSize={timeSize}
-        timeUnit={timeUnit as TimeUnitChar}
+        threshold={normalizedThreshold}
+        comparator={normalizedComparator}
+        timeSize={normalizedTimeSize}
+        timeUnit={normalizedTimeUnit}
         dataView={dataView}
         groupBy={groupBy}
-        timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+        timeRange={{ from: `now-${normalizedTimeSize * 20}${normalizedTimeUnit}`, to: 'now' }}
       />
 
       <EuiSpacer size="l" />
 
       <ForLastExpression
-        timeWindowSize={timeSize}
-        timeWindowUnit={timeUnit}
+        timeWindowSize={normalizedTimeSize}
+        timeWindowUnit={normalizedTimeUnit}
         errors={{
           timeSize: [],
           timeUnit: [],

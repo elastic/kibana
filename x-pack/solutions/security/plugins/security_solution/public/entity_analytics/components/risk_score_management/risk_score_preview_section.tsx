@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiCallOut,
   EuiButton,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,17 +26,15 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/entity_analytics/risk_engine';
+import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../../translations';
 import { useRiskScorePreview } from '../../api/hooks/use_preview_risk_scores';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
-import { userHasRiskEngineReadPermissions } from '../../common';
 import { EntityIconByType } from '../entity_store/helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useEntityAnalyticsTypes } from '../../hooks/use_enabled_entity_types';
+import type { AlertFilter } from './common';
+
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -45,20 +43,33 @@ interface IRiskScorePreviewPanel {
   type: EntityType;
 }
 
+const ENTITY_ID_FIELD = 'entity.id';
+
 const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
   scores
-    ?.filter((item) => item?.id_field === field)
+    ?.filter((item) => item?.id_field === field || item?.id_field === ENTITY_ID_FIELD)
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 
-export const RiskScorePreviewSection: React.FC<{
-  privileges: RiskEngineMissingPrivilegesResponse;
+interface RiskScorePreviewSectionProps {
+  hasReadPermissions: boolean;
+  isPrivilegesLoading: boolean;
   includeClosedAlerts: boolean;
   from: string;
   to: string;
-}> = ({ privileges, includeClosedAlerts, from, to }) => {
+  alertFilters?: Array<AlertFilter>;
+}
+
+export const RiskScorePreviewSection: React.FC<RiskScorePreviewSectionProps> = ({
+  hasReadPermissions,
+  isPrivilegesLoading,
+  includeClosedAlerts,
+  from,
+  to,
+  alertFilters,
+}) => {
   const sectionBody = useMemo(() => {
-    if (privileges.isLoading) {
+    if (isPrivilegesLoading) {
       return (
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -67,12 +78,19 @@ export const RiskScorePreviewSection: React.FC<{
         </EuiFlexGroup>
       );
     }
-    if (userHasRiskEngineReadPermissions(privileges)) {
-      return <RiskEnginePreview includeClosedAlerts={includeClosedAlerts} from={from} to={to} />;
+    if (hasReadPermissions) {
+      return (
+        <RiskEnginePreview
+          includeClosedAlerts={includeClosedAlerts}
+          from={from}
+          to={to}
+          alertFilters={alertFilters}
+        />
+      );
     }
 
     return <MissingPermissionsCallout />;
-  }, [privileges, includeClosedAlerts, from, to]);
+  }, [hasReadPermissions, isPrivilegesLoading, includeClosedAlerts, from, to, alertFilters]);
 
   return (
     <>
@@ -128,7 +146,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={EntityIconByType[type]} />}
+        extraAction={<EuiIcon type={EntityIconByType[type]} aria-hidden={true} />}
       >
         <>
           <EuiSpacer size={'m'} />
@@ -139,39 +157,35 @@ const RiskScorePreviewPanel = ({
   );
 };
 
-const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; to: string }> = ({
-  includeClosedAlerts,
-  from,
-  to,
-}) => {
+const RiskEnginePreview: React.FC<{
+  includeClosedAlerts: boolean;
+  from: string;
+  to: string;
+  alertFilters?: Array<AlertFilter>;
+}> = ({ includeClosedAlerts, from, to, alertFilters }) => {
   const entityTypes = useEntityAnalyticsTypes();
 
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
-
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const spaceId = useSpaceId();
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
-    data_view_id: sourcererDataView?.title,
+    data_view_id: spaceId ? getAlertsIndex(spaceId) : undefined,
     filter: filters,
     range: {
       start: from,
       end: to,
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
+    filters: alertFilters && alertFilters.length > 0 ? alertFilters : undefined,
   });
 
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         data-test-subj="risk-preview-error"
         title={i18n.PREVIEW_ERROR_TITLE}
         color="danger"

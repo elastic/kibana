@@ -19,10 +19,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { docLinks } from '../../../common/doc_links';
 import { useLLMsModels } from '../../hooks/use_llms_models';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 interface TokenEstimateTooltipProps {
   context: number;
@@ -54,6 +56,10 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.searchPlayground.chat.message.tokenEstimateTooltip.popover.ariaLabel',
+        { defaultMessage: 'Token estimate breakdown' }
+      )}
       id={normalContextMenuPopoverId}
       button={
         <EuiButtonEmpty
@@ -164,6 +170,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                     {clipped ? (
                       <EuiPanel paddingSize="s" hasShadow={false} color="warning">
                         <EuiCallOut
+                          announceOnMount
                           data-test-subj="clipped-tokens-callout"
                           title={
                             <FormattedMessage

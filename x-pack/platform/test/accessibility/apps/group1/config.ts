@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../../services';
 import { pageObjects } from '../../page_objects';
 
@@ -21,6 +21,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     pageObjects,
     services,
+
+    security: {
+      ...functionalConfig.get('security'),
+      cookieLogin: false, // login_page.ts audits the login form UI itself
+    },
 
     junit: {
       reportName: 'X-Pack Patform Accessibility Tests - Group 1',

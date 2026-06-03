@@ -11,8 +11,8 @@ import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from './dashboard_panel_converters';
-import { SavedDashboardPanel } from '../schema/v2/types';
-import { DashboardPanelState810 } from './types';
+import type { SavedDashboardPanel } from '../schema/v2/types';
+import type { DashboardPanelState810 } from './types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {

@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { columnsMetaWithCustomField, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, within } from '@testing-library/react';
 import React from 'react';
-import { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { useComparisonCellValue, UseComparisonCellValueProps } from './use_comparison_cell_value';
+import type { UseComparisonCellValueProps } from './use_comparison_cell_value';
+import { useComparisonCellValue } from './use_comparison_cell_value';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import {
   ADDED_SEGMENT_CLASS,
@@ -46,19 +48,21 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 3).map((hit, i) => {
   return buildDataTableRecord(hit, dataViewWithTimefieldMock);
 });
 
-const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+const createDocMap = (currentDocs = docs) =>
+  new Map(currentDocs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
 
 const fieldColumnId = 'fieldColumnId';
 
 const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> = {}) => {
   const defaultProps: UseComparisonCellValueProps = {
     dataView: dataViewWithTimefieldMock,
+    columnsMeta: undefined,
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
     selectedDocIds: ['0', '1', '2'],
     diffMode: undefined,
     fieldFormats: fieldFormatsMock,
-    getDocById,
+    docMap: createDocMap(),
     ...props,
   };
   const hook = renderHook((currentProps) => useComparisonCellValue(currentProps), {
@@ -122,6 +126,7 @@ const renderComparisonCell = ({
     getAllSegments: () => getCell().querySelectorAll(`.${SEGMENT_CLASS}`),
     getAddedSegments: () => getCell().querySelectorAll(`.${ADDED_SEGMENT_CLASS}`),
     getRemovedSegments: () => getCell().querySelectorAll(`.${REMOVED_SEGMENT_CLASS}`),
+    getFieldIcon: () => within(getCell()).getByTestId('unifiedDataTableComparisonFieldIcon'),
   };
 };
 
@@ -442,5 +447,19 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(6);
     renderComparisonCell(cellProps6);
     expect(calculateDiff).toHaveBeenCalledTimes(6);
+  });
+
+  it('should render icons from fields defined in columnsMeta (ES|QL computed columns)', () => {
+    const { renderCellValue } = renderComparisonCellValue({
+      columnsMeta: columnsMetaWithCustomField,
+      comparisonFields: ['custom_esql_field'],
+    });
+    const customFieldCell = renderComparisonCell({
+      columnId: fieldColumnId,
+      colIndex: 0,
+      rowIndex: 0,
+      renderCellValue,
+    });
+    expect(customFieldCell.getFieldIcon()).toBeInTheDocument();
   });
 });

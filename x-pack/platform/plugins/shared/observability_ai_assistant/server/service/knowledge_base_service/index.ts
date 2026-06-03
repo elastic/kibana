@@ -11,27 +11,36 @@ import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
+import type { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
 import { resourceNames } from '..';
-import {
+import type {
   Instruction,
+  IntegrationKnowledgeBaseEntry,
   KnowledgeBaseEntry,
-  KnowledgeBaseEntryRole,
-  KnowledgeBaseType,
 } from '../../../common/types';
+import { KnowledgeBaseEntryRole, KnowledgeBaseType } from '../../../common/types';
 import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import { getSpaceQuery } from '../util/get_space_query';
 import {
+  deleteInferenceEndpoint,
   getInferenceEndpointsForEmbedding,
   getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
+  waitForKbModel,
+  warmupModel,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantConfig } from '../../config';
 import { hasKbWriteIndex } from './has_kb_index';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
+import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
+import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
+import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
+
+const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -40,6 +49,7 @@ interface Dependencies {
   };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
+  productDoc: DocumentationManagerAPI;
 }
 
 export interface RecalledEntry {
@@ -108,6 +118,64 @@ export class KnowledgeBaseService {
     }));
   }
 
+  private async recallFromIntegrationsKnowledge({
+    queries,
+    esClient,
+  }: {
+    queries: Array<{ text: string; boost?: number }>;
+    esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
+  }): Promise<RecalledEntry[]> {
+    // Check if the .integration_knowledge index exists before searching for documents
+    // This has to be done with `.search` since `.exists` and `.get` can't be performed
+    // with the internal system user (lack of permissions)
+    try {
+      await esClient.asInternalUser.search({
+        index: INTEGRATION_KNOWLEDGE_INDEX,
+        size: 0,
+      });
+    } catch (error) {
+      // If there's an error checking the index existence, assume it doesn't exist and don't attempt to recall
+      this.dependencies.logger.debug(
+        `Failed to access the index: "${INTEGRATION_KNOWLEDGE_INDEX}". Skipping integration knowledge recall.`
+      );
+      this.dependencies.logger.debug(error);
+      return [];
+    }
+
+    try {
+      // Search the .integration_knowledge index using semantic search on the content field
+      const response = await esClient.asInternalUser.search<IntegrationKnowledgeBaseEntry>({
+        index: INTEGRATION_KNOWLEDGE_INDEX,
+        query: {
+          bool: {
+            should: queries.map(({ text, boost = 1 }) => ({
+              semantic: {
+                field: 'content',
+                query: text,
+                boost,
+              },
+            })),
+          },
+        },
+        size: 10,
+        _source: ['package_name', 'filename', 'content', 'version'],
+      });
+      return response.hits.hits.map((hit) => ({
+        text: hit._source?.content!,
+        labels: { filename: hit._source?.filename ?? '', version: hit._source?.version ?? '' },
+        title: hit._source?.package_name,
+        esScore: hit._score!,
+        id: hit._id!,
+      }));
+    } catch (error) {
+      this.dependencies.logger.error(
+        `Error recalling from index "${INTEGRATION_KNOWLEDGE_INDEX}": ${error?.message}`
+      );
+      this.dependencies.logger.debug(error);
+      return [];
+    }
+  }
+
   recall = async ({
     user,
     queries,
@@ -133,30 +201,42 @@ export class KnowledgeBaseService {
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
 
-    const [documentsFromKb, documentsFromConnectors] = await Promise.all([
-      this.recallFromKnowledgeBase({
-        user,
-        queries,
-        categories,
-        namespace,
-      }).catch((error) => {
-        if (isInferenceEndpointMissingOrUnavailable(error)) {
-          throwKnowledgeBaseNotReady(error);
-        }
-        throw error;
-      }),
-      recallFromSearchConnectors({
-        esClient,
-        uiSettingsClient,
-        queries,
-        core: this.dependencies.core,
-        logger: this.dependencies.logger,
-      }).catch((error) => {
-        this.dependencies.logger.error('Error getting data from search indices');
-        this.dependencies.logger.debug(error);
-        return [];
-      }),
-    ]);
+    const [documentsFromKb, documentsFromConnectors, documentsFromIntegrations] = await Promise.all(
+      [
+        this.recallFromKnowledgeBase({
+          user,
+          queries,
+          categories,
+          namespace,
+        }).catch((error) => {
+          if (isInferenceEndpointMissingOrUnavailable(error)) {
+            throwKnowledgeBaseNotReady(error);
+          }
+          throw error;
+        }),
+        recallFromSearchConnectors({
+          esClient,
+          uiSettingsClient,
+          queries,
+          core: this.dependencies.core,
+          logger: this.dependencies.logger,
+        }).catch((error) => {
+          this.dependencies.logger.error('Error getting data from search indices');
+          this.dependencies.logger.debug(error);
+          return [];
+        }),
+        this.recallFromIntegrationsKnowledge({
+          esClient,
+          queries,
+        }).catch((error) => {
+          this.dependencies.logger.error(
+            `Error getting data from ${INTEGRATION_KNOWLEDGE_INDEX} index`
+          );
+          this.dependencies.logger.debug(error);
+          return [];
+        }),
+      ]
+    );
 
     this.dependencies.logger.debug(
       `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
@@ -164,9 +244,12 @@ export class KnowledgeBaseService {
     this.dependencies.logger.debug(
       `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
     );
+    this.dependencies.logger.debug(
+      `documentsFromIntegrations: ${JSON.stringify(documentsFromIntegrations.slice(0, 5), null, 2)}`
+    );
 
     const sortedEntries = orderBy(
-      documentsFromKb.concat(documentsFromConnectors),
+      [...documentsFromKb, ...documentsFromConnectors, ...documentsFromIntegrations],
       'esScore',
       'desc'
     ).slice(0, limit.size ?? 20);
@@ -521,12 +604,105 @@ export class KnowledgeBaseService {
     }
   };
 
+  setupKnowledgeBase = async (
+    nextInferenceId: string,
+    waitUntilComplete: boolean = false
+  ): Promise<{
+    reindex: boolean;
+    currentInferenceId: string | undefined;
+    nextInferenceId: string;
+  }> => {
+    const { esClient, core, logger, productDoc, config } = this.dependencies;
+
+    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
+
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+    if (currentInferenceId === nextInferenceId) {
+      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
+      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
+      if (waitUntilComplete) {
+        logger.debug('Waiting for warmup to complete...');
+        await warmupModelPromise;
+        logger.debug('Warmup completed.');
+      }
+      return { reindex: false, currentInferenceId, nextInferenceId };
+    }
+
+    await createOrUpdateKnowledgeBaseIndexAssets({
+      core,
+      logger,
+      inferenceId: nextInferenceId,
+    });
+
+    const kbSetupPromise = waitForKbModel({
+      core,
+      esClient,
+      logger,
+      config,
+      inferenceId: nextInferenceId,
+      productDoc,
+    })
+      .then(async () => {
+        logger.info(
+          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
+        );
+
+        try {
+          logger.info(`Installing product document with inference ID: ${nextInferenceId}.`);
+          // explicitly set force to false - it won't reinstall product document if already present.
+          // will not wait for the installation to complete / but will wait to the task to be scheduled.
+          await productDoc.install({
+            force: false,
+            wait: false,
+            inferenceId: nextInferenceId,
+          });
+        } catch (e) {
+          logger.error(`Failed to install product documentation: ${e.message}`);
+          logger.debug(e);
+        }
+
+        await reIndexKnowledgeBaseWithLock({
+          core,
+          logger,
+          esClient,
+        });
+
+        // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
+        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
+          deleteInferenceEndpoint({
+            esClient,
+            logger,
+            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+          }).catch(() => {});
+        }
+      })
+      .catch((e) => {
+        if (isLockAcquisitionError(e)) {
+          logger.info(e.message);
+        } else {
+          logger.error(
+            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
+          );
+          logger.debug(e);
+        }
+      });
+
+    if (waitUntilComplete) {
+      logger.debug('Waiting for knowledge base setup to complete...');
+      await kbSetupPromise;
+      logger.debug('Knowledge base setup completed.');
+    }
+
+    return { reindex: true, currentInferenceId, nextInferenceId };
+  };
+
   getModelStatus = async () => {
     return getKbModelStatus({
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
+      productDoc: this.dependencies.productDoc,
     });
   };
 

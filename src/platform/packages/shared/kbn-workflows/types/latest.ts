@@ -8,49 +8,91 @@
  */
 
 export type {
+  // commands
+  BulkCreateWorkflowsCommand,
+  CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
-  WorkflowExecutionLogModel,
-  WorkflowExecutionHistoryModel,
-
-  // dtos
-  WorkflowDetailDto,
-  WorkflowListDto,
-  WorkflowListItemDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowExecutionListItemDto,
-  WorkflowListItemAction,
-
-  // commands
-  CreateWorkflowCommand,
-  UpdatedWorkflowResponseDto,
-
   // execution engine
   Provider,
   ProviderInput,
+  RunWorkflowCommand,
+  RunStepCommand,
+  RunWorkflowResponseDto,
+  ResumeWorkflowExecutionResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
+  StackFrame,
+  UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
+  // dtos
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionHistoryModel,
+  WorkflowExecutionListDto,
+  WorkflowExecutionListItemDto,
+  WorkflowExecutionLogModel,
+  WorkflowStepExecutionDto,
+  WorkflowListDto,
+  WorkflowListItemAction,
+  WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  WorkflowStepExecutionListDto,
+  WorkflowMgetResponseDto,
+  ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
+  // enums
+  ExecutionStatusUnion,
+  ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorContractUnion,
+  InternalConnectorContract,
+  DynamicConnectorContract,
+  BaseConnectorContract,
+  StepStabilityLevel,
+  HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
+  StepPropertyHandler,
+  PropertySelectionHandler,
+  SelectionOption,
+  SelectionDetails,
+  SelectionContext,
+  StepSelectionValues,
+  RequestOptions,
+  GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
 export {
-  ExecutionStatus,
-  WorkflowStatus,
-
   // command schemas
+  BulkCreateWorkflowsCommandSchema,
   CreateWorkflowCommandSchema,
+  ExecutionStatus,
+  ExecutionType,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
+  WorkflowExecutionSortFields,
+  TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
+  SearchWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
+  // shared constants
+  MAX_WORKFLOW_YAML_LENGTH,
 } from './v1';
-
-export type {
-  EnterIfNode,
-  ExitIfNode,
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  ExitConditionBranchNode,
-  ExitConditionBranchNodeSchema,
-  EnterForeachNode,
-  ExitForeachNode,
-  AtomicGraphNode,
-} from './execution';

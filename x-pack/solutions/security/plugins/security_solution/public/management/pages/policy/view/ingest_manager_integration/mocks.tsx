@@ -162,7 +162,8 @@ export const generateFleetPackageInfo = (): PackageInfo => {
     path: '',
     assets: {
       kibana: {
-        alert: [],
+        alerting_rule_template: [],
+        slo_template: [],
         csp_rule_template: [],
         dashboard: [],
         visualization: [],
@@ -185,6 +186,8 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         ilm_policy: [],
         data_stream_ilm_policy: [],
         ml_model: [],
+        knowledge_base: [],
+        esql_view: [],
       },
     },
     status: 'not_installed',

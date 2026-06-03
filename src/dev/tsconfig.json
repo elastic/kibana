@@ -1,20 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
   "include": [
     "**/*.js",
     "**/*.ts",
+    "**/*.mjs",
+    "**/*.cjs",
     "../../typings/**/*"
   ],
   "exclude": [
     "target/**/*",
-    "packages/**/*"
+    "packages/**/*",
+    "type_check_validation_loader.js"
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../tsconfig.json" },
     "@kbn/screenshotting-plugin",
     "@kbn/test",
     "@kbn/dev-cli-runner",
@@ -29,7 +31,6 @@
     "@kbn/dev-utils",
     "@kbn/utils",
     "@kbn/optimizer",
-    "@kbn/bazel-runner",
     "@kbn/peggy",
     "@kbn/babel-transform",
     "@kbn/import-resolver",
@@ -41,12 +42,15 @@
     "@kbn/get-repo-files",
     "@kbn/import-locator",
     "@kbn/config-schema",
-    "@kbn/core-test-helpers-so-type-serializer",
-    "@kbn/core-test-helpers-kbn-server",
     "@kbn/dev-proc-runner",
     "@kbn/core-i18n-server-internal",
     "@kbn/code-owners",
     "@kbn/projects-solutions-groups",
     "@kbn/dot-text",
+    "@kbn/yarn-lock-validator",
+    "@kbn/sort-package-json",
+    "@kbn/babel-register",
+    "@kbn/rspack-optimizer",
+    "@kbn/dev-validation-runner"
   ]
 }

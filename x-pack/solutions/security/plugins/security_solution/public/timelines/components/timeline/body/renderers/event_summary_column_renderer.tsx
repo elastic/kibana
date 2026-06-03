@@ -6,10 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import styled from 'styled-components';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { ColumnRenderer } from './column_renderer';
@@ -17,7 +17,7 @@ import { EVENT_SUMMARY_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
-const EventRenderedFlexItem = styled(EuiFlexItem)`
+const eventRenderedFlexItemStyles = css`
   div:first-child {
     padding-left: 0px;
 
@@ -102,11 +102,11 @@ const SummaryCell: React.FC<{
   return (
     <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
       {rowRenderer && rowRender ? (
-        <EventRenderedFlexItem className="eui-xScroll">
+        <EuiFlexItem className="eui-xScroll" css={eventRenderedFlexItemStyles}>
           <div className="eui-displayInlineBlock" css={{ width: 'fit-content' }}>
             {rowRender}
           </div>
-        </EventRenderedFlexItem>
+        </EuiFlexItem>
       ) : (
         values && <EuiFlexItem data-test-subj="plain-text-reason">{values}</EuiFlexItem>
       )}

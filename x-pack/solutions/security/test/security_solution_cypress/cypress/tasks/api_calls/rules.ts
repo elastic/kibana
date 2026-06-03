@@ -26,6 +26,30 @@ export const findAllRules = () => {
   });
 };
 
+type ReadRuleParams =
+  | {
+      id: string;
+      ruleId?: never;
+    }
+  | {
+      id?: never;
+      ruleId: string;
+    };
+
+export const readRule = ({
+  id,
+  ruleId,
+}: ReadRuleParams): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
+  return cy.currentSpace().then((spaceId) =>
+    rootRequest<RuleResponse>({
+      method: 'GET',
+      url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
+      qs: { ...(id ? { id } : {}), ...(ruleId ? { rule_id: ruleId } : {}) },
+      failOnStatusCode: true,
+    })
+  );
+};
+
 export const createRule = (
   rule: RuleCreateProps
 ): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
@@ -56,20 +80,6 @@ export const patchRule = (
   );
 };
 
-export const findRuleByRuleId = (
-  ruleId: string
-): Cypress.Chainable<Cypress.Response<RuleResponse>> => {
-  return cy.currentSpace().then((spaceId) =>
-    rootRequest<RuleResponse>({
-      method: 'GET',
-      url: `${
-        spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL
-      }?rule_id=${ruleId}`,
-      failOnStatusCode: false,
-    })
-  );
-};
-
 /**
  * Snoozes a rule via API
  *
@@ -95,26 +105,6 @@ export const deleteCustomRule = (ruleId = '1') => {
     url: `api/detection_engine/rules?rule_id=${ruleId}`,
     failOnStatusCode: false,
   });
-};
-
-export const importRule = (ndjsonPath: string) => {
-  cy.fixture(ndjsonPath)
-    .then((file) => Cypress.Blob.binaryStringToBlob(file))
-    .then((blob) => {
-      const formdata = new FormData();
-      formdata.append('file', blob, ndjsonPath);
-
-      rootRequest({
-        url: 'api/detection_engine/rules/_import',
-        method: 'POST',
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-        body: formdata,
-      })
-        .its('status')
-        .should('be.equal', 200);
-    });
 };
 
 export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Date) =>

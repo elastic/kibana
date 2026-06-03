@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IndicesIndexTemplate, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { castArray, groupBy, omit, uniq } from 'lodash';
 import { ASSET_VERSION } from '../../../../../common/constants';
@@ -15,7 +15,7 @@ import type {
   AppendProcessorToIngestPipelineAction,
   DeleteProcessorFromIngestPipelineAction,
   ElasticsearchAction,
-  UpsertWriteIndexOrRolloverAction,
+  UpdateDefaultIngestPipelineAction,
 } from './types';
 
 export const MANAGED_BY_STREAMS = 'streams';
@@ -31,7 +31,7 @@ type ClassicStreamPipelineAction =
  */
 export async function translateClassicStreamPipelineActions(
   actionsByType: ActionsByType,
-  scopedClusterClient: IScopedClusterClient
+  esClient: ElasticsearchClient
 ) {
   const maybeActions = [
     ...actionsByType.append_processor_to_ingest_pipeline,
@@ -45,7 +45,7 @@ export async function translateClassicStreamPipelineActions(
   const actionsByPipeline = groupBy(maybeActions, 'pipeline');
 
   for (const [pipelineName, actions] of Object.entries(actionsByPipeline)) {
-    const pipeline = await getPipeline(pipelineName, scopedClusterClient);
+    const pipeline = await getPipeline(pipelineName, esClient);
 
     if (pipeline) {
       if (pipeline._meta?.managed_by === MANAGED_BY_STREAMS) {
@@ -54,21 +54,20 @@ export async function translateClassicStreamPipelineActions(
           pipeline,
           actions,
           actionsByType,
-          scopedClusterClient,
         });
       } else {
         await updateExistingUserManagedPipeline({
           pipelineName,
           actions,
           actionsByType,
-          scopedClusterClient,
+          esClient,
         });
       }
     } else {
       await createStreamsManagedPipeline({
         actions,
         actionsByType,
-        scopedClusterClient,
+        esClient,
       });
     }
   }
@@ -80,11 +79,11 @@ export async function translateClassicStreamPipelineActions(
 async function createStreamsManagedPipeline({
   actions,
   actionsByType,
-  scopedClusterClient,
+  esClient,
 }: {
   actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
 }) {
   assertOnlyAppendActions(actions);
   const targetTemplateNames = uniq(actions.map((action) => action.template));
@@ -92,7 +91,7 @@ async function createStreamsManagedPipeline({
     throw new Error('Append actions targeting the same new pipeline target different templates');
   }
 
-  const indexTemplate = await getIndexTemplate(targetTemplateNames[0], scopedClusterClient);
+  const indexTemplate = await getIndexTemplate(targetTemplateNames[0], esClient);
   const pipelineName = `${indexTemplate.name}-pipeline`;
 
   actionsByType.upsert_ingest_pipeline.push({
@@ -111,21 +110,27 @@ async function createStreamsManagedPipeline({
     },
   });
 
+  // Remove properties from the GET response that cannot be in the PUT request
+  const { created_date_millis, modified_date_millis, ...safeTemplate } =
+    indexTemplate.index_template as IndicesIndexTemplate & {
+      created_date_millis: number;
+      modified_date_millis: number;
+    };
+
   actionsByType.upsert_index_template.push({
     type: 'upsert_index_template',
     request: {
       name: indexTemplate.name,
-      ...indexTemplate.index_template,
-      ignore_missing_component_templates: indexTemplate.index_template
-        .ignore_missing_component_templates
-        ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
+      ...safeTemplate,
+      ignore_missing_component_templates: safeTemplate.ignore_missing_component_templates
+        ? castArray(safeTemplate.ignore_missing_component_templates)
         : [],
       template: {
-        ...(indexTemplate.index_template.template ?? {}),
+        ...(safeTemplate.template ?? {}),
         settings: {
-          ...(indexTemplate.index_template.template?.settings ?? {}),
+          ...(safeTemplate.template?.settings ?? {}),
           index: {
-            ...(indexTemplate.index_template.template?.settings?.index ?? {}),
+            ...(safeTemplate.template?.settings?.index ?? {}),
             default_pipeline: pipelineName,
           },
         },
@@ -133,11 +138,12 @@ async function createStreamsManagedPipeline({
     },
   });
 
-  actionsByType.upsert_write_index_or_rollover.push(
-    ...actions.map<UpsertWriteIndexOrRolloverAction>((action) => ({
-      type: 'upsert_write_index_or_rollover',
+  actionsByType.update_default_ingest_pipeline.push(
+    ...actions.map<UpdateDefaultIngestPipelineAction>((action) => ({
+      type: 'update_default_ingest_pipeline',
       request: {
         name: action.dataStream,
+        pipeline: pipelineName,
       },
     }))
   );
@@ -148,124 +154,88 @@ async function updateExistingStreamsManagedPipeline({
   pipeline,
   actions,
   actionsByType,
-  scopedClusterClient,
 }: {
   pipelineName: string;
   pipeline: IngestPipeline;
   actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
-  scopedClusterClient: IScopedClusterClient;
 }) {
   let processors = pipeline.processors ?? [];
   const existingPipelineProcessors = processors
-    .filter((processor) => processor.pipeline !== undefined)
-    .map((processor) => processor.pipeline?.name);
+    .filter((processor) => processor?.pipeline !== undefined)
+    .map((processor) => processor!.pipeline!.name);
 
   for (const action of actions) {
     if (action.type === 'append_processor_to_ingest_pipeline') {
-      if (!existingPipelineProcessors.includes(action.processor.pipeline?.name)) {
+      if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
+        // Only set default_pipeline on the write index when this is the first time this stream's
+        // processor is being added (i.e. it wasn't already present in the shared pipeline).
+        // This mirrors what createStreamsManagedPipeline does for the very first stream — without
+        // this, a second (or later) stream sharing the same template pipeline never gets
+        // index.default_pipeline set on its write index and documents bypass processing entirely.
+        actionsByType.update_default_ingest_pipeline.push({
+          type: 'update_default_ingest_pipeline',
+          request: {
+            name: action.dataStream,
+            pipeline: pipelineName,
+          },
+        });
       }
     } else {
       processors = processors.filter(
         (processor) =>
-          processor.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
+          processor?.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
 
-  if (processors.length !== 0) {
-    actionsByType.upsert_ingest_pipeline.push({
-      type: 'upsert_ingest_pipeline',
-      // All of these are ClassicStreams so take any stream name to use for the ordering of operations
-      stream: actions[0].dataStream,
-      request: {
-        id: pipelineName,
-        ...pipeline,
-        processors,
-      },
-    });
-  } else {
-    actionsByType.delete_ingest_pipeline.push({
-      type: 'delete_ingest_pipeline',
-      request: {
-        name: pipelineName,
-      },
-    });
-
-    const targetTemplateNames = uniq(actions.map((action) => action.template));
-    if (targetTemplateNames.length !== 1) {
-      throw new Error(
-        'Actions targeting the same existing Streams managed pipeline target different templates'
-      );
-    }
-    const indexTemplate = await getIndexTemplate(targetTemplateNames[0], scopedClusterClient);
-
-    actionsByType.upsert_index_template.push({
-      type: 'upsert_index_template',
-      request: {
-        name: indexTemplate.name,
-        ...indexTemplate.index_template,
-        ignore_missing_component_templates: indexTemplate.index_template
-          .ignore_missing_component_templates
-          ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
-          : [],
-        template: {
-          ...(indexTemplate.index_template.template ?? {}),
-          settings: {
-            ...(indexTemplate.index_template.template?.settings ?? {}),
-            index: {
-              ...(indexTemplate.index_template.template?.settings?.index ?? {}),
-              default_pipeline: undefined,
-            },
-          },
-        },
-      },
-    });
-
-    actionsByType.upsert_write_index_or_rollover.push(
-      ...actions.map<UpsertWriteIndexOrRolloverAction>((action) => ({
-        type: 'upsert_write_index_or_rollover',
-        request: {
-          name: action.dataStream,
-        },
-      }))
-    );
-  }
+  // If all the processors are removed, we just leave the ingest pipeline in place and referenced by the template
+  // Since it's hard to correctly clean it up from all previous write indices which would allow us to delete the pipeline
+  actionsByType.upsert_ingest_pipeline.push({
+    type: 'upsert_ingest_pipeline',
+    // All of these are ClassicStreams so take any stream name to use for the ordering of operations
+    stream: actions[0].dataStream,
+    request: {
+      id: pipelineName,
+      ...pipeline,
+      processors,
+    },
+  });
 }
 
 async function updateExistingUserManagedPipeline({
   pipelineName,
   actions,
   actionsByType,
-  scopedClusterClient,
+  esClient,
 }: {
   pipelineName: string;
   actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
 }) {
   const referencePipelineNames = actions.map((action) => action.referencePipeline);
   const { targetPipelineName, targetPipeline } = await findPipelineToModify(
     pipelineName,
     referencePipelineNames,
-    scopedClusterClient
+    esClient
   );
 
   let processors = targetPipeline?.processors ?? [];
   const existingPipelineProcessors = processors
-    .filter((processor) => processor.pipeline !== undefined)
-    .map((processor) => processor.pipeline?.name);
+    .filter((processor) => processor?.pipeline !== undefined)
+    .map((processor) => processor!.pipeline!.name);
 
   for (const action of actions) {
     if (action.type === 'append_processor_to_ingest_pipeline') {
-      if (!existingPipelineProcessors.includes(action.processor.pipeline?.name)) {
+      if (!existingPipelineProcessors.includes(action.processor?.pipeline?.name ?? '')) {
         processors.push(action.processor);
       }
     } else {
       processors = processors.filter(
         (processor) =>
-          processor.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
+          processor?.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -285,12 +255,12 @@ async function updateExistingUserManagedPipeline({
 async function findPipelineToModify(
   pipelineName: string,
   referencePipelineNames: string[],
-  scopedClusterClient: IScopedClusterClient
+  esClient: ElasticsearchClient
 ): Promise<{
   targetPipelineName: string;
   targetPipeline: IngestPipeline | undefined;
 }> {
-  const pipeline = await getPipeline(pipelineName, scopedClusterClient);
+  const pipeline = await getPipeline(pipelineName, esClient);
 
   if (!pipeline) {
     return {
@@ -300,7 +270,7 @@ async function findPipelineToModify(
   }
 
   const streamProcessor = pipeline.processors?.find(
-    (processor) => processor.pipeline && processor.pipeline.name.includes('@stream.')
+    (processor) => processor?.pipeline && processor.pipeline.name.includes('@stream.')
   );
 
   if (streamProcessor) {
@@ -311,7 +281,7 @@ async function findPipelineToModify(
   }
 
   const customProcessor = pipeline.processors?.findLast(
-    (processor) => processor.pipeline && processor.pipeline.name.endsWith('@custom')
+    (processor) => processor?.pipeline && processor.pipeline.name.endsWith('@custom')
   );
 
   if (customProcessor) {
@@ -319,7 +289,7 @@ async function findPipelineToModify(
     return await findPipelineToModify(
       customProcessor.pipeline!.name,
       referencePipelineNames,
-      scopedClusterClient
+      esClient
     );
   }
 
@@ -329,9 +299,9 @@ async function findPipelineToModify(
   };
 }
 
-async function getPipeline(id: string, scopedClusterClient: IScopedClusterClient) {
+async function getPipeline(id: string, esClient: ElasticsearchClient) {
   return (
-    scopedClusterClient.asCurrentUser.ingest
+    esClient.ingest
       .getPipeline({ id })
       // some keys on the pipeline can't be modified, so we need to clean them up
       // to avoid errors when updating the pipeline
@@ -355,8 +325,8 @@ async function getPipeline(id: string, scopedClusterClient: IScopedClusterClient
   );
 }
 
-async function getIndexTemplate(name: string, scopedClusterClient: IScopedClusterClient) {
-  const indexTemplates = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
+async function getIndexTemplate(name: string, esClient: ElasticsearchClient) {
+  const indexTemplates = await esClient.indices.getIndexTemplate({
     name,
   });
   return indexTemplates.index_templates[0];

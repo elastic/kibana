@@ -10,7 +10,6 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
-import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 
 interface EndpointCallOutProps {
   basePath: string;
@@ -26,6 +25,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount={false}
           color="warning"
           iconType="warning"
           title={
@@ -35,7 +35,12 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
             />
           }
         >
-          <EuiText size={'xs'}>{CONSOLE_COMMANDS.isolate.privileges}</EuiText>
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.privilegesDescription"
+              defaultMessage="You do not have the required privileges to run this action. Please contact your administrator to request the necessary privileges."
+            />
+          </EuiText>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
@@ -47,6 +52,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={
@@ -72,6 +78,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           title={

@@ -6,7 +6,6 @@
  */
 
 import {
-  useEuiTheme,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,6 +13,8 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { type FC } from 'react';
@@ -54,10 +55,10 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
       <EuiSplitPanel.Inner color={isOpen ? 'plain' : 'subdued'}>
         <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize={'s'}>
+            <EuiFlexGroup gutterSize={'xs'}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={
+                <EuiToolTip
+                  content={
                     isOpen
                       ? i18n.translate('xpack.ml.collapsiblePanel.toggleClose', {
                           defaultMessage: 'Close {ariaLabel}',
@@ -68,14 +69,29 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
                           values: { ariaLabel },
                         })
                   }
-                  color={'text'}
-                  iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => {
-                    onToggle(!isOpen);
-                  }}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={
+                      isOpen
+                        ? i18n.translate('xpack.ml.collapsiblePanel.toggleClose', {
+                            defaultMessage: 'Close {ariaLabel}',
+                            values: { ariaLabel },
+                          })
+                        : i18n.translate('xpack.ml.collapsiblePanel.toggleOpen', {
+                            defaultMessage: 'Open {ariaLabel}',
+                            values: { ariaLabel },
+                          })
+                    }
+                    color={'text'}
+                    iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
+                    onClick={() => {
+                      onToggle(!isOpen);
+                    }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem css={{ minWidth: '67px' }} grow={false}>
                 <EuiTitle size="xxs">
                   <h2>{header}</h2>
                 </EuiTitle>
@@ -84,7 +100,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
           </EuiFlexItem>
           {headerItems ? (
             <EuiFlexItem grow={false}>
-              <PanelHeaderItems headerItems={headerItems} />
+              <PanelHeaderItems compressed={true} headerItems={headerItems} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -114,7 +130,7 @@ export interface OverviewStatsBarProps {
 
 export const OverviewStatsBar: FC<OverviewStatsBarProps> = ({ inputStats, dataTestSub }) => {
   return (
-    <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'m'}>
+    <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'s'}>
       {inputStats.map(({ value, label, 'data-test-subj': dataTestSubjValue }) => {
         return (
           <EuiFlexItem grow={false} key={label}>

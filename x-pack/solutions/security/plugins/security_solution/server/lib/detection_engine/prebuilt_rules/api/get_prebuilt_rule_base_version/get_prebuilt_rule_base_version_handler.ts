@@ -13,9 +13,9 @@ import {
   ThreeWayDiffOutcome,
   type GetPrebuiltRuleBaseVersionRequest,
   type GetPrebuiltRuleBaseVersionResponseBody,
-  type PartialRuleDiff,
+  type PartialThreeWayRuleDiff,
   type ThreeWayDiff,
-  type FullRuleDiff,
+  type FullThreeWayRuleDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -45,7 +45,8 @@ export const getPrebuiltRuleBaseVersionHandler = async (
       throw new Error(`Cannot find rule with id: ${id}`);
     }
 
-    const [baseRule] = await ruleAssetsClient.fetchAssetsByVersion([currentRule]);
+    const { assets } = await ruleAssetsClient.fetchAssetsByVersion([currentRule]);
+    const [baseRule] = assets;
 
     if (!baseRule) {
       return siemResponse.error({
@@ -87,10 +88,10 @@ const formatDiffResponse = ({
   baseRule,
   currentRule,
 }: {
-  ruleDiff: FullRuleDiff;
+  ruleDiff: FullThreeWayRuleDiff;
   baseRule: PrebuiltRuleAsset;
   currentRule: RuleResponse;
-}): { diff: PartialRuleDiff; baseVersion: RuleResponse; currentVersion: RuleResponse } => {
+}): { diff: PartialThreeWayRuleDiff; baseVersion: RuleResponse; currentVersion: RuleResponse } => {
   const baseVersion: RuleResponse = {
     ...convertPrebuiltRuleAssetToRuleResponse(baseRule),
     id: currentRule.id,

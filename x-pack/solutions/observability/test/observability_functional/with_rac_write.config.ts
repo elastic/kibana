@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [
@@ -43,6 +43,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     // default to the xpack functional config
     ...xpackFunctionalConfig.getAll(),
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      rules: {
+        pathname: '/app/rules',
+      },
+    },
     servers,
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),
@@ -91,6 +97,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'dateFormat:tz': 'UTC',
         'observability:enableLegacyUptimeApp': true,
+      },
+      globalDefaults: {
+        hideAnnouncements: true,
       },
     },
     testFiles: [resolve(__dirname, './apps/observability')],

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -160,6 +160,27 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         moduleIds: ['security_cloudtrail'],
+      },
+    },
+    {
+      testTitleSuffix: 'for siem azure activity logs dataset',
+      sourceDataArchive:
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs',
+      indexPattern: 'ft_module_security_azure_activitylogs',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_azure_activitylogs'],
+      },
+    },
+    {
+      testTitleSuffix: 'for siem azure gcp audit dataset',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit',
+      indexPattern: 'ft_module_security_gcp_audit',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_gcp_audit'],
       },
     },
     {

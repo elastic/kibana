@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { getDataBoundsForPalette } from './palette_data_bounds';
 
 describe('palette data bounds', () => {
@@ -68,5 +68,50 @@ describe('palette data bounds', () => {
         buildTableWithRows([{ metric: -100 }, { metric: 100 }, { metric: 200 }, { metric: 300 }])
       )
     ).toEqual({ min: -100, max: 300 });
+  });
+
+  it('uses minimum and maximum metric when breakdown with max', () => {
+    expect(
+      getDataBoundsForPalette(
+        { metric: 'metric', max: 'max', breakdownBy: 'breakdown' },
+        buildTableWithRows([
+          { metric: -100, max: 200 },
+          { metric: 100, max: 250 },
+          { metric: 200, max: 300 },
+          { metric: 300, max: 400 },
+        ])
+      )
+      // Return the range 0-Maximum max as rowNumber is not provided
+    ).toEqual({ min: 0, max: 400 });
+  });
+
+  it('uses minimum and maximum metric when breakdown with max with rowNumber', () => {
+    expect(
+      getDataBoundsForPalette(
+        { metric: 'metric', max: 'max', breakdownBy: 'breakdown' },
+        buildTableWithRows([
+          { metric: -100, max: 200 },
+          { metric: 100, max: 250 },
+          { metric: 200, max: 300 }, // <= it should use this
+          { metric: 300, max: 400 },
+        ]),
+        2
+      )
+    ).toEqual({ min: 0, max: 300 });
+  });
+
+  it('uses minimum and maximum metric when breakdown with max with rowNumber set to 0 (edge case)', () => {
+    expect(
+      getDataBoundsForPalette(
+        { metric: 'metric', max: 'max', breakdownBy: 'breakdown' },
+        buildTableWithRows([
+          { metric: -100, max: 200 }, // <= it should use this
+          { metric: 100, max: 250 },
+          { metric: 200, max: 300 },
+          { metric: 300, max: 400 },
+        ]),
+        0
+      )
+    ).toEqual({ min: 0, max: 200 });
   });
 });

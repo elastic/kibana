@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+
 import { CONTENT_ID, LATEST_VERSION, LINKS_EMBEDDABLE_TYPE } from '../common';
-import { LinksState, LinksStorage } from './content_management';
-import { linksSavedObjectType } from './saved_objects';
 import { transforms } from '../common/embeddable/transforms/transforms';
+import type { LinksState } from './content_management';
+import { LinksStorage } from './content_management';
+import { linksEmbeddableSchema } from './embeddable_schemas';
+import { linksSavedObjectType } from './saved_objects';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -42,7 +51,11 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     core.savedObjects.registerType<LinksState>(linksSavedObjectType);
 
-    plugins.embeddable.registerTransforms(LINKS_EMBEDDABLE_TYPE, transforms);
+    plugins.embeddable.registerEmbeddableServerDefinition(LINKS_EMBEDDABLE_TYPE, {
+      title: 'Links',
+      getTransforms: () => transforms,
+      getSchema: () => linksEmbeddableSchema,
+    });
 
     return {};
   }

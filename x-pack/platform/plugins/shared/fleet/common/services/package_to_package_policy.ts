@@ -16,7 +16,10 @@ import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
   RegistryStreamWithDataStream,
+  RegistryDataStream,
 } from '../types';
+
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 
 import { doesPackageHaveIntegrations } from '.';
 import {
@@ -26,8 +29,59 @@ import {
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
-  data_stream: { type: string; dataset: string };
+  data_stream: { type?: string; dataset: string };
 };
+
+/**
+ * Returns the effective discriminator for an input, regardless of whether it comes from
+ * the registry (`RegistryInput`) or a stored package policy (`NewPackagePolicyInput`).
+ *
+ * Uses the explicit `name` field when present, falling back to `type`. This value is
+ * used as the keying and matching discriminator throughout Fleet so that multiple inputs
+ * of the same `type` within one policy template can be distinguished.
+ */
+export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
+  input.name ?? input.type;
+
+/**
+ * Returns true if the given data stream effectively uses the OTel collector input type.
+ *
+ * A data stream is considered OTel when any of its `streams[].input` values is either:
+ * - the literal type `'otelcol'`, or
+ * - the `name` of an input within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
+ *
+ * The second case handles the named-input feature (package-spec 3.6.1+) where multiple inputs
+ * of the same type coexist in one policy template and data streams reference them by name instead
+ * of by type.
+ */
+export const dataStreamUsesOtelInput = (
+  pkgInfo: Pick<PackageInfo, 'policy_templates'>,
+  dataStream: Pick<RegistryDataStream, 'streams'>
+): boolean => {
+  const namedOtelInputs = new Set<string>();
+  for (const tpl of pkgInfo.policy_templates ?? []) {
+    for (const input of getNormalizedInputs(tpl)) {
+      if (input.type === OTEL_COLLECTOR_INPUT_TYPE && input.name) {
+        namedOtelInputs.add(input.name);
+      }
+    }
+  }
+  return (dataStream.streams ?? []).some(
+    (stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE || namedOtelInputs.has(stream.input)
+  );
+};
+
+/**
+ * Builds the composite key used to index input validation results and var definitions.
+ * For packages with integrations (multiple policy templates), the key is prefixed with
+ * the policy template name to avoid collisions across templates.
+ */
+export const buildInputKey = (
+  effectiveName: string,
+  policyTemplateName: string | undefined,
+  hasIntegrations: boolean
+): string =>
+  hasIntegrations && policyTemplateName ? `${policyTemplateName}-${effectiveName}` : effectiveName;
 
 export const getStreamsForInputType = (
   inputType: string,
@@ -85,7 +139,7 @@ export const getRegistryStreamWithDataStreamForInputType = (
 };
 
 // Reduces registry var def into config object entry
-const varsReducer = (
+export const varsReducer = (
   configObject: PackagePolicyConfigRecord,
   registryVar: RegistryVarsEntry
 ): PackagePolicyConfigRecord => {
@@ -115,7 +169,7 @@ export const packageToPackagePolicyInputs = (
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
     const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
     normalizedInputs?.forEach((packageInput) => {
-      const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
+      const inputKey = `${packagePolicyTemplate.name}-${getInputEffectiveName(packageInput)}`;
       const input = {
         ...packageInput,
         ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
@@ -131,15 +185,21 @@ export const packageToPackagePolicyInputs = (
     const streamsForInput: NewPackagePolicyInputStream[] = [];
     let varsForInput: PackagePolicyConfigRecord = {};
 
+    // Use the input's id as the discriminator for stream matching when present,
+    // so that stream.input values reference the input id rather than the type.
+    const streamMatchKey = getInputEffectiveName(packageInput);
+
     // Map each package input stream into package policy input stream
     const streams = getStreamsForInputType(
-      packageInput.type,
+      streamMatchKey,
       packageInfo,
       packageInput.data_streams
     ).map((packageStream) => {
       const stream: NewPackagePolicyInputStream = {
-        enabled: packageStream.enabled === false ? false : true,
+        // disable deprecated streams on new installations
+        enabled: packageStream.deprecated ? false : packageStream.enabled !== false,
         data_stream: packageStream.data_stream,
+        ...(packageStream.migrate_from ? { migrate_from: packageStream.migrate_from } : {}),
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
@@ -159,6 +219,10 @@ export const packageToPackagePolicyInputs = (
       ? !!streamsForInput.find((stream) => stream.enabled)
       : true;
 
+    // Disable deprecated inputs on new installations
+    if (enableInput && packageInput.deprecated) {
+      enableInput = false;
+    }
     // If we are wanting to enabling this input, check if we only want
     // to enable specific integrations (aka `policy_template`s)
     if (
@@ -172,13 +236,19 @@ export const packageToPackagePolicyInputs = (
 
     const input: NewPackagePolicyInput = {
       type: packageInput.type,
+      ...(packageInput.name ? { name: packageInput.name } : {}),
       policy_template: packageInput.policy_template,
       enabled: enableInput,
       streams: streamsForInput,
+      ...(packageInput.migrate_from ? { migrate_from: packageInput.migrate_from } : {}),
     };
 
     if (Object.keys(varsForInput).length) {
       input.vars = varsForInput;
+    }
+
+    if (packageInput.deprecated) {
+      input.deprecated = packageInput.deprecated;
     }
 
     inputs.push(input);

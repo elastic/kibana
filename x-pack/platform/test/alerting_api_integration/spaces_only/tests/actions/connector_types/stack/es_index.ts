@@ -60,6 +60,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index connector',
         connector_type_id: '.index',
         is_missing_secrets: false,
+        is_connector_type_deprecated: false,
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
@@ -77,11 +78,13 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedConnector.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_connector_type_deprecated: false,
         is_missing_secrets: false,
         is_system_action: false,
         name: 'An index connector',
         connector_type_id: '.index',
         config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
+        auth_mode: 'shared',
       });
 
       // create connector with all config props
@@ -103,6 +106,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: createdConnectorWithIndex.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_connector_type_deprecated: false,
         is_system_action: false,
         name: 'An index connector with index config',
         connector_type_id: '.index',
@@ -124,6 +128,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedConnectorWithIndex.id,
         is_preconfigured: false,
         is_deprecated: false,
+        is_connector_type_deprecated: false,
         is_system_action: false,
         name: 'An index connector with index config',
         connector_type_id: '.index',
@@ -133,6 +138,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: true,
           executionTimeField: 'test',
         },
+        auth_mode: 'shared',
       });
     });
 

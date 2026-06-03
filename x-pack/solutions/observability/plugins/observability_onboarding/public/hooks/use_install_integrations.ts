@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useTrackedPromise } from '@kbn/use-tracked-promise';
 import { i18n } from '@kbn/i18n';
-import { HttpFetchOptions } from '@kbn/core/public';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 
 // Errors
@@ -73,8 +73,9 @@ export const useInstallIntegrations = ({
       onResolve: ({ versions }: { versions?: string[] }) => {
         onIntegrationCreationSuccess?.({ versions });
       },
-      onReject: (requestError: any) => {
-        if (requestError?.body?.statusCode === 403) {
+      onReject: (requestError: unknown) => {
+        const err = requestError as { body?: { statusCode?: number; message?: string } };
+        if (err?.body?.statusCode === 403) {
           onIntegrationCreationFailure({
             type: 'AuthorizationError' as const,
             message: UNAUTHORIZED_ERROR,
@@ -82,7 +83,7 @@ export const useInstallIntegrations = ({
         } else {
           onIntegrationCreationFailure({
             type: 'UnknownError' as const,
-            message: requestError?.body?.message,
+            message: err?.body?.message ?? 'Unknown error',
           });
         }
       },

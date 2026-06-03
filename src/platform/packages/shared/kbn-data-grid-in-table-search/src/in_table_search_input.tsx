@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent, FocusEvent, useCallback } from 'react';
+import type { ChangeEvent, FocusEvent } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -118,28 +120,42 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowUp"
-                color="text"
-                data-test-subj={BUTTON_PREV_TEST_SUBJ}
-                disabled={areArrowsDisabled}
-                aria-label={i18n.translate('dataGridInTableSearch.buttonPreviousMatch', {
+              <EuiToolTip
+                content={i18n.translate('dataGridInTableSearch.buttonPreviousMatch', {
                   defaultMessage: 'Previous',
                 })}
-                onClick={goToPrevMatch}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="chevronSingleUp"
+                  color="text"
+                  data-test-subj={BUTTON_PREV_TEST_SUBJ}
+                  disabled={areArrowsDisabled}
+                  aria-label={i18n.translate('dataGridInTableSearch.buttonPreviousMatch', {
+                    defaultMessage: 'Previous',
+                  })}
+                  onClick={goToPrevMatch}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowDown"
-                color="text"
-                data-test-subj={BUTTON_NEXT_TEST_SUBJ}
-                disabled={areArrowsDisabled}
-                aria-label={i18n.translate('dataGridInTableSearch.buttonNextMatch', {
+              <EuiToolTip
+                content={i18n.translate('dataGridInTableSearch.buttonNextMatch', {
                   defaultMessage: 'Next',
                 })}
-                onClick={goToNextMatch}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="chevronSingleDown"
+                  color="text"
+                  data-test-subj={BUTTON_NEXT_TEST_SUBJ}
+                  disabled={areArrowsDisabled}
+                  aria-label={i18n.translate('dataGridInTableSearch.buttonNextMatch', {
+                    defaultMessage: 'Next',
+                  })}
+                  onClick={goToNextMatch}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

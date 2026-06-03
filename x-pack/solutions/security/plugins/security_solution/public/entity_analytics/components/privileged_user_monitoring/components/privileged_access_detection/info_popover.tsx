@@ -13,23 +13,23 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiTitle,
-  useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { useIntegrationLinkState } from '../../../../../common/hooks/integrations/use_integration_link_state';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../../../common/constants';
 import { addPathParamToUrl } from '../../../../../common/utils/integrations';
 import { INTEGRATION_APP_ID } from '../../../../../common/lib/integrations/constants';
 import { useKibana, useNavigation } from '../../../../../common/lib/kibana';
-import { usePrivilegedAccessDetectionIntegration } from '../../../privileged_user_monitoring_onboarding/hooks/use_integrations';
+import { usePrivilegedAccessDetectionIntegration } from '../../../privileged_user_monitoring_onboarding/hooks/use_privileged_access_detection_integration';
 
 export const PrivilegedAccessInfoPopover = () => {
   const { docLinks } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
@@ -47,17 +47,27 @@ export const PrivilegedAccessInfoPopover = () => {
     });
   }, [navigateTo, padPackage, state]);
 
-  const button = <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={'oi'} />;
+  const button = (
+    <EuiToolTip
+      content={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.privilegedAccessDetection.infoPopover.buttonTooltip',
+        { defaultMessage: 'More information' }
+      )}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="info"
+        onClick={togglePopover}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedAccessDetection.infoPopover.buttonAriaLabel',
+          { defaultMessage: 'More information' }
+        )}
+      />
+    </EuiToolTip>
+  );
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      className={css`
-        padding-left: ${euiTheme.size.s};
-      `}
-    >
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
         <EuiTitle size="xs">
           <h4>

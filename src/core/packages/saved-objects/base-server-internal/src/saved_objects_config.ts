@@ -8,7 +8,8 @@
  */
 
 import { valid } from 'semver';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import buffer from 'buffer';
 
@@ -55,8 +56,23 @@ const migrationSchema = schema.object({
      *
      * Defaults to ["migrator"]
      */
+    // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
+  /**
+   * Skip logging migration progress unless there are any errors.
+   */
+  useCumulativeLogger: schema.boolean({ defaultValue: true }),
+  /**
+   * List of WIP (work-in-progress) saved object type names that Kibana is explicitly allowed to
+   * start with. Kibana will refuse to start if any type listed in `wip_types.json` is registered
+   * but absent from this list. Intended for development environments only; do not use in production.
+   *
+   * Intentionally optional so that migration internals, which do not need this field, are unaffected
+   * by its presence in the config type.
+   */
+  // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
+  allowWipTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
@@ -77,6 +93,7 @@ const soSchema = schema.object({
     schema.boolean({ defaultValue: true }),
     schema.boolean({ defaultValue: false })
   ),
+  enableAccessControl: schema.boolean({ defaultValue: true }),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
@@ -92,6 +109,7 @@ export class SavedObjectConfig {
   /* @internal depend on env: see https://github.com/elastic/dev/issues/2200 */
   public allowHttpApiAccess: boolean;
   public migration: SavedObjectsMigrationConfigType;
+  public enableAccessControl: boolean;
 
   constructor(
     rawConfig: SavedObjectsConfigType,
@@ -101,5 +119,6 @@ export class SavedObjectConfig {
     this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
     this.allowHttpApiAccess = rawConfig.allowHttpApiAccess;
+    this.enableAccessControl = rawConfig.enableAccessControl;
   }
 }

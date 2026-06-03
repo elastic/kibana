@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -28,7 +29,7 @@ import {
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
-import {
+import type {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
@@ -37,7 +38,7 @@ import {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
   getCommonStylesheetPaths,
@@ -45,6 +46,7 @@ import {
   getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
+import { resolveLocale } from './resolve_locale';
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
@@ -69,7 +71,9 @@ export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 /** @internal */
 export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
-
+  private airgapped: boolean = false;
+  private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -105,6 +109,14 @@ export class RenderingService {
     userSettings,
     i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
+    this.airgapped = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('airgapped')
+    ).catch(() => false);
+
+    this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
+    ).catch(() => true);
+
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
@@ -131,7 +143,8 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+    this.userStorageStart = userStorage;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -171,6 +184,8 @@ export class RenderingService {
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
+      airgapped: this.airgapped,
+      isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -178,28 +193,37 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    // Anonymous pages skip user-scoped values and async default values (the latter typically
+    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
     const [
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
-    ] = await Promise.all([
-      // All sites
-      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-      // Only non-anonymous pages
-      ...(!isAnonymousPage
-        ? ([
-            uiSettings.client?.getUserProvided(),
-            uiSettings.globalClient?.getUserProvided(),
+      userSettingLocale,
+      userStorageValues = {},
+    ] = await Promise.all(
+      isAnonymousPage
+        ? [uiSettings.client?.getRegistered() ?? {}]
+        : ([
+            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+            uiSettings.client?.getUserProvided(true),
+            uiSettings.globalClient?.getUserProvided(true),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
+            // locale
+            userSettings?.getUserSettingLocale(request),
+            // user storage
+            this.fetchUserStorageValues(request),
           ] as [
+            ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined
+            Promise<DarkModeValue> | undefined,
+            Promise<string> | undefined,
+            Promise<Record<string, unknown>>
           ])
-        : []),
-    ]);
+    );
 
     const settings = {
       defaults: defaultSettings,
@@ -258,28 +282,65 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const locale = i18nLib.getLocale();
+    const configLocale = i18nLib.getLocale();
+    const translationHashes = i18n.getTranslationHashes();
+    const availableLocales = i18n.getAvailableLocales();
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+      request,
+      userSettingLocale,
+      configLocale,
+      configuredLocales: availableLocales.map((entry) => entry.id),
+      translationHashes,
+      isServerless,
+      serverBasePath,
+      allowLocaleCookie: i18n.allowLocaleCookie,
+    });
     let translationsUrl: string;
     if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+      translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
     } else {
-      const translationHash = i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+      const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
+
+    const useRspack = isRspackModeEnabled();
+    const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
+
+    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
+    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
+    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
+    // array already ensures all scripts are fetched with "High" priority via
+    // dynamic <script async=false> tags, so preloads provide no benefit and
+    // actively harm performance.
+    //
+    // Font preloads are kept: they are small, high-priority, and give the browser
+    // a head start on WOFF2 downloads during HTML parsing.
+    const preloadFonts = useRspack
+      ? [
+          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+        ]
+      : undefined;
+
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       hardenPrototypes: http.prototypeHardening,
-      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      locale,
+      locale: effectiveLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
+      preloadFonts,
+      optimizeFontLoading: useRspack || undefined,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -305,6 +366,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
         },
         theme: {
           darkMode,
@@ -337,13 +399,31 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        userStorage: { values: userStorageValues },
       },
     };
 
-    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    const cookieHeaders: Record<string, string> = i18n.allowLocaleCookie
+      ? { 'set-cookie': setCookieHeader }
+      : {};
+
+    return {
+      body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
+      headers: cookieHeaders,
+    };
   }
 
   public async stop() {}
+
+  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+    const userStorage = this.userStorageStart;
+    if (!userStorage) return {};
+
+    const client = userStorage.asScoped(request);
+    if (!client) return {};
+
+    return client.getForInjection();
+  }
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {

@@ -6,12 +6,17 @@
  */
 
 import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
+import { networkTrafficWithInterfacesWithFilter } from '../../../shared/metrics/snapshot/network_traffic';
 
 export const rxV2: SchemaBasedAggregations = {
   ecs: {
     rx_sum: {
       sum: {
+        field: 'host.network.ingress.bytes',
+      },
+    },
+    rx_count: {
+      value_count: {
         field: 'host.network.ingress.bytes',
       },
     },
@@ -29,39 +34,22 @@ export const rxV2: SchemaBasedAggregations = {
       bucket_script: {
         buckets_path: {
           value: 'rx_sum',
+          count: 'rx_count',
           minTime: 'min_timestamp',
           maxTime: 'max_timestamp',
         },
         script: {
-          source: 'params.value / ((params.maxTime - params.minTime) / 1000)',
+          source:
+            'params.count > 0 ? params.value / ((params.maxTime - params.minTime) / 1000) : null',
           lang: 'painless',
         },
         gap_policy: 'skip',
       },
     },
   },
-  semconv: {
-    rx_receive: {
-      filter: {
-        term: {
-          direction: 'receive',
-        },
-      },
-      aggs: {
-        per_interval: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: 30,
-          },
-          aggs: networkTrafficWithInterfaces('rx_otel', 'system.network.io', 'device'),
-        },
-      },
+  semconv: networkTrafficWithInterfacesWithFilter('rxV2', 'system.network.io', 'device', {
+    term: {
+      direction: 'receive',
     },
-    rxV2: {
-      avg_bucket: {
-        buckets_path: 'rx_receive>per_interval>rx_otel',
-        gap_policy: 'skip',
-      },
-    },
-  },
+  }),
 };

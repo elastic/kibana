@@ -9,9 +9,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
-import { createStateContainer, StateContainer } from '@kbn/kibana-utils-plugin/public';
+import type { StateContainer } from '@kbn/kibana-utils-plugin/public';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { SearchSessionSavedObject } from './sessions_client';
 
 /**
@@ -92,6 +93,11 @@ export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta ext
   appName?: string;
 
   /**
+   * Is the session in the process of being saved?
+   */
+  isSaving: boolean;
+
+  /**
    * Has the session already been stored (i.e. "sent to background")?
    */
   isStored: boolean;
@@ -159,6 +165,7 @@ const createSessionDefaultState: <
   isRestore: false,
   isCanceled: false,
   isContinued: false,
+  isSaving: false,
   isStarted: false,
   trackedSearches: [],
 });
@@ -171,6 +178,7 @@ export interface SessionPureTransitions<
   start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
+  save: (state: S) => () => S;
   store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
   trackSearch: (state: S) => (search: SearchDescriptor, meta?: SearchMeta) => S;
   removeSearch: (state: S) => (search: SearchDescriptor) => S;
@@ -200,12 +208,22 @@ export const sessionPureTransitions: SessionPureTransitions = {
     isStored: true,
   }),
   clear: (state) => () => createSessionDefaultState(),
-  store: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
+  save: (state) => () => {
+    if (!state.sessionId) throw new Error("Can't save session. Missing sessionId");
+    if (state.isStored || state.isRestore)
+      throw new Error('Can\'t save because current session is already stored"');
+    return {
+      ...state,
+      isSaving: true,
+    };
+  },
+  store: (state) => (searchSessionSavedObject?: SearchSessionSavedObject) => {
     if (!state.sessionId) throw new Error("Can't store session. Missing sessionId");
     if (state.isStored || state.isRestore)
       throw new Error('Can\'t store because current session is already stored"');
     return {
       ...state,
+      isSaving: false,
       isStored: true,
       searchSessionSavedObject,
     };
@@ -299,11 +317,11 @@ export const sessionPureTransitions: SessionPureTransitions = {
   setSearchSessionSavedObject: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
     if (!state.sessionId)
       throw new Error(
-        "Can't add search session saved object session into the state. Missing sessionId"
+        "Can't add background search saved object session into the state. Missing sessionId"
       );
     if (state.sessionId !== searchSessionSavedObject.attributes.sessionId)
       throw new Error(
-        "Can't add search session saved object session into the state. SessionIds don't match."
+        "Can't add background search saved object session into the state. SessionIds don't match."
       );
     return {
       ...state,
@@ -356,6 +374,8 @@ export const sessionPureSelectors: SessionPureSelectors = {
         return pendingSearches.length > 0
           ? SearchSessionState.BackgroundLoading
           : SearchSessionState.Restored;
+      case state.isSaving:
+        return SearchSessionState.BackgroundLoading;
       case state.isStored:
         return pendingSearches.length > 0
           ? SearchSessionState.BackgroundLoading

@@ -61,8 +61,8 @@ describe('Service inventory', () => {
 
     it('has no detectable a11y violations on load', () => {
       cy.contains('h1', 'Service inventory');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     it('has a list of services', () => {
@@ -98,7 +98,7 @@ describe('Service inventory', () => {
       cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
-        .contains('button', 'production')
+        .contains('.euiComboBoxOption', 'production')
         .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({

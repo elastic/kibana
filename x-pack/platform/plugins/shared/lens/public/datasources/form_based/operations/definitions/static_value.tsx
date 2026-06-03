@@ -8,13 +8,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { OperationDefinition } from '.';
-import {
-  ReferenceBasedIndexPatternColumn,
-  GenericIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
-import type { IndexPattern } from '../../../../types';
+import type {
+  ColumnBuildHints,
+  StaticValueIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
+import type { OperationDefinition } from '.';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
@@ -23,7 +22,7 @@ const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDef
   defaultMessage: 'Static value',
 });
 
-const defaultValue = 100;
+export const defaultValue = 100;
 
 function isEmptyValue(value: number | string | undefined) {
   return value == null || value === '';
@@ -39,17 +38,7 @@ function ofName(value: number | string | undefined) {
   });
 }
 
-export interface StaticValueIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'static_value';
-  params: {
-    value?: string;
-    format?: ValueFormatConfig;
-  };
-}
-
-function isStaticValueColumnLike(
-  col: GenericIndexPatternColumn
-): col is StaticValueIndexPatternColumn {
+function isStaticValueColumnLike(col: ColumnBuildHints): col is StaticValueIndexPatternColumn {
   return Boolean('params' in col && col.params && 'value' in col.params);
 }
 

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { createEsParams, SyntheticsEsClient } from '../lib';
-import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsEsClient } from '../lib';
+import { createEsParams } from '../lib';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import type { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
 export interface GetJourneyDetails {
   checkGroup: string;
+  remoteName?: string;
 }
 
 type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
@@ -18,10 +21,14 @@ type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string
 export const getJourneyDetails = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
 }: GetJourneyDetails & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
+  const index = getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices);
+
   const params = createEsParams({
+    index,
     query: {
       bool: {
         filter: [
@@ -60,6 +67,7 @@ export const getJourneyDetails = async ({
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
+      index,
       query: {
         bool: {
           must_not: [

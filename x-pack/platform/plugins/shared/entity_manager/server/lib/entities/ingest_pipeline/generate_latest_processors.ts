@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityDefinition, MetadataField } from '@kbn/entities-schema';
+import { ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   initializePathScript,
   cleanScript,
@@ -16,7 +17,7 @@ import { isBuiltinDefinition } from '../helpers/is_builtin_definition';
 
 function getMetadataSourceField({ aggregation, destination, source }: MetadataField) {
   if (aggregation.type === 'terms') {
-    return `ctx.entity.metadata.${destination}.data.keySet()`;
+    return `ctx.entity.metadata.${destination}.keySet()`;
   } else if (aggregation.type === 'top_value') {
     return `ctx.entity.metadata.${destination}.top_value["${source}"]`;
   }
@@ -41,15 +42,17 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
 
     if (metadata.aggregation.type === 'terms') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}?.data != null) {
+        if (ctx.entity?.metadata?.${optionalFieldPath} != null) {
           ${mapDestinationToPainless(metadata)}
         }
       `;
       return `${acc}\n${next}`;
     } else if (metadata.aggregation.type === 'top_value') {
       const next = `
-        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
-          ${mapDestinationToPainless(metadata)}
+        if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value != null) {
+          if (ctx.entity?.metadata?.${optionalFieldPath}?.top_value["${source}"] != null) {
+            ${mapDestinationToPainless(metadata)}
+          }
         }
       `;
       return `${acc}\n${next}`;

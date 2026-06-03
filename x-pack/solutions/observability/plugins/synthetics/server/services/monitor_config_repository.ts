@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import {
+import type {
+  ISavedObjectsRepository,
   SavedObject,
-  type SavedObjectsBulkCreateObject,
+  SavedObjectReference,
+  SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
-  type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  type SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsCreateOptions,
+  type SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 import {
   legacyMonitorAttributes,
@@ -27,13 +33,13 @@ import {
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import { combineAndSortSavedObjects } from './utils/combine_and_sort_saved_objects';
 
 const getSuccessfulResult = <T>(
@@ -63,7 +69,50 @@ export class MonitorConfigRepository {
     ]);
     const resolved = results.saved_objects.find((obj) => obj?.attributes);
     if (!resolved) {
-      throw new Error('Monitor not found');
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        syntheticsMonitorSavedObjectType,
+        id
+      );
+    }
+    return resolved;
+  }
+
+  /**
+   * Look up a monitor by id across the supplied spaces.
+   *
+   * Required for cross-space callers (e.g. the monitor health API) because
+   * `get` is bound to the request-scoped saved objects client and therefore
+   * only ever sees the request's space — see Kibana issue #270477.
+   *
+   * The multi-space type (`syntheticsMonitorSavedObjectType`,
+   * `namespaceType: 'multiple'`) supports a per-object `namespaces` array, so
+   * a single entry covers all spaces. The legacy type
+   * (`legacySyntheticsMonitorTypeSingle`, `namespaceType: 'single'`) only
+   * accepts one namespace per object, so we add one entry per space.
+   */
+  async getAcrossSpaces(
+    id: string,
+    namespaces: string[],
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository = this.soClient
+  ): Promise<SavedObject<EncryptedSyntheticsMonitorAttributes>> {
+    const uniqueNamespaces = [...new Set(namespaces)];
+    const bulkObjects: SavedObjectsBulkGetObject[] = [
+      { type: syntheticsMonitorSavedObjectType, id, namespaces: uniqueNamespaces },
+      ...uniqueNamespaces.map((namespace) => ({
+        type: legacySyntheticsMonitorTypeSingle,
+        id,
+        namespaces: [namespace],
+      })),
+    ];
+    const { saved_objects: results } = await soClient.bulkGet<EncryptedSyntheticsMonitorAttributes>(
+      bulkObjects
+    );
+    const resolved = results.find((obj) => obj?.attributes && !obj.error);
+    if (!resolved) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        syntheticsMonitorSavedObjectType,
+        id
+      );
     }
     return resolved;
   }
@@ -104,11 +153,13 @@ export class MonitorConfigRepository {
     spaceId,
     normalizedMonitor,
     savedObjectType,
+    references,
   }: {
     id: string;
     normalizedMonitor: SyntheticsMonitor;
     spaceId: string;
     savedObjectType?: string;
+    references?: SavedObjectReference[];
   }) {
     let { spaces } = normalizedMonitor;
     // Ensure spaceId is included in spaces
@@ -122,6 +173,7 @@ export class MonitorConfigRepository {
       id,
       ...(id && { overwrite: true }),
       ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+      references,
     };
 
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
@@ -141,11 +193,11 @@ export class MonitorConfigRepository {
     monitors,
     savedObjectType,
   }: {
-    monitors: Array<{ id: string; monitor: MonitorFields }>;
+    monitors: Array<{ id: string; monitor: MonitorFields; references?: SavedObjectReference[] }>;
     savedObjectType?: string;
   }) {
     const newMonitors: Array<SavedObjectsBulkCreateObject<EncryptedSyntheticsMonitorAttributes>> =
-      monitors.map(({ id, monitor }) => {
+      monitors.map(({ id, monitor, references }) => {
         const { spaces } = monitor;
 
         return {
@@ -158,6 +210,7 @@ export class MonitorConfigRepository {
             revision: 1,
           }),
           ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+          references,
         };
       });
     const result = await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(
@@ -169,7 +222,8 @@ export class MonitorConfigRepository {
   async update(
     id: string,
     data: SyntheticsMonitorWithSecretsAttributes,
-    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
+    decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+    references?: SavedObjectReference[]
   ) {
     const soType = decryptedPreviousMonitor.type;
     const prevSpaces = (decryptedPreviousMonitor.namespaces || []).sort();
@@ -177,12 +231,13 @@ export class MonitorConfigRepository {
     const spaces = (data.spaces || []).sort();
     // If the spaces have changed, we need to delete the saved object and recreate it
     if (isEqual(prevSpaces, spaces)) {
-      return this.soClient.update<MonitorFields>(soType, id, data);
+      return this.soClient.update<MonitorFields>(soType, id, data, { references });
     } else {
       await this.soClient.delete(soType, id, { force: true });
       return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
         id,
         ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+        references,
       });
     }
   }
@@ -195,6 +250,7 @@ export class MonitorConfigRepository {
       attributes: MonitorFields;
       id: string;
       previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
+      references?: SavedObjectReference[];
     }>;
     namespace?: string;
   }) {
@@ -203,20 +259,22 @@ export class MonitorConfigRepository {
       id: string;
       attributes: MonitorFields;
       previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
+      references?: SavedObjectReference[];
     }> = [];
     const toUpdate: Array<{
       type: string;
       id: string;
       attributes: MonitorFields;
       namespace?: string;
+      references?: SavedObjectReference[];
     }> = [];
 
     for (const monitor of monitors) {
-      const { attributes, id, previousMonitor } = monitor;
+      const { attributes, id, previousMonitor, references } = monitor;
       const prevSpaces = (previousMonitor.namespaces || []).sort();
       const spaces = (attributes.spaces || []).sort();
       if (!isEqual(prevSpaces, spaces) && !isEmpty(spaces)) {
-        toRecreate.push({ id, attributes, previousMonitor });
+        toRecreate.push({ id, attributes, previousMonitor, references });
         continue;
       }
 
@@ -225,6 +283,7 @@ export class MonitorConfigRepository {
         id,
         attributes,
         namespace,
+        references,
       });
     }
 
@@ -240,11 +299,12 @@ export class MonitorConfigRepository {
     // Use bulkCreate for recreations
     let recreateResults: Array<SavedObject<MonitorFields>> = [];
     if (toRecreate.length > 0) {
-      const bulkCreateObjects = toRecreate.map(({ id, attributes, previousMonitor }) => ({
+      const bulkCreateObjects = toRecreate.map(({ id, attributes, references }) => ({
         id,
         type: syntheticsMonitorSavedObjectType,
         attributes,
         ...(!isEmpty(attributes.spaces) && { initialNamespaces: attributes.spaces }),
+        references,
       }));
       const bulkCreateResult = await this.soClient.bulkCreate<MonitorFields>(bulkCreateObjects);
       recreateResults = bulkCreateResult.saved_objects;

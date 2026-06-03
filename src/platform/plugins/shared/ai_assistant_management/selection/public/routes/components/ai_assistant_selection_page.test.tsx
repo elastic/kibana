@@ -10,6 +10,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AiAssistantSelectionPage } from './ai_assistant_selection_page';
 import { useAppContext } from '../../app_context';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -24,9 +26,12 @@ describe('AiAssistantSelectionPage', () => {
     ({
       observabilityAIAssistant: { show: hasPermission },
       management: {
-        kibana: {
+        ai: {
           aiAssistantManagementSelection: hasPermission,
         },
+      },
+      securitySolutionAssistant: {
+        'ai-assistant': hasPermission,
       },
     } as unknown as CoreStart['application']['capabilities']);
 
@@ -43,6 +48,7 @@ describe('AiAssistantSelectionPage', () => {
       kibanaBranch: 'main',
       buildFlavor: 'ess',
       securityAIAssistantEnabled,
+      chatExperience$: of(AIChatExperience.Classic),
     });
     render(<AiAssistantSelectionPage />, {
       wrapper: I18nProvider,
@@ -57,7 +63,7 @@ describe('AiAssistantSelectionPage', () => {
     renderComponent(testCapabilities);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       {
-        text: 'AI Assistant',
+        text: 'AI Assistants',
       },
     ]);
   });
@@ -95,7 +101,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         fireEvent.click(screen.getByTestId('pluginsAiAssistantSelectionPageButton'));
         expect(navigateToApp).toHaveBeenCalledWith('management', {
-          path: 'kibana/observabilityAiAssistantManagement',
+          path: 'ai/observabilityAiAssistantManagement',
         });
       });
 
@@ -116,7 +122,9 @@ describe('AiAssistantSelectionPage', () => {
         expect(
           screen.getByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
         ).toBeInTheDocument();
-        expect(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton')).toBeDisabled();
+        expect(
+          screen.queryByTestId('pluginsAiAssistantSelectionSecurityPageButton')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -139,7 +147,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         fireEvent.click(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton'));
         expect(navigateToApp).toHaveBeenCalledWith('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       });
 

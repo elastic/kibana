@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { FormattedValue } from './common';
+import type { FormattedValue } from './common';
 import {
   formatMonitorConfigFields,
   formatHeartbeatRequest,
@@ -13,14 +13,16 @@ import {
 } from './format_configs';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
+import type {
   CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
-  ScheduleUnit,
   SyntheticsMonitor,
+} from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  ScheduleUnit,
   VerificationMode,
 } from '../../../../common/runtime_types';
 
@@ -203,7 +205,6 @@ describe('browser fields', () => {
         latency: 20,
         upload: 3,
       },
-      timeout: '16s',
       type: 'browser',
       synthetics_args: ['--hasTouch true'],
       params: {
@@ -225,6 +226,18 @@ describe('browser fields', () => {
     );
 
     expect(yamlConfig).toEqual(formattedBrowserConfig);
+  });
+
+  it('omits timeout for browser monitors in public config', () => {
+    const yamlConfig = formatMonitorConfigFields(
+      Object.keys(testBrowserConfig) as ConfigKey[],
+      testBrowserConfig,
+      logger,
+      { proxyUrl: 'https://www.google.com' },
+      []
+    );
+
+    expect(yamlConfig.timeout).toBeUndefined();
   });
 
   it('does not set empty strings or empty objects for params and playwright options', () => {
@@ -325,6 +338,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -353,6 +367,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -381,6 +396,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -408,6 +424,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -435,6 +452,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: true,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -463,6 +481,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -492,12 +511,38 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
       },
       fields_under_root: true,
     });
+  });
+
+  it('includes kibanaUrl in fields when provided', () => {
+    const monitorId = 'test-monitor-id';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+      kibanaUrl: 'https://my-kibana.example.com',
+    });
+
+    expect(actual.fields?.kibanaUrl).toBe('https://my-kibana.example.com');
+  });
+
+  it('omits kibanaUrl from fields when not provided', () => {
+    const monitorId = 'test-monitor-id';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
+
+    expect(actual.fields?.kibanaUrl).toBeUndefined();
   });
 });
 

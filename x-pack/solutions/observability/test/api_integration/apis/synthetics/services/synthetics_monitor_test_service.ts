@@ -10,8 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment/moment';
 import { omit } from 'lodash';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
@@ -154,5 +154,29 @@ export class SyntheticsMonitorTestService {
       .set('kbn-xsrf', 'true');
     expect(deleteResponse.status).to.eql(statusCode);
     return deleteResponse;
+  }
+
+  async createMaintenanceWindow(spaceId?: string) {
+    const path = spaceId
+      ? `/s/${spaceId}/internal/alerting/rules/maintenance_window`
+      : '/internal/alerting/rules/maintenance_window';
+    const response = await this.supertest
+      .post(path)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        title: 'test-maintenance-window',
+        duration: 60 * 60 * 1000, // 1 hr
+        r_rule: {
+          dtstart: new Date().toISOString(),
+          tzid: 'UTC',
+          freq: 0,
+          count: 1,
+        },
+        category_ids: ['management'],
+      });
+
+    expect(response.status).to.equal(200);
+
+    return response.body;
   }
 }

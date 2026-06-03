@@ -15,7 +15,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
 import type { SavedSearch } from '../common';
 import type { SerializableSavedSearch } from '../common/types';
-import type { SavedSearchUnwrapResult } from './services/saved_searches';
+import type { SavedSearchUnwrapResult } from './service/to_saved_search';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {
@@ -60,12 +60,14 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
         serialized
       )
     ),
+  getDiscoverSession: jest.fn(),
   getAll: jest.fn(),
   getNew: jest.fn().mockImplementation(() => ({
     searchSource: createEmptySearchSource(),
   })),
   save: jest.fn(),
-  checkForDuplicateTitle: jest.fn(),
+  saveDiscoverSession: jest.fn(),
+  hasLibraryItemWithTitle: jest.fn(),
   byValueToSavedSearch: toSavedSearchMock,
 });
 

@@ -21,7 +21,7 @@ import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo } from 'react';
 import type { Node } from 'unist';
-import { ChatActionClickHandler } from '../chat/types';
+import type { ChatActionClickHandler } from '../chat/types';
 import { CodeBlock, EsqlCodeBlock } from './esql_code_block';
 import { anonymizedHighlightPlugin } from './anonymized_highlight';
 interface Props {
@@ -104,7 +104,7 @@ const esqlLanguagePlugin = () => {
       });
     }
 
-    if (node.type === 'code' && node.lang === 'esql') {
+    if (node.type === 'code' && (node as Code).lang === 'esql') {
       node.type = 'esql';
     } else if (node.type === 'code') {
       // switch to type that allows us to control rendering

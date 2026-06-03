@@ -17,20 +17,14 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { runV2Migration, RunV2MigrationOpts } from './run_v2_migration';
+import type { RunV2MigrationOpts } from './run_v2_migration';
+import { runV2Migration } from './run_v2_migration';
 import { DocumentMigrator } from './document_migrator';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { buildTypesMappings, createIndexMap } from './core';
-import {
-  getIndicesInvolvedInRelocation,
-  indexMapToIndexTypesMap,
-  createWaitGroupMap,
-  waitGroup,
-} from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
 import {
   hashToVersionMapMock,
-  indexTypesMapMock,
   savedObjectTypeRegistryMock,
 } from './run_resilient_migrator.fixtures';
 import { getIndexDetails } from './core/get_index_details';
@@ -49,27 +43,10 @@ jest.mock('./core/get_index_details', () => {
     ...actual,
     getIndexDetails: jest.fn(() =>
       Promise.resolve({
-        mappings: {
-          _meta: {
-            indexTypesMap: {
-              '.my_index': ['testtype', 'testtype2', 'testtype3'],
-              '.task_index': ['testtasktype'],
-            },
-          },
-        },
+        mappings: {},
         aliases: ['.my_index', '.my_index_9.1.0'],
       })
     ),
-  };
-});
-
-jest.mock('./kibana_migrator_utils', () => {
-  const actual = jest.requireActual('./kibana_migrator_utils');
-  return {
-    ...actual,
-    indexMapToIndexTypesMap: jest.fn(actual.indexMapToIndexTypesMap),
-    createWaitGroupMap: jest.fn(actual.createWaitGroupMap),
-    getIndicesInvolvedInRelocation: jest.fn(actual.getIndicesInvolvedInRelocation),
   };
 });
 
@@ -103,13 +80,6 @@ jest.mock('./run_resilient_migrator', () => {
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));
 const mockCreateIndexMap = createIndexMap as jest.MockedFunction<typeof createIndexMap>;
-const mockIndexMapToIndexTypesMap = indexMapToIndexTypesMap as jest.MockedFunction<
-  typeof indexMapToIndexTypesMap
->;
-const mockCreateWaitGroupMap = createWaitGroupMap as jest.MockedFunction<typeof createWaitGroupMap>;
-const mockGetIndicesInvolvedInRelocation = getIndicesInvolvedInRelocation as jest.MockedFunction<
-  typeof getIndicesInvolvedInRelocation
->;
 const mockRunResilientMigrator = runResilientMigrator as jest.MockedFunction<
   typeof runResilientMigrator
 >;
@@ -119,9 +89,6 @@ const mockGetIndexDetails = getIndexDetails as jest.MockedFunction<typeof getInd
 describe('runV2Migration', () => {
   beforeEach(() => {
     mockCreateIndexMap.mockClear();
-    mockIndexMapToIndexTypesMap.mockClear();
-    mockCreateWaitGroupMap.mockClear();
-    mockGetIndicesInvolvedInRelocation.mockClear();
     mockRunResilientMigrator.mockClear();
   });
 
@@ -169,39 +136,6 @@ describe('runV2Migration', () => {
     });
   });
 
-  it('calls indexMapToIndexTypesMap with the result from createIndexMap', async () => {
-    const options = mockOptions();
-    options.documentMigrator.prepareMigrations();
-    await runV2Migration(options);
-    expect(indexMapToIndexTypesMap).toBeCalledTimes(1);
-    expect(indexMapToIndexTypesMap).toBeCalledWith(mockCreateIndexMap.mock.results[0].value);
-  });
-
-  it('calls getIndicesInvolvedInRelocation with the right params', async () => {
-    const options = mockOptions();
-    options.documentMigrator.prepareMigrations();
-    await runV2Migration(options);
-    expect(getIndicesInvolvedInRelocation).toBeCalledTimes(1);
-    expect(getIndicesInvolvedInRelocation).toBeCalledWith(
-      { '.my_index': ['testtype', 'testtype2', 'testtype3'], '.task_index': ['testtasktype'] },
-      {
-        '.my_index': ['testtype', 'testtype3'],
-        '.other_index': ['testtype2'],
-        '.task_index': ['testtasktype'],
-      }
-    );
-  });
-
-  it('calls createMultiPromiseDefer, with the list of moving indices', async () => {
-    const options = mockOptions();
-    options.documentMigrator.prepareMigrations();
-    await runV2Migration(options);
-    expect(mockCreateWaitGroupMap).toBeCalledTimes(3);
-    expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(1, ['.my_index', '.other_index']);
-    expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(2, ['.my_index', '.other_index']);
-    expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(3, ['.my_index', '.other_index']);
-  });
-
   it('calls runResilientMigrator for each migrator it must spawn', async () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
@@ -219,10 +153,6 @@ describe('runV2Migration', () => {
       expect.objectContaining({
         ...runResilientMigratorCommonParams,
         indexPrefix: '.my_index',
-        mustRelocateDocuments: true,
-        readyToReindex: expect.any(Object),
-        doneReindexing: expect.any(Object),
-        updateRelocationAliases: expect.any(Object),
       })
     );
     expect(runResilientMigrator).toHaveBeenNthCalledWith(
@@ -230,10 +160,6 @@ describe('runV2Migration', () => {
       expect.objectContaining({
         ...runResilientMigratorCommonParams,
         indexPrefix: '.other_index',
-        mustRelocateDocuments: true,
-        readyToReindex: expect.any(Object),
-        doneReindexing: expect.any(Object),
-        updateRelocationAliases: expect.any(Object),
       })
     );
     expect(runResilientMigrator).toHaveBeenNthCalledWith(
@@ -241,34 +167,41 @@ describe('runV2Migration', () => {
       expect.objectContaining({
         ...runResilientMigratorCommonParams,
         indexPrefix: '.task_index',
-        mustRelocateDocuments: false,
-        readyToReindex: undefined,
-        doneReindexing: undefined,
-        updateRelocationAliases: undefined,
       })
     );
   });
 
   it('awaits on all runResilientMigrator promises, and resolves with the results of each of them', async () => {
-    const myIndexMigratorDefer = waitGroup<MigrationResult>();
-    const otherIndexMigratorDefer = waitGroup();
-    const taskIndexMigratorDefer = waitGroup();
+    let resolveMyIndex: (value: MigrationResult) => void;
+    let resolveOtherIndex: (value: MigrationResult) => void;
+    let resolveTaskIndex: (value: MigrationResult) => void;
+
+    const myIndexPromise = new Promise<MigrationResult>((resolve) => {
+      resolveMyIndex = resolve;
+    });
+    const otherIndexPromise = new Promise<MigrationResult>((resolve) => {
+      resolveOtherIndex = resolve;
+    });
+    const taskIndexPromise = new Promise<MigrationResult>((resolve) => {
+      resolveTaskIndex = resolve;
+    });
+
     let migrationResults: MigrationResult[] | undefined;
 
-    mockRunResilientMigrator.mockReturnValueOnce(myIndexMigratorDefer.promise);
-    mockRunResilientMigrator.mockReturnValueOnce(otherIndexMigratorDefer.promise);
-    mockRunResilientMigrator.mockReturnValueOnce(taskIndexMigratorDefer.promise);
+    mockRunResilientMigrator.mockReturnValueOnce(myIndexPromise);
+    mockRunResilientMigrator.mockReturnValueOnce(otherIndexPromise);
+    mockRunResilientMigrator.mockReturnValueOnce(taskIndexPromise);
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
 
     runV2Migration(options).then((results) => (migrationResults = results));
     await nextTick();
     expect(migrationResults).toBeUndefined();
-    myIndexMigratorDefer.resolve(V2_SUCCESSFUL_MIGRATION_RESULT[0]);
-    otherIndexMigratorDefer.resolve(V2_SUCCESSFUL_MIGRATION_RESULT[1]);
+    resolveMyIndex!(V2_SUCCESSFUL_MIGRATION_RESULT[0]);
+    resolveOtherIndex!(V2_SUCCESSFUL_MIGRATION_RESULT[1]);
     await nextTick();
     expect(migrationResults).toBeUndefined();
-    taskIndexMigratorDefer.resolve(V2_SUCCESSFUL_MIGRATION_RESULT[2]);
+    resolveTaskIndex!(V2_SUCCESSFUL_MIGRATION_RESULT[2]);
     await nextTick();
     expect(migrationResults).toEqual(V2_SUCCESSFUL_MIGRATION_RESULT);
   });
@@ -301,7 +234,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     waitForMigrationCompletion: false,
     typeRegistry,
     kibanaIndexPrefix: '.my_index',
-    defaultIndexTypesMap: indexTypesMapMock,
     hashToVersionMap: hashToVersionMapMock,
     migrationConfig: {
       algorithm: 'v2' as const,
@@ -316,6 +248,7 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
+      useCumulativeLogger: false,
     },
     elasticsearchClient: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
@@ -329,5 +262,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     mappingProperties: buildTypesMappings(typeRegistry.getAllTypes()),
     esCapabilities: elasticsearchServiceMock.createCapabilities(),
     kibanaVersionCheck: '8.18.0',
+    meter: { record: jest.fn() },
   };
 };

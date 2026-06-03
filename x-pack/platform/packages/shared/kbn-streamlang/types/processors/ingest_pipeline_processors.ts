@@ -5,16 +5,36 @@
  * 2.0.
  */
 
-import { RenameFieldsAndRemoveAction } from '../utils';
-import {
+import type { RenameFieldsAndRemoveAction } from '../utils';
+import type {
   GrokProcessor,
   DissectProcessor,
+  UriPartsProcessor,
   DateProcessor,
   RenameProcessor,
   SetProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   AppendProcessor,
+  ConvertProcessor,
+  RemoveByPrefixProcessor,
+  RemoveProcessor,
+  DropDocumentProcessor,
+  ReplaceProcessor,
+  RedactProcessor,
+  UppercaseProcessor,
+  TrimProcessor,
+  LowercaseProcessor,
+  JoinProcessor,
+  SplitProcessor,
+  SortProcessor,
+  ConcatProcessor,
+  NetworkDirectionProcessor,
+  JsonExtractProcessor,
+  EnrichProcessor,
+  RegisteredDomainProcessor,
 } from '.';
+import type { Condition } from '../conditions';
 
 /** Ingest Pipeline processor configurations very closely resemble Streamlang DSL action blocks */
 
@@ -28,6 +48,12 @@ export type IngestPipelineGrokProcessor = RenameFieldsAndRemoveAction<
 export type IngestPipelineDissectProcessor = RenameFieldsAndRemoveAction<
   DissectProcessor,
   { from: 'field'; where: 'if' }
+>;
+
+// URI parts
+export type IngestPipelineUriPartsProcessor = RenameFieldsAndRemoveAction<
+  UriPartsProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
 // Date
@@ -54,6 +80,116 @@ export type IngestPipelineAppendProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Convert
+export type IngestPipelineConvertProcessor = RenameFieldsAndRemoveAction<
+  ConvertProcessor,
+  ConvertProcessor extends { where: Condition }
+    ? { from: 'field'; to: 'target_field'; where: 'if' }
+    : { from: 'field'; to: 'target_field' }
+>;
+
+// RemoveByPrefix
+export type IngestPipelineRemoveByPrefixProcessor = RenameFieldsAndRemoveAction<
+  RemoveByPrefixProcessor,
+  { from: 'fields' }
+>;
+
+// Remove
+export type IngestPipelineRemoveProcessor = RenameFieldsAndRemoveAction<
+  RemoveProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
+// Drop
+export type IngestPipelineDropProcessor = RenameFieldsAndRemoveAction<
+  DropDocumentProcessor,
+  { where: 'if' }
+>;
+
+// Replace
+export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
+  ReplaceProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Redact
+export type IngestPipelineRedactProcessor = RenameFieldsAndRemoveAction<
+  RedactProcessor,
+  { from: 'field'; where: 'if' }
+>;
+
+// Math (uses script processor internally)
+export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
+  MathProcessor,
+  { where: 'if' }
+>;
+
+// Uppercase
+export type IngestPipelineUppercaseProcessor = RenameFieldsAndRemoveAction<
+  UppercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Lowercase
+export type IngestPipelineLowercaseProcessor = RenameFieldsAndRemoveAction<
+  LowercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Trim
+export type IngestPipelineTrimProcessor = RenameFieldsAndRemoveAction<
+  TrimProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Join
+export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
+  JoinProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Concat
+export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
+  ConcatProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
+// Split
+export type IngestPipelineSplitProcessor = RenameFieldsAndRemoveAction<
+  SplitProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Sort
+export type IngestPipelineSortProcessor = RenameFieldsAndRemoveAction<
+  SortProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Network Direction
+export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
+  NetworkDirectionProcessor,
+  { where: 'if' }
+>;
+
+// JsonExtract (uses script processor internally)
+export type IngestPipelineJsonExtractProcessor = RenameFieldsAndRemoveAction<
+  JsonExtractProcessor,
+  { where: 'if' }
+>;
+
+// Enrich
+export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
+  EnrichProcessor,
+  { to: 'target_field'; where: 'if' }
+>;
+
+// Registered Domain
+export type IngestPipelineRegisteredDomainProcessor = RenameFieldsAndRemoveAction<
+  RegisteredDomainProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -63,8 +199,27 @@ export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveA
 export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
+  | IngestPipelineUriPartsProcessor
   | IngestPipelineDateProcessor
+  | IngestPipelineDropProcessor
+  | IngestPipelineMathProcessor
   | IngestPipelineRenameProcessor
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor
+  | IngestPipelineConvertProcessor
+  | IngestPipelineRemoveByPrefixProcessor
+  | IngestPipelineRemoveProcessor
+  | IngestPipelineReplaceProcessor
+  | IngestPipelineRedactProcessor
+  | IngestPipelineUppercaseProcessor
+  | IngestPipelineLowercaseProcessor
+  | IngestPipelineTrimProcessor
+  | IngestPipelineJoinProcessor
+  | IngestPipelineSplitProcessor
+  | IngestPipelineSortProcessor
+  | IngestPipelineConcatProcessor
+  | IngestPipelineNetworkDirectionProcessor
+  | IngestPipelineJsonExtractProcessor
+  | IngestPipelineEnrichProcessor
+  | IngestPipelineRegisteredDomainProcessor
   | IngestPipelineManualIngestPipelineProcessor;

@@ -7,7 +7,7 @@
 
 import { LIST_ID, TYPE } from '../../constants/index.mock';
 
-import { ImportListItemQuerySchema } from '.';
+import type { ImportListItemQuerySchema } from '.';
 
 export const getImportListItemQuerySchemaMock = (): ImportListItemQuerySchema => ({
   deserializer: undefined,

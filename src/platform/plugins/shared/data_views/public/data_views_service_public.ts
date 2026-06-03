@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { DataViewsService, MatchedItem } from '.';
+import type { HttpStart } from '@kbn/core/public';
+import type { MatchedItem } from '.';
+import { DataViewsService } from '.';
 
-import { DataViewsServiceDeps } from '../common/data_views/data_views';
-import { HasDataService } from '../common';
+import type { DataViewsServiceDeps } from '../common/data_views/data_views';
+import type { HasDataService } from '../common';
 
-import { ExistingIndicesResponse } from '../common/types';
+import type { ExistingIndicesResponse } from '../common/types';
 import { EXISTING_INDICES_PATH } from '../common/constants';
 
 /**
@@ -33,6 +34,7 @@ export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
     pattern: string;
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
+    projectRouting?: string;
   }) => Promise<MatchedItem[]>;
 
   getRollupsEnabled: () => boolean;
@@ -51,6 +53,7 @@ export class DataViewsServicePublic extends DataViewsService {
     pattern: string;
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
+    projectRouting?: string;
   }) => Promise<MatchedItem[]>;
   public hasData: HasDataService;
   private rollupsEnabled: boolean = false;

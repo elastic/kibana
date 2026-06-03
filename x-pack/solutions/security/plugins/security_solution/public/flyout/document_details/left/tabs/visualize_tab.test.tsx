@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_ID } from '../components/graph_visualization';
@@ -21,8 +21,8 @@ const mockAnalyzeGraphTestId = 'analyze-graph';
 const mockSessionViewTestId = 'session-view';
 
 // Mock all required dependencies
-jest.mock('../../shared/hooks/use_graph_preview');
-jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
+jest.mock('../../../../common/hooks/use_upselling');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../shared/context');
 jest.mock('../components/graph_visualization', () => ({
@@ -65,8 +65,11 @@ describe('VisualizeTab', () => {
     jest.clearAllMocks();
 
     (useGraphPreview as jest.Mock).mockReturnValue({
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
+      hasGraphData: true,
     });
+
+    (useUpsellingComponent as jest.Mock).mockReturnValue(null);
 
     (useExpandableFlyoutState as jest.Mock).mockReturnValue({
       left: {
@@ -77,14 +80,15 @@ describe('VisualizeTab', () => {
     });
 
     (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      getFieldsData: jest.fn(),
-      dataAsNestedObject: {},
-      dataFormattedForFieldBrowser: {},
+      searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
     });
   });
 
-  it('should not render GraphVisualization component when feature flag is disabled', () => {
-    (useUiSetting$ as jest.Mock).mockImplementation((setting) => [false]);
+  it('should not render GraphVisualization component when graph is not available', () => {
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      shouldShowGraph: false,
+      hasGraphData: false,
+    });
 
     renderVisualizeTab();
 
@@ -95,8 +99,11 @@ describe('VisualizeTab', () => {
     expect(screen.getByTestId(mockSessionViewTestId)).toBeInTheDocument();
   });
 
-  it('should render GraphVisualization component when feature flag is enabled', () => {
-    (useUiSetting$ as jest.Mock).mockImplementation((setting) => [true]);
+  it('should render graph visualization when shouldShowGraph is true', () => {
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      shouldShowGraph: true,
+      hasGraphData: true,
+    });
 
     renderVisualizeTab();
 
@@ -104,5 +111,23 @@ describe('VisualizeTab', () => {
       screen.queryByTestId(VISUALIZE_TAB_GRAPH_VISUALIZATION_BUTTON_TEST_ID)
     ).toBeInTheDocument();
     expect(screen.getByTestId(mockGraphVisualizationTestId)).toBeInTheDocument();
+  });
+
+  it('should render graph upselling message when hasGraphData is true and upsell component is available', () => {
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      shouldShowGraph: false,
+      hasGraphData: true,
+    });
+
+    const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
+    (useUpsellingComponent as jest.Mock).mockReturnValue(MockUpsell);
+
+    renderVisualizeTab();
+
+    expect(
+      screen.queryByTestId(VISUALIZE_TAB_GRAPH_VISUALIZATION_BUTTON_TEST_ID)
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId(mockGraphVisualizationTestId)).not.toBeInTheDocument();
+    expect(screen.getByTestId('graphVisualizationUpsell')).toBeInTheDocument();
   });
 });

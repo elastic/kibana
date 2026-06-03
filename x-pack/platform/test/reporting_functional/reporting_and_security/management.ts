@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
@@ -88,16 +88,28 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
-        await PageObjects.exports.clickExportTopNavButton();
-        await (await testSubjects.find('scheduleExport')).click();
-        await testSubjects.existOrFail('exportItemDetailsFlyout');
+        await retry.try(async () => {
+          if (
+            !(await testSubjects.exists('exportDerivativeFlyout-scheduledReports', {
+              timeout: 1000,
+            }))
+          ) {
+            if (!(await testSubjects.exists('scheduleExport', { timeout: 1000 }))) {
+              await PageObjects.exports.clickExportTopNavButton();
+            }
+            await (await testSubjects.find('scheduleExport')).click();
+          }
+          await testSubjects.existOrFail('scheduleExportSubmitButton');
+        });
 
         await (await testSubjects.find('scheduleExportSubmitButton')).click();
 
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain(
-          'Find your schedule information and your exports in the Reporting page'
-        );
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain(
+            'Find your schedule information and your exports in the Reporting page'
+          );
+        });
         await toasts.dismissAll();
 
         await PageObjects.common.navigateToApp('reporting');
@@ -111,13 +123,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('allows user to view schedule config in flyout', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
         await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
-        const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportViewConfig-"]`);
+        const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportEditConfig-"]`);
 
         await viewConfigButton.click();
 
-        await testSubjects.existOrFail('scheduledReportFlyout');
+        await testSubjects.existOrFail('editScheduledReportFlyout');
         await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('scheduledReportFlyout');
+        await testSubjects.missingOrFail('editScheduledReportFlyout');
       });
 
       it('allows user to disable schedule', async () => {
@@ -129,9 +141,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await disableButton.click();
 
-        await testSubjects.existOrFail('confirm-disable-modal');
+        await testSubjects.existOrFail('confirm-destructive-action-modal');
         await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('confirm-disable-modal');
+        await testSubjects.missingOrFail('confirm-destructive-action-modal');
 
         const successToast = await toasts.getElementByIndex(1);
         expect(await successToast.getVisibleText()).to.contain('Scheduled report disabled');
@@ -147,13 +159,41 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           `[data-test-subj*="reportOpenDashboard-"]`
         );
 
+        const handlesBefore = await browser.getAllWindowHandles();
+        const currentHandle = handlesBefore[handlesBefore.length - 1];
+
         await openDashboardButton.click();
 
-        const [, , dashboardWindowHandle] = await browser.getAllWindowHandles(); // it is the third window handle
+        const dashboardWindowHandle = await retry.try(async () => {
+          const handles = await browser.getAllWindowHandles();
+          if (handles.length <= handlesBefore.length) {
+            throw new Error(`Waiting for new window handle, count is still ${handles.length}`);
+          }
+          return handles[handles.length - 1];
+        });
 
         await browser.switchToWindow(dashboardWindowHandle);
 
         await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
+
+        await browser.switchToWindow(currentHandle);
+      });
+
+      it('allows user to delete schedule', async () => {
+        await (await testSubjects.find('reportingTabs-schedules')).click();
+        await testSubjects.existOrFail('reportSchedulesTable');
+        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        const deleteButton = await find.byCssSelector(`[data-test-subj*="reportDeleteSchedule-"]`);
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-destructive-action-modal');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.missingOrFail('confirm-destructive-action-modal');
+
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain('Scheduled report deleted');
+        await toasts.dismissAll();
+        await testSubjects.missingOrFail('reportScheduleRow');
       });
     });
 

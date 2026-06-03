@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiText,
   EuiListGroup,
   EuiSpacer,
   EuiListGroupItem,
-  EuiListGroupItemProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { EuiListGroupProps } from '@elastic/eui';
+import type { EuiListGroupProps } from '@elastic/eui';
 
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (
@@ -42,7 +43,7 @@ export function SectionSubtitle({ children }: { children?: ReactNode }) {
 
 export function SectionLinks({ children, ...props }: { children?: ReactNode } & EuiListGroupProps) {
   return (
-    <EuiListGroup {...props} size={'s'} color={'primary'} flush={true} bordered={false}>
+    <EuiListGroup {...props} color={'primary'} bordered={false}>
       {children}
     </EuiListGroup>
   );
@@ -64,7 +65,7 @@ export function SectionLink({ ...props }: SectionLinkProps) {
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <EuiListGroupItem style={{ padding: 0 }} size={'xs'} {...props} />
+        <EuiListGroupItem style={{ padding: 0 }} {...props} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

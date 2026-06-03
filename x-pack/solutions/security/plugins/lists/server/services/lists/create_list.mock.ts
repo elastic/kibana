@@ -21,19 +21,17 @@ import {
   VERSION,
 } from '../../../common/constants.mock';
 
-import { CreateListOptions } from '.';
+import type { CreateListOptions } from '.';
 
 export const getCreateListOptionsMock = (): CreateListOptions => ({
   dateNow: DATE_NOW,
   description: DESCRIPTION,
-  deserializer: undefined,
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   id: LIST_ID,
   immutable: IMMUTABLE,
   listIndex: LIST_INDEX,
   meta: META,
   name: NAME,
-  serializer: undefined,
   tieBreaker: TIE_BREAKER,
   type: TYPE,
   user: USER,

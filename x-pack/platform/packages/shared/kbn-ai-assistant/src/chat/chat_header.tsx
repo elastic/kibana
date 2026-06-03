@@ -21,14 +21,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  ElasticLlmTourCallout,
-  getElasticManagedLlmConnector,
-  ElasticLlmCalloutKey,
-  useElasticLlmCalloutDismissed,
-  useObservabilityAIAssistantFlyoutStateContext,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  Conversation,
+  ConversationAccess,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import type { ApplicationStart } from '@kbn/core/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -64,7 +61,6 @@ export function ChatHeader({
   loading,
   title,
   isConversationOwnedByCurrentUser,
-  isConversationApp,
   onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
@@ -75,6 +71,7 @@ export function ChatHeader({
   copyUrl,
   deleteConversation,
   handleArchiveConversation,
+  navigateToModelManagementApp,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -84,7 +81,6 @@ export function ChatHeader({
   loading: boolean;
   title: string;
   isConversationOwnedByCurrentUser: boolean;
-  isConversationApp: boolean;
   onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
@@ -95,6 +91,7 @@ export function ChatHeader({
   copyConversationToClipboard: (conversation: Conversation) => void;
   copyUrl: (id: string) => void;
   handleArchiveConversation: (id: string, isArchived: boolean) => Promise<void>;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -115,13 +112,13 @@ export function ChatHeader({
     }
   };
 
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
-    ElasticLlmCalloutKey.TOUR_CALLOUT,
-    false
+  const actionsMenu = (
+    <ChatActionsMenu
+      connectors={connectors}
+      disabled={licenseInvalid}
+      navigateToModelManagementApp={navigateToModelManagementApp}
+    />
   );
-
-  const { isFlyoutOpen } = useObservabilityAIAssistantFlyoutStateContext();
 
   return (
     <EuiPanel
@@ -225,6 +222,17 @@ export function ChatHeader({
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      aria-label={
+                        flyoutPositionMode === 'overlay'
+                          ? i18n.translate(
+                              'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
+                              { defaultMessage: 'Dock conversation' }
+                            )
+                          : i18n.translate(
+                              'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
+                              { defaultMessage: 'Undock conversation' }
+                            )
+                      }
                       anchorPosition="downLeft"
                       button={
                         <EuiToolTip
@@ -257,6 +265,10 @@ export function ChatHeader({
                   {navigateToConversation ? (
                     <EuiFlexItem grow={false}>
                       <EuiPopover
+                        aria-label={i18n.translate(
+                          'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+                          { defaultMessage: 'Navigate to conversations' }
+                        )}
                         anchorPosition="downLeft"
                         button={
                           <EuiToolTip
@@ -272,7 +284,7 @@ export function ChatHeader({
                                 { defaultMessage: 'Navigate to conversations' }
                               )}
                               data-test-subj="observabilityAiAssistantChatHeaderButton"
-                              iconType="discuss"
+                              iconType="comment"
                               onClick={() => navigateToConversation(conversationId)}
                             />
                           </EuiToolTip>
@@ -283,17 +295,7 @@ export function ChatHeader({
                 </>
               ) : null}
 
-              <EuiFlexItem grow={false}>
-                {!!elasticManagedLlm &&
-                !tourCalloutDismissed &&
-                !(isConversationApp && isFlyoutOpen) ? (
-                  <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
-                    <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
-                  </ElasticLlmTourCallout>
-                ) : (
-                  <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
-                )}
-              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

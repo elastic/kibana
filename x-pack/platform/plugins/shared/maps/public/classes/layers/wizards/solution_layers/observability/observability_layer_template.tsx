@@ -7,9 +7,11 @@
 
 import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { RenderWizardArguments } from '../../layer_wizard_registry';
-import { LayerSelect, OBSERVABILITY_LAYER_TYPE } from './layer_select';
-import { getMetricOptionsForLayer, MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import type { RenderWizardArguments } from '../../layer_wizard_registry';
+import type { OBSERVABILITY_LAYER_TYPE } from './layer_select';
+import { LayerSelect } from './layer_select';
+import type { OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import { getMetricOptionsForLayer, MetricSelect } from './metric_select';
 import { DisplaySelect, DISPLAY } from './display_select';
 import { createLayerDescriptor } from './create_layer_descriptor';
 

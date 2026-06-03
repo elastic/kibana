@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
 
   const dashboardTitle = 'lens_to_ml';
   const dashboardArchive =
@@ -40,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await kibanaServer.importExport.load(dashboardArchive);
       await browser.setWindowSize(1920, 1080);
     });

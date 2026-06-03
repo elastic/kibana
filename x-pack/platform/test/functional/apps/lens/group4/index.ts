@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
@@ -80,7 +80,5 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./show_underlying_data')); // 2m
     loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
     loadTestFile(require.resolve('./share')); // 1m 20s
-    // keep it last in the group
-    loadTestFile(require.resolve('./tsdb')); // 3m 56s
   });
 };

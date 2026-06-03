@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from '@kbn/expect';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+} from '@kbn/management-settings-ids';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  forkStream,
+  indexDocument,
+} from './helpers/requests';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 async function simulateProcessingForStream(
   client: StreamsSupertestRepositoryClient,
@@ -39,6 +45,7 @@ async function simulateProcessingForStream(
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -55,24 +62,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     const basicDissectProcessor = {
-      id: 'dissect-uuid',
-      dissect: {
-        field: 'body.text',
-        pattern:
-          '%{attributes.parsed_timestamp} %{attributes.parsed_level} %{attributes.parsed_message}',
-        if: { always: {} },
-      },
+      customIdentifier: 'dissect-uuid',
+      action: 'dissect' as const,
+      from: 'body.text',
+      pattern:
+        '%{attributes.parsed_timestamp} %{attributes.parsed_level} %{attributes.parsed_message}',
+      where: { always: {} },
     };
 
     const basicGrokProcessor = {
-      id: 'draft',
-      grok: {
-        field: 'body.text',
-        patterns: [
-          '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:attributes.parsed_level} %{GREEDYDATA:attributes.parsed_message}',
-        ],
-        if: { always: {} },
-      },
+      customIdentifier: 'draft',
+      action: 'grok' as const,
+      from: 'body.text',
+      patterns: [
+        '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:attributes.parsed_level} %{GREEDYDATA:attributes.parsed_message}',
+      ],
+      where: { always: {} },
     };
 
     const createTestDocument = (message = TEST_MESSAGE) => ({
@@ -86,18 +91,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Create a test document
-      await indexDocument(esClient, 'logs', testDoc);
+      await indexDocument(esClient, 'logs.otel', testDoc);
 
       // Create a forked stream for testing
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: {
-          name: 'logs.test',
+          name: 'logs.otel.test',
         },
-        if: {
+        where: {
           field: 'resource.attributes.host.name',
-          operator: 'eq' as const,
-          value: TEST_HOST,
+          eq: TEST_HOST,
         },
+        status: 'enabled',
       });
     });
 
@@ -107,8 +112,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Successful simulations', () => {
       it('should simulate additive processing', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [basicGrokProcessor],
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [basicGrokProcessor],
+          },
           documents: [createTestDocument()],
         });
 
@@ -129,8 +136,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate with detected fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [basicGrokProcessor],
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: { steps: [basicGrokProcessor] },
           documents: [createTestDocument()],
           detected_fields: [
             { name: 'attributes.parsed_timestamp', type: 'date' },
@@ -147,18 +154,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate multiple sequential processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            basicDissectProcessor,
-            {
-              id: 'draft',
-              grok: {
-                field: 'attributes.parsed_message',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor,
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'attributes.parsed_message',
                 patterns: ['%{IP:attributes.parsed_ip}'],
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
@@ -180,18 +188,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate partially parsed documents', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            basicDissectProcessor, // This processor will correctly extract fields
-            {
-              id: 'draft',
-              grok: {
-                field: 'attributes.parsed_message',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor, // This processor will correctly extract fields
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'attributes.parsed_message',
                 patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
+
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
@@ -212,24 +222,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return processor metrics', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            basicDissectProcessor, // This processor will correctly extract fields
-            {
-              id: 'draft',
-              grok: {
-                field: 'attributes.parsed_message',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor, // This processor will correctly extract fields
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'attributes.parsed_message',
                 patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
+
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
         const processorsMetrics = response.body.processors_metrics;
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
+
+        if (!dissectMetrics || !grokMetrics) {
+          throw new Error('Expected metrics for dissect and grok processors');
+        }
 
         expect(dissectMetrics.detected_fields).to.eql([
           'attributes.parsed_level',
@@ -254,18 +270,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return accurate rates', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            basicDissectProcessor,
-            {
-              id: 'draft',
-              grok: {
-                field: 'attributes.parsed_message',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor,
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'attributes.parsed_message',
                 patterns: ['%{IP:attributes.parsed_ip}'],
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           documents: [
             createTestDocument(`${TEST_MESSAGE} 127.0.0.1`),
             createTestDocument(),
@@ -287,6 +304,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const dissectMetrics = processorsMetrics['dissect-uuid'];
         const grokMetrics = processorsMetrics.draft;
 
+        if (!dissectMetrics || !grokMetrics) {
+          throw new Error('Expected metrics for dissect and grok processors');
+        }
+
         expect(dissectMetrics.failed_rate).to.be(0.25);
         expect(dissectMetrics.parsed_rate).to.be(0.75);
         expect(grokMetrics.failed_rate).to.be(0.75);
@@ -294,16 +315,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return metrics for skipped documents due to non-hit condition', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            {
-              ...basicDissectProcessor,
-              dissect: {
-                ...basicDissectProcessor.dissect,
-                if: { field: 'body.text', operator: 'contains', value: 'test' },
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                ...basicDissectProcessor,
+                where: { field: 'body.text', contains: 'test' },
               },
-            },
-          ],
+            ],
+          },
           documents: [
             createTestDocument(`${TEST_TIMESTAMP} info test`),
             createTestDocument('invalid format'),
@@ -322,26 +342,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const processorsMetrics = response.body.processors_metrics;
         const dissectMetrics = processorsMetrics['dissect-uuid'];
 
+        if (!dissectMetrics) {
+          throw new Error('Expected metrics for dissect processor');
+        }
+
         expect(dissectMetrics.failed_rate).to.be(0);
         expect(dissectMetrics.parsed_rate).to.be(0.25);
         expect(dissectMetrics.skipped_rate).to.be(0.75);
       });
 
       it('should allow overriding fields detected by previous simulation processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            basicDissectProcessor,
-            {
-              id: 'draft',
-              grok: {
-                field: 'attributes.parsed_message',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor,
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'attributes.parsed_message',
                 patterns: [
                   '%{WORD:attributes.ignored_field} %{IP:attributes.parsed_ip} %{GREEDYDATA:attributes.parsed_message}',
                 ], // Try overriding parsed_message previously computed by dissect
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1 greedy data message`)],
         });
 
@@ -362,18 +387,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return the errors for each partially parsed or failed document', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            basicDissectProcessor, // This processor will correctly extract fields
-            {
-              id: 'draft',
-              grok: {
-                field: 'attributes.parsed_message',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor, // This processor will correctly extract fields
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'attributes.parsed_message',
                 patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
@@ -389,110 +415,111 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return failed simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            {
-              id: 'draft',
-              grok: {
-                field: 'body.text',
-                patterns: ['%{INVALID_PATTERN:field}'],
-                if: { always: {} },
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'body.text',
+                patterns: ['%{INVALID_PATTERN:attributes.field}'],
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           documents: [createTestDocument('test message')],
         });
 
         const processorsMetrics = response.body.processors_metrics;
         const grokMetrics = processorsMetrics.draft;
+
+        if (!grokMetrics) {
+          throw new Error('Expected metrics for grok processor');
+        }
 
         expect(grokMetrics.errors).to.eql([
           {
             processor_id: 'draft',
             type: 'generic_simulation_failure',
             message:
-              "[patterns] Invalid regex pattern found in: [%{INVALID_PATTERN:field}]. Unable to find pattern [INVALID_PATTERN] in Grok's pattern dictionary",
+              "parse_exception\n\tRoot causes:\n\t\tparse_exception: [patterns] Invalid regex pattern found in: [%{INVALID_PATTERN:attributes.field}]. Unable to find pattern [INVALID_PATTERN] in Grok's pattern dictionary",
           },
         ]);
       });
 
-      it('should gracefully return errors related to non-namespaced fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            {
-              id: 'draft',
-              grok: {
-                field: 'body.text',
-                patterns: ['%{WORD:abc}'],
-                if: { always: {} },
-              },
-            },
-          ],
-          documents: [createTestDocument('test message')],
+      describe('manual_ingest_pipeline processor', () => {
+        // manual_ingest_pipeline is only allowed in classic streams, not wired streams
+        const CLASSIC_STREAM_NAME = 'logs-manual-pipeline-test-default';
+
+        before(async () => {
+          // Create a classic stream by indexing a document
+          await indexDocument(esClient, CLASSIC_STREAM_NAME, {
+            '@timestamp': TEST_TIMESTAMP,
+            message: 'test message',
+          });
         });
 
-        const processorsMetrics = response.body.processors_metrics;
-        const grokMetrics = processorsMetrics.draft;
-
-        expect(grokMetrics.errors).to.eql([
-          {
-            processor_id: 'draft',
-            type: 'non_namespaced_fields_failure',
-            message: 'The fields generated by the processor are not namespaced ECS fields: [abc]',
-          },
-        ]);
-      });
-
-      it('should correctly associate nested processors within Elasticsearch ingest pipeline', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            {
-              id: 'draft',
-              manual_ingest_pipeline: {
-                processors: [
-                  {
-                    set: {
-                      field: 'attributes.test',
-                      value: 'test',
-                    },
-                  },
-                  {
-                    fail: {
-                      message: 'Failing',
-                    },
-                  },
-                ],
-                if: { always: {} },
-              },
-            },
-          ],
-          documents: [createTestDocument('test message')],
+        after(async () => {
+          await esClient.indices.deleteDataStream({ name: CLASSIC_STREAM_NAME });
         });
 
-        const processorsMetrics = response.body.processors_metrics;
-        const processorMetrics = processorsMetrics.draft;
+        it('should correctly associate nested processors within Elasticsearch ingest pipeline', async () => {
+          const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
+            processing: {
+              steps: [
+                {
+                  customIdentifier: 'draft',
+                  action: 'manual_ingest_pipeline' as const,
+                  processors: [
+                    {
+                      set: {
+                        field: 'attributes.test',
+                        value: 'test',
+                      },
+                    },
+                    {
+                      fail: {
+                        message: 'Failing',
+                      },
+                    },
+                  ],
+                  where: { always: {} },
+                },
+              ],
+            },
+            documents: [createTestDocument('test message')],
+          });
 
-        expect(processorMetrics.errors).to.eql([
-          {
-            processor_id: 'draft',
-            type: 'generic_processor_failure',
-            message: 'Failing',
-          },
-        ]);
+          const processorsMetrics = response.body.processors_metrics;
+          const processorMetrics = processorsMetrics.draft;
+
+          if (!processorMetrics) {
+            throw new Error('Expected metrics for draft processor');
+          }
+
+          expect(processorMetrics.errors).to.eql([
+            {
+              processor_id: 'draft',
+              type: 'generic_processor_failure',
+              message: 'Failing',
+            },
+          ]);
+        });
       });
 
       it('should gracefully return mappings simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            {
-              id: 'draft',
-              grok: {
-                field: 'body.text',
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'body.text',
                 patterns: ['%{TIMESTAMP_ISO8601:@timestamp}'],
-                if: { always: {} },
+                where: { always: {} },
               },
-            },
-          ],
+            ],
+          },
           documents: [createTestDocument('2025-04-04 00:00:00,000')], // This date doesn't exactly match the mapping for @timestamp
         });
 
@@ -508,9 +535,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Simulate detected fields mapping issue
         const detectedFieldsFailureResponse = await simulateProcessingForStream(
           apiClient,
-          'logs.test',
+          'logs.otel.test',
           {
-            processing: [basicGrokProcessor],
+            processing: {
+              steps: [basicGrokProcessor],
+            },
             documents: [createTestDocument()],
             detected_fields: [
               { name: 'attributes.parsed_timestamp', type: 'boolean' }, // Incompatible type
@@ -521,10 +550,550 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(detectedFieldsFailureResponse.body.documents[0].errors).to.eql([
           {
             type: 'field_mapping_failure',
-            message: `Some field types might not be compatible with this document: [1:98] failed to parse field [attributes.parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
+            message: `Some field types might not be compatible with this document: [1:66] failed to parse field [attributes.parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
           },
         ]);
         expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
+      });
+    });
+
+    describe('Geo point field handling', () => {
+      const CLASSIC_STREAM_NAME = 'logs-geotest-default';
+
+      before(async () => {
+        // Create a sample document with geo point to establish the stream
+        const sampleDoc = {
+          '@timestamp': TEST_TIMESTAMP,
+          message: 'test message',
+          'source.geo.location': {
+            lat: 40.7128,
+            lon: -74.006,
+          },
+        };
+        await indexDocument(esClient, CLASSIC_STREAM_NAME, sampleDoc);
+      });
+
+      after(async () => {
+        await esClient.indices.deleteDataStream({ name: CLASSIC_STREAM_NAME });
+      });
+
+      // This test was added after ES issue #140506 was fixed (PR #141397).
+      // Previously, Kibana had a workaround that suppressed geo.location ignored field errors
+      // for OTEL streams. Now that the ES fix is in place, we should properly report any
+      // ignored_fields errors that might occur, without suppressing geo.location specifically.
+      it('should properly report ignored fields for geo.location in OTEL streams', async () => {
+        // logs.test is a wired stream (OTEL stream) created in the parent describe's before hook
+        // Test with geo.location field using OTEL semantic conventions (flattened format)
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft',
+                action: 'set' as const,
+                to: 'attributes.processed',
+                value: true,
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [
+            {
+              '@timestamp': TEST_TIMESTAMP,
+              'body.text': 'test with geo location',
+              // geo.location field following OTEL semantic conventions (flattened)
+              'resource.attributes.host.geo.location.lat': 40.7128,
+              'resource.attributes.host.geo.location.lon': -74.006,
+            },
+          ],
+        });
+
+        // The simulation should succeed
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { errors, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        // With the ES fix in place (PR #141397), geo.location fields should work correctly
+        // without generating ignored_fields errors. Any errors that do occur should be
+        // properly reported (not suppressed as before).
+        expect(errors).to.eql([]);
+        // Verify the geo.location fields are preserved in the output
+        expect(value).to.have.property('resource.attributes.host.geo.location.lat', 40.7128);
+        expect(value).to.have.property('resource.attributes.host.geo.location.lon', -74.006);
+      });
+
+      it('should correctly handle flattened geo point fields in simulation', async () => {
+        const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'message',
+                patterns: ['%{WORD:parsed_field}'],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [
+            {
+              '@timestamp': TEST_TIMESTAMP,
+              'source.geo.location.lat': 40.7128,
+              'source.geo.location.lon': -74.006,
+              message: 'test',
+              'other.field': 'value',
+            },
+          ],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { errors, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(errors).to.eql([]);
+
+        // Verify simulation succeeded without errors - geo points were regrouped internally
+        // but the response should still show flattened fields
+        expect(value).to.have.property('source.geo.location.lat', 40.7128);
+        expect(value).to.have.property('source.geo.location.lon', -74.006);
+        expect(value).to.have.property('other.field', 'value');
+        expect(value).to.have.property('parsed_field', 'test');
+      });
+
+      it('should handle multiple geo point fields in the same document', async () => {
+        const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft',
+                action: 'grok' as const,
+                from: 'message',
+                patterns: ['%{WORD:parsed_field}'],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [
+            {
+              '@timestamp': TEST_TIMESTAMP,
+              'source.geo.location.lat': 40.7128,
+              'source.geo.location.lon': -74.006,
+              'destination.geo.location.lat': 51.5,
+              'destination.geo.location.lon': -0.125,
+              message: 'test',
+            },
+          ],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { errors, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(errors).to.eql([]);
+
+        // Verify simulation succeeded - geo points were regrouped internally during processing
+        // but the response still shows them as flattened fields
+        expect(value).to.have.property('source.geo.location.lat', 40.7128);
+        expect(value).to.have.property('source.geo.location.lon', -74.006);
+        expect(value).to.have.property('destination.geo.location.lat', 51.5);
+        expect(value).to.have.property('destination.geo.location.lon', -0.125);
+      });
+    });
+
+    describe('Temporary field handling', () => {
+      // Tests for https://github.com/elastic/kibana/issues/248968
+      // Temporary fields that are created and then deleted should NOT appear in detected_fields
+
+      it('should NOT include temporary fields (created then deleted) in detected_fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-temp-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'temporary_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp-field',
+                action: 'remove' as const,
+                from: 'attributes.temp_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { detected_fields, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+
+        // The temp_field should NOT be in detected_fields since it was deleted
+        const tempFieldDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.temp_field'
+        );
+        expect(tempFieldDetected).to.be(undefined);
+
+        // The final document should NOT have the temp_field
+        expect(value).to.not.have.property('attributes.temp_field');
+      });
+
+      it('should include fields that are created and kept in detected_fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-permanent-field',
+                action: 'set' as const,
+                to: 'attributes.permanent_field',
+                value: 'permanent_value',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // The permanent_field SHOULD be in detected_fields
+        const permanentFieldDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.permanent_field'
+        );
+        expect(permanentFieldDetected).to.not.be(undefined);
+        expect(permanentFieldDetected!.processor_id).to.be('set-permanent-field');
+
+        // The final document should have the permanent_field
+        expect(value).to.have.property('attributes.permanent_field', 'permanent_value');
+      });
+
+      it('should NOT include fields that are modified then deleted in detected_fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'initial_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'modify-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'modified_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-field',
+                action: 'remove' as const,
+                from: 'attributes.temp_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // The temp_field should NOT be in detected_fields since it was deleted
+        const tempFieldDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.temp_field'
+        );
+        expect(tempFieldDetected).to.be(undefined);
+
+        // The final document should NOT have the temp_field
+        expect(value).to.not.have.property('attributes.temp_field');
+      });
+
+      it('should track per-processor fields even for temporary fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-temp-field',
+                action: 'set' as const,
+                to: 'attributes.temp_field',
+                value: 'temporary_value',
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp-field',
+                action: 'remove' as const,
+                from: 'attributes.temp_field',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        // Per-processor metrics SHOULD still track that the first processor added the temp field
+        const processorsMetrics = response.body.processors_metrics;
+        const setProcessorMetrics = processorsMetrics['set-temp-field'];
+
+        expect(setProcessorMetrics).to.not.be(undefined);
+        expect(setProcessorMetrics!.detected_fields).to.contain('attributes.temp_field');
+        expect(setProcessorMetrics!.parsed_rate).to.be(1);
+      });
+
+      it('should handle mixed temporary and permanent fields correctly', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-fields',
+                action: 'grok' as const,
+                from: 'body.text',
+                patterns: [
+                  '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{WORD:attributes.temp_level} %{GREEDYDATA:attributes.parsed_message}',
+                ],
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-temp-level',
+                action: 'remove' as const,
+                from: 'attributes.temp_level',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // temp_level should NOT be in detected_fields (created then deleted)
+        const tempLevelDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.temp_level'
+        );
+        expect(tempLevelDetected).to.be(undefined);
+
+        // parsed_timestamp and parsed_message SHOULD be in detected_fields (kept)
+        const timestampDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.parsed_timestamp'
+        );
+        const messageDetected = detected_fields.find(
+          (f: { name: string }) => f.name === 'attributes.parsed_message'
+        );
+        expect(timestampDetected).to.not.be(undefined);
+        expect(messageDetected).to.not.be(undefined);
+
+        // Final document should have permanent fields but not temp_level
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.not.have.property('attributes.temp_level');
+      });
+    });
+
+    describe('Draft stream simulation', function () {
+      this.tags(['skipCloud', 'skipMKI', 'skipServerless']);
+
+      const MATERIALIZED_PARENT = 'logs.otel.sim-parent';
+      const DRAFT_CHILD = 'logs.otel.sim-parent.sim-draft';
+      const NESTED_DRAFT = 'logs.otel.sim-parent.sim-draft.sim-nested';
+
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
+        });
+
+        await forkStream(apiClient, 'logs.otel', {
+          stream: { name: MATERIALIZED_PARENT },
+          where: { field: 'resource.attributes.host.name', eq: 'sim-host' },
+          status: 'enabled',
+        });
+
+        await forkStream(apiClient, MATERIALIZED_PARENT, {
+          stream: { name: DRAFT_CHILD },
+          where: { field: 'severity_text', eq: 'error' },
+          draft: true,
+        });
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, DRAFT_CHILD).catch(() => {});
+        await deleteStream(apiClient, MATERIALIZED_PARENT).catch(() => {});
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
+        });
+      });
+
+      it('should simulate additive processing on a draft stream', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'draft-grok',
+                action: 'grok' as const,
+                from: 'body.text',
+                patterns: [
+                  '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:attributes.parsed_level} %{GREEDYDATA:attributes.parsed_message}',
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { detected_fields, errors, status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(errors).to.eql([]);
+        expect(detected_fields).to.eql([
+          { processor_id: 'draft-grok', name: 'attributes.parsed_level' },
+          { processor_id: 'draft-grok', name: 'attributes.parsed_message' },
+          { processor_id: 'draft-grok', name: 'attributes.parsed_timestamp' },
+        ]);
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
+      });
+
+      it('should simulate multiple sequential processors on a draft stream', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [
+              basicDissectProcessor,
+              {
+                customIdentifier: 'set-service',
+                action: 'set' as const,
+                to: 'attributes.service.type',
+                value: 'web',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        const { status, value } = response.body.documents[0];
+        expect(status).to.be('parsed');
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.have.property('attributes.service.type', 'web');
+      });
+
+      it('should validate detected field mappings for a draft stream', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [basicGrokProcessor],
+          },
+          documents: [createTestDocument()],
+          detected_fields: [{ name: 'attributes.parsed_timestamp', type: 'boolean' }],
+        });
+
+        expect(response.body.documents[0].errors).to.not.be.empty();
+        expect(response.body.documents[0].errors[0].type).to.be('field_mapping_failure');
+        expect(response.body.documents[0].status).to.be('failed');
+      });
+
+      it('should include draft field definitions in mapping validation', async () => {
+        const response = await simulateProcessingForStream(apiClient, DRAFT_CHILD, {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'set-parsed',
+                action: 'set' as const,
+                to: 'attributes.processed',
+                value: 'true',
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+        expect(response.body.documents[0].status).to.be('parsed');
+      });
+
+      describe('Nested draft simulation', () => {
+        before(async () => {
+          await forkStream(apiClient, DRAFT_CHILD, {
+            stream: { name: NESTED_DRAFT },
+            where: { field: 'body.text', contains: 'critical' },
+            draft: true,
+          });
+        });
+
+        after(async () => {
+          await deleteStream(apiClient, NESTED_DRAFT).catch(() => {});
+        });
+
+        it('should simulate processing on a nested draft (draft child of draft)', async () => {
+          const response = await simulateProcessingForStream(apiClient, NESTED_DRAFT, {
+            processing: {
+              steps: [
+                {
+                  customIdentifier: 'nested-set',
+                  action: 'set' as const,
+                  to: 'attributes.nested_flag',
+                  value: 'true',
+                  where: { always: {} },
+                },
+              ],
+            },
+            documents: [createTestDocument()],
+          });
+
+          expect(response.body.documents_metrics.parsed_rate).to.be(1);
+          expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+          const { status, value } = response.body.documents[0];
+          expect(status).to.be('parsed');
+          expect(value).to.have.property('attributes.nested_flag', 'true');
+        });
+
+        it('should handle processor failures correctly on nested drafts', async () => {
+          const response = await simulateProcessingForStream(apiClient, NESTED_DRAFT, {
+            processing: {
+              steps: [
+                {
+                  customIdentifier: 'nested-grok',
+                  action: 'grok' as const,
+                  from: 'body.text',
+                  patterns: ['%{IP:attributes.ip_addr}'],
+                  where: { always: {} },
+                },
+              ],
+            },
+            documents: [createTestDocument()],
+          });
+
+          expect(response.body.documents_metrics.failed_rate).to.be(1);
+          expect(response.body.documents_metrics.parsed_rate).to.be(0);
+
+          const { status, errors } = response.body.documents[0];
+          expect(status).to.be('failed');
+          expect(errors).to.have.length(1);
+          expect(errors[0].type).to.be('generic_processor_failure');
+        });
       });
     });
   });

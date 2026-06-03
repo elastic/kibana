@@ -9,11 +9,11 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 
 import * as ast from '../ast';
 import * as not from './not';
-import { KqlNotFunctionNode } from './not';
+import type { KqlNotFunctionNode } from './not';
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
@@ -44,12 +44,12 @@ describe('kuery functions', () => {
         const result = not.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(Object.keys(result).length).toBe(1);
+        expect(Object.keys(result!).length).toBe(1);
 
-        expect(result.bool).toHaveProperty('must_not');
-        expect(Object.keys(result.bool!).length).toBe(1);
+        expect(result!.bool).toHaveProperty('must_not');
+        expect(Object.keys(result!.bool!).length).toBe(1);
 
-        expect(result.bool!.must_not).toEqual(ast.toElasticsearchQuery(childNode, indexPattern));
+        expect(result!.bool!.must_not).toEqual(ast.toElasticsearchQuery(childNode, indexPattern));
       });
     });
 

@@ -15,7 +15,7 @@ import {
   CaseUserActionBasicRt,
   UserActionsRt,
 } from '../../domain/user_action/v1';
-import type { Attachments } from '../../domain';
+import type { AttachmentsV2 } from '../../domain';
 
 export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
     typeof CaseUserActionInjectedIdsRt
@@ -26,8 +26,13 @@ export type UserActionWithResponse<T> = T & { id: string; version: string } & rt
  */
 export const CaseUserActionStatsRt = rt.strict({
   total: rt.number,
+  total_deletions: rt.number,
   total_comments: rt.number,
+  total_comment_deletions: rt.number,
+  total_comment_creations: rt.number,
+  total_hidden_comment_updates: rt.number,
   total_other_actions: rt.number,
+  total_other_action_deletions: rt.number,
 });
 
 export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;
@@ -88,5 +93,5 @@ export const UserActionFindResponseRt = rt.strict({
 export type UserActionFindResponse = rt.TypeOf<typeof UserActionFindResponseRt>;
 
 export interface UserActionInternalFindResponse extends UserActionFindResponse {
-  latestAttachments: Attachments;
+  latestAttachments: AttachmentsV2;
 }

@@ -15,6 +15,8 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScore } from '../../api/hooks/use_entity_store_risk_score';
+import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_risk_score_kpi';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { capitalize } from 'lodash/fp';
@@ -62,8 +64,12 @@ const defaultProps = {
 };
 const mockUseRiskScore = useRiskScore as jest.Mock;
 const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
+const mockUseEntityStoreRiskScore = useEntityStoreRiskScore as jest.Mock;
+const mockUseEntityStoreRiskScoreKpi = useEntityStoreRiskScoreKpi as jest.Mock;
 jest.mock('../../api/hooks/use_risk_score');
 jest.mock('../../api/hooks/use_risk_score_kpi');
+jest.mock('../../api/hooks/use_entity_store_risk_score');
+jest.mock('../../api/hooks/use_entity_store_risk_score_kpi');
 
 const mockOpenAlertsPageWithFilters = jest.fn();
 jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
@@ -86,8 +92,17 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
         loading: false,
+        refetch: jest.fn(),
+        inspect: { dsl: [], response: [] },
       });
       mockUseRiskScore.mockReturnValue(defaultProps);
+      mockUseEntityStoreRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+        refetch: jest.fn(),
+        inspect: { dsl: [], response: [] },
+      });
+      mockUseEntityStoreRiskScore.mockReturnValue(defaultProps);
     });
 
     it('renders enable button when module is disable', () => {
@@ -109,6 +124,62 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       );
 
       expect(queryByTestId(`enable_risk_score`)).not.toBeInTheDocument();
+    });
+
+    it('renders no data detected component when engine is installed, no severity filter, and data is empty', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScore.mockReturnValue({
+        ...defaultProps,
+        hasEngineBeenInstalled: true,
+        data: [],
+      });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      expect(getByTestId(`${riskEntity}-risk-score-no-data-detected`)).toBeInTheDocument();
+    });
+
+    it('does not render no data detected when data exists', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      const data = [
+        {
+          '@timestamp': '1234567899',
+          [riskEntity]: {
+            name: 'testName',
+            risk: {
+              rule_risks: [],
+              calculated_level: RiskSeverity.High,
+              calculated_score_norm: 75,
+              multipliers: [],
+            },
+          },
+        },
+      ];
+      mockUseRiskScore.mockReturnValue({
+        ...defaultProps,
+        hasEngineBeenInstalled: true,
+        data,
+      });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(`${riskEntity}-risk-score-no-data-detected`)).not.toBeInTheDocument();
     });
 
     it('queries when toggleStatus is true', () => {
@@ -225,8 +296,8 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
         expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
           {
             title: capitalize(riskEntity),
-            fieldName: EntityTypeToIdentifierField[riskEntity],
-            selectedOptions: [name],
+            field_name: EntityTypeToIdentifierField[riskEntity],
+            selected_options: [name],
           },
         ]);
       });

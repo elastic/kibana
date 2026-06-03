@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 import { uniqBy } from 'lodash';
@@ -22,6 +23,7 @@ import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
 import { getAgentStatusForAgentPolicy } from '../agents';
 import { appContextService } from '..';
+import { getValidSpaceId } from '../spaces/helpers';
 
 /**
  * Retrieve all agent policies which has a Fleet Server package policy
@@ -36,7 +38,8 @@ export const getFleetServerPolicies = async (
 
   // Extract associated fleet server agent policy IDs
   const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) => {
-    return p.policy_ids?.map((id) => ({ id, spaceId: p.spaceIds?.[0] ?? DEFAULT_SPACE_ID } ?? []));
+    // @ts-expect-error upgrade typescript v5.9.3
+    return p.policy_ids?.map((id) => ({ id, spaceId: getValidSpaceId(p.spaceIds) } ?? []));
   });
 
   // Retrieve associated agent policies
@@ -73,7 +76,7 @@ export const hasFleetServersForPolicies = async (
               ? `namespaces:"${spaceIds?.[0]}"`
               : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
 
-          return `(policy_id:"${id}" and (${space}))`;
+          return `(policy_id:"${escapeQuotes(id)}" and (${space}))`;
         })
         .join(' or ')
     );
@@ -138,7 +141,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
   }
 
   const kuery = `policy_id:(${Array.from(policyIds)
-    .map((id) => `"${id}"`)
+    .map((id) => `"${escapeQuotes(id)}"`)
     .join(' or ')})`;
 
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
@@ -149,7 +152,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
   });
 
   if (fleetServerAgents.agents.length === 0) {
-    return false;
+    return true;
   }
 
   let result = true;

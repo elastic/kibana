@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { ApplicationUsageTelemetryReport } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
@@ -130,29 +130,32 @@ export const applicationUsageSchema = {
   status: commonSchema,
   kibanaOverview: commonSchema,
   r: commonSchema,
+  workflows: commonSchema,
 
   // X-Pack
+  agent_builder: commonSchema,
   apm: commonSchema,
+  automaticImport: commonSchema,
   canvas: commonSchema,
+  cloud_connect: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
-  searchInferenceEndpoints: commonSchema,
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
-  elasticsearchIndices: commonSchema,
-  elasticsearchStart: commonSchema,
+  elasticRamen: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchRedirect: commonSchema,
-  searchExperiences: commonSchema,
+  searchGettingStarted: commonSchema,
   searchHomepage: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
   fleet: commonSchema,
   integrations: commonSchema,
+  ingestHub: commonSchema,
   ingestManager: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
@@ -163,18 +166,22 @@ export const applicationUsageSchema = {
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
+  onboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,
   profiling: commonSchema,
   slo: commonSchema,
   security_account: commonSchema,
   reportingRedirect: commonSchema,
+  rules: commonSchema,
   security_access_agreement: commonSchema,
   security_capture_url: commonSchema, // It's a forward app so we'll likely never report it
   security_logged_out: commonSchema,
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
+  security_reset_session: commonSchema,
+  security_unauthenticated: commonSchema,
   securitySolutionUI: commonSchema,
   /**
    * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement

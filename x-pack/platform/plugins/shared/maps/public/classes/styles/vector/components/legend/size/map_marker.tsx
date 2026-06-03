@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, CSSProperties } from 'react';
+import type { FC, CSSProperties } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { RightAlignedText } from '../right_aligned_text';
 

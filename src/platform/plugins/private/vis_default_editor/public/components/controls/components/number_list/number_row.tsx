@@ -9,9 +9,9 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NumberListRange } from './range';
+import type { NumberListRange } from './range';
 
 export interface NumberRowProps {
   autoFocus: boolean;
@@ -85,14 +85,15 @@ function NumberRow({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={deleteBtnAriaLabel}
-          title={deleteBtnAriaLabel}
-          color="danger"
-          iconType="trash"
-          onClick={onDeleteFn}
-          disabled={disableDelete}
-        />
+        <EuiToolTip content={deleteBtnAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={deleteBtnAriaLabel}
+            color="danger"
+            iconType="trash"
+            onClick={onDeleteFn}
+            disabled={disableDelete}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

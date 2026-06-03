@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
-import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
-import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
+import type { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './utils/constants';

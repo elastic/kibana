@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/sse-utils-client",
     "@kbn/tooling-log",
     "@kbn/kibana-api-cli",
     "@kbn/dev-cli-runner",
@@ -26,5 +25,6 @@
     "@kbn/telemetry",
     "@kbn/inference-tracing",
     "@kbn/logging",
+    "@kbn/es",
   ]
 }

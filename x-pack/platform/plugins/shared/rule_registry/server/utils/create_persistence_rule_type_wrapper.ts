@@ -28,10 +28,14 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  CPS_SCOPE_LINKED_PROJECTS,
+  CPS_SCOPE_EXPRESSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
 import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
+import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
+import type { CpsData } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -61,12 +65,14 @@ const augmentAlerts = async <T>({
   kibanaVersion,
   currentTimeOverride,
   dangerouslyCreateAlertsInAllSpaces,
+  cpsData,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
+  cpsData?: CpsData;
 }) => {
   const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
@@ -74,6 +80,16 @@ const augmentAlerts = async <T>({
 
   const currentDate = new Date();
   const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
+
+  const maintenanceWindowIdsField = maintenanceWindowIds.length
+    ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
+    : {};
+  const cpsFields = cpsData
+    ? {
+        [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression ?? null,
+        [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects ?? null,
+      }
+    : {};
   return alerts.map((alert) => {
     return {
       ...alert,
@@ -82,9 +98,8 @@ const augmentAlerts = async <T>({
         [ALERT_START]: timestampOverrideOrCurrent,
         [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
-        ...(maintenanceWindowIds.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
-          : {}),
+        ...maintenanceWindowIdsField,
+        ...cpsFields,
         ...commonRuleFields,
         ...alert._source,
       },
@@ -260,6 +275,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
     return {
       ...type,
       executor: async (options) => {
+        const cpsData = options.cpsData;
         const result = await type.executor({
           ...options,
           services: {
@@ -319,6 +335,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
                   dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+                  cpsData,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -422,6 +439,14 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   };
                 }
 
+                const suppressionBehaviorOnAlertClosure =
+                  await options.services.uiSettingsClient.get(
+                    SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING
+                  );
+
+                const shouldExcludeClosedAlerts =
+                  suppressionBehaviorOnAlertClosure !== 'continue-until-window-ends';
+
                 const suppressionAlertSearchRequest = {
                   size: filteredDuplicates.length,
                   query: {
@@ -441,15 +466,19 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                             ),
                           },
                         },
-                        {
-                          bool: {
-                            must_not: {
-                              term: {
-                                [ALERT_WORKFLOW_STATUS]: 'closed',
+                        ...(shouldExcludeClosedAlerts
+                          ? [
+                              {
+                                bool: {
+                                  must_not: {
+                                    term: {
+                                      [ALERT_WORKFLOW_STATUS]: 'closed',
+                                    },
+                                  },
+                                },
                               },
-                            },
-                          },
-                        },
+                            ]
+                          : []),
                       ],
                     },
                   },
@@ -586,6 +615,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
                   dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+                  cpsData,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

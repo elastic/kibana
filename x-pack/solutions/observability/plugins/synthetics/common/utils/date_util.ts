@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 export const SHORT_TS_LOCALE = 'en-short-locale';
 
 export const SHORT_TIMESPAN_LOCALE = {

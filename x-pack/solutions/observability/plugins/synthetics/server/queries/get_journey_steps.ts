@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SyntheticsEsClient } from '../lib';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { SyntheticsEsClient } from '../lib';
 import { asMutableArray } from '../../common/utils/as_mutable_array';
-import { JourneyStep } from '../../common/runtime_types/ping/synthetics';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import type { JourneyStep } from '../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
 }
 
 type ResultType = JourneyStep & { '@timestamp': string };
@@ -19,10 +21,12 @@ type ResultType = JourneyStep & { '@timestamp': string };
 export const getJourneySteps = async ({
   syntheticsEsClient,
   checkGroup,
+  remoteName,
 }: GetJourneyStepsParams & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<JourneyStep[]> => {
   const params = {
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     query: {
       bool: {
         filter: [

@@ -8,11 +8,13 @@
  */
 
 import _ from 'lodash';
-import { Datatable, isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  Filter,
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
@@ -20,9 +22,13 @@ import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
-import { getIndexPatterns, getSearchService } from '../../services';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { getHttp, getIndexPatterns, getSearchService } from '../../services';
+import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
 export interface ValueClickDataContext {
@@ -67,7 +73,7 @@ const getOtherBucketFilterTerms = (
     ...new Set(
       terms.filter((term) => {
         const notOther = String(term) !== '__other__';
-        const notMissing = String(term) !== '__missing__';
+        const notMissing = String(term) !== MISSING_TOKEN;
         return notOther && notMissing;
       })
     ),
@@ -133,6 +139,48 @@ export const createFilter = async (
   return filter;
 };
 
+const createFilterFromRawColumnsESQL = async (
+  column: DatatableColumn,
+  value: string | number | boolean | (string | number | boolean)[]
+) => {
+  const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
+
+  if (!indexPattern) {
+    return [];
+  }
+
+  const dataView = await getESQLAdHocDataview({
+    query: 'FROM ' + indexPattern,
+    dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
+    http: getHttp(),
+  });
+
+  // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
+  const sourceFieldName = column.meta?.sourceParams?.sourceField;
+  const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
+
+  const field = dataView.getFieldByName(fieldName);
+
+  // Field should be present in the data view and filterable
+  if (!field || !field.filterable) {
+    return [];
+  }
+
+  // Avoid index phrase filter when output column name collides with an index field
+  if (column.isComputedColumn === true && column.name === fieldName) {
+    return [];
+  }
+
+  // Match phrase or phrases filter based on whether value is an array
+  // The advantage of match_phrase is that you get a term query when it's not a text and
+  // match phrase if it is a text. So you don't have to worry about the field type.
+  const fieldDescriptor = { name: fieldName, type: column.meta?.type };
+  const filter = Array.isArray(value)
+    ? buildPhrasesFilter(fieldDescriptor, value, dataView)
+    : buildPhraseFilter(fieldDescriptor, value, dataView);
+  return [filter];
+};
+
 export const createFilterESQL = async (
   table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
@@ -158,7 +206,10 @@ export const createFilterESQL = async (
 
   const filters: Filter[] = [];
 
-  if (['date_histogram', 'histogram'].includes(operationType)) {
+  if (
+    typeof operationType === 'string' &&
+    ['date_histogram', 'histogram'].includes(operationType)
+  ) {
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
@@ -172,6 +223,8 @@ export const createFilterESQL = async (
         indexPattern
       )
     );
+  } else if (!operationType) {
+    filters.push(...(await createFilterFromRawColumnsESQL(column, value)));
   } else {
     filters.push(buildSimpleExistFilter(sourceField, indexPattern));
   }
@@ -185,7 +238,6 @@ export const createFiltersFromValueClickAction = async ({
   negate,
 }: ValueClickDataContext) => {
   const filters: Filter[] = [];
-
   for (const value of data) {
     if (!value) {
       continue;
@@ -207,6 +259,13 @@ export const createFiltersFromValueClickAction = async ({
     compareFilters(a, b, COMPARE_ALL_OPTIONS)
   );
 };
+
+function getOperationForWhere(value: unknown, negate: boolean) {
+  if (value == null) {
+    return negate ? 'is_not_null' : 'is_null';
+  }
+  return negate ? '-' : '+';
+}
 
 /** @public */
 export const appendFilterToESQLQueryFromValueClickAction = ({
@@ -235,15 +294,13 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
       if (table?.columns?.[columnIndex]) {
         const column = table.columns[columnIndex];
         const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-        if (value == null) {
-          return;
-        }
         const queryWithWhere = appendWhereClauseToESQLQuery(
           queryString,
           column.name,
           value,
-          negate ? '-' : '+',
-          column.meta?.type
+          getOperationForWhere(value, negate || false),
+          column.meta?.type,
+          column.meta?.esType
         );
 
         if (queryWithWhere) {

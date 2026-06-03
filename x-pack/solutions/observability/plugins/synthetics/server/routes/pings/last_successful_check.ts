@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { getJourneyScreenshot } from '../../queries/get_journey_screenshot';
 import { getLastSuccessfulCheck } from '../../queries/get_last_successful_check';
-import { isFullScreenshot, isRefResult, Ping } from '../../../common/runtime_types';
+import type { Ping } from '../../../common/runtime_types';
+import { isFullScreenshot, isRefResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
 export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -21,6 +22,7 @@ export const createLastSuccessfulCheckRoute: SyntheticsRestApiRouteFactory = () 
       stepIndex: schema.number(),
       timestamp: schema.string(),
       location: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async (routeProps) => {
@@ -33,13 +35,14 @@ export const getLastSuccessfulCheckScreenshot = async ({
   request,
   syntheticsEsClient,
 }: RouteContext) => {
-  const { timestamp, monitorId, stepIndex, location } = request.query;
+  const { timestamp, monitorId, stepIndex, location, remoteName } = request.query;
 
   const check: Ping | null = await getLastSuccessfulCheck({
     syntheticsEsClient,
     monitorId,
     timestamp,
     location,
+    remoteName,
   });
 
   if (check === null) {
@@ -54,6 +57,7 @@ export const getLastSuccessfulCheckScreenshot = async ({
     syntheticsEsClient,
     checkGroup: check.monitor.check_group,
     stepIndex,
+    remoteName,
   });
 
   if (screenshot === null) {

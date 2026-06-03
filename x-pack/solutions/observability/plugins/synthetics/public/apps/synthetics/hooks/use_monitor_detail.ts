@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
-import { Ping } from '../../../../common/runtime_types';
+import { getSyntheticsCcsIndex } from '../../../../common/get_synthetics_indices';
+import type { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
   configId: string,
-  location: string
+  location: string,
+  remoteName?: string
 ): { data?: Ping; loading?: boolean } => {
+  const index = getSyntheticsCcsIndex(remoteName);
+
   const params = {
-    index: SYNTHETICS_INDEX_PATTERN,
+    index,
     size: 1,
     query: {
       bool: {
@@ -42,7 +45,7 @@ export const useMonitorDetail = (
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,
-    [configId, location],
+    [configId, location, remoteName],
     {
       name: 'getMonitorStatusByLocation',
     }

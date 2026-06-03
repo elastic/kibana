@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Pagination } from './types';
+import type { Pagination } from './types';
 export { APIRoutes, type PlaygroundSavedObject } from './types';
 export { SearchPlaygroundQueryKeys, SearchPlaygroundMutationKeys } from './query_keys';
 

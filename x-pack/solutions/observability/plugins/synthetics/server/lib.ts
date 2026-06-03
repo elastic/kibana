@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -19,11 +19,11 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { SyntheticsServerSetup } from './types';
+import type { SyntheticsServerSetup } from './types';
 
 export interface CountResponse {
   result: {
@@ -48,6 +48,7 @@ export class SyntheticsEsClient {
   inspectableEsQueries: InspectResponse = [];
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
   savedObjectsClient: SavedObjectsClientContract;
+  heartbeatIndices: string;
 
   constructor(
     savedObjectsClient: SavedObjectsClientContract,
@@ -59,12 +60,13 @@ export class SyntheticsEsClient {
       heartbeatIndices?: string;
     }
   ) {
-    const { isDev = false, uiSettings, request } = options ?? {};
+    const { isDev = false, uiSettings, request, heartbeatIndices } = options ?? {};
     this.uiSettings = uiSettings;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
     this.request = request;
     this.isDev = isDev;
+    this.heartbeatIndices = heartbeatIndices ?? SYNTHETICS_INDEX_PATTERN;
     this.inspectableEsQueries = [];
     this.getInspectEnabled().catch(() => {});
   }
@@ -76,7 +78,7 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
+    const esParams = { index: this.heartbeatIndices, ignore_unavailable: true, ...params };
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -126,7 +128,7 @@ export class SyntheticsEsClient {
   ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
     const searches: Array<MsearchMultisearchHeader | SearchSearchRequestBody> = [];
     for (const request of requests) {
-      searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
+      searches.push({ index: this.heartbeatIndices, ignore_unavailable: true });
       searches.push(request);
     }
 
@@ -153,7 +155,7 @@ export class SyntheticsEsClient {
           getInspectResponse({
             esError,
             esRequestParams: {
-              index: SYNTHETICS_INDEX_PATTERN,
+              index: this.heartbeatIndices,
               ignore_unavailable: true,
               ...request,
             },
@@ -179,7 +181,7 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
+    const esParams = { index: this.heartbeatIndices, ignore_unavailable: true, ...params };
 
     try {
       res = await this.baseESClient.count(esParams, {
@@ -196,7 +198,7 @@ export class SyntheticsEsClient {
       throw esError;
     }
 
-    return { result: res, indices: SYNTHETICS_INDEX_PATTERN };
+    return { result: res, indices: this.heartbeatIndices };
   }
   getSavedObjectsClient() {
     return this.savedObjectsClient;

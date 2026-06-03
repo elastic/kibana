@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import * as i18n from './translations';

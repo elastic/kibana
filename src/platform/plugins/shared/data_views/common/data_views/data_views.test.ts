@@ -12,7 +12,7 @@ import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import {
+import type {
   UiSettingsCommon,
   PersistenceAPI,
   SavedObject,
@@ -419,7 +419,7 @@ describe('IndexPatterns', () => {
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      fields: ['title', 'type', 'typeMeta', 'name'],
+      fields: ['title', 'type', 'typeMeta', 'name', 'timeFieldName'],
       perPage: 10000,
     });
   });
@@ -667,7 +667,7 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.getDataViewLazy(id)).resolves.toBeInstanceOf(DataViewLazy);
   });
 
-  test('failed request does not affect adhoc data view being created', () => {
+  test('failed request does not affect adhoc data view being created', async () => {
     const badRequest = new Error('bad request');
     savedObjectsClient.get = jest.fn().mockRejectedValue(badRequest);
 
@@ -675,11 +675,9 @@ describe('IndexPatterns', () => {
     const failedDataViewPromise = indexPatterns.get(id);
     const adhocDataViewPromise = indexPatterns.create({ id });
 
-    // failed request!
-    expect(failedDataViewPromise).rejects.toBe(badRequest);
+    await expect(failedDataViewPromise).rejects.toBe(badRequest);
 
-    // successful subsequent request
-    expect(adhocDataViewPromise).resolves.toBeInstanceOf(DataView);
+    await expect(adhocDataViewPromise).resolves.toBeInstanceOf(DataView);
   });
 
   test('can set and remove field format', async () => {

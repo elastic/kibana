@@ -10,7 +10,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
 } from '@kbn/fleet-plugin/common/constants';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         res = err;
       }
-      expect(res.response.data.statusCode).equal(404);
+      expect(res.status).equal(404);
     });
     it('should return 400 if trying to install an out-of-date package', async function () {
       await supertest
@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         res = err;
       }
-      expect(res.response.data.statusCode).equal(404);
+      expect(res.status).equal(404);
     });
     it('should return 200 if trying to force install an out-of-date package', async function () {
       await supertest

@@ -8,30 +8,34 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+  HasDrilldowns,
+} from '@kbn/embeddable-plugin/public';
+import type {
+  PublishesWritableTitle,
+  PublishesTitle,
+  HasEditCapabilities,
+  HasSupportedTriggers,
+} from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
-  PublishesWritableTitle,
-  PublishesTitle,
-  SerializedTitles,
-  HasEditCapabilities,
-  HasSupportedTriggers,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import {
-  DynamicActionsSerializedState,
-  HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import { MonitorFilters } from '../monitors_overview/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import {
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+  SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/stats_overview/constants';
+import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -42,88 +46,80 @@ const DEFAULT_FILTERS: MonitorFilters = {
   projects: [],
   tags: [],
   locations: [],
-  monitorIds: [],
-  monitorTypes: [],
+  monitor_ids: [],
+  monitor_types: [],
 };
-
-export interface OverviewStatsEmbeddableCustomState {
-  filters?: MonitorFilters;
-}
-
-export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities &
-  HasDynamicActions &
+  HasDrilldowns &
   HasSupportedTriggers;
 
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
+  const factory: EmbeddablePublicDefinition<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    getPlacementHints: () => ({ width: 10, height: 8 }),
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      // Client code uses REST API shape (snake_case) directly
+      // transformOut handles conversion from legacy camelCase if needed
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
 
-      const { embeddableEnhanced } = pluginStart;
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState
-      );
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
-      function serializeState() {
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          dynamicActionsManager?.serializeState() ?? {};
-        return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            ...dynamicActionsState,
-          },
-          references: dynamicActionsReferences ?? [],
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OverviewStatsEmbeddableState>({
+      const stateApi = initializeStateApi<OverviewStatsEmbeddableState>({
         parentApi,
         uuid,
-        serializeState,
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          ...drilldownsManager.getLatestState(),
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          filters$,
-          ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : [])
-        ).pipe(map(() => undefined)),
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          drilldownsManager.anyStateChange$
+        ),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...drilldownsManager.comparators,
         }),
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
-        onReset: (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          filters$.next(nextState.filters ?? DEFAULT_FILTERS);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...(dynamicActionsManager?.api ?? {}),
-        ...unsavedChangesApi,
-        supportedTriggers: () => [],
+        ...drilldownsManager.api,
+        ...stateApi,
+        supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -149,7 +145,6 @@ export const getStatsOverviewEmbeddableFactory = (
             return Promise.reject();
           }
         },
-        serializeState,
       });
 
       const fetchSubscription = fetch$(api)
@@ -165,8 +160,8 @@ export const getStatsOverviewEmbeddableFactory = (
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
-              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
           return (

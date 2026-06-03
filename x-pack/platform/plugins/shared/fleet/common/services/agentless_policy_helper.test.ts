@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AgentlessDeploymentReleaseStatus } from '../types';
 import type { RegistryPolicyTemplate } from '../types';
 
 import {
@@ -14,6 +15,8 @@ import {
   isOnlyAgentlessPolicyTemplate,
   isInputAllowedForDeploymentMode,
   validateDeploymentModesForInputs,
+  getAgentlessRelease,
+  AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT,
 } from './agentless_policy_helper';
 
 describe('agentless_policy_helper', () => {
@@ -105,6 +108,58 @@ describe('agentless_policy_helper', () => {
       const result = isAgentlessIntegration(packageInfo);
 
       expect(result).toBe(false);
+    });
+
+    it('should return true if the specified integration supports agentless', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: false },
+            },
+          },
+          {
+            name: 'template2',
+            deployment_modes: {
+              agentless: { enabled: false },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'template1')).toBe(true);
+      expect(isAgentlessIntegration(packageInfo, 'template2')).toBe(false);
+    });
+
+    it('should return false if the specified integration does not exist', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+            deployment_modes: {
+              agentless: { enabled: true },
+              default: { enabled: false },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'nonexistent')).toBe(false);
+    });
+
+    it('should return false if the specified integration exists but has no deployment_modes', () => {
+      const packageInfo = {
+        policy_templates: [
+          {
+            name: 'template1',
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+
+      expect(isAgentlessIntegration(packageInfo, 'template1')).toBe(false);
     });
   });
 
@@ -321,6 +376,167 @@ describe('agentless_policy_helper', () => {
     });
   });
 
+  describe('getAgentlessRelease', () => {
+    it('should return the semver label for a single only-agentless template', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0-preview',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe('preview');
+    });
+
+    it('should return ga when release is explicitly set to GA', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe('ga');
+    });
+
+    it('should return undefined for an integration with no agentless support', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { default: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBeUndefined();
+    });
+
+    it('should return AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT for an absent release field in a multi-template package', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.GA },
+            },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: { agentless: { enabled: true }, default: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template2')).toBe(
+        AGENTLESS_DEPLOYMENT_RELEASE_DEFAULT
+      );
+    });
+
+    it('should return beta for an explicit beta release', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.Beta },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe('beta');
+    });
+
+    it('should return least maturity for an unknown release value', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: {
+                enabled: true,
+                release: 'experimental' as AgentlessDeploymentReleaseStatus,
+              },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo, 'template1')).toBe('beta');
+    });
+
+    it('should evaluate the single template when integrationToEnable is omitted', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: { enabled: true, release: AgentlessDeploymentReleaseStatus.Beta },
+              default: { enabled: true },
+            },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBe('beta');
+    });
+
+    it('should return undefined when integrationToEnable is omitted and there are multiple templates', () => {
+      const packageInfo = {
+        name: 'my-package',
+        version: '1.0.0',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+          {
+            name: 'template2',
+            title: 'Template 2',
+            description: '',
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ] as RegistryPolicyTemplate[],
+      };
+      expect(getAgentlessRelease(packageInfo)).toBeUndefined();
+    });
+  });
+
   describe('isInputAllowedForDeploymentMode', () => {
     const packageInfoWithDeploymentModes = {
       name: 'test-package',
@@ -331,6 +547,11 @@ describe('agentless_policy_helper', () => {
           name: 'template1',
           title: 'Template 1',
           description: '',
+          deployment_modes: {
+            agentless: {
+              enabled: true,
+            },
+          },
           inputs: [
             { type: 'logs', deployment_modes: ['default', 'agentless'] },
             { type: 'metrics', deployment_modes: ['default'] },
@@ -340,6 +561,11 @@ describe('agentless_policy_helper', () => {
           name: 'template2',
           title: 'Template 2',
           description: '',
+          deployment_modes: {
+            agentless: {
+              enabled: true,
+            },
+          },
           inputs: [
             { type: 'logs', deployment_modes: ['agentless'] },
             { type: 'tcp', deployment_modes: ['default'] },
@@ -368,6 +594,82 @@ describe('agentless_policy_helper', () => {
       ).toBe(true);
     });
 
+    it('should return false for input without a policy_template deployment_mode enabled for agentless when the requested mode is agentless', () => {
+      const packageInfoWithoutPolicyTemplateDeploymentModes = {
+        name: 'test-package',
+        version: '1.0.0',
+        owner: { github: 'elastic' },
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            inputs: [{ type: 'metrics', deployment_modes: ['agentless', 'default'] }],
+          },
+        ] as RegistryPolicyTemplate[],
+      } as any;
+      const input = { type: 'metrics', policy_template: 'template1' };
+      expect(
+        isInputAllowedForDeploymentMode(
+          input,
+          'agentless',
+          packageInfoWithoutPolicyTemplateDeploymentModes
+        )
+      ).toBe(false);
+    });
+
+    it('should return false for input with a policy_template deployment mode that overrides the requested mode', () => {
+      const packageInfoWithPolicyTemplateOverride = {
+        name: 'test-package',
+        version: '1.0.0',
+        owner: { github: 'elastic' },
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            deployment_modes: {
+              agentless: {
+                enabled: false,
+              },
+              default: {
+                enabled: false,
+              },
+            },
+            inputs: [{ type: 'metrics', deployment_modes: ['agentless', 'default'] }],
+          },
+        ] as RegistryPolicyTemplate[],
+      } as any;
+      const input = { type: 'metrics', policy_template: 'template1' };
+      expect(
+        isInputAllowedForDeploymentMode(input, 'agentless', packageInfoWithPolicyTemplateOverride)
+      ).toBe(false);
+
+      expect(
+        isInputAllowedForDeploymentMode(input, 'default', packageInfoWithPolicyTemplateOverride)
+      ).toBe(false);
+    });
+
+    it('should return true for input with no policy template or input deployment mode defined when requested mode is default ', () => {
+      const packageInfoWithPolicyTemplateOverride = {
+        name: 'test-package',
+        version: '1.0.0',
+        owner: { github: 'elastic' },
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'Template 1',
+            description: '',
+            inputs: [{ type: 'metrics' }],
+          },
+        ] as RegistryPolicyTemplate[],
+      } as any;
+      const input = { type: 'metrics', policy_template: 'template1' };
+      expect(
+        isInputAllowedForDeploymentMode(input, 'default', packageInfoWithPolicyTemplateOverride)
+      ).toBe(true);
+    });
+
     it('should handle inputs with different deployment_modes under different policy templates', () => {
       const input1 = { type: 'logs', policy_template: 'template1' };
       const input2 = { type: 'logs', policy_template: 'template2' };
@@ -390,6 +692,11 @@ describe('agentless_policy_helper', () => {
             name: 'template1',
             title: 'Template 1',
             description: '',
+            deployment_modes: {
+              agentless: {
+                enabled: true,
+              },
+            },
             inputs: [{ type: 'log' }, { type: 'winlog' }],
           },
         ] as RegistryPolicyTemplate[],
@@ -502,6 +809,11 @@ describe('agentless_policy_helper', () => {
           name: 'template1',
           title: 'Template 1',
           description: '',
+          deployment_modes: {
+            agentless: {
+              enabled: true,
+            },
+          },
           inputs: [
             { type: 'logs', deployment_modes: ['default', 'agentless'] },
             { type: 'metrics', deployment_modes: ['default'] },

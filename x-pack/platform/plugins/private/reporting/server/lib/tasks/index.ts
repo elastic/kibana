@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RruleSchedule, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
-import { BasePayload, ReportSource } from '@kbn/reporting-common/types';
+import type { RruleSchedule, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
+import type { BasePayload, ReportSource } from '@kbn/reporting-common/types';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
 export const SCHEDULED_REPORTING_EXECUTE_TYPE = 'report:execute-scheduled';
@@ -25,6 +25,7 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   jobtype: ReportSource['jobtype'];
   attempts: ReportSource['attempts'];
   meta: ReportSource['meta'];
+  useInternalUser?: boolean;
 }
 
 export interface ScheduledReportTaskParams {

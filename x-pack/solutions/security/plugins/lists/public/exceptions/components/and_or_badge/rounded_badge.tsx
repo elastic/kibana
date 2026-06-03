@@ -11,19 +11,19 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-import { AndOr } from '.';
+import type { AndOr } from '.';
 
 const RoundBadge = styled(EuiBadge)`
   align-items: center;
   border-radius: 100%;
   display: inline-flex;
   font-size: 9px;
-  height: 34px;
   justify-content: center;
   margin: 0 5px 0 5px;
   padding: 7px 6px 4px 6px;
   user-select: none;
-  width: 34px;
+  width: 40px;
+  height: 40px;
   .euiBadge__content {
     position: relative;
     top: -1px;

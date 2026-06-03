@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstQueryExpression, Walker } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
+import { Walker } from '@elastic/esql';
 import { ParameterReplacer } from '../transformers/parameter_replacer';
-import { Params } from '../types';
+import type { Params } from '../types';
 
+/**
+ * @deprecated Migrate to `@kbn/esql-language` composer.
+ */
 export function replaceParameters(queryAst: ESQLAstQueryExpression, params?: Params) {
   const parameterReplacer = new ParameterReplacer(params);
   Walker.walk(queryAst, {

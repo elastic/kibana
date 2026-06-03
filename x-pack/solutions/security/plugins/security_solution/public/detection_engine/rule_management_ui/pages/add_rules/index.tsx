@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -22,12 +21,13 @@ import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt
 import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
 import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
 import { APP_UI_ID } from '../../../../../common';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
+import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/components/callouts/missing_detections_privileges_callout';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 
 const AddRulesPageComponent: React.FC = () => {
-  const { navigateToApp } = useKibana().services.application;
+  const { application } = useKibana().services;
+  const { navigateToApp } = application;
 
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey }] = useUserData();
   const { needsConfiguration: needsListsConfiguration } = useListsConfig();
@@ -50,7 +50,7 @@ const AddRulesPageComponent: React.FC = () => {
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+      <MissingDetectionsPrivilegesCallOut />
 
       <AddPrebuiltRulesTableContextProvider>
         <SecuritySolutionPageWrapper>

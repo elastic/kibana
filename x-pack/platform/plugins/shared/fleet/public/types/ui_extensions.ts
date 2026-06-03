@@ -72,7 +72,7 @@ export interface PackagePolicyEditExtensionComponentProps {
    */
   onChange: (opts: {
     /** is current form state is valid */
-    isValid: boolean;
+    isValid?: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: Partial<NewPackagePolicy>;
     isExtensionLoaded?: boolean;
@@ -168,7 +168,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
    */
   onChange: (opts: {
     /** is current form state is valid */
-    isValid: boolean;
+    isValid?: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: NewPackagePolicy;
   }) => void;
@@ -179,19 +179,6 @@ export interface PackagePolicyCreateExtension {
   package: string;
   view: 'package-policy-create';
   Component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
-}
-
-/**
- * UI Component Extension is used on the pages displaying the ability to Create a multi step
- * Integration Policy
- */
-export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
-
-/** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
-export interface PackagePolicyCreateMultiStepExtension {
-  package: string;
-  view: 'package-policy-create-multi-step';
-  Component: LazyExoticComponent<PackagePolicyCreateMultiStepExtensionComponent>;
 }
 
 /**
@@ -242,6 +229,5 @@ export type UIExtensionPoint =
   | PackageAssetsExtension
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
-  | PackagePolicyCreateMultiStepExtension
   | EndpointAgentTamperProtectionExtension
   | PliAuthBlockExtension;

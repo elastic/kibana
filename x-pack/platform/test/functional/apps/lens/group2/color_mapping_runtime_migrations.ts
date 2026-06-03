@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 
 import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
-import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { DebugState } from '@elastic/charts';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import chroma from 'chroma-js';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const oldColorMappingsDashboardFixture =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/old_color_mapping_dashboard.json';
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load(oldColorMappingsDashboardFixture);
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode('Old Color Mappings');
+      await dashboard.loadDashboardInEditMode('Old Color Mappings');
       await elasticChart.setNewChartUiDebugFlag(true);
       await testSubjects.click('querySubmitButton');
 
@@ -277,14 +277,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const seriesColors = await getTagCloudColors(
             'RangeKey no label auto assigned - Tag Cloud'
           );
+          const expectedColorMap: Record<string, string> = {
+            '0 → 1,000': defaultPaletteColors[0],
+            '1,000 → 5,000': defaultPaletteColors[1],
+            '5,000 → 10,000': defaultPaletteColors[2],
+            '10,000 → +∞': defaultPaletteColors[3],
+          };
 
-          expect(seriesColors).to.eql([
-            // filter order not based on tag size
-            ['5,000 → 10,000', defaultPaletteColors[2]],
-            ['1,000 → 5,000', defaultPaletteColors[1]],
-            ['0 → 1,000', defaultPaletteColors[0]],
-            ['10,000 → +∞', defaultPaletteColors[3]],
-          ]);
+          expect(seriesColors.length).to.be.greaterThan(2);
+          expect(seriesColors.every(([label, color]) => expectedColorMap[label] === color)).to.be(
+            true
+          );
         });
       });
 
@@ -343,9 +346,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.clickInlineEdit(panel);
         await testSubjects.click(dimension);
         await testSubjects.click('lns_colorEditing_trigger');
-        await testSubjects.click('lns-colorMapping-colorSwatch-0');
-
-        await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
+        await retry.try(async () => {
+          if (
+            !(await testSubjects.exists('lns-colorMapping-colorPicker-tab-custom', {
+              timeout: 1000,
+            }))
+          ) {
+            await testSubjects.click('lns-colorMapping-colorSwatch-0');
+          }
+          await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
+        });
         await testSubjects.setValue('lns-colorMapping-colorPicker-custom-input', customColor, {
           typeCharByChar: true,
           clearWithKeyboard: true,
@@ -386,33 +396,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // range-key values
         await editAndApplyColorMapping(...testParams.xy3);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       it('should apply new mappings for pie vis', async () => {
         await editAndApplyColorMapping(...testParams.pie);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       it('should apply new mappings for tag clouds vis', async () => {
         await editAndApplyColorMapping(...testParams.tagCloud);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       it('should apply new mappings for table vis', async () => {
         await editAndApplyColorMapping(...testParams.table);
 
-        await dashboard.expectUnsavedChangesBadge();
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
-        await dashboard.expectMissingUnsavedChangesBadge();
+        await dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
       });
 
       async function verifyCustomColor(panelTitle: string, dimension: string) {

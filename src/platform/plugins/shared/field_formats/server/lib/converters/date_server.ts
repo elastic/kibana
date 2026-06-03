@@ -11,8 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldFormat, FIELD_FORMAT_IDS, FieldFormatsGetConfigFn } from '../../../common';
-import {
+import type { FieldFormatsGetConfigFn } from '../../../common';
+import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
+import type {
   FieldFormatMetaParams,
   FieldFormatParams,
   TextContextTypeConvert,

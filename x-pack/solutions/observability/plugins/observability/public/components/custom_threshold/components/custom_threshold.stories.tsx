@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Props, Threshold as Component } from './threshold';
+import type { Props } from './threshold';
+import { Threshold as Component } from './threshold';
 
 export default {
   component: Component,

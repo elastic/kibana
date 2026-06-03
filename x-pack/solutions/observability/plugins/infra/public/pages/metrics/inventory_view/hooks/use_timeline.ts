@@ -7,12 +7,11 @@
 
 import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import type { UseSnapshotRequest } from './use_snaphot';
 import { useSnapshot } from './use_snaphot';
+import { useWaffleOptionsContext } from './use_waffle_options';
 
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -47,7 +46,7 @@ const getTimeLengthFromInterval = (interval: string | undefined) => {
 };
 
 export function useTimeline({
-  kuery: filterQuery,
+  kuery,
   metrics,
   nodeType,
   sourceId,
@@ -60,8 +59,8 @@ export function useTimeline({
   interval?: string;
   shouldReload: boolean;
 }) {
+  const { preferredSchema } = useWaffleOptionsContext();
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
-  const config = usePluginConfig();
   const timeLengthResult = useMemo(
     () => getTimeLengthFromInterval(displayInterval),
     [displayInterval]
@@ -84,12 +83,12 @@ export function useTimeline({
       currentTime,
       nodeType,
       timerange,
-      kuery: filterQuery,
+      kuery,
       sourceId,
       accountId,
       region,
       includeTimeseries: true,
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
+      schema: preferredSchema,
     },
     { sendRequestImmediately: false }
   );

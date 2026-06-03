@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getEuidDslDocumentsContainsIdFilter user: returns documentsFilter AND postAggFilter DSL (IDP or non-IDP only) 1`] = `
+Object {
+  "bool": Object {
+    "must": Array [
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "exists": Object {
+                    "field": "event.outcome",
+                  },
+                },
+              },
+            },
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "match": Object {
+                    "event.outcome": "failure",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      Object {
+        "bool": Object {
+          "should": Array [
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.email",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "match": Object {
+                          "user.email": "",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.id",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "match": Object {
+                          "user.id": "",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "must": Array [
+                  Object {
+                    "exists": Object {
+                      "field": "user.name",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "match": Object {
+                          "user.name": "",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getEuidDslFilterBasedOnDocument user evaluates correctly for real non-IDP document 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "user.name": "tyrese.goldner",
+        },
+      },
+      Object {
+        "term": Object {
+          "host.id": "4a7a8b68-1814-487f-9e56-5e7bed425edc",
+        },
+      },
+    ],
+  },
+}
+`;

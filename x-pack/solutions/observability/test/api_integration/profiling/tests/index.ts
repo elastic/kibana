@@ -6,7 +6,7 @@
  */
 import globby from 'globby';
 import path from 'path';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { cleanUpProfilingData } from '../utils/profiling_data';
 import { getBettertest } from '../common/bettertest';
 
@@ -34,6 +34,7 @@ export default function profilingApiIntegrationTests({
   const logger = getService('log');
 
   describe('Profiling API tests', function () {
+    this.tags('skipFIPS');
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 

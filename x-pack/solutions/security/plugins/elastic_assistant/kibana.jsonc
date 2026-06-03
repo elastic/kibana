@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/elastic-assistant-plugin",
   "owner": [
-    "@elastic/security-generative-ai"
+    "@elastic/security-threat-hunting"
   ],
   "group": "security",
   "visibility": "private",
@@ -35,9 +35,14 @@
       "aiAssistantManagementSelection",
       "discover"
     ],
+    "optionalPlugins": [
+      "cloud",
+      "searchInferenceEndpoints"
+    ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "agentBuilder"
     ]
   },
   "build": {

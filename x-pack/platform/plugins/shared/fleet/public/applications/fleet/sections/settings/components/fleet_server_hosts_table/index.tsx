@@ -97,7 +97,16 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
       {
         render: (fleetServerHost: FleetServerHost) =>
           fleetServerHost.is_default ? (
-            <EuiIcon type="check" data-test-subj="fleetServerHostTable.defaultIcon" />
+            <EuiIcon
+              type="check"
+              data-test-subj="fleetServerHostTable.defaultIcon"
+              aria-label={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsTable.defaultIconLabel',
+                {
+                  defaultMessage: 'Default Fleet Server host',
+                }
+              )}
+            />
           ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.fleetServerHostsTable.defaultColumnTitle', {
@@ -126,6 +135,12 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
                         defaultMessage: 'Delete',
                       }
                     )}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.fleetServerHostsTable.deleteButtonAriaLabel',
+                      {
+                        defaultMessage: 'Delete host',
+                      }
+                    )}
                     data-test-subj="fleetServerHostsTable.delete.btn"
                   />
                 )}
@@ -141,6 +156,12 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
                     'xpack.fleet.settings.fleetServerHostsTable.editButtonTitle',
                     {
                       defaultMessage: 'Edit',
+                    }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.fleet.settings.fleetServerHostsTable.editButtonAriaLabel',
+                    {
+                      defaultMessage: 'Edit host',
                     }
                   )}
                   data-test-subj="fleetServerHostsTable.edit.btn"
@@ -160,6 +181,9 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
     <EuiBasicTable
       columns={columns}
       items={fleetServerHosts}
+      tableCaption={i18n.translate('xpack.fleet.settings.fleetServerHostsTable.tableCaption', {
+        defaultMessage: 'Fleet server hosts',
+      })}
       data-test-subj="settingsFleetServerHostsTable"
     />
   );

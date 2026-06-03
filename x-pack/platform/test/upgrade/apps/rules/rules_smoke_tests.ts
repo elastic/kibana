@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import semver from 'semver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);

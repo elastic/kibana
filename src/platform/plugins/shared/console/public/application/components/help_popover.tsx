@@ -9,7 +9,15 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiTitle, EuiText, EuiPanel, EuiSpacer, EuiListGroup } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiTitle,
+  EuiText,
+  EuiPanel,
+  EuiSpacer,
+  EuiListGroup,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useServicesContext } from '../contexts';
 
@@ -34,9 +42,14 @@ const styles = {
       background: transparent;
     }
   `,
+
+  fixedWidthText: css`
+    width: 300px;
+  `,
 };
 
 export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPopoverProps) => {
+  const popoverTitleId = useGeneratedHtmlId();
   const { docLinks } = useServicesContext();
 
   const listItems = useMemo(
@@ -49,7 +62,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         target: '_blank',
         css: styles.listItem,
         extraAction: {
-          iconType: 'popout',
+          iconType: 'external',
           href: docLinks.console.guide,
           target: '_blank',
           alwaysShow: true,
@@ -66,7 +79,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         target: '_blank',
         css: styles.listItem,
         extraAction: {
-          iconType: 'popout',
+          iconType: 'external',
           href: docLinks.query.queryDsl,
           target: '_blank',
           alwaysShow: true,
@@ -105,10 +118,11 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
       ownFocus={false}
       panelPaddingSize="none"
       data-test-subj="consoleHelpPopover"
+      aria-labelledby={popoverTitleId}
     >
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
         <EuiTitle size="xs">
-          <h4>
+          <h4 id={popoverTitleId}>
             {i18n.translate('console.helpPopover.title', {
               defaultMessage: 'Elastic Console',
             })}
@@ -117,7 +131,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
 
         <EuiSpacer size="s" />
 
-        <EuiText css={{ width: 300 }} color="subdued" size="s">
+        <EuiText css={styles.fixedWidthText} color="subdued" size="s">
           <p>
             {i18n.translate('console.helpPopover.description', {
               defaultMessage:
@@ -127,7 +141,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         </EuiText>
       </EuiPanel>
 
-      <EuiListGroup listItems={listItems} color="primary" size="s" />
+      <EuiListGroup listItems={listItems} color="primary" />
     </EuiPopover>
   );
 };

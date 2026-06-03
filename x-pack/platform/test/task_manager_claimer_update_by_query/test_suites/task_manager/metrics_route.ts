@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
+import type { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -46,16 +46,22 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/225112
-  describe.skip('task manager metrics', () => {
+  describe('task manager metrics', () => {
     describe('task claim', () => {
       it('should increment task claim success/total counters', async () => {
+        // reset metrics counter
+        await getMetricsRequest(true);
+
+        const metricsResetTime = Date.now();
+
         // counters are reset every 30 seconds, so wait until the start of a
         // fresh counter cycle to make sure values are incrementing
         const initialMetrics = (
           await getMetrics(
             false,
-            (metrics) => (metrics?.metrics?.task_claim?.value.total || 0) >= 1
+            (metrics) =>
+              !!metrics?.metrics?.task_claim?.timestamp &&
+              new Date(metrics?.metrics?.task_claim?.timestamp).getTime() > metricsResetTime
           )
         ).metrics;
         expect(initialMetrics).not.to.be(null);

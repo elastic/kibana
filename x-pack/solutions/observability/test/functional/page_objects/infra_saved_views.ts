@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -17,7 +17,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
 
   return {
     async clickSavedViewsButton() {
-      const button = await testSubjects.find('savedViews-openPopover');
+      const button = await testSubjects.find('savedViews-openPopover-loaded');
 
       await retry.waitFor('Wait for button to be enabled', async () => {
         const isDisabled = Boolean(await button.getAttribute('disabled'));
@@ -75,7 +75,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
 
     async ensureViewIsLoaded(name: string) {
       await retry.tryForTime(config.get('timeouts.try'), async () => {
-        const subject = await testSubjects.find('savedViews-openPopover');
+        const subject = await testSubjects.find('savedViews-openPopover-loaded');
         expect(await subject.getVisibleText()).to.be(name);
       });
     },

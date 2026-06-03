@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
+import type { Mutable } from 'utility-types';
+import { isResponseActionCancelable } from '../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
+import { getActionDetailsById } from '../../action_details_by_id';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { CancelActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/cancel';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -27,9 +35,12 @@ import type {
   SuspendProcessRequestBody,
   KillProcessRequestBody,
   UnisolationRouteRequestBody,
+  RunScriptActionRequestBody,
+  EndpointRunScriptActionRequestParams,
 } from '../../../../../../common/api/endpoint';
 import {
   ResponseActionsClientImpl,
+  type ResponseActionsClientValidateRequestResponse,
   type ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import type {
@@ -46,14 +57,23 @@ import type {
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
   LogsEndpointAction,
-  EndpointActionDataParameterTypes,
   UploadedFileInfo,
   ResponseActionScanParameters,
   ResponseActionScanOutputContent,
+  ResponseActionMemoryDumpOutputContent,
+  ResponseActionMemoryDumpParameters,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
+  EndpointScript,
+  EndpointActionDataParameterTypes,
+  ResponseActionScriptsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
@@ -111,6 +131,121 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     };
   }
 
+  protected async validateRequest(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
+  ): Promise<ResponseActionsClientValidateRequestResponse> {
+    // Memory Dump: ensure that agents/Endpoint support this command
+    if (actionRequest.command === 'memory-dump') {
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const memDumpType = actionRequest.parameters.type;
+      const unsupportedAgents: string[] = [];
+
+      for (const endpointMeta of endpointMetadata) {
+        if (
+          (memDumpType === 'kernel' &&
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
+          (memDumpType === 'process' &&
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
+        ) {
+          unsupportedAgents.push(
+            `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`
+          );
+        }
+      }
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+          ),
+        };
+      }
+    }
+
+    if (actionRequest.command === 'runscript') {
+      let scriptDetails: EndpointScript;
+
+      try {
+        scriptDetails = await this.fetchScript(actionRequest.parameters.scriptId);
+      } catch (error) {
+        return { isValid: false, error };
+      }
+
+      if (scriptDetails.requiresInput && !(actionRequest.parameters.scriptInput ?? '').trim()) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The script [${scriptDetails.name}] requires arguments to be specified.`
+          ),
+        };
+      }
+    }
+
+    if (actionRequest.command === 'cancel') {
+      try {
+        const actionToCancel = await getActionDetailsById(
+          this.options.endpointService,
+          this.options.spaceId,
+          actionRequest.parameters.id
+        );
+
+        if (actionToCancel.agentType !== 'endpoint') {
+          throw new ResponseActionsClientError(
+            `Action [${actionRequest.parameters.id} / ${actionToCancel.command} / ${actionToCancel.agentType}] agent type is not 'endpoint'`,
+            400
+          );
+        }
+
+        for (const endpointId of actionRequest.endpoint_ids) {
+          if (!actionToCancel.agents.includes(endpointId)) {
+            throw new ResponseActionsClientError(
+              `Endpoint [${endpointId}] is not associated with action [${actionToCancel.id}]`,
+              400
+            );
+          }
+        }
+
+        if (actionToCancel.isCompleted) {
+          throw new ResponseActionsClientError(
+            `Action [${actionRequest.parameters.id}] is already completed and cannot be canceled.`,
+            400
+          );
+        }
+
+        if (!isResponseActionCancelable(actionToCancel.command, this.agentType)) {
+          throw new ResponseActionsClientError(
+            `[${actionToCancel.command}] response action cannot be canceled.`,
+            400
+          );
+        }
+
+        // Ensure this endpoint supports `cancel`
+        const endpointDetails = await this.options.endpointService
+          .getEndpointMetadataService(this.options.spaceId)
+          .getMetadataForEndpoints(actionRequest.endpoint_ids);
+
+        for (const endpointMeta of endpointDetails) {
+          if (!endpointMeta.Endpoint.capabilities?.includes('cancel')) {
+            throw new ResponseActionsClientError(
+              `Endpoint [${endpointMeta.host.hostname || endpointMeta.host.name} / ${
+                endpointMeta.agent.id
+              }] running [v${endpointMeta.agent.version}] does not support cancel action.`,
+              400
+            );
+          }
+        }
+      } catch (error) {
+        return { isValid: false, error };
+      }
+    }
+
+    return super.validateRequest(actionRequest);
+  }
+
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
     TResponse extends ActionDetails = ActionDetails,
@@ -127,9 +262,9 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       command,
       endpoint_ids: validatedAgents.valid || [],
     });
-
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
+    let actionRequestMeta: Record<string, unknown> | undefined;
 
     if (actionError && !this.options.isAutomated) {
       throw new ResponseActionsClientError(actionError, 400);
@@ -137,6 +272,43 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
+      let actionParams = actionReq.parameters;
+
+      // For runscript, we pass allow some additional data to the Endpoint which does
+      // not come from the action request
+      if (command === 'runscript') {
+        const runscriptActionParams = actionParams as EndpointRunScriptActionRequestParams;
+        const scriptDetails = await this.fetchScript(runscriptActionParams.scriptId);
+        const scriptInfo = {
+          file_id: scriptDetails.fileId,
+          file_sha256: scriptDetails.fileHash,
+          file_name: scriptDetails.fileName,
+          file_size: scriptDetails.fileSize,
+          path_to_executable: scriptDetails.pathToExecutable,
+        };
+
+        actionParams = {
+          ...actionParams,
+          ...scriptInfo,
+        };
+
+        // For reference and because the file information is not stored in the Action Request list of `parameters`,
+        // we store the script info. in the action request `meta` field.
+        actionRequestMeta = {
+          ...(actionRequestMeta ?? {}),
+          ...scriptInfo,
+        };
+
+        // Prepend the script name to the `comment` field for reference
+        const scriptNameComment = `(Script name: ${scriptDetails.name} / File name: ${scriptDetails.fileName})`;
+
+        if (!(actionReq.comment ?? '').startsWith(scriptNameComment)) {
+          (actionReq as Mutable<TOptions>).comment = `${scriptNameComment}${
+            actionReq.comment ? ` ${actionReq.comment}` : ''
+          }`;
+        }
+      }
+
       try {
         await this.dispatchActionViaFleet({
           actionId,
@@ -144,7 +316,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           data: {
             command,
             comment: actionReq.comment,
-            parameters: actionReq.parameters as EndpointActionDataParameterTypes,
+            parameters: actionParams as EndpointActionDataParameterTypes,
           },
         });
       } catch (e) {
@@ -178,6 +350,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       actionId,
       command,
       comment,
+      meta: actionRequestMeta,
     } as ResponseActionsClientWriteActionRequestToEndpointIndexOptions);
 
     // Update cases
@@ -248,6 +421,29 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       this.log.error(error);
       throw error;
     });
+  }
+
+  protected async fetchScript(scriptId: string): Promise<EndpointScript> {
+    const cacheKey = `script:${scriptId}`;
+    const cacheResponse = this.cache.get<EndpointScript>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached script details found for script id [${scriptId}] - returning it`
+      );
+
+      return cacheResponse;
+    }
+
+    const scriptsLibraryClient = this.options.endpointService.getScriptsLibraryClient(
+      this.options.spaceId,
+      this.options.username
+    );
+    const scriptDetails = await scriptsLibraryClient.get(scriptId);
+
+    this.cache.set(cacheKey, scriptDetails);
+
+    return scriptDetails;
   }
 
   async isolate(
@@ -409,6 +605,115 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
       throw err;
     }
+  }
+
+  async memoryDump(
+    actionRequest: OmitUnsupportedAttributes<MemoryDumpActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+  > {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump) {
+      throw new ResponseActionsClientError('Memory dump operation is not enabled', 400);
+    }
+
+    return this.handleResponseAction<
+      MemoryDumpActionRequestBody,
+      ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
+    >('memory-dump', actionRequest, options);
+  }
+
+  async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointCancel) {
+      throw new ResponseActionsClientError('Elastic Defend cancel operation is not enabled', 400);
+    }
+
+    return this.handleResponseAction<
+      CancelActionRequestBody,
+      ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>
+    >('cancel', actionRequest, options);
+  }
+
+  async runscript(
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript ||
+      (this.options.isAutomated &&
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointAutomatedRunScript)
+    ) {
+      throw new ResponseActionsClientError(
+        'Elastic Defend runscript operation is not enabled',
+        400
+      );
+    }
+
+    let runscriptActionRequestParams = actionRequest;
+
+    // Apply default for `timeout` if not set on request payload
+    if (
+      !(runscriptActionRequestParams.parameters as EndpointRunScriptActionRequestParams).timeout
+    ) {
+      runscriptActionRequestParams = {
+        ...runscriptActionRequestParams,
+        parameters: {
+          ...runscriptActionRequestParams.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
+    return this.handleResponseAction<
+      RunScriptActionRequestBody,
+      ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+    >('runscript', runscriptActionRequestParams, options);
+  }
+
+  async getCustomScripts({
+    osType,
+  }: Omit<
+    CustomScriptsRequestQueryParams,
+    'agentType'
+  > = {}): Promise<ResponseActionScriptsApiResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript ||
+      !this.options.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement
+    ) {
+      throw new ResponseActionsClientError(
+        'Elastic Defend runscript operation is not enabled',
+        400
+      );
+    }
+
+    const scriptsClient = this.options.endpointService.getScriptsLibraryClient(
+      this.options.spaceId,
+      this.options.username
+    );
+
+    const scriptList = await scriptsClient.list({
+      sortField: 'name',
+      sortDirection: 'asc',
+      pageSize: 10_000,
+      kuery: osType ? `platform: "${osType}"` : undefined,
+    });
+
+    return {
+      data: scriptList.data.map((script) => {
+        return {
+          id: script.id,
+          name: script.name,
+          description: script.description ?? '',
+          meta: script,
+        };
+      }),
+    };
   }
 
   async getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse> {

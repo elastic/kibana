@@ -24,6 +24,7 @@ export class ListingTableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly flyout = this.ctx.getService('flyout');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
@@ -87,9 +88,7 @@ export class ListingTableService extends FtrService {
 
   public async waitUntilTableIsLoaded() {
     await this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
-      );
+      const isLoaded = await this.testSubjects.exists('listingTable-isLoaded');
 
       if (isLoaded) {
         return true;
@@ -188,12 +187,16 @@ export class ListingTableService extends FtrService {
     return visualizationNames;
   }
 
+  public async clickActionButton(actionSelector: string, index: number = 0) {
+    const buttons = await this.testSubjects.findAll(actionSelector);
+    await buttons[index].click();
+  }
+
   /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {
-    const inspectButtons = await this.testSubjects.findAll('inspect-action');
-    await inspectButtons[index].click();
+    await this.clickActionButton('inspect-action', index);
   }
 
   public async inspectorFieldsReadonly() {
@@ -206,7 +209,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async closeInspector() {
-    await this.testSubjects.click('closeFlyoutButton');
+    await this.flyout.closeFlyout();
   }
 
   /**

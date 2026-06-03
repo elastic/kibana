@@ -33,7 +33,9 @@ const setArgSelectorValueToParsedArgs = (
       if (parsedInput.hasArg(argName)) {
         const argumentValues = enteredCommand.argState[argName] ?? [];
 
-        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
+        parsedInput.args[argName] = argumentValues.map((itemState) => {
+          return itemState?.value || '';
+        });
       }
     }
   }
@@ -151,7 +153,6 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
                 argsWithValueSelectors[argName] = argDef;
 
                 // Clear selector argument values for clean commands (e.g., from history)
-                // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorShowTextValue set to true
                 // BUT: Don't clear if we already have values from preprocessing (paste, history, etc.)
                 if (
                   parsedInput.hasArg(argName) &&

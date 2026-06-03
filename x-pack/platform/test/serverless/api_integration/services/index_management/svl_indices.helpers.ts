@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { IndicesStatsRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getRandomString } from './svl_random';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlIndicesHelpers({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -28,7 +29,7 @@ export function SvlIndicesHelpers({ getService }: FtrProviderContext) {
   const catIndex = (index?: string, h?: any) =>
     es.cat.indices({ index, format: 'json', h }, { meta: true });
 
-  const indexStats = (index: string, metric: string) =>
+  const indexStats = (index: string, metric: IndicesStatsRequest['metric']) =>
     es.indices.stats({ index, metric }, { meta: true });
 
   return { createIndex, deleteAllIndices, catIndex, indexStats };

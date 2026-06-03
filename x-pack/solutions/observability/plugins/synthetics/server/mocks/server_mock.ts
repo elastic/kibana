@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
 
 export const getServerMock = () => {
@@ -15,6 +15,9 @@ export const getServerMock = () => {
   const serverMock: SyntheticsServerSetup = {
     syntheticsEsClient: { search: jest.fn() },
     stackVersion: null,
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
@@ -45,6 +48,21 @@ export const getServerMock = () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
+    coreStart: {
+      savedObjects: {
+        createInternalRepository: jest.fn().mockReturnValue({
+          createPointInTimeFinder: jest.fn().mockImplementation(() => ({
+            close: jest.fn(async () => {}),
+            find: jest.fn().mockReturnValue({
+              async *[Symbol.asyncIterator]() {
+                yield { saved_objects: [] };
+              },
+            }),
+          })),
+          get: jest.fn(),
+        }),
+      },
+    },
   } as unknown as SyntheticsServerSetup;
 
   return serverMock;

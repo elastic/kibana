@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { cloneDeep, isArray, mergeWith, uniq } from 'lodash';
+import { cloneDeep, mergeWith } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import type {
   ProductFeatureKibanaConfig,
   BaseKibanaFeatureConfig,
   SubFeaturesPrivileges,
+  FeatureConfigModifier,
+  MutableKibanaFeatureConfig,
+  MutableSubFeatureConfig,
 } from '@kbn/security-solution-features';
+import { featureConfigMerger } from '@kbn/security-solution-features/utils';
 
 export class ProductFeaturesConfigMerger<T extends string = string> {
   constructor(
@@ -32,39 +36,42 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     kibanaSubFeatureIds: T[],
     productFeaturesConfigs: ProductFeatureKibanaConfig[]
   ): KibanaFeatureConfig {
-    let mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as KibanaFeatureConfig;
-    const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
+    const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as MutableKibanaFeatureConfig;
+
     const enabledSubFeaturesIndexed = Object.fromEntries(
       kibanaSubFeatureIds.map((id) => [id, true])
     );
+    const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
+    const allFeatureConfigModifiers: FeatureConfigModifier[] = [];
 
     productFeaturesConfigs.forEach((productFeatureConfig) => {
       const {
         subFeaturesPrivileges,
         subFeatureIds,
-        baseFeatureConfigModifier,
+        featureConfigModifiers,
         ...productFeatureConfigToMerge
-      } = cloneDeep(productFeatureConfig);
+      } = productFeatureConfig;
 
       subFeatureIds?.forEach((subFeatureId) => {
         enabledSubFeaturesIndexed[subFeatureId] = true;
       });
 
-      if (baseFeatureConfigModifier) {
-        mergedKibanaFeatureConfig = baseFeatureConfigModifier(mergedKibanaFeatureConfig);
-      }
-
       if (subFeaturesPrivileges) {
         subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
       }
+
+      if (featureConfigModifiers) {
+        allFeatureConfigModifiers.push(...featureConfigModifiers);
+      }
+
       mergeWith(mergedKibanaFeatureConfig, productFeatureConfigToMerge, featureConfigMerger);
     });
 
     // generate sub features configs from enabled sub feature ids, preserving map order
-    const mergedKibanaSubFeatures: SubFeatureConfig[] = [];
+    const mergedKibanaSubFeatures: MutableSubFeatureConfig[] = [];
     this.subFeaturesMap.forEach((subFeature, id) => {
       if (enabledSubFeaturesIndexed[id]) {
-        mergedKibanaSubFeatures.push(cloneDeep(subFeature));
+        mergedKibanaSubFeatures.push(cloneDeep(subFeature) as MutableSubFeatureConfig);
       }
     });
 
@@ -75,7 +82,12 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
 
     mergedKibanaFeatureConfig.subFeatures = mergedKibanaSubFeatures;
 
-    return mergedKibanaFeatureConfig;
+    // Apply custom modifications after merging all the product feature configs, including the subFeatures
+    allFeatureConfigModifiers.forEach((modifier) => {
+      modifier(mergedKibanaFeatureConfig);
+    });
+
+    return Object.freeze(mergedKibanaFeatureConfig) as KibanaFeatureConfig;
   }
 
   /**
@@ -105,18 +117,5 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
         `Trying to merge subFeaturesPrivileges ${subFeaturesPrivileges.id} but the subFeature privilege was not found`
       );
     }
-  }
-}
-
-/**
- * The customizer used by lodash.mergeWith to merge deep objects
- * Uses concatenation for arrays and removes duplicates, objects are merged using lodash.mergeWith default behavior
- * */
-function featureConfigMerger(objValue: unknown, srcValue: unknown) {
-  if (isArray(srcValue)) {
-    if (isArray(objValue)) {
-      return uniq(objValue.concat(srcValue));
-    }
-    return srcValue;
   }
 }

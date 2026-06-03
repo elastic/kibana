@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
 
-import { AgentPolicyBaseSchema } from './agent_policy';
+import { set } from '@kbn/safer-lodash-set';
+
+import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
+import { getSettings } from '../../services/form_settings';
+
+import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
@@ -142,5 +146,65 @@ describe('AgentPolicyBaseSchema', () => {
         AgentPolicyBaseSchema.agentless.validate(agentless);
       }).toThrow();
     });
+  });
+
+  describe('overrides validations', () => {
+    it('should throw an error if inputs key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'inputs.foo': 'bar' });
+      }).toThrow('inputs overrides is not allowed');
+    });
+
+    it('should throw an error if output_permissions key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ output_permissions: { _fallback: {} } });
+      }).toThrow('output_permissions overrides is not allowed');
+    });
+
+    it('should throw an error if nested output_permissions key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'output_permissions.someOutput': {} });
+      }).toThrow('output_permissions overrides is not allowed');
+    });
+
+    it('should not throw for valid overrides keys', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });
+      }).not.toThrow();
+    });
+  });
+});
+
+describe('FullAgentPolicySchema', () => {
+  it('support all advanced settings', () => {
+    expect(() => {
+      const advancedPolicySettings = getSettings('AGENT_POLICY_ADVANCED_SETTINGS');
+
+      const policyData = {
+        id: 'test-id',
+        outputs: {},
+        inputs: [],
+        agent: {
+          monitoring: {
+            enabled: true,
+            metrics: true,
+            logs: true,
+            traces: true,
+          },
+          download: { sourceURI: 'http://test' },
+          features: {},
+        },
+      };
+
+      for (const settings of advancedPolicySettings) {
+        if (settings.example_value) {
+          set(policyData, settings.name, settings.example_value);
+        } else {
+          throw new Error(`No example value provided for ${settings.name}`);
+        }
+      }
+
+      FullAgentPolicyResponseSchema.validate(policyData);
+    }).not.toThrow();
   });
 });

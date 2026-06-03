@@ -7,11 +7,12 @@
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, IBasePath } from '@kbn/core/public';
+import type { CoreStart, IBasePath } from '@kbn/core/public';
 
-import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { CONTENT_ID } from '../../common/content_management';
 import type {
   GraphGetIn,
@@ -30,8 +31,8 @@ import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import { GraphWorkspaceSavedObject } from '../types';
-import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
+import type { GraphWorkspaceSavedObject } from '../types';
+import { saveWithConfirmation } from './saved_objects_utils';
 const savedWorkspaceType = 'graph-workspace';
 const mapping = {
   title: 'text',
@@ -108,7 +109,7 @@ export async function getSavedWorkspace(contentClient: ContentClient, id: string
   const resp = resolveResult.item;
 
   if (!resp.attributes) {
-    throw new SavedObjectNotFound(savedWorkspaceType, id || '');
+    throw new SavedObjectNotFound({ type: savedWorkspaceType, id: id || '' });
   }
 
   const savedObject = {
@@ -161,11 +162,7 @@ export function deleteSavedWorkspace(contentClient: ContentClient, ids: string[]
 
 export async function saveSavedWorkspace(
   savedObject: GraphWorkspaceSavedObject,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-  }: SavedObjectSaveOpts = {},
+  { confirmOverwrite = false }: SavedObjectSaveOpts = {},
   services: {
     contentClient: ContentClient;
   } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
@@ -205,13 +202,6 @@ export async function saveSavedWorkspace(
     }
 
     savedObject.isSaving = true;
-
-    await checkForDuplicateTitle(
-      savedObject as any,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-      services
-    );
 
     const resp = confirmOverwrite
       ? await saveWithConfirmation(

@@ -8,20 +8,19 @@
  */
 
 import { isEqual, omit } from 'lodash';
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DataViewFieldBase } from '@kbn/es-query';
-import { SchemaConfig } from '../../types';
-import {
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { AnyMetricColumn, AnyMetricColumnWithSourceField, ColumnWithMeta } from '../types';
+import type { SchemaConfig } from '../../types';
+import type {
   AggBasedColumn,
   MetricsWithoutSpecialParams,
   ParentPipelineMetric,
   SiblingPipelineMetric,
 } from './convert';
-import { ColumnWithMeta } from '../types';
 import { convertToSchemaConfig } from '../../vis_schemas';
-
-type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
 export const getLabel = (agg: SchemaConfig) => {
   return agg.aggParams && 'customLabel' in agg.aggParams
@@ -35,13 +34,11 @@ export const getLabelForPercentile = (agg: SchemaConfig) => {
     : '';
 };
 
-export const getValidColumns = (
-  columns: Array<AggBasedColumn | null> | AggBasedColumn | null | undefined
-) => {
+export const getValidColumns = <T extends AggBasedColumn | null>(
+  columns: T[] | T | undefined
+): Array<NonNullable<T>> | null => {
   if (columns && Array.isArray(columns)) {
-    const nonNullColumns = columns.filter(
-      (c): c is Exclude<UnwrapArray<typeof columns>, null> => c !== null
-    );
+    const nonNullColumns = columns.filter(<C extends T>(c: C): c is NonNullable<C> => c !== null);
 
     if (nonNullColumns.length !== columns.length) {
       return null;
@@ -214,3 +211,15 @@ export const getAggIdAndValue = (aggId?: string) => {
   }
   return aggId.split('.');
 };
+
+export function isColumnMetric(column: unknown): column is AnyMetricColumn {
+  return (
+    typeof column === 'object' && column !== null && 'isBucketed' in column && !column.isBucketed
+  );
+}
+
+export function isColumnMetricWithSourceField(
+  column: unknown
+): column is AnyMetricColumnWithSourceField {
+  return isColumnMetric(column) && 'sourceField' in column;
+}

@@ -8,9 +8,18 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiForm, EuiFormRow, EuiSpacer, EuiSelect, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSelect,
+  EuiSwitch,
+  EuiToolTip,
+  EuiAccordion,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import type { OnFileSelectParameters } from './geo_file_picker';
 import { GeoFilePicker } from './geo_file_picker';
 import { IndexNameForm } from './index_name_form';
@@ -31,6 +40,7 @@ interface Props {
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   indexName: string;
   indexNameError?: string;
+  indexSettings: string;
   smallChunks: boolean;
   onFileClear: () => void;
   onFileSelect: (onFileSelectParameters: OnFileSelectParameters) => void;
@@ -38,6 +48,7 @@ interface Props {
   onIndexNameChange: (name: string, error?: string) => void;
   onIndexNameValidationStart: () => void;
   onIndexNameValidationEnd: () => void;
+  onIndexSettingsChange: (indexSettings: string) => void;
   onSmallChunksChange: (smallChunks: boolean) => void;
 }
 
@@ -137,23 +148,64 @@ export class GeoUploadForm extends Component<Props, State> {
               onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
             />
             <EuiSpacer size="m" />
-            <EuiFormRow display="columnCompressed">
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.fileUpload.smallChunks.tooltip', {
-                  defaultMessage: 'Use to alleviate request timeout failures.',
-                })}
-              >
-                <EuiSwitch
-                  label={i18n.translate('xpack.fileUpload.smallChunks.switchLabel', {
-                    defaultMessage: 'Upload file in smaller chunks',
+            <EuiAccordion
+              id="advancedAccordion"
+              buttonContent={i18n.translate('xpack.fileUpload.geo.advancedAccordionLabel', {
+                defaultMessage: 'Advanced',
+              })}
+            >
+              <EuiSpacer size="m" />
+              <EuiFormRow display="columnCompressed">
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate('xpack.fileUpload.smallChunks.tooltip', {
+                    defaultMessage: 'Use to alleviate request timeout failures.',
                   })}
-                  checked={this.props.smallChunks}
-                  onChange={this._onSmallChunksChange}
-                  compressed
+                >
+                  <EuiSwitch
+                    label={i18n.translate('xpack.fileUpload.smallChunks.switchLabel', {
+                      defaultMessage: 'Upload file in smaller chunks',
+                    })}
+                    checked={this.props.smallChunks}
+                    onChange={this._onSmallChunksChange}
+                    compressed
+                  />
+                </EuiToolTip>
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                label={i18n.translate('xpack.fileUpload.geo.indexSettingsLabel', {
+                  defaultMessage: 'Index settings',
+                })}
+                fullWidth
+              >
+                <CodeEditor
+                  value={this.props.indexSettings}
+                  height="100px"
+                  languageId="json"
+                  languageConfiguration={{
+                    autoClosingPairs: [
+                      {
+                        open: '{',
+                        close: '}',
+                      },
+                    ],
+                  }}
+                  options={{
+                    tabSize: 2,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent',
+                    minimap: {
+                      enabled: false,
+                    },
+                    scrollBeyondLastLine: false,
+                    quickSuggestions: true,
+                  }}
+                  onChange={this.props.onIndexSettingsChange}
                 />
-              </EuiToolTip>
-            </EuiFormRow>
+              </EuiFormRow>
+            </EuiAccordion>
           </>
         ) : null}
       </EuiForm>

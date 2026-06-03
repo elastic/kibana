@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiContextMenu,
-  EuiContextMenuProps,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
@@ -170,12 +170,16 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.content.index.syncButton.popover.ariaLabel',
+        { defaultMessage: 'Sync options' }
+      )}
       button={
         <EuiButton
           disabled={disabled || isWaitingForConnector}
           data-test-subj="enterpriseSearchSyncsContextMenuButton"
           data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={togglePopover}
           fill

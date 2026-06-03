@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 import { i18n } from '@kbn/i18n';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 
 interface BuildEntityAlertsQueryParams {
@@ -18,6 +19,8 @@ interface BuildEntityAlertsQueryParams {
   severity?: string;
   sortField?: string;
   sortDirection?: string;
+  /** When set (EUID DSL from the entity store), used instead of a `term` filter on `field`. */
+  entityFilter?: QueryDslQueryContainer;
 }
 
 export const defaultErrorMessage = i18n.translate(
@@ -129,7 +132,21 @@ export const buildEntityAlertsQuery = ({
   severity,
   sortField,
   sortDirection,
+  entityFilter,
 }: BuildEntityAlertsQueryParams) => {
+  const entityClause: QueryDslQueryContainer = entityFilter ?? {
+    bool: {
+      should: [
+        {
+          term: {
+            [field]: `${queryValue || ''}`,
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+
   return {
     size: size || 0,
     _source: false,
@@ -145,18 +162,7 @@ export const buildEntityAlertsQuery = ({
     query: {
       bool: {
         filter: [
-          {
-            bool: {
-              should: [
-                {
-                  term: {
-                    [field]: `${queryValue || ''}`,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
+          entityClause,
           severity
             ? {
                 bool: {
@@ -194,4 +200,12 @@ export const buildEntityAlertsQuery = ({
       },
     },
   };
+};
+
+/**
+ * Gets the entities latest index name (v2) for a specific space.
+ * Used for LOOKUP JOIN queries.
+ */
+export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
+  return getLatestEntitiesIndexName(spaceId);
 };

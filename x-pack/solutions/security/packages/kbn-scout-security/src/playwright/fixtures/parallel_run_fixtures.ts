@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { spaceTest as baseTest, mergeTests, ApiServicesFixture } from '@kbn/scout';
-import {
+import type { ApiServicesFixture } from '@kbn/scout';
+import { spaceTest as baseTest, mergeTests } from '@kbn/scout';
+import type {
   SecurityApiServicesFixture,
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService } from './worker';
+import {
+  getDetectionRuleApiService,
+  getDetectionAlertsApiService,
+  getEntityAnalyticsApiService,
+  getCloudConnectorApiService,
+  getTimelineApiService,
+  getAttackDiscoveryApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityParallelFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -27,13 +35,15 @@ export const spaceTest = securityParallelFixtures.extend<
     {
       pageObjects,
       page,
+      config,
     }: {
       pageObjects: SecurityParallelTestFixtures['pageObjects'];
       page: SecurityParallelTestFixtures['page'];
+      config: SecurityParallelWorkerFixtures['config'];
     },
     use: (pageObjects: SecurityParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
   apiServices: [
@@ -41,18 +51,44 @@ export const spaceTest = securityParallelFixtures.extend<
       {
         apiServices,
         kbnClient,
+        esClient,
         log,
         scoutSpace,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
+        esClient: SecurityParallelWorkerFixtures['esClient'];
         log: SecurityParallelWorkerFixtures['log'];
         scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionAlerts = getDetectionAlertsApiService({
+        esClient,
+        log,
+        scoutSpace,
+      });
       extendedApiServices.detectionRule = getDetectionRuleApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+      });
+      extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+      });
+      extendedApiServices.cloudConnectorApi = getCloudConnectorApiService({
+        kbnClient,
+        scoutSpace,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
+        scoutSpace,
+      });
+      extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
         kbnClient,
         log,
         scoutSpace,

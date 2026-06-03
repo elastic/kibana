@@ -10,11 +10,11 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { Filter } from '@kbn/es-query';
-import { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
-import { RangeFilterManager } from './filter_manager/range_filter_manager';
-import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
-import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
+import type { Filter } from '@kbn/es-query';
+import type { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
+import type { RangeFilterManager } from './filter_manager/range_filter_manager';
+import type { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
+import type { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
 
 export function noValuesDisableMsg(fieldName: string, indexPatternName: string) {
   return i18n.translate('inputControl.control.noValuesDisableTooltip', {
@@ -74,7 +74,7 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
     const indexPattern = this.filterManager.getIndexPattern();
     const field = this.filterManager.getField();
     if (field && indexPattern) {
-      return indexPattern.getFormatterForField(field).convert(value);
+      return indexPattern.getFormatterForField(field).convertToText(value);
     }
 
     return value;

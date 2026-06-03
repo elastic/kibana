@@ -14,22 +14,19 @@ import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
-
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
-import { Sourcerer } from '../../../sourcerer/components';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import {
   getScopeFromPath,
-  showSourcererByPath,
+  showDataViewPickerByPath,
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
@@ -43,7 +40,6 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  * right hand side of the Kibana global header
  */
 export const GlobalHeader = React.memo(() => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
   const {
     theme,
@@ -52,6 +48,8 @@ export const GlobalHeader = React.memo(() => {
     application: { capabilities },
   } = useKibana().services;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
+  const canReadFleet = capabilities.fleet.read === true;
+  const canAddData = canReadFleet && !hasSearchAILakeConfigurations;
   const { pathname } = useLocation();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -59,8 +57,8 @@ export const GlobalHeader = React.memo(() => {
     (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
   );
 
-  const sourcererScope = getScopeFromPath(pathname, newDataViewPickerEnabled);
-  const showSourcerer = showSourcererByPath(pathname);
+  const pageScope = getScopeFromPath(pathname);
+  const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
@@ -86,15 +84,6 @@ export const GlobalHeader = React.memo(() => {
     }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
-  const dataViewPicker = newDataViewPickerEnabled ? (
-    <DataViewPicker
-      scope={sourcererScope}
-      disabled={sourcererScope === DataViewManagerScopeName.detections}
-    />
-  ) : (
-    <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
-  );
-
   return (
     <InPortal node={portalNode}>
       <EuiHeaderSection side="right">
@@ -106,7 +95,7 @@ export const GlobalHeader = React.memo(() => {
 
         <EuiHeaderSectionItem>
           <EuiHeaderLinks>
-            {!hasSearchAILakeConfigurations && (
+            {canAddData && (
               <EuiHeaderLink
                 color="primary"
                 data-test-subj="add-data"
@@ -117,7 +106,9 @@ export const GlobalHeader = React.memo(() => {
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
             )}
-            {showSourcerer && !showTimeline && dataViewPicker}
+            {showDataViewPicker && !showTimeline && (
+              <DataViewPicker scope={pageScope} disabled={pageScope === PageScope.alerts} />
+            )}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>

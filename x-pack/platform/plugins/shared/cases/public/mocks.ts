@@ -54,6 +54,7 @@ const helpersMock: jest.Mocked<CasesPublicStart['helpers']> = {
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),
+  getObservablesFromEcs: jest.fn(),
 };
 
 export interface CaseUiClientMock {
@@ -61,6 +62,7 @@ export interface CaseUiClientMock {
   ui: jest.Mocked<CasesPublicStart['ui']>;
   hooks: jest.Mocked<CasesPublicStart['hooks']>;
   helpers: jest.Mocked<CasesPublicStart['helpers']>;
+  config: CasesPublicStart['config'];
 }
 
 export const mockCasesContract = (): CaseUiClientMock => ({
@@ -68,6 +70,10 @@ export const mockCasesContract = (): CaseUiClientMock => ({
   ui: uiMock,
   hooks: hooksMock,
   helpers: helpersMock,
+  config: {
+    templatesEnabled: false,
+    casesRedesign: { list: false, details: false, settings: false },
+  },
 });
 
 export const casesPluginMock = {

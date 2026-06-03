@@ -11,22 +11,41 @@ import { action } from '@storybook/addon-actions';
 import { TraceWaterfall } from '.';
 import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample';
 import { traceSample } from './mock/trace_sample';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'UnifiedTraceWaterfall',
+  title: 'shared/TraceWaterfall/UnifiedTraceWaterfall',
   component: TraceWaterfall,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmPluginStorybook>
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    ),
-  ],
 };
 
 export default stories;
+
+const DEEP_NESTED_NODE_COUNT = 600;
+const DEEP_NESTED_TRACE_ID = 'deep-nested-trace-id';
+const DEEP_NESTED_START_TIMESTAMP_US = new Date('2025-05-21T18:50:00.000Z').getTime() * 1000;
+
+const createDeepNestedTraceItems = (count: number): TraceItem[] => {
+  return Array.from({ length: count }, (_, index) => {
+    const id = `deep-node-${index + 1}`;
+    return {
+      id,
+      parentId: index > 0 ? `deep-node-${index}` : undefined,
+      timestampUs: DEEP_NESTED_START_TIMESTAMP_US,
+      name: index === 0 ? 'Deep Root Transaction' : `Deep Child Span ${index}`,
+      duration: 1000000,
+      serviceName: `deep-service-${(index % 8) + 1}`,
+      traceId: DEEP_NESTED_TRACE_ID,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: index === 0 ? 'transaction' : 'span',
+    };
+  });
+};
+
+export const DeepNestedChildren600: StoryFn<{}> = () => {
+  return <TraceWaterfall traceItems={createDeepNestedTraceItems(DEEP_NESTED_NODE_COUNT)} />;
+};
 
 export const ManyChildren: StoryFn<{}> = () => {
   return (
@@ -39,7 +58,10 @@ export const ManyChildren: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 1,
+          errors: [{ errorDocId: '1' }],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
         ...Array(200)
           .fill(0)
@@ -51,7 +73,9 @@ export const ManyChildren: StoryFn<{}> = () => {
             parentId: '1',
             serviceName: 'child-service',
             traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-            errorCount: 0,
+            errors: [],
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span' as const,
           })),
       ]}
     />
@@ -71,7 +95,9 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           duration: 5000000,
           serviceName: 'frontend',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 1,
+          errors: [{ errorDocId: '1' }],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: 'cdd3568d81149715',
@@ -81,7 +107,9 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'd2efb76164a77608',
           serviceName: 'quote',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 0,
+          errors: [],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: 'a111aabbccddeeff',
@@ -91,7 +119,9 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           parentId: 'cdd3568d81149715',
           serviceName: 'database',
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
-          errorCount: 0,
+          errors: [],
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
     />
@@ -107,8 +137,10 @@ export const Example: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          errorCount: 0,
+          errors: [],
           serviceName: 'load-generator',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -116,9 +148,12 @@ export const Example: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          errorCount: 0,
+          errors: [],
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
         {
           id: '41b39c13ec0166a8',
@@ -126,9 +161,11 @@ export const Example: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          errorCount: 0,
+          errors: [],
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -136,12 +173,15 @@ export const Example: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          errorCount: 0,
+          errors: [],
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
     />
   );
 };
@@ -156,8 +196,10 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          errorCount: 0,
+          errors: [],
           serviceName: 'load-generator',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -165,9 +207,11 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          errorCount: 0,
+          errors: [],
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -175,9 +219,11 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          errorCount: 0,
+          errors: [],
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -185,12 +231,14 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          errorCount: 0,
+          errors: [],
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       showLegend
     />
   );
@@ -206,8 +254,10 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
-          errorCount: 0,
+          errors: [],
           serviceName: 'frontend',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -215,10 +265,12 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
-          errorCount: 0,
+          errors: [],
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
-          spanType: 'http',
+          type: 'http',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -226,10 +278,12 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
-          errorCount: 0,
+          errors: [],
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
-          spanType: 'http',
+          type: 'http',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -237,13 +291,15 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
-          errorCount: 0,
+          errors: [],
           parentId: '41b39c13ec0166a8',
           serviceName: 'frontend',
-          spanType: 'css',
+          type: 'css',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       serviceName="frontend"
       showLegend
     />
@@ -260,13 +316,16 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
         serviceName: item._source.resource.attributes['service.name'],
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       } as TraceItem)
   );
   return (
     <TraceWaterfall
       traceItems={traceItems}
       showAccordion={false}
-      highlightedTraceId="99e36adf40935241"
+      contextSpanIds={['99e36adf40935241']}
       onClick={() => {}}
     />
   );
@@ -282,6 +341,9 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
         serviceName: item._source.resource.attributes['service.name'],
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       } as TraceItem)
   );
   return <TraceWaterfall traceItems={traceItems} />;
@@ -293,13 +355,55 @@ export const APMExample: StoryFn<{}> = () => {
       ({
         id: item.span.id || item.transaction?.id,
         name: item.span.name || item.transaction?.name,
-        timestampUs: item.timestamp.us,
+        timestampUs: getTimestampUs(item),
         duration: item.span.duration?.us || item.transaction?.duration?.us,
         traceId: item.trace.id,
         parentId: item.parent?.id,
         serviceName: item.service.name,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       } as TraceItem)
   );
 
   return <TraceWaterfall traceItems={traceItems} />;
+};
+
+export const CompositeSpanExample: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: 'root-tx',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'GET /users',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 10000000,
+          errors: [],
+          serviceName: 'api-service',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
+        },
+        {
+          id: 'composite-span',
+          timestampUs: new Date('2025-05-27T12:15:05.000Z').getTime() * 1000,
+          name: 'SELECT * FROM users',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 5000000,
+          errors: [],
+          parentId: 'root-tx',
+          serviceName: 'api-service',
+          type: 'db',
+          spanLinksCount: { incoming: 0, outgoing: 0 },
+          icon: 'database',
+          composite: {
+            count: 9,
+            sum: 4500000,
+            compressionStrategy: 'exact_match',
+          },
+          docType: 'span',
+        },
+      ]}
+    />
+  );
 };

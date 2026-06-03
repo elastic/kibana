@@ -8,7 +8,7 @@
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { createAndUploadFile } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { OBSERVABILITY_FILE_KIND } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const common = getPageObject('common');
@@ -87,8 +87,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('case detail screenshot', async () => {
       await common.navigateToUrlWithBrowserHistory('observability', `/cases/${caseIdMonitoring}`);
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
+      const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
+      await attachmentsTab.click();
+      await testSubjects.existOrFail('case-view-attachment-accordion-file');
       await commonScreenshots.takeScreenshot(
         'observabiity-case-files',
         screenshotDirectories,

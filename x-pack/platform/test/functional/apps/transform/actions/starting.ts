@@ -11,11 +11,11 @@ import {
   TRANSFORM_HEALTH_LABEL,
   TRANSFORM_HEALTH_DESCRIPTION,
 } from '@kbn/transform-plugin/common/constants';
-import {
+import type {
   TransformLatestConfig,
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 
 interface TestDataPivot {
@@ -45,7 +45,6 @@ interface TestDataLatest {
 type TestData = TestDataPivot | TestDataLatest;
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('starting', function () {
@@ -109,7 +108,6 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {

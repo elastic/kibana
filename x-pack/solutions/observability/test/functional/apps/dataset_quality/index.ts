@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 
 export default function ({ loadTestFile }: DatasetQualityFtrProviderContext) {
   describe('Dataset Quality', function () {
@@ -18,5 +18,6 @@ export default function ({ loadTestFile }: DatasetQualityFtrProviderContext) {
     loadTestFile(require.resolve('./degraded_field_flyout'));
     loadTestFile(require.resolve('./failed_docs_flyout'));
     loadTestFile(require.resolve('./home'));
+    loadTestFile(require.resolve('./dataset_quality_details_failure_store'));
   });
 }

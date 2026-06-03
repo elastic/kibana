@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
@@ -16,10 +16,10 @@ import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_ent
 import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
 import { castArray, compact, groupBy, orderBy } from 'lodash';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
-import { RootCauseAnalysisContext } from '../../types';
+import type { RootCauseAnalysisContext } from '../../types';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 type LogPatternRelevance = 'normal' | 'unusual' | 'warning' | 'critical';
 
@@ -57,7 +57,7 @@ export async function analyzeLogPatterns({
   kbEntries,
 }: {
   entity: Record<string, string>;
-  allAnalysis: Array<{ index: string | string[]; analysis: TruncatedDocumentAnalysis }>;
+  allAnalysis: Array<{ index: string | string[]; analysis: FormattedDocumentAnalysis }>;
   system: string;
   cutoff?: LogPatternCutOff;
   kbEntries: ScoredKnowledgeBaseEntry[];

@@ -8,12 +8,13 @@
  */
 
 import { SolutionType } from '../../../profiles';
-import { createContextAwarenessMocks } from '../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderSharedServicesMock();
 
 describe('observabilityRootProfileProvider', () => {
   const observabilityRootProfileProvider = createObservabilityRootProfileProvider(mockServices);
@@ -62,7 +63,7 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([
         {
@@ -87,9 +88,50 @@ describe('observabilityRootProfileProvider', () => {
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
       const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
-        { context: result.context }
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
       )();
       expect(defaultDataViews).toEqual([]);
+    });
+  });
+
+  describe('getDefaultEsqlQuery', () => {
+    it('should return an ES|QL query using the allLogsIndexPattern from the resolved context', async () => {
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual('logs-*');
+      const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
+        () => ({ query: 'FROM prev-pattern' }),
+        { context: result.context, toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT }
+      )();
+      expect(defaultEsqlQuery).toEqual({ query: 'FROM logs-*' });
+    });
+
+    it('should fall back to the previous profile return value when allLogsIndexPattern is undefined', async () => {
+      jest
+        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
+        .mockReturnValueOnce(undefined);
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual(undefined);
+      const prevValue = { query: 'FROM prev-pattern' };
+      const prev = jest.fn().mockReturnValue(prevValue);
+      const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
+        prev,
+        {
+          context: result.context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      )();
+      expect(prev).toHaveBeenCalled();
+      expect(defaultEsqlQuery).toEqual(prevValue);
     });
   });
 
@@ -105,6 +147,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -134,6 +177,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -156,7 +200,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -171,6 +215,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -193,7 +238,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -208,6 +253,7 @@ describe('observabilityRootProfileProvider', () => {
             solutionType: SolutionType.Observability,
             allLogsIndexPattern: mockServices.logsContextService.getAllLogsIndexPattern(),
           },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
 
@@ -230,7 +276,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

@@ -8,15 +8,15 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { FormattedColumns, TableVisUiState } from '../types';
+import type { FormattedColumns, TableVisUiState } from '../types';
 
 interface FilterCellData {
   /**
@@ -65,7 +65,7 @@ export const createGridColumns = (
             // incoming data might change and put the current page out of bounds - check whether row actually exists
             const rowValue = rows[rowIndex]?.[columnId];
             if (rowValue == null) return null;
-            const cellContent = formattedColumn.formatter.convert(rowValue);
+            const cellContent = formattedColumn.formatter.convertToText(rowValue);
 
             const filterForText = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueText',
@@ -91,7 +91,7 @@ export const createGridColumns = (
                   onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
                   closeCellPopover?.();
                 }}
-                iconType="plusInCircle"
+                iconType="plusCircle"
               >
                 {filterForText}
               </Component>
@@ -101,7 +101,7 @@ export const createGridColumns = (
             // incoming data might change and put the current page out of bounds - check whether row actually exists
             const rowValue = rows[rowIndex]?.[columnId];
             if (rowValue == null) return null;
-            const cellContent = formattedColumn.formatter.convert(rowValue);
+            const cellContent = formattedColumn.formatter.convertToText(rowValue);
 
             const filterOutText = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueText',
@@ -126,7 +126,7 @@ export const createGridColumns = (
                   onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
                   closeCellPopover?.();
                 }}
-                iconType="minusInCircle"
+                iconType="minusCircle"
               >
                 {filterOutText}
               </Component>

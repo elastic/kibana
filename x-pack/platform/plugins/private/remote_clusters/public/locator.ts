@@ -6,8 +6,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ManagementAppLocator } from '@kbn/management-plugin/common';
-import { LocatorDefinition } from '@kbn/share-plugin/public';
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
 
 export const REMOTE_CLUSTERS_LOCATOR_ID = 'REMOTE_CLUSTERS_LOCATOR';
 

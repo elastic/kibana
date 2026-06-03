@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  createEndpointExceptionList,
+  deleteEndpointExceptionList,
+} from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
@@ -28,20 +32,21 @@ import {
 } from '../../../../../tasks/exceptions';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
-  ADD_AND_BTN,
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  ADD_NESTED_BTN,
+  ENDPOINT_EXCEPTION_CARD,
+  ENDPOINT_EXCEPTION_CARD_CONDITIONS,
+  ENDPOINT_EXCEPTION_CARD_HEADER_TITLE,
+  ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
+  ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
 } from '../../../../../screens/exceptions';
 import {
-  goToEndpointExceptionsTab,
+  navigateToEndpointExceptions,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// See https://github.com/elastic/kibana/issues/163967
-describe.skip(
+describe(
   'Endpoint Exceptions workflows from Alert',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
@@ -50,12 +55,15 @@ describe.skip(
     const ADDITIONAL_ENTRY = 'host.hostname';
 
     beforeEach(() => {
-      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
+      deleteEndpointExceptionList();
+      createEndpointExceptionList();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
+      createRule(getEndpointRule()).then((rule) =>
+        visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
+      );
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
@@ -63,6 +71,7 @@ describe.skip(
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'endpoint' });
+      deleteEndpointExceptionList();
     });
 
     it('Should be able to create and close single Endpoint exception from overflow menu', () => {
@@ -74,8 +83,8 @@ describe.skip(
       validateExceptionConditionField('file.Ext.code_signature');
 
       selectCloseSingleAlerts();
-      addExceptionFlyoutItemName(ITEM_NAME);
-      submitNewExceptionItem();
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
+      submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
       // Instead of immediately checking if the Opened Alert has moved to the closed tab,
       // use the waitForAlerts method to create a buffer, allowing the alerts some time to
@@ -97,29 +106,29 @@ describe.skip(
       // As the endpoint.alerts-* is used to trigger the alert the
       // file.Ext.code_signature will be auto-populated
       validateExceptionConditionField('file.Ext.code_signature');
-      addExceptionFlyoutItemName(ITEM_NAME);
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
 
-      cy.get(ADD_AND_BTN).click();
+      // Add non-nested condition
+      cy.get(ADD_NESTED_BTN).click();
       // edit conditions
       addExceptionEntryFieldValueAndSelectSuggestion(ADDITIONAL_ENTRY, 6);
       addExceptionEntryFieldValueValue('foo', 4);
 
       // Change the name again
-      editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+      editExceptionFlyoutItemName(ITEM_NAME_EDIT, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
 
       // validate the condition is still "agent.name" or got rest after the name is changed
       validateExceptionConditionField(ADDITIONAL_ENTRY);
 
       selectCloseSingleAlerts();
-      submitNewExceptionItem();
+      submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
-      // Endpoint Exception will move to Endpoint List under Exception tab of rule
-      goToEndpointExceptionsTab();
+      navigateToEndpointExceptions();
 
       // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
-      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+      cy.get(ENDPOINT_EXCEPTION_CARD).should('have.length', 1);
+      cy.get(ENDPOINT_EXCEPTION_CARD_HEADER_TITLE).should('have.text', ITEM_NAME_EDIT);
+      cy.get(ENDPOINT_EXCEPTION_CARD_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
     });
   }
 );

@@ -7,7 +7,8 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { getNewRule } from '../../../../objects/rule';
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
+import { getCustomQueryRuleParams, getNewRule } from '../../../../objects/rule';
 import {
   COLLAPSED_ACTION_BTN,
   RULE_CHECKBOX,
@@ -28,16 +29,20 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: '1', enabled: false }));
-    login(ROLES.t1_analyst);
-    visitRulesManagementTable();
-    cy.get(RULE_NAME).should('have.text', getNewRule().name);
+  before(() => {
+    installMockPrebuiltRulesPackage();
   });
 
-  it('Does not display select boxes for rules', () => {
-    cy.get(RULE_CHECKBOX).should('not.exist');
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    createRule(getCustomQueryRuleParams({ rule_id: '1', enabled: false }));
+    login(ROLES.t1_analyst);
+    visitRulesManagementTable();
+    cy.get(RULE_NAME).should('have.text', getCustomQueryRuleParams().name);
+  });
+
+  it('Does display select boxes for rules', () => {
+    cy.get(RULE_CHECKBOX).should('exist');
   });
 
   it('Disables value lists upload', () => {
@@ -45,9 +50,7 @@ describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServer
   });
 
   it('Does not display action options', () => {
-    // These are the 3 dots at the end of the row that opens up
-    // options to take action on the rule
-    cy.get(COLLAPSED_ACTION_BTN).should('not.exist');
+    cy.get(COLLAPSED_ACTION_BTN).should('exist');
   });
 
   it('Displays missing privileges primary callout', () => {

@@ -17,3 +17,4 @@ export * from './rule_monitoring';
 export * from './rule_preview';
 export * from './signals';
 export * from './signals_migration';
+export * from './unified_alerts';

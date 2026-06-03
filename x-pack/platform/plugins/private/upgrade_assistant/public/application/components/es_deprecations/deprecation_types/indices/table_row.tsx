@@ -8,7 +8,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EnrichedDeprecationInfo, IndicesResolutionType } from '../../../../../../common/types';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
+import type {
+  EnrichedDeprecationInfo,
+  IndicesResolutionType,
+} from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -18,10 +22,11 @@ import {
   UIM_REINDEX_CLOSE_MODAL_CLICK,
   UIM_REINDEX_OPEN_MODAL_CLICK,
 } from '../../../../lib/ui_metric';
-import { DeprecationTableColumns } from '../../../types';
+import type { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
-import { IndexFlyout, IndexFlyoutProps } from './flyout';
+import type { IndexFlyoutProps } from './flyout';
+import { IndexFlyout } from './flyout';
 import { IndexStatusProvider, useIndexContext } from './context';
 import { ReindexActionCell } from './actions_table_cell';
 import { IndexModal } from './flyout/modal_container';
@@ -139,10 +144,20 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 export const IndexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
   const {
     services: { api },
+    kibanaVersionInfo,
   } = useAppContext();
 
+  const version = new Version();
+  version.setup(
+    [
+      kibanaVersionInfo.currentMajor,
+      kibanaVersionInfo.currentMinor,
+      kibanaVersionInfo.currentPatch,
+    ].join('.')
+  );
+
   return (
-    <IndexStatusProvider deprecation={props.deprecation} api={api}>
+    <IndexStatusProvider deprecation={props.deprecation} api={api} version={version}>
       <IndexTableRowCells {...props} />
     </IndexStatusProvider>
   );

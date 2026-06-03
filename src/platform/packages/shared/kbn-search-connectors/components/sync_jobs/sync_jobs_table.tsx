@@ -9,27 +9,20 @@
 
 import React, { useState } from 'react';
 
-import {
-  CriteriaWithPagination,
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiCode,
-  EuiIcon,
-  EuiToolTip,
-  Pagination,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiCode, EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
+import type { ConnectorSyncJob, SyncJobType, SyncStatus } from '../..';
+import { isSyncCancellable } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { SyncJobFlyout } from './sync_job_flyout';
-import { CancelSyncJobModal, CancelSyncModalProps } from './sync_job_cancel_modal';
+import type { CancelSyncModalProps } from './sync_job_cancel_modal';
+import { CancelSyncJobModal } from './sync_job_cancel_modal';
 
 interface SyncJobHistoryTableProps {
   isLoading?: boolean;
@@ -74,7 +67,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
             {i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
               defaultMessage: 'Last sync',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -101,7 +100,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
             {i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
               defaultMessage: 'Sync duration',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -126,7 +131,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                   {i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
                     defaultMessage: 'Docs upserted',
                   })}
-                  <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+                  <EuiIcon
+                    size="s"
+                    type="question"
+                    color="subdued"
+                    className="eui-alignTop"
+                    aria-hidden={true}
+                  />
                 </>
               </EuiToolTip>
             ),
@@ -149,7 +160,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                   {i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
                     defaultMessage: 'Docs deleted',
                   })}
-                  <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+                  <EuiIcon
+                    size="s"
+                    type="question"
+                    color="subdued"
+                    className="eui-alignTop"
+                    aria-hidden={true}
+                  />
                 </>
               </EuiToolTip>
             ),
@@ -238,6 +255,15 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
     },
   ];
 
+  const tableCaption =
+    type === 'content'
+      ? i18n.translate('searchConnectors.syncJobsTable.contentTableCaption', {
+          defaultMessage: 'Content connector sync jobs',
+        })
+      : i18n.translate('searchConnectors.syncJobsTable.accessControlTableCaption', {
+          defaultMessage: 'Access control connector sync jobs',
+        });
+
   return (
     <>
       {Boolean(selectedSyncJob) && (
@@ -258,6 +284,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
         pagination={pagination}
         tableLayout="fixed"
         loading={isLoading}
+        tableCaption={tableCaption}
       />
     </>
   );

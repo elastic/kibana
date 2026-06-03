@@ -9,11 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiIcon, EuiText, EuiSkeletonRectangle } from '@elastic/eui';
 
-import {
-  getConfinedScreenshotSize,
-  ScreenshotImageSize,
-  THUMBNAIL_SCREENSHOT_SIZE,
-} from './screenshot_size';
+import type { ScreenshotImageSize } from './screenshot_size';
+import { getConfinedScreenshotSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
 export const thumbnailStyle = {
   padding: 0,
@@ -96,8 +93,9 @@ export const EmptyThumbnail = ({
         >
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"
-            type="eyeClosed"
+            type="eyeSlash"
             color={euiTheme.colors.textDisabled}
+            aria-hidden={true}
           />
 
           {unavailableMessage ? (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MessageRole } from '@kbn/elastic-assistant-common';
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';
@@ -19,6 +19,7 @@ import {
 import { createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
 describe('AI Assistant Messages', { tags: ['@ess', '@serverless'] }, () => {
@@ -52,6 +53,7 @@ describe('AI Assistant Messages', { tags: ['@ess', '@serverless'] }, () => {
     deleteConversations();
     deletePrompts();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     createAzureConnector();
     waitForConversation(mockConvo);
   });

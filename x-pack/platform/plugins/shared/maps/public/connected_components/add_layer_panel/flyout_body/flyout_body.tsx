@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LayerWizardSelect } from './layer_wizard_select';
-import { LayerWizard, RenderWizardArguments } from '../../../classes/layers';
+import type { LayerWizard, RenderWizardArguments } from '../../../classes/layers';
 
 type Props = RenderWizardArguments & {
   layerWizard: LayerWizard | null;
@@ -39,7 +39,7 @@ export const FlyoutBody = (props: Props) => {
 
     const backButton = props.showBackButton ? (
       <Fragment>
-        <EuiButtonEmpty size="xs" flush="left" onClick={props.onClear} iconType="arrowLeft">
+        <EuiButtonEmpty size="xs" flush="left" onClick={props.onClear} iconType="chevronSingleLeft">
           <FormattedMessage
             id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
             defaultMessage="Change layer"

@@ -8,8 +8,9 @@
  */
 
 import { Observable } from 'rxjs';
-import { Capabilities } from '@kbn/core/public';
-import { showPublicUrlSwitch, getTopNavConfig, TopNavConfigParams } from './get_top_nav_config';
+import type { Capabilities } from '@kbn/core/public';
+import type { TopNavConfigParams } from './get_top_nav_config';
+import { showPublicUrlSwitch, getTopNavConfig } from './get_top_nav_config';
 import type {
   VisualizeEditorVisInstance,
   VisualizeAppStateContainer,
@@ -154,7 +155,7 @@ describe('getTopNavConfig', () => {
           "description": "Finish editing visualization and return to the last app",
           "disableButton": false,
           "emphasize": true,
-          "iconType": "checkInCircleFilled",
+          "iconType": "checkCircleFill",
           "id": "saveAndReturn",
           "label": "Save and return",
           "run": [Function],
@@ -403,7 +404,7 @@ describe('getTopNavConfig', () => {
           "description": "Finish editing visualization and return to the last app",
           "disableButton": false,
           "emphasize": true,
-          "iconType": "checkInCircleFilled",
+          "iconType": "checkCircleFill",
           "id": "saveAndReturn",
           "label": "Save and return",
           "run": [Function],
@@ -490,7 +491,7 @@ describe('getTopNavConfig', () => {
           "description": "Finish editing visualization and return to the last app",
           "disableButton": false,
           "emphasize": true,
-          "iconType": "checkInCircleFilled",
+          "iconType": "checkCircleFill",
           "id": "saveAndReturn",
           "label": "Save and return",
           "run": [Function],
@@ -588,7 +589,7 @@ describe('getTopNavConfig', () => {
           "description": "Finish editing visualization and return to the last app",
           "disableButton": false,
           "emphasize": true,
-          "iconType": "checkInCircleFilled",
+          "iconType": "checkCircleFill",
           "id": "saveAndReturn",
           "label": "Save and return",
           "run": [Function],

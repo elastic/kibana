@@ -8,11 +8,15 @@
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
+import pRetry from 'p-retry';
+
+import { LockAcquisitionError } from '@kbn/lock-manager';
+
 import { getDefaultFleetServerpolicyId } from '../../common/services/agent_policies_helpers';
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -21,12 +25,12 @@ import {
 } from '../../common';
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
+import { PackagePolicyNameExistsError } from '../errors';
 
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import { agentlessAgentService } from './agents/agentless_agent';
 
 async function getFleetServerAgentPolicyId(
   soClient: SavedObjectsClientContract,
@@ -70,7 +74,7 @@ async function createPackagePolicy(
   options: {
     spaceId: string;
     user: AuthenticatedUser | undefined;
-    authorizationHeader?: HTTPAuthorizationHeader | null;
+    request?: KibanaRequest;
     force?: boolean;
   }
 ) {
@@ -89,18 +93,47 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
   if (agentPolicy.supports_agentless) {
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
 
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    spaceId: options.spaceId,
-    user: options.user,
-    bumpRevision: false,
-    authorizationHeader: options.authorizationHeader,
-    force: options.force,
-  });
+  const spaceIds = agentPolicy.space_ids ?? [options.spaceId];
+  const lockKey = `fleet-package-policy-name-${packageToInstall}-${[...spaceIds].sort().join(':')}`;
+
+  await pRetry(
+    () =>
+      appContextService.getLockManagerService()!.withLock(lockKey, async () => {
+        newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
+        await packagePolicyService.create(
+          soClient,
+          esClient,
+          newPackagePolicy,
+          {
+            spaceId: options.spaceId,
+            user: options.user,
+            bumpRevision: false,
+            force: options.force,
+          },
+          undefined,
+          options.request
+        );
+      }),
+    {
+      onFailedAttempt: (error) => {
+        if (
+          !(error instanceof LockAcquisitionError) &&
+          !(error instanceof PackagePolicyNameExistsError)
+        ) {
+          throw error;
+        }
+      },
+      minTimeout: 100,
+      factor: 2,
+      maxTimeout: 2_000,
+      retries: 100,
+      maxRetryTime: 60_000,
+    }
+  );
 }
 
 interface CreateAgentPolicyParams {
@@ -113,8 +146,11 @@ interface CreateAgentPolicyParams {
   monitoringEnabled?: string[];
   spaceId: string;
   user?: AuthenticatedUser;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  /** Pass force to all following calls: package install, policy creation */
   force?: boolean;
+  /** Pass force only to package policy creation */
+  forcePackagePolicyCreation?: boolean;
+  request?: KibanaRequest;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -123,12 +159,13 @@ export async function createAgentPolicyWithPackages({
   agentPolicyService,
   newPolicy,
   hasFleetServer,
-  withSysMonitoring,
-  monitoringEnabled,
+  withSysMonitoring: withSysMonitoringParams,
+  monitoringEnabled: monitoringEnabledParams,
   spaceId,
   user,
-  authorizationHeader,
+  request,
   force,
+  forcePackagePolicyCreation,
 }: CreateAgentPolicyParams) {
   const logger = appContextService.getLogger().get('createAgentPolicyWithPackages');
 
@@ -151,6 +188,24 @@ export async function createAgentPolicyWithPackages({
       newPolicy.is_default_fleet_server = true;
     }
   }
+
+  const withSysMonitoring = withSysMonitoringParams && !newPolicy.supports_agentless;
+  if (!withSysMonitoring && withSysMonitoringParams) {
+    logger.info(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
+  }
+  const monitoringEnabled =
+    newPolicy.supports_agentless && monitoringEnabledParams?.length
+      ? []
+      : (monitoringEnabledParams as NewAgentPolicy['monitoring_enabled']);
+
+  if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
+    logger.info(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
+  }
+  if (newPolicy.supports_agentless) {
+    newPolicy.keep_monitoring_alive = true;
+    logger.info(`Enabling keep monitoring alive for agentless policy [${newPolicy.name}]`);
+  }
+
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
   }
@@ -165,20 +220,31 @@ export async function createAgentPolicyWithPackages({
       esClient,
       packagesToInstall,
       spaceId,
-      authorizationHeader,
+      request,
       force,
     });
   }
 
-  const { id, ...policy } = newPolicy; // omit id from create object
+  const { id, monitoring_enabled: _, ...policy } = newPolicy; // omit id from create object
 
-  const agentPolicy = await agentPolicyService.create(soClient, esClient, policy, {
-    user,
-    id: agentPolicyId,
-    authorizationHeader,
-    hasFleetServer,
-    skipDeploy: true, // skip deploying the policy until package policies are added
-  });
+  const agentPolicy = await agentPolicyService.create(
+    soClient,
+    esClient,
+    { ...policy, monitoring_enabled: monitoringEnabled },
+    {
+      user,
+      id: agentPolicyId,
+      request,
+      hasFleetServer,
+      skipDeploy: true, // skip deploying the policy until package policies are added
+    }
+  );
+
+  // Since agentPolicyService does not handle multispace assignments, we need to keep this context with package policy creation
+  const agentPolicyWithStagedSpaces = {
+    ...agentPolicy,
+    space_ids: newPolicy.space_ids,
+  };
 
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
@@ -186,13 +252,13 @@ export async function createAgentPolicyWithPackages({
       soClient,
       esClient,
       agentPolicyService,
-      agentPolicy,
+      agentPolicyWithStagedSpaces,
       FLEET_SERVER_PACKAGE,
       {
         spaceId,
         user,
-        authorizationHeader,
-        force,
+        request,
+        force: force || forcePackagePolicyCreation,
       }
     );
   }
@@ -203,32 +269,33 @@ export async function createAgentPolicyWithPackages({
       soClient,
       esClient,
       agentPolicyService,
-      agentPolicy,
+      agentPolicyWithStagedSpaces,
       FLEET_SYSTEM_PACKAGE,
       {
         spaceId,
         user,
-        authorizationHeader,
-        force,
+        request,
+        force: force || forcePackagePolicyCreation,
       }
     );
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
-  await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
-  // Create the agentless agent
-  if (agentPolicy.supports_agentless) {
-    try {
-      await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
-    } catch (err) {
+  try {
+    // Deploy policy will create the agentless agent if needed
+    await agentPolicyService.deployPolicy(soClient, agentPolicy.id, undefined, {
+      throwOnAgentlessError: true,
+    });
+  } catch (err) {
+    if (agentPolicy.supports_agentless) {
       await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
         appContextService
           .getLogger()
           .error(`Error deleting agentless policy`, { error: agentPolicy });
       });
-      throw err;
     }
+    throw err;
   }
 
   return agentPolicy;

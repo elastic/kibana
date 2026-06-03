@@ -25,6 +25,8 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
 
   public get authc() {
     if (this.#authc == null) {
+      const uiam = this.securityStart.authc.apiKeys.uiam;
+
       this.#authc = {
         getCurrentUser: () => this.securityStart.authc.getCurrentUser(this.request),
         apiKeys: {
@@ -36,6 +38,14 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
           validate: (apiKeyParams) => this.securityStart.authc.apiKeys.validate(apiKeyParams),
           invalidate: (apiKeyParams) =>
             this.securityStart.authc.apiKeys.invalidate(this.request, apiKeyParams),
+          uiam: uiam
+            ? {
+                grant: (grantUiamApiKeyParams) => uiam.grant(this.request, grantUiamApiKeyParams),
+                invalidate: (invalidateUiamApiKeyParams) =>
+                  uiam.invalidate(this.request, invalidateUiamApiKeyParams),
+                convert: (convertUiamApiKeyParams) => uiam.convert(convertUiamApiKeyParams),
+              }
+            : null,
         },
       };
     }

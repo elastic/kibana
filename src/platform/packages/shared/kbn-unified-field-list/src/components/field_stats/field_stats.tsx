@@ -28,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PartialTheme } from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -38,11 +39,11 @@ import {
   Settings,
   TooltipType,
   Tooltip,
-  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
-import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation, NumberSummary } from '../../types';
 import {
   canProvideStatsForField,
@@ -371,7 +372,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               sampledDocuments,
               sampledDocumentsFormatted: fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampledDocuments),
+                .convertToText(sampledDocuments),
             },
           })}
         />
@@ -525,7 +526,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               id="key"
               position={Position.Left}
               showOverlappingTicks={true}
-              tickFormat={(d) => formatter.convert(d)}
+              tickFormat={(d) => formatter.convertToText(d)}
             />
 
             <HistogramBarSeries
@@ -586,7 +587,7 @@ function getCountsElement(
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampledDocuments)}
+                .convertToText(sampledDocuments)}
             </strong>
           ),
         }}
@@ -601,7 +602,7 @@ function getCountsElement(
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(totalDocuments)}
+                .convertToText(totalDocuments)}
             </strong>
           ),
         }}

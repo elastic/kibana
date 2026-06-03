@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../common/constants';
 import { ErrorCode } from '../../common/types/error_codes';
-import { SearchConnectorsPluginSetupDependencies } from '../types';
+import type { SearchConnectorsPluginSetupDependencies } from '../types';
 import { elasticsearchErrorHandler } from '../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
 import { createError } from '../utils/create_error';
@@ -28,6 +28,7 @@ export function registerSearchRoute({ router, log }: SearchConnectorsPluginSetup
       validate: {
         body: schema.object({
           searchQuery: schema.string({
+            maxLength: 1000,
             defaultValue: '',
           }),
         }),
@@ -62,7 +63,7 @@ export function registerSearchRoute({ router, log }: SearchConnectorsPluginSetup
         if (isIndexNotFoundException(error)) {
           return createError({
             errorCode: ErrorCode.INDEX_NOT_FOUND,
-            message: 'Could not found index',
+            message: 'Could not find index',
             response,
             statusCode: 404,
           });

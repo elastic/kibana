@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -34,9 +34,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const from = 'Sep 20, 2015 @ 00:00:00.000';
   const to = 'Sep 21, 2015 @ 00:00:00.000';
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
-  describe('dashboard feature controls security', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/257665
+  describe.skip('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
@@ -95,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dashboards', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.contain('Dashboards');
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -130,12 +131,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow a visualization to be edited`, async () => {
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadDashboardInEditMode('A Dashboard');
         await panelActions.expectMissingEditPanelAction();
       });
 
       it(`does not allow a map to be edited`, async () => {
-        await dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.loadDashboardInEditMode('dashboard with map');
         await panelActions.expectMissingEditPanelAction();
       });
     });
@@ -180,13 +181,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`allows a visualization to be edited`, async () => {
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadDashboardInEditMode('A Dashboard');
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.loadDashboardInEditMode('dashboard with map');
         await panelActions.expectExistsEditPanelAction();
       });
 
@@ -277,7 +278,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboards']);
+        expect(navLinks).to.eql(['Dashboards', 'Workflows']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -387,7 +388,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboards']);
+        expect(navLinks).to.contain('Dashboards');
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {

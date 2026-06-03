@@ -15,9 +15,10 @@ import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plug
 import type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
+import { PageScope } from '../../../data_view_manager/constants';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -26,7 +27,6 @@ import { DEFAULT_ACTIONS, useActions } from './use_actions';
 
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
@@ -61,7 +61,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   inspectTitle,
   lensAttributes,
   onLoad,
-  scopeId = SourcererScopeName.default,
+  scopeId = PageScope.default,
   enableLegendActions = true,
   stackByField,
   timerange,
@@ -69,6 +69,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
+  signalIndexName,
+  excludedPatterns,
   esql,
 }) => {
   const styles = useMemo(
@@ -102,8 +104,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
     esql,
+    signalIndexName,
+    excludedPatterns,
   });
-  const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  const preferredSeriesType = (attributes?.state?.visualization as XYVisualizationState)
+    ?.preferredSeriesType;
 
   const LensComponent = lens.EmbeddableComponent;
 

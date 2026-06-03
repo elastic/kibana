@@ -9,6 +9,9 @@ source "$(dirname "$0")/../../common/util.sh"
 #
 #is_test_execution_step
 
+echo "--- Clean up cached images"
+clean_cached_images
+
 echo "--- Package Testing for $TEST_PACKAGE"
 
 mkdir -p target

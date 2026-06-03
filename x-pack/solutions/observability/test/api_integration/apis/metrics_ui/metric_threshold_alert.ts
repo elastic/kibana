@@ -7,18 +7,16 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import {
-  Aggregators,
+import type {
   CountMetricExpressionParams,
   CustomMetricExpressionParams,
   MetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
-import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
-import {
-  EvaluatedRuleParams,
-  evaluateRule,
-} from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import { Aggregators } from '@kbn/infra-plugin/common/alerting/metrics';
+import type { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
+import type { EvaluatedRuleParams } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import { evaluateRule } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -118,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -178,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -243,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -298,6 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame,
             [{ key: 'middleware', bucketKey: { groupBy0: 'middleware' } }]
@@ -377,6 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -461,6 +464,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
 
@@ -521,6 +525,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -560,6 +565,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -616,6 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
               true,
               logger,
               void 0,
+              void 0,
               timeFrame
             );
             expect(results).to.eql([
@@ -669,6 +676,7 @@ export default function ({ getService }: FtrProviderContext) {
               10000,
               true,
               logger,
+              void 0,
               void 0,
               timeFrame,
               [
@@ -785,6 +793,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -836,6 +845,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -875,6 +885,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -929,6 +940,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -994,6 +1006,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -1063,6 +1076,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame,
             [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
@@ -1117,6 +1131,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             moment(gauge.midpoint).subtract(1, 'm').valueOf(),
             timeFrame,
             [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
@@ -1137,6 +1152,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             gauge.max,
             timeFrame
           );
@@ -1225,6 +1241,7 @@ export default function ({ getService }: FtrProviderContext) {
           true,
           logger,
           void 0,
+          void 0,
           timeFrame
         );
         expect(results).to.eql([
@@ -1277,6 +1294,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -1334,6 +1352,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );

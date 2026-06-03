@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
 import * as settings from '@kbn/management-settings-ids';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const editorSettings = new Set<string>([
   settings.BANNERS_TEXT_CONTENT_ID,

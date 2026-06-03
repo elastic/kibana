@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import type {
-  AnomalyChartsComponentApi,
-  AnomalyChartsDataLoadingApi,
   AnomalyChartsEmbeddableRuntimeState,
+  SeverityThreshold,
   AnomalyChartsEmbeddableState,
-} from '../types';
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
+import type { AnomalyChartsComponentApi, AnomalyChartsDataLoadingApi } from '../types';
 
 export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
   jobIds: 'deepEquality',
@@ -26,20 +26,20 @@ export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableR
 };
 
 export const initializeAnomalyChartsControls = (
-  rawState: AnomalyChartsEmbeddableState,
+  initialState: AnomalyChartsEmbeddableState,
   titlesApi?: TitlesApi,
   parentApi?: unknown
 ) => {
-  const jobIds$ = new BehaviorSubject<JobId[]>(rawState.jobIds);
+  const jobIds$ = new BehaviorSubject<JobId[]>(initialState.jobIds);
   const maxSeriesToPlot$ = new BehaviorSubject<number>(
-    rawState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
+    initialState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
 
   const severityThreshold$ = new BehaviorSubject<SeverityThreshold[] | undefined>(
-    rawState.severityThreshold
+    initialState.severityThreshold
   );
   const selectedEntities$ = new BehaviorSubject<MlEntityField[] | undefined>(
-    rawState.selectedEntities
+    initialState.selectedEntities
   );
   const interval$ = new BehaviorSubject<number | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -87,8 +87,23 @@ export const initializeAnomalyChartsControls = (
       onLoading,
       onError,
     } as AnomalyChartsDataLoadingApi,
-    anyStateChange$: merge(jobIds$, maxSeriesToPlot$, severityThreshold$, selectedEntities$).pipe(
-      map(() => undefined)
+    anyStateChange$: merge(
+      jobIds$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      maxSeriesToPlot$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      severityThreshold$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      selectedEntities$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
     ),
     getLatestState,
     reinitializeState: (lastSavedState: AnomalyChartsEmbeddableState) => {

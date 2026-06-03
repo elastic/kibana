@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 import { registerAppRoutes } from './app';
 import { registerCloudBackupStatusRoutes } from './cloud_backup_status';
@@ -21,11 +21,13 @@ import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
+import { registerCloudStackVersionsRoute } from './cloud_stack_versions';
 
 export function registerRoutes(dependencies: RouteDependencies) {
   registerAppRoutes(dependencies);
 
   registerCloudBackupStatusRoutes(dependencies);
+  registerCloudStackVersionsRoute(dependencies);
   registerClusterUpgradeStatusRoutes(dependencies);
   registerSystemIndicesMigrationRoutes(dependencies);
   registerESDeprecationRoutes(dependencies);

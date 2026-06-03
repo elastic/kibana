@@ -24,7 +24,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
@@ -69,6 +70,10 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.inferencePipelineCard.popover.ariaLabel',
+          { defaultMessage: 'Inference pipeline actions' }
+        )}
         button={actionButton}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}
@@ -122,7 +127,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                 size="s"
                 flush="both"
-                iconType="unlink"
+                iconType="linkSlash"
                 color="text"
                 onClick={() => {
                   detachMlPipeline({ indexName, pipelineName });

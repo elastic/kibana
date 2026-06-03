@@ -15,17 +15,19 @@ import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
-import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
+import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
 import { EsQueryParser } from './es_query_parser';
+import { EsqlQueryParser } from './esql_query_parser';
 import { Utils, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
-import { SearchAPI } from './search_api';
-import { TimeCache } from './time_cache';
+import type { SearchAPI } from './search_api';
+import type { TimeCache } from './time_cache';
 import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
-import {
+import type {
   Bool,
   Data,
   VegaSpec,
@@ -271,8 +273,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     }
     this.vlspec = this.spec;
-    const vegaLogger = logger(Warn); // note: eslint has a false positive here
-    vegaLogger.warn = this._onWarning.bind(this);
+    const vegaLogger = logger(Warn);
+    vegaLogger.warn = (...args) => {
+      this._onWarning(...args);
+      return vegaLogger;
+    };
     this.spec = compile(this.vlspec as TopLevelSpec, { logger: vegaLogger }).spec;
 
     // When using Vega-Lite (VL) with the type=map and user did not provid their own projection settings,
@@ -601,6 +606,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       const onWarn = this._onWarning.bind(this);
       this._urlParsers = {
         elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
+        esql: new EsqlQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),
         emsfile: new EmsFileParser(serviceSettings),
         url: new UrlParser(onWarn),
       };
@@ -740,6 +746,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'tickColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'domainColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
+    this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
     this._setDefaultValue('transparent', 'config', 'background');
   }
@@ -775,8 +782,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    */
   _onWarning(...args: any[]) {
     if (!this.hideWarnings) {
-      this.warnings.push(Utils.formatWarningToStr(args));
-      return Utils.formatWarningToStr(args);
+      this.warnings.push(Utils.formatWarningToStr(...args));
+      return Utils.formatWarningToStr(...args);
     }
   }
 }

@@ -1,4 +1,4 @@
-## NOW
+# NOW
 
 Returns the current date and time.
 
@@ -12,13 +12,13 @@ This function does not take any parameters.
 
 ## Examples
 
-#Retrieve the current date and time
+Returns a single row with the current date and time as the value of the `current_date` column:
 
 ```esql
 ROW current_date = NOW()
 ```
 
-#Retrieve logs from the last hour
+Filters and retrieves log entries from the `sample_data` index where the `@timestamp` is within the last hour:
 
 ```esql
 FROM sample_data

@@ -96,3 +96,10 @@ export const ALL_REVERT_RULES_SKIPPED = (skipped: number) =>
       values: { skipped },
     }
   );
+
+export const DEPRECATION_REVIEW_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.prebuiltRules.toast.deprecationReviewFetchFailure',
+  {
+    defaultMessage: 'Failed to fetch deprecated rules',
+  }
+);

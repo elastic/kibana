@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { EuiIcon, EuiPageHeaderProps } from '@elastic/eui';
+import type { useHistory } from 'react-router-dom';
+import { useRouteMatch } from 'react-router-dom';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useGetUrlParams } from '../../hooks';
 import { MonitorDetailsAlerts } from './monitor_alerts/monitor_detail_alerts';
 import { MonitorAlertsIcon } from './monitor_alerts/alerts_icon';
 import { MonitorNotFoundPage } from './monitor_not_found_page';
@@ -30,7 +33,7 @@ import {
   MONITOR_ROUTE,
   MONITORS_ROUTE,
 } from '../../../../../common/constants';
-import { RouteProps } from '../../routes';
+import type { RouteProps } from '../../routes';
 
 export const getMonitorDetailsRoute = (
   history: ReturnType<typeof useHistory>,
@@ -96,7 +99,7 @@ export const getMonitorDetailsRoute = (
 const getMonitorsBreadcrumb = (syntheticsPath: string) => ({
   text: (
     <>
-      <EuiIcon size="s" type="arrowLeft" />{' '}
+      <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />{' '}
       <FormattedMessage
         id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
         defaultMessage="Monitors"
@@ -115,6 +118,7 @@ const getMonitorSummaryHeader = (
 ): EuiPageHeaderProps => {
   // Not a component, but it doesn't matter. Hooks are just functions
   const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+  const { remoteName } = useGetUrlParams(); // eslint-disable-line react-hooks/rules-of-hooks
 
   if (!match) {
     return {};
@@ -122,6 +126,7 @@ const getMonitorSummaryHeader = (
 
   const search = history.location.search;
   const monitorId = match.params.monitorId;
+  const isRemote = Boolean(remoteName);
 
   const rightSideItems = [
     <Actions />,
@@ -161,14 +166,30 @@ const getMonitorSummaryHeader = (
         'data-test-subj': 'syntheticsMonitorErrorsTab',
       },
       {
-        label: i18n.translate('xpack.synthetics.monitorAlertsTab.title', {
-          defaultMessage: 'Alerts',
-        }),
-        prepend: <MonitorAlertsIcon />,
+        label: isRemote ? (
+          <EuiToolTip
+            content={i18n.translate('xpack.synthetics.monitorAlertsTab.disabledTooltip', {
+              defaultMessage: 'Alerts are not available for remote monitors',
+            })}
+            position="right"
+          >
+            <span tabIndex={0}>{ALERTS_LABEL}</span>
+          </EuiToolTip>
+        ) : (
+          ALERTS_LABEL
+        ),
+        prepend: isRemote ? undefined : <MonitorAlertsIcon />,
+        disabled: isRemote,
         isSelected: selectedTab === 'alerts',
-        href: `${syntheticsPath}${MONITOR_ALERTS_ROUTE.replace(':monitorId', monitorId)}${search}`,
+        href: isRemote
+          ? undefined
+          : `${syntheticsPath}${MONITOR_ALERTS_ROUTE.replace(':monitorId', monitorId)}${search}`,
         'data-test-subj': 'syntheticsMonitorAlertsTab',
       },
     ],
   };
 };
+
+const ALERTS_LABEL = i18n.translate('xpack.synthetics.monitorAlertsTab.title', {
+  defaultMessage: 'Alerts',
+});

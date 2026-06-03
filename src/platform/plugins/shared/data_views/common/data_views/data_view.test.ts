@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
+import type { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { DataViewField } from '../fields';
+import type { DataViewField } from '../fields';
 import { DataView } from './data_view';
 
 class MockFieldFormatter {}
@@ -476,8 +476,7 @@ describe('IndexPattern', () => {
         })
       ).toEqual(
         expect.objectContaining({
-          convert: expect.any(Function),
-          getConverterFor: expect.any(Function),
+          convertToText: expect.any(Function),
         })
       );
     });

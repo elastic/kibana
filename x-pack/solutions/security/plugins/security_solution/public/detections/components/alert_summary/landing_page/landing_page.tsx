@@ -54,14 +54,14 @@ export const LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID =
 
 export interface LandingPageProps {
   /**
-   * List of available AI for SOC integrations
+   * List of available EASE integrations
    */
   packages: PackageListItem[];
 }
 
 /**
- * Displays a gif of the alerts summary page, with empty prompt showing the top 2 available AI for SOC packages.
- * This page is rendered when no AI for SOC packages are installed.
+ * Displays a gif of the alerts summary page, with empty prompt showing the top 2 available EASE packages.
+ * This page is rendered when no EASE packages are installed.
  */
 export const LandingPage = memo(({ packages }: LandingPageProps) => {
   const { euiTheme } = useEuiTheme();
@@ -146,7 +146,7 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj={LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={navigateToIntegrationsPage}
             >
               {VIEW_ALL_INTEGRATIONS}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParsedUsageCollection } from './ts_parser';
+import type { ParsedUsageCollection } from './ts_parser';
 
 export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
 

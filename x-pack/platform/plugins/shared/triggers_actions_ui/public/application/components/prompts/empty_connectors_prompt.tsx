@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 export const EmptyConnectorsPrompt = ({
   onCTAClicked,
@@ -79,7 +79,7 @@ export const EmptyConnectorsPrompt = ({
             data-test-subj="createFirstActionButton"
             key="create-action"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
             onClick={onCTAClicked}
           >

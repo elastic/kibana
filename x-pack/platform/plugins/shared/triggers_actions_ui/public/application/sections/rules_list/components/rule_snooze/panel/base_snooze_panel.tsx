@@ -28,13 +28,14 @@ import {
   useGeneratedHtmlId,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleSnooze } from '@kbn/alerting-plugin/common';
+import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import React, { useState, useCallback, useMemo } from 'react';
 import { parseInterval } from '../../../../../../../common/parse_interval';
 
-import { SnoozeSchedule } from '../../../../../../types';
-import { COMMON_SNOOZE_TIMES, SnoozeUnit } from './constants';
+import type { SnoozeSchedule } from '../../../../../../types';
+import type { SnoozeUnit } from './constants';
+import { COMMON_SNOOZE_TIMES } from './constants';
 import { durationToTextString, scheduleSummary, usePreviousSnoozeInterval } from './helpers';
 import { DAYS, HOURS, MINUTES, MONTHS, WEEKS } from './translations';
 
@@ -240,7 +241,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                             {scheduleSummary(schedule as SnoozeSchedule)}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="arrowRight" />
+                            <EuiIcon type="chevronSingleRight" />
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiButton>
@@ -253,7 +254,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                 <EuiButtonEmpty
                   isDisabled={numberOfSchedules >= 5}
                   data-test-subj="ruleSchedulesListAddButton"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   onClick={onClickAddSchedule}
                 >
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.addButton', {
@@ -494,6 +495,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             iconType="info"
             size="s"
             title={i18n.translate(

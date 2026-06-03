@@ -9,7 +9,8 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 
-import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
+import type { LlmProxy } from './utils/create_llm_proxy';
+import { createLlmProxy } from './utils/create_llm_proxy';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -35,7 +36,7 @@ const esArchiveIndex =
 
 export default function (ftrContext: FtrProviderContext) {
   const { getService, getPageObjects } = ftrContext;
-  const pageObjects = getPageObjects(['common', 'searchPlayground', 'searchStart']);
+  const pageObjects = getPageObjects(['common', 'searchPlayground', 'indexManagement']);
   const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -188,11 +189,10 @@ export default function (ftrContext: FtrProviderContext) {
           it('should be able to create index from UI', async () => {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
-            await pageObjects.searchStart.expectToBeOnCreateIndexPage();
-            await pageObjects.searchStart.setIndexNameValue(indexName);
-            await pageObjects.searchStart.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.searchStart.clickCreateIndexButton();
-            await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
+            await pageObjects.indexManagement.expectToBeOnIndexManagement();
+            await pageObjects.indexManagement.clickCreateIndexButton();
+            await pageObjects.indexManagement.setCreateIndexName(indexName);
+            await pageObjects.indexManagement.clickCreateIndexSaveButton();
 
             // add mapping
             await es.indices.putMapping({

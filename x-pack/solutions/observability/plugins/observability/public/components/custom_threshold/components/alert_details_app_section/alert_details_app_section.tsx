@@ -7,12 +7,10 @@
 
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -28,24 +26,21 @@ import {
   ALERT_GROUP,
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { Threshold } from '../threshold';
-import { CustomThresholdAlert } from '../types';
+import type { CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
-import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
-import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
 import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
 
 interface AppSectionProps {
@@ -55,14 +50,7 @@ interface AppSectionProps {
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const services = useKibana().services;
-  const {
-    charts,
-    data,
-    application,
-    share: {
-      url: { locators },
-    },
-  } = services;
+  const { charts, data, application } = services;
   const { euiTheme } = useEuiTheme();
   const aiopsEnabled = application.capabilities.aiops?.enabled ?? false;
   const [dataView, setDataView] = useState<DataView>();
@@ -75,6 +63,9 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
   const groups = alert.fields[ALERT_GROUP];
+  const additionalFilters = useMemo(() => getGroupFilters(groups), [groups]);
+  const hasEvaluationValues: boolean =
+    alert.fields[ALERT_EVALUATION_VALUES]?.some((value) => value != null) ?? false;
 
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
@@ -133,17 +124,6 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
       {ruleParams.criteria.map((criterion, index) => {
-        const appUrl = getViewInAppUrl({
-          dataViewId: dataView?.id,
-          groups,
-          logsLocator: locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
-          metrics: criterion?.metrics,
-          searchConfiguration:
-            ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
-          startedAt: alertStart,
-          endedAt: alertEnd,
-        });
-
         return (
           <EuiFlexItem key={`criterion-${index}`}>
             <EuiPanel hasBorder hasShadow={false}>
@@ -156,18 +136,6 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
                       </h4>
                     </EuiTitle>
                   </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiLink data-test-subj={`viewLogs-${index}`} href={appUrl} color="text">
-                    <EuiIcon type="sortRight" />
-                    &nbsp;
-                    {i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel',
-                      {
-                        defaultMessage: 'Open in Discover',
-                      }
-                    )}
-                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
@@ -195,7 +163,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={5}>
                   <RuleConditionChart
-                    additionalFilters={getGroupFilters(groups)}
+                    additionalFilters={additionalFilters}
                     annotations={annotations}
                     chartOptions={{
                       // For alert details page, the series type needs to be changed to 'bar_stacked'
@@ -214,7 +182,9 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
           </EuiFlexItem>
         );
       })}
-      {aiopsEnabled && <LogRateAnalysis alert={alert} dataView={dataView} services={services} />}
+      {aiopsEnabled && hasEvaluationValues && (
+        <LogRateAnalysis alert={alert} dataView={dataView} services={services} />
+      )}
     </EuiFlexGroup>
   );
 }

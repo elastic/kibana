@@ -23,9 +23,9 @@ import {
   EuiLink,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
-import { RenderingService } from '@kbn/core-rendering-browser';
-import { ExampleDefinition } from './types';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { ExampleDefinition } from './types';
 
 interface Props {
   rendering: RenderingService;
@@ -91,16 +91,15 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }:
                     </EuiLink>
                     <EuiButtonIcon
                       iconType="popout"
+                      aria-label="Open in new tab"
                       onClick={() =>
                         window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')
                       }
-                    >
-                      Open in new tab
-                    </EuiButtonIcon>
+                    />
                   </React.Fragment>
                 }
                 image={def.image}
-                footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+                footer={def.links ? <EuiListGroup listItems={def.links} /> : undefined}
               />
             </EuiFlexItem>
           ))}

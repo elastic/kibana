@@ -8,22 +8,23 @@
 import { getChartsTheme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
+import type { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { IUnifiedSearchPluginServices, SearchBar } from '@kbn/unified-search-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { merge } from 'lodash';
 import React, { useMemo } from 'react';
 import { Subject } from 'rxjs';
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
-import { StreamsAppStartDependencies } from '../public/types';
+import type { StreamsAppStartDependencies } from '../public/types';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
   const appParams = coreMock.createAppMountParameters();
@@ -56,6 +57,8 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     refresh: jest.fn(),
   });
 
+  jest.spyOn(core.pricing, 'isFeatureAvailable').mockReturnValue(true);
+
   return {
     appParams,
     core,
@@ -87,16 +90,10 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         savedObjectsTagging: {},
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-        licensing: {},
+        licensing: licensingMock.createStart(),
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},
-        discover: {
-          locator: {
-            getRedirectUrl: () => '',
-          },
-        },
-        observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
         unifiedDocViewer: {} as unknown as UnifiedDocViewerStart,
         charts: {
           theme: {
@@ -114,8 +111,8 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     } as { start: StreamsAppStartDependencies },
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
-      PageTemplate: () => null,
       telemetryClient: telemetryService.getClient(),
+      version: '1.0.0',
     },
     isServerless: false,
   };

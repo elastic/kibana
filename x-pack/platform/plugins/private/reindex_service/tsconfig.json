@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -27,6 +27,7 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/i18n",
     "@kbn/upgrade-assistant-pkg-common",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

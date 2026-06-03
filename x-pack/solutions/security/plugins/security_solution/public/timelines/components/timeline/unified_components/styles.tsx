@@ -59,6 +59,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
 }))`
+  height: 100%;
+
   .udtTimeline .euiDataGrid__virtualized {
     ${({ theme }) =>
       `scrollbar-color: ${theme.eui.euiColorMediumShade} ${theme.eui.euiColorLightShade}`};
@@ -194,15 +196,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     width: fit-content;
   }
 
-  .udtTimeline .rightPosition {
-    position: absolute;
-    right: 5px;
-
-    button {
-      ${({ theme }) => `color: ${theme.eui.euiColorDarkShade};`}
-    }
-  }
-
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
   }
@@ -219,8 +212,9 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   ${leadingActionsColumnStyles}
 `;
 
+// we need this flyout to be above the timeline flyout (which has a z-index of 1003)
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
-    z-index: 1001 !important;
+    z-index: 1004 !important;
   }
 `;

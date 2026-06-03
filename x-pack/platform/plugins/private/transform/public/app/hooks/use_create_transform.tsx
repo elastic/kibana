@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -29,6 +29,7 @@ interface CreateTransformArgs {
   transformConfig: PutTransformsRequestSchema;
   createDataView: boolean;
   timeFieldName?: string;
+  deferValidation?: boolean;
 }
 
 export const useCreateTransform = () => {
@@ -52,11 +53,12 @@ export const useCreateTransform = () => {
       transformConfig,
       createDataView = false,
       timeFieldName,
+      deferValidation,
     }: CreateTransformArgs) => {
       return http.put<PutTransformsResponseSchema>(
         addInternalBasePath(`transforms/${transformId}`),
         {
-          query: { createDataView, timeFieldName },
+          query: { createDataView, timeFieldName, deferValidation },
           body: JSON.stringify(transformConfig),
           version: '1',
         }

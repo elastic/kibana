@@ -9,12 +9,12 @@ import type { TimeRange } from '@kbn/es-query';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isEmpty } from 'lodash';
 import { getGroupFilters } from './helpers/get_group';
-import { SearchConfigurationWithExtractedReferenceType } from './types';
-import type { CustomThresholdExpressionMetric } from './types';
-import { Group } from '../typings';
+import type { SearchConfigurationWithExtractedReferenceType } from './types';
+import type { BaseMetricExpressionParams, CustomThresholdExpressionMetric } from './types';
+import type { Group } from '../typings';
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
   dataViewId?: string;
@@ -24,24 +24,30 @@ export interface GetViewInAppUrlArgs {
   metrics?: CustomThresholdExpressionMetric[];
   startedAt?: string;
   spaceId?: string;
+  timeSize?: BaseMetricExpressionParams['timeSize'];
+  timeUnit?: BaseMetricExpressionParams['timeUnit'];
 }
 
-export const getViewInAppUrl = ({
+export const getViewInAppLocatorParams = ({
   dataViewId,
   endedAt,
   groups,
-  logsLocator,
   metrics = [],
   searchConfiguration,
   startedAt = new Date().toISOString(),
-  spaceId,
+  timeSize,
+  timeUnit,
 }: GetViewInAppUrlArgs) => {
-  if (!logsLocator) return '';
-
   const searchConfigurationQuery = searchConfiguration?.query.query;
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
-  const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
+  const lookBackWindow =
+    timeSize !== undefined && timeUnit ? { size: timeSize, unit: timeUnit } : undefined;
+  const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(
+    startedAt,
+    endedAt,
+    lookBackWindow
+  );
   timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
@@ -67,14 +73,19 @@ export const getViewInAppUrl = ({
     dataViewSpec = searchConfiguration.index as DataViewSpec;
   }
 
-  return logsLocator.getRedirectUrl(
-    {
-      dataViewId,
-      dataViewSpec,
-      timeRange,
-      query,
-      filters: [...searchConfigurationFilters, ...groupFilters],
-    },
-    { spaceId }
-  );
+  return {
+    dataViewId,
+    dataViewSpec,
+    timeRange,
+    query,
+    filters: [...searchConfigurationFilters, ...groupFilters],
+  };
+};
+
+export const getViewInAppUrl = ({ logsLocator, spaceId, ...rest }: GetViewInAppUrlArgs) => {
+  if (!logsLocator) return '';
+
+  const params = getViewInAppLocatorParams(rest);
+
+  return logsLocator.getRedirectUrl(params, { spaceId });
 };

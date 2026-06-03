@@ -22,6 +22,7 @@ import type { ApmConfigSchema } from './apm_config';
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
   active: true,
+  captureHeaders: false,
   contextPropagationOnly: true,
   environment: 'development',
   globalLabels: {},
@@ -48,7 +49,6 @@ export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfi
 const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
   breakdownMetrics: false,
   captureBody: 'off',
-  captureHeaders: false,
   metricsInterval: '120s',
   transactionSampleRate: 0.1,
 };
@@ -67,8 +67,12 @@ interface KibanaRawConfig {
   };
 }
 
+type ApmBaseConfiguration = AgentConfigOptions & {
+  servicesOverrides?: Record<string, AgentConfigOptions>;
+};
+
 export class ApmConfiguration {
-  private baseConfig?: AgentConfigOptions;
+  private baseConfig?: ApmBaseConfiguration;
   private kibanaVersion: string;
   private pkgBuild: Record<string, any>;
 
@@ -92,12 +96,17 @@ export class ApmConfiguration {
       serviceName,
     };
 
-    const serviceOverride = servicesOverrides[serviceName];
+    const serviceOverride = merge(
+      {},
+      baseConfig.servicesOverrides?.[serviceName],
+      servicesOverrides[serviceName]
+    );
     if (serviceOverride) {
       baseConfig = merge({}, baseConfig, serviceOverride);
     }
 
-    return baseConfig;
+    const { servicesOverrides: _servicesOverrides, ...resolvedConfig } = baseConfig;
+    return resolvedConfig;
   }
 
   public getTelemetryConfig(): TelemetryConfig {
@@ -123,6 +132,7 @@ export class ApmConfiguration {
           serviceVersion: this.kibanaVersion,
         },
         DEFAULT_CONFIG,
+        this.getElasticAPMConfigDerivedFromOTelConfig(),
         this.getUuidConfig(),
         this.getGitConfig(),
         this.getCiConfig(),
@@ -156,6 +166,32 @@ export class ApmConfiguration {
     }
 
     return this.baseConfig;
+  }
+
+  /**
+   * Retrieve the default Elastic APM config derived from the OTel config.
+   * Only applies when `telemetry.tracing.enabled` is true; otherwise returns an empty object.
+   *
+   * @returns The default Elastic APM config derived from the OTel config.
+   */
+  private getElasticAPMConfigDerivedFromOTelConfig(): ApmBaseConfiguration {
+    const telemetryConfig = this.getTelemetryConfig();
+    if (telemetryConfig.tracing.enabled) {
+      // We want to disable Elastic APM if OTel tracing is enabled.
+      // Note that this is only used for calculating our default config. The user can still override these.
+      return {
+        active: false,
+        contextPropagationOnly: false,
+        servicesOverrides: {
+          // Keep RUM active by default
+          'kibana-frontend': {
+            active: true,
+          },
+        },
+      };
+    }
+
+    return {};
   }
 
   /**

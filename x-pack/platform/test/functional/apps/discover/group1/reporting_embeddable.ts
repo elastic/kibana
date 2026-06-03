@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -35,6 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const GENERATE_CSV_DATA_TEST_SUBJ = 'embeddablePanelAction-generateCsvReport';
   const SAVED_DISCOVER_SESSION_WITH_DATA_VIEW = 'savedDiscoverSessionWithDataView';
   const SAVED_DISCOVER_SESSION_WITH_ESQL = 'savedDiscoverSessionWithESQL';
+  const SAVED_DISCOVER_SESSION_WITH_ESQL_NON_TRANSFORMATIONAL =
+    'savedDiscoverSessionWithESQLNonTransformational';
 
   const getDashboardPanelReport = async (title: string, { timeout } = { timeout: 60 * 1000 }) => {
     await toasts.dismissAll();
@@ -125,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(SAVED_DISCOVER_SESSION_WITH_DATA_VIEW);
       await header.waitUntilLoadingHasFinished();
 
-      // create and save a discover session with filters in ES|QL mode
+      // create and save a discover session with filters in ES|QL mode (transformational)
       await discover.clickNewSearchButton();
       await discover.selectTextBaseLang();
       await header.waitUntilLoadingHasFinished();
@@ -138,6 +140,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getDocCount()).to.be(5);
       await discover.saveSearch(SAVED_DISCOVER_SESSION_WITH_ESQL);
+      await header.waitUntilLoadingHasFinished();
+
+      // create and save a discover session in ES|QL mode (non-transformational, with columns)
+      await discover.clickNewSearchButton();
+      await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 50');
+      await testSubjects.click('querySubmitButton');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await discover.saveSearch(SAVED_DISCOVER_SESSION_WITH_ESQL_NON_TRANSFORMATIONAL);
       await header.waitUntilLoadingHasFinished();
     });
 
@@ -176,5 +193,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
     );
+
+    describe(`Generate Embeddable CSV for ${SAVED_DISCOVER_SESSION_WITH_ESQL_NON_TRANSFORMATIONAL}`, () => {
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
+      });
+
+      it('generates a report with @timestamp prepended for non-transformational ES|QL', async () => {
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await setDashboardGlobalTimeRange();
+        await addEmbeddableToDashboard(SAVED_DISCOVER_SESSION_WITH_ESQL_NON_TRANSFORMATIONAL);
+
+        const { text: csvFile } = await getDashboardPanelReport(
+          SAVED_DISCOVER_SESSION_WITH_ESQL_NON_TRANSFORMATIONAL
+        );
+        const headerRow = csvFile.split('\n')[0];
+        expect(headerRow).to.contain('@timestamp');
+        expect(headerRow).to.contain('extension');
+      });
+    });
+
+    describe(`Generate Embeddable CSV for ${SAVED_DISCOVER_SESSION_WITH_ESQL}`, () => {
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
+      });
+
+      it('does not prepend @timestamp for transformational ES|QL', async () => {
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await setDashboardGlobalTimeRange();
+        await addEmbeddableToDashboard(SAVED_DISCOVER_SESSION_WITH_ESQL);
+
+        const { text: csvFile } = await getDashboardPanelReport(SAVED_DISCOVER_SESSION_WITH_ESQL);
+        const headerRow = csvFile.split('\n')[0];
+        expect(headerRow).not.to.contain('@timestamp');
+        expect(headerRow).to.contain('averageB');
+        expect(headerRow).to.contain('extension');
+      });
+    });
   });
 }

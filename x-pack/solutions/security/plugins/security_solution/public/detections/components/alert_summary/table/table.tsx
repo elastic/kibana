@@ -25,8 +25,9 @@ import type {
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import styled from '@emotion/styled';
+import { RELATED_INTEGRATION } from '../../../constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useAdditionalBulkActions } from '../../../hooks/alert_summary/use_additional_bulk_actions';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../../common';
 import { ActionsCell } from './actions_cell';
@@ -36,9 +37,10 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
+import { useBulkAddToChatConfig } from '../../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export const TIMESTAMP_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.timeStamp',
@@ -63,7 +65,7 @@ export const columns: EuiDataGridProps['columns'] = [
     displayAsText: TIMESTAMP_COLUMN,
   },
   {
-    id: 'signal.rule.rule_id',
+    id: RELATED_INTEGRATION,
     displayAsText: RELATED_INTEGRATION_COLUMN,
   },
   {
@@ -90,6 +92,7 @@ export const CASES_CONFIGURATION = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
   syncAlerts: true,
+  extractObservables: true,
 };
 
 // This will guarantee that ALL cells will have their values vertically centered.
@@ -105,22 +108,9 @@ export const EuiDataGridStyleWrapper = styled.div`
 
 export interface AdditionalTableContext {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 export interface TableProps {
@@ -133,38 +123,27 @@ export interface TableProps {
    */
   groupingFilters: Filter[];
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 /**
  * Renders the table showing all the alerts. This component leverages the ResponseOps AlertsTable in a similar way that the alerts page does.
  * The table is used in combination with the GroupedAlertsTable component.
  */
-export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }: TableProps) => {
+export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) => {
   const {
     services: {
       application,
+      agentBuilder,
       cases,
       data,
       fieldFormats,
       http,
       licensing,
       notifications,
+      rendering,
       uiSettings,
       settings,
     },
@@ -175,13 +154,30 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
+      agentBuilder,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
   );
+
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_alert_summary');
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersSelector);
@@ -198,9 +194,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     [globalFilters, groupingFilters, timeRangeFilter]
   );
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
-  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
+  const browserFields = useBrowserFields(PageScope.alerts);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
@@ -209,7 +203,6 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     const combinedQuery = combineQueries({
       config: getEsQueryConfig(uiSettings),
       dataProviders: [],
-      dataViewSpec,
       dataView,
       browserFields,
       filters,
@@ -227,20 +220,14 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     } catch {
       return { bool: {} };
     }
-  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
+  }, [browserFields, dataView, filters, globalQuery, uiSettings]);
 
   const renderAdditionalToolbarControls = useCallback(
     () => <AdditionalToolbarControls dataView={dataView} />,
     [dataView]
   );
 
-  const additionalContext: AdditionalTableContext = useMemo(
-    () => ({
-      packages,
-      ruleResponse,
-    }),
-    [packages, ruleResponse]
-  );
+  const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
 
   const refetchRef = useRef<AlertsTableImperativeApi>(null);
   const refetch = useCallback(() => {
@@ -248,6 +235,8 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
   }, []);
 
   const bulkActions = useAdditionalBulkActions({ refetch });
+
+  const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
   return (
     <EuiDataGridStyleWrapper>
@@ -261,15 +250,18 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
         consumers={ALERT_TABLE_CONSUMERS}
         gridStyle={GRID_STYLE}
         id={TableId.alertsOnAlertSummaryPage}
+        isMutedAlertsEnabled={false}
         query={query}
         ref={refetchRef}
         renderActionsCell={ActionsCell}
         renderAdditionalToolbarControls={renderAdditionalToolbarControls}
         renderCellValue={CellValue}
         rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+        runtimeMappings={runtimeMappings}
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={maybeBulkAddToChatConfig}
       />
     </EuiDataGridStyleWrapper>
   );

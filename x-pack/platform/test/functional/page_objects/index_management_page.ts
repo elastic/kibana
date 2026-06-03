@@ -5,21 +5,18 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
-export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
+export function IndexManagementPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const pageObjects = getPageObjects(['common']);
 
   const browser = getService('browser');
   return {
     async sectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
-    },
-
-    async expectToBeOnSearchIndexManagement() {
-      await testSubjects.existOrFail('elasticsearchIndexManagement');
     },
 
     async expectToBeOnIndexManagement() {
@@ -192,15 +189,15 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       },
       async expectEditSettingsToBeEnabled() {
         await testSubjects.existOrFail('indexDetailsSettingsEditModeSwitch', { timeout: 2000 });
-        const isEditSettingsButtonDisabled = await testSubjects.isEnabled(
-          'indexDetailsSettingsEditModeSwitch'
-        );
-        expect(isEditSettingsButtonDisabled).to.be(true);
+        await retry.waitFor('edit settings switch to be enabled', async () => {
+          return (await testSubjects.isEnabled('indexDetailsSettingsEditModeSwitch')) === true;
+        });
       },
       async expectIndexDetailsMappingsAddFieldToBeEnabled() {
         await testSubjects.existOrFail('indexDetailsMappingsAddField');
-        const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
-        expect(isMappingsFieldEnabled).to.be(true);
+        await retry.waitFor('mappings add field button to be enabled', async () => {
+          return (await testSubjects.isEnabled('indexDetailsMappingsAddField')) === true;
+        });
       },
       async expectTabsExists() {
         await testSubjects.existOrFail('indexDetailsTab-mappings', { timeout: 2000 });
@@ -250,6 +247,17 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       expect(indexNames.some((i) => i === indexName)).to.be(true);
     },
 
+    async clickCreateIndexShowApiButton() {
+      await testSubjects.existOrFail('createIndexShowApiButton');
+      await testSubjects.click('createIndexShowApiButton');
+    },
+    async getCreateIndexShowApiButtonText() {
+      return await testSubjects.getVisibleText('createIndexShowApiButton');
+    },
+    async getCreateIndexApiCodeBlockContent() {
+      await testSubjects.existOrFail('createIndexApiCodeBlock');
+      return await testSubjects.getVisibleText('createIndexApiCodeBlock');
+    },
     async confirmDeleteModalIsVisible() {
       await testSubjects.existOrFail('deleteIndexMenuButton');
       await testSubjects.click('deleteIndexMenuButton');
@@ -322,6 +330,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail(manageIndexTab);
       const manageIndexComponent = await testSubjects.find(manageIndexTab);
       await manageIndexComponent.click();
+    },
+    async navigateToIndexManagementTab(
+      path: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
+    ) {
+      await pageObjects.common.navigateToApp('indexManagement', { path });
     },
   };
 }

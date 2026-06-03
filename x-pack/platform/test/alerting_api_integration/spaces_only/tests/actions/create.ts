@@ -46,6 +46,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
+        is_connector_type_deprecated: false,
       });
       expect(typeof response.body.id).to.be('string');
 
@@ -113,6 +114,110 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
         });
     });
 
+    it('should create a connector with a custom user-defined ID', async () => {
+      const customId = 'my-custom-connector-id';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My connector with custom ID',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        });
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'connector', 'actions');
+      expect(response.body.id).to.eql(customId);
+      expect(response.body.name).to.eql('My connector with custom ID');
+    });
+
+    it('should return 400 when creating a connector with the same ID as a preconfigured connector', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-slack1`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My connector',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: 'test',
+          },
+          secrets: {
+            encrypted: 'test',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'This my-slack1 already exists in a preconfigured action.',
+        });
+    });
+
+    it('should return 400 when creating a connector with a non-slugified ID', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/My%20Invalid%20ID!`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My connector',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message:
+            '[request params.id]: Connector ID must contain only lowercase letters, numbers, and hyphens.',
+        });
+    });
+
+    it('should return 409 conflict when creating a connector with a duplicate custom ID', async () => {
+      const customId = 'duplicate-connector-id';
+
+      // Create first connector with custom ID
+      const firstResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'First connector',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: 'test',
+          },
+          secrets: {
+            encrypted: 'test',
+          },
+        });
+
+      expect(firstResponse.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, firstResponse.body.id, 'connector', 'actions');
+
+      // Try to create second connector with same custom ID
+      const secondResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'Second connector',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: 'test',
+          },
+          secrets: {
+            encrypted: 'test',
+          },
+        });
+
+      expect(secondResponse.status).to.eql(409);
+    });
+
     it('should notify feature usage when creating a gold connector type', async () => {
       const testStart = new Date();
       const response = await supertest
@@ -132,7 +237,7 @@ export default function createConnectorTests({ getService }: FtrProviderContext)
       } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
       expect(features).to.be.an(Array);
       const noopFeature = features.find(
-        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+        (feature: { id: string }) => feature.id === 'Connector: Test: Noop'
       );
       expect(noopFeature).to.be.ok();
       expect(noopFeature.last_used).to.be.a('string');

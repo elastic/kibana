@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceLocationErrors } from '../runtime_types';
+import type { ServiceLocationErrors } from '../runtime_types';
 
 export interface TestNowResponse {
   errors?: ServiceLocationErrors;
@@ -19,4 +19,12 @@ export interface AgentPolicyInfo {
   status: string;
   description?: string;
   namespace?: string;
+  spaceIds?: string[];
+}
+
+export interface PackagePolicyLink {
+  locationId: string;
+  locationLabel: string;
+  agentPolicyId: string;
+  packagePolicyId: string;
 }

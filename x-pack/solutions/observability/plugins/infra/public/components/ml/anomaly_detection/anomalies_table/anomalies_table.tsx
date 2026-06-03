@@ -160,7 +160,7 @@ const AnomalyActionMenu = ({
   const items = [
     <EuiContextMenuItem
       key="openInAnomalyExplorer"
-      icon="popout"
+      icon="external"
       data-test-subj="infraAnomalyFlyoutOpenInAnomalyExplorer"
       {...anomaliesUrl}
     >
@@ -186,7 +186,7 @@ const AnomalyActionMenu = ({
     const showInHostsItem = !hostName ? (
       <EuiContextMenuItem
         key="showAffectedHosts"
-        icon="search"
+        icon="magnify"
         data-test-subj="infraAnomalyFlyoutShowAffectedHosts"
         href={hostsLocator?.getRedirectUrl({
           dateRange: {
@@ -210,7 +210,7 @@ const AnomalyActionMenu = ({
         showInHostsItem
       ) : (
         <EuiContextMenuItem
-          icon="search"
+          icon="magnify"
           data-test-subj="infraAnomalyFlyoutShowInInventory"
           onClick={showInInventory}
         >
@@ -230,7 +230,7 @@ const AnomalyActionMenu = ({
       button={
         <EuiButtonIcon
           data-test-subj="infraAnomalyActionMenuButton"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={handleToggleMenu}
           aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
             defaultMessage: 'Open',
@@ -253,7 +253,7 @@ export const NoAnomaliesFound = () => {
       `}
     >
       <EuiEmptyPrompt
-        iconType="eyeClosed"
+        iconType="eyeSlash"
         iconColor={euiTheme.euiTheme.colors.mediumShade}
         title={
           <h3 data-test-subj="noAnomaliesFoundMsg">
@@ -279,7 +279,7 @@ export interface Props {
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
-  // subject to watch the completition of the request
+  // subject to watch the completion of the request
   fetcherOpts?: Pick<FetcherOptions, 'autoFetch' | 'requestObservable$'>;
   hideSelectGroup?: boolean;
 }
@@ -288,6 +288,23 @@ const DEFAULT_DATE_RANGE: TimeRange = {
   from: 'now-30d',
   to: 'now',
 };
+
+const JOB_OPTIONS = [
+  {
+    id: `hosts` as JobType,
+    label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
+      defaultMessage: 'Hosts',
+    }),
+    'data-test-subj': 'anomaliesHostComboBoxItem',
+  },
+  {
+    id: `k8s` as JobType,
+    label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
+      defaultMessage: 'Kubernetes Pods',
+    }),
+    'data-test-subj': 'anomaliesK8sComboBoxItem',
+  },
+];
 
 export const AnomaliesTable = ({
   closeFlyout,
@@ -307,26 +324,9 @@ export const AnomaliesTable = ({
     field: 'startTime',
     direction: 'desc',
   });
-  const jobOptions = [
-    {
-      id: `hosts` as JobType,
-      label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
-        defaultMessage: 'Hosts',
-      }),
-      'data-test-subj': 'anomaliesHostComboBoxItem',
-    },
-    {
-      id: `k8s` as JobType,
-      label: i18n.translate('xpack.infra.ml.anomalyFlyout.podsBtn', {
-        defaultMessage: 'Kubernetes Pods',
-      }),
-      'data-test-subj': 'anomaliesK8sComboBoxItem',
-    },
-  ];
-  const [jobType, setJobType] = useState<JobType>('hosts');
-  const [selectedJobType, setSelectedJobType] = useState<JobOption[]>([
-    jobOptions.find((item) => item.id === 'hosts') || jobOptions[0],
-  ]);
+
+  const [jobType, setJobType] = useState<JobType>(JOB_OPTIONS[0].id);
+  const [selectedJobType, setSelectedJobType] = useState<JobOption[]>([JOB_OPTIONS[0]]);
   const { source } = useSourceContext();
   const anomalyThreshold = source?.configuration.anomalyThreshold;
 
@@ -593,7 +593,7 @@ export const AnomaliesTable = ({
                     defaultMessage: 'Select group',
                   })}
                   singleSelection={{ asPlainText: true }}
-                  options={jobOptions}
+                  options={JOB_OPTIONS}
                   selectedOptions={selectedJobType}
                   onChange={changeJobType}
                   fullWidth
@@ -612,6 +612,9 @@ export const AnomaliesTable = ({
           sorting={{ sort: sorting }}
           onChange={onTableChange}
           loading={isLoading}
+          tableCaption={i18n.translate('xpack.infra.ml.anomalyFlyout.anomaliesCaption', {
+            defaultMessage: 'Anomaly detection results',
+          })}
           noItemsMessage={
             isLoading ? (
               <FormattedMessage

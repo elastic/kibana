@@ -19,6 +19,7 @@ import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { RELATED_INTEGRATION } from '../../../constants';
 import { updateFiltersArray } from '../../../utils/filter';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -32,7 +33,12 @@ const INTEGRATIONS_BUTTON = i18n.translate(
   }
 );
 
-export const FILTER_KEY = 'signal.rule.rule_id';
+const INTEGRATIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.alertSummary.integrations.popoverAriaLabel',
+  {
+    defaultMessage: 'Integrations filter',
+  }
+);
 
 export interface IntegrationFilterButtonProps {
   /**
@@ -43,7 +49,7 @@ export interface IntegrationFilterButtonProps {
 
 /**
  * Filter button displayed next to the KQL bar at the top of the alert summary page.
- * For the AI for SOC effort, each integration has one rule associated with.
+ * For EASE effort, each integration has one rule associated with.
  * This means that deselecting an integration is equivalent to filtering out by the rule for that integration.
  * The EuiFilterButton works as follow:
  * - if an integration is selected, this means that no filters live in filterManager
@@ -80,7 +86,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
         const existingFilters = filterManager.getFilters();
         const newFilters: Filter[] = updateFiltersArray(
           existingFilters,
-          FILTER_KEY,
+          RELATED_INTEGRATION,
           ruleId,
           changedOption.checked === 'on'
         );
@@ -98,7 +104,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
       `}
       data-test-subj={INTEGRATION_BUTTON_TEST_ID}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       isSelected={isPopoverOpen}
       numActiveFilters={items.filter((item) => item.checked === 'on').length}
       numFilters={items.filter((item) => item.checked !== 'off').length}
@@ -109,8 +115,9 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed={true}>
       <EuiPopover
+        aria-label={INTEGRATIONS_POPOVER_ARIA_LABEL}
         button={button}
         closePopover={togglePopover}
         id={filterGroupPopoverId}

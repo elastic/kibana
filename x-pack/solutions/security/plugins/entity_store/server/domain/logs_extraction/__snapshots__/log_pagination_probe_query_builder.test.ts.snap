@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildLogPaginationCursorProbeEsql sorts ASC, limits, then aggregates MAX(timestamp) and COUNT(*) 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-*
+  | WHERE
+      @timestamp >= TO_DATETIME(\\"2024-01-01T00:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2024-01-02T00:00:00.000Z\\")
+      AND ((TO_STRING(event.outcome) IS NULL OR TO_STRING(event.outcome) != \\"failure\\") AND (TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\" OR TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\" OR TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\"))
+  | SORT @timestamp ASC
+  | LIMIT 100
+  | STATS @timestamp = MAX(@timestamp), total_logs = COUNT(*)"
+`;

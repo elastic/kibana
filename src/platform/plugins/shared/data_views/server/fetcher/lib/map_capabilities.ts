@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Dictionary } from 'lodash';
-import { AggregationRestrictions } from '../../../common';
+import type { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Dictionary } from 'lodash';
+import type { AggregationRestrictions } from '../../../common';
 import { mergeJobConfigurations } from './jobs_compatibility';
 
 /**

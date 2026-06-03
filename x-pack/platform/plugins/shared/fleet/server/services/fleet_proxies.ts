@@ -19,6 +19,7 @@ import {
   MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
 } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
+import { validateFleetSavedObjectId } from '../../common/services';
 import type {
   DownloadSource,
   FleetProxy,
@@ -79,6 +80,8 @@ export async function createFleetProxy(
   const logger = appContextService.getLogger();
   logger.debug(`Creating fleet proxy ${data}`);
 
+  validateFleetSavedObjectId(options?.id);
+
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,
     fleetProxyDataToSOAttribute(data),
@@ -89,6 +92,35 @@ export async function createFleetProxy(
   );
   logger.debug(`Created fleet proxy ${options?.id}`);
   return savedObjectToFleetProxy(res);
+}
+
+export async function bulkCreateFleetProxies(
+  soClient: SavedObjectsClientContract,
+  proxies: Array<NewFleetProxy & { id?: string }>,
+  options?: { overwrite?: boolean }
+): Promise<FleetProxy[]> {
+  if (proxies.length === 0) {
+    return [];
+  }
+  const logger = appContextService.getLogger();
+  logger.debug(`Bulk creating ${proxies.length} fleet proxies`);
+
+  const res = await soClient.bulkCreate<FleetProxySOAttributes>(
+    proxies.map(({ id, ...data }) => ({
+      type: FLEET_PROXY_SAVED_OBJECT_TYPE,
+      id,
+      attributes: fleetProxyDataToSOAttribute(data),
+    })),
+    { overwrite: options?.overwrite }
+  );
+
+  const itemErrors = res.saved_objects.filter((so) => so.error);
+  if (itemErrors.length > 0) {
+    throw itemErrors[0].error;
+  }
+
+  logger.debug(`Bulk created ${proxies.length} fleet proxies`);
+  return res.saved_objects.map(savedObjectToFleetProxy);
 }
 
 export async function getFleetProxy(
@@ -114,10 +146,7 @@ export async function deleteFleetProxy(
   if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
-  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
-    soClient,
-    id
-  );
+  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(id);
 
   if (
     // download sources cannot be preconfigured
@@ -231,15 +260,12 @@ async function updateRelatedSavedObject(
   );
 }
 
-export async function getFleetProxyRelatedSavedObjects(
-  soClient: SavedObjectsClientContract,
-  proxyId: string
-) {
+export async function getFleetProxyRelatedSavedObjects(proxyId: string) {
   const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
     await Promise.all([
-      fleetServerHostService.listAllForProxyId(soClient, proxyId),
-      outputService.listAllForProxyId(soClient, proxyId),
-      downloadSourceService.listAllForProxyId(soClient, proxyId),
+      fleetServerHostService.listAllForProxyId(proxyId),
+      outputService.listAllForProxyId(proxyId),
+      downloadSourceService.listAllForProxyId(proxyId),
     ]);
 
   return {

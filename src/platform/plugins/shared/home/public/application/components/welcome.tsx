@@ -14,6 +14,7 @@
  */
 
 import React, { useEffect } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiTitle,
   EuiSpacer,
@@ -21,7 +22,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPortal,
-  UseEuiTheme,
   useEuiShadow,
   mathWithUnits,
 } from '@elastic/eui';
@@ -90,7 +90,7 @@ export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: Welcome
                 ${euiShadowM}
               `}
             >
-              <EuiIcon type="logoElastic" size="xxl" />
+              <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
             </span>
             <EuiTitle size="l">
               <h1>

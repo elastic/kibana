@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -38,7 +38,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     // The file data visualizer should work the same as with a trial license
     loadTestFile(
-      require.resolve('../../../../../functional/apps/ml/data_visualizer/file_data_visualizer')
+      require.resolve(
+        '../../../../../functional/apps/ml/data_visualizer/group2/file_data_visualizer'
+      )
     );
   });
 }

@@ -6,13 +6,21 @@
  */
 
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { Ping } from '../../../../../../common/runtime_types';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import type { Ping } from '../../../../../../common/runtime_types';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 
-export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
+export const useStdErrorLogs = ({
+  checkGroup,
+  remoteName,
+}: {
+  checkGroup?: string;
+  remoteName?: string;
+}) => {
+  const index = !checkGroup ? '' : getSyntheticsCcsIndex(remoteName);
+
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: !checkGroup ? '' : SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 1000,
       query: {
         bool: {
@@ -35,7 +43,7 @@ export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
         },
       },
     }),
-    [],
+    [checkGroup, remoteName],
     { name: 'getStdErrLogs' }
   );
 

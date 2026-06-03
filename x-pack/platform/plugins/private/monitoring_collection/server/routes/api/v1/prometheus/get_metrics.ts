@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { PrometheusExporter } from '@kbn/metrics';
 import { MONITORING_COLLECTION_BASE_PATH } from '../../../../constants';
 
@@ -28,7 +28,6 @@ export function registerV1PrometheusRoute({
         },
       },
       options: {
-        authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {},

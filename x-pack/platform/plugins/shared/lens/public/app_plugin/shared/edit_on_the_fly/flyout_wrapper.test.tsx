@@ -19,7 +19,6 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
       isScrollable
       isNewPanel
       isSaveable
-      language={'Lens'}
       onCancel={jest.fn()}
       navigateToLensEditor={jest.fn()}
       onApply={jest.fn()}
@@ -39,7 +38,6 @@ function mountFlyoutWrapper(propsOverrides: Partial<FlyoutWrapperProps> = {}) {
           isScrollable
           isNewPanel
           isSaveable
-          language={'Lens'}
           onCancel={jest.fn()}
           navigateToLensEditor={jest.fn()}
           onApply={jest.fn()}

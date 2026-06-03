@@ -12,6 +12,7 @@ import { parse } from '@kbn/datemath';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
@@ -25,7 +26,7 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
   // don't propagate the autoRefresh to the details page
-  const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
+  const { dateRange, autoRefresh: _, preferredSchema, ...assetDetails } = state ?? {};
 
   const assetDetailMenuItemLinkProps = getAssetDetailUrl({
     entityType,
@@ -36,6 +37,7 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
       from: parse(dateRange?.from ?? '')?.valueOf(),
       to: parse(dateRange?.to ?? '')?.valueOf(),
     },
+    preferredSchema: preferredSchema ?? DEFAULT_SCHEMA,
   });
 
   return (

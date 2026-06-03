@@ -18,7 +18,6 @@ import type { FatalErrorsStart } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
@@ -29,6 +28,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -58,11 +58,6 @@ export interface CoreStart {
   http: HttpStart;
   /** {@link CoreDiServiceStart} */
   injection: CoreDiServiceStart;
-  /**
-   * {@link SavedObjectsStart}
-   * @deprecated See https://github.com/elastic/kibana/issues/149098
-   */
-  savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */
@@ -88,6 +83,8 @@ export interface CoreStart {
   security: SecurityServiceStart;
   /** {@link UserProfileServiceStart} */
   userProfile: UserProfileServiceStart;
+  /** {@link IUserStorageClient} */
+  userStorage: IUserStorageClient;
   /** {@link RenderingService} */
   rendering: RenderingService;
 }

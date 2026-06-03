@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '../../expression_types';
+import type { Datatable } from '../../expression_types';
 import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
-import { MovingAverageArgs } from './moving_average';
+import type { MovingAverageArgs } from './moving_average';
 
 /**
  * Calculates the moving average of a specified column in the data table.

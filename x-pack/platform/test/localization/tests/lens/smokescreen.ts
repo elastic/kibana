@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { NULL_LABEL } from '@kbn/field-formats-common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -54,11 +55,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `Maximum de ${field}` : 'Maximum';
       case 'terms':
-        return field
-          ? `${values} valeurs les plus élevées de ${field}`
-          : 'Valeurs les plus élevées';
+        return field ? `Top ${values} valeurs de ${field}` : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '(null)';
       default:
         return term;
     }
@@ -96,9 +98,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `${field} の最高値` : '最高';
       case 'terms':
-        return field ? `${field}の上位${values} の値` : 'トップの値';
+        return field ? `${values} の上位値${field}` : 'トップの値';
       case 'sum':
         return '合計';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '（null）';
       default:
         return term;
     }
@@ -139,6 +144,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} 的排名前 ${values} 的值` : `排名最前值`;
       case 'sum':
         return '求和';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '（空）';
       default:
         return term;
     }
@@ -147,18 +155,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   function getTranslationDe(term: string, field?: string, values: number = 3) {
     switch (term) {
       case 'legacyMetric':
-        return 'Legacy-Metrik';
+        // xpack.lens.legacyMetric.label
+        return 'Veraltete Metrik';
       case 'datatable':
+        // xpack.lens.datatable.label
         return 'Tabelle';
       case 'bar':
-        return 'Bar'; // 'Säulendiagramm'; Not translated yet.
+        // xpack.lens.xyVisualization.barLabel
+        return 'Balkendiagramm';
       case 'line':
-        return 'Zeile';
+        // xpack.lens.xyVisualization.lineLabel
+        return 'Liniendiagramm';
       case 'pie':
-        return 'Torte';
+        // xpack.lens.pie.pielabel
+        return 'Kreisdiagramm';
       case 'treemap':
+        // xpack.lens.pie.treemaplabel
         return 'Treemap';
       case 'heatmap':
+        // xpack.lens.heatmap.heatmapLabel
         return 'Heatmap';
       case 'Number':
         return 'Zahl';
@@ -167,20 +182,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'Linear':
         return 'Linear';
       case 'Records':
-        return 'Aufzeichnungen';
+        // xpack.lens.indexPattern.records
+        return 'Einträge';
       case 'records':
+        // xpack.lens.indexPattern.records
         return 'Einträge';
       case 'moving_average':
+        // xpack.lens.indexPattern.movingAverage
         return 'Gleitender Durchschnitt';
       case 'average':
+        // xpack.dataVisualizer.index.lensChart.averageOfLabel
         return field ? `Durchschnitt von ${field}` : `Durchschnitt`;
       case 'max':
-        // return field ? `${field} Maximum` : 'Maximum';
+        // xpack.dataVisualizer.index.lensChart.maximumOfLabel
         return field ? `Maximal ${field}` : 'Maximum';
       case 'terms':
         return field ? `Top ${values} values of ${field}` : 'Top values'; // Not translated yet
       case 'sum':
+        // xpack.maps.aggType.sumLabel
         return 'Summe';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '(Null)';
       default:
         return term;
     }
@@ -197,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'de-DE':
         return getTranslationDe;
       default:
-        return (v: string, field?: string) => v;
+        return (v: string, field?: string) => (v === 'null' ? NULL_LABEL : v);
     }
   }
 
@@ -256,8 +279,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      // 4th item is the other bucket
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
+      // 10th item is the other bucket (9 top values + Other)
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(10);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
@@ -312,8 +335,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.switchToVisualization('line', termTranslator('line'));
 
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('line'));
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql(termTranslator('line'));
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -327,9 +352,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -350,7 +376,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.createLayer('data', undefined, 'bar');
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -366,16 +392,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // only changes one layer for compatible chart
       await lens.switchToVisualization('line', termTranslator('line'), 1);
 
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('bar'));
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('line'));
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql(termTranslator('line'));
 
       // generates new one layer chart based on selected layer
       await lens.switchToVisualization('pie', termTranslator('pie'), 1);
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('pie'));
+      expect(await lens.getLayerType()).to.eql(termTranslator('pie'));
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
 
-      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 5));
+      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 9));
       expect(sizeByText).to.be(termTranslator('average', 'machine.ram'));
     });
 
@@ -394,12 +422,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat(termTranslator('Percent'));
       await lens.editDimensionColor('#ff0000');
-      await lens.openVisualOptions();
+
+      await lens.openStyleSettingsFlyout();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues(termTranslator('Linear'));
+
+      await lens.closeFlyoutWithBackButton();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -479,8 +510,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
+      await lens.closeFlyoutWithBackButton();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -496,7 +528,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -509,6 +541,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from line chart to pie chart and to bar chart', async () => {
@@ -688,7 +722,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        termTranslator('null'),
         '222,420.00',
         '702,050.00',
         '1,879,613.33',
@@ -914,10 +948,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await lens.openStyleSettingsFlyout();
 
-      await lens.openVisualOptions();
       await retry.try(async () => {
         expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { IAsyncSearchRequestParams } from '@kbn/data-plugin/server/search';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
@@ -13,10 +16,16 @@ import type {
   IUiSettingsClient,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  EqlRequestParams,
+  ISearchStartSearchSource,
+} from '@kbn/data-plugin/common';
+import type { LicenseType } from '@kbn/licensing-types';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,
@@ -34,12 +43,12 @@ import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
+import type { RuleQueryInspectorFn } from './rule_query_inspector/types';
 import type {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
 } from './rules_settings';
-import type { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import type {
   Rule,
@@ -54,12 +63,15 @@ import type {
   SanitizedRule,
   RuleAlertData,
   Artifacts,
+  GapReason,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
 import type { AlertDeletionClient } from './alert_deletion';
+import type { PublicAsyncSearchClient } from './task_runner/types';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -78,7 +90,6 @@ export interface AlertingApiRequestHandlerContext {
   getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
-  getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -119,6 +130,7 @@ export interface RuleExecutorServices<
   actionsClient?: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
+  getMaintenanceWindowNames: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
   ruleMonitoringService?: PublicRuleMonitoringService;
   ruleResultService?: PublicRuleResultService;
@@ -128,7 +140,18 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   shouldWriteAlerts: () => boolean;
   uiSettingsClient: IUiSettingsClient;
+  getAsyncSearchClient: <T extends AsyncSearchParams>(
+    strategy: AsyncSearchStrategies
+  ) => PublicAsyncSearchClient<T>;
 }
+
+export type AsyncSearchStrategies =
+  | typeof ESQL_ASYNC_SEARCH_STRATEGY // ESQL
+  | typeof EQL_SEARCH_STRATEGY // EQL
+  | typeof ENHANCED_ES_SEARCH_STRATEGY; // search
+
+export type ESQLQueryRequest = ESQLSearchParams & Omit<SqlQueryRequest, 'filter'>;
+export type AsyncSearchParams = ESQLQueryRequest | IAsyncSearchRequestParams | EqlRequestParams;
 
 export interface RuleExecutorOptions<
   Params extends RuleTypeParams = never,
@@ -153,6 +176,7 @@ export interface RuleExecutorOptions<
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
   ruleExecutionTimeout?: string;
+  cpsData?: CpsData;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -350,6 +374,13 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  /**
+   * When true, the alerting framework records change history events for this
+   * rule type via the registered `IChangeTrackingService`. Rule types must
+   * opt in (typically gated behind a config setting) before any history is
+   * tracked.
+   */
+  trackChanges?: boolean;
   alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
@@ -367,6 +398,12 @@ export interface RuleType<
    * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
    */
   internallyManaged?: boolean;
+  /**
+   * Optional function that returns the Elasticsearch query this rule type executes.
+   * When provided, the query inspector API exposes the query (and optionally its response)
+   * for debugging and investigation purposes.
+   */
+  queryInspector?: RuleQueryInspectorFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -430,15 +467,37 @@ export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
-export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
+export interface CpsLinkedProject {
+  id: string;
+  alias: string;
+  type: string;
+  organization: string;
+}
 
-export interface PublicMetricsSetters {
-  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
-  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
-  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
-  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
-  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
-  setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
+export interface CpsData {
+  resolvedExpression?: string;
+  linkedProjects: CpsLinkedProject[];
+}
+
+export interface ConsumerExecutionMetrics {
+  total_indexing_duration_ms: number;
+  total_enrichment_duration_ms: number;
+  gap_duration_s: number;
+  gap_range: { lte: string; gte: string };
+  matched_indices_count: number;
+  alerts_candidate_count: number;
+  alerts_suppressed_count: number;
+  frozen_indices_queried_count: number;
+  gap_reason?: GapReason;
+}
+
+export interface PublicRuleMonitoringService {
+  setMetric: <MetricName extends keyof ConsumerExecutionMetrics>(
+    metricName: MetricName,
+    value: ConsumerExecutionMetrics[MetricName]
+  ) => void;
+  setMetrics: (metrics: Partial<ConsumerExecutionMetrics>) => void;
+  clearGap: () => void;
 }
 
 export interface PublicLastRunSetters {
@@ -446,8 +505,6 @@ export interface PublicLastRunSetters {
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
-
-export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleResultService = PublicLastRunSetters;
 
@@ -459,5 +516,7 @@ export type {
   RawRuleLastRun,
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
+
+export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

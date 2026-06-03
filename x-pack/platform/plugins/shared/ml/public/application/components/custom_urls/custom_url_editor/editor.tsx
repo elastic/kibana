@@ -31,11 +31,11 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import { type Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { DashboardItems } from '../../../services/dashboard_service';
 import type { CustomUrlSettings } from './utils';
 import { isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
-import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import type { TimeRangeType } from './constants';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
@@ -113,9 +113,9 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       } catch (e) {
         dataViewToUse = undefined;
       }
-      if (dataViewToUse && dataViewToUse.timeFieldName) {
-        setHasTimefield(true);
-      }
+
+      setHasTimefield(dataViewToUse?.timeFieldName !== undefined);
+
       const dropDownOptions = await getDropDownOptions(
         isFirst.current,
         job,
@@ -242,8 +242,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
-  const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.attributes.title };
+  const dashboardOptions = dashboards.map(({ id, data }) => {
+    return { value: id, text: data.title };
   });
 
   const dataViewOptions = dataViewListItems.map(({ id, title }) => {
@@ -283,12 +283,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   return (
     <>
       <EuiTitle size="xs">
-        <h4>
+        <h2>
           <FormattedMessage
             id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
             defaultMessage="Create new custom URL"
           />
-        </h4>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiForm className="ml-edit-url-form" data-test-subj="mlJobCustomUrlForm">
@@ -316,6 +316,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           display="rowCompressed"
         >
           <EuiRadioGroup
+            name="linkToType"
             options={getLinkToOptions()}
             idSelected={type}
             onChange={onTypeChange}

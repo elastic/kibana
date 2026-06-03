@@ -7,17 +7,19 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FILTERS } from '@kbn/es-query';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { getEsQueryConfig, getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { DEFAULT_QUERY_STRING, EMPTY_FILTERS } from './constants';
-import { ObservabilityAlertSearchBarProps } from './types';
+import type { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
 
 const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
@@ -74,6 +76,12 @@ export function ObservabilityAlertSearchBar({
     http,
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   });
+  const { dataView } = useAlertsDataView({
+    http,
+    dataViewsService: dataViews,
+    toasts: notifications.toasts,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  });
 
   const clearSavedQuery = useCallback(
     () => (setSavedQuery ? setSavedQuery(undefined) : null),
@@ -93,12 +101,28 @@ export function ObservabilityAlertSearchBar({
     [indexNames]
   );
 
+  const spaceFilter = useMemo<Filter[]>(() => {
+    if (!spaceId) return [];
+    return [
+      {
+        meta: {
+          type: FILTERS.PHRASE,
+          key: SPACE_IDS,
+          params: { query: spaceId },
+          disabled: false,
+          negate: false,
+        },
+        query: { match_phrase: { [SPACE_IDS]: spaceId } },
+      },
+    ];
+  }, [spaceId]);
+
   const aggregatedFilters = useMemo(() => {
     const _filters = timeFilter
-      ? [timeFilter, ...filters, ...defaultFilters]
-      : [...filters, ...defaultFilters];
+      ? [timeFilter, ...filters, ...defaultFilters, ...spaceFilter]
+      : [...filters, ...defaultFilters, ...spaceFilter];
     return _filters.length ? _filters : undefined;
-  }, [timeFilter, filters, defaultFilters]);
+  }, [timeFilter, filters, defaultFilters, spaceFilter]);
 
   const submitQuery = useCallback(() => {
     try {
@@ -109,8 +133,9 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
-          filters: [...filters, ...(filterControls ?? []), ...defaultFilters],
+          filters: [...filters, ...(filterControls ?? []), ...defaultFilters, ...spaceFilter],
           config: getEsQueryConfig(uiSettings),
+          indexPattern: dataView,
         })
       );
       setTimeFilter(
@@ -133,9 +158,11 @@ export function ObservabilityAlertSearchBar({
     defaultFilters,
     filters,
     filterControls,
+    spaceFilter,
     uiSettings,
     toasts,
     onKueryChange,
+    dataView,
   ]);
 
   useEffect(() => {
@@ -201,7 +228,6 @@ export function ObservabilityAlertSearchBar({
           <AlertFilterControls
             dataViewSpec={dataViewSpec}
             spaceId={spaceId}
-            chainingSystem="HIERARCHICAL"
             controlsUrlState={controlConfigs}
             setControlsUrlState={onControlConfigsChange}
             filters={aggregatedFilters}
@@ -215,7 +241,6 @@ export function ObservabilityAlertSearchBar({
               dataViews,
               storage: Storage,
             }}
-            ControlGroupRenderer={ControlGroupRenderer}
             onInit={onControlApiAvailable}
           />
         )}

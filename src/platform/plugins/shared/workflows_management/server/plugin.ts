@@ -6,185 +6,151 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import { defineRoutes } from './api/routes';
+import { WorkflowManagementAuditLog } from './api/routes/utils/workflow_audit_logging';
+import { WorkflowsManagementApi } from './api/workflows_management_api';
+import { WorkflowsService } from './api/workflows_management_service';
+import { AvailabilityUpdater } from './availability';
+import {
+  createManagedWorkflowsSystemApiProvider,
+  createWorkflowsClientProvider,
+} from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../common';
-import { workflowSavedObjectType } from './saved_objects/workflow';
-import { SchedulerService } from './scheduler/scheduler_service';
-import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
-import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
+  getWorkflowsConnectorAdapter,
+  getConnectorType as getWorkflowsConnectorType,
+} from './connectors/workflows';
+import { WorkflowsManagementFeatureConfig } from './features';
+import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import type {
-  WorkflowsExecutionEnginePluginStartDeps,
-  WorkflowsManagementPluginServerDependenciesSetup,
-  WorkflowsPluginSetup,
-  WorkflowsPluginStart,
+  WorkflowsRequestHandlerContext,
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginSetupDeps,
+  WorkflowsServerPluginStart,
+  WorkflowsServerPluginStartDeps,
 } from './types';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { defineRoutes } from './workflows_management/workflows_management_routes';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
-import { registerFeatures } from './features';
+import { registerUISettings } from './ui_settings';
+import { stepSchemas } from '../common/step_schemas';
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
+export class WorkflowsPlugin
+  implements
+    Plugin<
+      WorkflowsServerPluginSetup,
+      WorkflowsServerPluginStart,
+      WorkflowsServerPluginSetupDeps,
+      WorkflowsServerPluginStartDeps
+    >
+{
   private readonly logger: Logger;
-  private readonly config: WorkflowsManagementConfig;
-  private workflowsService: WorkflowsService | null = null;
-  private schedulerService: SchedulerService | null = null;
-  private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
-  private unsecureActionsClient: IUnsecuredActionsClient | null = null;
+  private config: WorkflowsManagementConfig;
+  private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
-  // TODO: replace with esClient promise from core
+  private workflowsService: WorkflowsService | null = null;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
+  public setup(
+    core: CoreSetup<WorkflowsServerPluginStartDeps>,
+    plugins: WorkflowsServerPluginSetupDeps
+  ) {
     this.logger.debug('Workflows Management: Setup');
 
-    // Register workflow task definition
-    if (plugins.taskManager) {
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:scheduled': {
-          title: 'Scheduled Workflow Execution',
-          description: 'Executes workflows on a scheduled basis',
-          timeout: '5m',
-          maxAttempts: 3,
-          createTaskRunner: ({ taskInstance }) => {
-            // Capture the plugin instance in a closure
-            const plugin = this;
-            // Use a factory pattern to get dependencies when the task runs
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
+    registerUISettings(core, plugins);
 
-                // Create the actual task runner with dependencies
-                const taskRunner = createWorkflowTaskRunner({
-                  logger: plugin.logger,
-                  workflowsService: plugin.workflowsService!,
-                  workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
-                  actionsClient: plugin.unsecureActionsClient!,
-                })({ taskInstance });
-
-                return taskRunner.run();
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
-
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:run': {
-          title: 'Run Workflow',
-          description: 'Executes a workflow immediately',
-          timeout: '5m',
-          maxAttempts: 1,
-          createTaskRunner: ({ taskInstance }) => {
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-                const { workflowsExecutionEngine } =
-                  pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
-
-                return workflowsExecutionEngine.executeWorkflow(
-                  taskInstance.params.workflow,
-                  taskInstance.params.context
-                );
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
-    }
-
-    // Register saved object types
-    core.savedObjects.registerType(workflowSavedObjectType);
-
-    registerFeatures(plugins);
-
-    this.logger.debug('Workflows Management: Creating router');
-    const router = core.http.createRouter();
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    // Get ES client from core
-    const esClientPromise = core
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
+    const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
+    this.workflowsService = workflowsService;
 
-    // Get saved objects client from core
-    const getSavedObjectsClient = () =>
-      core
-        .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
+    const api = new WorkflowsManagementApi(workflowsService, this.config.available);
+    this.api = api;
 
-    this.workflowsService = new WorkflowsService(
-      esClientPromise,
-      this.logger,
-      getSavedObjectsClient,
-      WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
-      this.config.logging.console
-    );
-    this.api = new WorkflowsManagementApi(this.workflowsService);
+    if (plugins.actions) {
+      plugins.actions.registerType(getWorkflowsConnectorType(api));
 
-    // Register server side APIs
-    defineRoutes(router, this.api, this.logger);
-
-    return {
-      management: this.api,
-    };
-  }
-
-  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
-    this.logger.info('Workflows Management: Start');
-
-    this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
-
-    // Initialize workflow task scheduler with the start contract
-    this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
-
-    // Set task scheduler in workflows service
-    if (this.workflowsService) {
-      this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
+      if (plugins.alerting) {
+        plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
+      }
     }
 
-    const actionsTypes = plugins.actions.getAllTypes();
-    this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
-
-    this.logger.debug('Workflows Management: Creating scheduler service');
-    this.schedulerService = new SchedulerService(
-      this.logger,
-      this.workflowsService!,
-      this.unsecureActionsClient!,
-      plugins.taskManager
+    plugins.workflowsExtensions.registerWorkflowsClientProvider(
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
-    this.api!.setSchedulerService(this.schedulerService!);
+    plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
+      createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
+    );
 
-    this.logger.debug('Workflows Management: Started');
+    const spaces = plugins.spaces.spacesService;
+
+    const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
+    const audit = new WorkflowManagementAuditLog({ service: workflowsService });
+    defineRoutes(router, api, this.logger, spaces, workflowsService, audit);
+
+    if (plugins.inbox) {
+      this.logger.debug('Workflows Management: registering inbox provider');
+      plugins.inbox.registerActionProvider(
+        createWorkflowsInboxProvider({ api, logger: this.logger, audit })
+      );
+    }
 
     return {
-      // TODO: use api abstraction instead of schedulerService methods directly
-      pushEvent: this.schedulerService!.pushEvent.bind(this.schedulerService),
-      runWorkflow: this.schedulerService!.runWorkflow.bind(this.schedulerService),
+      management: api,
     };
   }
 
-  public stop() {}
+  public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
+    this.logger.debug('Workflows Management: Start');
+
+    stepSchemas.initialize(plugins.workflowsExtensions);
+
+    if (this.api) {
+      this.availabilityUpdater = new AvailabilityUpdater({
+        licensing: plugins.licensing,
+        config: this.config,
+        api: this.api,
+        logger: this.logger,
+      });
+    }
+
+    if (this.workflowsService) {
+      // Managed workflow owners register through workflows_extensions because owner
+      // plugins cannot depend on workflows_management. Pass the setup-time owner
+      // snapshot into workflows_management for storage reconciliation.
+      const registeredOwnerPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      // Safe to run in the background: this cleanup only removes docs for owners
+      // missing from the setup-time registry, so it cannot race valid start installs.
+      void this.runGlobalOrphanCleanup(registeredOwnerPluginIds);
+    }
+
+    this.logger.debug('Workflows Management: Started');
+    return {};
+  }
+
+  private async runGlobalOrphanCleanup(registeredOwnerPluginIds: string[]): Promise<void> {
+    try {
+      await this.workflowsService?.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
+    } catch (error) {
+      this.logger.warn(
+        'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
+        { error }
+      );
+    }
+  }
+
+  public stop() {
+    this.availabilityUpdater?.stop();
+  }
 }

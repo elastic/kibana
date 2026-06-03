@@ -5,16 +5,16 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { InferenceConnector } from '@kbn/inference-common';
 
 import { evaluateAttackDiscovery } from '.';
-import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
-import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
+import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
+import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { mockExperimentConnector } from './__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../routes/utils';
 
@@ -53,6 +53,7 @@ const connectorTimeout = 1000;
 const datasetName = 'test-dataset';
 const evaluationId = 'test-evaluation-id';
 const evaluatorConnectorId = 'test-evaluator-connector-id';
+const getInferenceConnectorById = jest.fn();
 const langSmithApiKey = 'test-api-key';
 const langSmithProject = 'test-lang-smith-project';
 const logger = loggerMock.create();
@@ -80,7 +81,7 @@ const connectors = [
 const projectName = 'test-lang-smith-project';
 
 const graphs: Array<{
-  connector: Connector;
+  connector: InferenceConnector;
   graph: DefaultAttackDiscoveryGraph;
   llmType: string | undefined;
   name: string;
@@ -89,7 +90,7 @@ const graphs: Array<{
     tracers: LangChainTracer[];
   };
 }> = connectors.map((connector) => {
-  const llmType = getLlmType(connector.actionTypeId);
+  const llmType = getLlmType(connector.type);
 
   const traceOptions = {
     projectName,
@@ -137,6 +138,7 @@ describe('evaluateAttackDiscovery', () => {
       esClientInternalUser: mockEsClientInternalUser,
       evaluationId,
       evaluatorConnectorId,
+      getInferenceConnectorById,
       langSmithApiKey,
       langSmithProject,
       logger,

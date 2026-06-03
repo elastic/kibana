@@ -8,26 +8,29 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridCellValueElementProps,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlProps, RowControlRowProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 /**
  * Menu button under which all other additional row controls would be placed
  */
 export const RowMenuControlCell = ({
-  rowControlColumns,
+  getAvailableControls,
+  startIndex = 0,
   ...props
 }: EuiDataGridCellValueElementProps & {
-  rowControlColumns: RowControlColumn[];
+  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[];
+  /** Index into the available controls list from which menu items start. */
+  startIndex?: number;
 }) => {
   const { record, rowIndex } = useControlColumn(props);
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
@@ -59,25 +62,27 @@ export const RowMenuControlCell = ({
     [record, rowIndex]
   );
 
-  const popoverMenuItems = useMemo(
-    () =>
-      rowControlColumns.map((rowControlColumn) => {
-        const Control = getControlComponent(rowControlColumn.id);
-        return (
-          <Fragment key={rowControlColumn.id}>
-            {record ? rowControlColumn.render(Control, { record, rowIndex }) : null}
-          </Fragment>
-        );
-      }),
-    [rowControlColumns, getControlComponent, record, rowIndex]
-  );
+  const popoverMenuItems = useMemo(() => {
+    if (!record) return [];
+    const rowProps = { record, rowIndex };
+    const visibleColumns = getAvailableControls(rowProps).slice(startIndex);
+    return visibleColumns.map((rowControlColumn) => {
+      const Control = getControlComponent(rowControlColumn.id);
+      return (
+        <Fragment key={rowControlColumn.id}>{rowControlColumn.render(Control, rowProps)}</Fragment>
+      );
+    });
+  }, [getAvailableControls, startIndex, getControlComponent, record, rowIndex]);
+
+  if (!popoverMenuItems.length) return null;
 
   return (
     <EuiPopover
       id={`rowMenuActionsPopover_${props.rowIndex}`}
       className="unifiedDataTable__rowControl"
+      aria-label={buttonLabel}
       button={
-        <EuiToolTip content={buttonLabel} delay="long" disableScreenReaderOutput>
+        <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj={`unifiedDataTable_additionalRowControl_${props.columnId}Menu`}
             iconSize="s"
@@ -95,13 +100,22 @@ export const RowMenuControlCell = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={popoverMenuItems} />
+      <EuiContextMenuPanel items={popoverMenuItems} />
     </EuiPopover>
   );
 };
 
-export const getRowMenuControlColumn = (rowControlColumns: RowControlColumn[]) => {
+export const getRowMenuControlColumn = (
+  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[],
+  startIndex?: number
+) => {
   return (props: EuiDataGridCellValueElementProps) => {
-    return <RowMenuControlCell {...props} rowControlColumns={rowControlColumns} />;
+    return (
+      <RowMenuControlCell
+        {...props}
+        getAvailableControls={getAvailableControls}
+        startIndex={startIndex}
+      />
+    );
   };
 };

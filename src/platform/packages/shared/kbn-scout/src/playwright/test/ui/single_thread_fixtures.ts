@@ -12,27 +12,28 @@ import {
   apiServicesFixture,
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   uiSettingsFixture,
-  synthtraceFixture,
   lighthouseFixture,
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
   EsArchiverFixture,
+  LinkedProjectFixture,
   EsClient,
   KbnClient,
   KibanaUrl,
   ScoutLogger,
   ScoutTestConfig,
   UiSettingsFixture,
-  SynthtraceFixture,
 } from '../../fixtures/scope/worker';
 import {
+  pageContextFixture,
   scoutPageFixture,
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
-  persistentContext,
+  persistentContextFixture,
   perfTrackerFixture,
 } from '../../fixtures/scope/test';
 import type {
@@ -48,11 +49,12 @@ export const scoutFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   uiSettingsFixture,
-  synthtraceFixture,
   // api fixtures
   apiServicesFixture,
   // test scope fixtures
+  pageContextFixture,
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
@@ -75,10 +77,14 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   kbnClient: KbnClient;
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
+  linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
-  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
-  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
+  isSnapshotBuild: boolean;
 }
 
-export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);
+export const lighthouseFixtures = mergeTests(
+  scoutFixtures,
+  persistentContextFixture,
+  lighthouseFixture
+);

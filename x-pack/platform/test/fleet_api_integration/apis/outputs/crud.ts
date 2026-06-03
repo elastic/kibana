@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateAgentPolicyResponse, GetOneAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type {
+  CreateAgentPolicyResponse,
+  GetOneAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
 } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidV4 } from 'uuid';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -195,19 +198,16 @@ export default function (providerContext: FtrProviderContext) {
   const TEST_SPACE_ID = 'testspaceoutputs';
 
   describe('fleet_outputs_crud', function () {
-    skipIfNoDockerRegistry(providerContext);
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
-      await fleetAndAgents.setup();
-    });
-
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
     let fleetServerPolicyWithCustomOutputId: string;
 
-    before(async function () {
+    skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
       await enableSecrets(providerContext);
       await enableOutputSecrets();
       await kibanaServer.spaces
@@ -692,7 +692,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should discard the shipper values when shipper is disabled', async function () {
+      it('should discard the shipper values for default output when shipper is disabled', async function () {
         await supertest
           .put(`/api/fleet/outputs/${defaultOutputId}`)
           .set('kbn-xsrf', 'xxxx')
@@ -929,6 +929,92 @@ export default function (providerContext: FtrProviderContext) {
           deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
           deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
         ]);
+      });
+
+      describe('with space awareness disabled', () => {
+        beforeEach(async () => {
+          await kibanaServer.savedObjects.update({
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            id: 'fleet-default-settings',
+            attributes: {
+              use_space_awareness_migration_status: null,
+            },
+            overwrite: true,
+          });
+        });
+        afterEach(async () => {
+          await kibanaServer.savedObjects.update({
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            id: 'fleet-default-settings',
+            attributes: {
+              use_space_awareness_migration_status: 'success',
+            },
+            overwrite: true,
+          });
+        });
+        it('should bump all related policies if updating non-default output and space awareness is disabled', async () => {
+          // Update settings to simulate older cluster
+          await kibanaServer.savedObjects.update({
+            type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+            id: 'fleet-default-settings',
+            attributes: {},
+            overwrite: true,
+          });
+          const { body: nonDefaultOutput } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Nondefault Output',
+              type: 'elasticsearch',
+              hosts: ['https://test.fr'],
+            })
+            .expect(200);
+
+          const [policy1, policy2, policy3, policy4] = await Promise.all([
+            createAgentPolicy(),
+            createAgentPolicy(undefined, nonDefaultOutput.item.id),
+            createAgentPolicy(TEST_SPACE_ID),
+            createAgentPolicy(TEST_SPACE_ID, nonDefaultOutput.item.id),
+          ]);
+
+          // Create package policies under agent policies using default output to ensure those
+          // agent policies still get bumped
+          await Promise.all([
+            createPackagePolicy([policy1.item.id], undefined, nonDefaultOutput.item.id),
+            createPackagePolicy([policy3.item.id], TEST_SPACE_ID, nonDefaultOutput.item.id),
+          ]);
+
+          await supertest
+            .put(`/api/fleet/outputs/${nonDefaultOutput.item.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Updated Nondefault Output',
+              type: 'elasticsearch',
+              hosts: ['http://test.fr:443'],
+            })
+            .expect(200);
+
+          const [updatedPolicy1, updatedPolicy2, updatedPolicy3, updatedPolicy4] =
+            await Promise.all([
+              getAgentPolicy(policy1.item.id),
+              getAgentPolicy(policy2.item.id),
+              getAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+              getAgentPolicy(policy4.item.id, TEST_SPACE_ID),
+            ]);
+
+          expect(updatedPolicy1.item.revision).to.eql(policy1.item.revision + 2);
+          expect(updatedPolicy2.item.revision).to.eql(policy2.item.revision + 1);
+          expect(updatedPolicy3.item.revision).to.eql(policy3.item.revision + 2);
+          expect(updatedPolicy4.item.revision).to.eql(policy4.item.revision + 1);
+
+          // cleanup
+          await Promise.all([
+            deleteAgentPolicy(policy1.item.id),
+            deleteAgentPolicy(policy2.item.id),
+            deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+            deleteAgentPolicy(policy4.item.id, TEST_SPACE_ID),
+          ]);
+        });
       });
     });
 
@@ -1377,29 +1463,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should discard the shipper values when shipper is disabled', async function () {
-        await supertest
-          .post(`/api/fleet/outputs`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'default monitoring output 1',
-            type: 'elasticsearch',
-            hosts: ['https://test.fr'],
-            is_default_monitoring: true,
-            shipper: {
-              disk_queue_enabled: true,
-              disk_queue_path: 'path/to/disk/queue',
-              disk_queue_encryption_enabled: true,
-            },
-          })
-          .expect(200);
-        const {
-          body: { items: outputs },
-        } = await supertest.get(`/api/fleet/outputs`).expect(200);
-        const defaultOutputs = outputs.filter((o: any) => o.is_default_monitoring);
-        expect(defaultOutputs[0].shipper).to.equal(null);
-      });
-
       it('should allow to create a kafka output with the shipper values', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1692,7 +1755,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.body.item.ssl.key).to.equal('KEY');
       });
 
-      it('should not store secrets if there is no fleet server', async function () {
+      it('should store secrets if there is no fleet server', async function () {
         await disableOutputSecrets();
         await clearAgents();
 
@@ -1712,10 +1775,10 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(Object.keys(res.body.item)).not.to.contain('secrets');
+        expect(Object.keys(res.body.item)).to.contain('secrets');
         expect(Object.keys(res.body.item)).to.contain('ssl');
-        expect(Object.keys(res.body.item.ssl)).to.contain('key');
-        expect(res.body.item.ssl.key).to.equal('KEY');
+        expect(Object.keys(res.body.item.ssl)).not.to.contain('key');
+        expect(res.body.item.secrets.ssl.key.id).to.be.a('string');
       });
 
       it('should allow to create a new elasticsearch output with ssl values', async function () {
@@ -1880,14 +1943,14 @@ export default function (providerContext: FtrProviderContext) {
           defaultMonitoringOutputId = defaultMonitoringOutputPostResponse.item.id;
         });
 
-        it('should return a 400 when deleting a default output ', async function () {
+        it('should return a 400 when deleting a default output', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultOutputIdToDelete}`)
             .set('kbn-xsrf', 'xxxx')
             .expect(400);
         });
 
-        it('should return a 400 when deleting a default output ', async function () {
+        it('should return a 400 when deleting a default monitoring output', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
             .set('kbn-xsrf', 'xxxx')

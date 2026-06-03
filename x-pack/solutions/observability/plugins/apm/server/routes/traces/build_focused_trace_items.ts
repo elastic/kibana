@@ -6,14 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { TraceItem, TraceItemChild, FocusedTraceItems } from '@kbn/apm-types';
 
 const MAX_NUMBER_OF_CHILDREN = 2;
-
-interface Child {
-  traceDoc: TraceItem;
-  children?: Child[];
-}
 
 export function buildChildrenTree({
   initialTraceDoc,
@@ -30,7 +25,7 @@ export function buildChildrenTree({
     if (!id) {
       return [];
     }
-    const children: Child[] = [];
+    const children: TraceItemChild[] = [];
     const _children = itemsGroupedByParentId[id];
     if (isEmpty(_children)) {
       return [];
@@ -48,11 +43,8 @@ export function buildChildrenTree({
   return findChildren(initialTraceDoc);
 }
 
-export interface FocusedTraceItems {
-  rootDoc: TraceItem;
-  parentDoc?: TraceItem;
-  focusedTraceDoc: TraceItem;
-  focusedTraceTree: Child[];
+export function findRootItem(traceItems: TraceItem[]) {
+  return traceItems.find((item) => !item.parentId);
 }
 
 export function buildFocusedTraceItems({

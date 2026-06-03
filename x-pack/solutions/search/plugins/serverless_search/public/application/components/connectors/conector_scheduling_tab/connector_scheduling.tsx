@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 import { useConnectorScheduling } from '../../../hooks/api/use_update_connector_scheduling';
 
@@ -30,7 +31,7 @@ export const ConnectorScheduling: React.FC<ConnectorSchedulingPanels> = ({
         dataTelemetryIdPrefix="serverlessSearch"
         hasChanges={hasChanges}
         hasIngestionError={connector?.status === ConnectorStatus.ERROR}
-        hasPlatinumLicense={false}
+        hasPlatinumLicense={true}
         setHasChanges={setHasChanges}
         shouldShowAccessControlSync={false}
         shouldShowIncrementalSync={shouldShowIncrementalSync}

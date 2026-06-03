@@ -159,6 +159,7 @@ Object {
           "negate": false,
           "params": Array [
             "auditbeat-mytest-*",
+            "*:auditbeat-mytest-*",
           ],
           "type": "phrases",
         },
@@ -169,6 +170,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "auditbeat-mytest-*",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:auditbeat-mytest-*",
                 },
               },
             ],
@@ -225,7 +231,9 @@ Object {
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "column-top-value-id-generated-uuid",
+          "splitAccessors": Array [
+            "column-top-value-id-generated-uuid",
+          ],
           "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],

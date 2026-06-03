@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import numeral from '@elastic/numeral';
 import { useKibana } from '../../../hooks/use_kibana';
 import { displayStatus } from './slo_status_badge';
@@ -44,7 +44,7 @@ export function SloValueBadge({ slo, isLoading }: SloStatusProps) {
               defaultMessage: 'It may take some time before the data is aggregated and available.',
             })}
           >
-            <EuiBadge color={displayStatus[slo.summary.status].badgeColor}>
+            <EuiBadge color={displayStatus[slo.summary.status].badgeColor} tabIndex={0}>
               {badgeDisplayText}
             </EuiBadge>
           </EuiToolTip>

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Status } from '../../../types';
+import type { Status } from '../../../types';
 
 const i18nTexts = {
   deleteInProgressText: i18n.translate(
@@ -65,7 +65,7 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
         data-test-subj="clusterSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" color="success" />
+          <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteCompleteText}</EuiText>
@@ -82,7 +82,7 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
         data-test-subj="clusterSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warningFilled" color="danger" />
+          <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteFailedText}</EuiText>

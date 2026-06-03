@@ -15,13 +15,11 @@ import { splitPkgKey } from '../../../../../../common/services';
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
-import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
 export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
   const queryParamsPolicyId = useMemo(
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
@@ -31,12 +29,16 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
 
   const { data: settings } = useGetSettings();
 
+  const queryParamPrerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
+
   useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    const isEnabled =
+      Boolean(settings?.item.prerelease_integrations_enabled) || queryParamPrerelease;
+
     if (settings?.item) {
       setPrerelease(isEnabled);
     }
-  }, [settings?.item]);
+  }, [queryParamPrerelease, settings?.item]);
 
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
@@ -60,10 +62,6 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     pkgVersion,
     integration: params.integration,
   };
-
-  if (useMultiPageLayout) {
-    return <CreatePackagePolicyMultiPage {...pageParams} />;
-  }
 
   return <CreatePackagePolicySinglePage {...pageParams} />;
 };

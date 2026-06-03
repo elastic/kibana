@@ -42,7 +42,7 @@ export const addExceptionEntryFieldValue = (field: string, index = 0) => {
 
 export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, index = 0) => {
   cy.get(FIELD_INPUT).eq(index).type(`${field}`);
-  cy.get(`button[title="${field}"]`).click();
+  cy.get(`.euiComboBoxOption[title="${field}"]`).click();
 };
 
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
@@ -80,7 +80,7 @@ export const addExceptionConditions = (exception: Exception) => {
 };
 
 export const validateExceptionConditionField = (value: string) => {
-  cy.get(EXCEPTION_ITEM_CONTAINER).contains('span', value);
+  cy.get(EXCEPTION_ITEM_CONTAINER).get(`input[value="${value}"]`).should('exist');
 };
 
 export const addTwoAndedConditions = (

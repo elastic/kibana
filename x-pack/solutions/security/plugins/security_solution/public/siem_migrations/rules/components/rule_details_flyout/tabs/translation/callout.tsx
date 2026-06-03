@@ -9,13 +9,11 @@ import type { FC } from 'react';
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import {
-  type RuleMigrationTranslationResult,
-  type RuleMigrationRule,
-} from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type MigrationTranslationResult } from '../../../../../../../common/siem_migrations/model/common.gen';
+import { type RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
-type RuleMigrationTranslationCallOutMode = RuleMigrationTranslationResult | 'mapped';
+type RuleMigrationTranslationCallOutMode = MigrationTranslationResult | 'mapped';
 
 const getCallOutInfo = (
   mode: RuleMigrationTranslationCallOutMode
@@ -24,27 +22,27 @@ const getCallOutInfo = (
     case 'mapped':
       return {
         title: i18n.CALLOUT_MAPPED_TRANSLATED_RULE_TITLE,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'success',
       };
     case 'full':
       return {
         title: i18n.CALLOUT_TRANSLATED_RULE_TITLE,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'success',
       };
     case 'partial':
       return {
         title: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION,
-        icon: 'warningFilled',
+        icon: 'warningFill',
         color: 'warning',
       };
     case 'untranslatable':
       return {
         title: i18n.CALLOUT_NOT_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'danger',
       };
   }

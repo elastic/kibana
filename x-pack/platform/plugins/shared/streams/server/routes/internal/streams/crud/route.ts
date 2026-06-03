@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
-import { estypes } from '@elastic/elasticsearch';
-import { Streams, ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { z } from '@kbn/zod/v4';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import type { StreamSummary } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
-  effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
+  effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
+  privileges: {
+    read_failure_store: boolean;
+  };
 }
 
 export const listStreamsRoute = createServerRoute({
@@ -32,24 +38,59 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
-    const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
-    const streams = await streamsClient.listStreamsWithDataStreamExistence();
+    const { streamsClient, scopedClusterClient, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
-    const streamNames = streams.filter(({ exists }) => exists).map(({ stream }) => stream.name);
+    const [allStreams, isQueryStreamsEnabled] = await Promise.all([
+      streamsClient.listStreamsWithDataStreamExistence(),
+      uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS),
+    ]);
 
-    const dataStreams = await processAsyncInChunks(streamNames, (streamNamesChunk) =>
-      scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk })
-    );
+    const availableStreams = allStreams.filter(({ stream }) => {
+      const isQueryStream = Streams.QueryStream.Definition.is(stream);
 
-    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
+      // Only include query streams if query streams are enabled
+      return !isQueryStream || (isQueryStream && isQueryStreamsEnabled);
+    });
+
+    const streamNames = availableStreams
+      .filter(({ exists }) => exists)
+      .map(({ stream }) => stream.name);
+
+    const streamPrivilegesMap = new Map<string, { read_failure_store: boolean }>();
+
+    const dataStreams = await processAsyncInChunks(streamNames, async (streamNamesChunk) => {
+      if (streamNamesChunk.length === 0) {
+        return { data_streams: [] };
+      }
+      const [privilegesPerStream, dataStreamsChunk] = await Promise.all([
+        streamsClient.getPrivilegesPerStream(streamNamesChunk),
+        scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk }),
+      ]);
+
+      Object.entries(privilegesPerStream).forEach(([name, privs]) => {
+        streamPrivilegesMap.set(name, privs);
+      });
+
+      return dataStreamsChunk;
+    });
+
+    const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
+      if (Streams.QueryStream.Definition.is(stream)) {
+        return { stream, privileges: { read_failure_store: false } };
+      }
+
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
-      acc.push({
+      const privileges = streamPrivilegesMap.get(stream.name);
+
+      return {
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
-      });
-      return acc;
-    }, []);
+        privileges: { read_failure_store: privileges?.read_failure_store ?? false },
+      };
+    });
 
     return { streams: enrichedStreams };
   },
@@ -82,12 +123,9 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
 
-    const indexPattern = Streams.GroupStream.Definition.is(streamEntity)
-      ? streamEntity.group.members.join(',')
-      : streamEntity.name;
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: indexPattern,
+      index: streamEntity.name,
       track_total_hits: true,
       ignore_unavailable: true,
       query: {
@@ -144,8 +182,37 @@ export const resolveIndexRoute = createServerRoute({
   },
 });
 
+const BULK_GET_SUMMARIES_MAX_NAMES = 10_000;
+
+export const bulkGetStreamSummariesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_bulk_get_summaries',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      names: z.array(z.string()).max(BULK_GET_SUMMARIES_MAX_NAMES),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+  }): Promise<{ summaries: StreamSummary[] }> => {
+    const { streamsClient } = await getScopedClients({ request });
+    const summaries = await streamsClient.getStreamSummaries(params.body.names);
+    return { summaries };
+  },
+});
+
 export const internalCrudRoutes = {
   ...listStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
+  ...bulkGetStreamSummariesRoute,
 };

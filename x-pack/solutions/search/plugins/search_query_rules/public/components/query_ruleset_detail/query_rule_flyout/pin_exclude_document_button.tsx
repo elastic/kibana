@@ -8,7 +8,7 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { QueryRulesQueryRuleType } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleType } from '@elastic/elasticsearch/lib/api/types';
 
 interface ExcludePinDocumentButtonProps {
   documentCount: number;
@@ -23,7 +23,7 @@ export const ExcludePinDocumentButton: React.FC<ExcludePinDocumentButtonProps> =
   return (
     <EuiButton
       data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
-      iconType="plusInCircle"
+      iconType="plusCircle"
       color={documentCount === 0 ? 'primary' : 'text'}
       size="s"
       onClick={addNewAction}

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../../config.oblt.base.ts'));
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [require.resolve('../../test_suites/visualizations/group3')],
+    testFiles: [require.resolve('../../test_suites/visualizations/group13')],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Common Group 4',
     },

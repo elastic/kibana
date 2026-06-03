@@ -6,9 +6,9 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { StatusRuleInspect } from '../../../../../common/runtime_types/alert_rules/common';
-import { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
-import { IHttpSerializedFetchError } from '..';
+import type { StatusRuleInspect } from '../../../../../common/runtime_types/alert_rules/common';
+import type { DEFAULT_ALERT_RESPONSE } from '../../../../../common/types/default_alerts';
+import type { IHttpSerializedFetchError } from '..';
 import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,

@@ -5,21 +5,23 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import {
+import type { Client } from '@elastic/elasticsearch';
+import type {
   ConversationCreateEvent,
   ConversationUpdateEvent,
   Message,
   MessageAddEvent,
-  MessageRole,
   StreamingChatResponseEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  MessageRole,
   StreamingChatResponseEventType,
   type ConversationCreateRequest,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../services/observability_ai_assistant_api';
 
 export function decodeEvents(body: Readable | string) {
@@ -78,7 +80,7 @@ export async function invokeChatCompleteWithFunctionRequest({
 
   expect(status).to.be(200);
 
-  return body;
+  return body as Readable;
 }
 
 export async function chatComplete({
@@ -115,10 +117,12 @@ export async function chatComplete({
     },
   });
 
+  const readableBody = body as Readable;
+
   expect(status).to.be(200);
-  const messageEvents = decodeEvents(body);
-  const messageAddedEvents = getMessageAddedEvents(body);
-  const conversationCreateEvent = getConversationCreatedEvent(body);
+  const messageEvents = decodeEvents(readableBody);
+  const messageAddedEvents = getMessageAddedEvents(readableBody);
+  const conversationCreateEvent = getConversationCreatedEvent(readableBody);
   return { messageAddedEvents, conversationCreateEvent, messageEvents, status };
 }
 

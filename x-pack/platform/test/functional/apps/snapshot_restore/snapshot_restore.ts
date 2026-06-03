@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'snapshotRestore', 'header']);
@@ -208,7 +208,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.snapshotRestore.navToRepositories();
         await pageObjects.snapshotRestore.createSourceOnlyRepositoryStepOne(sourceOnlyRepository);
         await pageObjects.snapshotRestore.createSourceOnlyRepositoryStepTwo('/tmp/es-backups/');
-        await pageObjects.snapshotRestore.closeRepositoriesFlyout();
 
         // Create a policy
         await pageObjects.snapshotRestore.navToPolicies();

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semverLt from 'semver/functions/lt';
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -11,6 +12,7 @@ import {
   SO_SEARCH_LIMIT,
   FLEET_INSTALL_FORMAT_VERSION,
 } from '../../../../../constants';
+import { handleNamespaceTemplateRestoreAfterPackageInstall } from '../..';
 import type { Installation } from '../../../../../types';
 
 import { packagePolicyService } from '../../../../package_policy';
@@ -41,7 +43,6 @@ export async function stepSaveSystemObject(context: InstallContext) {
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
   await withPackageSpan('Update install status', () =>
     savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       version: pkgVersion,
@@ -53,6 +54,9 @@ export async function stepSaveSystemObject(context: InstallContext) {
         pkgVersion,
         installedPkg?.attributes.latest_install_failed_attempts ?? []
       ),
+      rolled_back:
+        !!installedPkg?.attributes.version &&
+        semverLt(pkgVersion, installedPkg?.attributes.version),
     })
   );
 
@@ -62,6 +66,24 @@ export async function stepSaveSystemObject(context: InstallContext) {
     pkgName
   );
   logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
+  // Recreate namespace-scoped index templates for every namespace opted in on this
+  // package's Installation SO. On first install this is a no-op (opt-in list is empty).
+  if (packageInfo.type === 'integration') {
+    try {
+      await handleNamespaceTemplateRestoreAfterPackageInstall({
+        soClient: savedObjectsClient,
+        esClient,
+        packageName: pkgName,
+        packageInfo,
+        dataStreams: packageInfo.data_streams ?? [],
+      });
+    } catch (err: any) {
+      logger.warn(
+        `[stepSaveSystemObject] Failed to restore namespace templates for ${pkgName}: ${err.message}`
+      );
+    }
+  }
+
   // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
   // associated package policies after installation
   if (updatedPackage.attributes.keep_policies_up_to_date) {

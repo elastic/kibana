@@ -6,21 +6,22 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   BoundInferenceClient,
   PromptResponse,
-  ToolCallbacksOf,
+  ToolCallbacksOfToolOptions,
   ToolDefinition,
   ToolOptions,
-  truncateList,
 } from '@kbn/inference-common';
-import { PromptCompositeResponse, PromptOptions } from '@kbn/inference-common/src/prompt/api';
+import { truncateList } from '@kbn/inference-common';
+import type { PromptCompositeResponse, PromptOptions } from '@kbn/inference-common/src/prompt/api';
 import { EsqlDocumentBase, runAndValidateEsqlQuery } from '@kbn/inference-plugin/server';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { omit, once } from 'lodash';
 import moment from 'moment';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '../../..';
+import { indexPatternToCcs } from '@kbn/es-query';
+import { describeDataset, formatDocumentAnalysis } from '../../..';
 import { EsqlPrompt } from './prompt';
 
 const loadEsqlDocBase = once(() => EsqlDocumentBase.load());
@@ -34,9 +35,8 @@ export async function executeAsEsqlAgent<TTools extends Record<string, ToolDefin
     end?: number;
     signal: AbortSignal;
     prompt: string;
-    tools?: TTools;
   } & (TTools extends Record<string, ToolDefinition>
-    ? { toolCallbacks: ToolCallbacksOf<{ tools: TTools }> }
+    ? { toolCallbacks: ToolCallbacksOfToolOptions<{ tools: TTools }> }
     : {})
 ): PromptCompositeResponse<PromptOptions<typeof EsqlPrompt> & { tools: TTools; stream: false }>;
 
@@ -47,7 +47,6 @@ export async function executeAsEsqlAgent({
   end,
   signal,
   prompt,
-  tools,
   toolCallbacks,
 }: {
   inferenceClient: BoundInferenceClient;
@@ -56,8 +55,7 @@ export async function executeAsEsqlAgent({
   end?: number;
   signal: AbortSignal;
   prompt: string;
-  tools?: Record<string, ToolDefinition>;
-  toolCallbacks?: ToolCallbacksOf<ToolOptions>;
+  toolCallbacks?: ToolCallbacksOfToolOptions<ToolOptions>;
 }): Promise<PromptResponse> {
   const docBase = await loadEsqlDocBase();
 
@@ -87,26 +85,31 @@ export async function executeAsEsqlAgent({
     inferenceClient,
     prompt: EsqlPrompt,
     abortSignal: signal,
-    tools,
     toolCallbacks: {
       ...toolCallbacks,
       list_datasets: async (toolCall) => {
-        return esClient.indices
-          .resolveIndex({
-            name: toolCall.function.arguments.name.flatMap((index) => index.split(',')),
-            allow_no_indices: true,
-          })
-          .then((response) => {
-            return {
-              ...response,
-              data_streams: response.data_streams.map((dataStream) => {
-                return {
-                  name: dataStream.name,
-                  timestamp_field: dataStream.timestamp_field,
-                };
-              }),
-            };
-          });
+        return {
+          response: await esClient.indices
+            .resolveIndex({
+              name: indexPatternToCcs(
+                toolCall.function.arguments.name.length
+                  ? toolCall.function.arguments.name.flatMap((index) => index.split(','))
+                  : '*'
+              ),
+              allow_no_indices: true,
+            })
+            .then((response) => {
+              return {
+                ...response,
+                data_streams: response.data_streams.map((dataStream) => {
+                  return {
+                    name: dataStream.name,
+                    timestamp_field: dataStream.timestamp_field,
+                  };
+                }),
+              };
+            }),
+        };
       },
       describe_dataset: async (toolCall) => {
         const analysis = await describeDataset({
@@ -114,18 +117,22 @@ export async function executeAsEsqlAgent({
           index: toolCall.function.arguments.index,
           kql: toolCall.function.arguments.kql,
           start: start ?? moment().subtract(24, 'hours').valueOf(),
-          end: Date.now(),
+          end: end ?? moment().valueOf(),
         });
 
         return {
-          analysis: sortAndTruncateAnalyzedFields(analysis),
+          response: {
+            analysis: formatDocumentAnalysis(analysis),
+          },
         };
       },
       get_documentation: async (toolCall) => {
-        return docBase.getDocumentation(
-          toolCall.function.arguments.commands.concat(toolCall.function.arguments.functions),
-          { generateMissingKeywordDoc: true }
-        );
+        return {
+          response: docBase.getDocumentation(
+            toolCall.function.arguments.commands.concat(toolCall.function.arguments.functions),
+            { generateMissingKeywordDoc: true }
+          ),
+        };
       },
       run_queries: async (toolCall) => {
         const results = await Promise.all(
@@ -154,7 +161,9 @@ export async function executeAsEsqlAgent({
         );
 
         return {
-          queries: results,
+          response: {
+            results,
+          },
         };
       },
       validate_queries: async (toolCall) => {
@@ -181,7 +190,9 @@ export async function executeAsEsqlAgent({
         );
 
         return {
-          results,
+          response: {
+            results,
+          },
         };
       },
     },

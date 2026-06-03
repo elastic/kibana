@@ -158,10 +158,10 @@ import { TIMELINE } from '../screens/timelines';
 import { COMBO_BOX_INPUT, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
-import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { fillComboBox } from './eui_form_interactions';
+import { refreshPage } from './security_header';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -470,7 +470,8 @@ export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
@@ -573,7 +574,8 @@ export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
 
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -597,6 +599,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
@@ -621,7 +624,8 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
 export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
@@ -639,23 +643,28 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-const typeEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
-};
-
 /**
- * clears ES|QL search bar first
- * types new query
+ * Pastes query into the ES|QL Monaco editor via a synthetic ClipboardEvent.
+ * This avoids flakiness in the tests when typing in the ES|QL query bar.
  */
 export const fillEsqlQueryBar = (query: string) => {
-  // before typing anything in query bar, we need to clear it
-  // Since first click on ES|QL query bar trigger re-render. We need to clear search bar during second attempt
-  typeEsqlQueryBar(' ');
-  typeEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a{del}' : '{ctrl}a{del}');
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('exist').click({ force: true });
 
-  // only after this query can be safely typed
-  typeEsqlQueryBar(query);
+  const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(`${selectAll}{del}`, { force: true });
+
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).then(($textarea) => {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text/plain', query);
+    const pasteEvent = new ClipboardEvent('paste', {
+      clipboardData: dataTransfer,
+      bubbles: true,
+      cancelable: true,
+    });
+    $textarea[0].dispatchEvent(pasteEvent);
+  });
+
+  cy.get(ESQL_QUERY_BAR).contains(query);
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
@@ -684,7 +693,7 @@ export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) 
  * which row is valid or not.
  *
  * There are special tricks below with Eui combo box:
- * cy.get(`button[title="${indexField}"]`)
+ * cy.get(`.euiComboBoxOption[title="${indexField}"]`)
  * .should('be.visible')
  * .then(([e]) => e.click());
  *
@@ -715,14 +724,14 @@ export const fillIndicatorMatchRow = ({
     .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indexField}"]`).then(([e]) => e.click());
+    cy.get(`.euiComboBoxOption[title="${indexField}"]`).then(([e]) => e.click());
   }
   cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
     .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
+    cy.get(`.euiComboBoxOption[title="${indicatorIndexField}"]`).then(([e]) => e.click());
   }
 
   if (doesNotMatch) {
@@ -838,6 +847,7 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(COMBO_BOX_OPTION).should('have.length.gte', 1);
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
@@ -891,6 +901,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
       cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
@@ -940,12 +951,29 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
-export const fillAlertSuppressionFields = (fields: string[]) => {
+/**
+ * @param fields - The fields to fill in the alert suppression combo box.
+ * @param checkFieldsInComboBox - Whether to check if the fields are in the combo box before filling. It can be useful if takes time to load all options from index.
+ * If there are many fields in combobox, they are might be visible only after scrolling down menu.
+ */
+export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+    if (checkFieldsInComboBox) {
+      cy.get(COMBO_BOX_OPTION).should('contain.text', field);
+    }
+
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
+    // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
+    cy.contains(COMBO_BOX_OPTION, field).click();
+    // Wait for the field to be selected as a pill before closing the dropdown,
+    // otherwise {esc} can race with {enter} and cancel the selection
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
+      .find('[data-test-subj="euiComboBoxPill"]')
+      .should('contain.text', field);
   });
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
 };
 
 export const clearAlertSuppressionFields = () => {
@@ -956,12 +984,14 @@ export const clearAlertSuppressionFields = () => {
 };
 
 export const selectAlertSuppressionPerInterval = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled');
   // checkbox is covered by label, force:true is a workaround
   // click on label not working, likely because it has child components
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
@@ -970,7 +1000,10 @@ export const selectDoNotSuppressForMissingFields = () => {
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
+  cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).type(`{selectall}${interval}`);
+
+  cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).select(timeUnit);
 };
 

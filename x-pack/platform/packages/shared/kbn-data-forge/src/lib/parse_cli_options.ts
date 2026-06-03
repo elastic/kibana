@@ -7,7 +7,7 @@
 
 import { Command } from 'commander';
 import { FAKE_LOGS, FAKE_HOSTS, FAKE_STACK, DEFAULTS } from '../constants';
-import { CliOptions } from '../types';
+import type { CliOptions } from '../types';
 
 const parseCliInt = (value: string) => parseInt(value, 10);
 
@@ -24,7 +24,12 @@ export function parseCliOptions(): CliOptions {
       parseCliInt,
       DEFAULTS.EVENTS_PER_CYCLE
     )
-    .option('--payload-size <number>', 'The size of the ES bulk payload', DEFAULTS.PAYLOAD_SIZE)
+    .option(
+      '--payload-size <number>',
+      'The size of the ES bulk payload',
+      parseCliInt,
+      DEFAULTS.PAYLOAD_SIZE
+    )
     .option(
       '--concurrency <number>',
       'The number of concurrent connections to Elasticsearch',

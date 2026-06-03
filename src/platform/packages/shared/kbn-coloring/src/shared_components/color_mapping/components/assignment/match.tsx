@@ -8,13 +8,15 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/common';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { ColorMapping } from '../../config';
-import { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
-import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ColorMapping } from '../../config';
+import type { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
+import type { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 import { DuplicateWarning } from './duplicate_warning';
 import { getValueKey } from '../../color/utils';
 
@@ -160,14 +162,15 @@ export const Match: React.FC<{
 };
 
 function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
-  const formatter = fieldFormat?.convert.bind(fieldFormat) ?? String;
+  const formatter = fieldFormat ? (v: unknown) => fieldFormat.convertToText(v) : String;
   return (serializedValue: unknown) => {
     const rawValue = deserializeField(serializedValue);
     const key = getValueKey(rawValue);
+    const formatted = formatter(rawValue);
     return {
       key,
       value: typeof rawValue === 'number' ? key : undefined,
-      label: formatter(rawValue),
+      label: formatted,
     } satisfies EuiComboBoxOptionOption<string>;
   };
 }

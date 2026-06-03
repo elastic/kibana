@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
-import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
+import type { LoadActionPerfOptions } from '@kbn/es-archiver';
+import type { IndexStats } from '@kbn/es-archiver/src/lib/stats';
 import { coreWorkerFixtures } from './core_fixtures';
 import { getEsArchiver } from '../../../../common/services';
 
@@ -36,8 +36,8 @@ export const esArchiverFixture = coreWorkerFixtures.extend<{}, { esArchiver: EsA
    * we only expose capability to ingest the data indexes.
    */
   esArchiver: [
-    ({ log, esClient, kbnClient }, use) => {
-      const esArchiverInstance = getEsArchiver(esClient, kbnClient, log);
+    ({ log, esClient }, use) => {
+      const esArchiverInstance = getEsArchiver(esClient, log);
       const loadIfNeeded = async (name: string, performance?: LoadActionPerfOptions | undefined) =>
         esArchiverInstance!.loadIfNeeded(name, performance);
 

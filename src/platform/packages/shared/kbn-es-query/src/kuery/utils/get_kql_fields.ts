@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromKueryExpression, KueryNode } from '../../..';
+import type { KueryNode } from '../../..';
+import { fromKueryExpression } from '../../..';
 import { nodeTypes } from '../node_types';
 import { functions } from '../functions';
 
+/**
+ * @param expression
+ * @throws an exception is thrown when this function receives malformed or unsupported input.
+ */
 export function getKqlFieldNamesFromExpression(expression: string): string[] {
   const node = fromKueryExpression(expression);
   return getKqlFieldNames(node);
 }
 
+/**
+ * @throws an exception is thrown when this function receives a `node.type` or `node.function` that is
+ * not supported.
+ */
 export function getKqlFieldNames(node: KueryNode): string[] {
   if (nodeTypes.function.isNode(node)) {
     if (functions.and.isNode(node) || functions.or.isNode(node)) {

@@ -6,12 +6,12 @@
  */
 import expect from '@kbn/expect';
 import { first, last, sumBy } from 'lodash';
-import {
+import type {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import { config, generateData } from './generate_data';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { isFiniteNumber } from '../utils/common';

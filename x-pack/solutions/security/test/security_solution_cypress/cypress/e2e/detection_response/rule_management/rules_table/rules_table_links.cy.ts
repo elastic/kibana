@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../../objects/rule';
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
+import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { RULES_MONITORING_TAB, RULE_NAME } from '../../../../screens/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -14,10 +15,14 @@ import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 describe('Rules table: links', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: 'rule1', enabled: false }));
+    createRule(getCustomQueryRuleParams({ rule_id: 'rule1', enabled: false }));
     visit(RULES_MANAGEMENT_URL);
   });
 

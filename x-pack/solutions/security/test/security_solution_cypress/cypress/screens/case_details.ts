@@ -9,8 +9,6 @@ import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 
 export const CASE_ACTIONS = '[data-test-subj="property-actions-ellipses"]';
 
-export const CASE_CONNECTOR = '[data-test-subj="connector-fields"] .euiCard__title';
-
 export const CASE_DELETE = '[data-test-subj="property-actions-trash"]';
 
 export const CASE_DETAILS_DESCRIPTION =
@@ -30,18 +28,6 @@ export const CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT =
 
 export const CASE_DETAILS_USERNAMES = '[data-test-subj="user-profile-username"]';
 
-export const CASE_EVENT_UPDATE = '.euiCommentEvent[data-type="update"]';
-
-export const CASE_IN_PROGRESS_STATUS = '[data-test-subj="status-badge-in-progress"]';
-
-export const CASE_SWITCH = '[data-test-subj="sync-alerts-switch"]';
-
-export const CASES_TAGS = (tagName: string) => {
-  return `[data-test-subj="tag-${tagName}"]`;
-};
-
-export const CASE_USER_ACTION = '[data-test-subj="scrollable-markdown"]';
-
 export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card-details"]';
 
 export const CONNECTOR_TITLE = '[data-test-subj="connector-card-title"]';
@@ -58,7 +44,6 @@ export const EXPECTED_METRICS = [
   CaseMetricsFeature.ALERTS_HOSTS,
   CaseMetricsFeature.CONNECTORS,
 ];
-export const UNEXPECTED_METRICS = [CaseMetricsFeature.ACTIONS_ISOLATE_HOST];
 
 export const CASES_METRIC = (metric: string) => {
   return `[data-test-subj="case-metrics-totals-${metric}"]`;

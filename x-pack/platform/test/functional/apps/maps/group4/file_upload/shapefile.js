@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Purpose: shape file upload smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }) {
   const { geoFileUpload, maps } = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
@@ -60,6 +65,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should add as document layer', async () => {
+      await maps.setView(0, 0, 1);
       await geoFileUpload.addFileAsDocumentLayer();
       await maps.waitForLayersToLoad();
 

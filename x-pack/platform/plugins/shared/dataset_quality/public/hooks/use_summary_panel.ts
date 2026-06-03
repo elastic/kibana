@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { countBy } from 'lodash';
 import { useDatasetQualityTable } from '.';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicators } from '../../common/types';
+import type { QualityIndicators } from '../../common/types';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
 
@@ -35,7 +35,7 @@ const useSummaryPanel = () => {
   >;
 
   const isDegradedDocsLoading = useSelector(service, (state) =>
-    state.matches('main.stats.degradedDocs.fetching')
+    state.matches({ main: { stats: { degradedDocs: 'fetching' } } })
   );
   const isDatasetsQualityLoading = isDegradedDocsLoading || isTableLoading;
 
@@ -64,7 +64,7 @@ const useSummaryPanel = () => {
   };
 
   const isDatasetsActivityLoading = useSelector(service, (state) =>
-    state.matches('main.stats.datasets.fetching')
+    state.matches({ main: { stats: { datasets: 'fetching' } } })
   );
 
   /*
@@ -78,8 +78,8 @@ const useSummaryPanel = () => {
   const isEstimatedDataLoading = useSelector(
     service,
     (state) =>
-      state.matches('main.stats.datasets.fetching') ||
-      state.matches('main.stats.degradedDocs.fetching')
+      state.matches({ main: { stats: { datasets: 'fetching' } } }) ||
+      state.matches({ main: { stats: { degradedDocs: 'fetching' } } })
   );
 
   return {

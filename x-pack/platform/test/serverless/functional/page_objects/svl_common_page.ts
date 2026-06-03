@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -60,6 +60,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     log.debug(`browser: clearing session & local storages`);
     await browser.clearSessionStorage();
     await browser.clearLocalStorage();
+
     await pageObjects.common.sleep(700);
   };
 
@@ -90,13 +91,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           await browser.get(deployment.getHostPort());
           // Validating that the new cookie in the browser is set for the correct user
           const browserCookies = await browser.getCookies();
-          if (browserCookies.length === 0) {
+          const sidCookieInBrowser = browserCookies.find((c) => c.name === 'sid');
+          if (!sidCookieInBrowser) {
             throw new Error(`The cookie is missing in browser context`);
           }
           const { body } = await supertestWithoutAuth
             .get('/internal/security/me')
             .set(svlCommonApi.getInternalRequestHeader())
-            .set({ Cookie: `sid=${browserCookies[0].value}` });
+            .set({ Cookie: `sid=${sidCookieInBrowser.value}` });
 
           const email = await svlUserManager.getEmail(role);
           // email returned from API call must match the email for the specified role

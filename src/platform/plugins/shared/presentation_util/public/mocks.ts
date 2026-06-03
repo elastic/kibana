@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PresentationUtilPluginStart } from './types';
-import { registerExpressionsLanguage } from '.';
+import type { PresentationUtilPluginStart } from './types';
 import { setStubKibanaServices } from './services/mocks';
 
 const createStartContract = (): PresentationUtilPluginStart => {
@@ -20,7 +19,6 @@ const createStartContract = (): PresentationUtilPluginStart => {
       reset: jest.fn(),
       setProjectStatus: jest.fn(),
     },
-    registerExpressionsLanguage,
   };
   return startContract;
 };

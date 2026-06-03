@@ -5,32 +5,23 @@
  * 2.0.
  */
 
-import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   alerting?: AlertingServerSetup;
   fleet: FleetSetupContract;
-  taskManager: TaskManagerSetupContract;
-  telemetry: TelemetryPluginSetup;
-  usageCollection?: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
   share?: SharePluginSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
   alerting?: AlertingServerStart;
   fleet: FleetStartContract;
-  taskManager: TaskManagerStartContract;
-  telemetry: TelemetryPluginStart;
-  usageCollection?: UsageCollectionStart;
+  licensing: LicensingPluginStart;
   share?: SharePluginStart;
 }
 

@@ -12,6 +12,9 @@ import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
+import { defaultImplementation } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../components/detection_response/alerts_by_status', () => ({
   AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
@@ -47,18 +50,8 @@ jest.mock('../../common/components/filters_global', () => ({
 
 jest.mock('../../common/components/empty_prompt');
 
-const defaultUseSourcererReturn = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: '',
-};
-const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
-
 const defaultUseAlertsPrivilegesReturn = {
-  hasKibanaREAD: true,
+  hasAlertsRead: true,
   hasIndexRead: true,
 };
 
@@ -100,10 +93,12 @@ jest.mock('../../common/lib/kibana', () => {
 describe('DetectionResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
+    jest
+      .mocked(useDataView)
+      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'ready' });
   });
 
   it('should render default page', () => {
@@ -123,10 +118,7 @@ describe('DetectionResponse', () => {
   });
 
   it('should render landing page if index not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      indicesExist: false,
-    });
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
     const result = render(
       <TestProviders>
@@ -141,11 +133,10 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
   });
 
-  it('should render loader if sourcerer is loading', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      loading: true,
-    });
+  it('should render loader if dataview is loading', () => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'loading' });
 
     const result = render(
       <TestProviders>
@@ -156,7 +147,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).not.toBeInTheDocument();
   });
@@ -164,7 +155,7 @@ describe('DetectionResponse', () => {
   it('should not render alerts data sections if user has not index read permission', () => {
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: false,
-      hasKibanaREAD: true,
+      hasAlertsRead: true,
     });
 
     const result = render(
@@ -188,7 +179,7 @@ describe('DetectionResponse', () => {
   it('should not render alerts data sections if user has not kibana read permission', () => {
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: true,
-      hasKibanaREAD: false,
+      hasAlertsRead: false,
     });
 
     const result = render(
@@ -233,7 +224,7 @@ describe('DetectionResponse', () => {
   it('should render page permissions message if the user does not have read permission', () => {
     mockCanUseCases.mockReturnValue(noCasesPermissions());
     mockUseAlertsPrivileges.mockReturnValue({
-      hasKibanaREAD: true,
+      hasAlertsRead: true,
       hasIndexRead: false,
     });
 

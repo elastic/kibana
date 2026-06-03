@@ -9,7 +9,10 @@ import React, { type FC, memo, useCallback, useEffect, useMemo, useState } from 
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { AlertsTableProps, RenderContext } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableProps as ResponseOpsAlertsTableProps,
+  RenderContext as ResponseOpsRenderContext,
+} from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
@@ -19,11 +22,12 @@ import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolu
 import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
-import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
   GetSecurityAlertsTableProp,
   SecurityAlertsTableContext,
@@ -33,6 +37,8 @@ import { ActionsCell } from './actions_cell';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { APP_ID, CASES_FEATURE_ID, VIEW_SELECTION } from '../../../../common/constants';
+import { useBulkAddToChatConfig } from '../../../agent_builder/hooks/use_bulk_add_to_chat_config';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
@@ -41,9 +47,6 @@ import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CellValue, getColumns } from '../../configurations/security_solution_detections';
@@ -60,6 +63,7 @@ import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/u
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -73,7 +77,7 @@ const { updateIsLoading, updateTotalCount } = dataTableActions;
 const MAX_ACTION_BUTTON_COUNT = 6;
 const DEFAULT_DATA_GRID_HEIGHT = 600;
 
-const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
+const ALERT_TABLE_CONSUMERS: ResponseOpsAlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
@@ -120,31 +124,38 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
   width: 100%;
 `;
 
-interface DetectionEngineAlertTableProps
+interface AlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
   tableType?: TableId;
-  sourcererScope?: SourcererScopeName;
+  pageScope?: PageScope;
   isLoading?: boolean;
   onRuleChange?: () => void;
+  disableAdditionalToolbarControls?: boolean;
 }
 
-const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
+const sort: GetSecurityAlertsTableProp<'sort'> = [
   {
     '@timestamp': {
       order: 'desc',
     },
   },
 ];
-const casesConfiguration = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
+const casesConfiguration = {
+  featureId: CASES_FEATURE_ID,
+  owner: [APP_ID],
+  syncAlerts: true,
+  extractObservables: true,
+};
 const emptyInputFilters: Filter[] = [];
 
-const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'services'>> = ({
+const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlertsEnabled'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
+  pageScope = PageScope.alerts,
   isLoading,
   onRuleChange,
+  disableAdditionalToolbarControls,
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
@@ -152,12 +163,14 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     data,
     http,
     notifications,
+    rendering,
     fieldFormats,
     application,
     licensing,
     uiSettings,
     settings,
     cases,
+    agentBuilder,
   } = useKibana().services;
   const { alertsTableRef } = useAlertsContext();
 
@@ -174,21 +187,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(sourcererScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(sourcererScope);
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
-  const runtimeMappings = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataView.getRuntimeMappings()
-        : (oldSourcererDataView.runtimeFieldMap as RunTimeMappings),
-    [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]
-  );
-
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(pageScope);
+  const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
   const license = useLicense();
   const isEnterprisePlus = license.isEnterprise();
@@ -217,12 +218,11 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [inputFilters, globalFilters, timeRangeFilter]);
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && (oldSourcererDataView || experimentalDataView)) {
+    if (browserFields != null) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -230,14 +230,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       });
     }
     return null;
-  }, [
-    browserFields,
-    oldSourcererDataView,
-    uiSettings,
-    experimentalDataView,
-    allFilters,
-    globalQuery,
-  ]);
+  }, [browserFields, uiSettings, dataView, allFilters, globalQuery]);
 
   useInvalidFilterQuery({
     id: tableType,
@@ -248,7 +241,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     endDate: to,
   });
 
-  const finalBoolQuery: AlertsTableProps['query'] = useMemo(() => {
+  const finalBoolQuery: ResponseOpsAlertsTableProps['query'] = useMemo(() => {
     if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
       return { bool: {} };
     }
@@ -278,7 +271,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [isEventRenderedView]);
 
   const alertColumns = useMemo(
-    () => (columns.length ? columns : getColumns(license)),
+    () => (columns?.length ? columns : getColumns(license)),
     [columns, license]
   );
 
@@ -293,7 +286,8 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   );
 
   const { onLoad } = useFetchNotes();
-  const [tableContext, setTableContext] = useState<RenderContext<SecurityAlertsTableContext>>();
+  const [tableContext, setTableContext] =
+    useState<ResponseOpsRenderContext<SecurityAlertsTableContext>>();
 
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
@@ -340,11 +334,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     ACTION_BUTTON_COUNT--;
   }
 
-  // remove space if add notes icon shouldn't be displayed
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
   }
 
@@ -362,9 +352,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       leadingControlColumn,
       userProfiles,
       tableType,
-      sourcererScope,
+      pageScope,
     }),
-    [leadingControlColumn, sourcererScope, tableType, userProfiles]
+    [leadingControlColumn, pageScope, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {
@@ -372,7 +362,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    pageScope,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -405,13 +395,26 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
       cases,
+      agentBuilder,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings, cases]
+    [
+      application,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+      cases,
+      agentBuilder,
+    ]
   );
 
   /**
@@ -435,6 +438,22 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
 
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const pathway =
+    tableType === TableId.alertsOnRuleDetailsPage
+      ? ('bulk_alerts_rule_details' as const)
+      : ('bulk_alerts_alerts_page' as const);
+  const bulkAddToChatConfig = useBulkAddToChatConfig(pathway);
+  const maybeBulkAddToChatConfig = isAgentBuilderEnabled ? bulkAddToChatConfig : undefined;
+
+  /**
+   * We want to hide additional controls (like grouping) if the table is being rendered
+   * in the cases page OR if the user of the table explicitly set `disableAdditionalToolbarControls`
+   * to true
+   */
+  const shouldRenderAdditionalToolbarControls =
+    disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
+
   if (isLoading) {
     return null;
   }
@@ -443,18 +462,17 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider
-            tableId={tableType}
-            sourcererScope={SourcererScopeName.detections}
-          >
-            <AlertsTable<SecurityAlertsTableContext>
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={pageScope}>
+            <ResponseOpsAlertsTable<SecurityAlertsTableContext>
+              key={isEventRenderedView ? 'eventRenderedView' : 'defaultView'}
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
               ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
               consumers={ALERT_TABLE_CONSUMERS}
+              projectRouting={PROJECT_ROUTING.ORIGIN}
               query={finalBoolQuery}
-              initialSort={initialSort}
+              sort={sort}
               casesConfiguration={casesConfiguration}
               gridStyle={gridStyle}
               shouldHighlightRow={shouldHighlightRow}
@@ -465,25 +483,27 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
-              initialPageSize={50}
+              isMutedAlertsEnabled={false}
+              pageSize={50}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}
               renderActionsCell={ActionsCell}
               renderAdditionalToolbarControls={
-                tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
+                shouldRenderAdditionalToolbarControls ? undefined : AdditionalToolbarControls
               }
               actionsColumnWidth={leadingControlColumn.width}
               additionalBulkActions={bulkActions}
               fieldsBrowserOptions={
-                tableType === TableId.alertsOnAlertsPage ||
-                tableType === TableId.alertsOnRuleDetailsPage
+                DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType)
                   ? fieldsBrowserOptions
                   : undefined
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
+              showCsvExportButton
               services={services}
+              bulkAddToChatConfig={maybeBulkAddToChatConfig}
               {...tablePropsOverrides}
             />
           </AlertTableCellContextProvider>
@@ -493,4 +513,4 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   );
 };
 
-export const DetectionEngineAlertsTable = memo(DetectionEngineAlertsTableComponent);
+export const AlertsTable = memo(AlertsTableComponent);

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Optional } from 'utility-types';
-import { IKbnPalette, KbnPaletteType } from './types';
+import type { Optional } from 'utility-types';
+import type { IKbnPalette, KbnPaletteType } from './types';
 
 export type KbnBasePaletteConfig = Optional<
   Pick<IKbnPalette, 'id' | 'name' | 'tag' | 'colorCount' | 'legacy' | 'aliases' | 'standalone'>,
@@ -18,7 +18,7 @@ export type KbnBasePaletteConfig = Optional<
 export abstract class KbnBasePalette implements IKbnPalette {
   public abstract type: KbnPaletteType;
 
-  public readonly id: string;
+  public readonly id: IKbnPalette['id'];
   public readonly name: string;
   public readonly tag?: string;
   public readonly colorCount: number;

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -17,5 +17,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
+    "@kbn/expandable-flyout",
   ]
 }

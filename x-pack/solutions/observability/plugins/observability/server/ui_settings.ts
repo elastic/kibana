@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core/types';
+import type { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
@@ -30,8 +30,10 @@ import {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
+  enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
+  enableDiagnosticMode,
 } from '../common/ui_settings_keys';
 
 /**
@@ -153,6 +155,22 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.number({ min: 1 }),
     solutionViews: ['classic', 'oblt'],
+  },
+  [enableInfrastructureAssetCustomDashboards]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
+      defaultMessage: 'Custom dashboards for asset details in Infrastructure',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
+      {
+        defaultMessage: 'Enable option to link custom dashboards in the asset details view.',
+      }
+    ),
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
   },
   [apmEnableTableSearchBar]: {
     category: [observabilityFeatureId],
@@ -413,8 +431,24 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     value: [],
     schema: schema.arrayOf(
-      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')]),
+      { maxSize: 2 }
     ),
+    requiresPageReload: false,
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
+  },
+  [enableDiagnosticMode]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableDiagnosticMode', {
+      defaultMessage: 'Enable diagnostic mode',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableDiagnosticModeDescription', {
+      defaultMessage:
+        'Enable diagnostic mode for debugging and troubleshooting capabilities. Currently available only in the Service map view.',
+    }),
+    schema: schema.boolean(),
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],
     technicalPreview: true,

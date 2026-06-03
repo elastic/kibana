@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { DatatableColumnArgs } from './datatable_column';
+import type { DatatableColumnArgs } from './datatable_column';
 import { isNumericFieldForDatatable } from './utils';
 
 type SummaryRowType = Extract<DatatableColumnArgs['summaryRow'], string>;
@@ -95,9 +95,9 @@ export function computeSummaryRowForColumn(
   const summaryValue = computeFinalValue(columnArgs.summaryRow, columnArgs.columnId, table.rows);
   // ignore the column formatter for the count case
   if (columnArgs.summaryRow === 'count') {
-    return defaultFormatter.convert(summaryValue);
+    return defaultFormatter.convertToText(summaryValue);
   }
-  return formatters[getOriginalId(columnArgs.columnId)].convert(summaryValue);
+  return formatters[getOriginalId(columnArgs.columnId)].convertToText(summaryValue);
 }
 
 function computeFinalValue(

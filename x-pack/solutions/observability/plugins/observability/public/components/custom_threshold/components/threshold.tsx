@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { Chart, Metric, Settings, ValueFormatter } from '@elastic/charts';
+import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import type { PartialTheme, Theme } from '@elastic/charts';
+import type { PartialTheme, Theme, ValueFormatter } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
   theme?: PartialTheme[];
@@ -90,7 +90,13 @@ export function Threshold({
                 value: value ?? NO_DATA_VALUE,
                 valueFormatter,
                 icon: ({ width, height, color: iconColor }) => (
-                  <EuiIcon width={width} height={height} color={iconColor} type="alert" />
+                  <EuiIcon
+                    width={width}
+                    height={height}
+                    color={iconColor}
+                    type="warning"
+                    aria-hidden={true}
+                  />
                 ),
               },
             ],

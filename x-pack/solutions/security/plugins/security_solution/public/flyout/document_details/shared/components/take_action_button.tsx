@@ -8,9 +8,9 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useEuiTheme, EuiFlyout } from '@elastic/eui';
 import { find } from 'lodash/fp';
-import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { TakeActionDropdown } from './take_action_dropdown';
@@ -18,13 +18,13 @@ import { AddExceptionFlyoutWrapper } from '../../../../detections/components/ale
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { useDocumentDetailsContext } from '../context';
-import { useHostIsolation } from '../hooks/use_host_isolation';
-import { useRefetchByScope } from '../../right/hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
 import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
-import { IsolateHostPanelHeader } from '../../isolate_host/header';
-import { IsolateHostPanelContent } from '../../isolate_host/content';
+import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
+import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+
 interface AlertSummaryData {
   /**
    * Status of the alert (open, closed...)
@@ -52,28 +52,21 @@ interface AlertSummaryData {
  * Take action button in the panel footer
  */
 export const TakeActionButton: FC = () => {
-  const { euiTheme } = useEuiTheme();
-  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
-  const flyoutZIndex = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
-    [euiTheme]
+  const { closeFlyout } = useExpandableFlyoutApi();
+  const {
+    dataFormattedForFieldBrowser,
+    dataAsNestedObject,
+    refetchFlyoutData,
+    scopeId,
+    searchHit,
+  } = useDocumentDetailsContext();
+
+  const hit = useMemo(
+    () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : undefined),
+    [searchHit]
   );
 
-  const { closeFlyout } = useExpandableFlyoutApi();
-  const { dataFormattedForFieldBrowser, dataAsNestedObject, refetchFlyoutData, scopeId } =
-    useDocumentDetailsContext();
-
-  // host isolation interaction
-  const {
-    isolateAction,
-    isHostIsolationPanelOpen,
-    showHostIsolationPanel,
-    isIsolateActionSuccessBannerVisible,
-    handleIsolationActionSuccess,
-    showAlertDetails,
-  } = useHostIsolation();
-
-  const { hostName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const [isolateAction, setIsolateAction] = useState<HostIsolationAction | null>(null);
 
   const { refetch: refetchAll } = useRefetchByScope({ scopeId });
 
@@ -147,7 +140,7 @@ export const TakeActionButton: FC = () => {
   );
   const closeOsqueryFlyout = useCallback(() => {
     setOsqueryFlyoutOpenWithAgentId(null);
-  }, [setOsqueryFlyoutOpenWithAgentId]);
+  }, []);
   const alertId = useMemo(
     () => (dataAsNestedObject?.kibana?.alert ? dataAsNestedObject?._id : null),
     [dataAsNestedObject?._id, dataAsNestedObject?.kibana?.alert]
@@ -155,19 +148,28 @@ export const TakeActionButton: FC = () => {
 
   return (
     <>
+      {isolateAction !== null && hit != null && (
+        <HostIsolationFlyout
+          hit={hit}
+          detailsData={dataFormattedForFieldBrowser}
+          isolateAction={isolateAction}
+          onClose={() => setIsolateAction(null)}
+        />
+      )}
+
       {dataAsNestedObject && (
         <TakeActionDropdown
           dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
           dataAsNestedObject={dataAsNestedObject}
           handleOnEventClosed={closeFlyout}
-          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           onAddEventFilterClick={onAddEventFilterClick}
           onAddExceptionTypeClick={onAddExceptionTypeClick}
-          onAddIsolationStatusClick={showHostIsolationPanel}
+          onAddIsolationStatusClick={setIsolateAction}
           refetchFlyoutData={refetchFlyoutData}
           refetch={refetchAll}
           scopeId={scopeId}
           onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+          searchHit={searchHit}
         />
       )}
 
@@ -186,12 +188,7 @@ export const TakeActionButton: FC = () => {
         )}
 
       {isAddEventFilterModalOpen && dataAsNestedObject != null && (
-        <EventFiltersFlyout
-          data={dataAsNestedObject}
-          onCancel={closeAddEventFilterModal}
-          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps={flyoutZIndex} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
-        />
+        <EventFiltersFlyout data={dataAsNestedObject} onCancel={closeAddEventFilterModal} />
       )}
 
       {isOsqueryFlyoutOpenWithAgentId && dataAsNestedObject != null && (
@@ -201,25 +198,6 @@ export const TakeActionButton: FC = () => {
           onClose={closeOsqueryFlyout}
           ecsData={dataAsNestedObject}
         />
-      )}
-
-      {isHostIsolationPanelOpen && (
-        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={flyoutZIndex}>
-          <IsolateHostPanelHeader
-            isolateAction={isolateAction}
-            data={dataFormattedForFieldBrowser}
-          />
-          <IsolateHostPanelContent
-            isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
-            hostName={hostName}
-            alertId={alertId ?? undefined}
-            isolateAction={isolateAction}
-            dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-            showAlertDetails={showAlertDetails}
-            handleIsolationActionSuccess={handleIsolationActionSuccess}
-          />
-        </EuiFlyout>
       )}
     </>
   );

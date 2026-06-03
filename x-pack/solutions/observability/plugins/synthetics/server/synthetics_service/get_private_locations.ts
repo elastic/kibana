@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,
   privateLocationSavedObjectName,
 } from '../../common/saved_objects/private_locations';
-import {
+import type {
   PrivateLocationAttributes,
   SyntheticsPrivateLocationsAttributes,
 } from '../runtime_types/private_locations';
@@ -25,9 +22,16 @@ export const getPrivateLocations = async (
   client: SavedObjectsClientContract,
   spaceId?: string
 ): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
+  return getPrivateLocationsForNamespaces(client, spaceId ? [spaceId] : undefined);
+};
+
+export const getPrivateLocationsForNamespaces = async (
+  client: SavedObjectsClientContract,
+  namespaces?: string[]
+): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
   try {
     const [results, legacyLocations] = await Promise.all([
-      getNewPrivateLocations(client, spaceId),
+      getNewPrivateLocations(client, namespaces),
       getLegacyPrivateLocations(client),
     ]);
 
@@ -40,11 +44,14 @@ export const getPrivateLocations = async (
   }
 };
 
-const getNewPrivateLocations = async (client: SavedObjectsClientContract, spaceId?: string) => {
+const getNewPrivateLocations = async (
+  client: SavedObjectsClientContract,
+  namespaces?: string[]
+) => {
   const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
     type: privateLocationSavedObjectName,
     perPage: 1000,
-    ...(spaceId ? { namespaces: [spaceId] } : {}),
+    ...(namespaces && namespaces.length > 0 ? { namespaces } : {}),
   });
 
   const results: Array<

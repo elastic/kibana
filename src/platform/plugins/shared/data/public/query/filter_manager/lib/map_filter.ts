@@ -9,7 +9,7 @@
 
 import { cloneDeep, reduceRight } from 'lodash';
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { mapCombined } from './mappers/map_combined';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';

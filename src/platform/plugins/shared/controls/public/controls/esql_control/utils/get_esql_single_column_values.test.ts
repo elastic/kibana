@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ISearchGeneric } from '@kbn/search-types';
-import {
-  getESQLSingleColumnValues,
+import type { ISearchGeneric } from '@kbn/search-types';
+import type {
   GetESQLSingleColumnValuesSuccess,
   GetESQLSingleColumnValuesFailure,
 } from './get_esql_single_column_values';
+import { getESQLSingleColumnValues } from './get_esql_single_column_values';
 
 const mockGetESQLResults = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({
@@ -34,10 +34,12 @@ describe('getESQLSingleColumnValues', () => {
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | STATS BY column',
       search: searchMock,
+      esqlVariables: [],
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "columnType": undefined,
         "values": Array [
           "option1",
           "option2",
@@ -55,6 +57,7 @@ describe('getESQLSingleColumnValues', () => {
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index',
       search: searchMock,
+      esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
     expect('values' in result).toBe(false);
@@ -71,6 +74,7 @@ describe('getESQLSingleColumnValues', () => {
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | EVAL',
       search: searchMock,
+      esqlVariables: [],
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
     expect('values' in result).toBe(false);
@@ -89,6 +93,7 @@ describe('getESQLSingleColumnValues', () => {
       query: 'FROM index | STATS BY column',
       search: searchMock,
       timeRange,
+      esqlVariables: [],
     });
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({

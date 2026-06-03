@@ -6,9 +6,9 @@
  */
 
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         usersSessions.set(`user_${userPrefix}`, {
-          cookie: parseCookie(response.headers['set-cookie'][0])!,
+          cookie: findSessionCookie(response.headers['set-cookie']),
         });
       }
     });
@@ -308,7 +308,10 @@ export default function ({ getService }: FtrProviderContext) {
         .post('/internal/security/user_profile/_data')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', usersSessions.get('user_one')!.cookie.cookieString())
-        .send({ some: 'data', some_more: 'data', some_nested: { data: 'nested_data' } })
+        .send({
+          avatar: { initials: 'some-initials', color: '#f3f3f3' },
+          userSettings: { darkMode: 'dark', contrastMode: 'high' },
+        })
         .expect(200);
 
       // 2. Data is not returned by default
@@ -337,7 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
       suggestions = await supertest
         .post('/internal/user_profiles_consumer/_suggest')
         .set('kbn-xsrf', 'xxx')
-        .send({ name: 'one', requiredAppPrivileges: ['discover'], dataPath: 'some,some_more' })
+        .send({ name: 'one', requiredAppPrivileges: ['discover'], dataPath: 'avatar,userSettings' })
         .expect(200);
       expect(suggestions.body).to.have.length(1);
       expectSnapshot(
@@ -346,8 +349,15 @@ export default function ({ getService }: FtrProviderContext) {
         Array [
           Object {
             "data": Object {
-              "some": "data",
-              "some_more": "data",
+              "avatar": Object {
+                "color": "#f3f3f3",
+                "imageUrl": null,
+                "initials": "some-initials",
+              },
+              "userSettings": Object {
+                "contrastMode": "high",
+                "darkMode": "dark",
+              },
             },
             "user": Object {
               "email": "one@elastic.co",
@@ -371,10 +381,14 @@ export default function ({ getService }: FtrProviderContext) {
         Array [
           Object {
             "data": Object {
-              "some": "data",
-              "some_more": "data",
-              "some_nested": Object {
-                "data": "nested_data",
+              "avatar": Object {
+                "color": "#f3f3f3",
+                "imageUrl": null,
+                "initials": "some-initials",
+              },
+              "userSettings": Object {
+                "contrastMode": "high",
+                "darkMode": "dark",
               },
             },
             "user": Object {

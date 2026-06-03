@@ -6,7 +6,7 @@
  */
 
 import { esTestConfig } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export const ECOMMERCE_INDEX_PATTERN = 'kibana_sample_data_ecommerce';
 export const FLIGHTS_INDEX_PATTERN = 'kibana_sample_data_flights';
@@ -24,19 +24,11 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.testResources.disableKibanaAnnouncements();
       await browser.setWindowSize(1920, 1080);
       await securityPage.login(
         esTestConfig.getUrlParts().username,
         esTestConfig.getUrlParts().password
       );
-    });
-
-    after(async () => {
-      await securityPage.forceLogout();
-      await sampleData.testResources.removeAllKibanaSampleData();
-      await ml.testResources.resetKibanaTimeZone();
-      await ml.testResources.resetKibanaAnnouncements();
     });
 
     loadTestFile(require.resolve('./security_cases'));

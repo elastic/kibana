@@ -7,10 +7,9 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
 import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
@@ -19,13 +18,12 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -105,22 +103,16 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  value,
-  field,
   isPreviewMode,
-  isLinkEnabled,
   openDetailsPanel,
+  passedFindings,
+  failedFindings,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
+  passedFindings: number;
+  failedFindings: number;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
-  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    field,
-    value
-  );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {
@@ -128,32 +120,31 @@ export const MisconfigurationsPreview = ({
   }, []);
   const { euiTheme } = useEuiTheme();
 
-  const goToEntityInsightTab = useCallback(() => {
-    openDetailsPanel({
-      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-    });
-  }, [openDetailsPanel]);
+  const goToEntityInsightTab = useCallback(
+    () =>
+      openDetailsPanel({
+        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+      }),
+    [openDetailsPanel]
+  );
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToEntityInsightTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
-                defaultMessage="Show all misconfiguration findings"
-              />
-            ),
-          }
-        : undefined,
-    [isLinkEnabled, goToEntityInsightTab]
+    () => ({
+      callback: goToEntityInsightTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.misconfiguration.misconfigurationTooltip"
+          defaultMessage="Show all misconfiguration findings"
+        />
+      ),
+    }),
+    [goToEntityInsightTab]
   );
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
+        iconType: !isPreviewMode ? 'chevronLimitLeft' : '',
         title: (
           <EuiTitle
             css={css`
@@ -167,7 +158,7 @@ export const MisconfigurationsPreview = ({
             />
           </EuiTitle>
         ),
-        link: hasMisconfigurationFindings ? link : undefined,
+        link,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >

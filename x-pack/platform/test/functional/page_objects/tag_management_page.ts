@@ -7,8 +7,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 interface FillTagFormFields {
   name?: string;
@@ -87,6 +88,7 @@ class TagModal extends FtrService {
 
     if (submit) {
       await this.clickConfirm();
+      await this.header.waitUntilLoadingHasFinished();
     }
   }
 
@@ -185,7 +187,6 @@ class TagModal extends FtrService {
  */
 class TagAssignmentFlyout extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
 
   constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
     super(ctx);
@@ -231,9 +232,7 @@ class TagAssignmentFlyout extends FtrService {
    * Wait until the assignable object results are displayed in the flyout.
    */
   async waitUntilResultsAreLoaded() {
-    return this.find.waitForDeletedByCssSelector(
-      '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
-    );
+    return this.testSubjects.waitForDeleted('assignFlyoutResultList-loading');
   }
 
   /**
@@ -337,22 +336,26 @@ export class TagManagementPageObject extends FtrService {
   }
 
   async clickActionItem(action: string) {
+    await this.openCollapsedMenu();
+
+    await this.testSubjects.click(`tagsTableAction-${action}`);
+  }
+
+  async openCollapsedMenu(rowIndex = 0) {
     const rows = await this.testSubjects.findAll('tagsTableRow');
-    const firstRow = rows[0];
+    const row = rows[rowIndex];
     // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
     const menuActionPresent = await this.testSubjects.descendantExists(
       'euiCollapsedItemActionsButton',
-      firstRow
+      row
     );
     if (menuActionPresent) {
       const actionButton = await this.testSubjects.findDescendant(
         'euiCollapsedItemActionsButton',
-        firstRow
+        row
       );
       await actionButton.click();
     }
-
-    await this.testSubjects.click(`tagsTableAction-${action}`);
   }
 
   /**
@@ -464,17 +467,11 @@ export class TagManagementPageObject extends FtrService {
     if (!(await this.isActionMenuButtonDisplayed())) {
       return false;
     }
-    const menuWasOpened = await this.isActionMenuOpened();
-    if (!menuWasOpened) {
+    if (!(await this.isActionMenuOpened())) {
       await this.openActionMenu();
     }
 
-    if (!menuWasOpened) {
-      await this.toggleActionMenu();
-    }
-
-    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
-    return actionExists;
+    return await this.testSubjects.exists(`actionBar-button-${actionId}`);
   }
 
   /**
@@ -496,7 +493,7 @@ export class TagManagementPageObject extends FtrService {
    * Return true if the bulk action menu is opened, false otherwise.
    */
   async isActionMenuOpened() {
-    return this.testSubjects.exists('actionBar-contextMenuPopover');
+    return this.testSubjects.exists('actionBar-contextMenu');
   }
 
   /**

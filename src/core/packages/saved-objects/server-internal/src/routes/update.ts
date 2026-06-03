@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import {
@@ -38,9 +39,15 @@ export const registerUpdateRoute = (
       path: '/{type}/{id}',
       options: {
         summary: `Update a saved object`,
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Updates a single Kibana saved object by type and ID.
+
+For transferring or backing up saved objects, prefer the import and export APIs (\`POST /api/saved_objects/_import\` and \`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
+        oasOperationObject: () => path.resolve(__dirname, './update.examples.yaml'),
       },
       security: {
         authz: {
@@ -50,8 +57,8 @@ export const registerUpdateRoute = (
       },
       validate: {
         params: schema.object({
-          type: schema.string(),
-          id: schema.string(),
+          type: schema.string({ meta: { description: 'The saved object type.' } }),
+          id: schema.string({ meta: { description: 'The saved object identifier.' } }),
         }),
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
@@ -62,7 +69,8 @@ export const registerUpdateRoute = (
                 name: schema.string(),
                 type: schema.string(),
                 id: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             )
           ),
           upsert: schema.maybe(schema.recordOf(schema.string(), schema.any())),

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LicenseInfo, MultipleLicenseInfo } from '../types';
+import type { LicenseInfo, MultipleLicenseInfo } from '../types';
 
 // Helper function to get licenses array from either format
 

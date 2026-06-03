@@ -298,6 +298,10 @@ export const TransformList: FC<TransformListProps> = ({
       <EuiPopover
         key="bulkActionIcon"
         id="transformBulkActionsMenu"
+        aria-label={i18n.translate(
+          'xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel',
+          { defaultMessage: 'Bulk actions' }
+        )}
         button={buttonIcon}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
@@ -389,6 +393,9 @@ export const TransformList: FC<TransformListProps> = ({
         selection={selection}
         sorting={sorting}
         search={search}
+        tableCaption={i18n.translate('xpack.transform.list.tableCaption', {
+          defaultMessage: 'Transform list',
+        })}
         data-test-subj={`transformListTable ${
           isLoading || transformsLoading ? 'loading' : 'loaded'
         }`}

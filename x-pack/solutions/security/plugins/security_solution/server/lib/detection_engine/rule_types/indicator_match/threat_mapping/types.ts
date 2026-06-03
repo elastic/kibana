@@ -47,7 +47,6 @@ export interface CreateThreatSignalsOptions {
 
 export interface CreateThreatSignalOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
-  currentResult: SearchAfterAndBulkCreateReturnType;
   currentThreatList: ThreatListItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
@@ -66,7 +65,6 @@ export interface CreateThreatSignalOptions {
 
 export interface CreateEventSignalOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
-  currentResult: SearchAfterAndBulkCreateReturnType;
   currentEventList: EventItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
@@ -87,14 +85,14 @@ type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
   threatList: ThreatListItem[];
-  threatMapping: ThreatMapping;
+  threatMappings: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
 }
 
 export interface FilterThreatMappingOptions {
   threatListItem: ThreatListItem;
-  threatMapping: ThreatMapping;
+  threatMappingEntries: ThreatMappingEntries;
   entryKey: EntryKey;
 }
 
@@ -104,15 +102,16 @@ export interface CreateInnerAndClausesOptions {
   entryKey: EntryKey;
 }
 
-export interface CreateAndOrClausesOptions {
+export interface CreateNamedAndClauseOptions {
   threatListItem: ThreatListItem;
-  threatMapping: ThreatMapping;
+  threatMappingEntries: ThreatMappingEntries;
   entryKey: EntryKey;
+  threatMappingIndex: number;
 }
 
 export interface BuildEntriesMappingFilterOptions {
   threatList: ThreatListItem[];
-  threatMapping: ThreatMapping;
+  threatMappings: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
 }
@@ -168,11 +167,9 @@ export interface ThreatEnrichment {
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
-interface BaseThreatNamedQuery {
-  field: string;
-  value: string;
+export interface BaseThreatNamedQuery {
+  threatMappingIndex: number;
   queryType: string;
-  negate?: boolean;
 }
 
 export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {
@@ -195,6 +192,7 @@ export interface BuildThreatEnrichmentOptions {
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  threatMapping: ThreatMapping;
 }
 
 export interface EventsOptions {

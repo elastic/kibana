@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Serverless Common UI - Management', function () {
@@ -18,6 +18,5 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./disabled_uis'));
     loadTestFile(require.resolve('./landing_page.ts'));
-    loadTestFile(require.resolve('./ingest_pipelines'));
   });
 };

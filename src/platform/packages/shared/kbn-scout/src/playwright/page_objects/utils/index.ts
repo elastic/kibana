@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '../../fixtures/scope/test';
+import type { ScoutPage } from '../../fixtures/scope/test';
 
 /**
  * Creates a lazily instantiated proxy for a Page Object class, deferring the creation of the instance until
@@ -25,15 +25,26 @@ export function createLazyPageObject<T extends object, Args extends any[]>(
   ...constructorArgs: Args
 ): T {
   let instance: T | null = null;
+
+  const ensureInstance = (): T => {
+    if (!instance) {
+      instance = new PageObjectClass(scoutPage, ...constructorArgs);
+    }
+    return instance;
+  };
+
   return new Proxy({} as T, {
     get(_, prop: string | symbol) {
-      if (!instance) {
-        instance = new PageObjectClass(scoutPage, ...constructorArgs);
-      }
-      if (typeof prop === 'symbol' || !(prop in instance)) {
+      const obj = ensureInstance();
+      if (typeof prop === 'symbol' || !(prop in obj)) {
         return undefined;
       }
-      return instance[prop as keyof T];
+      return obj[prop as keyof T];
+    },
+    set(_, prop: string | symbol, value: unknown) {
+      const obj = ensureInstance();
+      (obj as Record<string | symbol, unknown>)[prop] = value;
+      return true;
     },
   });
 }

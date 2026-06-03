@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
@@ -21,6 +21,7 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { JsonObject } from '@kbn/utility-types';
+import { AlertDetailFlyout } from '@kbn/response-ops-alerts-table/components/alert_detail_flyout';
 import {
   CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE,
   getSolutionRuleTypesAuthPromptBody,
@@ -30,17 +31,17 @@ import {
 } from '../translations';
 import type { EmbeddableAlertsTableQuery } from '../types';
 import { NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ } from '../constants';
-import { InMemoryStorage } from '../utils/in_memory_storage';
 
 export interface EmbeddableAlertsTableProps {
   id: string;
   timeRange?: TimeRange;
+  lastReloadRequestTime?: number;
+  onLoadingChange?: (isLoading: boolean) => void;
   solution?: RuleTypeSolution;
   query?: EmbeddableAlertsTableQuery;
   services: AlertsTableProps['services'];
 }
 
-const inMemoryStorage = new InMemoryStorage();
 const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
   ...column,
   actions: false,
@@ -55,10 +56,18 @@ const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
 export const EmbeddableAlertsTable = ({
   id,
   timeRange,
+  lastReloadRequestTime,
+  onLoadingChange,
   solution,
   query,
   services,
 }: EmbeddableAlertsTableProps) => {
+  const onUpdate = useCallback<NonNullable<AlertsTableProps['onUpdate']>>(
+    (context) => {
+      onLoadingChange?.(context.isLoading);
+    },
+    [onLoadingChange]
+  );
   const {
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
@@ -68,21 +77,27 @@ export const EmbeddableAlertsTable = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
-  const timeRangeQuery: QueryDslQueryContainer | null = timeRange
-    ? {
-        bool: {
-          minimum_should_match: 1,
-          should: [
-            getTime(undefined, timeRange, {
-              fieldName: ALERT_TIME_RANGE,
-            })!.query,
-            getTime(undefined, timeRange, {
-              fieldName: TIMESTAMP,
-            })!.query,
-          ],
-        },
-      }
-    : null;
+  // Depend on the primitive `from`/`to` values rather than the `timeRange` object, whose
+  // reference is unstable across fetch contexts and would otherwise retrigger the query.
+  const timeRangeFrom = timeRange?.from;
+  const timeRangeTo = timeRange?.to;
+  const timeRangeQuery = useMemo<QueryDslQueryContainer | null>(() => {
+    if (!timeRangeFrom || !timeRangeTo) return null;
+    const range = { from: timeRangeFrom, to: timeRangeTo };
+    return {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          getTime(undefined, range, {
+            fieldName: ALERT_TIME_RANGE,
+          })!.query,
+          getTime(undefined, range, {
+            fieldName: TIMESTAMP,
+          })!.query,
+        ],
+      },
+    };
+  }, [timeRangeFrom, timeRangeTo]);
   const filtersQuery = useMemo(() => {
     let filters: JsonObject | null = null;
     try {
@@ -94,11 +109,14 @@ export const EmbeddableAlertsTable = ({
     }
     return filters;
   }, [query?.filters, services.notifications.toasts]);
-  const finalQuery = {
-    bool: {
-      must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],
-    },
-  };
+  const finalQuery = useMemo(
+    () => ({
+      bool: {
+        must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],
+      },
+    }),
+    [timeRangeQuery, filtersQuery]
+  );
 
   if (isLoadingRuleTypes) {
     // Using EuiLoadingChart instead of EuiLoadingSpinner to match the
@@ -136,36 +154,35 @@ export const EmbeddableAlertsTable = ({
   }
 
   return (
-    <AlertsTable
-      id={id}
-      ruleTypeIds={ruleTypeIds}
-      query={finalQuery}
-      columns={columns}
-      showAlertStatusWithFlapping
-      renderActionsCell={AlertActionsCell}
-      toolbarVisibility={{
-        // Disabling the fullscreen toggle since it breaks in Dashboards
-        // and panels can be maximized on their own
-        showFullScreenSelector: false,
-        // Disable data grid customizations
-        showColumnSelector: false,
-        showSortSelector: false,
-        showKeyboardShortcuts: false,
-        showDisplaySelector: false,
-      }}
-      emptyState={{
-        height: 'flex',
-        variant: 'transparent',
-      }}
-      openLinksInNewTab={true}
-      flyoutOwnsFocus={true}
-      flyoutPagination={false}
-      // Saves the configuration in memory in case we want to add a shared configuration saved in
-      // the panel config in the future (and avoid localStorage migrations or deletions tasks)
-      configurationStorage={inMemoryStorage}
-      // Disable columns customziation
-      browserFields={{}}
-      services={services}
-    />
+    <div css={{ height: '100%', width: '100%' }}>
+      <AlertsTable
+        id={id}
+        ruleTypeIds={ruleTypeIds}
+        query={finalQuery}
+        columns={columns}
+        lastReloadRequestTime={lastReloadRequestTime}
+        onUpdate={onUpdate}
+        showAlertStatusWithFlapping
+        renderActionsCell={AlertActionsCell}
+        toolbarVisibility={{
+          showFullScreenSelector: false,
+          showColumnSelector: false,
+          showSortSelector: false,
+          showKeyboardShortcuts: false,
+          showDisplaySelector: false,
+        }}
+        emptyState={{
+          height: 'flex',
+          variant: 'transparent',
+        }}
+        openLinksInNewTab={true}
+        renderExpandedAlertView={(props) => (
+          <AlertDetailFlyout {...props} ownFocus={true} hasPagination={false} />
+        )}
+        configurationStorage={null}
+        browserFields={{}}
+        services={services}
+      />
+    </div>
   );
 };

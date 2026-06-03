@@ -1,31 +1,19 @@
 # @kbn/core-chrome-layout
 
-The `core-chrome-layout` package provides implementation for different chrome layouts. Each implementation is a layout service that provides a layout component. A layout service is used by the rendering service to render the layout based on the selected layout type.
+Top-level layout wiring for Kibana's Chrome application shell. Bridges core services, chrome state, and chrome UI components into a renderable React tree.
 
-## Layouts
+## Responsibilities
 
-- `grid`: Grid-based layout (WIP)
-- `legacy-fixed`: Legacy fixed layout (default)
+- **Assembles `ChromeComponentsDeps`** from whole service contracts (`application`, `http`, `docLinks`, `customBranding`) and wraps the tree with `ChromeComponentsProvider`.
+- **Selects the chrome layout** based on `useChromeStyle()` — renders `ClassicHeader` or `ProjectHeader` + `GridLayoutProjectSideNav` accordingly.
+- **Composes the shell** — header, navigation, sidebar, banner, app menu bar, footer, and the application content area — into a CSS Grid layout via `ChromeLayout` from `@kbn/ui-chrome-layout`.
+- **Provides layout config** (`ChromeLayoutConfigProvider`) with dimensions (header height, banner height, sidebar width, etc.) consumed by layout components via CSS custom properties.
 
-## Usage
+## Available Layouts
 
-Import the layout service or components as needed:
+- **`GridLayout`** — modern CSS Grid-based layout (current default)
 
-```tsx
-import { LayoutService } from './layout_service';
-import { GridLayout } from './layouts/grid';
-import { LegacyFixedLayout } from './layouts/legacy-fixed';
+## Related
 
-const layout = featureFlag.getStringValue<LayoutFeatureFlag>(
-  LAYOUT_FEATURE_FLAG_KEY,
-  'legacy-fixed'
-);
-const Layout = layout === 'grid' ? new GridLayout(deps) : new LegacyFixedLayout(deps);
-
-ReactDOM.render(
-  <KibanaRootContextProvider {...startServices} globalStyles={true}>
-    <Layout />
-  </KibanaRootContextProvider>,
-  targetDomElement
-);
-```
+- [`@kbn/core-chrome-browser-components`](../../browser-components) — all chrome UI components (headers, sidenav, etc.)
+- [`@kbn/ui-chrome-layout`](../../../../platform/kbn-ui/chrome-layout) — `ChromeLayout` grid container and layout primitives

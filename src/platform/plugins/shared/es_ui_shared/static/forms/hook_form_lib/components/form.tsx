@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { EuiForm } from '@elastic/eui';
 
 import { FormProvider } from '../form_context';
 import { FormDataContextProvider } from '../form_data_context';
-import { FormHook } from '../types';
+import type { FormHook } from '../types';
 
 export interface Props {
   form: FormHook<any>;
@@ -21,6 +22,10 @@ export interface Props {
   [key: string]: any;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => {
   const { getFormData, __getFormData$ } = form;
 

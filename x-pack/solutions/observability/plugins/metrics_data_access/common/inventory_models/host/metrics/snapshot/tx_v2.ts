@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
+import { networkTrafficWithInterfacesWithFilter } from '../../../shared/metrics/snapshot/network_traffic';
 import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
 export const txV2: SchemaBasedAggregations = {
   ecs: {
     tx_sum: {
       sum: {
+        field: 'host.network.egress.bytes',
+      },
+    },
+    tx_count: {
+      value_count: {
         field: 'host.network.egress.bytes',
       },
     },
@@ -29,39 +34,22 @@ export const txV2: SchemaBasedAggregations = {
       bucket_script: {
         buckets_path: {
           value: 'tx_sum',
+          count: 'tx_count',
           minTime: 'min_timestamp',
           maxTime: 'max_timestamp',
         },
         script: {
-          source: 'params.value / ((params.maxTime - params.minTime) / 1000)',
+          source:
+            'params.count > 0 ? params.value / ((params.maxTime - params.minTime) / 1000) : null',
           lang: 'painless',
         },
         gap_policy: 'skip',
       },
     },
   },
-  semconv: {
-    tx_transmit: {
-      filter: {
-        term: {
-          direction: 'transmit',
-        },
-      },
-      aggs: {
-        per_interval: {
-          auto_date_histogram: {
-            field: '@timestamp',
-            buckets: 30,
-          },
-          aggs: networkTrafficWithInterfaces('tx_otel', 'system.network.io', 'device'),
-        },
-      },
+  semconv: networkTrafficWithInterfacesWithFilter('txV2', 'system.network.io', 'device', {
+    term: {
+      direction: 'transmit',
     },
-    txV2: {
-      avg_bucket: {
-        buckets_path: 'tx_transmit>per_interval>tx_otel',
-        gap_policy: 'skip',
-      },
-    },
-  },
+  }),
 };

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { EditConnectorFlyout } from '../application/sections/action_connector_form';
-import { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
-import { ConnectorServices } from '../types';
+import type { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
+import type { ConnectorServices } from '../types';
 
 const queryClient = new QueryClient();
 

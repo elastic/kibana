@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiText,
   EuiTitle,
@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { getBenchmarkIdQuery } from './benchmarks_section';
-import { BenchmarkData } from '../../../../common/types_old';
+import type { BenchmarkData } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 interface BenchmarkInfo {
@@ -194,9 +194,7 @@ export const BenchmarkDetailsBox = ({
       <EuiFlexItem grow={false} css={{ justifyContent: 'flex-end' }}>
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <CISBenchmarkIcon type={benchmarkId} name={`${benchmarkName}`} />
-          <EuiToolTip content={cisTooltip}>
-            <EuiIcon type={cisLogoIcon} size="xxl" />
-          </EuiToolTip>
+          <EuiIconTip content={cisTooltip} type={cisLogoIcon} size="xxl" />
           <EuiText size="xs" color="subdued">
             {benchmarkVersion}
           </EuiText>

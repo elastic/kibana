@@ -6,7 +6,7 @@
  */
 
 import { setupTestUsers } from './test_users';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   // total runtime ~ 4m
@@ -21,6 +21,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./policy_secrets')); // ~40s
 
     loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
+    loadTestFile(require.resolve('./enrollment_api_keys/bulk_delete')); // ~ 20s
     loadTestFile(require.resolve('./enrollment_api_keys/privileges')); // ~ 20s
 
     // Data Streams
@@ -56,5 +57,11 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
+
+    // Cloud connectors
+    loadTestFile(require.resolve('./cloud_connector'));
+
+    // Cloud onboarding deployments
+    loadTestFile(require.resolve('./cloud_onboarding_deployment'));
   });
 }

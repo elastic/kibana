@@ -23,11 +23,11 @@ import type {
   PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
-import { isZod } from '@kbn/zod';
+import { isZod } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
-import { Mutable } from 'utility-types';
+import type { Request } from '@hapi/hapi';
+import type { Mutable } from 'utility-types';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';
@@ -87,7 +87,7 @@ export function buildRoute({
     method,
     path: getRouteFullPath(router.routerPath, route.path),
     options: validOptions(method, route),
-    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
+    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>),
     validationSchemas: route.validate,
     isVersioned: false,
   };

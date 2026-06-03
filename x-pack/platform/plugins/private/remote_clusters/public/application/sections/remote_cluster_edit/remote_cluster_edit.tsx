@@ -19,8 +19,8 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
-import { RequestError } from '../../../types';
-import { Cluster, ClusterPayload } from '../../../../common/lib';
+import type { RequestError } from '../../../types';
+import type { Cluster, ClusterPayload } from '../../../../common/lib';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
@@ -30,7 +30,7 @@ const FORM_MAX_WIDTH = 850;
 
 interface Props {
   isLoading: boolean;
-  cluster: Cluster;
+  cluster: Cluster | undefined;
   startEditingCluster: (clusterName: string) => void;
   stopEditingCluster: () => void;
   editCluster: (cluster: ClusterPayload) => void;
@@ -116,7 +116,11 @@ export const RemoteClusterEdit: React.FC<Props> = ({
           </p>
         }
         actions={
-          <EuiButton {...reactRouterNavigate(history, '/list')} color="danger" iconType="arrowLeft">
+          <EuiButton
+            {...reactRouterNavigate(history, '/list')}
+            color="danger"
+            iconType="chevronSingleLeft"
+          >
             <FormattedMessage
               id="xpack.remoteClusters.edit.viewRemoteClustersButtonLabel"
               defaultMessage="View remote clusters"
@@ -144,6 +148,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
         {hasDeprecatedProxySetting ? (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.remoteClusters.edit.deprecatedSettingsTitle"

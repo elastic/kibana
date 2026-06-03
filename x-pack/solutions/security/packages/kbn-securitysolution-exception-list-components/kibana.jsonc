@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/securitysolution-exception-list-components",
   "owner": [
     "@elastic/security-detection-engine"

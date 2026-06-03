@@ -7,14 +7,13 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MonitorConfigRepository } from './monitor_config_repository';
-import { ConfigKey, SyntheticsMonitor } from '../../common/runtime_types';
+import type { SyntheticsMonitor } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import {
-  SavedObjectsClientContract,
-  type SavedObjectsFindOptions,
-} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { type SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -83,6 +82,101 @@ describe('MonitorConfigRepository', () => {
       await expect(repository.get(id)).rejects.toThrow(
         /Failed to get monitor with id test-id: Not found/
       );
+    });
+  });
+
+  describe('getAcrossSpaces', () => {
+    it('issues a single multi-space lookup and one legacy lookup per namespace', async () => {
+      const id = 'test-id';
+      const namespaces = ['default', 'space-two'];
+      const mockMonitor = {
+        id,
+        attributes: { name: 'Test Monitor' },
+        type: syntheticsMonitorSavedObjectType,
+        references: [],
+      };
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [mockMonitor] });
+
+      const result = await repository.getAcrossSpaces(id, namespaces);
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: syntheticsMonitorSavedObjectType, id, namespaces: ['default', 'space-two'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['default'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['space-two'] },
+      ]);
+      expect(result).toBe(mockMonitor);
+    });
+
+    it('returns the first saved object that has attributes and no error', async () => {
+      const id = 'test-id';
+      const errored = {
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        attributes: {},
+        references: [],
+        error: { statusCode: 404, error: 'Not Found', message: 'not found' },
+      };
+      const found = {
+        id,
+        type: legacySyntheticsMonitorTypeSingle,
+        attributes: { name: 'Legacy' },
+        references: [],
+      };
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [errored as any, found] });
+
+      const result = await repository.getAcrossSpaces(id, ['default']);
+
+      expect(result).toBe(found);
+    });
+
+    it('throws not-found when no namespace has the monitor', async () => {
+      const id = 'missing-id';
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id,
+            type: syntheticsMonitorSavedObjectType,
+            error: { statusCode: 404, error: 'Not Found', message: 'not found' },
+          },
+        ],
+      } as any);
+
+      await expect(repository.getAcrossSpaces(id, ['default'])).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('deduplicates the namespaces array', async () => {
+      const id = 'dup-id';
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { id, type: syntheticsMonitorSavedObjectType, attributes: {}, references: [] },
+        ],
+      } as any);
+
+      await repository.getAcrossSpaces(id, ['default', 'default', 'space-two']);
+
+      const calledWith = soClient.bulkGet.mock.calls[0][0];
+      expect(calledWith).toEqual([
+        { type: syntheticsMonitorSavedObjectType, id, namespaces: ['default', 'space-two'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['default'] },
+        { type: legacySyntheticsMonitorTypeSingle, id, namespaces: ['space-two'] },
+      ]);
+    });
+
+    it('uses the supplied saved objects client when provided', async () => {
+      const id = 'test-id';
+      const altClient = savedObjectsClientMock.create();
+      altClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { id, type: syntheticsMonitorSavedObjectType, attributes: {}, references: [] },
+        ],
+      } as any);
+
+      await repository.getAcrossSpaces(id, ['default'], altClient);
+
+      expect(altClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
     });
   });
 

@@ -60,6 +60,17 @@ export class ServerlessObservabilityPlugin
         description:
           'Observability Overview Complete - Enables overview of the Observability solution.',
       },
+      {
+        id: 'observability:workflows',
+        products: [{ name: 'observability', tier: 'complete' }],
+        description: 'Workflows - Enables the Workflows application in the Observability solution.',
+      },
+      {
+        id: 'observability:gen_ai_settings',
+        products: [{ name: 'observability', tier: 'complete' }],
+        description:
+          'GenAI Settings management page - Enables Stack Management GenAI Settings for Observability.',
+      },
     ]);
     return {};
   }

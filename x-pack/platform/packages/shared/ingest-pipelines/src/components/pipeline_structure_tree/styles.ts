@@ -6,23 +6,28 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
-export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => css`
+export const getStyles = (euiTheme: EuiThemeComputed) => css`
   [class*='cssTreeNode-'] {
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    padding: ${euiTheme.size.base} ${euiTheme.size.m};
-    border: ${euiTheme.border.thin};
-    width: 400px;
-    margin: ${euiTheme.size.base} 0;
+    padding: ${euiTheme.size.s} ${euiTheme.size.s};
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
+    margin: ${euiTheme.size.m} 0;
+    border-radius: ${euiTheme.border.radius.medium};
+    height: ${euiTheme.size.xxl};
+    color: ${euiTheme.colors.link};
+    weight: ${euiTheme.font.weight.medium};
   }
 
   [class*='cssTreeNode-']:hover {
-    background-color: ${euiTheme.colors.backgroundTransparentPrimary};
+    background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+    text-decoration: underline;
   }
 
   [class*='cssTreeNode-children'] {
-    margin-left: ${isExtension ? euiTheme.size.xl : euiTheme.size.l};
+    margin-left: ${euiTheme.size.xl};
+    max-width: calc(100% - ${euiTheme.size.xl});
   }
 
   // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's
@@ -33,14 +38,15 @@ export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => c
 
   .cssTreeNode-root--active,
   .cssTreeNode-children--active {
-    background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
-    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBasePrimary};
+    background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary};
+    color: ${euiTheme.colors.textPrimary} !important;
   }
 
   .cssTreeNode-morePipelines {
-    margin-left: ${euiTheme.size.base};
+    margin-left: ${euiTheme.size.xl};
+    max-width: calc(100% - ${euiTheme.size.xl});
     background-color: ${euiTheme.colors.backgroundLightPrimary};
-    color: ${euiTheme.colors.textPrimary} !important;
     border: none;
   }
 `;

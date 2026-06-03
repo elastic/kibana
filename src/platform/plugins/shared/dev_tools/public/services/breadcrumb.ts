@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18Texts } from '../constants/texts';
 
 export type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];

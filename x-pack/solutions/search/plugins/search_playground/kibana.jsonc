@@ -32,6 +32,8 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "evals",
+      "licenseManagement",
       "usageCollection",
       "searchNavigation",
       "spaces",

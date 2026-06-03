@@ -16,14 +16,13 @@ import {
   keys,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import React, { useCallback, useState } from 'react';
-
-import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
@@ -58,19 +57,24 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     services: { uiSettings },
   } = useKibana();
 
-  const { alertsIndexPattern, http } = useAssistantContext();
+  const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    featureId: 'attack_discovery',
+    settings,
   });
 
-  const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
+  const { dataView, status } = useDataView(PageScope.alerts);
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();
 
   const onCreateSchedule = useCallback(
     async (scheduleData: AttackDiscoveryScheduleSchema) => {
+      if (status !== 'ready') {
+        return;
+      }
+
       const connector = aiConnectors?.find((item) => item.id === scheduleData.connectorId);
       if (!connector) {
         return;
@@ -81,9 +85,8 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
           uiSettings,
-          experimentalDataView
+          dataView
         );
         await createAttackDiscoverySchedule({ scheduleToCreate });
         onClose();
@@ -95,15 +98,15 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       aiConnectors,
       alertsIndexPattern,
       createAttackDiscoverySchedule,
-      experimentalDataView,
+      dataView,
       onClose,
-      sourcererDataView,
+      status,
       uiSettings,
     ]
   );
 
   const { editForm, actionButtons } = useEditForm({
-    isLoading: isLoadingConnectors || isLoadingQuery,
+    isLoading: isLoadingConnectors || isLoadingQuery || status !== 'ready',
     onFormMutated,
     onSave: onCreateSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,

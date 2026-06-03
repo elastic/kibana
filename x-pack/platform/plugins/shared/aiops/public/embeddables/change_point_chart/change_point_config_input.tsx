@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
-import type { ChangePointEmbeddableState } from './types';
 
 export function EmbeddableChangePointUserInput({
   coreStart,
@@ -21,9 +21,9 @@ export function EmbeddableChangePointUserInput({
 }: {
   coreStart: CoreStart;
   pluginStart: AiopsPluginStartDeps;
-  onConfirm: (state: ChangePointEmbeddableState) => void;
+  onConfirm: (state: ChangePointChartEmbeddableState) => void;
   onCancel: () => void;
-  input?: ChangePointEmbeddableState;
+  input?: ChangePointChartEmbeddableState;
 }) {
   return (
     <AiopsAppContext.Provider

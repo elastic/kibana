@@ -8,14 +8,10 @@
  */
 
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import type { LinksState, StoredLinksState } from '../../server';
+import type { StoredLinksState } from '../../server';
 
-export interface LinksByReferenceState {
-  savedObjectId: string;
-}
+export type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../server';
 
-export type LinksByValueState = Pick<LinksState, 'layout' | 'links'>;
-
-export type LinksEmbeddableState = SerializedTitles & (LinksByValueState | LinksByReferenceState);
-
-export type StoredLinksEmbeddableState = SerializedTitles & StoredLinksState;
+// links never supported enhancements, but some legacy states serialized an empty enhancements object
+export type StoredLinksEmbeddableState = SerializedTitles &
+  StoredLinksState & { enhancements?: unknown };

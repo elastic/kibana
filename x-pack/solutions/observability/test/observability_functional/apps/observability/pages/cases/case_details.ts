@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
@@ -80,8 +79,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await (await find.byCssSelector('[data-test-subj*="alert-rule-link"]')).click();
 
-        const url = await browser.getCurrentUrl();
-        expect(url.includes('/app/observability/alerts/rules')).to.be(true);
+        await retry.waitFor('URL to include triggersActions/rule', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('/app/management/insightsAndAlerting/triggersActions/rule');
+        });
       });
     });
   });

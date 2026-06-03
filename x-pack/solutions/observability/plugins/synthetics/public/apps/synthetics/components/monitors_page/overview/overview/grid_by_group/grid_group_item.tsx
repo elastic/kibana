@@ -16,18 +16,19 @@ import {
   EuiSpacer,
   EuiTablePagination,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import useKey from 'react-use/lib/useKey';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
-import { OverviewStatusMetaData } from '../../types';
+import type { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item/metric_item';
-import { OverviewView } from '../../../../../state';
+import type { OverviewView } from '../../../../../state';
 import { MonitorsTable } from '../compact_view/components/monitors_table';
+import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -43,10 +44,11 @@ const GroupGridCardContent = ({
 }) => {
   const [activePage, setActivePage] = useState(0);
   const [rowSize, setRowSize] = useState(DEFAULT_ROW_SIZE);
-  const visibleMonitors = groupMonitors.slice(
-    activePage * rowSize * PER_ROW,
-    (activePage + 1) * rowSize * PER_ROW
+  const visibleMonitors = useMemo(
+    () => groupMonitors.slice(activePage * rowSize * PER_ROW, (activePage + 1) * rowSize * PER_ROW),
+    [groupMonitors, activePage, rowSize]
   );
+  useOverviewTrendsRequests(visibleMonitors);
 
   const totalEntries = groupMonitors.length / PER_ROW;
 
@@ -66,7 +68,7 @@ const GroupGridCardContent = ({
         >
           {visibleMonitors.map((monitor) => (
             <EuiFlexItem
-              key={`${monitor.configId}-${monitor.locationId}`}
+              key={`${monitor.configId}-${monitor.locations[0]?.id ?? 'default'}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
               <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
@@ -116,7 +118,10 @@ export const GroupGridItem = ({
   const downMonitors = groupMonitors.filter((monitor) => {
     const downConfigs = overviewStatus?.downConfigs;
     if (downConfigs) {
-      return downConfigs[`${monitor.configId}-${monitor.locationId}`]?.status === 'down';
+      return (
+        downConfigs[monitor.configId] ||
+        downConfigs[monitor.configId + '-' + (monitor.locations[0]?.id ?? '')]
+      );
     }
   });
 

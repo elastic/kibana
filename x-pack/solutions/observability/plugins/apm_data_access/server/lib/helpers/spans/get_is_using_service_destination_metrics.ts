@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-utils-common/es/queries/term_query';
+import { termsQuery } from '@kbn/observability-utils-common/es/queries/terms_query';
 import { METRICSET_NAME, METRICSET_INTERVAL } from '@kbn/apm-types/es_fields';
 import { RollupInterval } from '../../../../common/rollup';
 

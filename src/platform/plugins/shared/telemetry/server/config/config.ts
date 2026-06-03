@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, Type, offeringBasedSchema } from '@kbn/config-schema';
+import type { TypeOf, Type } from '@kbn/config-schema';
+import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { telemetryConfigSchemaProps } from '@kbn/telemetry-config';
 import { labelsSchema } from './telemetry_labels';
 
@@ -75,7 +76,11 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   },
   deprecations: () => [
     (cfg) => {
-      if (cfg.telemetry?.enabled === false) {
+      const raw = cfg.telemetry?.enabled;
+      const isDisabling =
+        raw === false || (typeof raw === 'string' && raw.toLowerCase() === 'false');
+
+      if (isDisabling) {
         return {
           set: [
             { path: 'telemetry.optIn', value: false },

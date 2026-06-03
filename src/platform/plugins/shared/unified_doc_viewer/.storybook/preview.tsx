@@ -69,6 +69,18 @@ export const decorators: Decorator[] = [
         show: storyArgs.hasApmShowCapability as boolean,
       };
 
+      draft.fieldsMetadata.useFieldsMetadata = jest.fn().mockReturnValue({
+        fieldsMetadata: {
+          'service.name': {
+            description:
+              'Name of the service data is collected from.\nThe name of the service is normally user given. This allows for distributed services that run on multiple hosts to correlate the related instances based on the name.\nIn the case of Elasticsearch the `service.name` could contain the cluster name. For Beats the `service.name` is by default a copy of the `service.type` field if no name is specified.',
+            flat_name: 'service.name',
+
+            short: 'Name of the service.',
+          },
+        },
+      });
+
       // Mock for latency distribution chart
       draft.core.http.post = jest.fn().mockImplementation((url, options) => {
         if (url.startsWith('/internal/apm/latency/overall_distribution/')) {

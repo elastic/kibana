@@ -454,7 +454,9 @@ components:
             eventId:
               type: string
               nullable: true
-              description: The `_id` of the associated event for this note.
+              description: >
+                Elasticsearch document `_id` for the event or alert this note refers to.
+                Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             note:
               type: string
@@ -463,7 +465,7 @@ components:
               example: This is an example text
             timelineId:
               type: string
-              description: The `savedObjectId` of the timeline that this note is associated with
+              description: The `savedObjectId` of the Timeline that this note is associated with
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     BareNote:
       allOf:
@@ -474,7 +476,9 @@ components:
             eventId:
               type: string
               nullable: true
-              description: The `_id` of the associated event for this note.
+              description: >
+                Elasticsearch document `_id` for the event or alert this note refers to.
+                Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
             note:
               type: string
@@ -483,7 +487,7 @@ components:
               example: This is an example text
             timelineId:
               type: string
-              description: The `savedObjectId` of the Timeline that this note is associated with
+              description: The `savedObjectId` of the Timeline this note belongs to (not the note's own ID).
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     Note:
       allOf:

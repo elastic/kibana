@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 
 interface StartDeps {
   data: DataPublicPluginStart;
@@ -43,7 +43,6 @@ export class DataViewFieldEditorPlugin implements Plugin<void, void, SetupDeps, 
           label: 'README',
           href: 'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_view_field_editor/README.md',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

@@ -17,7 +17,7 @@ export type {
   BaseCspSetupStatus,
   CspSetupStatus,
 } from './types/status';
-export type { CspFinding, CspFindingResult } from './types/findings';
+export type { CspFinding, CspFindingResource, CspFindingResult } from './types/findings';
 export type {
   CspVulnerabilityFinding,
   Vulnerability,
@@ -48,3 +48,4 @@ export {
   getFindingsDetectionRuleSearchTags,
 } from './rules/detection_rules';
 export type { RuleResponse } from './rules/rule';
+export * from './test_subjects';

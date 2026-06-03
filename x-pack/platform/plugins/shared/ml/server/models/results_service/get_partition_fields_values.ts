@@ -7,8 +7,11 @@
 
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
-import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
-import type { CriteriaField } from './results_service';
+import {
+  type MlPartitionFieldsType,
+  type CriteriaField,
+  ML_PARTITION_FIELDS,
+} from '@kbn/ml-anomaly-utils';
 import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 import type { MlClient } from '../../lib/ml_client';
 

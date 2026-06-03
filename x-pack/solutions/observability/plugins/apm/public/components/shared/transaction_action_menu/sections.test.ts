@@ -34,6 +34,13 @@ const mockAssetDetailsLocator = {
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
+const mockDiscoverLocator = {
+  getRedirectUrl: jest.fn((params: { query?: { query?: string } }) => {
+    const query = params.query?.query || '';
+    return `/app/discover#/?_a=(query:(language:kuery,query:'${query}'))`;
+  }),
+} as unknown as ReturnType<typeof sharePluginMock.createLocator>;
+
 const expectLogsLocatorToBeCalled = () => {
   expect(logsLocatorMock.getRedirectUrl).toBeCalledTimes(4);
 };
@@ -106,19 +113,6 @@ describe('Transaction action menu', () => {
               key: 'serviceMap',
               label: 'Show in service map',
               href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
-              condition: true,
-            },
-          ],
-        },
-      ],
-      [
-        {
-          key: 'kibana',
-          actions: [
-            {
-              key: 'sampleDocument',
-              label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -198,22 +192,55 @@ describe('Transaction action menu', () => {
           ],
         },
       ],
-      [
-        {
-          key: 'kibana',
-          actions: [
-            {
-              key: 'sampleDocument',
-              label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
-              condition: true,
-            },
-          ],
-        },
-      ],
     ]);
     expectUptimeLocatorToBeCalled();
     expectLogsLocatorToBeCalled();
+  });
+
+  it('shows Discover link for OTel-observed K8s pods instead of Infra UI', () => {
+    const transaction = {
+      kubernetes: { pod: { uid: '123' } },
+      agent: { name: 'otlp/nodejs' },
+      timestamp,
+      trace: { id: '123' },
+      transaction: { id: '123' },
+      '@timestamp': date,
+    } as unknown as Transaction;
+    const sections = getSections({
+      transaction,
+      basePath,
+      location,
+      apmRouter,
+      uptimeLocator,
+      logsLocator: logsLocatorMock,
+      infraLinksAvailable: true,
+      rangeFrom: 'now-24h',
+      rangeTo: 'now',
+      environment: 'ENVIRONMENT_ALL',
+      dataViewId: 'apm_static_data_view_id_default',
+      assetDetailsLocator: mockAssetDetailsLocator,
+      discoverLocator: mockDiscoverLocator,
+    });
+
+    const podDetailsSection = sections[0]?.find((section) => section.key === 'podDetails');
+    const podMetricsAction = podDetailsSection?.actions.find(
+      (action) => action.key === 'podMetrics'
+    );
+
+    expect(podMetricsAction?.condition).toBe(true);
+    // Should use Discover link, not Infra UI link
+    expect(mockAssetDetailsLocator.getRedirectUrl).not.toHaveBeenCalled();
+    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          language: 'kuery',
+          query: 'kubernetes.pod.uid: "123"',
+        }),
+      })
+    );
+    // Verify the generated URL contains the correct query
+    expect(podMetricsAction?.href).toContain('/app/discover');
+    expect(podMetricsAction?.href).toContain('kubernetes.pod.uid: "123"');
   });
 
   it('shows host and required sections only', () => {
@@ -280,19 +307,6 @@ describe('Transaction action menu', () => {
               key: 'serviceMap',
               label: 'Show in service map',
               href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
-              condition: true,
-            },
-          ],
-        },
-      ],
-      [
-        {
-          key: 'kibana',
-          actions: [
-            {
-              key: 'sampleDocument',
-              label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],

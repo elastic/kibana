@@ -6,17 +6,15 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import {
+import type {
   KibanaFeatureConfig,
-  KibanaFeature,
   FeatureKibanaPrivileges,
   ElasticsearchFeatureConfig,
-  ElasticsearchFeature,
   SubFeaturePrivilegeConfig,
-  KibanaFeatureScope,
 } from '../common';
+import { KibanaFeature, ElasticsearchFeature } from '../common';
 import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
 import type { ConfigOverridesType } from './config';
 
@@ -72,10 +70,6 @@ export class FeatureRegistry {
 
     if (feature.id in this.kibanaFeatures || feature.id in this.esFeatures) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
-    }
-
-    if (!feature.scope) {
-      feature.scope = [KibanaFeatureScope.Security];
     }
 
     const featureCopy = cloneDeep(feature);
@@ -377,7 +371,12 @@ function applyAutomaticAllPrivilegeGrants(
 ) {
   allPrivileges.forEach((allPrivilege) => {
     if (allPrivilege) {
-      allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
+      allPrivilege.savedObject.all = uniq([
+        ...allPrivilege.savedObject.all,
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
       allPrivilege.savedObject.read = uniq([
         ...allPrivilege.savedObject.read,
         'config',
@@ -403,6 +402,8 @@ function applyAutomaticReadPrivilegeGrants(
         'url',
         'tag',
         'cloud',
+        'user-storage',
+        'user-storage-global',
       ]);
     }
   });

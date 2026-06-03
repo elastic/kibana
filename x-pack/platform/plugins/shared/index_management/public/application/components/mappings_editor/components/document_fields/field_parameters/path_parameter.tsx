@@ -9,10 +9,11 @@ import React, { useMemo } from 'react';
 import { EuiFormRow, EuiComboBox, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { UseField, SerializerFunc } from '../../../shared_imports';
+import type { SerializerFunc } from '../../../shared_imports';
+import { UseField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
-import { NormalizedField, NormalizedFields, AliasOption } from '../../../types';
+import type { NormalizedField, NormalizedFields, AliasOption } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 const targetFieldTypeNotAllowed = PARAMETERS_DEFINITION.path.targetTypesNotAllowed;
@@ -95,6 +96,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
               {!Boolean(suggestedFields.length) && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="warning"
                     title={i18n.translate(

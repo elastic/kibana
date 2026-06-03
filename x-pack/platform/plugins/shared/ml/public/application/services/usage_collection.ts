@@ -9,6 +9,13 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import type { MlUsageEvent } from '../../../common/constants/usage_collection';
+import type { CustomRuleEditorOpenedEventName } from '../../../common/util/usage_collection';
+
+type MlCountEvent =
+  | MlUsageEvent
+  | MlUsageEvent[]
+  | CustomRuleEditorOpenedEventName
+  | CustomRuleEditorOpenedEventName[];
 
 export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup) {
   if (usageCollection === undefined) {
@@ -23,7 +30,9 @@ export function mlUsageCollectionProvider(usageCollection?: UsageCollectionSetup
   return {
     click: (eventNames: MlUsageEvent | MlUsageEvent[], count?: number) =>
       usageCollection.reportUiCounter(PLUGIN_ID, METRIC_TYPE.CLICK, eventNames, count),
-    count: (eventNames: MlUsageEvent | MlUsageEvent[], count?: number) =>
+    count: (eventNames: MlCountEvent, count?: number) =>
       usageCollection.reportUiCounter(PLUGIN_ID, METRIC_TYPE.COUNT, eventNames, count),
   };
 }
+
+export type MlPublicUsageCollection = ReturnType<typeof mlUsageCollectionProvider>;

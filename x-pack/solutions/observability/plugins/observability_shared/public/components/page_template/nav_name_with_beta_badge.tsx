@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   label?: string;

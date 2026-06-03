@@ -351,9 +351,14 @@ describe('policy details: ', () => {
                       usb_storage: 'audit',
                     },
                     memory_protection: { mode: 'off', supported: false },
+                    ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
+                        enabled: false,
                         message: '',
                       },
                       behavior_protection: {
@@ -377,8 +382,9 @@ describe('policy details: ', () => {
                   },
                   linux: {
                     events: {
-                      process: true,
+                      dns: true,
                       file: true,
+                      process: true,
                       network: true,
                       session_data: false,
                       tty_io: false,

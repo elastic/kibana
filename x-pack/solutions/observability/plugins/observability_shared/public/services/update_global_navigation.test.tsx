@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import {
-  App,
-  AppDeepLink,
-  ApplicationStart,
-  AppUpdater,
-  type PricingServiceStart,
-} from '@kbn/core/public';
+import type { Subject } from 'rxjs';
+import type { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
+import { type PricingServiceStart } from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
@@ -63,7 +58,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+        visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
 
@@ -96,10 +91,10 @@ describe('updateGlobalNavigation', () => {
           deepLinks: [
             {
               ...caseRoute,
-              visibleIn: ['sideNav', 'globalSearch'], // visibility set
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'], // visibility set
             },
           ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -131,7 +126,7 @@ describe('updateGlobalNavigation', () => {
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -167,10 +162,10 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
 
@@ -204,10 +199,10 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });

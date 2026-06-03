@@ -6,24 +6,26 @@
  */
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getPosturePolicy } from '../utils';
-import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { gcpField, getInputVarsFields } from './gcp_utils';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
-import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
+import {
+  GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ,
+  GCP_SINGLE_ACCOUNT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
+import { updatePolicyWithInputs, gcpField, getGcpInputVarsFields } from '../utils';
+import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
+import type { UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
-    id: GCP_ORGANIZATION_ACCOUNT,
+    id: ORGANIZATION_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpAccountType.gcpOrganizationLabel',
       {
         defaultMessage: 'GCP Organization',
       }
@@ -31,33 +33,30 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
     disabled: isGcpOrgDisabled,
     tooltip: isGcpOrgDisabled
       ? i18n.translate(
-          'securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationDisabledTooltip',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpAccountType.gcpOrganizationDisabledTooltip',
           {
             defaultMessage: 'Supported from integration version 1.6.0 and above',
           }
         )
       : undefined,
-    testId: 'gcpOrganizationAccountTestId',
+    testId: GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   },
   {
-    id: GCP_SINGLE_ACCOUNT,
+    id: SINGLE_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.gcpAccountType.gcpSingleAccountLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpAccountType.gcpSingleAccountLabel',
       {
         defaultMessage: 'Single Project',
       }
     ),
-    testId: 'gcpSingleAccountTestId',
+    testId: GCP_SINGLE_ACCOUNT_TEST_SUBJ,
   },
 ];
 
-type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
+type GcpAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;
 
-const getGcpAccountType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
-
-const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.6.0';
+const getGcpAccountType = (input: NewPackagePolicyInput): GcpAccountType | undefined =>
+  input.streams[0].vars?.['gcp.account_type']?.value;
 
 export const GcpAccountTypeSelect = ({
   input,
@@ -66,30 +65,27 @@ export const GcpAccountTypeSelect = ({
   packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
-  // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
-  const validSemantic = semverValid(packageInfo.version);
-  const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
-  const isGcpOrgDisabled = semverLt(integrationVersionNumberOnly, GCP_ORG_MINIMUM_PACKAGE_VERSION);
+  const { gcpOrganizationEnabled, gcpPolicyType, shortName } = useCloudSetup();
 
   const gcpAccountTypeOptions = useMemo(
-    () => getGcpAccountTypeOptions(isGcpOrgDisabled),
-    [isGcpOrgDisabled]
+    () => getGcpAccountTypeOptions(!gcpOrganizationEnabled),
+    [gcpOrganizationEnabled]
   );
   /* Create a subset of properties from GcpField to use for hiding value of Organization ID when switching account type from Organization to Single */
   const subsetOfGcpField = (({ 'gcp.organization_id': a }) => ({ 'gcp.organization_id': a }))(
     gcpField.fields
   );
-  const fieldsToHide = getInputVarsFields(input, subsetOfGcpField);
+  const fieldsToHide = getGcpInputVarsFields(input, subsetOfGcpField);
   const fieldsSnapshot = useRef({});
   const lastSetupAccessType = useRef<string | undefined>(undefined);
   const onSetupFormatChange = (newSetupFormat: string) => {
-    if (newSetupFormat === GCP_SINGLE_ACCOUNT) {
+    if (newSetupFormat === SINGLE_ACCOUNT) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
         fieldsToHide.map((field) => [field.id, { value: field.value }])
@@ -97,9 +93,9 @@ export const GcpAccountTypeSelect = ({
       // We need to store the last manual credentials type to restore it later
       lastSetupAccessType.current = input.streams[0].vars?.['gcp.account_type'].value;
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
-            value: 'single-account',
+            value: SINGLE_ACCOUNT,
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -109,10 +105,10 @@ export const GcpAccountTypeSelect = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
             // Restoring last manual credentials type
-            value: lastSetupAccessType.current || 'organization-account',
+            value: lastSetupAccessType.current || ORGANIZATION_ACCOUNT,
             type: 'text',
           },
           // Restoring fields from manual setup format if any
@@ -125,9 +121,9 @@ export const GcpAccountTypeSelect = ({
   useEffect(() => {
     if (!getGcpAccountType(input)) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
-            value: isGcpOrgDisabled ? GCP_SINGLE_ACCOUNT : GCP_ORGANIZATION_ACCOUNT,
+            value: gcpOrganizationEnabled ? ORGANIZATION_ACCOUNT : SINGLE_ACCOUNT,
             type: 'text',
           },
         }),
@@ -140,16 +136,16 @@ export const GcpAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.gcpAccountTypeDescriptionLabel"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.descriptionLabel"
           defaultMessage="Select between single project or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />
-      {isGcpOrgDisabled && (
+      {!gcpOrganizationEnabled && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationNotSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.organizationNotSupportedMessage"
               defaultMessage="GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration."
             />
           </EuiCallOut>
@@ -164,25 +160,27 @@ export const GcpAccountTypeSelect = ({
           accountType !== getGcpAccountType(input) && onSetupFormatChange(accountType)
         }
         size="m"
+        name="gcpAccountType"
       />
-      {getGcpAccountType(input) === GCP_ORGANIZATION_ACCOUNT && (
+      {getGcpAccountType(input) === ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.organizationDescription"
               defaultMessage="Connect Elastic to every GCP Project (current and future) in your environment by providing Elastic with read-only (configuration) access to your GCP organization"
             />
           </EuiText>
         </>
       )}
-      {getGcpAccountType(input) === GCP_SINGLE_ACCOUNT && (
+      {getGcpAccountType(input) === SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.singleDescription"
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy {shortName} at the organization-level, which automatically connects all projects (both current and future)."
+              values={{ shortName }}
             />
           </EuiText>
         </>

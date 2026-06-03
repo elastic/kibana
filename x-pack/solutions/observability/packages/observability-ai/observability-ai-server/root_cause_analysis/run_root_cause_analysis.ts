@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { MessageRole, AssistantMessage, ToolMessage, ToolChoiceType } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-common';
-import { Logger } from '@kbn/logging';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { AssistantMessage, ToolMessage } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { findLast, pick } from 'lodash';
 import moment from 'moment';
-import { catchError, filter, from, map, mergeMap, Observable, of, switchMap } from 'rxjs';
-import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { Observable } from 'rxjs';
+import { catchError, filter, from, map, mergeMap, of, switchMap } from 'rxjs';
+import type { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RCA_END_PROCESS_TOOL_NAME,
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
@@ -26,7 +28,7 @@ import { callInvestigateEntityTool } from './call_investigate_entity_tool';
 import { callObserveTool } from './call_observe_tool';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from './prompts';
 import { RCA_TOOLS } from './tools';
-import {
+import type {
   EndProcessToolMessage,
   InvestigateEntityToolMessage,
   ObservationToolMessage,

@@ -10,7 +10,7 @@ import semver from 'semver';
 import moment from 'moment';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -75,10 +75,18 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           overwrite: true,
           attributes: {
-            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
             name: 'Fleet Server',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
             package: {
               name: 'fleet_server',
+              version: '1.0.0',
             },
           },
         });
@@ -637,8 +645,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/215025
-    describe.skip('multiple agents', () => {
+    describe('multiple agents', () => {
       const fleetServerVersion = '7.16.0';
 
       beforeEach(async () => {
@@ -655,10 +662,18 @@ export default function (providerContext: FtrProviderContext) {
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           overwrite: true,
           attributes: {
-            policy_id: 'fleet-server-policy',
+            policy_ids: ['fleet-server-policy'],
             name: 'Fleet Server',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
             package: {
               name: 'fleet_server',
+              version: '1.0.0',
             },
           },
         });
@@ -999,7 +1014,7 @@ export default function (providerContext: FtrProviderContext) {
               await verifyActionResult();
               resolve({});
             }
-          }, 1000);
+          }, 3000);
         }).catch((e) => {
           throw e;
         });

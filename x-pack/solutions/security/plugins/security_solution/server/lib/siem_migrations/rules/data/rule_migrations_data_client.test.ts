@@ -7,13 +7,13 @@
 
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
-import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('./rule_migrations_data_rules_client');
-jest.mock('./rule_migrations_data_resources_client');
+jest.mock('../../common/data/siem_migrations_data_resources_client');
 
 const mockedRulesClient = {
   prepareDelete: jest
@@ -28,7 +28,7 @@ const mockedResourcesClient = {
   prepareDelete: jest
     .fn()
     .mockReturnValue([{ delete: { _id: 'resource1', _index: '.mocked-resource-index' } }]),
-} as unknown as jest.Mocked<RuleMigrationsDataResourcesClient>;
+} as unknown as jest.Mocked<SiemMigrationsDataResourcesClient>;
 
 const mockIndexNameProviders = {
   migrations: jest.fn().mockReturnValue('.mocked-migration-index'),
@@ -62,7 +62,7 @@ describe('RuleMigrationsDataClient', () => {
     (RuleMigrationsDataRulesClient as unknown as jest.Mock).mockImplementation(
       () => mockedRulesClient
     );
-    (RuleMigrationsDataResourcesClient as unknown as jest.Mock).mockImplementation(
+    (SiemMigrationsDataResourcesClient as unknown as jest.Mock).mockImplementation(
       () => mockedResourcesClient
     );
   });

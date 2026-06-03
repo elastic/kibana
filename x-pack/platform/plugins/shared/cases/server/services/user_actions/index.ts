@@ -14,9 +14,10 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { UserActionTypes } from '../../../common/types/domain';
+import { AttachmentType, UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
@@ -47,6 +48,7 @@ import type {
 } from '../../common/types/user_actions';
 import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
 import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
+import { isCommentAttachmentType } from '../../../common/utils/attachments';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -216,10 +218,7 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const res = transformToExternalModel(doc);
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -236,7 +235,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string,
-    isCasesWebhook = false
+    hasAdditionalUserActionsConnector = false
   ): Promise<UserActionSavedObjectTransformed | undefined> {
     try {
       this.context.log.debug(
@@ -250,14 +249,15 @@ export class CaseUserActionService {
         filters: [
           UserActionTypes.comment,
           UserActionTypes.description,
-          UserActionTypes.tags,
           UserActionTypes.title,
           /**
-           * TODO: Remove when all connectors support the status and
-           * the severity user actions or if there is a mechanism to
+           * TODO: Remove when all connectors support the status, severity
+           * and tags user actions or if there is a mechanism to
            * define supported user actions per connector type
            */
-          ...(isCasesWebhook ? [UserActionTypes.severity, UserActionTypes.status] : []),
+          ...(hasAdditionalUserActionsConnector
+            ? [UserActionTypes.severity, UserActionTypes.status, UserActionTypes.tags]
+            : []),
         ],
         field: 'type',
         operator: 'or',
@@ -279,10 +279,7 @@ export class CaseUserActionService {
         return;
       }
 
-      const res = transformToExternalModel(
-        userActions.saved_objects[0],
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformToExternalModel(userActions.saved_objects[0]);
 
       const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -362,10 +359,7 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(
-          doc,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
+        const res = transformToExternalModel(doc);
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -409,10 +403,7 @@ export class CaseUserActionService {
           rawPushDoc
         );
 
-      const res = transformToExternalModel(
-        doc,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformToExternalModel(doc);
 
       const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
       return { ...res, attributes: decodeRes };
@@ -529,10 +520,7 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      const transformedUserActions = legacyTransformFindResponseToExternalModel(
-        userActions,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const transformedUserActions = legacyTransformFindResponseToExternalModel(userActions);
 
       const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
         [];
@@ -710,6 +698,10 @@ export class CaseUserActionService {
   }
 
   public async getCaseUserActionStats({ caseId }: { caseId: string }) {
+    const isCasesAttachmentsEnabled = this.context.isCasesAttachmentsEnabled === true;
+    const isComment = (type: string) =>
+      isCasesAttachmentsEnabled ? isCommentAttachmentType(type) : type === AttachmentType.user;
+
     const response = await this.context.unsecuredSavedObjectsClient.find<
       unknown,
       UserActionsStatsAggsResult
@@ -723,18 +715,56 @@ export class CaseUserActionService {
     });
 
     const result = {
-      total: response.total,
+      total: response.total ?? 0,
+      total_deletions: response.aggregations?.deletions?.doc_count ?? 0,
       total_comments: 0,
+      total_comment_deletions: 0,
+      total_comment_creations: 0,
+      total_hidden_comment_updates: 0,
       total_other_actions: 0,
+      total_other_action_deletions: 0,
     };
 
     response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key === 'user') {
-        result.total_comments = docCount;
+      if (isComment(key)) {
+        result.total_comments += docCount;
       }
     });
 
+    response.aggregations?.deletions.deletions.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (isComment(key)) {
+        result.total_comment_deletions += docCount;
+      }
+    });
+
+    response.aggregations?.creations.creations.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (isComment(key)) {
+        result.total_comment_creations += docCount;
+      }
+    });
+
+    /**
+     * Calculate total_hidden_comment_updates by summing updates for DELETED comments.
+     * These are edit actions that are no longer visible to users because the comment was deleted.
+     */
+    const commentBuckets =
+      response.aggregations?.nonDeletedCommentUpdates?.comments?.byCommentId?.buckets ?? [];
+
+    for (const bucket of commentBuckets) {
+      const hasBeenDeleted = bucket.reverse?.hasDelete?.doc_count > 0;
+      if (hasBeenDeleted) {
+        const commentTypeBuckets = bucket.reverse?.updates?.byCommentType?.buckets ?? [];
+        const userCommentUpdates = commentTypeBuckets.reduce(
+          (sum: number, b: { key: string; doc_count: number }) =>
+            isComment(b.key) ? sum + b.doc_count : sum,
+          0
+        );
+        result.total_hidden_comment_updates += userCommentUpdates;
+      }
+    }
+
     result.total_other_actions = result.total - result.total_comments;
+    result.total_other_action_deletions = result.total_deletions - result.total_comment_deletions;
 
     return result;
   }
@@ -748,6 +778,96 @@ export class CaseUserActionService {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
           size: 100,
+        },
+      },
+      deletions: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.delete,
+          },
+        },
+        aggs: {
+          deletions: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
+        },
+      },
+      creations: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.create,
+          },
+        },
+        aggs: {
+          creations: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
+        },
+      },
+      /**
+       * Count updates only for comments that have NOT been deleted.
+       * This aggregation:
+       * 1. Groups user actions by comment_id reference
+       * 2. Filters out comments that have a delete action
+       * 3. Sums up the update counts for remaining (non-deleted) comments
+       */
+      nonDeletedCommentUpdates: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggs: {
+          comments: {
+            filter: {
+              term: {
+                [`${CASE_USER_ACTION_SAVED_OBJECT}.references.type`]: CASE_COMMENT_SAVED_OBJECT,
+              },
+            },
+            aggs: {
+              byCommentId: {
+                terms: {
+                  field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+                  size: MAX_DOCS_PER_PAGE,
+                },
+                aggs: {
+                  reverse: {
+                    reverse_nested: {},
+                    aggs: {
+                      hasDelete: {
+                        filter: {
+                          term: {
+                            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]:
+                              UserActionActions.delete,
+                          },
+                        },
+                      },
+                      updates: {
+                        filter: {
+                          term: {
+                            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]:
+                              UserActionActions.update,
+                          },
+                        },
+                        aggs: {
+                          byCommentType: {
+                            terms: {
+                              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+                              size: 100,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     };

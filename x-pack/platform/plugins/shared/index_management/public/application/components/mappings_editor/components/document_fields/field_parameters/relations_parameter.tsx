@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiToolTip,
@@ -14,20 +15,13 @@ import {
   EuiCallOut,
   EuiLink,
   EuiBasicTable,
-  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  UseField,
-  UseArray,
-  ArrayItem,
-  FieldConfig,
-  TextField,
-  ComboBoxField,
-} from '../../../shared_imports';
-import { Field } from '../../../types';
+import type { ArrayItem, FieldConfig } from '../../../shared_imports';
+import { UseField, UseArray, TextField, ComboBoxField } from '../../../shared_imports';
+import type { Field } from '../../../types';
 
 import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
@@ -209,11 +203,11 @@ export const RelationsParameter = () => {
                       }
                     );
                     return (
-                      <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+                      <EuiToolTip content={label} disableScreenReaderOutput>
                         <EuiButtonIcon
                           data-test-subj="removeRelationshipButton"
                           aria-label={label}
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           color="danger"
                           onClick={() => removeItem(id)}
                         />
@@ -238,6 +232,12 @@ export const RelationsParameter = () => {
                 items={items}
                 itemId="id"
                 columns={columns}
+                tableCaption={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.caption',
+                  {
+                    defaultMessage: 'Defined relationships',
+                  }
+                )}
                 noItemsMessage={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.emptyTableMessage',
                   {
@@ -249,7 +249,7 @@ export const RelationsParameter = () => {
               {/* Add relation button */}
               <EuiButtonEmpty
                 onClick={addItem}
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 data-test-subj="addRelationButton"
               >
                 {i18n.translate(

@@ -12,7 +12,7 @@ import {
   validateHasWildcardWithWrongOperator,
 } from '@kbn/securitysolution-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   CreateExceptionListItemSchema,
   EntriesArray,
   Entry,
@@ -20,6 +20,9 @@ import {
   ExceptionListType,
   ListSchema,
   NamespaceType,
+  CreateRuleExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   createExceptionListItemSchema,
@@ -28,15 +31,10 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
-  CreateRuleExceptionListItemSchema,
   createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  DataViewBase,
-  DataViewFieldBase,
-  getDataViewFieldSubtypeNested,
-  isDataViewFieldSubtypeNested,
-} from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { getDataViewFieldSubtypeNested, isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {
@@ -53,9 +51,10 @@ import {
   isNotInListOperator,
   matchesOperator,
   doesNotMatchOperator,
+  ALL_OPERATORS_SANS_MATCHES,
 } from '../autocomplete_operators';
 
-import {
+import type {
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   DataViewField,
@@ -725,8 +724,9 @@ export const getOperatorOptions = (
           doesNotExistOperator,
         ];
   } else {
+    const supportMatches = fieldSupportsMatches(item.field);
     return listType === 'detection'
-      ? fieldSupportsMatches(item.field)
+      ? supportMatches
         ? DETECTION_ENGINE_EXCEPTION_OPERATORS
         : [
             isOperator,
@@ -738,7 +738,9 @@ export const getOperatorOptions = (
             isInListOperator,
             isNotInListOperator,
           ]
-      : ALL_OPERATORS;
+      : supportMatches
+      ? ALL_OPERATORS
+      : ALL_OPERATORS_SANS_MATCHES;
   }
 };
 
@@ -1025,31 +1027,98 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
   return conflicts;
 };
 
+/** Flattens exception items into a single list of leaf entries, expanding nested entry children. */
+const flattenExceptionEntries = (
+  items: Array<Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>>
+): BuilderEntry[] =>
+  items
+    .flatMap((item) => item.entries)
+    .flatMap((item) => (item.type === 'nested' ? item.entries : item));
+
+/** Narrows a BuilderEntry to one that uses the wildcard operator with a string value. */
+const isWildcardStringEntry = (
+  builderEntry: BuilderEntry
+): builderEntry is BuilderEntry & { type: 'wildcard'; value: string } =>
+  builderEntry.type === 'wildcard' &&
+  'value' in builderEntry &&
+  typeof builderEntry.value === 'string';
+
 /**
  * Given an exceptions list, determine if any entries have an "IS" operator with a wildcard value
  */
 export const hasWrongOperatorWithWildcard = (
   items: ExceptionsBuilderReturnExceptionItem[]
-): boolean => {
-  // flattens array of multiple entries added with OR
-  const multipleEntries = items.flatMap((item) => item.entries);
-  // flattens nested entries
-  const allEntries = multipleEntries.flatMap((item) => {
-    if (item.type === 'nested') {
-      return item.entries;
-    }
-    return item;
-  });
-
-  // eslint-disable-next-line array-callback-return
-  return allEntries.some((e) => {
-    if (e.type !== 'list' && 'value' in e) {
+): boolean =>
+  flattenExceptionEntries(items).some((e) => {
+    if (e.type !== 'list' && 'value' in e && e.value != null) {
       return validateHasWildcardWithWrongOperator({
         operator: e.type,
         value: e.value,
       });
     }
+    return false;
   });
+
+export const hasEscaping = (
+  items: Array<Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>>,
+  osTypes: ExceptionsBuilderReturnExceptionItem['os_types'] = ['linux']
+): boolean =>
+  flattenExceptionEntries(items).some((builderEntry) => hasEntryEscaping(builderEntry, osTypes));
+
+export const hasEntryEscaping = (
+  builderEntry: BuilderEntry,
+  osTypes: ExceptionsBuilderReturnExceptionItem['os_types'] = ['linux']
+): boolean => {
+  if (
+    builderEntry.type === 'list' ||
+    !('value' in builderEntry) ||
+    typeof builderEntry.value !== 'string'
+  ) {
+    return false;
+  }
+
+  const isOnlyWindows = osTypes.length === 1 && osTypes.includes('windows');
+  const isPathField =
+    (builderEntry.field?.includes('path') ||
+      builderEntry.field?.includes('executable') ||
+      builderEntry.field?.includes('directory')) ??
+    false;
+
+  const isWindowsPathField = isPathField && isOnlyWindows;
+  if (isWindowsPathField) {
+    // - allow escaped backslash on starting position: \\server\share\path
+    // - don't care about seemingly escaped wildcards, as they can be valid windows paths: abc\?\def\*\ghi
+    return builderEntry.value.includes('\\\\', 1);
+  }
+
+  return (
+    builderEntry.value.includes('\\\\') ||
+    builderEntry.value.includes('\\*') ||
+    builderEntry.value.includes('\\?')
+  );
+};
+
+// Detect `matches` entries with escaped wildcard metacharacters (\* or \?). Uses a negative
+// lookbehind so that \\* (double-backslash path separator + wildcard) does not trigger — only
+// a lone \* or \? (escaped metacharacter) fires the warning.
+const ESCAPED_WILDCARD_REGEX = /(?<!\\)\\[*?]/;
+
+export const getMalformedMatchesFields = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): string[] => {
+  const flattenedEntries = flattenExceptionEntries(items);
+
+  return flattenedEntries.reduce<string[]>((result, builderEntry) => {
+    if (
+      isWildcardStringEntry(builderEntry) &&
+      builderEntry.field !== '' &&
+      ESCAPED_WILDCARD_REGEX.test(builderEntry.value)
+    ) {
+      return [...result, builderEntry.field];
+    }
+
+    return result;
+  }, []);
 };
 
 /**

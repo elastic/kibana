@@ -5,37 +5,51 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { boomify, isBoom } from '@hapi/boom';
 
-import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
+
 import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../constants';
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
+import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
+
+import type { RegisterAPIRouteFn } from '../../types';
+import type { LensUpdateResponseBody } from './types';
 import {
-  lensAttributesSchema,
-  lensCreateOptionsSchema,
-  lensSavedObjectSchema,
-} from '../../../content_management/v1';
-import { RegisterAPIRouteFn } from '../../types';
+  lensUpdateRequestBodySchema,
+  lensUpdateRequestParamsSchema,
+  lensUpdateResponseBodySchema,
+} from './schema';
+import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder, usageCounter }
 ) => {
   const updateRoute = router.put({
-    path: `${PUBLIC_API_PATH}/visualizations/{id}`,
-    access: PUBLIC_API_ACCESS,
-    enableQueryVersion: true,
-    summary: 'Update Lens visualization',
-    description: 'Update an existing Lens visualization.',
+    path: `${LENS_VIS_API_PATH}/{id}`,
+    access: LENS_API_ACCESS,
+    summary: 'Update visualization',
+    description: [
+      'Replaces the full configuration of an existing Lens visualization. Partial updates are not supported.',
+      'To make incremental changes, retrieve the visualization first, modify the fields you need, then send the complete object back.',
+      '',
+      'If no visualization exists with the specified ID, a new one is created.',
+      '',
+      'ES|QL visualizations cannot be updated through this endpoint.',
+    ].join('\n'),
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -48,25 +62,20 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
   updateRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'The saved object id of a Lens visualization.',
-              },
-            }),
-          }),
-          body: schema.object({
-            options: lensCreateOptionsSchema,
-            data: lensAttributesSchema,
-          }),
+          params: lensUpdateRequestParamsSchema,
+          body: lensUpdateRequestBodySchema,
         },
         response: {
           200: {
-            body: () => lensSavedObjectSchema,
+            body: () => lensUpdateResponseBodySchema,
             description: 'Ok',
+          },
+          201: {
+            body: () => lensUpdateResponseBodySchema,
+            description: 'Created',
           },
           400: {
             description: 'Malformed request',
@@ -77,42 +86,65 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
           403: {
             description: 'Forbidden',
           },
-          404: {
-            description: 'Resource not found',
-          },
           500: {
             description: 'Internal Server Error',
           },
         },
       },
     },
-    async (ctx, req, res) => {
-      let result;
-      const { data, options } = req.body;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const requestBodyData = req.body;
+        if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
+          throw new Error('visualizationType is required');
+        }
 
-      try {
-        ({ result } = await client.update(req.params.id, data, options));
-      } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A Lens visualization with saved object id [${req.params.id}] was not found.`,
-              },
-            });
-          }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
+        // TODO fix IContentClient to type this client based on the actual
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
+
+        // Note: these types are to enforce loose param typings of client methods
+        const { references, ...data } = getLensRequestConfig(builder, req.body);
+        const options: LensUpdateIn['options'] = { references };
+
+        let createdNew = false;
+        try {
+          await client.get(req.params.id);
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 404) {
+            createdNew = true;
           }
         }
 
-        return boomify(error); // forward unknown error
-      }
+        if (createdNew) {
+          try {
+            asCodeIdSchema.validate(req.params.id);
+          } catch (error) {
+            return res.badRequest({ body: { message: error.message } });
+          }
+        }
 
-      return res.ok({ body: result.item });
-    }
+        try {
+          const { result } = await client.update(req.params.id, data, options);
+          const responseItem = getLensResponseItem(builder, result.item);
+
+          if (createdNew) {
+            return res.created<LensUpdateResponseBody>({
+              body: responseItem,
+            });
+          }
+
+          return res.ok<LensUpdateResponseBody>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return res.forbidden();
+          }
+
+          return boomify(error); // forward unknown error
+        }
+      })
   );
 };

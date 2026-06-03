@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-common';
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { InferenceClient } from '@kbn/inference-common';
 import { omit, partition, sumBy } from 'lodash';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
-import { AnalyzedLogPattern } from '../analyze_log_patterns';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { AnalyzedLogPattern } from '../analyze_log_patterns';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export interface LogPatternDescription {
@@ -36,7 +36,7 @@ export async function describeLogPatterns({
   inferenceClient: InferenceClient;
   connectorId: string;
   entity: Record<string, string>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
   contextForEntityInvestigation: string;
   ownPatterns: AnalyzedLogPattern[];
   patternsFromOtherEntities: AnalyzedLogPattern[];

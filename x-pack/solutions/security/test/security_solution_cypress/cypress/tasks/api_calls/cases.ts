@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import type { TestCase } from '../../objects/case';
 import { rootRequest } from './common';
 
@@ -25,6 +25,7 @@ export const createCase = (newCase: TestCase) =>
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: newCase.owner,
     },

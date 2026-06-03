@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatternRollup } from '../../../../types';
+import type { PatternRollup } from '../../../../types';
 
 export const getPatternSizeInBytes = ({
   pattern,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FieldPatternResultWithChanges, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
-import { InferenceClient } from '@kbn/inference-common';
+import type { FieldPatternResultWithChanges, FormattedDocumentAnalysis } from '@kbn/ai-tools';
+import type { InferenceClient } from '@kbn/inference-common';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export async function describeEntity({
@@ -25,7 +25,7 @@ export async function describeEntity({
   inferenceClient: InferenceClient;
   connectorId: string;
   entity: Record<string, string>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
   contextForEntityInvestigation: string;
   ownPatterns: FieldPatternResultWithChanges[];
   kbEntries: ScoredKnowledgeBaseEntry[];

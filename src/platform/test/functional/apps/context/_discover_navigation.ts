@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // navigate to the context view
         await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         await rowActions[1].click();
         await context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstContextTimestamp = await getTimestamp(false);
         await dataGrid.clickRowToggle({ rowIndex: 0 });
 
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         await rowActions[1].click();
         await context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
@@ -115,15 +115,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // click the open action
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
         await rowActions[0].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.try(async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        expect(hasDocHit).to.be(true);
+      });
 
       await testSubjects.click('~breadcrumb & ~first');
       await discover.waitForDiscoverAppOnScreen();
@@ -143,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[0].click();
       await common.sleep(250);
 

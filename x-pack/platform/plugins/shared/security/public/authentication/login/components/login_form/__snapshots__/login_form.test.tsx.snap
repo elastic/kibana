@@ -1,131 +1,193 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LoginForm login selector properly switches to login form -> login help and back: Login Help 1`] = `
-<ReactMarkdown
-  transformLinkUri={[Function]}
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+  data-test-subj="loginHelp"
 >
-  <p
-    key="p-1-1-0"
+  <div
+    class="euiText emotion-euiText-m"
   >
-    <strong
-      key="strong-1-1-0"
-    >
-      some help
-    </strong>
-  </p>
-</ReactMarkdown>
+    <p>
+      <strong>
+        some help
+      </strong>
+    </p>
+  </div>
+</div>
 `;
 
 exports[`LoginForm login selector properly switches to login help: Login Help 1`] = `
-<ReactMarkdown
-  transformLinkUri={[Function]}
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+  data-test-subj="loginHelp"
 >
-  <p
-    key="p-1-1-0"
+  <div
+    class="euiText emotion-euiText-m"
   >
-    <strong
-      key="strong-1-1-0"
-    >
-      some help
-    </strong>
-  </p>
-</ReactMarkdown>
+    <p>
+      <strong>
+        some help
+      </strong>
+    </p>
+  </div>
+</div>
 `;
 
 exports[`LoginForm properly switches to login help: Login Help 1`] = `
-<ReactMarkdown
-  transformLinkUri={[Function]}
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+  data-test-subj="loginHelp"
 >
-  <p
-    key="p-1-1-0"
+  <div
+    class="euiText emotion-euiText-m"
   >
-    <strong
-      key="strong-1-1-0"
-    >
-      some help
-    </strong>
-  </p>
-</ReactMarkdown>
+    <p>
+      <strong>
+        some help
+      </strong>
+    </p>
+  </div>
+</div>
 `;
 
 exports[`LoginForm renders as expected 1`] = `
-<Fragment>
-  <EuiPanel
-    color="transparent"
-    data-test-subj="loginForm"
-  >
-    <form
-      onSubmit={[Function]}
+<div
+  class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+  data-test-subj="loginForm"
+>
+  <form>
+    <div
+      class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+      id="generated-id-row"
     >
-      <EuiFormRow
-        isInvalid={false}
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Username"
-            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
-          />
-        }
+      <div
+        class="euiFormRow__labelWrapper"
       >
-        <EuiFieldText
-          aria-required={true}
-          autoComplete="off"
-          data-test-subj="loginUsername"
-          disabled={false}
-          id="username"
-          inputRef={[Function]}
-          isInvalid={false}
-          name="username"
-          onChange={[Function]}
-          value=""
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        isInvalid={false}
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Password"
-            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
-          />
-        }
+        <label
+          aria-invalid="false"
+          class="euiFormLabel euiFormRow__label euiFormLabel-isFocused emotion-euiFormLabel"
+          for="generated-id"
+          id="generated-id-label"
+        >
+          Username
+        </label>
+      </div>
+      <div
+        class="euiFormRow__fieldWrapper"
       >
-        <EuiFieldPassword
-          aria-required={true}
-          autoComplete="off"
-          data-test-subj="loginPassword"
-          disabled={false}
-          id="password"
-          isInvalid={false}
-          name="password"
-          onChange={[Function]}
-          type="dual"
-          value=""
-        />
-      </EuiFormRow>
-      <EuiSpacer />
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiButton
-            color="primary"
-            data-test-subj="loginSubmit"
-            fill={true}
-            fullWidth={true}
-            isDisabled={false}
-            isLoading={false}
-            onClick={[Function]}
-            type="submit"
+        <div
+          class="euiFormControlLayout emotion-euiFormControlLayout"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
           >
-            <MemoizedFormattedMessage
-              defaultMessage="Log in"
-              id="xpack.security.login.basicLoginForm.logInButtonLabel"
+            <input
+              aria-required="true"
+              autocomplete="off"
+              class="euiFieldText emotion-euiFieldText"
+              data-test-subj="loginUsername"
+              id="generated-id"
+              name="username"
+              type="text"
+              value=""
             />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </form>
-  </EuiPanel>
-</Fragment>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+      id="generated-id-row"
+    >
+      <div
+        class="euiFormRow__labelWrapper"
+      >
+        <label
+          aria-invalid="false"
+          class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+          for="generated-id"
+          id="generated-id-label"
+        >
+          Password
+        </label>
+      </div>
+      <div
+        class="euiFormRow__fieldWrapper"
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
+            style="--euiFormControlLeftIconsCount: 1;"
+          >
+            <div
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-left"
+            >
+              <span
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="lock"
+                />
+              </span>
+            </div>
+            <input
+              aria-required="true"
+              autocomplete="off"
+              class="euiFieldPassword emotion-euiFieldPassword-inGroup-withToggle"
+              data-test-subj="loginPassword"
+              id="generated-id"
+              name="password"
+              type="password"
+              value=""
+            />
+          </div>
+          <div
+            class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
+          >
+            <button
+              aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              title="Show password as plain text. Note: this will visually expose your password on the screen."
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="eye"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-fullWidth-defaultMinWidth-fill-primary"
+          data-test-subj="loginSubmit"
+          type="submit"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Log in
+          </span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
 `;

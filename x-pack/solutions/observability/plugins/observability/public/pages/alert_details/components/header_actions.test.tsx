@@ -13,13 +13,15 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { createTelemetryClientMock } from '../../../services/telemetry/telemetry_client.mock';
 import { alertWithGroupsAndTags, mockAlertUuid, untrackedAlert } from '../mock/alert';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 
 import { HeaderActions } from './header_actions';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { AlertStatus, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
+import { paths } from '../../../../common/locators/paths';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
@@ -52,12 +54,14 @@ const mockKibana = () => {
       cases: mockCases,
       http: mockHttp,
       application: mockNavigateToApp,
+      telemetryClient: createTelemetryClientMock(),
     },
   });
 };
 
 const mockRuleId = '123';
 const mockRuleName = '456';
+const mockRuleTypeId = 'mocked-type-id';
 
 const mockUseFetchRuleWithData = () => {
   useFetchRuleMock.mockReturnValue({
@@ -109,21 +113,24 @@ describe('Header Actions', () => {
           rule={{
             id: mockRuleId,
             name: mockRuleName,
+            ruleTypeId: mockRuleTypeId,
           }}
         />
       );
 
-      fireEvent.click(getByTestId('add-to-case-button'));
+      fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([
         {
-          alertId: mockAlertUuid,
-          index: 'alert-index',
-          rule: {
-            id: mockRuleId,
-            name: mockRuleName,
+          type: 'observability.alert',
+          attachmentId: mockAlertUuid,
+          metadata: {
+            index: 'alert-index',
+            rule: {
+              id: mockRuleId,
+              name: mockRuleName,
+            },
           },
-          type: 'alert',
         },
       ]);
     });
@@ -236,7 +243,7 @@ describe('Header Actions', () => {
         fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
         expect(queryByTestId('view-rule-details-button')).toHaveProperty(
           'href',
-          `http://localhost/wow${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(mockRuleId)}`
+          `http://localhost/wow${paths.observability.ruleDetails(mockRuleId)}`
         );
         expect(queryByTestId('view-rule-details-button')).toHaveProperty('target', '_blank');
       });

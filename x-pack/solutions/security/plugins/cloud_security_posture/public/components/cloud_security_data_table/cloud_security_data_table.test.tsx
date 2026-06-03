@@ -8,7 +8,8 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 import { TestProvider } from '../../test/test_provider';
-import { CloudSecurityDataTable, CloudSecurityDataTableProps } from './cloud_security_data_table';
+import type { CloudSecurityDataTableProps } from './cloud_security_data_table';
+import { CloudSecurityDataTable } from './cloud_security_data_table';
 import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
 
 jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
@@ -25,7 +26,8 @@ const mockDataView = {
   },
   getFieldByName: (name: string) => ({ id: name }),
   getFormatterForField: (name: string) => ({
-    convert: (value: string) => value,
+    convertToText: (value: string) => value,
+    convertToReact: (value: unknown) => value,
   }),
 } as any;
 

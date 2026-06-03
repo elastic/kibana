@@ -5,124 +5,58 @@
  * 2.0.
  */
 
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
 
-import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
-import { getLensClient } from './lens_client';
-import { SAVE_DUPLICATE_REJECTED } from './constants';
-import { LensDocument } from './types';
+import type { LensDocument, ILensDocumentService } from '@kbn/lens-common';
+import { LensClient } from './lens_client';
+import type { LensSearchRequestQuery } from '../../server';
 
-export interface CheckDuplicateTitleOptions {
-  id?: string;
-  title: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-}
-
-interface ILensDocumentService {
-  save: (vis: LensDocument) => Promise<{ savedObjectId: string }>;
-  load: (savedObjectId: string) => Promise<unknown>;
-  checkForDuplicateTitle: (
-    options: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ) => Promise<boolean>;
+interface LensSaveResult {
+  savedObjectId: string;
 }
 
 export class LensDocumentService implements ILensDocumentService {
-  private client: VisualizationClient<'lens', LensSavedObjectAttributes>;
+  private client: LensClient;
 
-  constructor(cm: ContentManagementPublicStart) {
-    this.client = getLensClient(cm);
+  constructor(http: HttpStart) {
+    this.client = new LensClient(http);
   }
 
-  save = async (vis: LensDocument) => {
-    const { savedObjectId, type, references, ...attributes } = vis;
+  save = async (vis: LensDocument): Promise<LensSaveResult> => {
+    // TODO: Flatten LenDocument types to align with new LensItem, for now just keep it.
+    const { savedObjectId, references, ...attributes } = vis;
 
     if (savedObjectId) {
-      const result = await this.client.update({
-        id: savedObjectId,
-        data: attributes,
-        options: {
-          references,
-        },
-      });
-      return { ...vis, savedObjectId: result.item.id };
+      const {
+        item: { id },
+      } = await this.client.update(savedObjectId, attributes, references);
+      return { savedObjectId: id };
     }
-    const result = await this.client.create({
-      data: attributes,
-      options: {
-        references,
-      },
-    });
-    return { ...vis, savedObjectId: result.item.id };
+
+    const {
+      item: { id: newId },
+    } = await this.client.create(attributes, references);
+
+    return { savedObjectId: newId };
   };
 
   async load(savedObjectId: string) {
-    const resolveResult = await this.client.get(savedObjectId);
-
-    if (resolveResult.item.error) {
-      throw resolveResult.item.error;
-    }
-
-    return resolveResult;
+    return this.client.get(savedObjectId);
   }
 
-  async search(query: SearchQuery, options: LensSearchQuery) {
-    const result = await this.client.search(query, options);
-    return result;
+  async search(options: LensSearchRequestQuery) {
+    return this.client.search(options);
   }
 
-  /**
-   * check for an existing saved object with the same title in ES
-   * returns Promise<true> when it's no duplicate, or the modal displaying the warning
-   * that's there's a duplicate is confirmed, else it returns a rejected Promise<ErrorMsg>
-   */
-  async checkForDuplicateTitle(
-    {
-      id,
-      title,
-      isTitleDuplicateConfirmed,
-      lastSavedTitle,
-      copyOnSave,
-    }: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ): Promise<boolean> {
-    // Don't check for duplicates if user has already confirmed save with duplicate title
-    if (isTitleDuplicateConfirmed) {
-      return true;
-    }
-
-    // Don't check if the user isn't updating the title, otherwise that would become very annoying to have
-    // to confirm the save every time, except when copyOnSave is true, then we do want to check.
-    if (title === lastSavedTitle && !copyOnSave) {
-      return true;
-    }
-
+  hasLibraryItemWithTitle = async (title: string): Promise<boolean> => {
     // Elasticsearch will return the most relevant results first, which means exact matches should come
     // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
-    const response = await this.search(
-      {
-        limit: 10,
-        text: `"${title}"`,
-      },
-      {
-        searchFields: ['title'],
-      }
-    );
-    const duplicate = response.hits.find(
-      (obj) => obj.attributes.title.toLowerCase() === title.toLowerCase()
-    );
+    const response = await this.search({
+      perPage: 10,
+      query: `"${title}"`,
+      searchFields: ['title'],
+    });
 
-    if (!duplicate || duplicate.id === id) {
-      return true;
-    }
-
-    onTitleDuplicate();
-
-    return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
-  }
+    return response.some((item) => item.title.toLowerCase() === title.toLowerCase());
+  };
 }

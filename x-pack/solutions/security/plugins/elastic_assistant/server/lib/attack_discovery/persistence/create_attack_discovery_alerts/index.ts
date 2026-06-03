@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, Logger } from '@kbn/core/server';
-import {
-  AttackDiscoveryAlert,
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type {
+  AttackDiscoveryApiAlert,
   CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import { transformToAlertDocuments } from '../transforms/transform_to_alert_documents';
 import { getCreatedDocumentIds } from './get_created_document_ids';
@@ -35,7 +35,7 @@ export const createAttackDiscoveryAlerts = async ({
   createAttackDiscoveryAlertsParams,
   logger,
   spaceId,
-}: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryAlert[]> => {
+}: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryApiAlert[]> => {
   const attackDiscoveryAlertsIndex = adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId);
   const readDataClient = adhocAttackDiscoveryDataClient.getReader({ namespace: spaceId });
   const writeDataClient = await adhocAttackDiscoveryDataClient.getWriter({ namespace: spaceId });
@@ -116,11 +116,15 @@ export const createAttackDiscoveryAlerts = async ({
         )}`
     );
 
+    const { enableFieldRendering, withReplacements } = createAttackDiscoveryAlertsParams;
+
     return getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds,
+      enableFieldRendering,
       logger,
       readDataClient,
+      withReplacements,
     });
   } catch (err) {
     logger.error(

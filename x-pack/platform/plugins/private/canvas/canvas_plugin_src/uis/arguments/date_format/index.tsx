@@ -7,13 +7,14 @@
 
 import React from 'react';
 import moment from 'moment';
-import { Assign } from '@kbn/utility-types';
-import { DateFormatArgInput, Props as ComponentProps } from './date_format';
+import type { Assign } from '@kbn/utility-types';
+import type { Props as ComponentProps } from './date_format';
+import { DateFormatArgInput } from './date_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { ArgumentFactory } from '../../../../types/arguments';
+import type { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
 
-import { SetupInitializer } from '../../../plugin';
+import type { SetupInitializer } from '../../../plugin';
 
 const { DateFormat: strings } = ArgumentStrings;
 

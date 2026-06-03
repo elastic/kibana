@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 
 import { GetSuccessfulGenerationsSearchResult } from '../../get_successfull_generations_search_result';

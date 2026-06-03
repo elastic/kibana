@@ -8,7 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import { compact } from 'lodash';
 import { format, parse } from 'node:url';
 import Path from 'path';
-import { UrlWithParsedQuery } from 'url';
+import type { UrlWithParsedQuery } from 'url';
 import { FetchResponseError } from './kibana_fetch_response_error';
 import { createProxyTransport } from './proxy_transport';
 import { getInternalKibanaHeaders } from './get_internal_kibana_headers';

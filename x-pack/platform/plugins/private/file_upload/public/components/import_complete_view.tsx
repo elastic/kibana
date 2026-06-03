@@ -18,11 +18,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
+import type { ImportResults } from '@kbn/file-upload-common';
 import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
-import type { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
 
 const services = {
@@ -60,19 +61,26 @@ export class ImportCompleteView extends Component<Props, {}> {
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={jsonAsString}>
               {(copy) => (
-                <EuiButtonIcon
-                  size="s"
-                  onClick={copy}
-                  iconType="copy"
-                  color="text"
-                  data-test-subj={copyButtonDataTestSubj}
-                  aria-label={i18n.translate(
-                    'xpack.fileUpload.importComplete.copyButtonAriaLabel',
-                    {
-                      defaultMessage: 'Copy to clipboard',
-                    }
-                  )}
-                />
+                <EuiToolTip
+                  content={i18n.translate('xpack.fileUpload.importComplete.copyButtonAriaLabel', {
+                    defaultMessage: 'Copy to clipboard',
+                  })}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={copy}
+                    iconType="copy"
+                    color="text"
+                    data-test-subj={copyButtonDataTestSubj}
+                    aria-label={i18n.translate(
+                      'xpack.fileUpload.importComplete.copyButtonAriaLabel',
+                      {
+                        defaultMessage: 'Copy to clipboard',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           </EuiFlexItem>
@@ -104,6 +112,7 @@ export class ImportCompleteView extends Component<Props, {}> {
     if (this.props.failedPermissionCheck) {
       return (
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
@@ -148,6 +157,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         : '';
       return (
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
@@ -163,6 +173,7 @@ export class ImportCompleteView extends Component<Props, {}> {
     if (this.props.importResults.failures?.length) {
       return (
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessWithFailuresTitle', {
             defaultMessage: 'File upload complete with failures',
           })}

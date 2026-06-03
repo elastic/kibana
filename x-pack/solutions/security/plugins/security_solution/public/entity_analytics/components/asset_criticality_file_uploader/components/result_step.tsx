@@ -35,6 +35,7 @@ export const AssetCriticalityResultStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          announceOnMount
           data-test-subj="asset-criticality-result-step-error"
           title={
             <FormattedMessage
@@ -60,6 +61,7 @@ export const AssetCriticalityResultStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          announceOnMount
           data-test-subj="asset-criticality-result-step-success"
           title={
             <FormattedMessage
@@ -68,7 +70,7 @@ export const AssetCriticalityResultStep: React.FC<{
             />
           }
           color="success"
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
         >
           <FormattedMessage
             defaultMessage="Your asset criticality levels have been assigned. Note that your assignments can take a few moments to populate."

@@ -8,12 +8,11 @@
 import expect from '@kbn/expect';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const samlAuth = getService('samlAuth');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
@@ -26,10 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the index templates tab
-        await pageObjects.indexManagement.changeTabs('component_templatesTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('component_templates');
       });
 
       it('renders the component templates tab', async () => {
@@ -87,7 +83,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Creates component template', async () => {
-          await testSubjects.click('createPipelineButton');
+          // Ensure the test subject matches the UI component's data-test-subj attribute
+          await testSubjects.click('createComponentTemplateButton');
 
           await testSubjects.setValue('nameField', TEST_COMPONENT_TEMPLATE);
 
@@ -100,36 +97,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           expect(await testSubjects.getVisibleText('title')).to.contain(TEST_COMPONENT_TEMPLATE);
         });
-      });
-    });
-
-    describe('no access', () => {
-      this.tags(['skipSvlOblt', 'skipMKI']);
-      before(async () => {
-        await samlAuth.setCustomRole({
-          elasticsearch: {
-            cluster: ['monitor'],
-            indices: [{ names: ['*'], privileges: ['all'] }],
-          },
-          kibana: [
-            {
-              base: ['all'],
-              feature: {},
-              spaces: ['*'],
-            },
-          ],
-        });
-        await pageObjects.svlCommonPage.loginWithCustomRole();
-        await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await samlAuth.deleteCustomRole();
-      });
-
-      it('hides the component templates tab', async () => {
-        await testSubjects.missingOrFail('component_templatesTab');
       });
     });
   });

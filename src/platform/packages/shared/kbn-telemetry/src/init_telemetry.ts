@@ -9,12 +9,11 @@
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
 import { initMetrics } from '@kbn/metrics';
+import { context } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 
-import type { InstrumentaionsMap } from '@elastic/opentelemetry-node/types/instrumentations';
-import { resources, getInstrumentations } from '@elastic/opentelemetry-node/sdk';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
+import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
+import { buildOtelResources } from './build_otel_resources';
 
 /**
  *
@@ -38,45 +37,42 @@ export const initTelemetry = (
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
   const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
-  // attributes.resource.*
-  const resource = resources.resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: apmConfig.serviceName,
-    [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
-    [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
-    [ATTR_SERVICE_NAMESPACE]: apmConfig.environment,
-    ...(apmConfig.globalLabels as Record<string, unknown>),
-  });
+  if (apmConfig.active !== false && telemetryConfig.tracing.enabled) {
+    throw new Error(
+      'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.\n' +
+        'To use OpenTelemetry tracing, disable APM by setting `elastic.apm.active: false` in your Kibana configuration.\n' +
+        'To use Elastic APM, disable OpenTelemetry tracing by setting `telemetry.tracing.enabled: false`.'
+    );
+  }
+
+  // resource.attributes.*
+  const resource = buildOtelResources(serviceName);
+
+  // The context manager runs unconditionally (outside the telemetry.enabled gate) because the
+  // dedicated inference tracer provider needs context.active() for span parent-child propagation
+  // and baggage for inference context detection, even when global tracing is off.
+  const contextManager = new AsyncLocalStorageContextManager();
+  context.setGlobalContextManager(contextManager);
+  contextManager.enable();
 
   if (telemetryConfig.enabled) {
-    const desiredInstrumentations = new Set<keyof InstrumentaionsMap>();
-
     if (telemetryConfig.tracing.enabled) {
-      initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+      maybeInitAutoInstrumentations();
     }
 
-    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-      initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
+    const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
+    asyncSettled.then(() => {
+      if (telemetryConfig.tracing.enabled) {
+        initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+      }
 
-      // Provides metrics about the Event Loop, GC Collector, and Heap stats.
-      desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');
-
-      // Uncomment the ones below when we clarify the performance impact of having them enabled
-      // // HTTP Server and Client durations
-      // desiredInstrumentations.add('@opentelemetry/instrumentation-http');
-      // // Undici client's request duration
-      // desiredInstrumentations.add('@opentelemetry/instrumentation-undici');
-    }
-
-    if (desiredInstrumentations.size > 0) {
-      // register opted-in EDOT auto-instrumentations (node-runtime, http, hapi, and more)
-      // https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/nodejs/supported-technologies#instrumentations
-
-      // We want to be selective for now to avoid potential conflicts with the Elastic APM agent (hapi is a good example)
-      const instrumentations = getInstrumentations().filter((instrumentation) =>
-        desiredInstrumentations.has(instrumentation.instrumentationName as keyof InstrumentaionsMap)
-      );
-
-      registerInstrumentations({ instrumentations });
-    }
+      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+        initMetrics({
+          resource,
+          metricsConfig: telemetryConfig.metrics,
+          monitoringCollectionConfig,
+        });
+      }
+    });
   }
 };

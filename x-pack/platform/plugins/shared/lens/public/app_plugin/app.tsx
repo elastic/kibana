@@ -10,28 +10,35 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import { LensAppProps, LensAppServices } from './types';
+import type {
+  LensAppState,
+  LensAppServices,
+  LensDocument,
+  AddUserMessages,
+  EditorFrameInstance,
+  UserMessagesGetter,
+  LensInspector,
+} from '@kbn/lens-common';
+import type { Simplify } from '@kbn/chart-expressions-common';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { LensAppProps } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
-import { LensDocument } from '../persistence';
 
 import {
   setState,
   applyChanges,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
   selectSavedObjectFormat,
   updateIndexPatterns,
+  updateVisualizationState,
   selectActiveDatasourceId,
   selectFramePublicAPI,
   selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
-import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
@@ -41,19 +48,21 @@ import {
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
+  isComingFromContainerView,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
   useNavigateBackToApp,
   useShortUrlService,
 } from './app_helpers';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 export type SaveProps = Simplify<
-  Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  Omit<OnSaveProps, 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;
@@ -69,8 +78,6 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  datasourceMap,
-  visualizationMap,
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
@@ -78,6 +85,8 @@ export function App({
 }: LensAppProps) {
   const confirmModalTitleId = useGeneratedHtmlId();
   const lensAppServices = useKibana<LensAppServices>().services;
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     data,
@@ -145,19 +154,19 @@ export function App({
   }
 
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
-  const savedObjectId = initialInput?.savedObjectId;
+  const savedObjectId = initialInput?.ref_id;
 
   const isFromLegacyEditorEmbeddable = isLegacyEditorEmbeddable(initialContext);
   const legacyEditorAppName =
-    initialContext && 'originatingApp' in initialContext
+    initialContext && 'legacyEditorOriginatingApp' in initialContext
+      ? initialContext.legacyEditorOriginatingApp
+      : initialContext && 'originatingApp' in initialContext
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
     initialContext && 'vizEditorOriginatingAppUrl' in initialContext
       ? initialContext.vizEditorOriginatingAppUrl
       : undefined;
-  const initialContextIsEmbedded = Boolean(legacyEditorAppName);
-
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
   }, [setIndicateNoData]);
@@ -255,19 +264,26 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
+    if (savedObjectId && !persistedDoc) {
+      return;
+    }
     const isByValueMode = getIsByValueMode();
     const currentDocTitle = getCurrentTitle(persistedDoc, isByValueMode, initialContext);
     setBreadcrumbsTitle(
       { application, chrome, serverless },
       {
-        isByValueMode,
         currentDocTitle,
         redirectToOrigin,
-        isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
+        incomingBreadcrumbs:
+          incomingState?.breadcrumbs ??
+          (initialContext && 'breadcrumbs' in initialContext
+            ? initialContext.breadcrumbs
+            : undefined),
         originatingAppName: getOriginatingAppName(),
       }
     );
   }, [
+    savedObjectId,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -279,6 +295,8 @@ export function App({
     legacyEditorAppName,
     serverless,
     initialContext,
+    incomingState?.originatingApp,
+    incomingState?.breadcrumbs,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -290,6 +308,31 @@ export function App({
   const runSave = useCallback(
     async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+
+      if (visualization.activeId === 'lnsXY') {
+        try {
+          const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+            visualization.state,
+            lensAppServices.eventAnnotationService
+          );
+          if (updatedVizState !== visualization.state) {
+            dispatch(
+              updateVisualizationState({
+                visualizationId: visualization.activeId,
+                newState: updatedVizState,
+              })
+            );
+          }
+        } catch (err) {
+          notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+            title: i18n.translate('xpack.lens.app.saveLinkedAnnotationsError', {
+              defaultMessage: 'Failed to save linked annotation changes',
+            }),
+          });
+          return;
+        }
+      }
+
       const prevVisState =
         persistedDoc?.visualizationType === visualization.activeId
           ? persistedDoc?.state.visualization
@@ -313,7 +356,9 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: incomingState?.originatingApp,
+            originatingApp: isComingFromContainerView(incomingState)
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
           },
@@ -343,10 +388,12 @@ export function App({
       onAppLeave,
       redirectTo,
       switchDatasource,
-      incomingState?.originatingApp,
+      incomingState,
+      initialContext?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
+      notifications.toasts,
     ]
   );
 
@@ -440,6 +487,7 @@ export function App({
       >
         <LensTopNavMenu
           initialInput={initialInput}
+          incomingState={incomingState}
           redirectToOrigin={redirectToOrigin}
           getIsByValueMode={getIsByValueMode}
           onAppLeave={onAppLeave}
@@ -447,15 +495,12 @@ export function App({
           setIsSaveModalVisible={setIsSaveModalVisible}
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
-          datasourceMap={datasourceMap}
-          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}
           isCurrentStateDirty={!isLensEqualWrapper(persistedDoc)}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
-          initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
@@ -479,7 +524,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isLinkedToOriginatingApp
+            isComingFromContainerView(incomingState) || legacyEditorAppName
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
   const { canvas, header, lens } = getPageObjects(['canvas', 'header', 'lens']);
@@ -36,7 +36,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     describe('by-value', () => {
       it('creates new lens embeddable', async () => {
-        await canvas.addNewPanel('Lens');
+        await canvas.addNewLensPanel();
         await lens.goToTimeRange();
         await lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -63,12 +63,13 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     });
 
     describe('by-reference', () => {
-      it('adds existing lens embeddable from the visualize library', async () => {
+      it('adds existing lens embeddable from the visualize library with global time range', async () => {
         await canvas.goToListingPageViaBreadcrumbs();
         await canvas.createNewWorkpad();
         await canvas.clickAddFromLibrary();
         await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
+        await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
 
       it('edits lens by-reference embeddable', async () => {
@@ -82,7 +83,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await canvas.goToListingPage();
         await canvas.loadFirstWorkpad('Test Workpad');
         await header.waitUntilLoadingHasFinished();
-
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });
@@ -92,6 +92,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await canvas.addNewPage();
         await canvas.goToPreviousPage();
         await header.waitUntilLoadingHasFinished();
+        // Test Workpad does not provide time range
+        // time range default to last 15 minutes - which has no data
         await lens.assertLegacyMetric('Maximum of bytes', '16,788');
       });
     });

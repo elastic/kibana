@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 
 export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
   CLOUD_FORMATION: 'cloud_formation_template',

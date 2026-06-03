@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty, orderBy, compact } from 'lodash';
 import type { Logger } from '@kbn/logging';
-import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { RecalledEntry } from '.';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { RecalledEntry } from '.';
 import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { getElserModelId } from './get_elser_model_id';
 
 export async function recallFromSearchConnectors({

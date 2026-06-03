@@ -8,9 +8,9 @@
 import { from } from 'rxjs';
 import { takeUntil } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { ITagsCache, ITagAssignmentService } from '../../services';
-import { StartServices } from '../../types';
-import { TagBulkAction } from '../types';
+import type { ITagsCache, ITagAssignmentService } from '../../services';
+import type { StartServices } from '../../types';
+import type { TagBulkAction } from '../types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 
 interface GetBulkAssignActionOptions extends StartServices {

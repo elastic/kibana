@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { UserActivityPrivilegedUsersPanel } from '.';
 import { TestProviders } from '../../../../../common/mock';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: () => ({
@@ -36,14 +37,14 @@ jest.mock('../../queries/helpers', () => {
   };
 });
 
-const mockedSourcererDataView = {
+const mockedDataViewSpec = {
   title: 'test-*',
   fields: {},
 };
 
 describe('UserActivityPrivilegedUsersPanel', () => {
   it('renders panel title', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 
@@ -51,7 +52,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the toggle button group', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
     expect(
@@ -60,17 +61,24 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the stack by select with options', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
+
     expect(screen.getByText('Stack by')).toBeInTheDocument();
+    const privUserButton = screen.getByText('Privileged user');
+
+    act(() => {
+      privUserButton.click();
+    });
+
     expect(screen.getByRole('option', { name: 'Privileged user' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Target user' })).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Granted right' })).toBeInTheDocument();
   });
 
   it('renders the EsqlDashboardPanel', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 
@@ -78,16 +86,24 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('changes stack by option when select changes', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
-    const select = screen.getByRole('combobox');
-    fireEvent.change(select, { target: { value: 'group_name' } });
-    expect((select as HTMLSelectElement).value).toBe('group_name');
+    expect(screen.getByDisplayValue('privileged_user')).toBeInTheDocument(); // Assert that input value before change
+
+    act(() => {
+      screen.getByText('Privileged user').click(); // click to open the select
+    });
+
+    act(() => {
+      screen.getByRole('option', { name: 'Target user' }).click(); // select "Target user"
+    });
+
+    expect(screen.getByDisplayValue('target_user')).toBeInTheDocument(); // Assert that input value after change
   });
 
   it('renders the "View all events by privileged users" link', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 

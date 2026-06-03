@@ -11,7 +11,10 @@ import { getActionDetailsById as _getActionDetailsById } from '../../action_deta
 import { EndpointActionsClient } from '../../..';
 import { endpointActionClientMock } from './mocks';
 import { responseActionsClientMock } from '../mocks';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  metadataCurrentIndexPattern,
+} from '../../../../../../common/endpoint/constants';
 
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
@@ -22,6 +25,9 @@ import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_
 import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
+import type { ActionDetails } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -55,6 +61,26 @@ describe('EndpointActionsClient', () => {
       classConstructorOptions.endpointService.getInternalFleetServices()
         .ensureInCurrentSpace as jest.Mock
     ).mockResolvedValue(undefined);
+
+    getActionDetailsByIdMock.mockResolvedValue(
+      new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['1-2-3'],
+        isCompleted: false,
+      })
+    );
+
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+      true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
+      true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement =
+      true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
+      true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -245,7 +271,7 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should update cases for valid agent ids', async () => {
+  it('should update cases with unified attachment for valid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions({
         endpoint_ids: ['1-2-3'],
@@ -256,11 +282,11 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          externalReferenceAttachmentTypeId: 'endpoint',
-          externalReferenceId: expect.any(String),
-          externalReferenceMetadata: {
+          type: 'security.endpoint',
+          attachmentId: expect.any(String),
+          data: { content: 'test comment' },
+          metadata: {
             command: 'isolate',
-            comment: 'test comment',
             targets: [
               {
                 agentType: 'endpoint',
@@ -269,18 +295,14 @@ describe('EndpointActionsClient', () => {
               },
             ],
           },
-          externalReferenceStorage: {
-            type: 'elasticSearchDoc',
-          },
           owner: 'securitySolution',
-          type: 'externalReference',
         },
       ],
       caseId: 'case-a',
     });
   });
 
-  it('should update cases for valid/invalid agent ids', async () => {
+  it('should update cases with unified attachment for valid/invalid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
@@ -288,12 +310,14 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          externalReferenceAttachmentTypeId: 'endpoint',
-          externalReferenceId: expect.any(String),
-          externalReferenceMetadata: {
-            command: 'isolate',
-            comment:
+          type: 'security.endpoint',
+          attachmentId: expect.any(String),
+          data: {
+            content:
               'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+          },
+          metadata: {
+            command: 'isolate',
             targets: [
               {
                 agentType: 'endpoint',
@@ -302,11 +326,7 @@ describe('EndpointActionsClient', () => {
               },
             ],
           },
-          externalReferenceStorage: {
-            type: 'elasticSearchDoc',
-          },
           owner: 'securitySolution',
-          type: 'externalReference',
         },
       ],
       caseId: 'case-a',
@@ -368,34 +388,36 @@ describe('EndpointActionsClient', () => {
 
     // NOTE: checking only the keys in order to avoid confusion - because the use of Mocks would
     // have returned a action details that would not match the request sent in this test.
-    expect(Object.keys(actionResponse)).toEqual([
-      'action',
-      'id',
-      'agentType',
-      'agents',
-      'hosts',
-      'command',
-      'startedAt',
-      'isCompleted',
-      'completedAt',
-      'wasSuccessful',
-      'errors',
-      'isExpired',
-      'status',
-      'outputs',
-      'agentState',
-      'createdBy',
-      'comment',
-      'parameters',
-      'alertIds',
-      'ruleId',
-      'ruleName',
-    ]);
+    expect(Object.keys(actionResponse).sort()).toEqual(
+      [
+        'action',
+        'id',
+        'agentType',
+        'agents',
+        'hosts',
+        'command',
+        'startedAt',
+        'isCompleted',
+        'completedAt',
+        'wasSuccessful',
+        'errors',
+        'isExpired',
+        'status',
+        'outputs',
+        'agentState',
+        'createdBy',
+        'comment',
+        'parameters',
+        'alertIds',
+        'ruleId',
+        'ruleName',
+      ].sort()
+    );
   });
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript' | 'getCustomScripts'
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'getCustomScripts'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -424,16 +446,35 @@ describe('EndpointActionsClient', () => {
 
     scan: responseActionsClientMock.createScanOptions(getCommonResponseActionOptions()),
 
-    // TODO: not yet implemented
-    // runscript: responseActionsClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
+    memoryDump: responseActionsClientMock.createMemoryDumpActionOption(
+      getCommonResponseActionOptions()
+    ),
+
+    runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
+
+    cancel: responseActionsClientMock.createCancelActionOptions({
+      ...getCommonResponseActionOptions(),
+      parameters: { id: 'test-action-id-123', force: true },
+    }),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
     'should dispatch a fleet action request calling %s() method',
     async (methodName) => {
+      if (methodName === 'cancel') {
+        getActionDetailsByIdMock.mockResolvedValue(
+          new EndpointActionGenerator('seed').generateActionDetails({
+            agents: ['1-2-3'],
+            isCompleted: false,
+            command: 'memory-dump',
+          })
+        );
+      }
+
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
       let expectedParams = responseActionMethods[methodName].parameters;
+      let expectedComment = 'test comment';
 
       switch (methodName) {
         case 'upload':
@@ -452,6 +493,27 @@ describe('EndpointActionsClient', () => {
             timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
           };
           break;
+
+        case 'runscript':
+          expectedParams = {
+            ...expectedParams,
+            file_sha256: 'e5441eb2bb',
+            file_id: 'file-1-2-3',
+            file_name: 'my_script.sh',
+            file_size: 12098,
+            path_to_executable: undefined,
+            scriptId: 'script-1-2-3',
+            timeout: 60000,
+          };
+          expectedComment = `(Script name: script one / File name: my_script.sh) ${expectedComment}`;
+          break;
+
+        case 'cancel':
+          expectedParams = {
+            id: 'test-action-id-123',
+            force: true,
+          };
+          break;
       }
 
       expect(
@@ -460,7 +522,7 @@ describe('EndpointActionsClient', () => {
         expect.objectContaining({
           data: {
             command: expect.any(String),
-            comment: 'test comment',
+            comment: expectedComment,
             parameters: expectedParams,
           },
         })
@@ -574,12 +636,295 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#memoryDump()', () => {
+    it('should error when feature flag is false', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+        false;
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+        )
+      ).rejects.toThrow('Memory dump operation is not enabled');
+    });
+
+    it.each`
+      title        | params
+      ${'kernel'}  | ${{ type: 'kernel' }}
+      ${'process'} | ${{ type: 'process', pid: '123' }}
+    `(
+      'should validate that agent supports memory dump of $title',
+      async ({ params: ResponseActionMemoryDumpParameters }) => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.memoryDump(
+            responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+          )
+        ).rejects.toThrow(
+          'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
+        );
+      }
+    );
+  });
+
+  describe('#cancel()', () => {
+    let actionToBeCanceledDetails: ActionDetails;
+
+    beforeEach(() => {
+      actionToBeCanceledDetails = new EndpointActionGenerator('seed').generateActionDetails({
+        id: 'action-123',
+        agents: ['1-2-3'],
+        agentType: 'endpoint',
+        isCompleted: false,
+        command: 'memory-dump',
+      });
+
+      getActionDetailsByIdMock.mockResolvedValue(actionToBeCanceledDetails);
+    });
+
+    it('should error when feature flag is false', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
+        false;
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions())
+        )
+      ).rejects.toThrow('Elastic Defend cancel operation is not enabled');
+    });
+
+    it('should process cancel action when feature flag is enabled', async () => {
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions())
+        )
+      ).resolves.toBeDefined();
+    });
+
+    it('should throw error if action is already complete', async () => {
+      actionToBeCanceledDetails.isCompleted = true;
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('Action [action-123] is already completed and cannot be canceled.');
+    });
+
+    it('should throw error if action to cancel does not have an agentType of endpoint', async () => {
+      actionToBeCanceledDetails.agentType = 'sentinel_one';
+      actionToBeCanceledDetails.command = 'runscript';
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow(
+        "Action [action-123 / runscript / sentinel_one] agent type is not 'endpoint'"
+      );
+    });
+
+    it('should throw error if agent ID is not part of action to be canceled', async () => {
+      actionToBeCanceledDetails.agents = ['some-other-id'];
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('Endpoint [1-2-3] is not associated with action [action-123]');
+    });
+
+    it('should throw error if response action command is not cancelable', async () => {
+      actionToBeCanceledDetails.command = 'cancel';
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('[cancel] response action cannot be canceled.');
+    });
+  });
+
+  describe('#runscript()', () => {
+    it('should error if feature flag is disabled', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
+        false;
+
+      await expect(
+        endpointActionsClient.runscript(endpointActionClientMock.createRunScriptOptions())
+      ).rejects.toThrow('Elastic Defend runscript operation is not enabled');
+    });
+
+    it('should error if script ID does not exist', async () => {
+      (
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+      ).mockRejectedValueOnce(new Error('not found'));
+
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'non-existent-script-id' },
+          })
+        )
+      ).rejects.toThrow('not found');
+    });
+
+    it('should error if script requires input args but none were provided', async () => {
+      (
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+      ).mockResolvedValue(ScriptsLibraryMock.generateScriptEntry({ requiresInput: true }));
+
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).rejects.toThrow('The script [script one] requires arguments to be specified.');
+    });
+
+    it('should store script info in action request doc `meta` property', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            meta: {
+              file_sha256: 'e5441eb2bb',
+              file_id: 'file-1-2-3',
+              file_name: 'my_script.sh',
+              file_size: 12098,
+              path_to_executable: undefined,
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should send user defined `timeout` value to endpoint', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args', timeout: 123456 },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: expect.objectContaining({ timeout: 123456 }),
+              }),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should include a default `timeout` if one is not provided', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args', timeout: 0 },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: expect.objectContaining({ timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT }),
+              }),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('#getCustomScripts()', () => {
+    it.each(['responseActionsEndpointRunScript', 'responseActionsScriptLibraryManagement'])(
+      'should error if feature flag [%s] is disabled',
+      async (featureFlag) => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures[featureFlag] = false;
+
+        await expect(endpointActionsClient.getCustomScripts()).rejects.toThrow(
+          `Elastic Defend runscript operation is not enabled`
+        );
+      }
+    );
+
+    it('should return list of scripts', async () => {
+      const expectedScriptResponse = ScriptsLibraryMock.generateScriptEntry();
+
+      await expect(endpointActionsClient.getCustomScripts()).resolves.toEqual({
+        data: [
+          {
+            id: expectedScriptResponse.id,
+            name: expectedScriptResponse.name,
+            description: expectedScriptResponse.description ?? '',
+            meta: expectedScriptResponse,
+          },
+        ],
+      });
+    });
+
+    it('should support filtering by OS Type', async () => {
+      await expect(endpointActionsClient.getCustomScripts({ osType: 'linux' })).resolves.toEqual(
+        expect.any(Object)
+      );
+
+      expect(
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').list as jest.Mock
+      ).toHaveBeenCalledWith({
+        kuery: 'platform: "linux"',
+        pageSize: 10000,
+        sortDirection: 'asc',
+        sortField: 'name',
+      });
+    });
+  });
+
   describe('and Space Awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 
@@ -620,6 +965,12 @@ describe('EndpointActionsClient', () => {
             .getByIds as jest.Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
+        });
+        getActionDetailsByIdMock.mockResolvedValue({
+          isCompleted: false,
+          agentType: 'endpoint',
+          command: 'runscript',
+          agents: ['1-2-3'],
         });
         const options = responseActionsClientMock.getOptionsForResponseActionMethod(methodName);
 

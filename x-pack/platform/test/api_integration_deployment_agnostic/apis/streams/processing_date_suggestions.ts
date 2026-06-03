@@ -6,14 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { disableStreams, enableStreams, forkStream } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 async function simulateDateSuggestions(
   client: StreamsSupertestRepositoryClient,
@@ -40,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Processing Date Suggestions', () => {
-    const TEST_STREAM_NAME = 'logs.test';
+    const TEST_STREAM_NAME = 'logs.otel.test';
 
     const TIMESTAMP_ISO8601 = '2025-01-01T00:00:00.000Z';
     const TIMESTAMP_ISO8601_SPACED = '2025-01-01 00:00:00.000Z';
@@ -53,15 +51,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Create a forked stream for testing
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: {
           name: TEST_STREAM_NAME,
         },
-        if: {
+        where: {
           field: 'host.name',
-          operator: 'eq' as const,
-          value: 'test-host',
+          eq: 'test-host',
         },
+        status: 'enabled',
       });
     });
 

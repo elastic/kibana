@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
+import type { EcsFlat } from '@elastic/ecs';
 import * as rt from 'io-ts';
-import { MetadataFields } from '../metadata_fields';
+import type { TSemconvFields, SemconvFieldName } from '@kbn/otel-semantic-conventions';
+import type { MetadataFields } from '../metadata_fields';
 
 export const fieldSourceRT = rt.keyof({
   ecs: null,
   integration: null,
   metadata: null,
+  otel: null,
+  streams: null,
   unknown: null,
 });
 
@@ -33,9 +36,11 @@ export const multiFieldRT = rt.type({
   type: rt.string,
 });
 
+// ECS 9.2.0 introduced OTEL fields with stability: "experimental" in addition to existing values
 export const baseOTELPropertyRT = rt.intersection([
   rt.type({
     stability: rt.keyof({
+      development: null,
       stable: null,
       experimental: null,
     }),
@@ -97,8 +102,6 @@ const requiredBaseMetadataPlainRT = rt.type({
   name: rt.string,
 });
 
-const optionalBaseMetadataPlainRT = rt.partial(requiredBaseMetadataPlainRT.props);
-
 const optionalMetadataPlainRT = rt.partial({
   allowed_values: rt.array(allowedValueRT),
   beta: rt.string,
@@ -127,22 +130,23 @@ const optionalMetadataPlainRT = rt.partial({
   source: fieldSourceRT,
   type: rt.string,
   documentation_url: rt.string,
+  otel_equivalent: rt.string,
 });
 
-export const partialFieldMetadataPlainRT = rt.intersection([
-  optionalBaseMetadataPlainRT,
-  optionalMetadataPlainRT,
-]);
+export const partialFieldMetadataPlainRT = rt.partial({
+  ...requiredBaseMetadataPlainRT.props,
+  ...optionalMetadataPlainRT.props,
+});
 
 export const fieldMetadataPlainRT = rt.intersection([
   requiredBaseMetadataPlainRT,
   optionalMetadataPlainRT,
 ]);
 
-export const fieldAttributeRT = rt.union([
-  rt.keyof(requiredBaseMetadataPlainRT.props),
-  rt.keyof(optionalMetadataPlainRT.props),
-]);
+export const fieldAttributeRT = rt.keyof({
+  ...requiredBaseMetadataPlainRT.props,
+  ...optionalMetadataPlainRT.props,
+});
 
 export const fieldsMetadataDictionaryRT = rt.record(rt.string, fieldMetadataPlainRT);
 
@@ -151,10 +155,14 @@ export type TMetadataFields = typeof MetadataFields;
 export type MetadataFieldName = keyof TMetadataFields;
 export type TEcsFields = typeof EcsFlat;
 export type EcsFieldName = keyof TEcsFields;
+
+export type TOtelFields = TSemconvFields;
+export type OtelFieldName = SemconvFieldName;
 export type IntegrationFieldName = AnyFieldName;
 
-export type FieldName = MetadataFieldName | EcsFieldName | IntegrationFieldName;
+export type FieldName = MetadataFieldName | EcsFieldName | OtelFieldName | IntegrationFieldName;
 export type FieldMetadataPlain = rt.TypeOf<typeof fieldMetadataPlainRT>;
 export type PartialFieldMetadataPlain = rt.TypeOf<typeof partialFieldMetadataPlainRT>;
 
+export type FieldSource = rt.TypeOf<typeof fieldSourceRT>;
 export type FieldAttribute = rt.TypeOf<typeof fieldAttributeRT>;

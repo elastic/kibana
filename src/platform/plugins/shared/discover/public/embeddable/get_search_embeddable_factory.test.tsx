@@ -14,17 +14,31 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import { createDataViewDataSource } from '../../common/data_sources';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
-import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
-import type { SolutionId } from '@kbn/core-chrome-browser';
+import type {
+  SearchEmbeddableApi,
+  SearchEmbeddablePanelApiState,
+  SearchEmbeddableRuntimeState,
+} from './types';
+import {
+  EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+  SolutionType,
+  type ContextAwarenessToolkit,
+} from '../context_awareness';
+import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -46,7 +60,7 @@ describe('saved search embeddable', () => {
       .mockResolvedValueOnce(searchSource);
 
     return {
-      timeRange: { from: 'now-15m', to: 'now' },
+      time_range: { from: 'now-15m', to: 'now' },
       columns: ['message', 'extension'],
       rowHeight: 30,
       headerRowHeight: 5,
@@ -62,6 +76,7 @@ describe('saved search embeddable', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('./utils/serialization_utils').deserializeState = () => runtimeState;
+    mockedEditableDashboardApi.setFocusedPanelId.mockClear();
   });
 
   const mockServices = {
@@ -73,6 +88,22 @@ describe('saved search embeddable', () => {
   };
 
   const uuid = 'mock-embeddable-id';
+  const byValueInitialState: SearchEmbeddableState = {
+    attributes: {
+      title: 'By value Discover session',
+      description: '',
+      sort: [],
+      columns: [],
+      grid: {},
+      hideChart: false,
+      hideTable: false,
+      isTextBasedQuery: false,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{}',
+      },
+      tabs: [],
+    },
+  };
   const factory = getSearchEmbeddableFactory(mockServices);
   const dashboadFilters = new BehaviorSubject<Filter[] | undefined>(undefined);
   const mockedDashboardApi = {
@@ -106,12 +137,34 @@ describe('saved search embeddable', () => {
   };
 
   const finalizeApiMock = (
-    api: Omit<SearchEmbeddableApi, 'uuid' | 'type' | 'parentApi' | 'phase$'>
+    api: EmbeddableApiRegistration<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
   ) => ({
     ...api,
+    applySerializedState: () => undefined,
     uuid,
     type: factory.type,
     parentApi: mockedDashboardApi,
+    phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
+  });
+
+  const mockedEditableDashboardApi = {
+    ...mockedDashboardApi,
+    getAppContext: jest.fn().mockReturnValue({
+      currentAppId: 'dashboard',
+      getCurrentPath: jest.fn().mockReturnValue('/dashboard'),
+    }),
+    setFocusedPanelId: jest.fn(),
+    viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
+  };
+
+  const finalizeEditableApiMock = (
+    api: EmbeddableApiRegistration<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
+  ) => ({
+    ...api,
+    applySerializedState: () => undefined,
+    uuid,
+    type: factory.type,
+    parentApi: mockedEditableDashboardApi,
     phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
   });
 
@@ -122,7 +175,8 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -144,32 +198,89 @@ describe('saved search embeddable', () => {
       });
     });
 
-    it('should render field stats table in AGGREGATED_LEVEL view mode', async () => {
-      const { search, resolveSearch } = createSearchFnMock(0);
+    it('should render field stats table in AGGREGATED_LEVEL view mode and not fetch documents', async () => {
+      const { search } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
         partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
       });
+
+      discoverServiceMock.uiSettings.get = jest.fn().mockImplementation((key: string) => {
+        if (key === SHOW_FIELD_STATISTICS) return true;
+      });
+
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
       });
       await waitOneTick(); // wait for build to complete
 
-      discoverServiceMock.uiSettings.get = jest.fn().mockImplementationOnce((key: string) => {
-        if (key === SHOW_FIELD_STATISTICS) return true;
-      });
       const discoverComponent = render(<Component />);
 
-      // wait for data fetching
-      expect(api.dataLoading$.getValue()).toBe(true);
-      resolveSearch();
-      await waitOneTick();
+      // Field statistics mode should not trigger document fetching
+      expect(search).not.toHaveBeenCalled();
       expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
+    });
+  });
+
+  describe('missing data view', () => {
+    const getNoDataViewRuntimeState = (searchMock?: jest.Mock): SearchEmbeddableRuntimeState => {
+      const searchSource = createSearchSourceMock({}, undefined, searchMock);
+      const parentSearchSource = createSearchSourceMock({});
+      discoverServiceMock.data.search.searchSource.create = jest
+        .fn()
+        .mockResolvedValueOnce(searchSource)
+        .mockResolvedValueOnce(parentSearchSource);
+
+      return {
+        time_range: { from: 'now-15m', to: 'now' },
+        columns: ['message', 'extension'],
+        rowHeight: 30,
+        headerRowHeight: 5,
+        rowsPerPage: 50,
+        sampleSize: 250,
+        serializedSearchSource: searchSource.getSerializedFields(),
+      };
+    };
+
+    it('should render missing data view prompt when data view is not found', async () => {
+      runtimeState = getNoDataViewRuntimeState();
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+      const { queryByTestId } = renderWithI18n(<Component />);
+
+      await waitFor(() => {
+        expect(queryByTestId('discoverEmbeddableMissingDataViewCallout')).toBeVisible();
+        expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not fetch data when data view is missing', async () => {
+      const { search } = createSearchFnMock(0);
+      runtimeState = getNoDataViewRuntimeState(search);
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(search).not.toHaveBeenCalled();
+      expect(api.dataLoading$.getValue()).toBe(false);
     });
   });
 
@@ -178,10 +289,11 @@ describe('saved search embeddable', () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
         searchMock: search,
-        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
       });
       const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -199,13 +311,172 @@ describe('saved search embeddable', () => {
       await waitOneTick();
       expect(search).toHaveBeenCalledTimes(1);
     });
+
+    it('should not provide inline editing overrides for by-value embeddables', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+      });
+
+      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
+        navigateToEditor: jest.fn(),
+      });
+      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+        app: 'discover',
+        path: '/mock-url',
+        state: {},
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: byValueInitialState,
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(api.overrideHoverActions$).toBeUndefined();
+      expect(api.OverriddenHoverActionsComponent).toBeUndefined();
+    });
+
+    it('should enter inline edit mode and keep legacy discover edit behavior', async () => {
+      const user = userEvent.setup();
+
+      const { search, resolveSearch } = createSearchFnMock(1);
+
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL, savedObjectId: 'id' },
+      });
+      const navigateToEditor = jest.fn();
+
+      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
+        navigateToEditor,
+      }));
+      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+        app: 'discover',
+        path: '/mock-url',
+        state: {},
+      });
+
+      const { api, Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+      await waitOneTick();
+
+      const discoverComponent = render(<Component />);
+      resolveSearch();
+      await waitOneTick();
+
+      expect(api.overrideHoverActions$?.getValue()).toBe(false);
+      expect(api.OverriddenHoverActionsComponent).toBeDefined();
+      expect(api.onEdit).toBeDefined();
+
+      await act(async () => {
+        await api.onEdit?.();
+      });
+
+      expect(api.overrideHoverActions$?.getValue()).toBe(true);
+      expect(mockedEditableDashboardApi.setFocusedPanelId).toHaveBeenCalledWith(uuid);
+      await waitFor(() => {
+        expect(
+          discoverComponent.getByTestId('discoverEmbeddableInlineEditApplyButton')
+        ).toBeInTheDocument();
+      });
+
+      await user.click(discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton'));
+
+      expect(api.overrideHoverActions$?.getValue()).toBe(false);
+      await waitFor(() => {
+        expect(
+          discoverComponent.queryByTestId('discoverEmbeddableInlineEditApplyButton')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    describe('anyStateChange$', () => {
+      let embeddableApi: SearchEmbeddableApi;
+      beforeEach((done) => {
+        const { search } = createSearchFnMock(1);
+        runtimeState = getInitialRuntimeState({
+          searchMock: search,
+          partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+        });
+        factory
+          .buildEmbeddable({
+            initializeDrilldownsManager,
+            initialState: { ref_id: 'id', overrides: {} },
+            finalizeApi: finalizeApiMock,
+            uuid,
+            parentApi: mockedDashboardApi,
+          })
+          .then(({ api }) => {
+            embeddableApi = api;
+            done();
+          })
+          .catch(done);
+      });
+
+      test('should not emit on subscribe and emit when any state changes', (done) => {
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const title = embeddableApi.title$.value;
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      });
+    });
+  });
+
+  describe('deleted tab', () => {
+    it('should render the deleted tab prompt when the selected tab no longer exists', async () => {
+      const { search } = createSearchFnMock(0);
+
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: {
+          savedObjectId: 'id',
+          selectedTabId: 'removed-tab',
+          tabs: [{ id: 'tab-1' }, { id: 'tab-2' }] as SearchEmbeddableRuntimeState['tabs'],
+        },
+      });
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+
+      await waitOneTick();
+      const { queryByTestId } = renderWithI18n(<Component />);
+
+      await waitFor(() => {
+        expect(queryByTestId('discoverEmbeddableDeletedTabCallout')).toBeInTheDocument();
+        expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe('context awareness', () => {
     beforeAll(() => {
       jest
         .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-        .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
+        .mockReturnValue(new BehaviorSubject(SolutionType.Search));
     });
 
     afterAll(() => {
@@ -219,14 +490,15 @@ describe('saved search embeddable', () => {
       );
       runtimeState = getInitialRuntimeState();
       await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
       });
       await waitOneTick(); // wait for build to complete
 
-      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
+      expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: SolutionType.Search });
       resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });
@@ -243,7 +515,8 @@ describe('saved search embeddable', () => {
         },
       };
       await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -258,6 +531,7 @@ describe('saved search embeddable', () => {
       const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager(
         {
           scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         }
       );
       const resolveDataSourceProfileSpy = jest.spyOn(
@@ -269,25 +543,30 @@ describe('saved search embeddable', () => {
         .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
       });
       await waitOneTick(); // wait for build to complete
 
-      expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
-        dataView: dataViewMock,
-        query: api.savedSearch$.getValue().searchSource.getField('query'),
+      await waitFor(() => {
+        expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
+          dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+          dataView: dataViewMock,
+          query: api.savedSearch$.getValue().searchSource.getField('query'),
+        });
       });
-      resolveDataSourceProfileSpy.mockReset();
+      resolveDataSourceProfileSpy.mockClear();
       expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
 
       // trigger a refetch
-      dashboadFilters.next([]);
-      await waitOneTick();
-      expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
+      dashboadFilters.next([{ meta: {} }]);
+
+      await waitFor(() => {
+        expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
+      });
     });
 
     it('should pass cell renderers from profile', async () => {
@@ -297,7 +576,8 @@ describe('saved search embeddable', () => {
         partialState: { columns: ['rootProfile', 'message', 'extension'] },
       });
       const { Component, api } = await factory.buildEmbeddable({
-        initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -317,6 +597,40 @@ describe('saved search embeddable', () => {
         expect(discoverGridComponent).toBeInTheDocument();
         expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
       });
+    });
+
+    it('should not expose addFilter through the toolkit when filters are disabled', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState({
+        partialState: {
+          nonPersistedDisplayOptions: {
+            enableFilters: false,
+          },
+        },
+      });
+
+      await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(capturedToolkit?.actions.addFilter).toBeUndefined();
     });
   });
 });

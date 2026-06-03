@@ -6,9 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import type { SelectedDataView } from '../../../../sourcerer/store/model';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { DESCRIPTION } from './translations';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import type { BrowserFields } from '../../../types';
 
 /**
  * Inline definition for a runtime field "threat.indicator.name" we are adding for indicators grid
@@ -23,29 +27,41 @@ const indicatorNameField = {
   esTypes: ['keyword'],
 } as const;
 
-export const useTIDataView = () => {
-  const sourcererDataView = useSourcererDataView();
+export const useTIDataView = (): SelectedDataView => {
+  const { dataView, status } = useDataView();
+  const browserFields = useBrowserFields();
+  const selectedPatterns = useSelectedPatterns();
 
-  const browserFields = useMemo(() => {
-    const { threat = { fields: {} } } = sourcererDataView.browserFields;
+  const tiBrowserFields = useMemo(() => {
+    const { threat = { fields: {} } } = browserFields;
 
     return {
-      ...sourcererDataView.browserFields,
+      ...browserFields,
       threat: {
         fields: {
           ...threat.fields,
           [indicatorNameField.name]: indicatorNameField,
         },
       },
-    };
-  }, [sourcererDataView.browserFields]);
+    } as BrowserFields;
+  }, [browserFields]);
 
   return useMemo(
-    () => ({
-      ...sourcererDataView,
-      browserFields,
-      patternList: sourcererDataView.selectedPatterns,
-    }),
-    [browserFields, sourcererDataView]
+    () =>
+      ({
+        ...{
+          sourcererDataView: {
+            fields: dataView.fields.toSpec(),
+            title: dataView.title,
+            id: dataView.id,
+          },
+          loading: status !== 'ready',
+          dataViewId: dataView.id,
+          indicesExist: dataView.hasMatchedIndices(),
+        },
+        browserFields: tiBrowserFields,
+        selectedPatterns,
+      } as SelectedDataView),
+    [tiBrowserFields, dataView, selectedPatterns, status]
   );
 };

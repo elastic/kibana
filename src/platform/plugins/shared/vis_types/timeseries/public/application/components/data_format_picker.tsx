@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useCallback, useState, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -300,7 +301,6 @@ export const DataFormatPicker = ({
             onChange={handleChange}
             data-test-subj="tsvbDataFormatPicker"
             fullWidth
-            hasDividers
           />
         </EuiFormRow>
       </EuiFlexItem>

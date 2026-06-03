@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@kbn/react-query';
 import { useFormContext } from 'react-hook-form';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { APIRoutes, PlaygroundForm, PlaygroundFormFields, Pagination } from '../types';
+import type { PlaygroundForm, Pagination } from '../types';
+import { APIRoutes, PlaygroundFormFields } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION, SearchPlaygroundQueryKeys } from '../../common';
 import { elasticsearchQueryObject } from '../utils/user_query';

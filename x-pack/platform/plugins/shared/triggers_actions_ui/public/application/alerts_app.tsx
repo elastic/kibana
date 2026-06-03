@@ -8,7 +8,6 @@
 import React, { lazy } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
@@ -30,15 +29,15 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews } = deps;
 
   setDataViewsService(dataViews);
-  return (
-    <KibanaRenderContextProvider {...deps}>
-      <KibanaContextProvider services={{ ...deps }}>
+  return deps.rendering.addContext(
+    <KibanaContextProvider services={{ ...deps }}>
+      <KibanaContextProvider services={{ uiActions: deps.uiActions }}>
         <Router history={deps.history}>
           <Routes>
             <Route path={`/`} component={suspendedComponentWithProps(StackAlertsPage, 'xl')} />
           </Routes>
         </Router>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    </KibanaContextProvider>
   );
 };

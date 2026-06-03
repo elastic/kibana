@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiPopover,
   EuiToolTip,
   useGeneratedHtmlId,
@@ -63,7 +63,7 @@ const BulkActionsComponent: React.FC<Props> = ({
         <EuiButtonEmpty
           data-test-subj="bulkActionsButton"
           disabled={disabled}
-          iconType={appliesTo === 'multipleRows' ? 'arrowDown' : 'boxesVertical'}
+          iconType={appliesTo === 'multipleRows' ? 'chevronSingleDown' : 'boxesVertical'}
           iconSide={appliesTo === 'multipleRows' ? 'right' : undefined}
           onClick={onButtonClick}
           size="xs"
@@ -111,7 +111,7 @@ const BulkActionsComponent: React.FC<Props> = ({
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={PRIMARY_PANEL_ID} panels={panels} />
     </EuiPopover>
   );
 };

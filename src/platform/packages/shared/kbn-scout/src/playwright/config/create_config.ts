@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineConfig, PlaywrightTestConfig, devices } from '@playwright/test';
+import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
+import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
+import { VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   /**
@@ -34,10 +37,21 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
+
+      testIgnore: [
+        // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
+        '**/ai_suggestions_*.spec.ts',
+        // TODO: remove when we find a way to run "no data" tests without being affected by others
+        '**/no_data_*.spec.ts',
+      ],
       use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
     },
     {
       name: 'mki',
+      testIgnore: [
+        // TODO: remove when we find a way to run "no data" tests without being affected by others
+        '**/no_data_*.spec.ts',
+      ],
       use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
     },
   ];
@@ -45,21 +59,36 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
   let scoutProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [];
 
   /**
-   * For parallel tests, we need to add a setup as a project dependency. While Playwright doesn't allow to read 'use'
-   * from the parent project, we have to create a setup project with the explicit 'use' object for each parent project.
+   * When runGlobalSetup is true, we add a setup project as a dependency for each project.
+   * While Playwright doesn't allow to read 'use' from the parent project, we have to create
+   * a setup project with the explicit 'use' object for each parent project.
    * This is a workaround for https://github.com/microsoft/playwright/issues/32547
+   *
+   * The matching teardown project is always emitted: if no `global.teardown.ts` exists in
+   * `testDir`, the project's `testMatch` finds no tests and Playwright silently skips it,
+   * so plugins opt-in to teardown simply by adding the file. Linking it via Playwright's
+   * `teardown` field on the setup project guarantees teardown runs after the setup project
+   * AND every project depending on it has finished — including on test failure.
    */
-  scoutProjects =
-    options.workers && options.workers > 1
-      ? scoutDefaultProjects.flatMap((project) => [
-          {
-            name: `setup-${project?.name}`,
-            use: project?.use ? { ...project.use } : {},
-            testMatch: /global.setup\.ts/,
-          },
-          { ...project, dependencies: [`setup-${project?.name}`] },
-        ])
-      : scoutDefaultProjects;
+  const GLOBAL_HOOK_TIMEOUT_MS = 180000; // 3 minutes
+  scoutProjects = options.runGlobalSetup
+    ? scoutDefaultProjects.flatMap((project) => [
+        {
+          name: `setup-${project?.name}`,
+          use: project?.use ? { ...project.use } : {},
+          testMatch: /global.setup\.ts/,
+          timeout: GLOBAL_HOOK_TIMEOUT_MS,
+          teardown: `teardown-${project?.name}`,
+        },
+        { ...project, dependencies: [`setup-${project?.name}`] },
+        {
+          name: `teardown-${project?.name}`,
+          use: project?.use ? { ...project.use } : {},
+          testMatch: /global.teardown\.ts/,
+          timeout: GLOBAL_HOOK_TIMEOUT_MS,
+        },
+      ])
+    : scoutDefaultProjects;
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
@@ -77,6 +106,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+      scoutFailureSummaryReporter({ name: 'scout-failure-summary', runId }), // Scout failure summary (local only)
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
@@ -86,6 +116,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
+      runGlobalSetup: options.runGlobalSetup,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
@@ -94,6 +125,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
+      timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     },
 
     // Timeout for each test, includes test, hooks and fixtures

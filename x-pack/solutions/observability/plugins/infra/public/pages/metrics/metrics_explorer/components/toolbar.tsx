@@ -96,7 +96,7 @@ export const MetricsExplorerToolbar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup wrap alignItems="center">
           <EuiFlexItem>
             <UnifiedSearchBar onQuerySubmit={onFilterQuerySubmit} />
           </EuiFlexItem>
@@ -106,10 +106,11 @@ export const MetricsExplorerToolbar = ({
               chartOptions={chartOptions}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
+          <EuiFlexItem grow={false} style={{ marginRight: 5, maxWidth: '100%' }}>
             <EuiSuperDatePicker
               start={timeRange.from}
               end={timeRange.to}
+              compressed
               onTimeChange={({ start, end }) => onTimeChange(start, end)}
               onRefresh={onRefresh}
               commonlyUsedRanges={commonlyUsedRanges}

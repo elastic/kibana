@@ -6,15 +6,16 @@
  */
 
 import moment from 'moment';
-import { SavedObjectsFindResult } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
-import { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
-import {
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
+import type {
   AlertStatusConfigs,
   AlertPendingStatusConfigs,
   MissingPingMonitorInfo,
 } from '../../../../common/runtime_types/alert_rules/common';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export interface ConfigStats {
   up: number;
@@ -100,8 +101,16 @@ export const getPendingConfigs = ({
   const pendingConfigs: AlertPendingStatusConfigs = {};
 
   for (const monitorQueryId of monitorQueryIds) {
+    // Resolve the saved object to get the canonical configId (SO UUID).
+    // For regular monitors: configId === monitorQueryId.
+    // For project monitors: configId is the SO UUID, monitorQueryId is the journey ID.
+    const monitorSO = monitors.find(
+      (m) => m.id === monitorQueryId || m.attributes[ConfigKey.MONITOR_QUERY_ID] === monitorQueryId
+    );
+    const configId = monitorSO?.id ?? monitorQueryId;
+
     for (const locationId of monitorLocationIds) {
-      const configWithLocationId = `${monitorQueryId}-${locationId}`;
+      const configWithLocationId = `${configId}-${locationId}`;
 
       const isConfigMissing =
         !upConfigs[configWithLocationId] &&
@@ -121,7 +130,7 @@ export const getPendingConfigs = ({
           ) {
             pendingConfigs[configWithLocationId] = {
               status: 'pending',
-              configId: monitorQueryId,
+              configId,
               monitorQueryId,
               locationId,
               monitorInfo,

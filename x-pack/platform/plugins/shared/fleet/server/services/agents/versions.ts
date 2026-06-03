@@ -68,6 +68,17 @@ export const getLatestAvailableAgentVersion = async ({
   return latestCompatibleVersion;
 };
 
+export const getLatestAgentAvailableDockerImageVersion = async ({
+  includeCurrentVersion = false,
+  ignoreCache = false,
+}: {
+  includeCurrentVersion?: boolean;
+  ignoreCache?: boolean;
+} = {}): Promise<string> => {
+  const fullVersion = await getLatestAvailableAgentVersion({ includeCurrentVersion, ignoreCache });
+  return fullVersion.replace('+', '.');
+};
+
 export const getAvailableVersions = async ({
   includeCurrentVersion,
   ignoreCache = false, // This is only here to allow us to ignore the cache in tests
@@ -110,7 +121,7 @@ export const getAvailableVersions = async ({
   // fetch from the live API more than `TIME_BETWEEN_FETCHES` milliseconds.
   const apiVersions = await fetchAgentVersionsFromApi();
 
-  // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION` - we
+  // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION`, also only get the version <= to the current cluster version (inclusive of patches) - we
   // only want support versions in the final result. We'll also sort by newest version first.
   availableVersions = uniq(
     [...availableVersions, ...apiVersions]
@@ -124,7 +135,10 @@ export const getAvailableVersions = async ({
         ) {
           return false;
         }
-        return semverGte(v, MINIMUM_SUPPORTED_VERSION);
+        return (
+          semverGte(v, MINIMUM_SUPPORTED_VERSION) &&
+          (!semverGt(v, kibanaVersion) || differsOnlyInPatch(v, kibanaVersion))
+        );
       })
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
   );

@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useQuickPromptUpdater } from '../../settings/use_settings_updater/use_quick_prompt_updater';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
@@ -155,13 +155,14 @@ const QuickPromptSettingsManagementComponent = () => {
             <EuiText size="m">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={!promptsLoaded}>
+            <EuiButton iconType="plusCircle" onClick={onCreate} disabled={!promptsLoaded}>
               {i18n.QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          tableCaption={i18n.QUICK_PROMPT_TABLE_CAPTION}
           columns={columns}
           items={quickPromptSettings}
           onTableChange={onTableChange}

@@ -6,11 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-
-import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-
+import { v4 as uuidv4 } from 'uuid';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,27 +20,19 @@ export default function ({ getService }: FtrProviderContext) {
   describe('fleet_agents_status', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
-      await es.create({
-        id: 'fleet-agent-policies:policy-inactivity-timeout',
-        index: INGEST_SAVED_OBJECT_INDEX,
-        refresh: 'wait_for',
-        document: {
-          type: 'fleet-agent-policies',
-          'fleet-agent-policies': {
-            name: 'Test policy',
-            namespace: 'default',
-            description: 'Policy with inactivity timeout',
-            status: 'active',
-            is_default: true,
-            monitoring_enabled: ['logs', 'metrics'],
-            revision: 2,
-            updated_at: '2020-05-07T19:34:42.533Z',
-            updated_by: 'system',
-            inactivity_timeout: 60,
-          },
-          typeMigrationVersion: '7.10.0',
-        },
-      });
+      await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'policy-inactivity-timeout',
+          name: 'Test policy inactivity timeout',
+          namespace: 'default',
+          description: 'Policy with inactivity timeout',
+          is_default: true,
+          monitoring_enabled: ['logs', 'metrics'],
+          inactivity_timeout: 60,
+        })
+        .expect(200);
       // 2 agents online
       await es.update({
         id: 'agent1',
@@ -291,27 +281,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       await Promise.all(
         policiesToAdd.map((policyId) =>
-          es.create({
-            id: 'fleet-agent-policies:' + policyId,
-            index: INGEST_SAVED_OBJECT_INDEX,
-            refresh: 'wait_for',
-            document: {
-              type: 'fleet-agent-policies',
-              'fleet-agent-policies': {
-                name: policyId,
-                namespace: 'default',
-                description: 'Policy with inactivity timeout',
-                status: 'active',
-                is_default: true,
-                monitoring_enabled: ['logs', 'metrics'],
-                revision: 2,
-                updated_at: '2020-05-07T19:34:42.533Z',
-                updated_by: 'system',
-                inactivity_timeout: 60,
-              },
-              typeMigrationVersion: '7.10.0',
-            },
-          })
+          supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              id: 'fleet-agent-policies:' + policyId,
+              name: policyId,
+              namespace: 'default',
+              description: 'Policy with inactivity timeout',
+              is_default: true,
+              monitoring_enabled: ['logs', 'metrics'],
+              inactivity_timeout: 60,
+            })
+            .expect(200)
         )
       );
       const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
@@ -373,6 +355,39 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
+      await es.create({
+        refresh: 'wait_for',
+        index: 'logs-system.system-default',
+        id: uuidv4(),
+        body: {
+          agent: {
+            id: 'agent1',
+          },
+          '@timestamp': new Date().toISOString(),
+          data_stream: {
+            dataset: 'system.system',
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+      await es.create({
+        refresh: 'wait_for',
+        index: 'logs-system.system-default',
+        id: uuidv4(),
+        body: {
+          agent: {
+            id: 'agent2',
+          },
+          '@timestamp': new Date().toISOString(),
+          data_stream: {
+            dataset: 'system.system',
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+
       const { body: apiResponse1 } = await supertest
         .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
         .expect(200);
@@ -382,12 +397,26 @@ export default function ({ getService }: FtrProviderContext) {
         )
         .expect(200);
       expect(apiResponse1).to.eql({
-        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        items: [{ agent1: { data: true } }, { agent2: { data: true } }],
         dataPreview: [],
       });
       expect(apiResponse2).to.eql({
-        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        items: [{ agent1: { data: true } }, { agent2: { data: true } }],
         dataPreview: [],
+      });
+
+      // clean up test data
+      await es.deleteByQuery({
+        index: 'logs-system.system-default',
+        query: {
+          bool: {
+            filter: {
+              terms: {
+                'agent.id': ['agent1', 'agent2'],
+              },
+            },
+          },
+        },
       });
     });
   });

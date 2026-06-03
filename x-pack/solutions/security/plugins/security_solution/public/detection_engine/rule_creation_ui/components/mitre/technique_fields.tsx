@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -23,7 +24,10 @@ import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type { MitreSubTechnique, MitreTechnique } from '../../../../detections/mitre/types';
+import type {
+  MitreSubTechnique,
+  MitreTechnique,
+} from '../../../../../common/detection_engine/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -32,7 +36,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 
@@ -189,13 +193,15 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                 {getSelectTechnique(values[threatIndex].tactic.name, index, isDisabled, technique)}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="danger"
-                  iconType="trash"
-                  isDisabled={isDisabled}
-                  onClick={() => removeTechnique(index)}
-                  aria-label={Rulei18n.DELETE}
-                />
+                <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="trash"
+                    isDisabled={isDisabled}
+                    onClick={() => removeTechnique(index)}
+                    aria-label={Rulei18n.DELETE}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

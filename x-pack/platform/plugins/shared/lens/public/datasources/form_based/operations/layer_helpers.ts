@@ -6,20 +6,29 @@
  */
 
 import { partition, mapValues, pickBy } from 'lodash';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { nonNullable } from '../../../utils';
-import type { DateRange } from '../../../../common/types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type {
-  DatasourceFixAction,
+  BuildColumnBaseOptions,
+  TimeScaleUnit,
+  ReferenceBasedIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  FormBasedPrivateState,
+  TermsIndexPatternColumn,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
-  OperationMetadata,
   VisualizationDimensionGroupConfig,
-} from '../../../types';
+  FormulaIndexPatternColumn,
+  BaseIndexPatternColumn,
+  DatasourceFixAction,
+} from '@kbn/lens-common';
+import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -27,22 +36,15 @@ import {
   type RequiredReference,
   type OperationDefinition,
   type GenericOperationDefinition,
-  type TermsIndexPatternColumn,
   type FieldBasedOperationErrorMessage,
 } from './definitions';
-import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
+import type { DataViewDragDropOperation } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
-import {
-  GenericIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-} from './definitions/column_types';
-import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
-import type { TimeScaleUnit } from '../../../../common/expressions';
+import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import type { DataType } from '../../..';
+import type { DataType, OperationMetadata } from '../../..';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -348,9 +350,9 @@ export function insertNewColumn({
     throw new Error(`Can't insert a column with an ID that is already in use`);
   }
 
-  const baseOptions = {
+  const baseOptions: BuildColumnBaseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
+    previousColumn: { ...incompleteParams, ...initialParams },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -364,9 +366,7 @@ export function insertNewColumn({
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
-    const buildColumnFn = columnParams
-      ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
-      : operationDefinition.buildColumn({ ...baseOptions, layer });
+    const buildColumnFn = operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams);
 
     return updateDefaultLabels(
       addOperationFn(
@@ -1646,25 +1646,6 @@ export function getReferenceRoot(layer: FormBasedLayer, columnId: string): strin
     currentId = refLookup[currentId];
   }
   return currentId;
-}
-
-export function getReferencedColumnIds(layer: FormBasedLayer, columnId: string): string[] {
-  const referencedIds: string[] = [];
-  function collect(id: string) {
-    const column = layer.columns[id];
-    if (column && 'references' in column) {
-      const columnReferences = column.references;
-      // only record references which have created columns yet
-      const existingReferences = columnReferences.filter((reference) =>
-        Boolean(layer.columns[reference])
-      );
-      referencedIds.push(...existingReferences);
-      existingReferences.forEach(collect);
-    }
-  }
-  collect(columnId);
-
-  return referencedIds;
 }
 
 export function hasTermsWithManyBuckets(layer: FormBasedLayer): boolean {

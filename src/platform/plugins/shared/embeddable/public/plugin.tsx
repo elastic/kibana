@@ -7,49 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
-import {
+import type { Subscription } from 'rxjs';
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   PublicAppInfo,
 } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { registerTriggers } from './ui_actions/register_triggers';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { EnhancementsRegistry } from './enhancements/registry';
-import {
+import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
-import { getTransforms, hasTransforms, registerTransforms } from './transforms_registry';
+import {
+  registerLegacyURLTransform,
+  hasLegacyURLTransform,
+  getLegacyURLTransform,
+} from './bwc/legacy_url_transform';
+import { registerDrilldown } from './drilldowns/registry';
+import { registerActions } from './ui_actions/register_actions';
+import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
+import type {
+  SearchLibraryRequestType,
+  SearchLibraryResponseType,
+} from '../server/search_route/types';
+import { SEARCH_ROUTE_PATH } from '../common/constants';
+import { getEmbeddableDefinition } from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
-  private enhancementsRegistry = new EnhancementsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    registerTriggers(uiActions);
+    registerActions(uiActions);
 
     return {
-      registerReactEmbeddableFactory,
+      registerDrilldown,
+      registerEmbeddablePublicDefinition,
       registerAddFromLibraryType,
-      registerTransforms,
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
+      registerLegacyURLTransform,
     };
   }
 
   public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
+    closeSetup();
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -61,6 +72,32 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const embeddableStart: EmbeddableStart = {
+      getSavedObjects: async (request: SearchLibraryRequestType) => {
+        try {
+          const result = await core.http.post(SEARCH_ROUTE_PATH, {
+            body: JSON.stringify(request),
+          });
+          return result as SearchLibraryResponseType;
+        } catch (e) {
+          if (e.body.statusCode === 403) {
+            // we should not surface any forbidden errors to the front end
+            return { hits: [], total: 0 } as SearchLibraryResponseType;
+          }
+          throw e;
+        }
+      },
+      getAddFromLibraryComponent: async () => {
+        const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
+        return AddFromLibraryFlyout;
+      },
+      getAddFromLibraryContentComponent: async () => {
+        const { AddFromLibraryContent } = await import(
+          './add_from_library/add_from_library_flyout'
+        );
+        return AddFromLibraryContent;
+      },
+      // @ts-ignore
+      getEmbeddableDefinition,
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
@@ -70,9 +107,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      getTransforms,
-      hasTransforms,
-      getEnhancement: this.enhancementsRegistry.getEnhancement,
+      hasLegacyURLTransform,
+      getLegacyURLTransform,
     };
 
     setKibanaServices(core, embeddableStart, deps);

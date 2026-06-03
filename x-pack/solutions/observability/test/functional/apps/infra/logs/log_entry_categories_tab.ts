@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security']);
@@ -49,10 +49,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         full_name: 'logs test user',
       });
 
-      await PageObjects.security.forceLogout();
-
-      await PageObjects.security.login('global_logs_read_user', 'global_logs_read_user-password', {
-        expectSpaceSelector: false,
+      await retry.try(async () => {
+        await PageObjects.security.forceLogout();
+        await PageObjects.security.login(
+          'global_logs_read_user',
+          'global_logs_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
     };
 

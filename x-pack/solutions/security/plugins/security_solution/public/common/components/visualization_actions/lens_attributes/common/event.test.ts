@@ -12,6 +12,8 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getEventsHistogramLensAttributes, stackByFieldAccessorId } from './events';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest
@@ -20,15 +22,6 @@ jest.mock('uuid', () => ({
     .mockReturnValue('34919782-4546-43a5-b668-06ac934d3acd')
     .mockReturnValue('aac9d7d0-13a3-480a-892b-08207a787926')
     .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
-}));
-
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
 }));
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({
@@ -42,6 +35,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getEventsHistogramLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+  });
+
   it('should render query and filters for hosts events histogram', () => {
     (useRouteSpy as jest.Mock).mockReturnValue([
       {
@@ -91,6 +90,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -153,6 +157,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -226,6 +235,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -324,6 +338,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -390,6 +409,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -470,6 +494,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -517,7 +546,7 @@ describe('getEventsHistogramLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.objectContaining({ splitAccessor: stackByFieldAccessorId }),
+          expect.objectContaining({ splitAccessors: [stackByFieldAccessorId] }),
         ]),
       })
     );
@@ -535,7 +564,7 @@ describe('getEventsHistogramLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.not.objectContaining({ splitAccessor: stackByFieldAccessorId }),
+          expect.not.objectContaining({ splitAccessors: [stackByFieldAccessorId] }),
         ]),
       })
     );

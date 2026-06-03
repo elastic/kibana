@@ -9,14 +9,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
   showSaveModal,
-  OnSaveProps,
-  SavedObjectSaveModal,
-  SaveResult,
+  SavedObjectSaveModalWithSaveResult,
 } from '@kbn/saved-objects-plugin/public';
 import { LINKS_EMBEDDABLE_TYPE, CONTENT_ID } from '../../common';
-import { checkForDuplicateTitle } from './duplicate_title_check';
+import { hasLibraryItemWithTitle } from './has_library_item_with_title';
 import { linksClient } from './links_content_management_client';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 import type { EditorState } from '../editor/get_editor_flyout';
@@ -30,24 +29,7 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
 
 export const runSaveToLibrary = async (newState: EditorState): Promise<EditorState | undefined> => {
   return new Promise<EditorState | undefined>((resolve, reject) => {
-    const onSave = async ({
-      newTitle,
-      newDescription,
-      onTitleDuplicate,
-      isTitleDuplicateConfirmed,
-    }: OnSaveProps): Promise<SaveResult> => {
-      if (
-        !(await checkForDuplicateTitle({
-          title: newTitle,
-          lastSavedTitle: newState.title ?? '',
-          copyOnSave: false,
-          onTitleDuplicate,
-          isTitleDuplicateConfirmed,
-        }))
-      ) {
-        return {};
-      }
-
+    const onSave = async ({ newTitle, newDescription }: OnSaveProps): Promise<SaveResult> => {
       const newAttributes = {
         ...newState,
         links: serializeResolvedLinks(newState.links ?? []),
@@ -65,7 +47,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
           ...newState,
           title: newTitle,
           description: newDescription,
-          savedObjectId: id,
+          refId: id,
         });
         return { id };
       } catch (error) {
@@ -75,7 +57,9 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
     };
 
     const saveModal = (
-      <SavedObjectSaveModal
+      <SavedObjectSaveModalWithSaveResult
+        lastSavedTitle={''}
+        hasLibraryItemWithTitle={hasLibraryItemWithTitle}
         onSave={onSave}
         onClose={() => resolve(undefined)}
         title={newState.title ?? ''}

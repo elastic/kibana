@@ -18,7 +18,7 @@ const tabItem: TabItem = {
   label: 'test-label',
 };
 
-const previewTestSubj = `unifiedTabs_tabPreview_${tabItem.id}`;
+const previewTestSubj = `unifiedTabs_tabPreview_outerPanel_${tabItem.id}`;
 
 describe('TabPreview', () => {
   it('should call setShowPreview when mouse enters and change opacity after a delay', async () => {

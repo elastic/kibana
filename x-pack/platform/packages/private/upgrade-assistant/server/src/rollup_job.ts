@@ -6,10 +6,16 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type {
   RollupGetRollupIndexCapsResponse,
   RollupGetJobsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+
+export type GetRollupJobByIndexNameType = (
+  esClient: ElasticsearchClient,
+  log: Logger,
+  index: string
+) => Promise<string | undefined>;
 
 export async function getRollupJobByIndexName(
   esClient: ElasticsearchClient,

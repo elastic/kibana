@@ -10,11 +10,10 @@
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
 import { INPUT_TEST_SUBJ } from '@kbn/data-grid-in-table-search';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const retry = getService('retry');
@@ -35,9 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await browser.setWindowSize(1200, 2000);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -57,6 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
+    });
+
+    afterEach(async function () {
+      await discover.resetQueryMode();
     });
 
     it('should show highlights for in-table search', async () => {

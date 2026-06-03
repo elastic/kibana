@@ -15,20 +15,17 @@ interface TransformAdHocRunToBackfillResultOpts {
   adHocRunSO: SavedObject<AdHocRunSO>;
   isSystemAction: (connectorId: string) => boolean;
   originalSO?: SavedObjectsBulkCreateObject<AdHocRunSO>;
-  omitGeneratedActionValues?: boolean;
 }
 
 export const transformAdHocRunToBackfillResult = ({
   adHocRunSO,
   isSystemAction,
   originalSO,
-  omitGeneratedActionValues = true,
 }: TransformAdHocRunToBackfillResultOpts): ScheduleBackfillResult => {
   const { id, attributes, references, error } = adHocRunSO;
   const ruleId = references?.[0]?.id ?? originalSO?.references?.[0]?.id ?? 'unknown';
   const ruleName = attributes?.rule?.name ?? originalSO?.attributes?.rule.name;
   if (error) {
-    // get rule info from original SO if available since SO create errors don't return this
     return createBackfillError(error.message, ruleId, ruleName);
   }
 
@@ -58,7 +55,6 @@ export const transformAdHocRunToBackfillResult = ({
 
   return {
     id,
-    // exclude API key information
     createdAt: attributes.createdAt,
     duration: attributes.duration,
     enabled: attributes.enabled,
@@ -71,28 +67,26 @@ export const transformAdHocRunToBackfillResult = ({
         actions: attributes.rule.actions,
         references,
         isSystemAction,
-        omitGeneratedValues: omitGeneratedActionValues,
       }),
     },
     spaceId: attributes.spaceId,
     start: attributes.start,
     status: attributes.status,
     schedule: attributes.schedule,
+    initiator: attributes.initiator,
+    initiatorId: attributes.initiatorId,
   };
 };
 
-// includes API key information
 export const transformAdHocRunToAdHocRunData = ({
   adHocRunSO,
   isSystemAction,
   originalSO,
-  omitGeneratedActionValues = true,
 }: TransformAdHocRunToBackfillResultOpts): AdHocRun => {
   const result = transformAdHocRunToBackfillResult({
     adHocRunSO,
     isSystemAction,
     originalSO,
-    omitGeneratedActionValues,
   });
 
   return {

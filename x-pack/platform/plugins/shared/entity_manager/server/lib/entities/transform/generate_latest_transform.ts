@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import {
+import { type EntityDefinition } from '@kbn/entities-schema';
+import type {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -87,17 +87,7 @@ const generateTransformPutRequest = ({
       max_page_search_size: maxPageSearchSize,
     },
     pivot: {
-      group_by: {
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identity.${id.field}`]: {
-              terms: { field: id.field },
-            },
-          }),
-          {}
-        ),
-      },
+      group_by: generatePivotGroup(definition.identityFields),
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
@@ -110,6 +100,18 @@ const generateTransformPutRequest = ({
     },
   };
 };
+
+export function generatePivotGroup(identityFields: EntityDefinition['identityFields']) {
+  return identityFields.reduce(
+    (acc, id) => ({
+      ...acc,
+      [`entity.identity.${id.field}`]: {
+        terms: { field: id.field },
+      },
+    }),
+    {}
+  );
+}
 
 function generateFilters(definition: EntityDefinition) {
   const filter = {
@@ -125,6 +127,9 @@ function generateFilters(definition: EntityDefinition) {
 
   definition.identityFields.forEach(({ field }) => {
     filter.bool.must.push({ exists: { field } });
+    filter.bool.must_not.push({
+      term: { [field]: '' }, // identity field can't be empty
+    });
   });
 
   filter.bool.must.push({
@@ -140,5 +145,6 @@ function generateFilters(definition: EntityDefinition) {
       _tier: TRANSFORM_IGNORED_SLOW_TIERS,
     },
   });
+
   return filter;
 }

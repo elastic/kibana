@@ -7,11 +7,9 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { noop } from 'lodash';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -20,12 +18,14 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  AlertStatus,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
+import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
@@ -34,7 +34,11 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import {
   AlertDetailsRuleFormFlyout,
   type AlertDetailsRuleFormFlyoutBaseProps,
-} from './AlertDetailsRuleFormFlyout';
+} from './alert_details_rule_form_flyout';
+import { ObsCasesContext } from './obs_cases_context';
+import { AddToCaseButton } from './add_to_case_button';
+import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
+import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -62,9 +66,9 @@ export function HeaderActions({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
-
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+
+  const { discoverUrl } = useDiscoverUrl({ alert, rule });
 
   const handleUntrackAlert = useCallback(async () => {
     if (alert) {
@@ -81,26 +85,6 @@ export function HeaderActions({
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
 
-  const attachments: CaseAttachmentsWithoutOwner =
-    alert && rule
-      ? [
-          {
-            alertId: alert?.fields[ALERT_UUID] || '',
-            index: alertIndex || '',
-            rule: {
-              id: rule.id,
-              name: rule.name,
-            },
-            type: AttachmentType.alert,
-          },
-        ]
-      : [];
-
-  const handleAddToCase = () => {
-    setIsPopoverOpen(false);
-    selectCaseModal?.open({ getAttachments: () => attachments });
-  };
-
   const handleOpenSnoozeModal = () => {
     setIsPopoverOpen(false);
     setSnoozeModalOpen(true);
@@ -109,20 +93,47 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        {cases && (
+        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plus"
-              onClick={handleAddToCase}
-              data-test-subj="add-to-case-button"
+            <RuleQueryInspector
+              ruleId={alert.fields[ALERT_RULE_UUID]}
+              ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+              alertId={alert.fields[ALERT_UUID]}
+            />
+          </EuiFlexItem>
+        )}
+        {discoverUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={discoverUrl}
+              iconType="discoverApp"
+              target="_blank"
+              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
+              {...getEbtProps({
+                action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
+                detail: rule?.ruleTypeId,
+              })}
             >
               <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                  defaultMessage: 'Add to case',
+                {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
+                  defaultMessage: 'View in Discover',
                 })}
               </EuiText>
-            </EuiButton>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+
+        {cases && (
+          <EuiFlexItem grow={false}>
+            <ObsCasesContext>
+              <AddToCaseButton
+                alert={alert}
+                alertIndex={alertIndex}
+                rule={rule}
+                setIsPopoverOpen={setIsPopoverOpen}
+              />
+            </ObsCasesContext>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
@@ -183,7 +194,7 @@ export function HeaderActions({
                 <EuiButtonEmpty
                   size="s"
                   color="text"
-                  iconType="eyeClosed"
+                  iconType="eyeSlash"
                   onClick={handleUntrackAlert}
                   data-test-subj="untrack-alert-button"
                   disabled={alertStatus !== ALERT_STATUS_ACTIVE}

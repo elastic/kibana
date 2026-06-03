@@ -9,12 +9,13 @@ import * as Rx from 'rxjs';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
-import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { UsageData } from './spaces_usage_collector';
 import { getSpacesUsageCollector } from './spaces_usage_collector';
-import type { PluginsSetup } from '../plugin';
+import type { SpacesPluginSetupDeps } from '../types';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
@@ -70,7 +71,7 @@ function setup({
 
   const featuresSetup = {
     getKibanaFeatures: jest.fn().mockReturnValue(features),
-  } as unknown as PluginsSetup['features'];
+  } as unknown as SpacesPluginSetupDeps['features'];
 
   const usageStatsClient = usageStatsClientMock.create();
   usageStatsClient.getUsageStats.mockResolvedValue(MOCK_USAGE_STATS);

@@ -6,7 +6,7 @@
  */
 
 import { openSans } from '@kbn/expressions-plugin/common/fonts';
-import {
+import type {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,

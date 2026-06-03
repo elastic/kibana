@@ -6,13 +6,139 @@
  */
 
 import type { NewPackagePolicy, PackageInfo } from '../../server/types';
+import { PackagePolicyValidationError } from '../errors';
 
 import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
 
 import {
   simplifiedPackagePolicytoNewPackagePolicy,
+  packagePolicyToSimplifiedPackagePolicy,
   generateInputId,
 } from './simplified_package_policy_helper';
+
+/**
+ * Minimal multi-template package fixture covering both shapes of the
+ * deployment-mode annotation that drove https://github.com/elastic/kibana/issues/268930:
+ *
+ * - `otel`: a normal template with no `deployment_modes` annotation. Implicitly
+ *   allowed in both default and agentless modes.
+ * - `apache-agentless`: a template marked agentless-only at the template level
+ *   (`deployment_modes.default.enabled = false`). Its `aws/s3` input is also
+ *   annotated `deployment_modes: ['agentless']` for good measure.
+ * - `mixed`: a template with no template-level annotation but a per-input
+ *   annotation: `httpjson` is unannotated (allowed everywhere), `cel` is
+ *   annotated `deployment_modes: ['agentless']`.
+ */
+const multiTemplatePkgInfo = {
+  name: 'good_v3',
+  title: 'Good v3',
+  version: '1.0.0',
+  description: 'Test package with multiple policy templates',
+  type: 'integration',
+  format_version: '3.0.0',
+  owner: { github: 'elastic/fleet' },
+  policy_templates: [
+    {
+      name: 'otel',
+      title: 'OTel template',
+      description: 'Default-allowed template',
+      inputs: [{ type: 'otelcol', title: 'OTel collector', description: '' }],
+      multiple: true,
+    },
+    {
+      name: 'apache-agentless',
+      title: 'Apache agentless template',
+      description: 'Agentless-only template',
+      deployment_modes: {
+        agentless: { enabled: true },
+        default: { enabled: false },
+      },
+      inputs: [
+        {
+          type: 'aws/s3',
+          title: 'AWS S3',
+          description: '',
+          deployment_modes: ['agentless'],
+        },
+      ],
+      multiple: false,
+    },
+    {
+      name: 'mixed',
+      title: 'Mixed template',
+      description: 'Template with default-allowed and agentless-only inputs',
+      inputs: [
+        { type: 'httpjson', title: 'HTTP JSON', description: '' },
+        {
+          type: 'cel',
+          title: 'CEL',
+          description: '',
+          deployment_modes: ['agentless'],
+        },
+      ],
+      multiple: true,
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'good_v3.otel_logs',
+      title: 'OTel logs',
+      release: 'ga',
+      package: 'good_v3',
+      ingest_pipeline: 'default',
+      path: 'otel_logs',
+      streams: [
+        {
+          input: 'otelcol',
+          title: 'OTel logs stream',
+          description: '',
+          vars: [],
+          template_path: '',
+        },
+      ],
+    },
+    {
+      type: 'logs',
+      dataset: 'good_v3.s3_logs',
+      title: 'S3 logs',
+      release: 'ga',
+      package: 'good_v3',
+      ingest_pipeline: 'default',
+      path: 's3_logs',
+      streams: [
+        {
+          input: 'aws/s3',
+          title: 'S3 logs stream',
+          description: '',
+          vars: [],
+          template_path: '',
+        },
+      ],
+    },
+    {
+      type: 'logs',
+      dataset: 'good_v3.cel_logs',
+      title: 'CEL logs',
+      release: 'ga',
+      package: 'good_v3',
+      ingest_pipeline: 'default',
+      path: 'cel_logs',
+      streams: [
+        {
+          input: 'cel',
+          title: 'CEL logs stream',
+          description: '',
+          vars: [],
+          template_path: '',
+        },
+      ],
+    },
+  ],
+  latestVersion: '1.0.0',
+  keepPoliciesUpToDate: false,
+  status: 'not_installed',
+} as unknown as PackageInfo;
 
 function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
   return newPackagePolicy.inputs
@@ -28,6 +154,42 @@ function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
     }, {} as Record<string, string[]>);
 }
 
+describe('generateInputId', () => {
+  it('should use name instead of type when name is present', () => {
+    expect(
+      generateInputId({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('nginx-filelog_otel');
+  });
+
+  it('should fall back to type when name is not present', () => {
+    expect(
+      generateInputId({
+        type: 'logfile',
+        policy_template: 'nginx',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('nginx-logfile');
+  });
+
+  it('should use name without policy_template prefix when policy_template is not stored on the input (single-template packages)', () => {
+    expect(
+      generateInputId({
+        type: 'otelcol',
+        name: 'filelog_otel',
+        enabled: true,
+        streams: [],
+      })
+    ).toBe('filelog_otel');
+  });
+});
+
 describe('toPackagePolicy', () => {
   describe('With nginx package', () => {
     it('should work', () => {
@@ -37,6 +199,8 @@ describe('toPackagePolicy', () => {
           namespace: 'default',
           policy_id: 'policy123',
           policy_ids: ['policy123'],
+          supports_cloud_connector: undefined,
+          cloud_connector_id: undefined,
           output_id: 'output123',
           description: 'Test description',
           inputs: {
@@ -173,6 +337,251 @@ describe('toPackagePolicy', () => {
       );
 
       expect(res.additional_datastreams_permissions).toEqual(['logs-test-123']);
+    });
+
+    it('should preserve var_group_selections when creating package policy', () => {
+      const varGroupSelections = { auth_method: 'api_key' };
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          policy_ids: ['policy123'],
+          description: 'Test description',
+          var_group_selections: varGroupSelections,
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(res.var_group_selections).toEqual(varGroupSelections);
+    });
+
+    it('should include var_group_selections when converting back to simplified policy', () => {
+      const varGroupSelections = { auth_method: 'api_key' };
+      const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          policy_ids: ['policy123'],
+          description: 'Test description',
+          var_group_selections: varGroupSelections,
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      const simplified = packagePolicyToSimplifiedPackagePolicy(packagePolicy as any);
+
+      expect((simplified as any).var_group_selections).toEqual(varGroupSelections);
+    });
+  });
+
+  describe('With input-only package', () => {
+    const inputPkgInfo: PackageInfo = {
+      name: 'log',
+      type: 'input',
+      title: 'Custom logs',
+      version: '2.4.0',
+      description: 'Collect custom logs with Elastic Agent.',
+      format_version: '3.1.5',
+      owner: { github: '' },
+      assets: {} as any,
+      data_streams: [],
+      policy_templates: [
+        {
+          name: 'logs',
+          type: 'logs',
+          title: 'Custom log file',
+          description: 'Collect logs from custom files.',
+          input: 'logfile',
+          template_path: 'input.yml.hbs',
+          vars: [],
+        },
+      ],
+      latestVersion: '2.4.0',
+      keepPoliciesUpToDate: false,
+      status: 'not_installed',
+    };
+
+    it('should accept data_stream.type via simplified API for input packages', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'log-1',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+          inputs: {
+            'logs-logfile': {
+              streams: {
+                'log.logs': {
+                  vars: {
+                    'data_stream.type': 'metrics',
+                  },
+                },
+              },
+            },
+          },
+        },
+        inputPkgInfo
+      );
+
+      const streamVars = res.inputs[0].streams[0].vars;
+      expect(streamVars?.['data_stream.type']?.value).toEqual('metrics');
+      expect(res.inputs[0].streams[0].data_stream.type).toEqual('metrics');
+    });
+
+    it('should reject data_stream.type via simplified API when dynamic_signal_types is true', () => {
+      const dynamicPkgInfo: PackageInfo = {
+        ...inputPkgInfo,
+        policy_templates: [
+          {
+            name: 'otel',
+            title: 'OTel',
+            description: 'OTel input',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+            vars: [],
+            dynamic_signal_types: true,
+          } as any,
+        ],
+      };
+
+      expect(() =>
+        simplifiedPackagePolicytoNewPackagePolicy(
+          {
+            name: 'otel-1',
+            namespace: 'default',
+            policy_ids: ['policy123'],
+            inputs: {
+              'otel-otelcol': {
+                streams: {
+                  'log.otel': {
+                    vars: {
+                      'data_stream.type': 'metrics',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          dynamicPkgInfo
+        )
+      ).toThrow(PackagePolicyValidationError);
+    });
+  });
+
+  /**
+   * Regression tests for https://github.com/elastic/kibana/issues/268930.
+   *
+   * When a multi-policy-template package is used with the simplified API and
+   * the resulting policy targets the default deployment mode, inputs that the
+   * package spec marks as not allowed in default mode (either via a
+   * template-level `deployment_modes.default.enabled = false` flag or a
+   * per-input `deployment_modes: ['agentless']` annotation) must come out as
+   * `enabled: false` so that `validateDeploymentModesForInputs` does not
+   * reject the policy with a 400.
+   *
+   * Agentless mode is intentionally not subject to this filtering: that flow
+   * already routes through an explicit `policy_template` and would not benefit.
+   */
+  describe('default-mode filtering for multi-template packages', () => {
+    it('disables inputs from agentless-only templates when no inputs are listed', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-defaults',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+        },
+        multiTemplatePkgInfo
+      );
+
+      const apacheInput = res.inputs.find((input) => input.policy_template === 'apache-agentless');
+      expect(apacheInput).toBeDefined();
+      expect(apacheInput?.enabled).toBe(false);
+    });
+
+    it('disables agentless-only inputs inside otherwise default-allowed templates', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-defaults',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+        },
+        multiTemplatePkgInfo
+      );
+
+      const celInput = res.inputs.find(
+        (input) => input.policy_template === 'mixed' && input.type === 'cel'
+      );
+      const httpjsonInput = res.inputs.find(
+        (input) => input.policy_template === 'mixed' && input.type === 'httpjson'
+      );
+
+      expect(celInput?.enabled).toBe(false);
+      expect(httpjsonInput?.enabled).toBe(true);
+    });
+
+    it('keeps inputs without deployment_modes annotations enabled in default mode', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-defaults',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+        },
+        multiTemplatePkgInfo
+      );
+
+      const otelInput = res.inputs.find((input) => input.policy_template === 'otel');
+      expect(otelInput?.enabled).toBe(true);
+    });
+
+    it('disables streams of inputs filtered out by default-mode policy', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-defaults',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+        },
+        multiTemplatePkgInfo
+      );
+
+      const apacheInput = res.inputs.find((input) => input.policy_template === 'apache-agentless');
+      expect(apacheInput?.streams.length).toBeGreaterThan(0);
+      expect(apacheInput?.streams.every((stream) => stream.enabled === false)).toBe(true);
+    });
+
+    it('does not affect agentless policies (symmetric behavior intentionally omitted)', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'good-v3-agentless',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+          supports_agentless: true,
+        },
+        multiTemplatePkgInfo
+      );
+
+      const apacheInput = res.inputs.find((input) => input.policy_template === 'apache-agentless');
+      const celInput = res.inputs.find(
+        (input) => input.policy_template === 'mixed' && input.type === 'cel'
+      );
+      expect(apacheInput?.enabled).toBe(true);
+      expect(celInput?.enabled).toBe(true);
+    });
+
+    it('is a no-op for packages without deployment_modes annotations', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_ids: ['policy123'],
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(getEnabledInputsAndStreams(res)).toEqual({
+        'nginx-logfile': ['nginx.access', 'nginx.error'],
+        'nginx-nginx/metrics': ['nginx.stubstatus'],
+      });
     });
   });
 });

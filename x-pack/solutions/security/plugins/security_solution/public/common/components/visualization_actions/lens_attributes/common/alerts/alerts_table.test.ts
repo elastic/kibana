@@ -11,6 +11,8 @@ import { wrapper } from '../../../mocks';
 import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsTableLensAttributes } from './alerts_table';
+import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 interface VisualizationState {
   visualization: { columns: {} };
@@ -24,15 +26,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
-jest.mock('../../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    selectedPatterns: ['signal-index'],
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
@@ -42,6 +35,12 @@ jest.mock('../../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getAlertsTableLensAttributes', () => {
+  beforeAll(() => {
+    jest
+      .mocked(useDataView)
+      .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
+  });
+
   it('should render without extra options', () => {
     const { result } = renderHook(
       () =>

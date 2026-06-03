@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import type { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../services';
+import type { FtrProviderContext } from '../../../services';
 
 const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
 
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * Vega embeddable
        */
       it('emits when a vega panel is added', async () => {
-        await dashboardAddPanel.clickAddCustomVisualization();
+        await dashboardAddPanel.clickAddVega();
         await PageObjects.visualize.saveVisualizationExpectSuccess(VEGA_PANEL_TITLE, {
           saveAsNew: false,
           redirectToOrigin: true,

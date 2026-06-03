@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
@@ -54,13 +54,30 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // packages listed in fleet_packages.json
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'bulkEditAlertSuppressionEnabled',
-          'doesNotMatchForIndicatorMatchRuleEnabled',
-        ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        // For testing Import flyout with Endpoint artifacts
+        '--xpack.securitySolution.enableExperimental=["endpointExceptionsMovedUnderManagement"]',
       ],
+      runOptions: {
+        wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
+      },
+    },
+    uiSettings: {
+      ...xpackFunctionalTestsConfig.get('uiSettings'),
+      globalDefaults: {
+        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: true,
+      },
     },
   };
 }
+
+/**
+ * A log message indicating that Fleet plugin has completed any necessary setup logic
+ * to make sure test suites can run without race conditions with Fleet plugin initialization.
+ *
+ * The message must not be filtered out by the logging configuration. Subsequently higher log level is better.
+ * "Fleet setup completed" has the same "info" level as "Kibana server is ready" log message.
+ */
+const FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP = /Fleet setup completed/;

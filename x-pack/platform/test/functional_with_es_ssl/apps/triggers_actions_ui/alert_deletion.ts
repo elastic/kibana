@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   activeO11yAlertsNewerThan90,
   activeO11yAlertsOlderThan90,
@@ -22,7 +22,7 @@ import {
   inactiveStackAlertsNewerThan90,
   inactiveStackAlertsOlderThan90,
 } from '../../../alerting_api_integration/security_and_spaces/group2/tests/alerting/alert_deletion/alert_deletion_test_utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -95,7 +95,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await indexTestDocs();
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
     });
 
     afterEach(async () => {

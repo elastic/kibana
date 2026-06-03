@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { useCallback } from 'react';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
 
 export function buildOnboardingPath({
@@ -39,16 +40,21 @@ export function addPathParamToUrl(
   return `${url}?${paramsString}`;
 }
 
-export function useCardUrlRewrite(props: { category?: string | null; search?: string }) {
-  const params = new URLSearchParams();
-  if (props.category) params.append('category', props.category);
-  if (props.search) params.append('search', props.search);
-
-  return (card: IntegrationCardItem) => ({
-    ...card,
-    url:
-      card.url.indexOf('/app/integrations') >= 0
-        ? addPathParamToUrl(card.url, { category: props.category, search: props.search })
-        : card.url,
-  });
+export function useCardUrlRewrite({
+  category,
+  search,
+}: {
+  category?: string | null;
+  search?: string;
+}) {
+  return useCallback(
+    (card: IntegrationCardItem) => ({
+      ...card,
+      url:
+        card.url.indexOf('/app/integrations') >= 0
+          ? addPathParamToUrl(card.url, { category, search })
+          : card.url,
+    }),
+    [category, search]
+  );
 }

@@ -8,17 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiDragDropContext,
   EuiDroppable,
-  DragDropContextProps,
   EuiDraggable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiIcon,
 } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 const DROPPABLE_ID = 'onDragEnd';
 
@@ -51,7 +52,7 @@ export function MultiFieldSelect(props: {
                     {...provided.dragHandleProps}
                     aria-label={dragAriaLabel}
                   >
-                    <EuiIcon type="grab" />
+                    <EuiIcon type="dragVertical" aria-hidden={true} />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={true}>

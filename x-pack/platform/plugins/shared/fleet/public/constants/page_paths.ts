@@ -18,6 +18,7 @@ export type StaticPage =
   | 'uninstall_tokens'
   | 'data_streams'
   | 'settings'
+  | 'collectors'
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
@@ -31,22 +32,28 @@ export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
+  | 'integration_details_alerting'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_details_language_clients'
   | 'integration_details_api_reference'
   | 'integration_details_configs'
   | 'integration_policy_edit'
+  | 'integration_policy_copy'
   | 'integration_policy_upgrade'
+  | 'integration_policy_edit_from_installed'
+  | 'integration_policy_copy_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
+  | 'copy_integration'
   | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs'
   | 'agent_details_settings'
   | 'agent_details_diagnostics'
+  | 'agent_details_collector_config'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
@@ -70,15 +77,18 @@ export const FLEET_ROUTING_PATHS = {
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
   agent_details_settings: '/agents/:agentId/settings',
+  agent_details_collector_config: '/agents/:agentId/collector-config',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  copy_integration: '/policies/:policyId/copy-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
   uninstall_tokens: '/uninstall-tokens',
   data_streams: '/data-streams',
+  collectors: '/collectors',
   settings: '/settings',
   settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
   settings_edit_fleet_server_hosts: '/settings/fleet-server-hosts/:itemId',
@@ -95,22 +105,27 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
+export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
+export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
   integrations_create: '/create',
+  integrations_upload: '/upload',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
   integration_details_assets: '/detail/:pkgkey/assets',
+  integration_details_alerting: '/detail/:pkgkey/alerting',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_configs: '/detail/:pkgkey/configs',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_details_api_reference: '/detail/:pkgkey/api-reference',
   integration_details_language_clients: '/language_clients/:pkgkey/overview',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
+  integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
 
@@ -126,19 +141,36 @@ export const pagePathGetters: {
     searchTerm,
     category,
     subCategory,
+    onlyAgentless,
+    showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
+    onlyAgentless?: boolean;
+    showDeprecated?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
-        ? `/${category}/${subCategory} `
+        ? `/${category}/${subCategory}`
         : category && !subCategory
         ? `/${category}`
         : ``;
-    const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
-    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
+    const queryParams = new URLSearchParams();
+    if (searchTerm) {
+      queryParams.set(INTEGRATIONS_SEARCH_QUERYPARAM, searchTerm);
+    }
+    if (onlyAgentless) {
+      queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    if (showDeprecated === true) {
+      queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
+    }
+    const queryString = queryParams.toString();
+    return [
+      INTEGRATIONS_BASE_PATH,
+      `/browse${categoryPath}${queryString ? `?${queryString}` : ''}`,
+    ];
   },
   integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
     const categoryPath = category ? `/${category}` : ``;
@@ -175,6 +207,10 @@ export const pagePathGetters: {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
   },
+  integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
+  },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/settings${qs ? `?${qs}` : ''}`];
@@ -195,9 +231,23 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
+  integration_policy_copy: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/copy-integration/${packagePolicyId}`,
+  ],
   // Upgrades happen on the same edit form, just with a flag set. Separate page record here
   // allows us to set different breadcrumbs for upgrades when needed.
   integration_policy_upgrade: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
+  // Used for breadcrumbs when editing a policy from the installed integrations tab
+  integration_policy_edit_from_installed: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
+  // Used for breadcrumbs when copying a policy from the installed integrations tab
+  integration_policy_copy_from_installed: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
@@ -212,10 +262,10 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+      ...(prerelease ? { prerelease } : {}),
     });
     return [
       FLEET_BASE_PATH,
@@ -226,6 +276,10 @@ export const pagePathGetters: {
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
+  ],
+  copy_integration: ({ policyId, packagePolicyId }) => [
+    FLEET_BASE_PATH,
+    `/policies/${policyId}/copy-integration/${packagePolicyId}`,
   ],
   upgrade_package_policy: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
@@ -250,9 +304,14 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
+  agent_details_collector_config: ({ agentId }) => [
+    FLEET_BASE_PATH,
+    `/agents/${agentId}/collector-config`,
+  ],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  collectors: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.collectors],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
   settings_edit_fleet_server_hosts: ({ itemId }) => [
     FLEET_BASE_PATH,

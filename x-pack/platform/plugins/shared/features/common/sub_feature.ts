@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
+import type { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 
 /**
  * Configuration for a sub-feature.
@@ -71,7 +71,7 @@ export interface SubFeaturePrivilegeGroupConfig {
  * Configuration for a sub-feature privilege.
  */
 export interface SubFeaturePrivilegeConfig
-  extends Omit<FeatureKibanaPrivileges, 'excludeFromBasePrivileges' | 'composedOf' | 'replacedBy'> {
+  extends Omit<FeatureKibanaPrivileges, 'composedOf' | 'replacedBy'> {
   /**
    * Identifier for this privilege. Must be unique across all other privileges within a feature.
    */

@@ -6,7 +6,7 @@
  */
 
 import { upperFirst } from 'lodash';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import type { BeatsElasticsearchResponse, BucketCount } from './types';

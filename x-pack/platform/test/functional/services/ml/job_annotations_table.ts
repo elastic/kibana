@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { ProvidedType } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ProvidedType } from '@kbn/test';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 export type MlJobAnnotations = ProvidedType<typeof MachineLearningJobAnnotationsProvider>;
 
 export function MachineLearningJobAnnotationsProvider({ getService }: FtrProviderContext) {
@@ -365,7 +365,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
           `mlAnnotationsTableRow row-${annotationId} > euiCollapsedItemActionsButton`,
           30 * 1000
         );
-        await find.existsByCssSelector('euiContextMenuPanel');
+        await find.byCssSelector('.euiContextMenuPanel');
       });
     }
 

@@ -6,31 +6,35 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '../../common/constants/cases';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables/anomaly_swimlane/types';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { AnomalySwimLaneAttachmentData } from '../../common/util/cases_utils';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
+
+type AnomalySwimLaneViewProps = UnifiedValueAttachmentViewProps<AnomalySwimLaneAttachmentData>;
 
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
   return React.memo(
-    (props: PersistableStateAttachmentViewProps) => {
-      const { persistableStateAttachmentState, caseData } = props;
+    (props: AnomalySwimLaneViewProps) => {
+      const { caseData } = props;
+      const attachmentState = props.data.state;
 
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
       });
 
-      const inputProps =
-        persistableStateAttachmentState as unknown as AnomalySwimLaneEmbeddableState;
+      const inputProps = transformTimeRangeOut(
+        attachmentState as unknown as AnomalySwimLaneEmbeddableState
+      );
 
       const listItems = [
         {
@@ -42,7 +46,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
           ),
           description: inputProps.jobIds.join(', '),
         },
-        ...(inputProps.viewBy
+        ...(inputProps.swimlaneType === 'viewBy' && inputProps.viewBy
           ? [
               {
                 title: (
@@ -62,9 +66,9 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
               defaultMessage="Time range"
             />
           ),
-          description: `${dataFormatter.convert(
-            inputProps.timeRange!.from
-          )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+          description: `${dataFormatter.convertToText(
+            inputProps.time_range!.from
+          )} - ${dataFormatter.convertToText(inputProps.time_range!.to)}`,
         },
       ];
 
@@ -85,11 +89,9 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
           <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
           <EmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
             maybeId={inputProps.id}
-            type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
+            type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
             getParentApi={() => ({
-              getSerializedStateForChild: () => ({
-                rawState: inputProps,
-              }),
+              getSerializedStateForChild: () => inputProps,
               executionContext: {
                 type: 'cases',
                 description: caseData.title,
@@ -100,10 +102,6 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         </>
       );
     },
-    (prevProps, nextProps) =>
-      deepEqual(
-        prevProps.persistableStateAttachmentState,
-        nextProps.persistableStateAttachmentState
-      )
+    (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
   );
 });

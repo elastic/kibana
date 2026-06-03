@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { NoDataViewsPromptServices } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 const defaultParams = {};
 

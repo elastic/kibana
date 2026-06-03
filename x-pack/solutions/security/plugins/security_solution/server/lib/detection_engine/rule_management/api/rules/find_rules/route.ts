@@ -7,16 +7,25 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { gapStatus } from '@kbn/alerting-plugin/common';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
+import {
+  DETECTION_ENGINE_RULES_URL_FIND,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  EXCLUDED_GAP_REASONS_KEY,
+} from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
+import { getGapFilteredRuleIds } from '../../../logic/search/get_gap_filtered_rule_ids';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { transformFindAlerts } from '../../../utils/utils';
 
@@ -27,7 +36,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
       path: DETECTION_ENGINE_RULES_URL_FIND,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -54,23 +63,54 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const rulesClient = await ctx.alerting.getRulesClient();
 
           let ruleIds: string[] | undefined;
-          if (query.gaps_range_start && query.gaps_range_end) {
-            const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
-              start: query.gaps_range_start,
-              end: query.gaps_range_end,
-              statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-              hasUnfilledIntervals: true,
+          let warnings: WarningSchema[] | undefined;
+          const gapFillStatuses = (query.gap_fill_statuses ?? []) as GapFillStatus[];
+
+          if (gapFillStatuses.length > 0 && query.gaps_range_start && query.gaps_range_end) {
+            const uiSettingsClient = ctx.core.uiSettings.client;
+            const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
+              EXCLUDED_GAP_REASONS_KEY
+            );
+
+            const { ruleIds: gapRuleIds, truncated } = await getGapFilteredRuleIds({
+              rulesClient,
+              gapRange: {
+                start: query.gaps_range_start,
+                end: query.gaps_range_end,
+              },
+              gapFillStatuses,
+              maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+              filter: query.filter,
+              sortField: query.sort_field,
+              sortOrder: query.sort_order,
+              excludedReasons,
+              schedulerId: query.gap_auto_fill_scheduler_id,
             });
-            ruleIds = ruleIdsWithGaps.ruleIds;
-            if (ruleIds.length === 0) {
-              const emptyRules = transformFindAlerts({
-                data: [],
-                page: query.page,
-                perPage: query.per_page,
-                total: 0,
-              });
+
+            if (truncated) {
+              warnings = [
+                {
+                  type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+                  message: `Only the first ${MAX_RULES_WITH_GAPS_TO_FETCH} rules with gaps in the selected time range are returned. Additional rules with gaps are not included in this response.`,
+                  actionPath: '',
+                },
+              ];
+            }
+
+            if (gapRuleIds.length === 0) {
+              const emptyRules = transformFindAlerts(
+                {
+                  data: [],
+                  page: query.page,
+                  perPage: query.per_page,
+                  total: 0,
+                },
+                warnings
+              );
               return response.ok({ body: emptyRules });
             }
+
+            ruleIds = gapRuleIds;
           }
 
           const rules = await findRules({
@@ -84,7 +124,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             ruleIds,
           });
 
-          const transformed = transformFindAlerts(rules);
+          const transformed = transformFindAlerts(rules, warnings);
           return response.ok({ body: transformed ?? {} });
         } catch (err) {
           const error = transformError(err);

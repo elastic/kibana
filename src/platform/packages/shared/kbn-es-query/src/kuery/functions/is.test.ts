@@ -11,11 +11,11 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 
 import * as is from './is';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 import type { estypes } from '@elastic/elasticsearch';
 import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
-import { KqlIsFunctionNode } from './is';
+import type { KqlIsFunctionNode } from './is';
 
 describe('kuery functions', () => {
   describe('is', () => {
@@ -116,7 +116,7 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect((result.bool!.should! as estypes.QueryDslQueryContainer[]).length).toBe(
+        expect((result!.bool!.should! as estypes.QueryDslQueryContainer[]).length).toBe(
           indexPattern.fields.length
         );
       });
@@ -270,7 +270,7 @@ describe('kuery functions', () => {
         ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
-        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+        expect((result!.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
           'script'
         );
       });

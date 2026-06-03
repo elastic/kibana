@@ -1890,13 +1890,13 @@ describe('Action Scheduler', () => {
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(3);
 
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-1.'
+      'no scheduling of actions "1" for alert "1" from rule "1": has active maintenance windows test-id-1.'
     );
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-2.'
+      'no scheduling of actions "1" for alert "2" from rule "1": has active maintenance windows test-id-2.'
     );
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-3.'
+      'no scheduling of actions "1" for alert "3" from rule "1": has active maintenance windows test-id-3.'
     );
   });
 

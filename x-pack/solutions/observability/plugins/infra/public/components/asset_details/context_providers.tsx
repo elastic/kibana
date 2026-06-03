@@ -42,6 +42,7 @@ export const ContextProviders = ({
     overrides,
     entityType = 'host',
     renderMode,
+    preferredSchema,
   } = props;
 
   return (
@@ -56,6 +57,7 @@ export const ContextProviders = ({
                 entityType={entityType}
                 overrides={overrides}
                 renderMode={renderMode}
+                preferredSchema={preferredSchema}
               >
                 {children}
               </AssetDetailsRenderPropsProvider>

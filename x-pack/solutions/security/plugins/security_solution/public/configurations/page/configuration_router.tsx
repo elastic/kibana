@@ -9,11 +9,11 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { AISettings } from '../tabs/ai_settings';
 import { PromotionRules } from '../tabs/promotion_rules';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { ConfigurationTabs } from '../constants';
 import { LazyConfigurationsIntegrationsHome } from '../tabs/integrations';
+import { AISettingsRouteGuard } from './ai_settings_route_guard';
 
 export const ConfigurationsRouter = React.memo(() => {
   return (
@@ -24,7 +24,7 @@ export const ConfigurationsRouter = React.memo(() => {
       />
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.aiSettings})`}
-        component={AISettings}
+        component={AISettingsRouteGuard}
       />
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.basicRules})`}

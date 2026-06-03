@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../lib/object_remover';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
 
@@ -22,7 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
-  describe('Slack', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/251934
+  describe.skip('Slack', () => {
     before(async () => {
       objectRemover = await createSlackConnectorAndObjectRemover({ getService });
     });
@@ -147,7 +148,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         objectRemover.add(webhookAction.id, 'connector', 'actions');
         objectRemover.add(webApiAction.id, 'connector', 'actions');
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
       });
 
       it('should save webhook type slack connectors', async () => {
@@ -160,7 +163,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
 
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
         await testSubjects.click('rulesTab');
         await pageObjects.triggersActionsUI.searchAlerts(ruleName);
 

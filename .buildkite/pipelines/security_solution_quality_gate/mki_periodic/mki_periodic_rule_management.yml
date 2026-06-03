@@ -2,19 +2,37 @@ steps:
   - group: 'Serverless MKI QA Rule Management - Cypress Test'
     key: cypress_test_rule_management
     steps:
-      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:authorization
-        label: 'Cypress MKI - Authorization'
-        key: test_rule_management_authorization
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management
+        label: 'Cypress MKI - Rules Monitoring'
+        key: test_rule_management_monitoring
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:authorization
+        label: 'Cypress MKI - Authorization'
+        key: test_rule_management_authorization
+        env:
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:coverage_overview
         label: 'Cypress MKI - Coverage Overview'
@@ -22,13 +40,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:maintenance_windows
         label: 'Cypress MKI - Maintenance Windows'
@@ -36,13 +56,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:prebuilt_rules
         label: 'Cypress MKI - Prebuilt Rules'
@@ -50,13 +72,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 3
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:related_integrations
         label: 'Cypress MKI - Related Integrations'
@@ -64,13 +88,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rule_actions
         label: 'Cypress MKI - Rule Actions'
@@ -78,13 +104,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 2
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rule_details
         label: 'Cypress MKI - Rule Details'
@@ -92,13 +120,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:rules_table
         label: 'Cypress MKI - Rules Table'
@@ -106,13 +136,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
   - group: 'API MKI - Rule Management'
     key: api_test_rule_management
@@ -121,7 +153,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:qa:serverless
         key: rule_creation:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -130,12 +162,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_creation:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless
         key: rule_creation:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -144,12 +178,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_update:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless
         key: rule_update:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -158,12 +194,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_update:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless
         key: rule_update:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -172,12 +210,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_patch:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless
         key: rule_patch:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -186,12 +226,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_patch:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless
         key: rule_patch:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -200,12 +242,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - prebuilt_rules_management:customization_disabled:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_disabled:qa:serverless
         key: prebuilt_rules_management:customization_disabled:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -214,12 +258,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
-      - label: 'API MKI - prebuilt_rules_management:customization_enabled:qa:serverless'
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:qa:serverless
-        key: prebuilt_rules_management:customization_enabled:qa:serverless
+      - label: 'API MKI - prebuilt_rules_management:customization_enabled:customization:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:customization:qa:serverless
+        key: prebuilt_rules_management:customization_enabled:customization:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -228,12 +274,46 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - prebuilt_rules_management:customization_enabled:upgrade_prebuilt_rules:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:upgrade_prebuilt_rules:qa:serverless
+        key: prebuilt_rules_management:customization_enabled:upgrade_prebuilt_rules:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - prebuilt_rules_management:customization_enabled:upgrade_notifications:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:upgrade_notifications:qa:serverless
+        key: prebuilt_rules_management:customization_enabled:upgrade_notifications:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless
         key: prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -242,12 +322,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless
         key: prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -256,12 +338,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_delete:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless
         key: rule_delete:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -270,12 +354,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_delete:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless
         key: rule_delete:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -284,12 +370,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_import_export:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless
         key: rule_import_export:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -298,12 +386,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_import_export:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless
         key: rule_import_export:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -312,12 +402,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_management:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless
         key: rule_management:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -326,12 +418,31 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - rule_management:essentials:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:essentials:qa:serverless
+        key: rule_management:essentials:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
 
       - label: 'API MKI - rule_bulk_actions:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless
         key: rule_bulk_actions:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -340,12 +451,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_read:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless
         key: rule_read:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -354,12 +467,14 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - rule_read:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless
         key: rule_read:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -368,17 +483,5 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
-
-      - label: 'API MKI - rules_management:essentials:qa:serverless'
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless
-        key: rules_management:essentials:qa:serverless
-        agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-4
-        timeout_in_minutes: 120
-        retry:
-          automatic:
-            - exit_status: '1'
-              limit: 2
+        soft_fail:
+          - exit_status: 101

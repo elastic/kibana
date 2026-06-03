@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {

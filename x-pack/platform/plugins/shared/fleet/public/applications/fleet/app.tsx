@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, Suspense, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
@@ -15,7 +15,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -61,6 +61,8 @@ import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { LazyCollectorsApp } from './sections/collectors';
+import { ExperimentalFeaturesService } from './services';
 import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
@@ -277,6 +279,7 @@ const FleetTopNav = memo(
     }, [euiTheme]);
 
     const { TopNavMenu } = services.navigation.ui;
+    const isFeedbackEnabled = services.notifications.feedback.isEnabled();
 
     const topNavConfig: TopNavMenuData[] = [];
 
@@ -287,7 +290,7 @@ const FleetTopNav = memo(
         }),
         disableButton: true,
         className: readOnlyBtnClass,
-        iconType: 'glasses',
+        iconType: 'readOnly',
         tooltip: i18n.translate('xpack.fleet.appNavigation.readOnlyTooltip', {
           defaultMessage:
             "You can view most Fleet settings, but your current privileges don't allow you to perform all actions.",
@@ -295,13 +298,15 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-        defaultMessage: 'Send feedback',
-      }),
-      iconType: 'popout',
-      run: () => window.open(FEEDBACK_URL),
-    });
+    if (isFeedbackEnabled) {
+      topNavConfig.push({
+        label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+          defaultMessage: 'Give feedback',
+        }),
+        iconType: 'external',
+        run: () => window.open(FEEDBACK_URL),
+      });
+    }
 
     return (
       <TopNavMenu
@@ -439,6 +444,31 @@ export const AppRoutes = memo(
               </ErrorLayout>
             )}
           </Route>
+
+          {ExperimentalFeaturesService.get().enableOtelUI && (
+            <Route path={FLEET_ROUTING_PATHS.collectors} key={FLEET_ROUTING_PATHS.collectors}>
+              {authz.fleet.readAgents ? (
+                <AppLayout
+                  setHeaderActionMenu={setHeaderActionMenu}
+                  isReadOnly={!authz.fleet.allAgents}
+                >
+                  <Suspense fallback={<Loading />}>
+                    <LazyCollectorsApp />
+                  </Suspense>
+                </AppLayout>
+              ) : (
+                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
+                  <ErrorLayout isAddIntegrationsPath={false}>
+                    <PermissionsError
+                      callingApplication="Fleet"
+                      error="MISSING_PRIVILEGES"
+                      requiredFleetRole="Agents Read"
+                    />
+                  </ErrorLayout>
+                </AppLayout>
+              )}
+            </Route>
+          )}
 
           {/* TODO: Move this route to the Integrations app */}
           <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>

@@ -55,7 +55,7 @@ export const ProcessDraggable = React.memo<Props>(
               eventId={eventId}
               field="process.name"
               value={processName}
-              iconType="console"
+              iconType="commandLine"
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -68,7 +68,7 @@ export const ProcessDraggable = React.memo<Props>(
               eventId={eventId}
               field="process.executable"
               value={processExecutable}
-              iconType="console"
+              iconType="commandLine"
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -81,7 +81,7 @@ export const ProcessDraggable = React.memo<Props>(
               eventId={eventId}
               field="endgame.process_name"
               value={endgameProcessName}
-              iconType="console"
+              iconType="commandLine"
               fieldType="keyword"
               isAggregatable={true}
             />

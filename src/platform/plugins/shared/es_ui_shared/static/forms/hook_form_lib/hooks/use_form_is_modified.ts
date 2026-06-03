@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
 
-import { FieldHook, FormHook } from '../types';
+import type { FieldHook, FormHook } from '../types';
 import { useFormContext } from '../form_context';
 import { useFormData } from './use_form_data';
 
@@ -30,6 +30,9 @@ interface Options {
  * the form **won't be marked as modified**.
  * This is useful to detect if a form has changed and we need to display a confirm modal
  * to the user before they navigate away and lose their changes.
+ *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
  *
  * @param options - Optional options object
  * @returns flag to indicate if the form has been modified

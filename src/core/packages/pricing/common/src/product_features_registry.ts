@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PricingProductFeature } from './types';
+import type { PricingProductFeature } from './types';
 
 /**
  * Registry for managing pricing product features.

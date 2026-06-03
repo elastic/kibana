@@ -6,19 +6,19 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverTitle,
   EuiFilterButton,
   EuiPopover,
   EuiIcon,
   EuiButtonEmpty,
-  EuiSelectableOption,
 } from '@elastic/eui';
 
 import { EuiSelectable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FilterProps } from '../columns/filter_expanded';
+import type { FilterProps } from '../columns/filter_expanded';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { FilterValuesList } from './filter_values_list';
 import { useFilterValues } from '../use_filter_values';
@@ -40,7 +40,7 @@ export function LabelsFieldFilter(props: FilterProps) {
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isPopoverOpen}
       onClick={onButtonClick}
@@ -57,7 +57,7 @@ export function LabelsFieldFilter(props: FilterProps) {
     return {
       label: field.name,
       searchableLabel: field.name,
-      append: <EuiIcon type="arrowRight" />,
+      append: <EuiIcon type="chevronSingleRight" aria-hidden={true} />,
       showIcons: false,
     };
   });
@@ -79,7 +79,7 @@ export function LabelsFieldFilter(props: FilterProps) {
           <EuiPopoverTitle>
             <EuiButtonEmpty
               data-test-subj="o11yLabelsFieldFilterButton"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               onClick={() => setSelectedLabel('')}
             >

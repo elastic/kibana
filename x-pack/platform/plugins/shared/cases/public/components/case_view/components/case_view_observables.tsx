@@ -4,48 +4,55 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-
-import type { CaseUI } from '../../../../common/ui/types';
-
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
+import React, { useCallback, useMemo } from 'react';
+import type { CaseUI, ObservableUI } from '../../../../common/ui/types';
 import { ObservablesTable } from '../../observables/observables_table';
-import { ObservablesUtilityBar } from '../../observables/observables_utility_bar';
-import { useCaseObservables } from '../use_case_observables';
+import type { OnUpdateFields } from '../types';
+import { OBSERVABLES_TAB } from '../../user_actions/translations';
+import { AttachmentAccordion } from './attachment_accordion';
 
 interface CaseViewObservablesProps {
   caseData: CaseUI;
+  observables: ObservableUI[];
+  searchTerm?: string;
   isLoading: boolean;
+  onUpdateField: (args: OnUpdateFields) => void;
 }
 
-export const CaseViewObservables = ({ caseData, isLoading }: CaseViewObservablesProps) => {
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
+export const CaseViewObservables = ({
+  caseData,
+  observables,
+  searchTerm,
+  isLoading,
+  onUpdateField,
+}: CaseViewObservablesProps) => {
+  const caseDataWithFilteredObservables: CaseUI = useMemo(
+    () => ({ ...caseData, observables }),
+    [caseData, observables]
+  );
 
-  const caseDataWithFilteredObservables: CaseUI = useMemo(() => {
-    return {
-      ...caseData,
-      observables,
-    };
-  }, [caseData, observables]);
+  const onExtractObservablesChanged = useCallback(
+    (isOn: boolean) => {
+      onUpdateField({
+        key: 'settings',
+        value: { ...caseData.settings, extractObservables: !isOn },
+      });
+    },
+    [caseData.settings, onUpdateField]
+  );
+
+  if (searchTerm && observables.length === 0) {
+    return null;
+  }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <ObservablesUtilityBar caseData={caseData} />
-            <ObservablesTable
-              caseData={caseDataWithFilteredObservables}
-              isLoading={isLoading || isLoadingObservables}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <AttachmentAccordion id="observables" title={OBSERVABLES_TAB} count={observables.length}>
+      <ObservablesTable
+        caseData={caseDataWithFilteredObservables}
+        isLoading={isLoading}
+        onExtractObservablesChanged={onExtractObservablesChanged}
+      />
+    </AttachmentAccordion>
   );
 };
 

@@ -13,8 +13,11 @@ import { get } from 'lodash';
 import { getIpRangeQuery } from '../../../common/options_list/ip_search';
 import { isValidSearch } from '../../../common/options_list/is_valid_search';
 import { getDefaultSearchTechnique } from '../../../common/options_list/suggestions_searching';
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../../common/options_list/types';
-import { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
+import type {
+  OptionsListRequestBody,
+  OptionsListSuggestions,
+} from '../../../common/options_list/types';
+import type { EsBucket, OptionsListSuggestionAggregationBuilder } from '../types';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import {
   getEscapedWildcardQuery,
@@ -124,7 +127,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       }, []);
       return {
         suggestions,
-        totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`),
+        totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`) ?? 0,
       };
     },
   },

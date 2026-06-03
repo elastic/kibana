@@ -11,6 +11,7 @@ import { getThresholds } from '../common/get_values';
 import { set } from '@kbn/safer-lodash-set';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type {
+  CustomMetricExpressionParams,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from '../../../../common/alerting/metrics';
@@ -31,6 +32,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -65,6 +67,15 @@ const mockAssetDetailsLocator = {
 
 const mockMetricsExplorerLocator = {
   getRedirectUrl: jest.fn(),
+};
+
+const mockDataView = {
+  title: 'metrics-*,metricbeat-*',
+  fields: [{ name: 'host.name', type: 'string', esTypes: ['keyword'] }],
+};
+
+const mockDataViewsService = {
+  getFieldsForWildcard: jest.fn().mockResolvedValue(mockDataView.fields),
 };
 
 const mockOptions = {
@@ -116,7 +127,8 @@ describe('The metric threshold rule type', () => {
     jest.setSystemTime();
   });
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    services.getDataViews.mockResolvedValue(mockDataViewsService);
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
       ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
@@ -304,6 +316,133 @@ describe('The metric threshold rule type', () => {
       setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
       await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
       testNAlertsReported(0);
+    });
+
+    test('should report alert with the between (inclusive) comparator when condition is met', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0, 1.5], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 0 and 1.5.',
+        tags: [],
+      });
+    });
+
+    test('should not report any alerts with the between (inclusive) comparator when condition is not met', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+      testNAlertsReported(0);
+    });
+
+    test('should report alert with the between (inclusive) comparator when value equals lower bound', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [1, 1.5], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [1, 1.5]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [1, 1.5], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 1 and 1.5.',
+        tags: [],
+      });
+    });
+
+    test('should report alert with the between (inclusive) comparator when value equals upper bound', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0.5, 1], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 0.5 and 1.',
+        tags: [],
+      });
+    });
+
+    test('should report alert with the not between (inclusive) comparator when condition is met', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0, 0.75], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason:
+          'test.metric.1 is 1 in the last 1 min. Alert when not between (inclusive) 0 and 0.75.',
+        tags: [],
+      });
+    });
+
+    test('should not report any alerts with the not between (inclusive) comparator when condition is not met', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should not report alert with the not between (inclusive) comparator when value equals lower bound', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should not report alert with the not between (inclusive) comparator when value equals upper bound', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1]);
+      testNAlertsReported(0);
+    });
+  });
+
+  describe('data view fetching', () => {
+    test('does not fetch a data view when the rule has no custom count filters', async () => {
+      setEvaluationResults([]);
+
+      await executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [baseNonCountCriterion],
+        },
+      });
+
+      expect(services.getDataViews).not.toHaveBeenCalled();
+      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toBeUndefined();
+    });
+
+    test('fetches a data view when the rule uses a filtered custom count metric', async () => {
+      setEvaluationResults([]);
+
+      await executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [baseCustomCriterion],
+        },
+      });
+
+      expect(services.getDataViews).toHaveBeenCalledTimes(1);
+      expect(mockDataViewsService.getFieldsForWildcard).toHaveBeenCalledWith({
+        pattern: 'metrics-*,metricbeat-*',
+        allowNoIndex: true,
+      });
+      expect(jest.requireMock('./lib/evaluate_rule').evaluateRule.mock.calls[0][6]).toEqual(
+        mockDataView
+      );
     });
   });
 
@@ -903,7 +1042,7 @@ describe('The metric threshold rule type', () => {
         stateResult2
       );
       expect(stateResult3.missingGroups).toEqual([{ key: 'b', bucketKey: { groupBy0: 'b' } }]);
-      expect(mockedEvaluateRule.mock.calls[2][8]).toEqual([
+      expect(mockedEvaluateRule.mock.calls[2][9]).toEqual([
         { bucketKey: { groupBy0: 'b' }, key: 'b' },
       ]);
     });
@@ -1004,6 +1143,44 @@ describe('The metric threshold rule type', () => {
         group: [{ field: 'host.name', value: alertIdB }],
         ecsGroups: { 'host.name': alertIdB },
         grouping: { host: { name: alertIdB } },
+      });
+    });
+
+    test('when source tags is a string, it is treated as a single tag', async () => {
+      setEvaluationResults([
+        {
+          'host-01': {
+            ...baseNonCountCriterion,
+            comparator: COMPARATORS.GREATER_THAN,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-01' },
+            context: {
+              tags: 'host-01_tag1',
+            },
+          },
+        },
+      ]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: alertIdA,
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0.75], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min for host-01. Alert when above 0.75.',
+        tags: ['host-01_tag1', 'ruleTag1', 'ruleTag2'],
+        groupByKeys: { host: { name: alertIdA } },
+        group: [{ field: 'host.name', value: alertIdA }],
+        ecsGroups: { 'host.name': alertIdA },
+        grouping: { host: { name: alertIdA } },
       });
     });
   });
@@ -2232,6 +2409,941 @@ describe('The metric threshold rule type', () => {
     });
   });
 
+  describe('noDataBehavior parameter', () => {
+    const alertID = '*';
+
+    describe("noDataBehavior: 'recover' (default)", () => {
+      const execute = (sourceId: string = 'default') =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId,
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'recover',
+          },
+        });
+
+      test('should not report any alerts when there is no data', async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+        await execute();
+        testNAlertsReported(0);
+      });
+
+      test('should report alert when condition is met', async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: 2,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+        await execute();
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertID,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '2', evaluation_value: 2 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 2 in the last 1 min. Alert when above 1.',
+          tags: [],
+        });
+      });
+    });
+
+    describe("noDataBehavior: 'alertOnNoData'", () => {
+      const execute = (sourceId: string = 'default') =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId,
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'alertOnNoData',
+          },
+        });
+
+      test('should report NO_DATA alert when there is no data', async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+        await execute();
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertID,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m',
+          tags: [],
+        });
+      });
+    });
+
+    describe("noDataBehavior: 'remainActive'", () => {
+      const execute = (state?: any) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'remainActive',
+          },
+          state: state ?? mockOptions.state,
+        });
+
+      test('should keep alert in ALERT state when there is no data and alert was previously active', async () => {
+        // Mock that the alert is tracked (previously active)
+        services.alertsClient.isTrackedAlert.mockReturnValue(true);
+
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+        await execute();
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertID,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: FIRED_ACTIONS.id, // Should stay in ALERT state, not NO_DATA
+          alertState: 'ALERT',
+          reason: 'test.metric.1 reported no data in the last 1m',
+          tags: [],
+        });
+
+        // Reset mock
+        services.alertsClient.isTrackedAlert.mockReturnValue(false);
+      });
+
+      test('should not create new alert when there is no data and alert was not previously active', async () => {
+        // Mock that the alert is NOT tracked (not previously active)
+        services.alertsClient.isTrackedAlert.mockReturnValue(false);
+
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+        await execute();
+        testNAlertsReported(0);
+      });
+    });
+
+    describe('noDataBehavior takes precedence over alertOnNoData', () => {
+      test("noDataBehavior: 'recover' should override alertOnNoData: true", async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+        await executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            alertOnNoData: true, // This should be overridden
+            noDataBehavior: 'recover',
+          },
+        });
+
+        // Should recover (no alert) because noDataBehavior takes precedence
+        testNAlertsReported(0);
+      });
+
+      test("noDataBehavior: 'alertOnNoData' should override alertOnNoData: false", async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+        await executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            alertOnNoData: false, // This should be overridden
+            noDataBehavior: 'alertOnNoData',
+          },
+        });
+
+        // Should trigger NO_DATA alert because noDataBehavior takes precedence
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertID,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m',
+          tags: [],
+        });
+      });
+    });
+
+    describe('backward compatibility - when noDataBehavior is not set', () => {
+      test('should use alertOnNoData: true behavior (trigger NO_DATA alert)', async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+        await executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            alertOnNoData: true,
+            // noDataBehavior is not set - should fall back to alertOnNoData behavior
+          },
+        });
+
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertID,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m',
+          tags: [],
+        });
+      });
+
+      test('should use alertOnNoData: false behavior (recover/no alert)', async () => {
+        setEvaluationResults([
+          {
+            '*': {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+
+        await executor({
+          ...mockOptions,
+          services,
+          params: {
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            alertOnNoData: false,
+            // noDataBehavior is not set - should fall back to alertOnNoData behavior
+          },
+        });
+
+        testNAlertsReported(0);
+      });
+    });
+
+    describe("noDataBehavior: 'remainActive' with groupBy", () => {
+      const alertIdA = 'a';
+
+      const execute = () =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'remainActive',
+          },
+        });
+
+      test('should keep only tracked group alerts active when there is no data', async () => {
+        // Mock: group 'a' is tracked, group 'b' is not tracked
+        services.alertsClient.isTrackedAlert.mockImplementation((id: string) => id === alertIdA);
+
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // Only group 'a' should be reported (it was tracked)
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: FIRED_ACTIONS.id, // Should stay in ALERT state
+          alertState: 'ALERT',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+
+        // Reset mock
+        services.alertsClient.isTrackedAlert.mockReturnValue(false);
+      });
+    });
+
+    describe("noDataBehavior: 'recover' with groupBy", () => {
+      const alertIdA = 'a';
+
+      const execute = () =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'recover',
+          },
+        });
+
+      test('should not report alerts for groups with no data (all groups recover)', async () => {
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // No alerts should be reported - all groups recover
+        testNAlertsReported(0);
+      });
+
+      test('should report alert only for groups that meet condition, not for no-data groups', async () => {
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: 2,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // Only group 'a' should be reported (has data and meets condition)
+        // Group 'b' should recover (no alert)
+        testNAlertsReported(1);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '2', evaluation_value: 2 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 2 in the last 1 min for a. Alert when above 1.',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+      });
+    });
+
+    describe("noDataBehavior: 'alertOnNoData' with groupBy", () => {
+      const alertIdA = 'a';
+      const alertIdB = 'b';
+
+      const execute = () =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'alertOnNoData',
+          },
+        });
+
+      test('should report NO_DATA alerts for all groups with no data', async () => {
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // Both groups should get NO_DATA alerts
+        testNAlertsReported(2);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        testAlertReported(2, {
+          id: alertIdB,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for b',
+          tags: [],
+          groupByKeys: { something: alertIdB },
+          grouping: { something: alertIdB },
+        });
+      });
+
+      test('should report FIRED alert for firing group and NO_DATA for no-data group', async () => {
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: 2,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        testNAlertsReported(2);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '2', evaluation_value: 2 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 2 in the last 1 min for a. Alert when above 1.',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        testAlertReported(2, {
+          id: alertIdB,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: NO_DATA_ACTIONS.id,
+          alertState: 'NO DATA',
+          reason: 'test.metric.1 reported no data in the last 1m for b',
+          tags: [],
+          groupByKeys: { something: alertIdB },
+          grouping: { something: alertIdB },
+        });
+      });
+    });
+
+    describe("noDataBehavior: 'remainActive' with groupBy - mixed scenarios", () => {
+      const alertIdA = 'a';
+      const alertIdB = 'b';
+      const alertIdC = 'c';
+
+      const execute = () =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            groupBy: 'something',
+            sourceId: 'default',
+            criteria: [
+              {
+                ...baseNonCountCriterion,
+                comparator: COMPARATORS.GREATER_THAN,
+                threshold: [1],
+                metric: 'test.metric.1',
+              },
+            ],
+            noDataBehavior: 'remainActive',
+          },
+        });
+
+      test('should handle mixed scenario: firing, no-data tracked, and no-data untracked groups', async () => {
+        // Mock: group 'a' is tracked (was previously active), group 'b' is not tracked, group 'c' has data
+        services.alertsClient.isTrackedAlert.mockImplementation(
+          (id: string) => id === alertIdA || id === alertIdC
+        );
+
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+            c: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: 2,
+              timestamp: new Date().toISOString(),
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+              bucketKey: { groupBy0: 'c' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // Group 'a': tracked + no data → should remain active (FIRED)
+        // Group 'b': not tracked + no data → should NOT create new alert
+        // Group 'c': has data + firing → should report FIRED alert
+        testNAlertsReported(2);
+
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+
+        testAlertReported(2, {
+          id: alertIdC,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '2', evaluation_value: 2 },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 is 2 in the last 1 min for c. Alert when above 1.',
+          tags: [],
+          groupByKeys: { something: alertIdC },
+          grouping: { something: alertIdC },
+        });
+
+        // Reset mock
+        services.alertsClient.isTrackedAlert.mockReturnValue(false);
+      });
+
+      test('should keep all tracked groups active when all have no data', async () => {
+        // All groups are tracked
+        services.alertsClient.isTrackedAlert.mockReturnValue(true);
+
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // Both groups are tracked, both should remain active
+        testNAlertsReported(2);
+        testAlertReported(1, {
+          id: alertIdA,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 reported no data in the last 1m for a',
+          tags: [],
+          groupByKeys: { something: alertIdA },
+          grouping: { something: alertIdA },
+        });
+        testAlertReported(2, {
+          id: alertIdB,
+          conditions: [
+            { metric: 'test.metric.1', threshold: [1], value: '[NO DATA]', evaluation_value: null },
+          ],
+          actionGroup: FIRED_ACTIONS.id,
+          alertState: 'ALERT',
+          reason: 'test.metric.1 reported no data in the last 1m for b',
+          tags: [],
+          groupByKeys: { something: alertIdB },
+          grouping: { something: alertIdB },
+        });
+
+        // Reset mock
+        services.alertsClient.isTrackedAlert.mockReturnValue(false);
+      });
+
+      test('should not create any alerts when no groups are tracked and all have no data', async () => {
+        // No groups are tracked
+        services.alertsClient.isTrackedAlert.mockReturnValue(false);
+
+        setEvaluationResults([
+          {
+            a: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'a' },
+            },
+            b: {
+              ...baseNonCountCriterion,
+              comparator: COMPARATORS.GREATER_THAN,
+              threshold: [1],
+              metric: 'test.metric.1',
+              currentValue: null,
+              timestamp: new Date().toISOString(),
+              shouldFire: false,
+              shouldWarn: false,
+              isNoData: true,
+              bucketKey: { groupBy0: 'b' },
+            },
+          },
+        ]);
+
+        await execute();
+
+        // No groups are tracked, no alerts should be created
+        testNAlertsReported(0);
+      });
+    });
+  });
+
   describe('attempting to use a malformed filterQuery', () => {
     const alertID = '*';
     const execute = () =>
@@ -2470,6 +3582,7 @@ describe('The metric threshold rule type', () => {
             }
           : {}),
         [ALERT_REASON]: reason,
+        [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),
@@ -2501,7 +3614,6 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: false,
     ruleFormV2Enabled: false,
-    hostOtelEnabled: false,
   },
   enabled: true,
   sources,
@@ -2517,6 +3629,7 @@ const mockLibs: any = {
             type: 'index_pattern',
             indexPatternId: 'some-id',
           },
+          metricAlias: 'metrics-*,metricbeat-*',
         },
       });
     },
@@ -2574,3 +3687,18 @@ const baseCountCriterion = {
   threshold: [0],
   comparator: COMPARATORS.GREATER_THAN,
 } as CountMetricExpressionParams;
+
+const baseCustomCriterion = {
+  aggType: Aggregators.CUSTOM,
+  timeSize: 1,
+  timeUnit: 'm',
+  threshold: [0],
+  comparator: COMPARATORS.GREATER_THAN,
+  customMetrics: [
+    {
+      name: 'A',
+      aggType: Aggregators.COUNT,
+      filter: 'host.name: *foo*',
+    },
+  ],
+} as CustomMetricExpressionParams;

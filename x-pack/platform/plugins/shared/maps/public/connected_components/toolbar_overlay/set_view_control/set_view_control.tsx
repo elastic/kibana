@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import type { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { SetViewForm } from './set_view_form';
 
 export interface Props {
@@ -56,7 +56,7 @@ export class SetViewControl extends Component<Props, State> {
               size="s"
               onClick={this._togglePopover}
               data-test-subj="toggleSetViewVisibilityButton"
-              iconType="crosshairs"
+              iconType="crosshair"
               color="text"
               aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
                 defaultMessage: 'Go to',
@@ -69,6 +69,9 @@ export class SetViewControl extends Component<Props, State> {
         }
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
+        aria-label={i18n.translate('xpack.maps.setViewControl.popoverAriaLabel', {
+          defaultMessage: 'Set view',
+        })}
       >
         <SetViewForm
           settings={this.props.settings}

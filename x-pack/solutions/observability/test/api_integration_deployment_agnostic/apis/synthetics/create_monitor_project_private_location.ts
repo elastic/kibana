@@ -7,9 +7,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { expect as rawExpect } from 'expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { ProjectMonitorsRequest, ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/add_monitor_project';
@@ -22,18 +23,34 @@ import {
   getTestProjectSyntheticsPolicy,
   getTestProjectSyntheticsPolicyLightweight,
 } from './sample_data/test_project_monitor_policy';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { comparePolicies } from './sample_data/test_policy';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const config = getService('config');
+    const kibanaProtocol = config.get('servers.kibana.protocol') as string;
+    const kibanaHostname = config.get('servers.kibana.hostname') as string;
+    const kibanaPort = config.get('servers.kibana.port') as number;
+    // Omit default ports (80 for http, 443 for https) to match server.publicBaseUrl behavior
+    const isDefaultPort =
+      (kibanaProtocol === 'https' && kibanaPort === 443) ||
+      (kibanaProtocol === 'http' && kibanaPort === 80);
+    const kibanaServerUrl = isDefaultPort
+      ? `${kibanaProtocol}://${kibanaHostname}`
+      : `${kibanaProtocol}://${kibanaHostname}:${kibanaPort}`;
 
     let projectMonitors: ProjectMonitorsRequest;
     let httpProjectMonitors: ProjectMonitorsRequest;
@@ -57,9 +74,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       viewerUser = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
+
       await supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(editorUser.apiKeyHeader)
@@ -83,10 +101,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const formatLocations = (monitors: ProjectMonitorsRequest['monitors']) => {
         return monitors.map((monitor) => {
           return {
@@ -107,6 +125,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       icmpProjectMonitors = setUniqueIds({
         monitors: formatLocations(getFixtureJson('project_icmp_monitor').monitors),
+      });
+      await kibanaServer.savedObjects.clean({
+        types: [syntheticsMonitorSavedObjectType],
       });
     });
 
@@ -1377,6 +1398,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           projectId: project,
           locationName: testPrivateLocationName,
           locationId: testPolicyId,
+          kibanaUrl: kibanaServerUrl,
         })
       );
     });
@@ -1685,7 +1707,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
-          monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
+          monitors: [
+            {
+              ...httpProjectMonitors.monitors[1],
+              id: projectMonitors.monitors[0].id,
+              maintenance_windows: [],
+            },
+          ],
         })
         .expect(200);
       expect(body).eql({
@@ -1712,6 +1740,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               hash: 'ekrjelkjrelkjre',
               id: projectMonitors.monitors[0].id,
               locations: [],
+              maintenance_windows: [],
               privateLocations: [testPrivateLocationName],
               name: 'My Monitor 3',
               response: {
@@ -1803,6 +1832,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...httpProjectMonitors.monitors[1],
               locations: ['does not exist'],
+              maintenance_windows: [],
             },
           ],
         })
@@ -1838,6 +1868,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               hash: 'ekrjelkjrelkjre',
               id: httpProjectMonitors.monitors[1].id,
               locations: ['does not exist'],
+              maintenance_windows: [],
               privateLocations: [testPrivateLocationName],
               name: 'My Monitor 3',
               response: {
@@ -1882,6 +1913,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...httpProjectMonitors.monitors[1],
               locations: [],
               privateLocations: ['does not exist'],
+              maintenance_windows: [],
             },
           ],
         })
@@ -1930,6 +1962,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               type: 'http',
               urls: ['http://localhost:9200'],
               locations: [],
+              maintenance_windows: [],
               params: {
                 testGlobalParam2: 'testGlobalParamOverwrite',
                 testLocal1: 'testLocalParamsValue',
@@ -1961,6 +1994,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...httpProjectMonitors.monitors[1],
               privateLocations: [],
               locations: [],
+              maintenance_windows: [],
             },
           ],
         })
@@ -2007,6 +2041,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               type: 'http',
               urls: ['http://localhost:9200'],
               locations: [],
+              maintenance_windows: [],
               params: {
                 testGlobalParam2: 'testGlobalParamOverwrite',
                 testLocal1: 'testLocalParamsValue',
@@ -2019,6 +2054,188 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ],
         updatedMonitors: [],
       });
+    });
+
+    it('project monitors - cannot update project monitors when user does not have access to a space in multi space use case', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const SPACE_ID_1 = `test-space-1-${uuidv4()}`;
+      const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
+      const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
+      const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
+
+      await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
+      await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      const limitedRole = {
+        elasticsearch: {
+          indices: [{ names: ['*'], privileges: ['all'] }],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [SPACE_ID_1],
+            feature: { uptime: ['all'] },
+          },
+        ],
+      };
+      await samlAuth.setCustomRole(limitedRole);
+      const limitedUser = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+
+      try {
+        // Try to add a monitor to both spaces, but user only has access to one
+        const multiSpaceMonitor = {
+          ...projectMonitors.monitors[0],
+          spaces: [SPACE_ID_1, SPACE_ID_2],
+        };
+
+        const resp = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID_1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .set(limitedUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [multiSpaceMonitor] });
+
+        expect(resp.status).to.eql(403);
+        expect(resp.body.message).to.eql(
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
+        );
+      } finally {
+        await monitorTestService.deleteMonitorByJourney(
+          projectMonitors.monitors[0].id,
+          project,
+          SPACE_ID_1,
+          editorUser
+        );
+        await kibanaServer.spaces.delete(SPACE_ID_1);
+        await kibanaServer.spaces.delete(SPACE_ID_2);
+        await samlAuth.deleteCustomRole();
+      }
+    });
+
+    it('project monitors - cannot update project monitors when user does not have access to all spaces using * in spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const SPACE_ID_1 = `test-space-1-${uuidv4()}`;
+      const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
+      const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
+      const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
+
+      await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
+      await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      const limitedRole = {
+        elasticsearch: {
+          indices: [{ names: ['*'], privileges: ['all'] }],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: [SPACE_ID_1],
+            feature: { uptime: ['all'] },
+          },
+        ],
+      };
+      await samlAuth.setCustomRole(limitedRole);
+      const limitedUser = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+
+      try {
+        // Try to add a monitor to all spaces using '*', but user only has access to one
+        const multiSpaceMonitor = {
+          ...projectMonitors.monitors[0],
+          spaces: ['*'],
+        };
+
+        const resp = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID_1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .set(limitedUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [multiSpaceMonitor] });
+
+        expect(resp.status).to.eql(403);
+        expect(resp.body.message).to.eql(
+          'This monitor is shared to spaces where you do not have update permissions. To save changes, either request access to those spaces or remove them from the monitor.'
+        );
+      } finally {
+        await monitorTestService.deleteMonitorByJourney(
+          projectMonitors.monitors[0].id,
+          project,
+          SPACE_ID_1,
+          editorUser
+        );
+        await kibanaServer.spaces.delete(SPACE_ID_1);
+        await kibanaServer.spaces.delete(SPACE_ID_2);
+        await samlAuth.deleteCustomRole();
+      }
+    });
+
+    it('project monitors - user with access to all spaces can specify * in spaces and monitor is created in all spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const SPACE_ID_1 = `test-space-1-${uuidv4()}`;
+      const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
+      const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
+      const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
+
+      await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
+      await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      const allSpacesPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation([
+        '*',
+      ]);
+
+      try {
+        // Use a monitor with spaces: ['*']
+        const monitorId = uuidv4();
+        const monitor = {
+          ...httpProjectMonitors.monitors[1],
+          privateLocations: [allSpacesPrivateLocation.label],
+          id: monitorId,
+          name: `All spaces Monitor ${monitorId}`,
+          spaces: ['*'],
+        };
+
+        // Create monitor in SPACE_ID_1 context
+        const { body } = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID_1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [monitor] })
+          .expect(200);
+
+        expect(body).eql({
+          updatedMonitors: [],
+          createdMonitors: [monitorId],
+          failedMonitors: [],
+        });
+
+        // Use savedObjects client to verify monitor is created in all spaces
+        const soRes = await kibanaServer.savedObjects.find({
+          type: syntheticsMonitorSavedObjectType,
+        });
+
+        // Find the monitor
+        const found = soRes.saved_objects.find(
+          (obj: any) => obj.attributes.journey_id === monitorId
+        );
+        expect(found).not.to.be(undefined);
+        expect(found?.namespaces).to.eql('*');
+        expect(found?.attributes.name).to.eql(monitor.name);
+      } finally {
+        await kibanaServer.spaces.delete(SPACE_ID_1);
+        await kibanaServer.spaces.delete(SPACE_ID_2);
+      }
     });
   });
 }

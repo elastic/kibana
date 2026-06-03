@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { createHash } from 'crypto';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
-import { TelemetryEventsSender } from '../../telemetry/sender';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
   MONITOR_ERROR_EVENTS_CHANNEL,
 } from '../../telemetry/constants';
-import { MonitorErrorEvent } from '../../telemetry/types';
-import {
+import type { MonitorErrorEvent } from '../../telemetry/types';
+import type {
   MonitorFields,
   EncryptedSyntheticsMonitorAttributes,
-  ConfigKey,
   ServiceLocationErrors,
-  SourceType,
 } from '../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../common/runtime_types';
 import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
 
 export function sendTelemetryEvents(
@@ -102,7 +101,7 @@ export function formatTelemetryEvent({
             },
           }))
         : undefined,
-    configId: sha256.create().update(monitor.id).hex(),
+    configId: createHash('sha256').update(monitor.id).digest('hex'),
     revision: attributes[ConfigKey.REVISION],
   };
 }

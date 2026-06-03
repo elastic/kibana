@@ -6,16 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { encode } from '@kbn/rison';
-
-import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import type { State } from '../../../common/store';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
-} from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+} from '../../../detections/hooks/use_rule_from_timeline';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -25,9 +24,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
-
 import { useGetAllTimeline } from '../../containers/all';
-
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -53,7 +50,6 @@ import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
@@ -136,6 +132,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   }) => {
     const dispatch = useDispatch();
     const { startTransaction } = useStartTransaction();
+    const noteIds = useSelector((state: State) => state.notes.ids);
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>
@@ -160,21 +157,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
-      useSourcererDataView(SourcererScopeName.timeline);
-    const { newDataViewPickerEnabled } = useEnableExperimental();
-
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-    const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-
-    const dataViewId = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),
-      [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
-    );
-    const selectedPatterns = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-      [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-    );
+    const { dataView } = useDataView(PageScope.timeline);
+    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+    const dataViewId = useMemo(() => dataView.id || '', [dataView.id]);
 
     const {
       customTemplateTimelineCount,
@@ -390,16 +375,34 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelinePrivileges: { crud: canWriteTimelines },
     } = useUserPrivileges();
     useEffect(() => {
+      let cancelled = false;
       const fetchData = async () => {
         if (canWriteTimelines) {
           await installPrepackagedTimelines();
-          refetch();
-        } else {
+        }
+        if (!cancelled) {
           refetch();
         }
       };
       fetchData();
+      return () => {
+        cancelled = true;
+      };
     }, [refetch, installPrepackagedTimelines, canWriteTimelines]);
+
+    useEffect(() => {
+      setItemIdToExpandedNotesRowMap((prev) => {
+        const newNotesMap: Record<string, JSX.Element> = { ...prev };
+        const noteIdsSet = new Set(noteIds);
+        for (const noteId of Object.keys(newNotesMap)) {
+          if (!noteIdsSet.has(noteId)) {
+            delete newNotesMap[noteId];
+          }
+        }
+
+        return newNotesMap;
+      });
+    }, [noteIds]);
 
     return !isModal ? (
       <OpenTimeline

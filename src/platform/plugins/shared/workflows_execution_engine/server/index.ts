@@ -19,6 +19,24 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export type {
+  LogsRepository,
+  WorkflowLogEvent,
+  LogSearchResult,
+  SearchLogsParams,
+} from './repositories/logs_repository';
+
+export type { IWorkflowEventLoggerService } from './workflow_event_logger';
+
+export { resolveWorkflowEventsModeFromOn } from './trigger_events/lib/resolve_workflow_events_mode_from_on';
+
+export type {
+  SearchTriggerEventLogHit,
+  SearchTriggerEventLogParams,
+  SearchTriggerEventLogResult,
+} from './trigger_events/event_logs/trigger_event_log_query';

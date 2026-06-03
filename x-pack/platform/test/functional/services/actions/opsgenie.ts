@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { ActionsCommon } from './common';
 
 export interface ConnectorFormFields {
@@ -16,11 +16,12 @@ export interface ConnectorFormFields {
 }
 
 export function ActionsOpsgenieServiceProvider(
-  { getService, getPageObject }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -34,7 +35,9 @@ export function ActionsOpsgenieServiceProvider(
 
     async setConnectorFields({ name, apiUrl, apiKey }: ConnectorFormFields) {
       await testSubjects.setValue('nameInput', name);
-      await testSubjects.setValue('config.apiUrl-input', apiUrl);
+      await retry.try(async () => {
+        await testSubjects.setValue('config.apiUrl-input', apiUrl);
+      });
       await testSubjects.setValue('secrets.apiKey-input', apiKey);
     },
 

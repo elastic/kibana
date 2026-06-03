@@ -6,10 +6,10 @@
  */
 
 // Note: this suite is currently only called from the feature flags test config:
-// x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+// x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -104,17 +104,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Organization members', function () {
-        // Cannot test cloud link on MKI (will redirect to login)
-        this.tags(['skipMKI']);
-
-        it('displays the organization members management card, and will navigate to the cloud organization URL', async () => {
-          // The org members nav card is always visible because there is no way to check if a user has approprite privileges
-          await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
-          await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
-
-          const url = await browser.getCurrentUrl();
-          // `--xpack.cloud.organization_url: '/account/members'`,
-          expect(url).to.contain('/account/members');
+        it('should not display the organization members management card', async () => {
+          await retry.waitFor('page to be visible', async () => {
+            return await testSubjects.exists('cards-navigation-page');
+          });
+          await pageObjects.svlManagementPage.assertOrgMembersManagementCardDoesNotExist();
         });
       });
 

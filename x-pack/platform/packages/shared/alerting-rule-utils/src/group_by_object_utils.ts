@@ -6,7 +6,7 @@
  */
 
 import { unflattenObject } from '@kbn/object-utils';
-import { Group } from './types';
+import type { Group } from './types';
 
 export const unflattenGrouping = (
   grouping?: Record<string, string> | undefined

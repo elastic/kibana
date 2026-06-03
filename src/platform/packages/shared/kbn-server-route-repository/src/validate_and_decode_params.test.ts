@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { z } from '@kbn/zod/v4';
 import * as t from 'io-ts';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 

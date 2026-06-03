@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
 
-import {
+import type {
   EncryptedSyntheticsSavedMonitor,
   ServiceLocation,
 } from '../../../../../../common/runtime_types';
@@ -64,13 +64,20 @@ export const MonitorLocationSelect = ({
           onClick={openLocationList}
           disabled={isDisabled}
         >
-          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" /> : null}
+          {selectedLocation.label}{' '}
+          {!isDisabled ? <EuiIcon type="chevronSingleDown" aria-hidden={true} /> : null}
         </EuiLink>
       );
 
       const menuItems =
         loadingLocationsStatus && !locationsStatus
-          ? [<span key="loading">Loading...</span>]
+          ? [
+              <span key="loading">
+                {i18n.translate('xpack.synthetics.locationList.span.loadingLabel', {
+                  defaultMessage: 'Loading...',
+                })}
+              </span>,
+            ]
           : locationsStatus
               .map((location) => {
                 return (
@@ -110,7 +117,6 @@ export const MonitorLocationSelect = ({
         >
           <EuiContextMenuPanel
             items={menuItems}
-            size="s"
             title={i18n.translate(
               'xpack.synthetics.monitorLocation.locationContextMenuTitleLabel',
               { defaultMessage: 'Go to location' }

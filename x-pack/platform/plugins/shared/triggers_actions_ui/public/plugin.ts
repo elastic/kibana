@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin as CorePlugin,
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -18,6 +24,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -32,12 +39,16 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -146,16 +157,24 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getGlobalRuleEventLogList: (
     props: GlobalRuleEventLogListProps
   ) => ReactElement<GlobalRuleEventLogListProps>;
+  /**
+   * Get the alert formatter for a specific rule type.
+   * Returns the formatter function if the rule type has one registered, undefined otherwise.
+   */
+  getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
 }
 
 interface PluginsSetup {
+  security: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
   actions: ActionsPublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 interface PluginsStart {
+  security: SecurityPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -174,6 +193,8 @@ interface PluginsStart {
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
+  cps?: CPSPluginStart;
+  inspector?: InspectorStart;
 }
 
 export class Plugin
@@ -211,6 +232,9 @@ export class Plugin
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+
+    plugins.share.url.locators.create(new RulesLocatorDefinition());
+    plugins.share.url.locators.create(new RuleDetailsLocatorDefinition());
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
       defaultMessage: 'Rules',
@@ -268,6 +292,25 @@ export class Plugin
     }
 
     if (this.config.rules.enabled) {
+      core.application.register({
+        id: 'rules',
+        appRoute: '/app/rules',
+        title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
+          defaultMessage: 'Rules',
+        }),
+        visibleIn: ['globalSearch', 'projectSideNav'],
+        category: DEFAULT_APP_CATEGORIES.management,
+        async mount(params: AppMountParameters) {
+          const [coreStart] = (await core.getStartServices()) as [CoreStart, PluginsStart, unknown];
+          const { pathname, search, hash } = params.history.location;
+          await coreStart.application.navigateToApp('management', {
+            path: `/insightsAndAlerting/${PLUGIN_ID}${pathname}${search}${hash}`,
+            replace: true,
+          });
+          return () => {};
+        },
+      });
+
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
@@ -279,7 +322,7 @@ export class Plugin
             unknown
           ];
 
-          const { renderApp } = await import('./application/rules_app');
+          const { renderRulesPageApp } = await import('./application/rules_page_app');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
           // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -291,9 +334,10 @@ export class Plugin
             kibanaFeatures = [];
           }
 
-          return renderApp({
+          return renderRulesPageApp({
             ...coreStart,
             actions: plugins.actions,
+            security: pluginsStart.security,
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -304,7 +348,7 @@ export class Plugin
             unifiedSearch: pluginsStart.unifiedSearch,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
-            theme: params.theme,
+            theme: coreStart.theme,
             storage: new Storage(window.localStorage),
             setBreadcrumbs: params.setBreadcrumbs,
             history: params.history,
@@ -313,12 +357,15 @@ export class Plugin
             kibanaFeatures,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
-            isServerless: !!pluginsStart.serverless,
+            isServerless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
+            uiActions: pluginsStart.uiActions,
+            cps: pluginsStart.cps,
+            inspector: pluginsStart.inspector,
           });
         },
       });
@@ -350,7 +397,6 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
-          cloud: plugins.cloud,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -369,6 +415,7 @@ export class Plugin
           share: pluginsStart.share,
           kibanaFeatures,
           isServerless,
+          uiActions: pluginsStart.uiActions,
         });
       },
     });
@@ -396,6 +443,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
+            security: pluginsStart.security,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
@@ -418,6 +466,7 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            uiActions: pluginsStart.uiActions,
           });
         },
       });
@@ -456,7 +505,7 @@ export class Plugin
     );
 
     plugins.uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
+      ON_OPEN_PANEL_MENU,
       ALERT_RULE_TRIGGER,
       createAlertRuleAction
     );
@@ -562,6 +611,12 @@ export class Plugin
             snoozeSchedule: rule.snoozeSchedule,
           }),
         };
+      },
+      getAlertFormatter: (ruleTypeId: string): AlertFormatter | undefined => {
+        if (!this.ruleTypeRegistry.has(ruleTypeId)) {
+          return undefined;
+        }
+        return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
     };
   }

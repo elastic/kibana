@@ -9,7 +9,9 @@ import { partition, remove, uniq } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { OWNER_FIELD } from '../../common/constants';
+import { CASE_ATTACHMENT_SAVED_OBJECT, OWNER_FIELD } from '../../common/constants';
+import type { Authorization } from './authorization';
+import type { AuthFilterHelpers, OperationDetails } from './types';
 
 export const getOwnersFilter = (
   savedObjectType: string,
@@ -44,8 +46,9 @@ export const combineFilterWithAuthorizationFilter = (
 };
 
 export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean => {
-  const invalid = value.match(/([>=<\*:()]+|\s+)/g);
-  if (invalid) {
+  const matches = value.match(/([>=<\*:()]+|\s+)/g);
+  if (matches) {
+    const invalid = Array.from(matches);
     const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
     const errors = [];
     if (whitespace.length) {
@@ -64,6 +67,36 @@ export const includeFieldsRequiredForAuthentication = (fields?: string[]): strin
     return;
   }
   return uniq([...fields, OWNER_FIELD]);
+};
+
+/**
+ * Returns an authorization filter that covers both the legacy `cases-comments`
+ * and the unified `cases-attachments` saved object types based on feature flag
+ */
+export const getAttachmentAuthorizationFilter = async (
+  authorization: Pick<Authorization, 'getAuthorizationFilter'>,
+  operation: OperationDetails,
+  { isCasesAttachmentsEnabled }: { isCasesAttachmentsEnabled: boolean }
+): Promise<AuthFilterHelpers> => {
+  const { filter, authorizedOwners, ensureSavedObjectsAreAuthorized } =
+    await authorization.getAuthorizationFilter(operation);
+
+  if (!isCasesAttachmentsEnabled) {
+    return { filter, authorizedOwners, ensureSavedObjectsAreAuthorized };
+  }
+
+  const unifiedFilter = authorizedOwners?.length
+    ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+    : undefined;
+
+  const combinedFilter =
+    filter && unifiedFilter ? nodeBuilder.or([filter, unifiedFilter]) : filter ?? unifiedFilter;
+
+  return {
+    filter: combinedFilter,
+    authorizedOwners,
+    ensureSavedObjectsAreAuthorized,
+  };
 };
 
 export const groupByAuthorization = <T extends { owner: string }>(

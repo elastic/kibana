@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
 
 import { type AppDeepLink } from '@kbn/core/public';
-import type { MlCapabilities } from '../../../common/types/capabilities';
-import { ML_PAGES } from '../../../common/constants/locator';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 function createDeepLinks(
   mlCapabilities: MlCapabilities,
@@ -28,6 +28,7 @@ function createDeepLinks(
           defaultMessage: 'Overview',
         }),
         path: `/${ML_PAGES.OVERVIEW}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -37,7 +38,7 @@ function createDeepLinks(
       return {
         id: 'anomalyDetection',
         title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
-          defaultMessage: 'Anomaly Detection',
+          defaultMessage: 'Anomaly detection',
         }),
         deepLinks: [
           {
@@ -46,6 +47,7 @@ function createDeepLinks(
               defaultMessage: 'Anomaly explorer',
             }),
             path: `/${ML_PAGES.ANOMALY_EXPLORER}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'singleMetricViewer',
@@ -53,6 +55,7 @@ function createDeepLinks(
               defaultMessage: 'Single metric viewer',
             }),
             path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'suppliedConfigurations',
@@ -82,6 +85,7 @@ function createDeepLinks(
               defaultMessage: 'Results explorer',
             }),
             path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
           {
             id: 'analyticsMap',
@@ -89,6 +93,7 @@ function createDeepLinks(
               defaultMessage: 'Analytics map',
             }),
             path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
           },
         ],
       };
@@ -137,23 +142,50 @@ function createDeepLinks(
           {
             id: 'logRateAnalysis',
             title: i18n.translate('xpack.ml.deepLink.logRateAnalysis', {
-              defaultMessage: 'Log Rate Analysis',
+              defaultMessage: 'Log rate analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
+          },
+          {
+            id: 'logRateAnalysisPage',
+            title: i18n.translate('xpack.ml.deepLink.logRateAnalysis', {
+              defaultMessage: 'Log rate analysis',
+            }),
+            path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
+            visibleIn: [],
           },
           {
             id: 'logPatternAnalysis',
             title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
-              defaultMessage: 'Log Pattern Analysis',
+              defaultMessage: 'Log pattern analysis',
             }),
             path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
+          },
+          {
+            id: 'logPatternAnalysisPage',
+            title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
+              defaultMessage: 'Log pattern analysis',
+            }),
+            path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION}`,
+            visibleIn: [],
           },
           {
             id: 'changePointDetections',
             title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
-              defaultMessage: 'Change Point Detection',
+              defaultMessage: 'Change point detection',
             }),
             path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
+            visibleIn: ['globalSearch', 'projectSideNav'],
+          },
+          {
+            id: 'changePointDetectionsPage',
+            title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
+              defaultMessage: 'Change point detection',
+            }),
+            path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION}`,
+            visibleIn: [],
           },
         ],
       };
@@ -176,9 +208,10 @@ function createDeepLinks(
       return {
         id: 'dataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.dataVisualizer', {
-          defaultMessage: 'Data Visualizer',
+          defaultMessage: 'Data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -186,10 +219,11 @@ function createDeepLinks(
       return {
         id: 'fileUpload',
         title: i18n.translate('xpack.ml.deepLink.fileUpload', {
-          defaultMessage: 'File Upload',
+          defaultMessage: 'File upload',
         }),
         keywords: ['CSV', 'JSON'],
         path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
       };
     },
 
@@ -197,9 +231,20 @@ function createDeepLinks(
       return {
         id: 'indexDataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
-          defaultMessage: 'Index Data Visualizer',
+          defaultMessage: 'Index data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
+      };
+    },
+    getIndexDataVisualizerPageDeepLink: (): AppDeepLink<LinkId> => {
+      return {
+        id: 'indexDataVisualizerPage',
+        title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
+          defaultMessage: 'Index data visualizer',
+        }),
+        path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`,
+        visibleIn: [],
       };
     },
 
@@ -208,7 +253,7 @@ function createDeepLinks(
       return {
         id: 'esqlDataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
-          defaultMessage: 'ES|QL Data Visualizer',
+          defaultMessage: 'ES|QL data visualizer',
         }),
         path: `/${ML_PAGES.DATA_VISUALIZER_ESQL}`,
       };
@@ -218,9 +263,20 @@ function createDeepLinks(
       return {
         id: 'dataDrift',
         title: i18n.translate('xpack.ml.deepLink.dataDrift', {
-          defaultMessage: 'Data Drift',
+          defaultMessage: 'Data drift',
         }),
         path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
+        visibleIn: ['globalSearch', 'projectSideNav'],
+      };
+    },
+    getDataDriftPageDeepLink: (): AppDeepLink<LinkId> => {
+      return {
+        id: 'dataDriftPage',
+        title: i18n.translate('xpack.ml.deepLink.dataDrift', {
+          defaultMessage: 'Data drift',
+        }),
+        path: `/${ML_PAGES.DATA_DRIFT}`,
+        visibleIn: [],
       };
     },
   };

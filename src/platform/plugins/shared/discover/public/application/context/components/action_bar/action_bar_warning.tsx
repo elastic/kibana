@@ -16,6 +16,7 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
   if (type === SurrDocType.PREDECESSORS) {
     return (
       <EuiCallOut
+        announceOnMount
         color="primary"
         data-test-subj="predecessorsWarningMsg"
         iconType="info"

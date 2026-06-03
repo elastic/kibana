@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const config = getService('config');
   const isCcsTest = config.get('esTestCluster.ccs');
@@ -20,15 +19,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1300, 800);
     });
 
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
     loadTestFile(require.resolve('./_data_view_editor'));
     loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_search_errors'));
-    if (isCcsTest) loadTestFile(require.resolve('./_timeout_results'));
+    if (isCcsTest) {
+      loadTestFile(require.resolve('./_timeout_results'));
+      loadTestFile(require.resolve('./_cancel_results'));
+    }
   });
 }

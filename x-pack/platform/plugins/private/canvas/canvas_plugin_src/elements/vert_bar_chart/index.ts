@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElementFactory } from '../../../types';
+import type { ElementFactory } from '../../../types';
 
 export const verticalBarChart: ElementFactory = () => ({
   name: 'verticalBarChart',
   displayName: 'Vertical bar chart',
   type: 'chart',
   help: 'A customizable vertical bar chart',
-  icon: 'visBarVertical',
+  icon: 'chartBarVertical',
   expression: `kibana
 | selectFilter
 | demodata

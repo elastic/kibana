@@ -7,11 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiSpacer,
   EuiAccordion,
   EuiIconTip,
@@ -23,14 +23,20 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { css } from '@emotion/react';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
+import type {
+  OperationMetadata,
+  DataType,
+  GenericIndexPatternColumn,
+  IncompleteColumn,
+  TermsIndexPatternColumn,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
-import type { DataType, OperationMetadata } from '../../../../../types';
-import { OperationDefinition } from '..';
-import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
+import type { OperationDefinition } from '..';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
@@ -38,8 +44,7 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
-import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../../../types';
+import { getFirstValue } from '../../../pure_utils';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
@@ -70,7 +75,6 @@ export function supportsSignificantRanking(field?: IndexPatternField) {
 function isRareOrSignificant(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
   return orderBy.type === 'rare' || orderBy.type === 'significant';
 }
-export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
   defaultMessage: 'Missing field',
@@ -231,10 +235,6 @@ export const termsOperation: OperationDefinition<
       .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
 
-    const previousBucketsLength = Object.values(layer.columns).filter(
-      (col) => col && col.isBucketed
-    ).length;
-
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -242,7 +242,7 @@ export const termsOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
+        size: columnParams?.size ?? DEFAULT_SIZE,
         orderBy:
           columnParams?.orderBy ??
           (existingMetricColumn
@@ -377,13 +377,7 @@ export const termsOperation: OperationDefinition<
       includeIsRegex: Boolean(column.params.includeIsRegex),
       excludeIsRegex: Boolean(column.params.excludeIsRegex),
       otherBucket: Boolean(column.params.otherBucket),
-      otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
-        defaultMessage: 'Other',
-      }),
       missingBucket: column.params.otherBucket && column.params.missingBucket,
-      missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
-        defaultMessage: '(missing value)',
-      }),
     }).toAst();
   },
   getDefaultLabel: (column, columns, indexPattern) =>
@@ -500,19 +494,21 @@ export const termsOperation: OperationDefinition<
           const possibleOperations = operationSupportMatrix.operationByField.get(sourcefield);
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
-            const newFieldOp = possibleOperations?.values().next().value;
-            return updateLayer(
-              insertOrReplaceColumn({
-                layer,
-                columnId,
-                indexPattern,
-                op: newFieldOp,
-                field: mainField,
-                visualizationGroups: dimensionGroups,
-                targetGroup: groupId,
-                incompleteParams,
-              })
-            );
+            const newFieldOp = getFirstValue(possibleOperations);
+            if (newFieldOp) {
+              return updateLayer(
+                insertOrReplaceColumn({
+                  layer,
+                  columnId,
+                  indexPattern,
+                  op: newFieldOp,
+                  field: mainField,
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: groupId,
+                  incompleteParams,
+                })
+              );
+            }
           }
         }
         updateLayer({
@@ -660,12 +656,27 @@ The top values of a specified field ranked by the chosen metric.
       };
     }
 
+    const getEffectiveLabel = (column: GenericIndexPatternColumn): string => {
+      if (column.customLabel) {
+        return column.label;
+      }
+      return (
+        (column.label ||
+          operationDefinitionMap[column.operationType]?.getDefaultLabel(
+            column,
+            layer.columns,
+            indexPattern
+          )) ??
+        ''
+      );
+    };
+
     const orderOptions = Object.entries(layer.columns)
       .filter(([sortId]) => isSortableByColumn(layer, sortId))
       .map(([sortId, column]) => {
         return {
           value: toValue({ type: 'column', columnId: sortId }),
-          text: column.label,
+          text: getEffectiveLabel(column),
         };
       });
     orderOptions.push({
@@ -808,7 +819,7 @@ The top values of a specified field ranked by the chosen metric.
                 ).buildColumn({
                   layer,
                   indexPattern,
-                  field: indexPattern.getFieldByName(DOCUMENT_FIELD_NAME)!,
+                  field: indexPattern.getFieldByName(LENS_DOCUMENT_FIELD_NAME)!,
                 });
                 updatedLayer = updateColumnParam({
                   layer: updatedLayer,

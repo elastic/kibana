@@ -11,6 +11,8 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  MAX_EMAIL_BODY_LENGTH,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import {
   getActionsConfigurationUtilities,
@@ -40,6 +42,15 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+  auth: {
+    oauth_authorization_code: {
+      rate_limits: {
+        authorize: { lookbackWindow: '1h', limit: 100 },
+        callback: { lookbackWindow: '1h', limit: 100 },
+      },
+    },
+    ears: { enabled: false, enableExperimental: false },
+  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -478,10 +489,16 @@ const testEmailsInvalid = ['invalid-email-address', '(garbage)'];
 const testEmailsAll = testEmailsOk.concat(testEmailsNotAllowed).concat(testEmailsInvalid);
 
 describe('validateEmailAddresses()', () => {
-  test('all domains allowed if config not set', () => {
+  test('all domains allowed if config not set, but format still validated', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
-    const message = acu.validateEmailAddresses(testEmailsAll);
+    const message = acu.validateEmailAddresses(testEmailsOk.concat(testEmailsNotAllowed));
     expect(message).toEqual(undefined);
+  });
+
+  test('invalid format rejected even without domain allowlist', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const message = acu.validateEmailAddresses(testEmailsInvalid);
+    expect(message).toMatchInlineSnapshot(`"not valid emails: invalid-email-address, (garbage)"`);
   });
 
   test('only filtered domains allowed if config set', () => {
@@ -570,6 +587,52 @@ describe('validateEmailAddresses()', () => {
         `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org, dev.team@company.co, dev.backend@company.co"`
       );
     });
+  });
+});
+
+describe('getMaxEmailBodyLength() ', () => {
+  function getAcu(maxEmailBodyLength?: number) {
+    const actionsConfig =
+      maxEmailBodyLength == null
+        ? defaultActionsConfig
+        : {
+            ...defaultActionsConfig,
+            email: {
+              maximum_body_length: maxEmailBodyLength,
+            },
+          };
+
+    return getActionsConfigurationUtilities(actionsConfig);
+  }
+
+  test('default value is as expected', async () => {
+    const acu = getAcu();
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(DEFAULT_EMAIL_BODY_LENGTH);
+  });
+
+  test('value coerced to minimum of range if below', async () => {
+    const acu = getAcu(-100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value of 0 accepted', async () => {
+    const acu = getAcu(0);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value within range is passed through', async () => {
+    const acu = getAcu(100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(100);
+  });
+
+  test('value coerced to maximum of range if above', async () => {
+    const acu = getAcu(MAX_EMAIL_BODY_LENGTH + 100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(MAX_EMAIL_BODY_LENGTH);
   });
 });
 
@@ -711,6 +774,60 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEarsUrl()', () => {
+  test('returns undefined when ears.url is not set in config', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEarsUrl()).toBeUndefined();
+  });
+
+  test('returns the configured URL when auth.ears.url is set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+});
+
+describe('isEarsEnabled()', () => {
+  test('returns false when neither config key is set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when auth.ears.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(true);
+  });
+});
+
+describe('isEarsExperimentalEnabled()', () => {
+  test('returns false when neither config key is set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isEarsExperimentalEnabled()).toBe(false);
+  });
+
+  test('returns true when auth.ears.enableExperimental is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: true },
+      },
+    });
+    expect(acu.isEarsExperimentalEnabled()).toBe(true);
   });
 });
 

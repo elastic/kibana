@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
-import { RendererFactory } from '../../../../types';
-import { StartInitializer } from '../../../plugin';
+import type { RendererFactory } from '../../../../types';
+import type { StartInitializer } from '../../../plugin';
 import { DropdownFilter } from './component';
 import { RendererStrings } from '../../../../i18n';
 

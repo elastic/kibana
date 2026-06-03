@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChartType, LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { ChartType, LensBaseLayer } from '@kbn/lens-embeddable-utils';
 import type {
   InventoryTsvbType,
   LensConfigWithId,
@@ -15,10 +15,12 @@ import type {
 } from '../../types';
 
 /* base types */
-export enum DataSchemaFormat {
+export enum DataSchemaFormatEnum {
   ECS = 'ecs',
   SEMCONV = 'semconv',
 }
+
+export type DataSchemaFormat = `${DataSchemaFormatEnum}`;
 
 export type SchemaBasedFormula = Omit<LensBaseLayer, 'value'> & {
   value: Record<DataSchemaFormat, LensBaseLayer['value']>;

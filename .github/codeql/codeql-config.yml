@@ -8,12 +8,15 @@ paths-ignore:
   - '**/.storybook/**'
   - '**/*-mocks/**'
   - '**/*.cy.*'
+  - '**/*.md'
   - '**/*.yaml'
+  - '**/*.yml'
   - '**/*.hbs'
   - '**/*.njk'
   - '**/*.mock.*'
   - '**/*.mocks.*'
   - '**/*.test.*'
+  - '**/*.spec.*'
   - '**/cypress/**'
   - '**/e2e/**'
   - '**/ftr_e2e/**'
@@ -32,6 +35,7 @@ paths-ignore:
   - '**/test_helpers/**'
   - '**/test-helpers/**'
   - '**/test_utils/**'
+  - '.github/codeql/custom-queries/**'
   - api_docs
   - dev_docs
   - docs
@@ -40,10 +44,9 @@ paths-ignore:
   - legacy_rfcs
   - oas_docs
   - packages/kbn-babel-*
-  - packages/kbn-bazel-*
   - packages/kbn-capture-oas-snapshot-cli
-  - packages/kbn-check-mappings-update-cli
   - packages/kbn-check-prod-native-modules-cli
+  - packages/kbn-check-saved-objects-cli
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
   - packages/kbn-dependency-*
@@ -100,7 +103,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-some-dev-log
   - src/platform/packages/private/kbn-stdio-dev-helpers
   - src/platform/packages/private/kbn-telemetry-tools
-  - src/platform/packages/shared/kbn-apm-synthtrace
+  - src/platform/packages/shared/kbn-synthtrace
   - src/platform/packages/shared/kbn-axe-config
   - src/platform/packages/shared/kbn-cache-cli
   - src/platform/packages/shared/kbn-dev-cli-errors
@@ -110,6 +113,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-es
   - src/platform/packages/shared/kbn-es-archiver
   - src/platform/packages/shared/kbn-expect
+  - src/platform/packages/shared/kbn-kbn-client
   - src/platform/packages/shared/kbn-openapi-*
   - src/platform/packages/shared/kbn-scout
   - src/platform/packages/shared/kbn-storybook
@@ -129,12 +133,15 @@ paths-ignore:
   - x-pack/platform/test
   - x-pack/performance
   - x-pack/scripts
+  - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
   - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/solutions/*/test
-  - x-pack/test
-  - x-pack/test_serverless
 query-filters:
   - exclude:
       paths:
         - codeql/javascript-queries/AngularJS
         - codeql/javascript-queries/Electron
+packs:
+  - githubsecuritylab/codeql-javascript-queries
+queries:
+  - uses: ./.github/codeql/custom-queries

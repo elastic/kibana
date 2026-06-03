@@ -5,33 +5,37 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { boomify, isBoom } from '@hapi/boom';
-import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
+
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import type { TypeOf } from '@kbn/config-schema';
+
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../constants';
-import { lensSavedObjectSchema } from '../../../content_management/v1';
-import { RegisterAPIRouteFn } from '../../types';
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
+import type { LensSavedObject } from '../../../content_management';
+import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
+import { getLensResponseItem } from './utils';
+import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder, usageCounter }
 ) => {
   const getRoute = router.get({
-    path: `${PUBLIC_API_PATH}/visualizations/{id}`,
-    access: PUBLIC_API_ACCESS,
-    enableQueryVersion: true,
-    summary: 'Get Lens visualization',
-    description: 'Get a Lens visualization from id.',
+    path: `${LENS_VIS_API_PATH}/{id}`,
+    access: LENS_API_ACCESS,
+    summary: 'Get visualization',
+    description: 'Returns a single Lens visualization by its ID.',
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -44,20 +48,14 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
 
   getRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'The saved object id of a Lens visualization.',
-              },
-            }),
-          }),
+          params: lensGetRequestParamsSchema,
         },
         response: {
           200: {
-            body: () => lensSavedObjectSchema,
+            body: () => lensGetResponseBodySchema,
             description: 'Ok',
           },
           400: {
@@ -78,32 +76,35 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      let result;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      try {
-        ({ result } = await client.get(req.params.id));
-      } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A Lens visualization with saved object id [${req.params.id}] was not found.`,
-              },
-            });
+        try {
+          const { result } = await client.get(req.params.id);
+          const responseItem = getLensResponseItem(builder, result.item);
+
+          return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error)) {
+            if (error.output.statusCode === 404) {
+              return res.notFound({
+                body: {
+                  message: `A visualization with id [${req.params.id}] was not found.`,
+                },
+              });
+            }
+            if (error.output.statusCode === 403) {
+              return res.forbidden();
+            }
           }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
+
+          return boomify(error); // forward unknown error
         }
-
-        return boomify(error); // forward unknown error
-      }
-
-      return res.ok({ body: result.item });
-    }
+      })
   );
 };

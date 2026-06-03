@@ -7,9 +7,10 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 
 import { EuiModal } from '@elastic/eui';
-import { IndicesResolutionType } from '../../../../../../../common/types';
+import type { IndicesResolutionType } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import {
@@ -19,7 +20,7 @@ import {
   UIM_REINDEX_UNFREEZE_RETRY_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
-import { ModalStep } from './steps/types';
+import type { ModalStep } from './steps/types';
 import { InitializingStep } from '../../../common/initializing_step';
 import { UpdateIndexModalStep } from './steps/update/update_step';
 import { WarningModalStep } from './steps/warning/warning_step_modal';
@@ -166,6 +167,10 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
       data-test-subj="updateIndexModal"
       maxWidth={true}
       css={{ minWidth: 750 }}
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.flyout.modalAriaLabel',
+        { defaultMessage: 'Index migration' }
+      )}
     >
       {modalContent}
     </EuiModal>

@@ -11,11 +11,6 @@ import {
   createCaseAttachAlertAndDeleteAlert,
   getAlertById,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/alerts';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 
 import {
@@ -51,6 +46,11 @@ import {
   secSolutionOnlyReadNoIndexAlerts,
   superUser,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/users';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '@kbn/detections-response-ftr-services';
 import {
   createSecuritySolutionAlerts,
   getSecuritySolutionAlerts,

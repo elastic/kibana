@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPopover,
@@ -21,12 +22,12 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
+import type { Error } from '../../../../shared_imports';
 import {
   WithPrivileges,
   NotAuthorizedSection,
   PageError,
   PageLoading,
-  Error,
   useExecutionContext,
 } from '../../../../shared_imports';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
@@ -145,10 +146,14 @@ export const RestoreList: React.FunctionComponent = () => {
             <EuiFlexItem grow={false}>
               <EuiPopover
                 id="srRestoreListIntervalMenu"
+                aria-label={i18n.translate(
+                  'xpack.snapshotRestore.restoreList.intervalMenuAriaLabel',
+                  { defaultMessage: 'Refresh interval options' }
+                )}
                 button={
                   <EuiButtonEmpty
                     size="xs"
-                    iconType="arrowDown"
+                    iconType="chevronSingleDown"
                     iconSide="right"
                     onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
                   >

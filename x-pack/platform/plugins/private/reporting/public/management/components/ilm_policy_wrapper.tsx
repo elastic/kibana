@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { RouteComponentProps } from 'react-router-dom';
-import { ClientConfigType, ReportingAPIClient, useKibana } from '@kbn/reporting-public';
-import { Section } from '../../constants';
+import type { RouteComponentProps } from 'react-router-dom';
+import type { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
+import { useKibana } from '@kbn/reporting-public';
+import type { Section } from '../../constants';
 
 import { IlmPolicyLink } from './ilm_policy_link';
 import { ReportDiagnostic } from './report_diagnostic';

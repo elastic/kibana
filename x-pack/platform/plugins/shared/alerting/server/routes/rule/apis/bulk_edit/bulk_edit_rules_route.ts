@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter } from '@kbn/core/server';
 
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
@@ -21,10 +21,11 @@ import { bulkEditRulesRequestBodySchemaV1 } from '../../../../../common/routes/r
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
 
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformRuleToRuleResponseInternalV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformOperationsV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { validateInternalRuleTypesBulkOperation } from '../../../lib/validate_internal_rule_types_by_query';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -46,13 +47,22 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const alertingContext = await context.alerting;
+
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
+          const ruleTypes = alertingContext.listTypes();
 
           const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;
           const { filter, operations, ids } = bulkEditData;
 
           try {
+            await validateInternalRuleTypesBulkOperation({
+              ids: bulkEditData.ids,
+              ruleTypes,
+              rulesClient,
+              operationText: 'update',
+            });
+
             validateRequiredGroupInDefaultActionsInOperations(
               operations ?? [],
               (connectorId: string) => actionsClient.isSystemAction(connectorId)
@@ -73,7 +83,9 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
                 rules: bulkEditResults.rules.map((rule) => {
                   // TODO (http-versioning): Remove this cast, this enables us to move forward
                   // without fixing all of other solution types
-                  return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);
+                  return transformRuleToRuleResponseInternalV1<RuleParamsV1>(
+                    rule as Rule<RuleParamsV1>
+                  );
                 }),
               },
             };

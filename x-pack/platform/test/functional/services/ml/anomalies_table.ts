@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningAnomaliesTableProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -124,6 +124,12 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
+    async clickConfigureRulesButton(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.click('mlAnomaliesListRowActionConfigureRulesButton');
+      await testSubjects.existOrFail('mlRuleEditorFlyout');
+    },
+
     async assertAnomalyActionViewSeriesButtonEnabled(rowIndex: number, expectedValue: boolean) {
       await this.ensureAnomalyActionsMenuOpen(rowIndex);
       const isEnabled = await testSubjects.isEnabled('mlAnomaliesListRowActionViewSeriesButton');
@@ -146,10 +152,10 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
     },
 
     async ensureAnomalyActionDiscoverButtonClicked(rowIndex: number) {
-      await retry.tryForTime(10 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await this.ensureAnomalyActionsMenuOpen(rowIndex);
         await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
-        await testSubjects.existOrFail('discoverLayoutResizableContainer');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer', { timeout: 10 * 1000 });
       });
     },
 

@@ -10,7 +10,7 @@
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
-  createCachedFieldValueFormatter,
+  createCachedTextFieldValueFormatter,
   getFieldsForTerms,
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
@@ -18,7 +18,7 @@ import type { Panel, PanelData, Series } from '../../../../../common/types';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 import type { BaseMeta } from '../../request_processors/types';
-import { SanitizedFieldType } from '../../../../../common/types';
+import type { SanitizedFieldType } from '../../../../../common/types';
 
 export function formatLabel(
   resp: unknown,
@@ -53,7 +53,7 @@ export function formatLabel(
         fields = await extractFields(meta.indexPatternString);
       }
 
-      const formatField = createCachedFieldValueFormatter(
+      const formatField = createCachedTextFieldValueFormatter(
         fetchedIndex?.indexPattern,
         fields,
         fieldFormatService,

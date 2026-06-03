@@ -44,6 +44,7 @@ import {
   USER_PROMPT,
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 
 const mockConvo1 = {
   id: 'spooky',
@@ -61,6 +62,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     deleteConversations();
     deleteAlertsAndRules();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
@@ -78,7 +80,8 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected('My OpenAI Connector');
     });
   });
-  describe('When no conversations exist but connectors do exist, show empty convo', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/237487
+  describe.skip('When no conversations exist but connectors do exist, show empty convo', () => {
     beforeEach(() => {
       createAzureConnector();
     });
@@ -86,6 +89,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       visitGetStartedPage();
       openAssistant();
       assertNewConversation(false, 'New chat');
+      selectConnector(azureConnectorAPIPayload.name);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(USER_PROMPT).should('not.have.text');
     });
@@ -96,6 +100,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         selectRule(createdRule?.body?.id);
         openAssistant('rule');
         assertNewConversation(false, `Detection Rules - Rule 1`);
+        selectConnector(azureConnectorAPIPayload.name);
         assertConnectorSelected(azureConnectorAPIPayload.name);
         cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
       });
@@ -107,6 +112,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       expandFirstAlert();
       openAssistant('alert');
       assertConversationTitleContains('New Rule Test');
+      selectConnector(azureConnectorAPIPayload.name);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
     });

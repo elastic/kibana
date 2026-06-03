@@ -6,10 +6,9 @@
  */
 
 import { last } from 'lodash';
-import { Message, MessageRole } from '../../../common';
+import type { Message } from '../../../common';
+import { CONTEXT_FUNCTION_NAME, MessageRole } from '../../../common';
 import { removeContextToolRequest } from './context';
-
-const CONTEXT_FUNCTION_NAME = 'context';
 
 describe('removeContextToolRequest', () => {
   const baseMessages: Message[] = [

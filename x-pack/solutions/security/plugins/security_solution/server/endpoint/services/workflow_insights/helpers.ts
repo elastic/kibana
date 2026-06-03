@@ -14,11 +14,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import { WorkflowInsightType } from '../../../../common/endpoint/types/workflow_insights';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 
 import type { EndpointMetadataService } from '../metadata';
@@ -104,6 +104,7 @@ const validKeys = new Set([
 
 const paramFieldMap = {
   ids: '_id',
+  types: 'type',
   sourceTypes: 'source.type',
   sourceIds: 'source.id',
   targetTypes: 'target.type',
@@ -228,7 +229,7 @@ export const checkIfRemediationExists = async ({
   exceptionListsClient: ExceptionListClient;
   endpointMetadataClient: EndpointMetadataService;
 }): Promise<boolean> => {
-  if (insight.type !== DefendInsightType.Enum.incompatible_antivirus) {
+  if (insight.type !== WorkflowInsightType.enum.incompatible_antivirus) {
     return false;
   }
 

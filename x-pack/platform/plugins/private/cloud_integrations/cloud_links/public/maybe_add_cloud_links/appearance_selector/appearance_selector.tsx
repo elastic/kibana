@@ -10,7 +10,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
@@ -74,7 +74,6 @@ function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Pr
   return (
     <EuiContextMenuItem
       icon="brush"
-      size="s"
       onClick={() => {
         openModal();
         closePopover();

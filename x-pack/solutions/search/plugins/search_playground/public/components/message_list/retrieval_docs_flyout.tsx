@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { Doc } from '../../types';
+import type { Doc } from '../../types';
 
 interface RetrievalDocsFlyoutProps {
   onClose: () => void;
@@ -136,7 +136,17 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiBasicTable items={truncateFields(doc)} columns={columns} />
+                <EuiBasicTable
+                  items={truncateFields(doc)}
+                  columns={columns}
+                  tableCaption={i18n.translate(
+                    'xpack.searchPlayground.chat.message.assistant.retrievalDoc.tableCaption',
+                    {
+                      defaultMessage: 'Fields for document {id}',
+                      values: { id: doc.metadata._id },
+                    }
+                  )}
+                />
               </EuiFlexGroup>
             </EuiPanel>
           ))}

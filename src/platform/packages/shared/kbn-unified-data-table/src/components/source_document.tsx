@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, type ReactNode } from 'react';
+import { css } from '@emotion/react';
 import type {
+  DataTableColumnsMeta,
   DataTableRecord,
   EsHitRecord,
   FormattedHit,
@@ -16,12 +18,16 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
+import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  euiLineHeightFromBaseline,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 
@@ -39,6 +45,7 @@ export function SourceDocument({
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
+  columnsMeta,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -51,37 +58,51 @@ export function SourceDocument({
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
+  columnsMeta: DataTableColumnsMeta | undefined;
 }) {
+  const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
-    ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
-        0,
-        maxEntries
-      )
-    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+    ? getTopLevelObjectPairsReact(
+        row.raw,
+        columnId,
+        dataView,
+        shouldShowFieldHandler,
+        fieldFormats,
+        columnsMeta
+      ).slice(0, maxEntries)
+    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
+
+  const renderedPairs: ReactNode[] = [];
+
+  for (const [fieldDisplayName, value, fieldName] of pairs) {
+    // temporary solution for text based mode. As there are a lot of unsupported fields we want to
+    // hide the empty one from the Document view
+    if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) continue;
+    renderedPairs.push(
+      <Fragment key={fieldDisplayName}>
+        <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+          {fieldDisplayName}
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription className="unifiedDataTable__descriptionListDescription">
+          {value}
+        </EuiDescriptionListDescription>
+      </Fragment>
+    );
+  }
+
+  if (isPlainRecord && renderedPairs.length === 0) {
+    return <span className={classnames(CELL_CLASS, className)}>—</span>;
+  }
 
   return (
     <EuiDescriptionList
       type="inline"
       compressed={isCompressed}
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className)}
+      css={styles.descriptionList}
       data-test-subj={dataTestSubj}
     >
-      {pairs.map(([fieldDisplayName, value, fieldName]) => {
-        // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-        // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
-        return (
-          <Fragment key={fieldDisplayName}>
-            <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-              {fieldDisplayName}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              className="unifiedDataTable__descriptionListDescription"
-              dangerouslySetInnerHTML={{ __html: value }}
-            />
-          </Fragment>
-        );
-      })}
+      {renderedPairs}
     </EuiDescriptionList>
   );
 }
@@ -90,33 +111,35 @@ export function SourceDocument({
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
-function getTopLevelObjectPairs(
+function getTopLevelObjectPairsReact(
   row: EsHitRecord,
   columnId: string,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler
-) {
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+  fieldFormats: FieldFormatsStart,
+  columnsMeta: DataTableColumnsMeta | undefined
+): FormattedHit {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
-    const subField = dataView.getFieldByName(key);
+    const subField = getDataViewFieldOrCreateFromColumnMeta({
+      dataView,
+      fieldName: key,
+      columnMeta: columnsMeta?.[key],
+    });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    const formatter = subField
-      ? dataView.getFormatterForField(subField)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
-    const formatted = values
-      .map((val: unknown) =>
-        formatter.convert(val, 'html', {
-          field: subField,
-          hit: row,
-        })
-      )
-      .join(', ');
+    // Join ReactNode values with ', ' separator, using keyed Fragments to avoid React warnings
+    const formatted: ReactNode = values.map((value: unknown, idx) => (
+      <Fragment key={`${key}-${idx}`}>
+        {idx > 0 ? ', ' : null}
+        {formatFieldValueReact({ value, hit: row, fieldFormats, dataView, field: subField })}
+      </Fragment>
+    ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
@@ -131,3 +154,49 @@ function getTopLevelObjectPairs(
 
 // eslint-disable-next-line import/no-default-export
 export default SourceDocument;
+
+const componentStyles = {
+  descriptionList: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // force the content truncation when "Body cell lines: 1" row height setting is active
+      '.euiDataGridRowCell__content--defaultHeight &': {
+        WebkitLineClamp: 1,
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        height: '100%',
+        overflow: 'hidden',
+      },
+
+      // Following guidelines for CSS-in-JS - styles for high granularity components should be assigned to a parent and targeting classes of repeating children
+      '.unifiedDataTable__descriptionListTitle': {
+        marginInline: `0 ${euiTheme.size.s}`,
+        paddingInline: 0,
+        background: 'transparent',
+        fontWeight: euiTheme.font.weight.bold,
+        lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
+        display: 'inline-block',
+      },
+
+      '.unifiedDataTable__descriptionListDescription': {
+        marginInline: `0 ${euiTheme.size.s}`,
+        paddingInline: 0,
+        wordBreak: 'break-all',
+        whiteSpace: 'normal',
+        lineHeight: 'inherit', // Required for EuiDataGrid lineCount to work correctly
+
+        // Special handling for images coming from the image field formatter
+        '& img': {
+          // Align the images vertically centered with the text
+          verticalAlign: 'middle',
+          // !important is required to overwrite the max-height on the element from the field formatter
+          // historically we used lineHeightFromBaseline(2) here, but the smallest euiLineHeightFromBaseline was too large
+          maxHeight: `${euiLineHeightFromBaseline('xs', euiTheme)} !important`,
+          // An arbitrary amount of width we don't want to go over, to not have very wide images.
+          // For most width-height-ratios that will never be hit, because we'd usually limit
+          // it by the way smaller height. But images with very large width and very small height
+          // might be limited by that.
+          maxWidth: `calc(${euiTheme.size.xxl} * 12.5) !important`,
+        },
+      },
+    }),
+};

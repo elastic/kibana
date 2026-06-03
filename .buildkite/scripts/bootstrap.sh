@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
 
@@ -24,6 +23,16 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
+  # Check if there's a cache artifact uploaded from a previous step
+  if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
+    if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
+      echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
+      mkdir -p ./.moon/cache
+      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
+      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+    fi
+    .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+  fi
 fi
 
 # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
@@ -42,4 +51,3 @@ fi
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
-

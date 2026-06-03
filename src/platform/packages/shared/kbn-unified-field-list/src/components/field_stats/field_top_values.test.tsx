@@ -11,10 +11,24 @@ import React from 'react';
 import { EuiProgress, EuiButtonIcon } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { FieldTopValues, FieldTopValuesProps } from './field_top_values';
-import { getChildrenTextBySelector } from './field_stats.test';
+import type { FieldTopValuesProps } from './field_top_values';
+import { FieldTopValues } from './field_top_values';
+import type { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
+
+// Similar to wrapper.text() but filtered by a selector
+const getChildrenTextBySelector = (wrapper: ReactWrapper, selector: string) => {
+  let text = '';
+  const children = wrapper.find(selector);
+
+  children.forEach((element) => {
+    text += element.text();
+  });
+
+  return text;
+};
 
 describe('UnifiedFieldList <FieldTopValues />', () => {
   let defaultProps: FieldTopValuesProps;
@@ -36,11 +50,11 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         },
       ],
       getFormatterForField: jest.fn(() => ({
-        convert: jest.fn((s: unknown) =>
+        convertToText: jest.fn((s: unknown) =>
           fieldFormatsServiceMock
             .createStartContract()
             .getDefaultInstance(KBN_FIELD_TYPES.STRING, [ES_FIELD_TYPES.STRING])
-            .convert(s)
+            .convertToText(s)
         ),
       })),
     } as unknown as DataView;
@@ -135,7 +149,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
     );
     const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(text).toBe('(empty)60.0%sourceA30.0%sourceB0.4%Other9.6%');
+    expect(text).toBe(`${EMPTY_LABEL}60.0%sourceA30.0%sourceB0.4%Other9.6%`);
   });
 
   it('should render correctly without floating point', async () => {

@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const dashboardName = 'Dashboard Test Time';
 
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
     });
 
-    describe('dashboard without stored timed', () => {
+    describe('dashboard without stored time', () => {
       it('is saved', async () => {
         await dashboard.clickNewDashboard();
         await dashboard.addVisualizations([dashboard.getTestVisualizationNames()[0]]);
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dashboard with stored timed', function () {
+    describe('dashboard with stored time', function () {
       it('is saved with time', async function () {
         await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();
@@ -57,16 +57,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           storeTimeWithDashboard: true,
           saveAsNew: false,
         });
+        await dashboard.expectUnsavedChangesListingDoesNotExist(dashboardName);
+        const time = await timePicker.getTimeConfig();
+        expect(time.start).to.equal(timePicker.defaultStartTime);
+        expect(time.end).to.equal(timePicker.defaultEndTime);
       });
 
-      it('sets time on open', async function () {
+      it('restores saved time on open when no unsaved session state is present', async function () {
         await timePicker.setAbsoluteRange(
           'Jan 1, 2019 @ 00:00:00.000',
           'Jan 2, 2019 @ 00:00:00.000'
         );
-
+        await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
+        // reset the dashboard to its last saved state by clearing session storage
+        await browser.clearSessionStorage();
         await dashboard.loadSavedDashboard(dashboardName);
-
         const time = await timePicker.getTimeConfig();
         expect(time.start).to.equal(timePicker.defaultStartTime);
         expect(time.end).to.equal(timePicker.defaultEndTime);
@@ -85,7 +90,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
         await browser.get(urlWithGlobalTime, false);
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.equal('~ an hour ago');
+        // Legacy picker shows "~ an hour ago", new DateRangePicker returns
+        // dateMath (with /h rounding when roundRelativeTime setting is enabled)
+        expect(
+          time.start === '~ an hour ago' || time.start === 'now-1h' || time.start === 'now-1h/h'
+        ).to.equal(true);
         expect(time.end).to.equal('now');
 
         /**
@@ -95,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectEmptyPieChart();
       });
 
-      it('should use saved time, if time is missing in global state, but _g is present in the url', async function () {
+      it('should use unsaved saved time from session storage, if time is missing in global state, but _g is present in the url', async function () {
         const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await dashboard.getDashboardIdFromCurrentUrl();
@@ -104,9 +113,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
+
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.equal(timePicker.defaultStartTime);
-        expect(time.end).to.equal(timePicker.defaultEndTime);
+        // Legacy picker shows "~ an hour ago", new DateRangePicker returns
+        // dateMath (with /h rounding when roundRelativeTime setting is enabled)
+        expect(
+          time.start === '~ an hour ago' || time.start === 'now-1h' || time.start === 'now-1h/h'
+        ).to.equal(true);
+        expect(time.end).to.equal('now');
       });
 
       it('should use saved time after time change is undone', async function () {

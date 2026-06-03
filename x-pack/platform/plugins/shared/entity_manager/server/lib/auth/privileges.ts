@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENTITY_INTERNAL_INDICES_PATTERN } from '../../../common/constants_entities';
 import { SO_ENTITY_DEFINITION_TYPE, SO_ENTITY_DISCOVERY_API_KEY_TYPE } from '../../saved_objects';
 import { BUILT_IN_ALLOWED_INDICES } from '../entities/built_in/constants';

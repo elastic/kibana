@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { API_BASE_PATH } from './constants';
-import { RoleCredentials } from '../../../shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type Options = Partial<ClusterPutComponentTemplateRequest> | { _kbnMeta: Record<string, any> };
 
@@ -46,7 +46,7 @@ export function SvlComponentTemplatesApi({ getService }: FtrProviderContext) {
     roleAuthc: RoleCredentials
   ) =>
     await supertestWithoutAuth
-      .get(`${API_BASE_PATH}/component_templates/${name}`)
+      .put(`${API_BASE_PATH}/component_templates/${name}`)
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({

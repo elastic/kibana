@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ObservabilityStreamsFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import type {
+  ObservabilityStreamsFeatureRenderByStreamNameDeps,
+  ObservabilityStreamsFeatureRenderDeps,
+} from '@kbn/discover-shared-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { DiscoverFlyoutStreamFieldProps } from './discover_flyout_stream_field';
-import { DiscoverFlyoutStreamProcessingLinkProps } from './discover_flyout_stream_processing_link';
+import type { DiscoverFlyoutStreamFieldByStreamNameProps } from './discover_flyout_stream_field_by_stream_name';
+import type { DiscoverFlyoutStreamProcessingLinkProps } from './discover_flyout_stream_processing_link';
 
 const DiscoverFlyoutStreamField = dynamic(() =>
   import('./discover_flyout_stream_field').then((m) => ({ default: m.DiscoverFlyoutStreamField }))
@@ -23,6 +27,20 @@ export function createDiscoverFlyoutStreamFieldLink(
   );
 }
 
+const DiscoverFlyoutStreamFieldByStreamName = dynamic(() =>
+  import('./discover_flyout_stream_field_by_stream_name').then((m) => ({
+    default: m.DiscoverFlyoutStreamFieldByStreamName,
+  }))
+);
+
+export function createDiscoverFlyoutStreamFieldByStreamNameLink(
+  services: Omit<DiscoverFlyoutStreamFieldByStreamNameProps, 'streamName'>
+) {
+  return (props: ObservabilityStreamsFeatureRenderByStreamNameDeps) => (
+    <DiscoverFlyoutStreamFieldByStreamName {...services} {...props} />
+  );
+}
+
 const DiscoverFlyoutStreamProcessingLink = dynamic(() =>
   import('./discover_flyout_stream_processing_link').then((m) => ({
     default: m.DiscoverFlyoutStreamProcessingLink,
@@ -30,7 +48,7 @@ const DiscoverFlyoutStreamProcessingLink = dynamic(() =>
 );
 
 export function createDiscoverFlyoutStreamProcessingLink(
-  services: Omit<DiscoverFlyoutStreamProcessingLinkProps, 'doc'>
+  services: Omit<DiscoverFlyoutStreamProcessingLinkProps, 'doc' | 'dataView'>
 ) {
   return (props: ObservabilityStreamsFeatureRenderDeps) => (
     <DiscoverFlyoutStreamProcessingLink {...services} {...props} />

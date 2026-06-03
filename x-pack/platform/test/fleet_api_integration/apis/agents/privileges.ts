@@ -15,7 +15,7 @@ import {
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { generateAgent } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';
@@ -60,10 +60,18 @@ export default function (providerContext: FtrProviderContext) {
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         overwrite: true,
         attributes: {
-          policy_id: 'fleet-server-policy',
+          policy_ids: ['fleet-server-policy'],
           name: 'Fleet Server',
+          enabled: true,
+          inputs: [],
+          revision: 1,
+          created_at: new Date().toISOString(),
+          created_by: 'system',
+          updated_at: new Date().toISOString(),
+          updated_by: 'system',
           package: {
             name: 'fleet_server',
+            version: '1.0.0',
           },
         },
       });
@@ -316,7 +324,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         method: 'POST',
-        path: '/api/fleet/agents/agent1/migrate',
+        path: '/api/fleet/agents/agent2/migrate',
         scenarios: ALL_SCENARIOS,
         send: {
           enrollment_token: '1234',

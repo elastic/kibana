@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -56,6 +57,12 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiInMemoryTable
+          tableCaption={i18n.translate(
+            'xpack.indexLifecycleMgmt.policyTable.indexTemplatesTable.caption',
+            {
+              defaultMessage: 'Index templates',
+            }
+          )}
           pagination={true}
           // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
           items={indexTemplates ?? []}

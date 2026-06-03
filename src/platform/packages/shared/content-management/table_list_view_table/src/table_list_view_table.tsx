@@ -10,19 +10,14 @@
 import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useAsync from 'react-use/lib/useAsync';
-import {
+import type {
   EuiBasicTableColumn,
-  EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
   Pagination,
   Direction,
-  EuiSpacer,
   EuiTableActionsColumnType,
   CriteriaWithPagination,
-  Query,
-  Ast,
 } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,10 +29,7 @@ import {
   ManagedAvatarTip,
   NoCreatorTip,
 } from '@kbn/content-management-user-profiles';
-import type {
-  OpenContentEditorParams,
-  SavedObjectsReference,
-} from '@kbn/content-management-content-editor';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { RecentlyAccessed } from '@kbn/recently-accessed';
 import {
@@ -60,13 +52,14 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import type { RowActions, SearchQueryError, TableItemsRowActions } from './types';
-import { CustomSortingOptions, sortByRecentlyAccessed } from './components/table_sort_select';
+import type { CustomSortingOptions } from './components/table_sort_select';
+import { sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
 
 const disabledEditAction = {
   enabled: false,
   reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-    defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+    defaultMessage: 'Elastic manages this item. Duplicate it to make changes.',
   }),
 };
 
@@ -105,6 +98,7 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
+      tabId?: string;
     }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
@@ -545,9 +539,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const inspectItem = useCallback(
     (item: T) => {
-      const tags = getTagIdsFromReferences(item.references).map((_id) => {
-        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
-      });
+      const tags = getTagIdsFromReferences(item.references);
 
       const close = openContentEditor({
         item: {
@@ -604,7 +596,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             defaultMessage: 'Name',
           }),
         sortable: true,
-        render: (field: keyof T, record: T) => {
+        render: (_: keyof T, record: T) => {
           return (
             <ItemDetails<T>
               id={listingId}
@@ -623,6 +615,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             />
           );
         },
+        minWidth: '18em',
       },
     ];
 
@@ -650,7 +643,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
-        width: '100px',
+        width: '4.5em',
+        minWidth: '4.5em',
         align: 'center',
       });
     }
@@ -661,11 +655,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
-        render: (field: string, record: { updatedAt?: string }) => (
+        render: (_: string, record: { updatedAt?: string }) => (
           <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
         ),
         sortable: true,
-        width: '130px',
+        className: 'eui-textNoWrap',
+        width: '9.5em', // Always fit relative and absolute (day, month, year) dates
+        minWidth: '8em',
       });
     }
 
@@ -717,7 +713,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'controlsVertical',
+          icon: 'info',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,
@@ -728,7 +724,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: `72px`,
+        // Allow expanding to the width needed to show 3 action buttons in a row
+        minWidth: '4.5em',
+        width: '7em',
+        maxWidth: '7em',
         actions,
       });
     }
@@ -972,12 +971,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const renderCreateButton = useCallback(() => {
     if (createItem) {
       return (
-        <EuiButton
-          onClick={createItem}
-          data-test-subj="newItemButton"
-          iconType="plusInCircleFilled"
-          fill
-        >
+        <EuiButton onClick={createItem} data-test-subj="newItemButton" iconType="plusCircle" fill>
           <FormattedMessage
             id="contentManagement.tableList.listing.createNewItemButtonLabel"
             defaultMessage="Create {entityName}"
@@ -1149,9 +1143,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Render
   // ------------
-  if (!hasInitialFetchReturned) {
-    return null;
-  }
 
   if (!showFetchError && hasNoItems) {
     return (

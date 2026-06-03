@@ -9,30 +9,32 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import type { VisParams } from '@kbn/visualizations-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
-import { FormatOverrides } from './helpers';
+import type { DimensionsVisParam, MetricVisParam } from '../../common';
+import type { FormatOverrides } from './helpers';
+import { getMetricFormatter } from './helpers';
+
+const TREND_UPWARD = '\u{2191}'; // ↑
+const TREND_DOWNWARD = '\u{2193}'; // ↓
+const TREND_STABLE = '\u{003D}'; // =
 
 export interface TrendConfig {
   showIcon: boolean;
   showValue: boolean;
   palette: [string, string, string];
+  textPalette?: [string, string, string];
   baselineValue: number | undefined;
   borderColor?: string;
   compareToPrimary: boolean;
 }
 
 export interface SecondaryMetricInfoArgs {
-  columns: DatatableColumn[];
   row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  getMetricFormatter: (
-    accessor: string,
-    columns: DatatableColumn[],
-    formatOverrides?: FormatOverrides | undefined
-  ) => FieldFormatConvertFunction;
+  columns: DatatableColumn[];
+  secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
+  secondaryLabel: MetricVisParam['secondaryLabel'];
   trendConfig?: TrendConfig;
   staticColor?: string;
 }
@@ -41,7 +43,9 @@ export interface SecondaryMetricInfo {
   value: string;
   label?: string;
   badgeColor?: string;
+  badgeTextColor?: string;
   description?: string;
+  icon?: string;
 }
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
@@ -62,25 +66,6 @@ function getEnhancedNumberSignFormatter(
   };
 }
 
-function getMetricColumnAndFormatter(
-  columns: SecondaryMetricInfoArgs['columns'],
-  config: SecondaryMetricInfoArgs['config'],
-  getMetricFormatter: SecondaryMetricInfoArgs['getMetricFormatter'],
-  formatOverrides: FormatOverrides | undefined
-) {
-  if (!config.dimensions.secondaryMetric) {
-    return;
-  }
-  return {
-    metricColumn: getColumnByAccessor(config.dimensions.secondaryMetric, columns),
-    metricFormatter: getMetricFormatter(
-      config.dimensions.secondaryMetric,
-      columns,
-      formatOverrides
-    ),
-  };
-}
-
 function getDeltaValue(rawValue: number | undefined, baselineValue: number | undefined) {
   // Return NAN delta for now if either side of the formula is not a number
   if (rawValue == null || baselineValue == null || !Number.isFinite(baselineValue)) {
@@ -95,52 +80,59 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
       icon: undefined,
       iconLabel: notAvailable,
       color: trendConfig.palette[1],
+      textColor: trendConfig.textPalette?.[1],
     };
   }
 
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.showIcon ? '\u{2193}' : undefined, // ↓
+      icon: trendConfig.showIcon ? TREND_DOWNWARD : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
       color: trendConfig.palette[0],
+      textColor: trendConfig.textPalette?.[0],
     };
   }
 
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.showIcon ? '\u{2191}' : undefined, // ↑
+      icon: trendConfig.showIcon ? TREND_UPWARD : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
       color: trendConfig.palette[2],
+      textColor: trendConfig.textPalette?.[2],
     };
   }
 
   return {
-    icon: trendConfig.showIcon ? '\u{003D}' : undefined, // =
+    icon: trendConfig.showIcon ? TREND_STABLE : undefined,
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
     color: trendConfig.palette[1],
+    textColor: trendConfig.textPalette?.[1],
   };
 }
 
 function getValueToShow(
   value: string,
   deltaValue: number,
-  formatter: FieldFormatConvertFunction | undefined,
+  formatter: TextContextTypeConvert | undefined,
   compareToPrimary: boolean
 ) {
-  // In comparison mode the NaN delta should be converted to N/A
-  if (compareToPrimary) {
-    if (Number.isNaN(deltaValue)) {
-      return notAvailable;
-    }
-    return formatter?.(deltaValue) ?? String(deltaValue);
+  if (!compareToPrimary) {
+    return String(value);
   }
-  return String(value);
+
+  // In comparison mode the NaN delta should be converted to N/A
+  if (Number.isNaN(deltaValue)) {
+    return notAvailable;
+  }
+
+  const formattedDelta = formatter ? formatter(deltaValue) : deltaValue;
+  return String(formattedDelta);
 }
 
 function getTrendDescription(hasIcon: boolean, value: string, direction: string) {
@@ -172,12 +164,17 @@ function getDynamicColorInfo(
   trendConfig: TrendConfig,
   rawValue: number | undefined,
   safeFormattedValue: string,
-  metricFormatter: FieldFormatConvertFunction | undefined,
+  metricFormatter: TextContextTypeConvert | undefined,
   label: string
 ): SecondaryMetricInfo {
   const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;
   const deltaValue = deltaFactor * getDeltaValue(rawValue, trendConfig.baselineValue);
-  const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
+  const {
+    icon,
+    color: trendColor,
+    textColor: trendTextColor,
+    iconLabel,
+  } = getBadgeConfiguration(trendConfig, deltaValue);
   const valueToShow = getValueToShow(
     safeFormattedValue,
     deltaValue,
@@ -192,33 +189,36 @@ function getDynamicColorInfo(
     return { value: '', label: '', badgeColor: '', description: trendDescription };
   }
 
-  const valueContent = `${trendConfig.showValue ? valueToShow : ''}${
-    trendConfig.showValue && trendConfig.showIcon && icon ? ' ' : ''
-  }${trendConfig.showIcon && icon ? icon : ''}`;
-
-  return { value: valueContent, label, badgeColor: trendColor, description: trendDescription };
+  return {
+    value: trendConfig.showValue ? valueToShow : '',
+    label,
+    badgeColor: trendColor,
+    badgeTextColor: trendTextColor,
+    description: trendDescription,
+    icon: trendConfig.showIcon ? icon : undefined,
+  };
 }
 
-/**
- * Computes the display information for the secondary metric
- * @returns An object with value, label, badgeColor and description for rendering.
- */
+/** Computes the display information for the Secondary Metric */
 export function getSecondaryMetricInfo({
-  columns,
   row,
-  config,
-  getMetricFormatter,
+  columns,
+  secondaryMetric,
+  secondaryLabel,
   trendConfig,
   staticColor,
 }: SecondaryMetricInfoArgs): SecondaryMetricInfo {
-  const formatOverrides = getEnhancedNumberSignFormatter(trendConfig);
-  const { metricFormatter, metricColumn } =
-    getMetricColumnAndFormatter(columns, config, getMetricFormatter, formatOverrides) || {};
+  const secondaryMetricColumn = getColumnByAccessor(secondaryMetric, columns);
+  const secondaryMetricFormatter = getMetricFormatter(
+    secondaryMetric,
+    columns,
+    getEnhancedNumberSignFormatter(trendConfig)
+  );
 
-  const label = config.metric.secondaryPrefix ?? metricColumn?.name; // prefix
+  const label = secondaryLabel ?? secondaryMetricColumn?.name ?? '';
 
-  const rawValue = metricColumn ? row[metricColumn.id] : undefined;
-  const formattedValue = metricFormatter?.(rawValue);
+  const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
+  const formattedValue = secondaryMetricFormatter(rawValue);
   const safeFormattedValue = formattedValue ?? notAvailable;
 
   if (staticColor) {
@@ -227,7 +227,13 @@ export function getSecondaryMetricInfo({
 
   const hasDynamicColor = trendConfig && (typeof rawValue === 'number' || rawValue == null);
   if (hasDynamicColor) {
-    return getDynamicColorInfo(trendConfig, rawValue, safeFormattedValue, metricFormatter, label);
+    return getDynamicColorInfo(
+      trendConfig,
+      rawValue,
+      safeFormattedValue,
+      secondaryMetricFormatter,
+      label
+    );
   }
 
   return { value: formattedValue ?? '', label };

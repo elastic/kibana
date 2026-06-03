@@ -7,8 +7,8 @@
 
 import { mapValues } from 'lodash';
 import path from 'path';
-import { getFips } from 'crypto';
-import { createTestConfig, CreateTestConfig } from '../common/config';
+import type { CreateTestConfig } from '../common/config';
+import { createTestConfig } from '../common/config';
 
 const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 
@@ -18,13 +18,10 @@ const profilingDebugLogger = {
   appenders: ['console'],
 };
 
-const isFipsMode = getFips() === 1;
-
 const profilingFtrConfigs = {
   cloud: {
     license: 'trial' as const,
     kibanaConfig: {
-      ...(isFipsMode ? { 'xpack.security.fipsMode.enabled': true } : {}),
       'logging.loggers': [profilingDebugLogger],
       config: kibanaYamlFilePath,
     },

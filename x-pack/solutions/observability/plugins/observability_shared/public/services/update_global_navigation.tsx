@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import {
+import type { Subject } from 'rxjs';
+import type {
   AppUpdater,
   ApplicationStart,
   AppDeepLink,
-  type PricingServiceStart,
   AppDeepLinkLocations,
 } from '@kbn/core/public';
+import { type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
 
@@ -51,7 +51,7 @@ export function updateGlobalNavigation({
           if (capabilities[casesFeatureId].read_cases) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -59,7 +59,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -67,7 +67,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleIn: ['sideNav', 'globalSearch'],
+              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;
@@ -79,7 +79,7 @@ export function updateGlobalNavigation({
 
   updater$.next(() => {
     const visibleIn: AppDeepLinkLocations[] = someVisible
-      ? ['sideNav', 'home', 'kibanaOverview']
+      ? ['classicSideNav', 'projectSideNav', 'home', 'kibanaOverview']
       : [];
 
     if (isCompleteOverviewEnabled && someVisible) {

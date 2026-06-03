@@ -18,6 +18,7 @@ export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
+  onlyAgentless?: boolean;
 }
 
 export const useBuildIntegrationsUrl = () => {
@@ -28,16 +29,23 @@ export const useBuildIntegrationsUrl = () => {
     selectedCategory: initialSelectedCategory,
     selectedSubcategory: initialSubcategory,
     searchParam,
+    onlyAgentless: initialOnlyAgentless,
   } = getParams(useParams<CategoryParams>(), useLocation().search);
 
   const { getHref, getAbsolutePath } = useLink();
   const history = useHistory();
 
-  const buildUrl = ({ searchString, categoryId, subCategoryId }: IntegrationsURLParameters) => {
+  const buildUrl = ({
+    searchString,
+    categoryId,
+    subCategoryId,
+    onlyAgentless,
+  }: IntegrationsURLParameters) => {
     const url = pagePathGetters.integrations_all({
       category: categoryId ? categoryId : '',
       subCategory: subCategoryId ? subCategoryId : '',
       searchTerm: searchString ? searchString : '',
+      onlyAgentless: onlyAgentless || false,
     })[1];
     return url;
   };
@@ -46,11 +54,13 @@ export const useBuildIntegrationsUrl = () => {
     searchString,
     categoryId,
     subCategoryId,
+    onlyAgentless,
   }: IntegrationsURLParameters) => {
     const url = buildUrl({
       categoryId,
       searchString,
       subCategoryId,
+      onlyAgentless,
     });
     history.push(url);
   };
@@ -59,11 +69,13 @@ export const useBuildIntegrationsUrl = () => {
     searchString,
     categoryId,
     subCategoryId,
+    onlyAgentless,
   }: IntegrationsURLParameters) => {
     const url = buildUrl({
       categoryId,
       searchString,
       subCategoryId,
+      onlyAgentless,
     });
     // Use .replace so the browser's back button is not tied to single keystroke
     history.replace(url);
@@ -72,6 +84,7 @@ export const useBuildIntegrationsUrl = () => {
   return {
     initialSelectedCategory,
     initialSubcategory,
+    initialOnlyAgentless,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,

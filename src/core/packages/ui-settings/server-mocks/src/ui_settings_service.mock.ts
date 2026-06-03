@@ -15,13 +15,14 @@ import type {
   InternalUiSettingsServicePreboot,
   UiSettingsService,
 } from '@kbn/core-ui-settings-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createClientMock = () => {
-  const mocked: jest.Mocked<IUiSettingsClient> = {
-    getRegistered: jest.fn(),
-    get: jest.fn(),
-    getAll: jest.fn(),
-    getUserProvided: jest.fn(),
+  const mocked: jest.Mocked<IUiSettingsClient> = lazyObject({
+    getRegistered: jest.fn().mockReturnValue({}),
+    get: jest.fn().mockResolvedValue(false),
+    getAll: jest.fn().mockResolvedValue({}),
+    getUserProvided: jest.fn().mockResolvedValue({}),
     setMany: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
@@ -29,30 +30,25 @@ const createClientMock = () => {
     isOverridden: jest.fn(),
     isSensitive: jest.fn(),
     validate: jest.fn(),
-  };
-  mocked.get.mockResolvedValue(false);
-  mocked.getAll.mockResolvedValue({});
-  mocked.getRegistered.mockReturnValue({});
-  mocked.getUserProvided.mockResolvedValue({});
+  });
+
   return mocked;
 };
 
 const createPrebootMock = () => {
-  const mocked: jest.Mocked<InternalUiSettingsServicePreboot> = {
-    createDefaultsClient: jest.fn(),
-  };
-
-  mocked.createDefaultsClient.mockReturnValue(createClientMock());
+  const mocked: jest.Mocked<InternalUiSettingsServicePreboot> = lazyObject({
+    createDefaultsClient: jest.fn().mockReturnValue(createClientMock()),
+  });
 
   return mocked;
 };
 
 const createSetupMock = () => {
-  const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
+  const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = lazyObject({
     register: jest.fn(),
     registerGlobal: jest.fn(),
     setAllowlist: jest.fn(),
-  };
+  });
 
   return mocked;
 };
@@ -70,15 +66,13 @@ const createStartMock = () => {
 
 type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<UiSettingsServiceContract> = {
-    preboot: jest.fn(),
-    setup: jest.fn(),
-    start: jest.fn(),
+  const mocked: jest.Mocked<UiSettingsServiceContract> = lazyObject({
+    preboot: jest.fn().mockResolvedValue(createPrebootMock()),
+    setup: jest.fn().mockResolvedValue(createSetupMock()),
+    start: jest.fn().mockResolvedValue(createStartMock()),
     stop: jest.fn(),
-  };
-  mocked.preboot.mockResolvedValue(createPrebootMock());
-  mocked.setup.mockResolvedValue(createSetupMock());
-  mocked.start.mockResolvedValue(createStartMock());
+  });
+
   return mocked;
 };
 

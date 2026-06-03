@@ -10,11 +10,29 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardApi } from '../../../dashboard_api/types';
+import type { DashboardApi } from '../../../dashboard_api/types';
 import { coreServices } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+
+jest.mock('../../../dashboard_app/top_nav/add_panel_button/use_featured_items', () => {
+  return {
+    useFeaturedItems: () => ({
+      featuredItems: [
+        {
+          id: '1',
+          name: 'Mock Add Panel',
+          icon: 'chart',
+          onClick: jest.fn(),
+          order: 0,
+          ['data-test-subj']: 'mockAddPanelAction',
+        },
+      ],
+      loading: false,
+    }),
+  };
+});
 
 describe('DashboardEmptyScreen', () => {
   function renderComponent(viewMode: ViewMode) {
@@ -47,6 +65,7 @@ describe('DashboardEmptyScreen', () => {
     expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
     expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAddPanelAction')).toBeInTheDocument();
   });
 
   test('renders correctly with readonly mode', () => {

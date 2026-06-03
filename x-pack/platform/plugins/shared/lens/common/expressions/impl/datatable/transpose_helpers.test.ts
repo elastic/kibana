@@ -7,7 +7,7 @@
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { DatatableArgs } from '../..';
+import type { DatatableArgs } from '../..';
 import { transposeTable } from './transpose_helpers';
 
 describe('transpose helpers', () => {
@@ -100,11 +100,11 @@ describe('transpose helpers', () => {
 
   function buildFormatters() {
     return {
-      bucket1: { convert: (x: unknown) => x },
-      bucket2: { convert: (x: unknown) => x },
-      bucket3: { convert: (x: unknown) => x },
-      metric1: { convert: (x: unknown) => x },
-      metric2: { convert: (x: unknown) => x },
+      bucket1: { convertToText: (x: unknown) => x },
+      bucket2: { convertToText: (x: unknown) => x },
+      bucket3: { convertToText: (x: unknown) => x },
+      metric1: { convertToText: (x: unknown) => x },
+      metric2: { convertToText: (x: unknown) => x },
     } as unknown as Record<string, FieldFormat>;
   }
 

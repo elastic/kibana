@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { GaugeVisualizationState } from '@kbn/lens-common';
 import { getDefaultGaugeArgsFromParams } from '../../to_ast';
-import { GaugeVisParams } from '../../types';
+import type { GaugeVisParams } from '../../types';
+
+type GaugeVisConfiguration = Omit<GaugeVisualizationState, 'palette'> & {
+  palette?: PaletteOutput<CustomPaletteParams>;
+};
 
 export const getConfiguration = (
   layerId: string,

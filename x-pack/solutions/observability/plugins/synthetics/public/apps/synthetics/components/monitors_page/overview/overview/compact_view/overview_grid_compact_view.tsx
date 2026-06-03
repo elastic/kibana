@@ -8,9 +8,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useMonitorsSortedByStatus } from '../../../../../hooks/use_monitors_sorted_by_status';
-import { selectOverviewState } from '../../../../../state';
+import { selectOverviewGroupBy } from '../../../../../state';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 import { MonitorsTable } from './components/monitors_table';
 
 export const OverviewGridCompactView = ({
@@ -18,12 +18,10 @@ export const OverviewGridCompactView = ({
 }: {
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
-  const {
-    groupBy: { field: groupField },
-  } = useSelector(selectOverviewState);
+  const { field: groupField } = useSelector(selectOverviewGroupBy);
   const monitorsSortedByStatus = useMonitorsSortedByStatus();
 
-  return groupField === 'none' ? (
+  return groupField === 'none' || groupField === 'monitor' ? (
     <MonitorsTable
       items={monitorsSortedByStatus}
       setFlyoutConfigCallback={setFlyoutConfigCallback}

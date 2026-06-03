@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 /**
@@ -30,12 +30,32 @@ export class ComboBoxService extends FtrService {
    *
    * @param comboBoxSelector data-test-subj selector
    * @param value option text
+   * @param options optional configuration
+   * @param options.maxRetries maximum number of retry attempts (default: 0)
    */
 
-  public async set(comboBoxSelector: string, value: string): Promise<void> {
-    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
-    const comboBox = await this.testSubjects.find(comboBoxSelector);
-    await this.setElement(comboBox, value);
+  public async set(
+    comboBoxSelector: string,
+    value: string,
+    options: { retryCount?: number } = {}
+  ): Promise<void> {
+    const { retryCount = 0 } = options;
+    this.log.debug(
+      `comboBox.set, comboBoxSelector: ${comboBoxSelector}, retryCount: ${retryCount}`
+    );
+    if (retryCount < 1) {
+      const comboBox = await this.testSubjects.find(comboBoxSelector);
+      await this.setElement(comboBox, value);
+    } else {
+      await this.retry.tryWithRetries(
+        `comboBox.set, comboBoxSelector: ${comboBoxSelector}`,
+        async () => {
+          const comboBox = await this.testSubjects.find(comboBoxSelector);
+          await this.setElement(comboBox, value);
+        },
+        { retryCount, retryDelay: 1000 }
+      );
+    }
   }
 
   public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {
@@ -67,7 +87,7 @@ export class ComboBoxService extends FtrService {
   public async getOptions(comboBoxSelector: string) {
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
     await this.openOptionsList(comboBoxElement);
-    return await this.find.allByCssSelector('.euiFilterSelectItem', this.WAIT_FOR_EXISTS_TIME);
+    return await this.find.allByCssSelector('.euiComboBoxOption', this.WAIT_FOR_EXISTS_TIME);
   }
 
   /**
@@ -96,7 +116,7 @@ export class ComboBoxService extends FtrService {
 
     if (trimmedValue !== undefined) {
       const selectOptions = await this.find.allByCssSelector(
-        `.euiFilterSelectItem[title="${trimmedValue}"]`,
+        `.euiComboBoxOption[title="${trimmedValue}"]`,
         this.WAIT_FOR_EXISTS_TIME
       );
 
@@ -107,7 +127,7 @@ export class ComboBoxService extends FtrService {
         const alternateTitle = (
           await Promise.all(
             (
-              await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
+              await this.find.allByCssSelector(`.euiComboBoxOption`, this.WAIT_FOR_EXISTS_TIME)
             ).map(async (e) => {
               const title = (await e.getAttribute('title')) ?? '';
               return { title, formattedTitle: title.toLowerCase().trim() };
@@ -119,7 +139,7 @@ export class ComboBoxService extends FtrService {
 
         const [alternate] = alternateTitle
           ? await this.find.allByCssSelector(
-              `.euiFilterSelectItem[title="${alternateTitle}" i]`,
+              `.euiComboBoxOption[title="${alternateTitle}" i]`,
               this.WAIT_FOR_EXISTS_TIME
             )
           : [];
@@ -134,12 +154,12 @@ export class ComboBoxService extends FtrService {
           this.log.warning(
             `comboBox.setElement - Could not find option [${trimmedValue}], using first`
           );
-          const firstOption = await this.find.byCssSelector('.euiFilterSelectItem', 5000);
+          const firstOption = await this.find.byCssSelector('.euiComboBoxOption', 5000);
           await this.clickOption(options.clickWithMouse, firstOption);
         }
       }
     } else {
-      const firstOption = await this.find.byCssSelector('.euiFilterSelectItem');
+      const firstOption = await this.find.byCssSelector('.euiComboBoxOption');
       await this.clickOption(options.clickWithMouse, firstOption);
     }
     await this.closeOptionsList(comboBoxElement);
@@ -329,10 +349,25 @@ export class ComboBoxService extends FtrService {
    */
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.closeOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
-    if (isOptionsListOpen) {
+
+    // wait for potential other animations to finish (e.g. due to closing on selection)
+    const isOptionListClosed = await this.retry.tryWithRetries(
+      'wait for possible ongoing closing of the combobox listbox',
+      async () => {
+        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
+          timeout: 50,
+        });
+
+        return !isOpen;
+      },
+      {
+        timeout: 5000,
+        initialDelay: 500,
+        retryCount: 3,
+      }
+    );
+
+    if (!isOptionListClosed) {
       const input = await comboBoxElement.findByTagName('input');
       await input.pressKeys(this.browser.keys.ESCAPE);
     }

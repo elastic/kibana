@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
@@ -69,9 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await log.debug('Navigating to the data streams tab');
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the data streams tab
-      await pageObjects.indexManagement.changeTabs('data_streamsTab');
+      await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -133,7 +131,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('modify data streams index mode', () => {
+    describe('modify data streams index mode', function () {
+      // FIPS mode sets defaultRoles to superuser which causes trial-licensed UI elements to
+      // appear and intercept clicks that expect the index_management_user role restrictions
+      this.tags('skipFIPS');
       const TEST_DS_NAME = 'test-ds';
       const setIndexModeTemplate = async (settings: object) => {
         await es.indices.putIndexTemplate({

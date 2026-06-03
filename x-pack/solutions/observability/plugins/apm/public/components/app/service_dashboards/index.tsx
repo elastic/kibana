@@ -76,12 +76,12 @@ export function ServiceDashboards() {
   useEffect(() => {
     const filteredServiceDashboards = (data?.serviceDashboards ?? []).reduce(
       (result: MergedServiceDashboard[], serviceDashboard: SavedApmCustomDashboard) => {
-        const matchedDashboard = allAvailableDashboards.find(
+        const matchedDashboard = allAvailableDashboards?.find(
           ({ id }) => id === serviceDashboard.dashboardSavedObjectId
         );
         if (matchedDashboard) {
           result.push({
-            title: matchedDashboard.attributes.title,
+            title: matchedDashboard.data.title,
             ...serviceDashboard,
           });
         }
@@ -134,7 +134,7 @@ export function ServiceDashboards() {
   );
 
   const locator = useMemo(() => {
-    const baseLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
+    const baseLocator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
     if (!baseLocator) return;
 
     return {

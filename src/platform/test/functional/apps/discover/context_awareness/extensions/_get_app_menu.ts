@@ -11,28 +11,16 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, header } = getPageObjects([
+  const { appMenu, common, discover, header } = getPageObjects([
+    'appMenu',
     'common',
     'timePicker',
     'discover',
     'header',
   ]);
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
   describe('extension getAppMenu', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
-    after(async () => {
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-    });
-
     it('should render the main actions and the action from root profile', async () => {
       const state = kbnRison.encode({
         dataSource: { type: 'esql' },
@@ -43,9 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('discoverNewButton');
-      await testSubjects.existOrFail('discoverAlertsButton');
-      await testSubjects.existOrFail('example-custom-root-submenu');
+      await appMenu.existOrFail('discoverNewButton');
+      await appMenu.existOrFail('discoverAlertsButton');
+      await appMenu.existOrFail('example-custom-root-submenu');
     });
 
     it('should render custom actions', async () => {
@@ -58,19 +46,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      await testSubjects.existOrFail('discoverNewButton');
-      await testSubjects.existOrFail('discoverAlertsButton');
-      await testSubjects.existOrFail('example-custom-root-submenu');
-      await testSubjects.existOrFail('example-custom-action');
+      await appMenu.existOrFail('discoverNewButton');
+      await appMenu.existOrFail('discoverAlertsButton');
+      await appMenu.existOrFail('example-custom-root-submenu');
+      await appMenu.existOrFail('example-custom-action');
 
-      await testSubjects.click('example-custom-root-submenu');
+      await appMenu.clickMenuItem('example-custom-root-submenu');
       await testSubjects.existOrFail('example-custom-root-action12');
 
       await testSubjects.click('example-custom-root-action12');
       await testSubjects.existOrFail('example-custom-root-action12-flyout');
       await testSubjects.click('euiFlyoutCloseButton');
 
-      await testSubjects.click('discoverAlertsButton');
+      await appMenu.clickMenuItem('discoverAlertsButton');
       await testSubjects.existOrFail('example-custom-action-under-alerts');
     });
   });

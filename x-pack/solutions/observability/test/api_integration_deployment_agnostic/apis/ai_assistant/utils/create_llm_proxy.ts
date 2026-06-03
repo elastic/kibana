@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
@@ -13,16 +13,18 @@ import { isString, once, pull, isFunction, last, first } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
-import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
-import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { createOpenAiChunk } from './create_openai_chunk';
+import {
+  MessageRole,
+  SELECT_RELEVANT_FIELDS_NAME,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import { createOpenAiChunk, createOpenAIResponse } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
-type LLMMessage = string[] | ToolMessage | string | undefined;
+export type LLMMessage = string[] | ToolMessage | string | undefined;
 
 type RequestHandler = (
   request: Request,
@@ -58,6 +60,7 @@ export interface LlmResponseSimulator {
   complete: () => Promise<void>;
   rawWrite: (chunk: string) => Promise<void>;
   rawEnd: () => Promise<void>;
+  stream: boolean;
 }
 
 export class LlmProxy {
@@ -238,10 +241,16 @@ export class LlmProxy {
   interceptScoreToolChoice(log: ToolingLog) {
     function extractDocumentsToScore(source: string): KnowledgeBaseDocument[] {
       const [, raw] = source.match(/<DocumentsToScore>\s*(\[[\s\S]*?\])\s*<\/DocumentsToScore>/i)!;
-      const jsonString = raw.trim().replace(/\\"/g, '"');
-      const documentsToScore = JSON.parse(jsonString);
-      log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
-      return documentsToScore;
+      const jsonString = raw.trim().replace(/\\"/g, '"').replace(/\n/g, ' ');
+      try {
+        const documentsToScore = JSON.parse(jsonString);
+        log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
+        return documentsToScore;
+      } catch (error) {
+        log.error(`Failed to extract documents to score: ${error}`);
+        log.debug(`Raw string: ${jsonString}`);
+      }
+      return [];
     }
 
     let documentsToScore: KnowledgeBaseDocument[] = [];
@@ -309,6 +318,8 @@ export class LlmProxy {
           name,
           when,
           handle: (request, response, requestBody) => {
+            const stream = requestBody.stream ?? false;
+
             function write(chunk: string) {
               return new Promise<void>((resolve) => response.write(chunk, () => resolve()));
             }
@@ -318,10 +329,11 @@ export class LlmProxy {
 
             const simulator: LlmResponseSimulator = {
               requestBody,
+              stream,
               status: once((status: number) => {
                 response.writeHead(status, {
                   'Elastic-Interceptor': name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
-                  'Content-Type': 'text/event-stream',
+                  'Content-Type': stream ? 'text/event-stream' : 'application/json',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
                 });
@@ -340,11 +352,15 @@ export class LlmProxy {
               },
               complete: async () => {
                 this.log.debug(`Completed intercept for "${name}"`);
-                await write('data: [DONE]\n\n');
+                if (stream) {
+                  await write('data: [DONE]\n\n');
+                }
                 await end();
               },
               error: async (error) => {
-                await write(`data: ${JSON.stringify({ error })}\n\n`);
+                await write(
+                  stream ? `data: ${JSON.stringify({ error })}\n\n` : JSON.stringify({ error })
+                );
                 await end();
               },
             };
@@ -363,11 +379,7 @@ export class LlmProxy {
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
 
-        function getParsedChunks(): Array<string | ToolMessage> {
-          const llmMessage = isFunction(responseChunks)
-            ? responseChunks(simulator.requestBody)
-            : responseChunks;
-
+        function getParsedChunks(llmMessage: LLMMessage): Array<string | ToolMessage> {
           if (!llmMessage) {
             return [];
           }
@@ -383,9 +395,17 @@ export class LlmProxy {
           return [llmMessage];
         }
 
-        const parsedChunks = getParsedChunks();
-        for (const chunk of parsedChunks) {
-          await simulator.next(chunk);
+        const llmMessage = isFunction(responseChunks)
+          ? responseChunks(simulator.requestBody)
+          : responseChunks;
+
+        if (simulator.stream) {
+          const parsedChunks = getParsedChunks(llmMessage);
+          for (const chunk of parsedChunks) {
+            await simulator.next(chunk);
+          }
+        } else {
+          await simulator.rawWrite(JSON.stringify(createOpenAIResponse(llmMessage)));
         }
 
         await simulator.complete();

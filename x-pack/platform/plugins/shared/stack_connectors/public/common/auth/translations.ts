@@ -104,13 +104,48 @@ export const HEADERS_SWITCH = i18n.translate(
 export const HEADERS_TITLE = i18n.translate(
   'xpack.stackConnectors.components.auth.httpHeadersTitle',
   {
-    defaultMessage: 'Headers in use',
+    defaultMessage: 'HTTP headers',
   }
 );
+
+export const HEADERS_SUBTITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.httpHeadersSubtitle',
+  {
+    defaultMessage: 'Add custom HTTP headers to be sent with API requests',
+  }
+);
+
+export const MAX_HEADERS_LIMIT = (maxHeaders: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.maxHeaders', {
+    values: { maxHeaders },
+    defaultMessage: 'Maximum number of {maxHeaders} headers reached.',
+  });
 
 export const KEY_LABEL = i18n.translate('xpack.stackConnectors.components.auth.keyTextFieldLabel', {
   defaultMessage: 'Key',
 });
+
+export const ENCRYPTED_HEADERS_BADGE = i18n.translate(
+  'xpack.stackConnectors.components.auth.encryptedHeadersBadge',
+  {
+    defaultMessage: 'Encrypted Headers',
+  }
+);
+
+export const ENCRYPTED_HEADERS_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.stackConnectors.components.auth.encryptedHeadersTooltipContent',
+  {
+    defaultMessage:
+      'Values of the secret headers are encrypted. You must re-enter them when editing the connector',
+  }
+);
+
+export const SAME_HEADER_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.sameHeaderKeyError',
+  {
+    defaultMessage: 'This key is already used in another header',
+  }
+);
 
 export const VALUE_LABEL = i18n.translate(
   'xpack.stackConnectors.components.auth.valueTextFieldLabel',
@@ -119,8 +154,43 @@ export const VALUE_LABEL = i18n.translate(
   }
 );
 
+export const CONFIG_OPTION = i18n.translate(
+  'xpack.stackConnectors.components.auth.configHeaderLabel',
+  {
+    defaultMessage: 'Config',
+  }
+);
+
+export const HEADER_TYPE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.headerTypeLabel',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const SECRET_OPTION = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretHeaderLabel',
+  {
+    defaultMessage: 'Secret',
+  }
+);
+
+export const HEADER_MISSING_VALUE_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretHeaderMissingValueError',
+  {
+    defaultMessage: 'Value is required',
+  }
+);
+
+export const HEADER_MISSING_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretHeaderMissingValueError',
+  {
+    defaultMessage: 'Key is required',
+  }
+);
+
 export const ADD_BUTTON = i18n.translate('xpack.stackConnectors.components.auth.addHeaderButton', {
-  defaultMessage: 'Add',
+  defaultMessage: 'Add header',
 });
 
 export const DELETE_BUTTON = i18n.translate(
@@ -157,3 +227,184 @@ export const EDIT_CA_CALLOUT = i18n.translate(
       'This connector has an existing certificate authority file. Upload a new one to replace it.',
   }
 );
+
+export const ACCESS_TOKEN_URL = i18n.translate(
+  'xpack.stackConnectors.components.auth.accessTokenUrlTextFieldLabel',
+  {
+    defaultMessage: 'Access token URL',
+    description: 'The URL to get the access token from',
+  }
+);
+export const ACCESS_TOKEN_URL_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredAccessTokenUrlText',
+  {
+    defaultMessage: 'Access token URL is required.',
+  }
+);
+export const CLIENT_ID = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+    description: 'The client ID to use for OAuth2 authentication',
+  }
+);
+export const CLIENT_ID_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredClientIdText',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+export const CLIENT_SECRET = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client secret',
+    description: 'The client secret to use for for OAuth2 authentication',
+  }
+);
+export const CLIENT_SECRET_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredClientSecretText',
+  {
+    defaultMessage: 'Client secret is required.',
+  }
+);
+export const SCOPE = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Scope',
+    description: 'The scope to use for for OAuth2 authentication',
+  }
+);
+
+export const SCOPE_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.auth.scopeHelpText',
+  {
+    defaultMessage: "Space-separated list of scopes (e.g., 'email profile').",
+  }
+);
+
+export const AUTHENTICATION_OAUTH2 = i18n.translate(
+  'xpack.stackConnectors.components.auth.authenticationMethodOAuth2Label',
+  {
+    defaultMessage: 'OAuth 2.0 Client Credentials',
+  }
+);
+
+export const INVALID_JSON = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsFormatErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON',
+  }
+);
+
+export const INVALID_INPUT_EMPTY = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsEmptyErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON, cannot be empty',
+  }
+);
+
+export const INVALID_INPUT_ARRAY = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsArrayErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON, cannot be an array',
+  }
+);
+
+export const ADDITIONAL_FIELDS = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsTitle',
+  {
+    defaultMessage: 'Additional fields',
+    description: 'Title for the additional fields section',
+  }
+);
+
+export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.webhhok.additionalFieldsHelpTooltipText',
+  {
+    defaultMessage:
+      'Additional fields in JSON format. Your token provider may require more that just the default fields.',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const QUERY_PARAMS_SWITCH = i18n.translate(
+  'xpack.stackConnectors.components.auth.viewQueryParamsSwitch',
+  {
+    defaultMessage: 'Add secret query parameters',
+  }
+);
+
+export const QUERY_PARAMS_TITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamsTitle',
+  {
+    defaultMessage: 'Secret query parameters',
+  }
+);
+
+export const QUERY_PARAMS_SUBTITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamsSubtitle',
+  {
+    defaultMessage:
+      'Add query parameters to be appended to each request URL. Values are encrypted and never exposed.',
+  }
+);
+
+export const MAX_QUERY_PARAMS_LIMIT = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.maxQueryParams', {
+    values: { max },
+    defaultMessage: 'Maximum number of {max} query parameters reached.',
+  });
+
+export const ADD_QUERY_PARAM_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.auth.addQueryParamButton',
+  {
+    defaultMessage: 'Add query parameter',
+  }
+);
+
+export const DELETE_QUERY_PARAM_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.auth.deleteQueryParamButton',
+  {
+    defaultMessage: 'Delete',
+    description: 'Delete secret query parameter',
+  }
+);
+
+export const SAME_QUERY_PARAM_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.sameQueryParamKeyError',
+  {
+    defaultMessage: 'This key is already used in another query parameter',
+  }
+);
+
+export const QUERY_PARAM_MISSING_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamMissingKeyError',
+  {
+    defaultMessage: 'Key is required',
+  }
+);
+
+export const QUERY_PARAM_MISSING_VALUE_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamMissingValueError',
+  {
+    defaultMessage: 'Value is required',
+  }
+);
+
+export const QUERY_PARAM_KEY_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.queryParamKeyTooLongError', {
+    values: { max },
+    defaultMessage: 'Key must be {max} characters or fewer',
+  });
+
+export const QUERY_PARAM_VALUE_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.queryParamValueTooLongError', {
+    values: { max },
+    defaultMessage: 'Value must be {max} characters or fewer',
+  });

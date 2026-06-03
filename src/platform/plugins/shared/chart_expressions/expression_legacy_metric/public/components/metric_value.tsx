@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { CSSProperties, useLayoutEffect } from 'react';
+import type { CSSProperties } from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
@@ -23,6 +25,17 @@ interface MetricVisValueProps {
   autoScale?: boolean;
   renderComplete?: () => void;
 }
+
+const ELASTIC_UI_NUMERIC_FONT_FAMILY = "'Elastic UI Numeric'";
+
+const prependNumericFontFamily = (style: CSSProperties): CSSProperties => {
+  const { fontFamily } = style;
+  if (!fontFamily || typeof fontFamily !== 'string') return style;
+
+  return fontFamily.includes(ELASTIC_UI_NUMERIC_FONT_FAMILY)
+    ? style
+    : { ...style, fontFamily: `${ELASTIC_UI_NUMERIC_FONT_FAMILY}, ${fontFamily}` };
+};
 
 export const MetricVisValue = (props: MetricVisValueProps) => {
   const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
@@ -49,24 +62,17 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
         className="legacyMtrVis__value"
         css={styles.legacyMtrVisValue}
         style={{
-          ...(style.spec as CSSProperties),
+          ...prependNumericFontFamily(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),
         }}
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * This is one of the visualizations which makes use of the HTML field formatters.
-         * Since these formatters produce raw HTML, this visualization needs to be able to render them as-is, relying
-         * on the field formatter to only produce safe HTML.
-         * `metric.value` is set by the MetricVisComponent, so this component must make sure this value never contains
-         * any unsafe HTML (e.g. by bypassing the field formatter).
-         */
-        dangerouslySetInnerHTML={{ __html: metric.value }} // eslint-disable-line react/no-danger
-      />
+      >
+        {metric.value}
+      </div>
       {labelConfig.show && (
         <div
           data-test-subj="metric_label"
           style={{
-            ...(labelConfig.style.spec as CSSProperties),
+            ...prependNumericFontFamily(labelConfig.style.spec as CSSProperties),
             order: labelConfig.position === 'top' ? -1 : 2,
           }}
         >

@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import { AgentPolicyInfo } from '../../../../common/types';
-import { SyntheticsServerSetup } from '../../../types';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { AgentPolicyInfo } from '../../../../common/types';
+import type { SyntheticsServerSetup } from '../../../types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.AGENT_POLICIES,
   validate: {},
-  handler: async ({ server }): Promise<AgentPolicyInfo[]> => {
-    return getAgentPoliciesAsInternalUser({ server, withAgentCount: true });
+  handler: async ({ server, spaceId }): Promise<AgentPolicyInfo[]> => {
+    return getAgentPoliciesAsInternalUser({ server, withAgentCount: true, spaceId });
   },
 });
 
 export const getAgentPoliciesAsInternalUser = async ({
   server,
   withAgentCount = false,
+  spaceId,
 }: {
   server: SyntheticsServerSetup;
   withAgentCount?: boolean;
+  spaceId: string;
 }) => {
   const soClient = server.coreStart.savedObjects.createInternalRepository();
   const esClient = server.coreStart.elasticsearch.client.asInternalUser;
@@ -34,9 +36,11 @@ export const getAgentPoliciesAsInternalUser = async ({
     perPage: 10000,
     sortField: 'name',
     sortOrder: 'asc',
-    kuery: 'ingest-agent-policies.is_managed : false',
+    kuery:
+      'ingest-agent-policies.is_managed : false and not ingest-agent-policies.supports_agentless : true',
     esClient,
     withAgentCount,
+    spaceId,
   });
 
   return agentPolicies.items.map((agentPolicy) => ({
@@ -46,5 +50,6 @@ export const getAgentPoliciesAsInternalUser = async ({
     status: agentPolicy.status,
     description: agentPolicy.description,
     namespace: agentPolicy.namespace,
+    spaceIds: agentPolicy.space_ids,
   }));
 };

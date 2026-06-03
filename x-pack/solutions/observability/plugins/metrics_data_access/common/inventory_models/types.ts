@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type {
   AggregationConfigMap,
   ChartsConfigMap,
@@ -15,9 +15,13 @@ import type {
   FormulasConfigMap,
   InventoryMetricsConfig,
 } from './shared/metrics/types';
-import type { HOST_METRICS_RECEIVER_OTEL, SYSTEM_INTEGRATION } from '../constants';
+import type {
+  HOST_METRICS_RECEIVER_OTEL,
+  KUBELET_STATS_RECEIVER_OTEL,
+  SYSTEM_INTEGRATION,
+} from '../constants';
 
-export { DataSchemaFormat } from './shared/metrics/types';
+export { DataSchemaFormatEnum, type DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -122,12 +126,21 @@ export const TSVBMetricModelVariableRT = rt.type({
   name: rt.string,
 });
 
-export const TSVBMetricModelBucketScriptRT = rt.type({
-  id: rt.string,
-  script: rt.string,
-  type: rt.literal('calculation'),
-  variables: rt.array(TSVBMetricModelVariableRT),
-});
+export const TSVBMetricModelBucketScriptRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    script: rt.string,
+    type: rt.literal('calculation'),
+    variables: rt.array(TSVBMetricModelVariableRT),
+  }),
+  rt.partial({
+    gap_policy: rt.union([
+      rt.literal('skip'),
+      rt.literal('insert_zeros'),
+      rt.literal('keep_values'),
+    ]),
+  }),
+]);
 
 export const TSVBMetricModelDerivativeRT = rt.type({
   id: rt.string,
@@ -255,7 +268,7 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 type BeatsIntegrations = 'aws' | 'docker' | typeof SYSTEM_INTEGRATION | 'kubernetes';
-type OtelReceivers = typeof HOST_METRICS_RECEIVER_OTEL;
+type OtelReceivers = typeof HOST_METRICS_RECEIVER_OTEL | typeof KUBELET_STATS_RECEIVER_OTEL;
 type Integrations =
   | {
       beats: BeatsIntegrations;

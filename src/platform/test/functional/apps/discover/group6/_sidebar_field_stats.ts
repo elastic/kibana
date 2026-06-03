@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
@@ -27,9 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sidebar field stats popover', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

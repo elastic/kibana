@@ -8,7 +8,7 @@
 import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { EventOutcome } from '../../../common/event_outcome';
 import type { ServiceMapService, ServiceMapSpan } from '../../../common/service_map/types';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
@@ -37,6 +37,13 @@ import {
 const SPAN_LINK_IDS_LIMIT = 128;
 const MAX_EXIT_SPANS = 10000;
 const MAX_SPAN_LINKS = 1000;
+
+// Safety limits to prevent runaway queries on clusters with large number of
+// traces or traces with a large number of spans (common instrumentation bugs).
+// terminate_after: caps per-shard document scanning
+// timeout: cancels the query if it exceeds the time limit (returning partial results)
+const TERMINATE_AFTER = 1_000_000;
+const QUERY_TIMEOUT = '60s';
 
 type IncomingSpanLink = ServiceMapService & { transactionName: string };
 
@@ -100,10 +107,12 @@ async function fetchExitSpanIdsFromTraceIds({
 }) {
   const sampleExitSpans = await apmEventClient.search('get_service_map_exit_span_samples', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
 
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     size: 0,
     query: {
       bool: {
@@ -216,6 +225,8 @@ async function fetchSpanLinksFromTraceIds({
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     size: 0,
     query: {
       bool: {
@@ -404,6 +415,8 @@ async function fetchTransactionsFromExitSpans({
       events: [ProcessorEvent.transaction],
     },
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     query: {
       bool: {
         filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
@@ -416,18 +429,18 @@ async function fetchTransactionsFromExitSpans({
   const destinationsBySpanId = new Map(exitSpansSample);
 
   servicesResponse.hits.hits.forEach((hit) => {
-    const transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
+    const transaction = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
 
-    const spanId = transaction.parent.id;
+    const spanId = transaction[PARENT_ID];
 
     const destination = destinationsBySpanId.get(spanId);
     if (destination) {
       destinationsBySpanId.set(spanId, {
         ...destination,
         destinationService: {
-          agentName: transaction.agent.name,
-          serviceEnvironment: transaction.service.environment,
-          serviceName: transaction.service.name,
+          agentName: transaction[AGENT_NAME],
+          serviceEnvironment: transaction[SERVICE_ENVIRONMENT],
+          serviceName: transaction[SERVICE_NAME],
         },
       });
     }
@@ -456,6 +469,8 @@ async function fetchSpansFromSpanLinks({
       events: [ProcessorEvent.span],
     },
     track_total_hits: false,
+    terminate_after: TERMINATE_AFTER,
+    timeout: QUERY_TIMEOUT,
     size: 0,
     query: {
       bool: {

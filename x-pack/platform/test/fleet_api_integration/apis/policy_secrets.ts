@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
+import type { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENTS_INDEX,
   AGENT_POLICY_INDEX,
@@ -15,8 +15,9 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
 import moment from 'moment';
+import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
 
 const secretVar = (id: string) => `$co.elastic.secret{${id}}`;
@@ -128,19 +129,22 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
-    const cleanupAgents = async () => {
-      try {
-        await es.deleteByQuery({
-          index: AGENTS_INDEX,
-          refresh: true,
-          query: {
-            match_all: {},
-          },
-        });
-      } catch (err) {
-        // index doesn't exist
-      }
-    };
+    const cleanupAgents = async () =>
+      await pRetry(async () => {
+        try {
+          await es.deleteByQuery({
+            index: AGENTS_INDEX,
+            refresh: true,
+            query: {
+              match_all: {},
+            },
+          });
+        } catch (err) {
+          if (err?.meta?.statusCode === 409) {
+            throw err;
+          }
+        }
+      });
 
     const cleanupSecrets = async () => {
       try {
@@ -743,10 +747,16 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should have correctly deleted unused secrets after update', async () => {
-        const searchRes = await getSecrets();
-        expect(searchRes.hits.hits.length).to.eql(5); // should have created 2 and deleted 2 docs
+        // Secret deletion is async — retry until the expected count is reached
+        let searchRes: Awaited<ReturnType<typeof getSecrets>> | undefined;
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          searchRes = await getSecrets();
+          if (searchRes.hits.hits.length === 5) break;
+        }
+        expect(searchRes!.hits.hits.length).to.eql(5); // should have created 2 and deleted 2 docs
 
-        const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
+        const secretValuesById = searchRes!.hits.hits.reduce((acc: any, secret: any) => {
           acc[secret._id] = secret._source.value;
           return acc;
         }, {});
@@ -907,13 +917,15 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        // sleep to allow for secrets to be deleted
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Secret deletion is async — retry until the expected count is reached
+        for (let i = 0; i < 5; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const searchRes = await getSecrets();
+          // should have deleted new_package_secret_val_2 and new_package_multi_secret_val_3/4
+          if (searchRes.hits.hits.length === 5) return;
+        }
 
-        const searchRes = await getSecrets();
-
-        // should have deleted new_package_secret_val_2 and new_package_multi_secret_val_3/4
-        expect(searchRes.hits.hits.length).to.eql(5);
+        throw new Error('Secrets not deleted to expected count of 5');
       });
     });
 
@@ -960,9 +972,14 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('fleet server version requirements', () => {
       afterEach(async () => {
-        await cleanupAgents();
-        await cleanupPolicies();
-        await cleanupSecrets();
+        await pRetry(
+          async () => {
+            await cleanupAgents();
+            await cleanupPolicies();
+            await cleanupSecrets();
+          },
+          { retries: 3 }
+        );
       });
       it('should not store secrets if fleet server does not meet minimum version', async () => {
         const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy();
@@ -986,15 +1003,12 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should not store secrets if there are no fleet servers', async () => {
+      it('should store secrets if there are no fleet servers', async () => {
         await createFleetServerAgentPolicy();
         const agentPolicy = await createAgentPolicy();
-        // agent with new version shouldn't make storage secrets enabled
-        await createFleetServerAgent(agentPolicy.id, 'server_2', '8.12.0');
         const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
 
-        // secret should be in plain text i.e not a secret refrerence
-        expect(packagePolicyWithSecrets.vars.package_var_secret.value).eql('package_secret_val');
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
       });
 
       it('should convert plain text values to secrets once fleet server requirements are met', async () => {

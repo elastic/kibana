@@ -7,26 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import {
+  AppMenuActionId,
   AppMenuRegistry,
-  type AppMenuItemPrimary,
-  type AppMenuItemSecondary,
+  dismissFlyouts,
+  DiscoverFlyouts,
 } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import useObservable from 'react-use/lib/useObservable';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { useI18n } from '@kbn/i18n-react';
+import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
-import { onSaveSearch } from './on_save_search';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
@@ -34,17 +36,31 @@ import {
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
   getInspectAppMenuItem,
-  convertAppMenuItemToTopNavItem,
+  getBackgroundSearchFlyout,
+  enhanceAppMenuItemWithRunAction,
 } from './app_menu_actions';
-import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
+  selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
+  useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  useInternalStateSubscribe,
+  useRuntimeStateManager,
 } from '../../state_management/redux';
-import type { DiscoverAppLocatorParams } from '../../../../../common';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../state_management/redux';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
+import { useDataState } from '../../hooks/use_data_state';
+import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
+
+const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
+  AppMenuActionId.alerts,
+  AppMenuActionId.export,
+  AppMenuActionId.inspect,
+]);
 
 /**
  * Helper function to build the top nav links
@@ -52,29 +68,42 @@ import type { DiscoverAppState } from '../../state_management/discover_app_state
 export const useTopNavLinks = ({
   dataView,
   services,
-  state,
-  onOpenInspector,
+  hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
-  topNavCustomization,
-  shouldShowESQLToDataViewTransitionModal,
+  hasShareIntegration,
+  persistedDiscoverSession,
+  onOpenSaveModal,
+  onOpenSaveAsModal,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
-  state: DiscoverStateContainer;
-  onOpenInspector: () => void;
+  hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
-  topNavCustomization: TopNavCustomization | undefined;
-  shouldShowESQLToDataViewTransitionModal: boolean;
-}): TopNavMenuData[] => {
+  hasShareIntegration: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
+}): AppMenuConfig => {
+  const intl = useI18n();
   const dispatch = useInternalStateDispatch();
+  const getState = useInternalStateGetState();
+  const subscribe = useInternalStateSubscribe();
+  const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
+  const appId = useObservable(services.application.currentAppId$);
+  const currentTab = useCurrentTabSelector((tabState) => tabState);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
       toasts: services.notifications.toasts,
     });
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const totalHits$ = dataStateContainer.data$.totalHits$;
+  const totalHitsState = useDataState(totalHits$);
+  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
+    useCurrentTabMenuActions({ currentDataView });
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes
@@ -83,200 +112,332 @@ export const useTopNavLinks = ({
       )
       .map((ruleType) => ruleType.id);
 
+  const transferBackToEditor = useCallback(async () => {
+    const byValueState = await selectTabSavedSearchByValueAttributes({
+      tabId: currentTab.id,
+      getState,
+      runtimeStateManager,
+      services,
+    });
+
+    services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
+      state: {
+        byValueState,
+        controlGroupState: currentTab.attributes.controlGroupState,
+      },
+    });
+  }, [
+    currentTab.id,
+    currentTab.attributes.controlGroupState,
+    getState,
+    runtimeStateManager,
+    services,
+  ]);
+
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
       isEsqlMode,
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      actions: {
-        updateAdHocDataViews: async (adHocDataViewList) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
-        },
-      },
     }),
-    [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
+    [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const defaultMenu = topNavCustomization?.defaultMenu;
+  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
+  const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
 
-  const appMenuPrimaryAndSecondaryItems: Array<AppMenuItemPrimary | AppMenuItemSecondary> =
-    useMemo(() => {
-      const items: Array<AppMenuItemPrimary | AppMenuItemSecondary> = [];
-      if (!defaultMenu?.inspectItem?.disabled) {
-        const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
-        items.push(inspectAppMenuItem);
-      }
+  const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
+    const items: DiscoverAppMenuItemType[] = [];
 
-      if (
-        services.triggersActionsUi &&
-        !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.length
-      ) {
-        const alertsAppMenuItem = getAlertsAppMenuItem({
-          discoverParams,
-          services,
-          stateContainer: state,
-        });
-        items.push(alertsAppMenuItem);
-      }
+    const hasV1AlertsAccess = discoverParams.authorizedRuleTypeIds.length > 0;
+    const shouldShowAlertsMenu = hasV1AlertsAccess || showCreateRuleV2;
 
-      if (!defaultMenu?.newItem?.disabled) {
-        const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
-          isEsqlMode && currentDataView.type === ESQL_TYPE
-            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-            : undefined;
-        const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
-          ? defaultEsqlState
-          : currentDataView.isPersisted()
-          ? { dataViewId: currentDataView.id }
-          : { dataViewSpec: currentDataView.toMinimalSpec() };
-        const newSearchMenuItem = getNewSearchAppMenuItem({
-          newSearchUrl: services.locator.getRedirectUrl(locatorParams),
-          onNewSearch: () => {
-            const defaultState: DiscoverAppState = defaultEsqlState ?? {
-              dataSource: currentDataView.id
-                ? createDataViewDataSource({ dataViewId: currentDataView.id })
-                : undefined,
-            };
-            services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
-          },
-        });
-        items.push(newSearchMenuItem);
-      }
+    if (services.triggersActionsUi && shouldShowAlertsMenu) {
+      const alertsAppMenuItem = getAlertsAppMenuItem({
+        discoverParams,
+        services,
+        tabId: currentTab.id,
+        getState,
+        dispatch,
+        subscribe,
+        showCreateRuleV2,
+      });
+      items.push(alertsAppMenuItem);
+    }
 
-      if (!defaultMenu?.openItem?.disabled) {
-        const openSearchMenuItem = getOpenSearchAppMenuItem({
-          onOpenSavedSearch: state.actions.onOpenSavedSearch,
-        });
-        items.push(openSearchMenuItem);
-      }
+    if (
+      !!appId &&
+      services.data.search.isBackgroundSearchEnabled &&
+      services.capabilities.discover_v2.storeSearchSession
+    ) {
+      const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
+        onClick: ({ context: { onFinishAction } }) => {
+          services.data.search.showSearchSessionsFlyout({
+            appId,
+            trackingProps: { openedFrom: 'background search button' },
+            onBackgroundSearchOpened: ({ session, event }) => {
+              event?.preventDefault();
+              void dispatch(
+                internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+              );
+            },
+            onClose: onFinishAction,
+          });
+        },
+      });
+      items.push(backgroundSearchFlyoutMenuItem);
+    }
 
-      if (!defaultMenu?.shareItem?.disabled) {
-        const shareAppMenuItem = getShareAppMenuItem({
-          discoverParams,
-          services,
-          stateContainer: state,
-        });
-        items.push(...shareAppMenuItem);
-      }
+    if (!services.embeddableEditor.isEmbeddedEditor()) {
+      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
+        isEsqlMode && currentDataView.type === ESQL_TYPE
+          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+          : undefined;
+      const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
+        ? defaultEsqlState
+        : currentDataView.isPersisted()
+        ? { dataViewId: currentDataView.id }
+        : { dataViewSpec: currentDataView.toMinimalSpec() };
+      const newSearchMenuItem = getNewSearchAppMenuItem({
+        newSearchUrl: services.locator.getRedirectUrl(locatorParams),
+        onNewSearch: () => {
+          const defaultState: DiscoverAppState = defaultEsqlState ?? {
+            dataSource: currentDataView.id
+              ? createDataViewDataSource({ dataViewId: currentDataView.id })
+              : undefined,
+          };
+          services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
+        },
+      });
+      items.push(newSearchMenuItem);
+    }
 
-      return items;
-    }, [
-      defaultMenu,
-      services,
-      onOpenInspector,
+    if (!services.embeddableEditor.isEmbeddedEditor()) {
+      const openSearchMenuItem = getOpenSearchAppMenuItem({
+        onOpenSavedSearch: (discoverSessionId) =>
+          dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
+      });
+      items.push(openSearchMenuItem);
+    }
+
+    const shareAppMenuItem = getShareAppMenuItem({
       discoverParams,
-      state,
-      isEsqlMode,
-      currentDataView,
-    ]);
+      services,
+      hasIntegrations: hasShareIntegration,
+      hasUnsavedChanges,
+      currentTab,
+      persistedDiscoverSession,
+      totalHitsState,
+      intl,
+    });
+    items.push(...shareAppMenuItem);
+
+    if (canSwitchLanguageMode) {
+      items.push({
+        id: AppMenuActionId.switchLanguageMode,
+        order: 2,
+        label: isDataViewMode
+          ? i18n.translate('discover.localMenu.switchToESQLTitle', {
+              defaultMessage: 'Query in ES|QL',
+            })
+          : i18n.translate('discover.localMenu.switchToClassicTitle', {
+              defaultMessage: 'Switch to Classic',
+            }),
+        tooltipContent: isDataViewMode
+          ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
+              defaultMessage:
+                'Search, transform, join, and aggregate your data with ES|QL or PromQL',
+            })
+          : i18n.translate('discover.localMenu.switchToClassicTooltip', {
+              defaultMessage: 'Search your data with data views and KQL in Classic Discover',
+            }),
+        iconType: isDataViewMode ? 'code' : 'discoverApp',
+        testId: isDataViewMode ? 'select-text-based-language-btn' : 'select-classic-mode-btn',
+        run: switchLanguageMode,
+      });
+    }
+
+    items.push(getInspectAppMenuItem({ onOpenInspector: openInspector }));
+
+    const firstTabScopedMenuItem = items
+      .filter(({ id }) => TAB_SCOPED_APP_MENU_ITEM_IDS.has(id))
+      .sort((left, right) => left.order - right.order)[0];
+
+    if (firstTabScopedMenuItem) {
+      const firstItemIndex = items.findIndex(({ id }) => id === firstTabScopedMenuItem.id);
+
+      if (firstItemIndex >= 0) {
+        items[firstItemIndex] = {
+          ...items[firstItemIndex],
+          separator: 'above',
+        };
+      }
+    }
+
+    return items;
+  }, [
+    canSwitchLanguageMode,
+    services,
+    discoverParams,
+    appId,
+    dispatch,
+    getState,
+    subscribe,
+    isEsqlMode,
+    currentDataView,
+    currentTab,
+    isDataViewMode,
+    openInspector,
+    persistedDiscoverSession,
+    hasShareIntegration,
+    hasUnsavedChanges,
+    totalHitsState,
+    intl,
+    showCreateRuleV2,
+    switchLanguageMode,
+  ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
   const appMenuRegistry = useMemo(() => {
-    const newAppMenuRegistry = new AppMenuRegistry(appMenuPrimaryAndSecondaryItems);
+    const newAppMenuRegistry = new AppMenuRegistry();
+
+    newAppMenuRegistry.registerItems(appMenuItems);
+
+    if (services.capabilities.discover_v2.save) {
+      const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
+
+      const savedAsButton = {
+        run: async () => {
+          onOpenSaveAsModal();
+        },
+        id: 'saveAs',
+        order: 1,
+        label: i18n.translate('discover.localMenu.saveAsTitle', {
+          defaultMessage: 'Save as',
+        }),
+        iconType: 'save',
+        testId: 'interactiveSaveMenuItem',
+      };
+
+      newAppMenuRegistry.setPrimaryActionItem({
+        id: 'save',
+        label: isEmbeddedEditor
+          ? i18n.translate('discover.localMenu.saveAndReturnTitle', {
+              defaultMessage: 'Save and return',
+            })
+          : i18n.translate('discover.localMenu.saveTitle', {
+              defaultMessage: 'Save',
+            }),
+        testId: 'discoverSaveButton',
+        iconType: isEmbeddedEditor ? 'checkCircleFill' : 'save',
+        run: async () => {
+          if (isEmbeddedEditor && services.embeddableEditor.isByValueEditor()) {
+            await transferBackToEditor();
+          } else {
+            onOpenSaveModal();
+          }
+        },
+        popoverWidth: 170,
+        popoverTestId: 'discoverSaveButtonPopover',
+        splitButtonProps: {
+          secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
+            defaultMessage: 'Save options',
+          }),
+          // Show different split button options when in embedded editor mode
+          ...(isEmbeddedEditor
+            ? {
+                items: [
+                  savedAsButton,
+                  {
+                    run: () =>
+                      services.embeddableEditor.transferBackToEditor(TransferAction.Cancel),
+                    id: 'cancel',
+                    order: 100,
+                    label: i18n.translate('discover.localMenu.cancelTitle', {
+                      defaultMessage: 'Cancel',
+                    }),
+                    iconType: 'undo',
+                    testId: 'discoverCancelButton',
+                  },
+                ],
+              }
+            : {
+                showNotificationIndicator: hasUnsavedChanges,
+                notificationIndicatorTooltipContent: hasUnsavedChanges
+                  ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
+                      defaultMessage: 'You have unsaved changes',
+                    })
+                  : undefined,
+                items: [
+                  {
+                    ...savedAsButton,
+                    disableButton: !persistedDiscoverSession,
+                  },
+                  {
+                    run: async () => {
+                      dismissFlyouts([DiscoverFlyouts.lensEdit]);
+
+                      const internalState = getState();
+
+                      if (internalState.persistedDiscoverSession) {
+                        await dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+                      }
+                    },
+                    id: 'resetChanges',
+                    order: 2,
+                    label: i18n.translate('discover.localMenu.resetChangesTitle', {
+                      defaultMessage: 'Reset changes',
+                    }),
+                    iconType: 'undo',
+                    testId: 'revertUnsavedChangesButton',
+                    disableButton: !hasUnsavedChanges,
+                  },
+                ],
+              }),
+        },
+      });
+    }
+
+    // Allow profile accessors to add additional items/popover items
     const getAppMenu = getAppMenuAccessor(() => ({
       appMenuRegistry: () => newAppMenuRegistry,
     }));
 
-    return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
-  }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
+    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
 
-  return useMemo(() => {
-    const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
-      convertAppMenuItemToTopNavItem({
-        appMenuItem,
-        services,
-      })
-    );
-
-    if (services.uiSettings.get(ENABLE_ESQL)) {
-      /**
-       * Switches from ES|QL to classic mode and vice versa
-       */
-      const esqLDataViewTransitionToggle = {
-        id: 'esql',
-        label: isEsqlMode
-          ? i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch to classic',
-            })
-          : i18n.translate('discover.localMenu.tryESQLTitle', {
-              defaultMessage: 'Try ES|QL',
-            }),
-        emphasize: true,
-        fill: false,
-        color: 'text',
-        tooltip: isEsqlMode
-          ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
-              defaultMessage: 'Switch to KQL or Lucene syntax.',
-            })
-          : i18n.translate('discover.localMenu.esqlTooltipLabel', {
-              defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
-            }),
-        run: () => {
-          if (dataView) {
-            if (isEsqlMode) {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-              /**
-               * Display the transition modal if:
-               * - the user has not dismissed the modal
-               * - the user has opened and applied changes to the saved search
-               */
-              if (
-                shouldShowESQLToDataViewTransitionModal &&
-                !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-              ) {
-                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-              } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
-              }
-            } else {
-              state.actions.transitionFromDataViewToESQL(dataView);
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
-            }
-          }
-        },
-        testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
-      };
-      entries.unshift(esqLDataViewTransitionToggle);
-    }
-
-    if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
-      const saveSearch = {
-        id: 'save',
-        label: i18n.translate('discover.localMenu.saveTitle', {
-          defaultMessage: 'Save',
-        }),
-        description: i18n.translate('discover.localMenu.saveSearchDescription', {
-          defaultMessage: 'Save session',
-        }),
-        testId: 'discoverSaveButton',
-        iconType: 'save',
-        emphasize: true,
-        run: (anchorElement: HTMLElement) => {
-          onSaveSearch({
-            savedSearch: state.savedSearchState.getState(),
-            services,
-            state,
-            onClose: () => {
-              anchorElement?.focus();
-            },
-          });
-        },
-      };
-      entries.push(saveSearch);
-    }
-
-    return entries;
+    return registry;
   }, [
-    appMenuRegistry,
+    getAppMenuAccessor,
+    discoverParams,
+    appMenuItems,
     services,
-    defaultMenu?.saveItem?.disabled,
-    isEsqlMode,
-    dataView,
-    shouldShowESQLToDataViewTransitionModal,
     dispatch,
-    state,
+    getState,
+    hasUnsavedChanges,
+    transferBackToEditor,
+    persistedDiscoverSession,
+    onOpenSaveModal,
+    onOpenSaveAsModal,
   ]);
+
+  return useMemo((): AppMenuConfig => {
+    const config = appMenuRegistry.getAppMenuConfig();
+
+    return {
+      items: config.items?.map((item) =>
+        enhanceAppMenuItemWithRunAction({
+          appMenuItem: item,
+          services,
+        })
+      ),
+      primaryActionItem: config.primaryActionItem
+        ? enhanceAppMenuItemWithRunAction({
+            appMenuItem: config.primaryActionItem,
+            services,
+          })
+        : undefined,
+    };
+  }, [appMenuRegistry, services]);
 };

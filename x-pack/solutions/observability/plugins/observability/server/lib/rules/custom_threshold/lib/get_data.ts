@@ -8,7 +8,7 @@
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type {
@@ -17,7 +17,8 @@ import type {
 } from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
-import { CONTAINER_ID, AdditionalContext, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
+import type { AdditionalContext } from '../utils';
+import { CONTAINER_ID, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
@@ -107,6 +108,7 @@ export const getData = async (
   timeFieldName: string,
   groupBy: string | undefined | string[],
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   esQueryConfig: EsQueryConfig,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -175,6 +177,7 @@ export const getData = async (
           timeFieldName,
           groupBy,
           searchConfiguration,
+          dataView,
           esQueryConfig,
           compositeSize,
           alertOnGroupDisappear,
@@ -219,6 +222,7 @@ export const getData = async (
       compositeSize,
       alertOnGroupDisappear,
       searchConfiguration,
+      dataView,
       esQueryConfig,
       runtimeMappings,
       lastPeriodEnd,

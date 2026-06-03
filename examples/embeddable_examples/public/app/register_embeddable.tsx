@@ -16,8 +16,6 @@ import registerSearchPanelAction from '../react_embeddables/search/register_sear
 // @ts-ignore
 import createPanelAction from '../react_embeddables/search/create_search_panel_action?raw';
 // @ts-ignore
-import registerFieldListEmbeddableSource from '../react_embeddables/field_list/register_field_list_embeddable?raw';
-// @ts-ignore
 import registerReactEmbeddableSavedObjectSource from '../react_embeddables/register_saved_object_example?raw';
 
 export const RegisterEmbeddable = () => {
@@ -27,7 +25,7 @@ export const RegisterEmbeddable = () => {
         <h2>Register a new embeddable type</h2>
         <p>
           This plugin registers several embeddable types with{' '}
-          <strong>registerReactEmbeddableFactory</strong>. The code example below shows Search
+          <strong>registerEmbeddablePublicDefinition</strong>. The code example below shows Search
           embeddable registration. The embeddable factory is imported asynchronously to limit
           initial page load size.
         </p>
@@ -66,24 +64,6 @@ export const RegisterEmbeddable = () => {
       <EuiSpacer size="s" />
       <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
         {createPanelAction}
-      </EuiCodeBlock>
-
-      <EuiSpacer size="l" />
-
-      <EuiText>
-        <h2>Configure initial dashboard placement (optional)</h2>
-        <p>
-          Add an entry to <strong>registerDashboardPanelPlacementSetting</strong> provided by the
-          Dashboard plugin start contract to configure initial dashboard placement. Panel placement
-          lets you configure the width, height, and placement strategy when panels get added to a
-          dashboard. In the example below, the Field List embeddable will be added to dashboards as
-          a narrow and tall panel.
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-
-      <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-        {registerFieldListEmbeddableSource}
       </EuiCodeBlock>
 
       <EuiSpacer size="l" />

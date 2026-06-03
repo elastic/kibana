@@ -6,16 +6,17 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { areFiltersEmpty } from '../common/utils';
 import { getStatsOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
-import { MonitorFilters } from '../monitors_overview/types';
 import { setOverviewPageStateAction } from '../../synthetics/state';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
+import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewStatus } from '../../synthetics/components/monitors_page/overview/overview/overview_status';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const StatsOverviewComponent = ({
   reload$,
@@ -44,13 +45,16 @@ export const StatsOverviewComponent = ({
 
 const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
   const dispatch = useDispatch();
+
+  useOverviewStatus({ scopeStatusByLocation: false });
+
   useEffect(() => {
     dispatch(
       setOverviewPageStateAction({
         tags: filters.tags?.map((tag) => tag.value),
         locations: filters.locations?.map((location) => location.value),
-        monitorTypes: filters.monitorTypes?.map((monitorType) => monitorType.value),
-        monitorQueryIds: filters.monitorIds?.map((monitorId) => monitorId.value),
+        monitorTypes: filters.monitor_types?.map((monitorType) => monitorType.value),
+        monitorQueryIds: filters.monitor_ids?.map((monitorId) => monitorId.value),
         projects: filters.projects?.map((project) => project.value),
       })
     );

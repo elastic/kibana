@@ -6,8 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { SyntheticsEsClient } from '../lib';
-import { Ping } from '../../common/runtime_types/ping';
+import type { SyntheticsEsClient } from '../lib';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import type { Ping } from '../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
@@ -85,8 +86,10 @@ export const getLastSuccessfulCheck = async ({
   monitorId,
   timestamp,
   location,
+  remoteName,
 }: GetStepScreenshotParams & {
   syntheticsEsClient: SyntheticsEsClient;
+  remoteName?: string;
 }): Promise<Ping | null> => {
   const lastSuccessCheckParams = getLastSuccessfulStepParams({
     monitorId,
@@ -94,7 +97,10 @@ export const getLastSuccessfulCheck = async ({
     location,
   });
 
-  const { body: result } = await syntheticsEsClient.search(lastSuccessCheckParams);
+  const { body: result } = await syntheticsEsClient.search({
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+    ...lastSuccessCheckParams,
+  });
 
   if (result.hits.total.value < 1) {
     return null;

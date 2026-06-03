@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { LensPluginStartDependencies } from '../plugin';
+import type { LensPluginStartDependencies } from '../plugin';
 import { lensVisTypeAlias } from '../vis_type_alias';
 
 export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
   return {
     id: 'addLensPanelAction',
-    getIconType: () => lensVisTypeAlias.icon,
+    getIconType: () => 'visBarVertical',
     order: lensVisTypeAlias.order,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {

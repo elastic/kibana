@@ -6,7 +6,7 @@
  */
 
 import { replaceParams } from '@kbn/openapi-common/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { GetRuleMigrationPrebuiltRulesResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../common/siem_migrations/constants';

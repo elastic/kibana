@@ -17,9 +17,6 @@ jest.mock('../../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(() => ({
     services: {
       application: { navigateToUrl: jest.fn() },
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
     },
   })),
   useToasts: jest.fn(() => ({
@@ -40,12 +37,6 @@ jest.mock('../../../../use_attack_discovery_bulk', () => ({
 
 jest.mock('../../../../use_find_attack_discoveries', () => ({
   useInvalidateFindAttackDiscoveries: jest.fn(() => jest.fn()),
-}));
-
-jest.mock('../../../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn(() => ({
-    attackDiscoveryAlertsEnabled: true,
-  })),
 }));
 
 const defaultProps = {

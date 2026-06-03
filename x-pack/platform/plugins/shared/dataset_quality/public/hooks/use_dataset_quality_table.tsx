@@ -16,7 +16,7 @@ import { getDatasetQualityTableColumns } from '../components/dataset_quality/tab
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
-import { SortDirection } from '../../common/types';
+import type { SortDirection } from '../../common/types';
 import { useDatasetQualityState } from './use_dataset_quality_state';
 
 export type DatasetTableSortField = keyof DataStreamStat;
@@ -66,23 +66,23 @@ export const useDatasetQualityTable = () => {
     service,
     (state) =>
       state.matches('initializing') ||
-      state.matches('main.stats.datasets.fetching') ||
-      state.matches('main.stats.docsStats.fetching') ||
-      state.matches('main.integrations.fetching') ||
-      state.matches('main.stats.degradedDocs.fetching') ||
-      state.matches('main.stats.failedDocs.fetching')
+      state.matches({ main: { stats: { datasets: 'fetching' } } }) ||
+      state.matches({ main: { stats: { docsStats: 'fetching' } } }) ||
+      state.matches({ main: { integrations: 'fetching' } }) ||
+      state.matches({ main: { stats: { degradedDocs: 'fetching' } } }) ||
+      state.matches({ main: { stats: { failedDocs: 'fetching' } } })
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
-    state.matches('main.stats.datasets.fetching')
+    state.matches({ main: { stats: { datasets: 'fetching' } } })
   );
   const loadingDocStats = useSelector(service, (state) =>
-    state.matches('main.stats.docsStats.fetching')
+    state.matches({ main: { stats: { docsStats: 'fetching' } } })
   );
   const loadingDegradedStats = useSelector(service, (state) =>
-    state.matches('main.stats.degradedDocs.fetching')
+    state.matches({ main: { stats: { degradedDocs: 'fetching' } } })
   );
   const loadingFailedStats = useSelector(service, (state) =>
-    state.matches('main.stats.failedDocs.fetching')
+    state.matches({ main: { stats: { failedDocs: 'fetching' } } })
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
@@ -208,6 +208,31 @@ export const useDatasetQualityTable = () => {
     );
   }, [rowsPerPage, page, renderedItems.length, datasets.length]);
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+      dataStreamName,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+      dataStreamName: string;
+    }) => {
+      const dataStream = datasets.find((ds) => ds.rawName === dataStreamName);
+      if (!dataStream) return;
+
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        dataStream: {
+          ...dataStream,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
+        },
+      });
+    },
+    [service, datasets]
+  );
+
   return {
     sort: { sort },
     onTableChange,
@@ -223,5 +248,6 @@ export const useDatasetQualityTable = () => {
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
+    updateFailureStore,
   };
 };

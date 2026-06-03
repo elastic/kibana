@@ -12,11 +12,12 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiHighlight,
   EuiIcon,
+  EuiIconTip,
   EuiToolTip,
   euiShadowXSmall,
   type UseEuiTheme,
@@ -26,7 +27,7 @@ import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 
-const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
+const DRAG_ICON = <EuiIcon type="drag" size="m" aria-hidden={true} />;
 
 /**
  * Props of FieldItemButton component
@@ -188,7 +189,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
             className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
             css={fieldActionCss}
             color="text"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               event.preventDefault();
               event.stopPropagation();
@@ -264,7 +265,9 @@ function FieldConflictInfoIcon({
 }) {
   const types = conflictDescriptions ? Object.keys(conflictDescriptions) : [];
   return (
-    <EuiToolTip
+    <EuiIconTip
+      type="warning"
+      size="s"
       position="bottom"
       title={i18n.translate('unifiedFieldList.fieldItemButton.mappingConflictTitle', {
         defaultMessage: 'Mapping Conflict',
@@ -284,9 +287,7 @@ function FieldConflictInfoIcon({
                 'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
             })
       }
-    >
-      <EuiIcon tabIndex={0} type="warning" size="s" />
-    </EuiToolTip>
+    />
   );
 }
 
@@ -303,7 +304,7 @@ const componentStyles = {
   }),
   fieldItemButton: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
-    const boxShadow = euiShadowXSmall(themeContext);
+    const boxShadow = euiShadowXSmall(themeContext, { border: 'none' });
 
     return css({
       width: '100%',

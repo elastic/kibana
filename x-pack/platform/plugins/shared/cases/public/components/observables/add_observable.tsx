@@ -31,7 +31,7 @@ export interface AddObservableProps {
 const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const { permissions } = useCasesContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
+  const { isLoading, mutateAsync: postObservable } = usePostObservable(caseData.id);
   const { observablesAuthorized: isObservablesEnabled } = useCasesFeatures();
 
   const closeModal = () => setIsModalVisible(false);
@@ -39,13 +39,13 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
 
   const handleCreateObservable = useCallback(
     async (observable: ObservablePost) => {
-      await postObservables({
+      await postObservable({
         observable,
       });
 
       closeModal();
     },
-    [postObservables]
+    [postObservable]
   );
 
   const modalTitleId = useGeneratedHtmlId();
@@ -56,7 +56,7 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         disabled={!isObservablesEnabled}
         title={isObservablesEnabled ? undefined : i18n.PLATINUM_NOTICE}
         data-test-subj="cases-observables-add"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={showModal}
       >
         {i18n.ADD_OBSERVABLE}

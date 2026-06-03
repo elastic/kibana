@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { ContextEditorRow } from '../types';
+import type { ContextEditorRow } from '../types';
 import { getColumns } from '.';
 
 interface ColumnWithRender {
@@ -282,7 +282,7 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(container.querySelector('[data-euiicon-type="eyeClosed"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="eyeSlash"]')).not.toBeNull();
       expect(container.querySelector('[data-euiicon-type="eye"]')).toBeNull();
     });
 
@@ -296,7 +296,7 @@ describe('getColumns', () => {
         </TestProviders>
       );
 
-      expect(container.querySelector('[data-euiicon-type="eyeClosed"]')).toBeNull();
+      expect(container.querySelector('[data-euiicon-type="eyeSlash"]')).toBeNull();
       expect(container.querySelector('[data-euiicon-type="eye"]')).not.toBeNull();
     });
 

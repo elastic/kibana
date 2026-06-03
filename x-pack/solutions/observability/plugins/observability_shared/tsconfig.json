@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -48,7 +48,9 @@
     "@kbn/charts-theme",
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
-    "@kbn/config-schema",
+    "@kbn/agent-builder-browser",
+    "@kbn/controls-constants",
+    "@kbn/apm-types",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

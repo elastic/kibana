@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 

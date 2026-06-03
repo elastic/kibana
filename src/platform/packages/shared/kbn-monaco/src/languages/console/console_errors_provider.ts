@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConsoleWorkerProxyService } from './console_worker_proxy';
+import type { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { CONSOLE_LANG_ID } from './constants';
 import { monaco } from '../../monaco_imports';
 
@@ -32,13 +32,15 @@ export const setupConsoleErrorsProvider = (workerProxyService: ConsoleWorkerProx
     monaco.editor.setModelMarkers(
       model,
       CONSOLE_LANG_ID,
-      errors.map(({ offset, text }) => {
+      errors.map(({ offset, endOffset, text }) => {
         const { column, lineNumber } = model.getPositionAt(offset);
+        const endPosition =
+          endOffset !== undefined ? model.getPositionAt(endOffset) : { column, lineNumber };
         return {
           startLineNumber: lineNumber,
           startColumn: column,
-          endLineNumber: lineNumber,
-          endColumn: column,
+          endLineNumber: endPosition.lineNumber,
+          endColumn: endPosition.column,
           message: text,
           severity: monaco.MarkerSeverity.Error,
         };

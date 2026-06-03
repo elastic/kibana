@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
+import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import { HEALTHY_ROLLING_SLO, historicalSummaryData } from '../../data/slo/historical_summary_data';
-import { Params, UseFetchHistoricalSummaryResponse } from '../use_fetch_historical_summary';
+import type { Params, UseFetchHistoricalSummaryResponse } from '../use_fetch_historical_summary';
 
 export const useFetchHistoricalSummary = ({
   sloList = [],

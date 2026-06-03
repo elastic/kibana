@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   const { common, dashboard, home, dashboardControls } = getPageObjects([
     'common',
@@ -28,8 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await home.addSampleDataSet('flights');
       await common.navigateToApp('dashboard');
-      await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('[Flights] Global Flight Dashboard');
     });
 
     after(async () => {
@@ -39,13 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await home.removeSampleDataSet('flights');
     });
 
-    it('Controls main menu panel', async () => {
-      await testSubjects.click('dashboard-controls-menu-button');
-      await a11y.testAppSnapshot();
-    });
-
     it('Add controls panel', async () => {
-      await testSubjects.click('controls-create-button');
+      await dashboardAddPanel.clickAddControlPanel();
       await a11y.testAppSnapshot();
     });
 
@@ -69,20 +64,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Range control panel & dashboard with both range and options control', async () => {
-      await testSubjects.click('dashboard-controls-menu-button');
-      await testSubjects.click('controls-create-button');
+      await dashboardAddPanel.clickAddControlPanel();
       await testSubjects.click('field-picker-select-AvgTicketPrice');
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');
       await a11y.testAppSnapshot();
-    });
-
-    it('Controls setting panel', async () => {
-      await testSubjects.click('dashboard-controls-menu-button');
-      await testSubjects.click('controls-settings-button');
-      await testSubjects.click('control-group-validate-selections');
-      await a11y.testAppSnapshot();
-      await testSubjects.click('control-group-editor-save');
     });
 
     it('Dashboard with options and range control panel popovers', async () => {
@@ -92,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListOpenPopover(optionsControlId);
       await a11y.testAppSnapshot();
       // a11y error on range control https://github.com/elastic/kibana/issues/135266 - uncomment after the fix
-      // const rangeControlId = (await dashboardControls.getAllControlIds())[1];
+      // const rangeControlId = (await dashboardControls.getAllControlIds())[];
       // await dashboardControls.rangeSliderOpenPopover(rangeControlId);
       // await a11y.testAppSnapshot();
     });

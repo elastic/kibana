@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment } from 'react';
 
 import { css } from '@emotion/react';
 
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiIcon,
   EuiLoadingSpinner,
@@ -16,8 +18,6 @@ import {
   shadeOrTint,
   makeHighContrastColor,
   tintOrShade,
-  EuiThemeColorModeStandard,
-  EuiThemeComputed,
 } from '@elastic/eui';
 
 type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused' | 'cancelled';
@@ -66,22 +66,22 @@ const StepStatus: React.FunctionComponent<{ status: STATUS; idx: number }> = ({ 
     inProgress: <EuiLoadingSpinner size="m" css={statusStyles.info} />,
     complete: (
       <span css={statusStyles.success}>
-        <EuiIcon type="check" size="s" />
+        <EuiIcon type="check" size="s" aria-hidden={true} />
       </span>
     ),
     paused: (
       <span css={statusStyles.warning}>
-        <EuiIcon type="pause" size="s" />
+        <EuiIcon type="pause" size="s" aria-hidden={true} />
       </span>
     ),
     cancelled: (
       <span css={statusStyles.warning}>
-        <EuiIcon type="cross" size="s" />
+        <EuiIcon type="cross" size="s" aria-hidden={true} />
       </span>
     ),
     failed: (
       <span css={statusStyles.danger}>
-        <EuiIcon type="cross" size="s" />
+        <EuiIcon type="cross" size="s" aria-hidden={true} />
       </span>
     ),
   };

@@ -12,6 +12,7 @@ import { isString } from 'lodash';
 import {
   OBSERVABLE_TYPE_DOMAIN,
   OBSERVABLE_TYPE_EMAIL,
+  OBSERVABLE_TYPE_FILE_PATH,
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
   OBSERVABLE_TYPE_URL,
@@ -65,6 +66,12 @@ export const validateDomain = createStringValidationFunction((value) => {
 });
 export const validateGenericValue = createStringValidationFunction((value) => {
   return GENERIC_REGEX.test(value) ? undefined : { code: 'ERR_NOT_VALID' };
+});
+export const validateFilePath = createStringValidationFunction((value) => {
+  const invalidChars = /[<>"|?*]/;
+  return typeof value === 'string' && value.length > 0 && !invalidChars.test(value)
+    ? undefined
+    : { code: 'ERR_NOT_VALID' };
 });
 
 export const validateIp = (kind: 'ipv6' | 'ipv4') =>
@@ -124,6 +131,10 @@ export const getValidatorForObservableType = (
 
     case OBSERVABLE_TYPE_IPV6.key: {
       return validateIp('ipv6');
+    }
+
+    case OBSERVABLE_TYPE_FILE_PATH.key: {
+      return validateFilePath;
     }
 
     default: {

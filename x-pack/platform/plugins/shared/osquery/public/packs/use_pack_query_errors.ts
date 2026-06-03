@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import { SortDirection } from '@kbn/data-plugin/common';
@@ -14,7 +14,8 @@ import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface UsePackQueryErrorsProps {
-  actionId: string;
+  actionId?: string;
+  scheduleId?: string;
   interval: number;
   logsDataView?: DataView;
   skip?: boolean;
@@ -22,14 +23,20 @@ interface UsePackQueryErrorsProps {
 
 export const usePackQueryErrors = ({
   actionId,
+  scheduleId,
   interval,
   skip = false,
 }: UsePackQueryErrorsProps) => {
   const data = useKibana().services.data;
   const { data: logsDataView } = useLogsDataView({ skip });
 
+  // Scheduled-pack errors logged by elastic-agent reference the schedule_id
+  // (native osqueryd path) rather than the legacy action_id. Match on whichever
+  // identifier the caller provided; scheduleId wins when both are present.
+  const messageMatch = scheduleId ?? actionId;
+
   return useQuery(
-    ['scheduledQueryErrors', { actionId, interval }],
+    ['scheduledQueryErrors', { actionId, scheduleId, interval }],
     async () => {
       const searchSource = await data.search.searchSource.create({
         fields: ['*'],
@@ -54,7 +61,7 @@ export const usePackQueryErrors = ({
               },
               {
                 match_phrase: {
-                  message: actionId,
+                  message: messageMatch,
                 },
               },
               {
@@ -77,7 +84,7 @@ export const usePackQueryErrors = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && logsDataView),
+      enabled: !!(!skip && messageMatch && interval && logsDataView),
       select: (response) => response.rawResponse.hits ?? [],
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,

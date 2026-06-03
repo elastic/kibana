@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import React, {
-  MouseEvent,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  KeyboardEvent,
-} from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiModal,
@@ -41,6 +35,7 @@ export const JourneyScreenshotDialog = ({
   initialStepNumber,
   isOpen,
   onClose,
+  remoteName,
 }: {
   timestamp?: string;
   checkGroup: string | undefined;
@@ -49,13 +44,14 @@ export const JourneyScreenshotDialog = ({
   maxSteps: number | undefined;
   isOpen: boolean;
   onClose: () => void;
+  remoteName?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isSmall = useIsWithinMaxBreakpoint('m');
   const [stepNumber, setStepNumber] = useState(initialStepNumber);
 
   const { basePath } = useContext(SyntheticsSettingsContext);
-  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber });
+  const imgPath = getScreenshotUrl({ basePath, checkGroup, stepNumber, remoteName });
 
   const imageResult = useRetrieveStepImage({
     hasIntersected: true,
@@ -103,7 +99,10 @@ export const JourneyScreenshotDialog = ({
   return isOpen ? (
     <EuiOutsideClickDetector onOutsideClick={onClose}>
       <EuiModal
-        onClose={(evt?: KeyboardEvent<HTMLDivElement> | MouseEvent<HTMLButtonElement>) => {
+        aria-label={i18n.translate('xpack.synthetics.monitor.screenshotDialog.ariaLabel', {
+          defaultMessage: 'Journey screenshot dialog',
+        })}
+        onClose={(evt) => {
           // for table row click to work
           evt?.stopPropagation?.();
           onClose();
@@ -165,7 +164,7 @@ export const JourneyScreenshotDialog = ({
                   setStepNumber((s) => s - 1);
                   evt.preventDefault();
                 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 aria-label={prevAriaLabel}
               >
                 {prevAriaLabel}
@@ -191,7 +190,7 @@ export const JourneyScreenshotDialog = ({
                   setStepNumber((s) => s + 1);
                   evt.stopPropagation();
                 }}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 aria-label={nextAriaLabel}
               >
@@ -235,18 +234,25 @@ export const getScreenshotUrl = ({
   basePath,
   checkGroup,
   stepNumber,
+  remoteName,
 }: {
   basePath: string;
   checkGroup?: string;
   stepNumber: number;
+  remoteName?: string;
 }) => {
   if (!checkGroup) {
     return '';
   }
-  return `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
+  const path = `${basePath}${SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT.replace(
     '{checkGroup}',
     checkGroup
   ).replace('{stepIndex}', stepNumber.toString())}`;
+
+  // For remote monitors append `?remoteName=...` so the route handler
+  // forwards it to `get_journey_screenshot` and the query targets
+  // `${remoteName}:synthetics-*` via CCS.
+  return remoteName ? `${path}?remoteName=${encodeURIComponent(remoteName)}` : path;
 };
 
 const prevAriaLabel = i18n.translate('xpack.synthetics.monitor.step.previousStep', {

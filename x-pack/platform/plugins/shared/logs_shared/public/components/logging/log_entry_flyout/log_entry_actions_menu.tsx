@@ -13,10 +13,11 @@ import {
   type UptimeOverviewLocatorInfraParams,
 } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React, { useMemo } from 'react';
-import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
+import type { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 
@@ -74,12 +75,15 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
   return (
     <EuiPopover
       anchorPosition="downRight"
+      aria-label={i18n.translate('xpack.logsShared.logEntryActionsMenu.popoverAriaLabel', {
+        defaultMessage: 'Investigate actions',
+      })}
       button={
         <EuiButton
           data-test-subj="logEntryActionsMenuButton"
           disabled={!hasMenuItems}
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={toggle}
         >
           <FormattedMessage

@@ -12,13 +12,12 @@ import {
   EuiFieldNumber,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiSpacer,
   EuiSwitch,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
+import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
@@ -86,7 +85,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                             id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountLabel"
                             defaultMessage="Number of documents"
                           />
-                          <EuiToolTip
+                          <EuiIconTip
                             position="bottom"
                             content={
                               <FormattedMessage
@@ -94,9 +93,8 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                                 defaultMessage="The threshold for the amount of missing documents to alert upon."
                               />
                             }
-                          >
-                            <EuiIcon type="question" />
-                          </EuiToolTip>
+                            type="question"
+                          />
                         </>
                       }
                     >
@@ -123,7 +121,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                             id="xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.timeIntervalLabel"
                             defaultMessage="Time interval"
                           />
-                          <EuiToolTip
+                          <EuiIconTip
                             position="bottom"
                             content={
                               <FormattedMessage
@@ -131,9 +129,8 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                                 defaultMessage="The lookback interval to check during rule execution for delayed data. By default derived from the longest bucket span and query delay."
                               />
                             }
-                          >
-                            <EuiIcon type="question" />
-                          </EuiToolTip>
+                            type="question"
+                          />
                         </>
                       }
                       value={uiConfig.delayedData.timeInterval}

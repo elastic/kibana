@@ -111,7 +111,7 @@ describe('AgentStatusChangeTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -157,18 +157,6 @@ describe('AgentStatusChangeTask', () => {
             },
           },
           last_known_status: 'offline',
-        },
-        {
-          id: 'agent-3',
-          policy_id: 'agent-policy-3',
-          status: 'online',
-          namespaces: ['default'],
-          local_metadata: {
-            host: {
-              hostname: 'host3',
-            },
-          },
-          last_known_status: 'online',
         },
       ] as unknown as Agent[];
       mockedFetchAllAgentsByKuery
@@ -236,20 +224,7 @@ describe('AgentStatusChangeTask', () => {
     });
 
     it('should do nothing when no agents changed status', async () => {
-      const agents = [
-        {
-          id: 'agent-3',
-          policy_id: 'agent-policy-3',
-          status: 'online',
-          namespaces: ['default'],
-          local_metadata: {
-            host: {
-              hostname: 'host3',
-            },
-          },
-          last_known_status: 'online',
-        },
-      ] as unknown as Agent[];
+      const agents = [] as unknown as Agent[];
       mockedFetchAllAgentsByKuery
         .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
         .mockResolvedValue(getMockFetchAllAgentsByKuery([]));

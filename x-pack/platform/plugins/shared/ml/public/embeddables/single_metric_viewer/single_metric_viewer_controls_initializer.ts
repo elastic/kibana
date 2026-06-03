@@ -6,12 +6,12 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import { BehaviorSubject, map, merge } from 'rxjs';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
-} from '../types';
+} from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 
 export type AnomalySwimLaneControlsState = Pick<
   SingleMetricViewerEmbeddableState,
@@ -32,16 +32,20 @@ export const singleMetricViewerComparators: StateComparators<SingleMetricViewerC
 };
 
 export const initializeSingleMetricViewerControls = (
-  rawState: SingleMetricViewerEmbeddableState,
+  initialState: SingleMetricViewerEmbeddableState,
   titlesApi: TitlesApi
 ) => {
-  const functionDescription = new BehaviorSubject<string | undefined>(rawState.functionDescription);
-  const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
-  const selectedDetectorIndex = new BehaviorSubject<number>(rawState.selectedDetectorIndex ?? 0);
-  const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
-    rawState.selectedEntities
+  const functionDescription = new BehaviorSubject<string | undefined>(
+    initialState.functionDescription
   );
-  const forecastId = new BehaviorSubject<string | undefined>(rawState.forecastId);
+  const jobIds = new BehaviorSubject<JobId[]>(initialState.jobIds);
+  const selectedDetectorIndex = new BehaviorSubject<number>(
+    initialState.selectedDetectorIndex ?? 0
+  );
+  const selectedEntities = new BehaviorSubject<Record<string, any> | undefined>(
+    initialState.selectedEntities
+  );
+  const forecastId = new BehaviorSubject<string | undefined>(initialState.forecastId);
 
   const updateUserInput = (update: SingleMetricViewerEmbeddableUserInput) => {
     jobIds.next(update.jobIds);
@@ -76,12 +80,27 @@ export const initializeSingleMetricViewerControls = (
       updateUserInput,
     },
     anyStateChange$: merge(
-      jobIds,
-      forecastId,
-      selectedDetectorIndex,
-      selectedEntities,
-      functionDescription
-    ).pipe(map(() => undefined)),
+      jobIds.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      forecastId.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      selectedDetectorIndex.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      selectedEntities.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      functionDescription.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState,
     reinitializeState: (lastSavedState: SingleMetricViewerControlsState) => {
       jobIds.next(lastSavedState.jobIds);

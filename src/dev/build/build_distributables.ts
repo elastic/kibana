@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import execa from 'execa';
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, createRunner } from './lib';
+import { Config, SOLUTION_BUILDS, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -24,7 +25,6 @@ export interface BuildOptions {
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
-  buildCanvasShareableRuntime: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
@@ -41,12 +41,22 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  skipServerless: boolean;
+  tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
+  if (options.tarZstd) {
+    try {
+      await execa('zstd', ['--version']);
+    } catch {
+      throw new Error('--tar-zstd requires zstd to be installed.');
+    }
+  }
+
   log.verbose('building distributables with options:', options);
 
   log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);
@@ -71,18 +81,19 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
-    // Build before copying source files
-    if (options.buildCanvasShareableRuntime) {
-      await globalRun(Tasks.BuildCanvasShareableRuntime);
-    }
-
     await globalRun(Tasks.CopyLegacySource);
 
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.ReplaceFavicon);
-    await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
+    // When legacy is removed, keep only Tasks.BuildRspackBundles.
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+      await globalRun(Tasks.BuildRspackBundles);
+    } else {
+      await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    }
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
@@ -94,10 +105,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateXPackNoticeFile);
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
+
     await globalRun(Tasks.UpdateLicenseFile);
     await globalRun(Tasks.RemovePackageJsonDeps);
     await globalRun(Tasks.CleanPackageManagerRelatedFiles);
     await globalRun(Tasks.CleanExtraFilesFromModules);
+
     await globalRun(Tasks.CleanEmptyFolders);
     await globalRun(Tasks.FetchAgentVersionsList);
   }
@@ -173,8 +186,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    artifactTasks.push(Tasks.CreateDockerServerlessX64);
-    artifactTasks.push(Tasks.CreateDockerServerlessARM64);
+    artifactTasks.push(Tasks.CreateDockerServerless('x64'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64'));
+    SOLUTION_BUILDS.forEach((solution) => {
+      artifactTasks.push(Tasks.CreateDockerServerless('x64', solution));
+      artifactTasks.push(Tasks.CreateDockerServerless('aarch64', solution));
+    });
   }
 
   if (options.createDockerFIPS) {

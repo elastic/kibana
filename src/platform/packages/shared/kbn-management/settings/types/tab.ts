@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RegistryEntry } from '@kbn/management-settings-section-registry';
-import { CategoryCounts } from './category';
-import { FieldDefinition } from '.';
+import type { RegistryEntry } from '@kbn/management-settings-section-registry';
+import type { CategoryCounts } from './category';
+import type { FieldDefinition } from '.';
 
 export interface SettingsTabs {
   [id: string]: {

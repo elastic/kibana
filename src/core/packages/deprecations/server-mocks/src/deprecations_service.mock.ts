@@ -14,21 +14,22 @@ import type {
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
 } from '@kbn/core-deprecations-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 type DeprecationsServiceContract = PublicMethodsOf<DeprecationsService>;
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<DeprecationsServiceSetup> = {
+  const setupContract: jest.Mocked<DeprecationsServiceSetup> = lazyObject({
     registerDeprecations: jest.fn(),
-  };
+  });
 
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const mocked: jest.Mocked<InternalDeprecationsServiceStart> = {
+  const mocked: jest.Mocked<InternalDeprecationsServiceStart> = lazyObject({
     asScopedToClient: jest.fn(),
-  };
+  });
 
   mocked.asScopedToClient.mockReturnValue(createClientMock());
 
@@ -36,30 +37,29 @@ const createStartContractMock = () => {
 };
 
 const createInternalSetupContractMock = () => {
-  const internalSetupContract: jest.Mocked<InternalDeprecationsServiceSetup> = {
+  const internalSetupContract: jest.Mocked<InternalDeprecationsServiceSetup> = lazyObject({
     getRegistry: jest.fn(),
-  };
+  });
 
   internalSetupContract.getRegistry.mockReturnValue(createSetupContractMock());
   return internalSetupContract;
 };
 
 const createDeprecationsServiceMock = () => {
-  const mocked: jest.Mocked<DeprecationsServiceContract> = {
+  const mocked: jest.Mocked<DeprecationsServiceContract> = lazyObject({
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
-  };
+  });
 
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   return mocked;
 };
 
 const createClientMock = () => {
-  const mocked: jest.Mocked<DeprecationsClient> = {
-    getAllDeprecations: jest.fn(),
-  };
-  mocked.getAllDeprecations.mockResolvedValue([]);
+  const mocked: jest.Mocked<DeprecationsClient> = lazyObject({
+    getAllDeprecations: jest.fn().mockResolvedValue([]),
+  });
   return mocked;
 };
 

@@ -9,8 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { validAttachment } from '../utils';
-import type { attachmentApiV1 } from '../../../../common/types/api';
+import { escapeHatch } from '../utils';
+import type { attachmentApiV2 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
@@ -22,7 +22,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
     params: schema.object({
       case_id: schema.string(),
     }),
-    body: schema.arrayOf(validAttachment),
+    body: schema.arrayOf(escapeHatch),
   },
   routerOptions: {
     access: 'internal',
@@ -32,7 +32,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
       const casesContext = await context.cases;
       const casesClient = await casesContext.getCasesClient();
       const caseId = request.params.case_id;
-      const attachments = request.body as attachmentApiV1.BulkCreateAttachmentsRequest;
+      const attachments = request.body as attachmentApiV2.BulkCreateAttachmentsRequestV2;
       const res: caseDomainV1.Case = await casesClient.attachments.bulkCreate({
         caseId,
         attachments,

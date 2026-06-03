@@ -78,7 +78,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (validationResult && validationResult.error) {
       validationWarning = (
         <Fragment>
-          <EuiCallOut color="danger" title={validationResult.error} size="s" />
+          <EuiCallOut announceOnMount color="danger" title={validationResult.error} size="s" />
         </Fragment>
       );
     }
@@ -160,6 +160,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (this.state.mode === 'json' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
       return (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate(
             'xpack.security.management.editRoleMapping.visualEditorUnavailableTitle',
@@ -193,7 +194,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                 id="xpack.security.management.editRoleMapping.switchToJSONEditorLink"
                 defaultMessage="Switch to JSON editor"
               />{' '}
-              <EuiIcon type="inputOutput" size="s" />
+              <EuiIcon type="inputOutput" size="s" aria-hidden={true} />
             </Fragment>
           </EuiLink>
         );
@@ -210,7 +211,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                 id="xpack.security.management.editRoleMapping.switchToVisualEditorLink"
                 defaultMessage="Switch to visual editor"
               />{' '}
-              <EuiIcon type="inputOutput" size="s" />
+              <EuiIcon type="inputOutput" size="s" aria-hidden={true} />
             </Fragment>
           </EuiLink>
         );

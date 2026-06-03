@@ -10,11 +10,7 @@ import type {
   ExceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export const TRUSTED_APPS_LIST_TYPE: ExceptionListType =
   ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS;
@@ -28,9 +24,9 @@ export const SEARCHABLE_FIELDS: Readonly<string[]> = [
 ];
 
 export const TRUSTED_APPS_EXCEPTION_LIST_DEFINITION: CreateExceptionListSchema = {
-  name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+  name: ENDPOINT_ARTIFACT_LISTS.trustedApps.name,
   namespace_type: 'agnostic',
-  description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+  description: ENDPOINT_ARTIFACT_LISTS.trustedApps.description,
+  list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
   type: ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS,
 };

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('can browse Kibana', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await svlCommonPage.loginAsViewer();
     });

@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
+  const kbnTestServer = functionalConfig.get('kbnTestServer');
 
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...kbnTestServer,
+      serverArgs: [
+        ...kbnTestServer.serverArgs,
+        '--feature_flags.overrides.discover.cascadeLayoutEnabled=false',
+      ],
+    },
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests - aiops',
     },

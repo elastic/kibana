@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { strings } from './action_strings';
-import { FilterItemActionsProps } from './types';
+import type { FilterItemActionsProps } from './types';
 import { FilterItemActions } from './actions';
 
 export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) => {
@@ -24,7 +25,7 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) =>
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       color="text"
       aria-label={strings.getMoreActionsLabel()}
       onClick={onMoreActionsButtonClick}
@@ -32,7 +33,13 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) =>
   );
 
   return (
-    <EuiPopover ownFocus={false} button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      ownFocus={false}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={strings.getMoreActionsLabel()}
+    >
       <FilterItemActions {...props} minimizePaddings={true} />
     </EuiPopover>
   );

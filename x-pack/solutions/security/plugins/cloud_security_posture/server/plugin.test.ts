@@ -17,14 +17,14 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
-import { CspServerPluginStartDeps } from './types';
-import {
+import type { CspServerPluginStartDeps } from './types';
+import type {
   Installation,
   ListResult,
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import {
+import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
@@ -32,7 +32,7 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
-import {
+import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,

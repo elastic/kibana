@@ -12,8 +12,9 @@ import {
   FINAL_SUMMARY_FILTER,
   getRangeFilter,
 } from '../constants/client_defaults';
+import { selectedMimeCategoriesQuery } from '../constants/mime_types';
 import type { CertificatesResults } from '../../server/queries/get_certs';
-import { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import { asMutableArray } from '../utils/as_mutable_array';
@@ -31,7 +32,48 @@ export const DEFAULT_SIZE = 20;
 export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
 
-function absoluteDate(relativeDate: string) {
+export const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
+export const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
+export const CERT_ISSUER_COMMON_NAME = 'tls.server.x509.issuer.common_name';
+
+// `synthetics.type` value stamped on browser monitor network events, which is
+// where browser TLS certificates are captured.
+export const BROWSER_NETWORK_INFO = 'journey/network_info';
+
+// Values used by the browser-cert "party" quick filter (first- vs third-party).
+// Shared with the UI control.
+export const FIRST_PARTY = 'first_party';
+export const THIRD_PARTY = 'third_party';
+
+// Origin is derived from the browser-emitted `Sec-Fetch-Site` fetch-metadata
+// header (captured at `http.request.headers.sec_fetch_site`). The legacy
+// `http.request.is_same_site` boolean is no longer collected by the synthetics
+// agent, so we read the header instead. It lives only in `_source` (request
+// headers are not indexed), hence the no-script runtime field below — the same
+// pattern the step waterfall uses for `synthetics.payload.transfer_size`.
+export const SEC_FETCH_SITE_FIELD = 'http.request.headers.sec_fetch_site';
+
+// `same-origin`/`same-site` are the monitored site itself; `none` is the
+// user-initiated top-level navigation (the page's own document). `cross-site`
+// is a different registrable domain, i.e. a third-party resource (CDN, ads…).
+export const FIRST_PARTY_SEC_FETCH_VALUES = ['same-origin', 'same-site', 'none'] as const;
+export const THIRD_PARTY_SEC_FETCH_VALUES = ['cross-site'] as const;
+
+export const PARTY_RUNTIME_MAPPINGS: estypes.MappingRuntimeFields = {
+  [SEC_FETCH_SITE_FIELD]: { type: 'keyword' },
+};
+
+export const partyQuery = (
+  party: typeof FIRST_PARTY | typeof THIRD_PARTY
+): estypes.QueryDslQueryContainer => ({
+  terms: {
+    [SEC_FETCH_SITE_FIELD]: [
+      ...(party === FIRST_PARTY ? FIRST_PARTY_SEC_FETCH_VALUES : THIRD_PARTY_SEC_FETCH_VALUES),
+    ],
+  },
+});
+
+export function absoluteDate(relativeDate: string) {
   return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
 }
 
@@ -47,18 +89,99 @@ export const getCertsRequestBody = ({
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
   filters,
+  monitorTypes,
+  browserResourceTypes,
+  party,
+  tags,
+  issuers,
+  includeBrowserCerts = false,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
+
+  // The collapse/dedupe key. For the lightweight-only query we keep using the
+  // indexed sha256 fingerprint. When browser certs are included we dedupe on the
+  // certificate subject common name instead, because browser network events do
+  // not index a `tls.server.hash.sha256` fingerprint (and `collapse` cannot run
+  // on a runtime field, which has no doc_values).
+  const certIdField = includeBrowserCerts ? CERT_SUBJECT_COMMON_NAME : CERT_HASH_SHA256;
+
+  // Browser-only quick filters, derived from fields that only exist on browser
+  // network events. Origin maps the `Sec-Fetch-Site` header (read via the
+  // `SEC_FETCH_SITE_FIELD` runtime field) onto first-/third-party; resource type
+  // maps the indexed `http.response.mime_type` onto the shared mime categories
+  // (the browser engine's own `synthetics.payload.type` is stored unindexed, so
+  // it is not queryable — see common/constants/mime_types.ts).
+  const wantsFirstParty = party?.includes(FIRST_PARTY);
+  const wantsThirdParty = party?.includes(THIRD_PARTY);
+  const partyFilter =
+    wantsFirstParty && !wantsThirdParty
+      ? [partyQuery(FIRST_PARTY)]
+      : wantsThirdParty && !wantsFirstParty
+      ? [partyQuery(THIRD_PARTY)]
+      : [];
+  const hasResourceTypeFilter = Boolean(browserResourceTypes && browserResourceTypes.length > 0);
+
+  const browserBranchFilter = [
+    { term: { 'synthetics.type': BROWSER_NETWORK_INFO } },
+    { exists: { field: CERT_SUBJECT_COMMON_NAME } },
+    { exists: { field: 'tls.server.x509.not_after' } },
+    ...(hasResourceTypeFilter ? [selectedMimeCategoriesQuery(browserResourceTypes ?? [])] : []),
+    ...partyFilter,
+  ];
+
+  const lightweightBranchFilter = [FINAL_SUMMARY_FILTER, { exists: { field: CERT_HASH_SHA256 } }];
+
+  // Resource type and origin are browser-only concepts: a lightweight HTTP/TCP
+  // cert has no resource type or same-site flag, so when either filter is active
+  // we must exclude the lightweight branch entirely. Otherwise lightweight certs
+  // would leak through unfiltered (and inconsistently disappear once the user
+  // also narrows monitor type to browser).
+  const browserOnlyFilterActive = hasResourceTypeFilter || partyFilter.length > 0;
+
+  // Restricts which documents carry a certificate. Lightweight monitors expose
+  // the cert on their summary ping; browser monitors expose it on every network
+  // event (one per resource), so the certificates page lists all of them.
+  const certTypeFilter = !includeBrowserCerts
+    ? lightweightBranchFilter
+    : browserOnlyFilterActive
+    ? browserBranchFilter
+    : [
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { bool: { filter: lightweightBranchFilter } },
+              { bool: { filter: browserBranchFilter } },
+            ],
+          },
+        },
+      ];
 
   return createEsQuery({
     from: (pageIndex ?? 0) * size,
     size,
+    // The origin filter reads `Sec-Fetch-Site` from `_source`; the runtime field
+    // is only declared when that filter is active so other callers (e.g. the TLS
+    // alert rule) skip the per-doc evaluation entirely.
+    ...(partyFilter.length > 0 ? { runtime_mappings: PARTY_RUNTIME_MAPPINGS } : {}),
     sort: asMutableArray([
       {
         [sort]: {
           order: direction,
         },
       },
+      // When browser certs are included the collapse key is the subject common
+      // name, which a lightweight summary ping and a browser network event can
+      // share. On a tie in the primary sort (e.g. same not_after) ES would
+      // otherwise pick the group representative by shard order — and picking the
+      // browser event hides a fingerprint the lightweight ping actually captured.
+      // Sorting fingerprinted docs first (browser events miss sha256, so they
+      // sort last) makes the representative deterministic and always surfaces the
+      // fingerprint when one exists. The lightweight-only query collapses on
+      // sha256 itself, so it needs no tiebreaker and keeps its lean sort.
+      ...(includeBrowserCerts
+        ? [{ [CERT_HASH_SHA256]: { order: 'asc' as const, missing: '_last' as const } }]
+        : []),
     ]) as estypes.SortCombinations[],
     query: {
       bool: {
@@ -83,15 +206,23 @@ export const getCertsRequestBody = ({
             }
           : {}),
         filter: [
-          FINAL_SUMMARY_FILTER,
+          ...certTypeFilter,
           EXCLUDE_RUN_ONCE_FILTER,
           ...(filters ? [filters] : []),
           ...(monitorIds && monitorIds.length > 0 ? [{ terms: { 'monitor.id': monitorIds } }] : []),
-          {
-            exists: {
-              field: 'tls.server.hash.sha256',
-            },
-          },
+          ...(monitorTypes && monitorTypes.length > 0
+            ? [{ terms: { 'monitor.type': monitorTypes } }]
+            : []),
+          // Tags are stamped on every event a monitor emits (lightweight summary
+          // pings and browser network events alike), so this applies uniformly
+          // across both branches regardless of monitor type.
+          ...(tags && tags.length > 0 ? [{ terms: { tags } }] : []),
+          // Issuer (the signing certificate authority) is recorded on both
+          // lightweight summary pings and browser network events, so this terms
+          // filter applies uniformly across both branches regardless of monitor type.
+          ...(issuers && issuers.length > 0
+            ? [{ terms: { [CERT_ISSUER_COMMON_NAME]: issuers } }]
+            : []),
           // fetch large enough date range to cover the last 7 days, no particular reason for 7 days
           getRangeFilter({
             from: 'now-7d',
@@ -160,11 +291,11 @@ export const getCertsRequestBody = ({
       'error',
     ],
     collapse: {
-      field: 'tls.server.hash.sha256',
+      field: certIdField,
       inner_hits: {
         size: 100,
         _source: {
-          includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
+          includes: ['monitor.id', 'monitor.name', 'monitor.type', 'url.full', 'config_id'],
         },
         collapse: {
           field: 'monitor.id',
@@ -176,7 +307,7 @@ export const getCertsRequestBody = ({
     aggs: {
       total: {
         cardinality: {
-          field: 'tls.server.hash.sha256',
+          field: certIdField,
         },
       },
     },
@@ -203,6 +334,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
         id: monitorPing?.monitor.id,
         configId: monitorPing?.config_id,
         url: monitorPing?.url?.full,
+        type: monitorPing?.monitor?.type,
       };
     });
 
@@ -210,7 +342,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       monitors,
       issuer,
       sha1,
-      sha256: sha256 as string,
+      sha256,
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,

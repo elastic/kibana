@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState, forwardRef } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { i18nTexts } from './i18n_texts';
 
@@ -22,13 +23,18 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const ContextMenu: FunctionComponent<Props> = (props) => {
-  const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+const getStyles = ({ hidden }: { hidden?: boolean }) => ({
+  container: hidden
+    ? css`
+        display: none;
+      `
+    : undefined,
+});
 
-  const containerClasses = classNames({
-    'pipelineProcessorsEditor__item--displayNone': hidden,
-  });
+export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+  const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
+  const styles = getStyles({ hidden });
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const contextMenuItems = [
     <EuiContextMenuItem
@@ -70,19 +76,24 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
   ].filter(Boolean) as JSX.Element[];
 
   return (
-    <div className={containerClasses}>
+    <div css={styles.container}>
       <EuiPopover
         data-test-subj={props['data-test-subj']}
+        aria-label={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.item.contextMenuAriaLabel',
+          { defaultMessage: 'Processor actions' }
+        )}
         anchorPosition="leftCenter"
         panelPaddingSize="none"
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         button={
           <EuiButtonIcon
+            buttonRef={ref}
             data-test-subj="button"
             disabled={disabled}
             onClick={() => setIsOpen((v) => !v)}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18nTexts.moreButtonAriaLabel}
           />
         }
@@ -91,4 +102,4 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
       </EuiPopover>
     </div>
   );
-};
+});

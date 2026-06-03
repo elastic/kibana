@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, IconSize, type EuiIconProps } from '@elastic/eui';
+import type { IconSize } from '@elastic/eui';
+import { EuiIcon, type EuiIconProps } from '@elastic/eui';
 import { getSpanIcon } from './get_span_icon';
 
 interface Props extends Omit<EuiIconProps, 'type'> {
@@ -19,5 +20,6 @@ interface Props extends Omit<EuiIconProps, 'type'> {
 
 export function SpanIcon({ type, subtype, size = 'l', ...props }: Props) {
   const icon = getSpanIcon(type, subtype);
+
   return <EuiIcon type={icon} size={size} title={type || subtype} {...props} />;
 }

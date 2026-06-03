@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -74,9 +74,5 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./pie'));
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./xy'));
-    loadTestFile(require.resolve('./gauge'));
-    loadTestFile(require.resolve('./goal'));
-    loadTestFile(require.resolve('./table'));
-    loadTestFile(require.resolve('./heatmap'));
   });
 }

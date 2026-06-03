@@ -14,185 +14,304 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import { MigrationLastExecution, MigrationStatus, MigrationTaskStatus } from './common.gen';
+import {
+  MigrationLastExecution,
+  MigrationTranslationResult,
+  MigrationStatus,
+  MigrationComments,
+  MigrationTaskStats,
+} from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
+
+/**
+ * The original dashboard vendor identifier.
+ */
+export const OriginalDashboardVendor = lazySchema(() => z.literal('splunk'));
+export type OriginalDashboardVendor = z.infer<typeof OriginalDashboardVendor>;
 
 /**
  * The dashboard migration object ( without Id ) with its settings.
  */
+export const DashboardMigrationData = lazySchema(() =>
+  z.object({
+    /**
+     * The dashboard migration name
+     */
+    name: NonEmptyString,
+    /**
+     * The user profile ID of the user who created the migration.
+     */
+    created_by: NonEmptyString,
+    /**
+     * The moment migration was created
+     */
+    created_at: NonEmptyString,
+    /**
+     * The last execution of the dashboard migration task.
+     */
+    last_execution: MigrationLastExecution.optional(),
+  })
+);
 export type DashboardMigrationData = z.infer<typeof DashboardMigrationData>;
-export const DashboardMigrationData = z.object({
-  /**
-   * The dashboard migration name
-   */
-  name: NonEmptyString,
-  /**
-   * The user profile ID of the user who created the migration.
-   */
-  created_by: NonEmptyString,
-  /**
-   * The moment migration was created
-   */
-  created_at: NonEmptyString,
-  /**
-   * The last execution of the dashboard migration task.
-   */
-  last_execution: MigrationLastExecution.optional(),
-});
 
 /**
  * The dashboard migration object with its settings.
  */
+export const DashboardMigration = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The dashboard migration id
+       */
+      id: NonEmptyString,
+    })
+    .merge(DashboardMigrationData)
+);
 export type DashboardMigration = z.infer<typeof DashboardMigration>;
-export const DashboardMigration = z
-  .object({
+
+/**
+ * The dashboard migration translation stats object.
+ */
+export const DashboardMigrationTranslationStats = lazySchema(() =>
+  z.object({
     /**
-     * The dashboard migration id
+     * The migration id
      */
     id: NonEmptyString,
+    /**
+     * The dashboards migration translation stats.
+     */
+    dashboards: z.object({
+      /**
+       * The total number of dashboards in the migration.
+       */
+      total: z.number().int(),
+      /**
+       * The number of dashboards that have been successfully translated.
+       */
+      success: z.object({
+        /**
+         * The total number of dashboards that have been successfully translated.
+         */
+        total: z.number().int(),
+        /**
+         * The translation results
+         */
+        result: z.object({
+          /**
+           * The number of dashboards that have been fully translated.
+           */
+          full: z.number().int(),
+          /**
+           * The number of dashboards that have been partially translated.
+           */
+          partial: z.number().int(),
+          /**
+           * The number of dashboards that could not be translated.
+           */
+          untranslatable: z.number().int(),
+        }),
+        /**
+         * The number of dashboards that have been successfully translated and can be installed.
+         */
+        installable: z.number().int(),
+      }),
+      /**
+       * The number of dashboards that have failed translation.
+       */
+      failed: z.number().int(),
+    }),
   })
-  .merge(DashboardMigrationData);
+);
+export type DashboardMigrationTranslationStats = z.infer<typeof DashboardMigrationTranslationStats>;
 
 /**
  * The raw dashboard object from different vendors
  */
+export const OriginalDashboard = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier for the dashboard
+     */
+    id: z.string(),
+    /**
+     * The original dashboard vendor identifier.
+     */
+    vendor: OriginalDashboardVendor,
+    /**
+     * The title of the dashboard
+     */
+    title: z.string(),
+    /**
+     * The description of the dashboard
+     */
+    description: z.string(),
+    /**
+     * The data of the dashboard in the specified format
+     */
+    data: z.string(),
+    /**
+     * The last updated timestamp of the dashboard
+     */
+    last_updated: z.string().optional(),
+    /**
+     * The format of the dashboard data (e.g., 'json', 'xml')
+     */
+    format: z.string(),
+    /**
+     * Additional properties specific to the splunk
+     */
+    splunk_properties: SplunkOriginalDashboardProperties.optional(),
+  })
+);
 export type OriginalDashboard = z.infer<typeof OriginalDashboard>;
-export const OriginalDashboard = z.object({
-  /**
-   * The unique identifier for the dashboard
-   */
-  id: z.string(),
-  /**
-   * The vendor of the dashboard (e.g., 'splunk')
-   */
-  vendor: z.string(),
-  /**
-   * The title of the dashboard
-   */
-  title: z.string(),
-  /**
-   * The description of the dashboard
-   */
-  description: z.string(),
-  /**
-   * The data of the dashboard, typically in JSON format
-   */
-  data: z.object({}),
-  /**
-   * The last updated timestamp of the dashboard
-   */
-  last_updated: z.string(),
-  /**
-   * The format of the dashboard (e.g., 'json', 'xml')
-   */
-  format: z.string(),
-  /**
-   * Additional properties specific to the splunk
-   */
-  splunk_properties: SplunkOriginalDashboardProperties.optional(),
-});
+
+/**
+ * The elastic dashboard translation.
+ */
+export const ElasticDashboard = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier for the dashboard installed Saved Object
+     */
+    id: z.string().optional(),
+    /**
+     * The title of the dashboard
+     */
+    title: z.string(),
+    /**
+     * The description of the dashboard
+     */
+    description: z.string().optional(),
+    /**
+     * The data of the dashboard, format could depend on the vendor
+     */
+    data: z.string().optional(),
+  })
+);
+export type ElasticDashboard = z.infer<typeof ElasticDashboard>;
 
 /**
  * The dashboard migration document object.
  */
+export const DashboardMigrationDashboardData = lazySchema(() =>
+  z.object({
+    /**
+     * The moment of creation
+     */
+    '@timestamp': z.string(),
+    /**
+     * The migration id.
+     */
+    migration_id: NonEmptyString,
+    /**
+     * The user profile ID of the user who created the migration.
+     */
+    created_by: NonEmptyString,
+    /**
+     * The original dashboard to migrate.
+     */
+    original_dashboard: OriginalDashboard,
+    /**
+     * The translated elastic dashboard.
+     */
+    elastic_dashboard: ElasticDashboard.optional(),
+    /**
+     * The rule translation result.
+     */
+    translation_result: MigrationTranslationResult.optional(),
+    /**
+     * The status of the dashboard migration process.
+     */
+    status: MigrationStatus.default('pending'),
+    /**
+     * The comments for the migration including a summary from the LLM in markdown.
+     */
+    comments: MigrationComments.optional(),
+    /**
+     * The moment of the last update
+     */
+    updated_at: z.string().optional(),
+    /**
+     * The user who last updated the migration
+     */
+    updated_by: z.string().optional(),
+  })
+);
 export type DashboardMigrationDashboardData = z.infer<typeof DashboardMigrationDashboardData>;
-export const DashboardMigrationDashboardData = z.object({
-  /**
-   * The moment of creation
-   */
-  '@timestamp': z.string(),
-  /**
-   * The migration id.
-   */
-  migration_id: NonEmptyString,
-  /**
-   * The user profile ID of the user who created the migration.
-   */
-  created_by: NonEmptyString,
-  /**
-   * The original dashboard to migrate.
-   */
-  original_dashboard: OriginalDashboard,
-  /**
-   * The status of the dashboard migration process.
-   */
-  status: MigrationStatus.default('pending'),
-  /**
-   * The moment of the last update
-   */
-  updated_at: z.string().optional(),
-  /**
-   * The user who last updated the migration
-   */
-  updated_by: z.string().optional(),
-});
 
 /**
  * The dashboard migration document object.
  */
+export const DashboardMigrationDashboard = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The dashboard migration id
+       */
+      id: NonEmptyString,
+    })
+    .merge(DashboardMigrationDashboardData)
+);
 export type DashboardMigrationDashboard = z.infer<typeof DashboardMigrationDashboard>;
-export const DashboardMigrationDashboard = z
-  .object({
+
+/**
+ * The partial version of the migrated elastic dashboard.
+ */
+export const ElasticDashboardPartial = lazySchema(() => ElasticDashboard.partial());
+export type ElasticDashboardPartial = z.infer<typeof ElasticDashboardPartial>;
+
+/**
+ * The dashboard migration data object for dashboard update operation
+ */
+export const UpdateMigrationDashboard = lazySchema(() =>
+  z.object({
     /**
      * The dashboard migration id
      */
     id: NonEmptyString,
+    /**
+     * The migrated elastic dashboard attributes to update.
+     */
+    elastic_dashboard: ElasticDashboardPartial.optional(),
+    /**
+     * The comments for the migration including a summary from the LLM in markdown.
+     */
+    comments: MigrationComments.optional(),
   })
-  .merge(DashboardMigrationDashboardData);
+);
+export type UpdateMigrationDashboard = z.infer<typeof UpdateMigrationDashboard>;
 
 /**
  * The dashboard migration task stats object.
  */
+export const DashboardMigrationTaskStats = lazySchema(() => MigrationTaskStats);
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
-export const DashboardMigrationTaskStats = z.object({
-  /**
-   * The migration id
-   */
-  id: NonEmptyString,
-  /**
-   * The migration name
-   */
-  name: NonEmptyString,
-  /**
-   * Indicates if the migration task status.
-   */
-  status: MigrationTaskStatus,
-  /**
-   * The dashboards migration stats.
-   */
-  dashboards: z
-    .object({
-      /**
-       * The total number of dashboards to migrate.
-       */
-      total: z.number().int(),
-      /**
-       * The number of dashboards that are pending migration.
-       */
-      pending: z.number().int(),
-      /**
-       * The number of dashboards that are being migrated.
-       */
-      processing: z.number().int(),
-      /**
-       * The number of dashboards that have been migrated successfully.
-       */
-      completed: z.number().int(),
-      /**
-       * The number of dashboards that have failed migration.
-       */
-      failed: z.number().int(),
-    })
-    .optional(),
-  /**
-   * The moment the migration was created.
-   */
-  created_at: z.string(),
-  /**
-   * The moment of the last update.
-   */
-  last_updated_at: z.string(),
-});
+
+/**
+ * The dashboard migration task execution settings.
+ */
+export const DashboardMigrationTaskExecutionSettings = lazySchema(() =>
+  z.object({
+    /**
+     * The connector ID used in the last execution.
+     */
+    connector_id: z.string(),
+  })
+);
+export type DashboardMigrationTaskExecutionSettings = z.infer<
+  typeof DashboardMigrationTaskExecutionSettings
+>;
+
+/**
+ * Indicates the filter to retry the migrations dashboards translation
+ */
+export const DashboardMigrationRetryFilter = lazySchema(() =>
+  z.enum(['failed', 'not_fully_translated'])
+);
+export type DashboardMigrationRetryFilter = z.infer<typeof DashboardMigrationRetryFilter>;
+export type DashboardMigrationRetryFilterEnum = typeof DashboardMigrationRetryFilter.enum;
+export const DashboardMigrationRetryFilterEnum = DashboardMigrationRetryFilter.enum;

@@ -8,7 +8,12 @@
  */
 
 export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
-export type { UnifiedDataTableProps, SortOrder } from './src/components/data_table';
+export type {
+  UnifiedDataTableProps,
+  SortOrder,
+  RenderDocumentViewCallback,
+  RenderDocumentViewMeta,
+} from './src/components/data_table';
 export {
   RowHeightSettings,
   type RowHeightSettingsProps,
@@ -38,8 +43,10 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
-export { getDataGridDensity } from './src/hooks/use_data_grid_density';
+export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_data_grid_density';
 export { getRowHeight } from './src/hooks/use_row_height';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
+
+export { type EuiDataGridRefProps } from '@elastic/eui';

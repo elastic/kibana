@@ -6,17 +6,18 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { PLUGIN } from '../common/constants';
-import { ClientConfigType } from './types';
-import { AppDependencies } from './application';
+import type { ClientConfigType } from './types';
+import type { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
-import { LicenseManagementLocator, LicenseManagementLocatorDefinition } from './locator';
+import type { LicenseManagementLocator } from './locator';
+import { LicenseManagementLocatorDefinition } from './locator';
 
 interface PluginsDependenciesSetup {
   management: ManagementSetup;
@@ -35,7 +36,13 @@ export interface LicenseManagementUIPluginSetup {
 export type LicenseManagementUIPluginStart = void;
 
 export class LicenseManagementUIPlugin
-  implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any>
+  implements
+    Plugin<
+      LicenseManagementUIPluginSetup,
+      LicenseManagementUIPluginStart,
+      PluginsDependenciesSetup,
+      PluginsDependenciesStart
+    >
 {
   private breadcrumbService = new BreadcrumbService();
   private locator?: LicenseManagementLocator;

@@ -6,10 +6,11 @@
  */
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
+  ID,
   ERROR_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
@@ -43,7 +44,8 @@ export async function getErrorGroupSampleIds({
   start: number;
   end: number;
 }): Promise<ErrorGroupSampleIdsResponse> {
-  const requiredFields = asMutableArray([ERROR_ID] as const);
+  const requiredFields = asMutableArray([ID] as const);
+  const optionalFields = asMutableArray([ERROR_ID] as const);
   const resp = await apmEventClient.search('get_error_group_sample_ids', {
     apm: {
       sources: [
@@ -67,15 +69,17 @@ export async function getErrorGroupSampleIds({
         should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
       },
     },
-    fields: requiredFields,
+    fields: [...requiredFields, ...optionalFields],
+    _source: false,
     sort: asMutableArray([
       { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
       { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
     ] as const),
   });
+
   const errorSampleIds = resp.hits.hits.map((item) => {
-    const event = unflattenKnownApmEventFields(item.fields, requiredFields);
-    return event.error?.id;
+    const event = accessKnownApmEventFields(item.fields).requireFields(requiredFields);
+    return event[ERROR_ID] ?? event._id;
   });
 
   return {

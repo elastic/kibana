@@ -21,11 +21,8 @@ import { KibanaLogic } from '../../../../../../shared/kibana';
 
 import { TRAINED_MODELS_PATH } from '../utils';
 
-import {
-  TextExpansionCallOutState,
-  TextExpansionDismissButton,
-  FineTuneModelsButton,
-} from './text_expansion_callout';
+import type { TextExpansionCallOutState } from './text_expansion_callout';
+import { TextExpansionDismissButton, FineTuneModelsButton } from './text_expansion_callout';
 
 export const ModelStarted = ({
   dismiss,
@@ -41,7 +38,7 @@ export const ModelStarted = ({
       <EuiFlexItem grow>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">

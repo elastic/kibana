@@ -15,6 +15,8 @@ import { EndpointActionGenerator } from '../../../../../common/endpoint/data_gen
 import { set } from '@kbn/safer-lodash-set';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/reference_data';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 describe('fetchActionRequestById() utility', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -44,23 +46,7 @@ describe('fetchActionRequestById() utility', () => {
     );
   });
 
-  it('should not validate space access to the action when feature is disabled', async () => {
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-
-    await fetchActionRequestById(endpointServiceMock, 'default', '123');
-
-    expect(
-      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace
-    ).not.toHaveBeenCalled();
-  });
-
   describe('and space awareness feature is enabled', () => {
-    beforeEach(() => {
-      // @ts-expect-error
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-    });
-
     it('should validate that action is accessible in active space', async () => {
       (
         endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
@@ -91,7 +77,10 @@ describe('fetchActionRequestById() utility', () => {
       });
       (endpointServiceMock.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
         set(
-          REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](),
+          await REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](
+            {} as SavedObjectsClientContract,
+            {} as ExperimentalFeatures
+          ),
           'metadata.spaceId',
           'foo'
         )
@@ -114,7 +103,10 @@ describe('fetchActionRequestById() utility', () => {
       });
       (endpointServiceMock.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
         set(
-          REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](),
+          await REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](
+            {} as SavedObjectsClientContract,
+            {} as ExperimentalFeatures
+          ),
           'metadata.spaceId',
           'bar'
         )

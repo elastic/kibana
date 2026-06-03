@@ -8,7 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import type { MountPoint } from '@kbn/core/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
@@ -20,11 +21,17 @@ import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
 import { type TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,
   'kibana' | 'intl' | 'timeHistory'
 > & {
   config?: TopNavMenuData[];
+  /**
+   * @deprecated Use coreStart.chrome.setBreadcrumbsBadges API instead
+   */
   badges?: TopNavMenuBadgeProps[];
   showSearchBar?: boolean;
   showQueryInput?: boolean;
@@ -69,6 +76,9 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
  *
  **/
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   props: TopNavMenuProps<QT>
 ): ReactElement | null {

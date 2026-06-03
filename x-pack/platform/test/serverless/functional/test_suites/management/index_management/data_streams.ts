@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   const TEST_DS_NAME = 'test-ds-1';
 
@@ -25,8 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     TIME_SERIES = 'Time series',
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/205316
-  describe.skip('Data Streams', () => {
+  describe('Data Streams', () => {
     before(async () => {
       log.debug('Creating required data stream');
       try {
@@ -64,10 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the indices tab
-      await pageObjects.indexManagement.changeTabs('data_streamsTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');
     });
 
     after(async () => {
@@ -125,14 +122,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('saveButton');
 
         // Expect to see a success toast
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+        });
       });
 
       describe('Project level data retention checks - security solution', () => {
         this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
         it('shows project data retention in the datastreams list', async () => {
+          // Ensure the callout is visible by setting localStorage
+          await browser.setLocalStorageItem('showProjectLevelRetention', 'true');
+          await browser.refresh();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          expect(await testSubjects.exists('projectLevelRetentionLink')).to.be(true);
           expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
           expect(await testSubjects.exists('cloudLinkButton')).to.be(true);
         });
@@ -224,10 +229,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       before(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the indices tab
-        await pageObjects.indexManagement.changeTabs('data_streamsTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');
       });
 
       afterEach(async () => {

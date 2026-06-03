@@ -51,7 +51,6 @@ export {
   INTERNAL_BULK_GET_CASES_URL,
   LENS_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  SAVED_OBJECT_TYPES,
   CASE_COMMENT_SAVED_OBJECT,
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
@@ -59,6 +58,21 @@ export {
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+  LEGACY_INDICATOR_ATTACHMENT_TYPE,
+  MANAGE_TEMPLATES_CAPABILITY,
+  ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+  AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+  AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
@@ -68,3 +82,25 @@ export { createUICapabilities, type CasesUiCapabilities } from './utils/capabili
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
+
+export { CASE_VIEW_PAGE_TABS } from './types';
+
+export { getSavedObjectsTypes } from './utils/saved_object_types';
+
+export {
+  isEventAttachmentType,
+  isAlertAttachmentType,
+  isLegacyAttachmentRequest,
+  isUnifiedEventAttachment,
+  isUnifiedAlertAttachment,
+  assertValidIndexMetadata,
+  isIndexMetadata,
+  toStringArray,
+  toStringOrStringArray,
+  getNonEmptyField,
+  isStringArray,
+  getRuleInfo,
+  getManualAlertIds,
+} from './utils/attachments';
+
+export { AttachmentActionType } from './utils/attachment_actions';

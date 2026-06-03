@@ -11,7 +11,8 @@ import type {
 } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { calculateIsCustomized } from './calculate_is_customized';
+import { calculateExternalRuleSource } from './calculate_external_rule_source';
+import { createDefaultInternalRuleSource } from './create_default_internal_rule_source';
 
 interface CalculateRuleSourceProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
@@ -27,27 +28,20 @@ export async function calculateRuleSource({
   if (nextRule.immutable) {
     // This is a prebuilt rule and, despite the name, they are not immutable. So
     // we need to recalculate `ruleSource.isCustomized` based on the rule's contents.
-    const prebuiltRulesResponse = await prebuiltRuleAssetClient.fetchAssetsByVersion([
+    const { assets } = await prebuiltRuleAssetClient.fetchAssetsByVersion([
       {
         rule_id: nextRule.rule_id,
         version: nextRule.version,
       },
     ]);
-    const baseRule: PrebuiltRuleAsset | undefined = prebuiltRulesResponse.at(0);
+    const baseRule: PrebuiltRuleAsset | undefined = assets.at(0);
 
-    const isCustomized = calculateIsCustomized({
+    return calculateExternalRuleSource({
       baseRule,
       nextRule,
       currentRule,
     });
-
-    return {
-      type: 'external',
-      is_customized: isCustomized,
-    };
   }
 
-  return {
-    type: 'internal',
-  };
+  return createDefaultInternalRuleSource();
 }

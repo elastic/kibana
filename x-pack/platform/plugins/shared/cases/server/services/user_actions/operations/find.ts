@@ -17,6 +17,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 
 import type { FindOptions, ServiceContext } from '../types';
 import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
@@ -62,10 +63,7 @@ export class UserActionFinder {
           filter: finalFilter,
         });
 
-      const res = transformFindResponseToExternalModel(
-        userActions,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const res = transformFindResponseToExternalModel(userActions);
 
       const decodeRes = bulkDecodeSOAttributes(
         res.saved_objects,
@@ -106,11 +104,11 @@ export class UserActionFinder {
   }
 
   private static buildActionFilter(): KueryNode | undefined {
-    const filterForUserActionsExcludingComment = fromKueryExpression(
-      `not ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user}`
+    const filterForUserActionsExcludingComments = fromKueryExpression(
+      `not (${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${AttachmentType.user} or ${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type: ${COMMENT_ATTACHMENT_TYPE})`
     );
 
-    return filterForUserActionsExcludingComment;
+    return filterForUserActionsExcludingComments;
   }
 
   private static buildCommentTypeFilter(): KueryNode | undefined {
@@ -123,8 +121,14 @@ export class UserActionFinder {
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
         buildFilter({
-          filters: [AttachmentType.user],
+          filters: [AttachmentType.user, COMMENT_ATTACHMENT_TYPE],
           field: 'payload.comment.type',
+          operator: 'or',
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+        }),
+        buildFilter({
+          filters: [UserActionActions.create],
+          field: 'action',
           operator: 'or',
           type: CASE_USER_ACTION_SAVED_OBJECT,
         }),
@@ -225,10 +229,7 @@ export class UserActionFinder {
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
           findResults.saved_objects.map((so) => {
-            const res = transformToExternalModel(
-              so,
-              this.context.persistableStateAttachmentTypeRegistry
-            );
+            const res = transformToExternalModel(so);
 
             const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 

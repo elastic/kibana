@@ -7,9 +7,9 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { IndexSettings } from '@kbn/index-management-plugin/common';
+import type { IndexSettings } from '@kbn/index-management-plugin/common';
 
-import {
+import type {
   PolicyFromES,
   SerializedPolicy,
   ListNodesRouteResponse,

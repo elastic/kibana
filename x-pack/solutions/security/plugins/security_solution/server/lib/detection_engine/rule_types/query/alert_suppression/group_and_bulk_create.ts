@@ -6,7 +6,7 @@
  */
 
 import type moment from 'moment';
-
+import { sum } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -20,6 +20,7 @@ import {
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getTotalHitsValue,
   mergeReturns,
 } from '../../utils/utils';
 import type { SuppressionBucket } from './wrap_suppressed_alerts';
@@ -217,6 +218,7 @@ export const groupAndBulkCreate = async ({
       }
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);
+      toReturn.totalEventsFound = getTotalHitsValue(searchResult.hits.total);
 
       const eventsByGroupResponseWithAggs =
         searchResult as EventGroupingMultiBucketAggregationResult;
@@ -225,6 +227,9 @@ export const groupAndBulkCreate = async ({
       }
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+
+      // Collect rule execution metrics
+      toReturn.alertsCandidateCount = sum(buckets.map((b) => b.doc_count));
 
       // we can create only as many unsuppressed alerts, as total number of alerts(suppressed and unsuppressed) does not exceeds maxSignals
       const maxUnsuppressedCount = tuple.maxSignals - buckets.length;
@@ -283,7 +288,7 @@ export const groupAndBulkCreate = async ({
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
         sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+          `Alerts bulk creation completed: ${bulkCreateResult.createdItemsCount}`
         );
       } else {
         const bulkCreateResult = await bulkCreate({
@@ -299,7 +304,7 @@ export const groupAndBulkCreate = async ({
           },
         });
         sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+          `Alerts bulk creation completed: ${bulkCreateResult.createdItemsCount}`
         );
       }
 

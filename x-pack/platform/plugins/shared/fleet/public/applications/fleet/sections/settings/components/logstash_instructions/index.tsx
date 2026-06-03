@@ -51,7 +51,11 @@ export const LogstashInstructions = ({ isSSLEnabled }: LogstashInstructionsProps
           {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink external={true} href={docLinks.links.logstash.inputElasticAgent}>
+              <EuiLink
+                external={true}
+                target="_blank"
+                href={docLinks.links.logstash.inputElasticAgent}
+              >
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.documentationLink"
                   defaultMessage="Learn more"
@@ -134,7 +138,7 @@ const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProp
                       {(copy) => (
                         <EuiButtonIcon
                           onClick={copy}
-                          iconType="copyClipboard"
+                          iconType="copy"
                           color="text"
                           disabled={!hasAllSettings}
                           aria-label={i18n.translate(
@@ -207,7 +211,11 @@ const LogstashInstructionSteps = ({ isSSLEnabled }: LogstashInstructionStepsProp
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.secureLogstash}>
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                    href={docLinks.links.fleet.secureLogstash}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"

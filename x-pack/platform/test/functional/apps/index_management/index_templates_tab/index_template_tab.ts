@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   const INDEX_TEMPLATE_NAME = 'index-template-test-name';
 
@@ -22,10 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await log.debug('Navigating to the index templates tab');
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the templates tab
-      await pageObjects.indexManagement.changeTabs('templatesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
     });
 
     afterEach(async () => {
@@ -37,13 +35,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       if (await testSubjects.exists('reloadButton')) {
-        await testSubjects.click('reloadButton');
+        await browser.execute(() => {
+          const btn = document.querySelector('[data-test-subj="reloadButton"]') as HTMLElement;
+          if (btn) btn.click();
+        });
       }
     });
 
     describe('index template creation', () => {
       beforeEach(async () => {
-        // Click create template button
+        if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+          await testSubjects.click('closeDetailsButton');
+        }
         await testSubjects.click('createTemplateButton');
         // Complete required fields from step 1
         await testSubjects.setValue('nameField', INDEX_TEMPLATE_NAME);
@@ -51,9 +54,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        // Click Create template
-        await pageObjects.indexManagement.clickNextButton();
-        // Close detail tab
+        await retry.try(async () => {
+          await pageObjects.indexManagement.clickNextButton();
+        });
         await testSubjects.click('closeDetailsButton');
       });
 
@@ -85,8 +88,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('index template modification', () => {
+    describe('index template modification', function () {
+      // FIPS mode sets defaultRoles to superuser which causes a trial-licensed UI element to
+      // intercept the templateDetailsLink click in the beforeEach hook
+      this.tags('skipFIPS');
       beforeEach(async () => {
+        if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+          await testSubjects.click('closeDetailsButton');
+        }
         await es.indices.putIndexTemplate({
           name: INDEX_TEMPLATE_NAME,
           index_patterns: ['logsdb-test-index-pattern'],
@@ -100,8 +109,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         });
 
-        await testSubjects.click('reloadButton');
-        await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+        await testSubjects.scrollIntoView('reloadButton');
+        await browser.execute(() => {
+          const btn = document.querySelector('[data-test-subj="reloadButton"]') as HTMLElement;
+          if (btn) btn.click();
+        });
+        await retry.try(async () => {
+          if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+            await testSubjects.click('closeDetailsButton');
+          }
+          await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+        });
         await testSubjects.click('manageTemplateButton');
         await testSubjects.click('editIndexTemplateButton');
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -112,9 +130,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Close Flyout to return to templates tab
           await testSubjects.click('closeDetailsButton');
         } else {
-          // Comeback to templates tab
-          await pageObjects.common.navigateToApp('indexManagement');
-          await pageObjects.indexManagement.changeTabs('templatesTab');
+          await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
         }
       });
 
@@ -145,8 +161,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Navigate to Mappings
         await testSubjects.click('formWizardStep-3');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        const mappingTabs = await testSubjects.findAll('formTab');
-        await mappingTabs[3].click();
+        await testSubjects.click('advancedOptionsTab');
 
         // Modify timestamp format
         await testSubjects.click('comboBoxClearButton');
@@ -164,10 +179,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.clickNextButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        const flyoutTabs = await testSubjects.findAll('tab');
-
         // Verify Index Settings
-        await flyoutTabs[1].click();
+        await testSubjects.click('settingsTabBtn');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.exists('settingsTabContent')).to.be(true);
         const settingsTabContent = await testSubjects.getVisibleText('settingsTabContent');
@@ -176,6 +189,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             mode: 'logsdb',
             mapping: {
               ignore_above: '20',
+              source: {
+                mode: 'synthetic',
+              },
               total_fields: {
                 ignore_dynamic_beyond_limit: 'true',
               },
@@ -185,15 +201,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify Mappings
-        await flyoutTabs[2].click();
+        await testSubjects.click('mappingsTabBtn');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.exists('mappingsTabContent')).to.be(true);
         const mappingsTabContent = await testSubjects.getVisibleText('mappingsTabContent');
         expect(JSON.parse(mappingsTabContent)).to.eql({
           dynamic_date_formats: ['basic_date'],
-          _source: {
-            mode: 'synthetic',
-          },
           subobjects: false,
         });
       });
@@ -202,8 +215,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Navigate to Mappings
           await testSubjects.click('formWizardStep-3');
           await pageObjects.header.waitUntilLoadingHasFinished();
-          const mappingTabs = await testSubjects.findAll('formTab');
-          await mappingTabs[3].click();
+          await (await testSubjects.find('advancedOptionsTab')).click();
 
           // Modify source
           await testSubjects.click('sourceValueField');
@@ -243,11 +255,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             },
           },
         });
-
-        // Navigate to the index management
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the templates tab
-        await pageObjects.indexManagement.changeTabs('templatesTab');
+        await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
       });
 
       after(async () => {

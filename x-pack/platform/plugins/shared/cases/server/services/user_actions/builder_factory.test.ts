@@ -17,14 +17,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -34,9 +32,7 @@ describe('UserActionBuilder', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry,
-    });
+    builderFactory = new BuilderFactory();
   });
 
   beforeAll(() => {
@@ -160,7 +156,7 @@ describe('UserActionBuilder', () => {
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -207,7 +203,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -264,7 +260,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentES,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -316,7 +312,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: persistableStateAttachment,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -353,11 +349,6 @@ describe('UserActionBuilder', () => {
               "id": "test-id",
               "name": "associated-cases-comments",
               "type": "cases-comments",
-            },
-            Object {
-              "id": "testRef",
-              "name": "myTestReference",
-              "type": "test-so",
             },
           ],
         }
@@ -671,6 +662,7 @@ describe('UserActionBuilder', () => {
               "description": "testing sir",
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -776,6 +768,43 @@ describe('UserActionBuilder', () => {
         }
       `);
     });
+
+    it('builds an add observables user action correctly', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.observables)!;
+      const userAction = builder.build({
+        payload: { observables: { count: 1, actionType: 'add' } },
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "action": "create",
+            "created_at": "2022-01-09T22:00:00.000Z",
+            "created_by": Object {
+              "email": "elastic@elastic.co",
+              "full_name": "Elastic User",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "payload": Object {
+              "observables": Object {
+                "actionType": "add",
+                "count": 1,
+              },
+            },
+            "type": "observables",
+          },
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "associated-cases",
+              "type": "cases",
+            },
+          ],
+        }
+      `);
+    });
   });
 
   describe('eventDetails', () => {
@@ -847,7 +876,7 @@ describe('UserActionBuilder', () => {
             owner: SECURITY_SOLUTION_OWNER,
           },
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -872,7 +901,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -897,7 +926,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: externalReferenceAttachmentES,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -922,7 +951,7 @@ describe('UserActionBuilder', () => {
         payload: {
           attachment: persistableStateAttachment,
         },
-        attachmentId: 'test-id',
+        savedObjectId: 'test-id',
         ...commonArgs,
       });
 
@@ -1067,6 +1096,26 @@ describe('UserActionBuilder', () => {
       expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the status for case id: 123 - user action id: 123"`
       );
+    });
+
+    it('logs a status user action with close reason when alerts are synced', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.status)!;
+      const userAction = builder.build({
+        payload: {
+          status: CaseStatuses.closed,
+          closeReason: 'false_positive',
+          syncAlerts: true,
+        },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User closed case id: 123 and synced alerts with a close reason - user action id: 123"`
+      );
+      expect(userAction!.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        closeReason: 'false_positive',
+      });
     });
 
     it('logs a severity user action correctly', () => {
@@ -1236,6 +1285,27 @@ describe('UserActionBuilder', () => {
       `);
       expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the category for case id: 123 - user action id: 123"`
+      );
+    });
+
+    it('builds an update observables user action correctly', () => {
+      const builder = builderFactory.getBuilder(UserActionTypes.observables)!;
+      const userAction = builder.build({
+        payload: { observables: { count: 1, actionType: 'update' } },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "create",
+          "descriptiveAction": "case_user_action_observables",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
+      `);
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User added observables to case id: 123 - user action id: 123"`
       );
     });
   });

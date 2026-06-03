@@ -7,9 +7,9 @@
 
 import { zip, take } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
-import { ColorPalette } from '../../../../common/lib';
-import { ColorStop } from '../types';
-import { Palette, PaletteColorStops } from './types';
+import type { ColorPalette } from '../../../../common/lib';
+import type { ColorStop } from '../types';
+import type { Palette, PaletteColorStops } from './types';
 
 const id = htmlIdGenerator();
 

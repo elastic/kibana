@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KnowledgeBaseConfig } from '../assistant/types';
+import type { KnowledgeBaseConfig } from '../assistant/types';
 
 export const ATTACK_DISCOVERY_STORAGE_KEY = 'attackDiscovery';
 export const DEFEND_INSIGHTS_STORAGE_KEY = 'defendInsights';
@@ -13,6 +13,7 @@ export const DEFAULT_ASSISTANT_NAMESPACE = 'elasticAssistantDefault';
 export const END_LOCAL_STORAGE_KEY = 'end';
 export const LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY = 'lastConversationId';
 export const LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY = 'lastSelectedConversation';
+export const SHARED_CONVERSATION_CALLOUT = 'sharedConversationCallout';
 export const FILTERS_LOCAL_STORAGE_KEY = 'filters';
 export const MAX_ALERTS_LOCAL_STORAGE_KEY = 'maxAlerts';
 export const KNOWLEDGE_BASE_LOCAL_STORAGE_KEY = 'knowledgeBase';
@@ -32,6 +33,7 @@ export const SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY = 'systemPromptTable';
 export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
 export const ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY =
   'anonymizationPromptContextTable';
+export const MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY = 'movingAttacksCallout';
 
 /** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
 export const DEFAULT_LATEST_ALERTS = 100;

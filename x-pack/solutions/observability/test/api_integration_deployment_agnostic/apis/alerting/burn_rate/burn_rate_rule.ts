@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
+import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const RULE_TYPE_ID = 'slo.rules.burnRate';
 const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
@@ -280,48 +281,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 shortWindow: {
                   value: 5,
-                  unit: 'm',
-                },
-              },
-              {
-                id: '2',
-                actionGroup: 'slo.burnRate.high',
-                burnRateThreshold: 1.4,
-                maxBurnRateThreshold: 120,
-                longWindow: {
-                  value: 6,
-                  unit: 'h',
-                },
-                shortWindow: {
-                  value: 30,
-                  unit: 'm',
-                },
-              },
-              {
-                id: '3',
-                actionGroup: 'slo.burnRate.medium',
-                burnRateThreshold: 0.7,
-                maxBurnRateThreshold: 30,
-                longWindow: {
-                  value: 24,
-                  unit: 'h',
-                },
-                shortWindow: {
-                  value: 120,
-                  unit: 'm',
-                },
-              },
-              {
-                id: '4',
-                actionGroup: 'slo.burnRate.low',
-                burnRateThreshold: 0.234,
-                maxBurnRateThreshold: 10,
-                longWindow: {
-                  value: 72,
-                  unit: 'h',
-                },
-                shortWindow: {
-                  value: 360,
                   unit: 'm',
                 },
               },

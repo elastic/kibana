@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -125,12 +126,14 @@ export const SelectSeverity: FC<Props> = ({ onChange, value }) => {
 
   return (
     <EuiSuperSelect
-      hasDividers
       style={{ width: 200 }}
       options={getSeverityOptions()}
       valueOfSelected={severity.display}
       onChange={onSeverityChange}
       data-test-subj={'anomalySeveritySelect'}
+      aria-label={i18n.translate('xpack.uptime.controls.selectSeverity.ariaLabel', {
+        defaultMessage: 'Anomaly severity',
+      })}
     />
   );
 };

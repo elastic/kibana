@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 // @ts-expect-error unconverted component
 import { ElementConfig } from '../../element_config';
 // @ts-expect-error unconverted component

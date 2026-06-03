@@ -5,32 +5,33 @@
  * 2.0.
  */
 import type {
-  Layer,
-  TermsColumn,
-  FiltersColumn,
-  FormulaColumn,
-  StaticValueColumn,
-  CountColumn,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { DatasourceSuggestion } from '../../types';
+  TermsColumn as VisualizeContextTermsColumn,
+  FiltersColumn as VisualizeContextFiltersColumn,
+  FormulaColumn as VisualizeContextFormulaColumn,
+  StaticValueColumn as VisualizeContextStaticValueColumn,
+  CountColumn as VisualizeContextCountColumn,
+} from '@kbn/visualizations-plugin/common';
+import type {
+  NavigateToLensLayer,
+  DatasourceSuggestion,
+  FormBasedPrivateState,
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+  MathIndexPatternColumn,
+  RangeIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+} from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
-import type { FormBasedPrivateState } from './types';
+import type { IndexPatternSuggestion } from './form_based_suggestions';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
   getDatasourceSuggestionsForVisualizeCharts,
-  IndexPatternSuggestion,
 } from './form_based_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import {
-  MathIndexPatternColumn,
-  RangeIndexPatternColumn,
-  StaticValueIndexPatternColumn,
-} from './operations/definitions';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -156,7 +157,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },
@@ -167,7 +168,7 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },
@@ -257,7 +258,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       operationType: 'terms',
                       sourceField: 'source',
                       params: expect.objectContaining({
-                        size: 5,
+                        size: 9,
                         orderBy: { columnId: 'id2', type: 'column' },
                       }),
                     }),
@@ -422,7 +423,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ]),
-            getFormatterForField: () => ({ convert: (v: unknown) => v }),
+            getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
             isPersisted: true,
             spec: {},
           },
@@ -501,7 +502,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       operationType: 'terms',
                       sourceField: 'source',
                       params: expect.objectContaining({
-                        size: 5,
+                        size: 9,
                         orderBy: { columnId: 'id1', type: 'column' },
                       }),
                     }),
@@ -667,7 +668,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ]),
-            getFormatterForField: () => ({ convert: (v: unknown) => v }),
+            getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
             isPersisted: true,
             spec: {},
           },
@@ -1002,7 +1003,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     newid: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'dest',
-                      params: expect.objectContaining({ size: 3 }),
+                      params: expect.objectContaining({ size: 9 }),
                     }),
                   },
                 }),
@@ -1587,7 +1588,7 @@ describe('IndexPattern Data Source suggestions', () => {
         indexPatternId: '1',
         ignoreGlobalFilters: false,
       },
-    ] as Layer[];
+    ] as unknown as NavigateToLensLayer[];
     function stateWithoutLayer() {
       return {
         ...testInitialState(),
@@ -1725,7 +1726,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id: 'bytes',
                 },
               },
-            } as CountColumn,
+            } as VisualizeContextCountColumn,
             context[0].columns[1],
           ],
         },
@@ -1802,7 +1803,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnId: 'column-id-1',
                 },
               },
-            } as TermsColumn,
+            } satisfies VisualizeContextTermsColumn,
           ],
         },
       ];
@@ -1872,6 +1873,7 @@ describe('IndexPattern Data Source suggestions', () => {
               operationType: 'filters',
               isBucketed: true,
               columnId: 'column-id-3',
+              dataType: 'string',
               isSplit: true,
               params: {
                 filters: [
@@ -1891,7 +1893,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   },
                 ],
               },
-            } as FiltersColumn,
+            } satisfies VisualizeContextFiltersColumn,
           ],
         },
       ];
@@ -1978,7 +1980,7 @@ describe('IndexPattern Data Source suggestions', () => {
               params: {
                 formula: 'overall_sum(count())',
               },
-            } as FormulaColumn,
+            } satisfies VisualizeContextFormulaColumn,
             context[0].columns[1],
           ],
         },
@@ -2051,7 +2053,7 @@ describe('IndexPattern Data Source suggestions', () => {
               params: {
                 value: '10',
               },
-            } as StaticValueColumn,
+            } satisfies VisualizeContextStaticValueColumn,
           ],
         },
       ];
@@ -2153,7 +2155,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id3: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
-                      params: expect.objectContaining({ size: 5 }),
+                      params: expect.objectContaining({ size: 9 }),
                     }),
                     id2: expect.objectContaining({
                       operationType: 'count',
@@ -2919,7 +2921,7 @@ describe('IndexPattern Data Source suggestions', () => {
           hasRestrictions: false,
           fields,
           getFieldByName: getFieldByNameFactory(fields),
-          getFormatterForField: () => ({ convert: (v: unknown) => v }),
+          getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
           isPersisted: true,
           spec: {},
         },
@@ -3017,7 +3019,7 @@ describe('IndexPattern Data Source suggestions', () => {
               searchable: true,
             },
           ]),
-          getFormatterForField: () => ({ convert: (v: unknown) => v }),
+          getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
           isPersisted: true,
           spec: {},
         },
@@ -3100,7 +3102,7 @@ describe('IndexPattern Data Source suggestions', () => {
               searchable: true,
             },
           ]),
-          getFormatterForField: () => ({ convert: (v: unknown) => v }),
+          getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
           isPersisted: true,
           spec: {},
         },

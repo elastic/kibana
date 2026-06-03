@@ -18,8 +18,6 @@ export const ensureActionRequestsIndexIsConfigured = async (
 ): Promise<void> => {
   const logger = endpointService.createLogger('ensureActionRequestsIndexIsConfigured');
   const esClient = endpointService.getInternalEsClient();
-  const isSpacesEnabled =
-    endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
   const COMPONENT_TEMPLATE_NAME = '.logs-endpoint.actions@package';
 
   logger.debug(`Checking setup of index [${ENDPOINT_ACTIONS_INDEX}]`);
@@ -35,11 +33,6 @@ export const ensureActionRequestsIndexIsConfigured = async (
 
     logger.debug(`Index for [${ENDPOINT_ACTIONS_INDEX}] already exists`);
   });
-
-  if (!isSpacesEnabled) {
-    logger.debug(`Space awareness feature is disabled. Nothing to do.`);
-    return;
-  }
 
   logger.debug(
     `Checking field mappings for index [${ENDPOINT_ACTIONS_INDEX}] in support of space awareness`
@@ -66,16 +59,24 @@ export const ensureActionRequestsIndexIsConfigured = async (
     integrationPolicyId: { type: 'keyword', ignore_above: 1024 },
     agentPolicyId: { type: 'keyword', ignore_above: 1024 },
   };
-  const backingIndexName = Object.keys(indexMapping)[0];
 
-  if (
-    !get(indexMapping[backingIndexName], 'mappings.properties.originSpaceId') ||
-    !get(indexMapping[backingIndexName], 'mappings.properties.tags') ||
-    !get(indexMapping[backingIndexName], 'mappings.properties.agent.properties.policy')
-  ) {
-    logger.debug(
-      `adding mappings to index [${ENDPOINT_ACTIONS_INDEX}] - Endpoint package v9.1.x not yet installed`
-    );
+  const needsMappingUpdates = Object.entries(indexMapping).some(
+    ([backingIndexName, backingIndexMapping]) => {
+      if (
+        !get(backingIndexMapping, 'mappings.properties.originSpaceId') ||
+        !get(backingIndexMapping, 'mappings.properties.tags') ||
+        !get(backingIndexMapping, 'mappings.properties.agent.properties.policy')
+      ) {
+        logger.debug(`DS Backing index [${backingIndexName}] missing required mappings`);
+        return true;
+      }
+
+      return false;
+    }
+  );
+
+  if (needsMappingUpdates) {
+    logger.debug(`adding mappings to index [${ENDPOINT_ACTIONS_INDEX}]`);
 
     await esClient.indices
       .putMapping({

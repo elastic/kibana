@@ -23,8 +23,8 @@ import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import { i18n } from '@kbn/i18n';
+import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useDatePickerContext } from '../../../components/asset_details/hooks/use_date_picker';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../hooks/use_viewport_dimensions';
 
@@ -45,13 +45,22 @@ export const PageViewLogInContext: React.FC = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const { dateRange } = useDatePickerContext();
   const logsLocator = getLogsLocatorFromUrlService(url);
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
-  const [{ contextEntry }, { setContextEntry }] = useViewLogInProviderContext();
+  const [{ contextEntry, startTimestamp, endTimestamp }, { setContextEntry }] =
+    useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
+
+  // Convert timestamps to TimeRange format for LazySavedSearchComponent
+  const timeRange = useMemo(
+    () => ({
+      from: new Date(startTimestamp).toISOString(),
+      to: new Date(endTimestamp).toISOString(),
+    }),
+    [startTimestamp, endTimestamp]
+  );
 
   const contextQuery = useMemo(() => {
     if (contextEntry && !isEmpty(contextEntry.context)) {
@@ -74,36 +83,45 @@ export const PageViewLogInContext: React.FC = () => {
   }
 
   const discoverLink = logsLocator?.getRedirectUrl({
-    timeRange: dateRange,
+    timeRange,
     query: contextQuery,
   });
 
   return (
-    <EuiModal onClose={closeModal} maxWidth={false}>
-      <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
-        <EuiFlexGroup direction="column" responsive={false} wrap={false} css={{ height: '100%' }}>
-          <EuiFlexItem grow={false}>
-            <LogEntryContext context={contextEntry.context} discoverLink={discoverLink} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            {logSources.value ? (
-              <LazySavedSearchComponent
-                dependencies={{ embeddable, searchSource, dataViews }}
-                index={logSources.value}
-                timeRange={dateRange}
-                query={contextQuery}
-                height={'100%'}
-                displayOptions={{
-                  solutionNavIdOverride: 'oblt',
-                  enableDocumentViewer: false,
-                  enableFilters: false,
-                }}
-              />
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </LogInContextWrapper>
-    </EuiModal>
+    <>
+      {/* z-index override so DocViewer flyout is being visible */}
+      <Global
+        styles={css`
+          .DiscoverFlyout {
+            z-index: 6000 !important;
+          }
+        `}
+      />
+      <EuiModal onClose={closeModal} maxWidth={false}>
+        <LogInContextWrapper width={vw - MODAL_MARGIN * 2} height={vh - MODAL_MARGIN * 2}>
+          <EuiFlexGroup direction="column" responsive={false} wrap={false} css={{ height: '100%' }}>
+            <EuiFlexItem grow={false}>
+              <LogEntryContext context={contextEntry.context} discoverLink={discoverLink} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              {logSources.value ? (
+                <LazySavedSearchComponent
+                  dependencies={{ embeddable, searchSource, dataViews }}
+                  index={logSources.value}
+                  timeRange={timeRange}
+                  query={contextQuery}
+                  height={'100%'}
+                  displayOptions={{
+                    solutionNavIdOverride: 'oblt',
+                    enableFilters: false,
+                  }}
+                />
+              ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </LogInContextWrapper>
+      </EuiModal>
+    </>
   );
 };
 
@@ -141,7 +159,7 @@ const LogEntryContext: React.FC<{ context: LogEntry['context']; discoverLink?: s
         values={{
           file: (
             <EuiToolTip content={context['log.file.path']}>
-              <span>{shortenedFilePath}</span>
+              <span tabIndex={0}>{shortenedFilePath}</span>
             </EuiToolTip>
           ),
           host: context['host.name'],
@@ -168,7 +186,7 @@ const LogEntryContext: React.FC<{ context: LogEntry['context']; discoverLink?: s
           >
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="discoverApp" size="s" color="primary" />
+                <EuiIcon type="discoverApp" size="s" color="primary" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">

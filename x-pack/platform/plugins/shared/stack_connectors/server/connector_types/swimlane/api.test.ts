@@ -13,9 +13,9 @@ import {
   recordResponseCreate,
   recordResponseUpdate,
 } from './mocks';
-import type { Logger } from '@kbn/logging';
+import { loggerMock } from '@kbn/logging-mocks';
 
-let mockedLogger: jest.Mocked<Logger>;
+const mockedLogger = loggerMock.create();
 
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;

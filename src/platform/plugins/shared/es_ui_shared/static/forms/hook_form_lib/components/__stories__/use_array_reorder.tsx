@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { DropResult } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,13 +19,12 @@ import {
   EuiDroppable,
   EuiDraggable,
   EuiTitle,
-  DropResult,
   EuiIcon,
 } from '@elastic/eui';
 
 import { TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
-import { FormConfig } from '../../types';
+import type { FormConfig } from '../../types';
 import { UseField } from '../use_field';
 import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';
@@ -90,7 +90,7 @@ export function Reorder() {
                                     css={{ marginTop: '20px' }}
                                     aria-label="Change row order"
                                   >
-                                    <EuiIcon type="grab" />
+                                    <EuiIcon type="dragVertical" aria-hidden={true} />
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>
@@ -120,7 +120,7 @@ export function Reorder() {
                                 {items.length > 1 && (
                                   <EuiFlexItem grow={false}>
                                     <EuiButtonIcon
-                                      iconType="minusInCircle"
+                                      iconType="minusCircle"
                                       onClick={() => removeItem(id)}
                                       aria-label="Remove item"
                                     />
@@ -217,7 +217,7 @@ const MyFormComponent = () => {
                                   css={{ marginTop: '20px' }}
                                   aria-label="Change row order"
                                 >
-                                  <EuiIcon type="grab" />
+                                  <EuiIcon type="dragVertical" aria-hidden={true} />
                                 </div>
                               </EuiFlexItem>
                               <EuiFlexItem>
@@ -247,7 +247,7 @@ const MyFormComponent = () => {
                               {items.length > 1 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
-                                    iconType="minusInCircle"
+                                    iconType="minusCircle"
                                     onClick={() => removeItem(id)}
                                     aria-label="Remove item"
                                   />

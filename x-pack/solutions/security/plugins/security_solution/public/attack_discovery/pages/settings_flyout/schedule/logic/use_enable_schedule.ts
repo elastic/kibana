@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { EnableAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
 import { ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE } from '@kbn/elastic-assistant-common';
 
@@ -14,6 +14,8 @@ import { enableAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 export const ENABLE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'POST',
@@ -25,6 +27,9 @@ interface EnableAttackDiscoveryScheduleParams {
 }
 
 export const useEnableAttackDiscoverySchedule = () => {
+  const {
+    services: { telemetry },
+  } = useKibana();
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
@@ -40,9 +45,15 @@ export const useEnableAttackDiscoverySchedule = () => {
       invalidateGetAttackDiscoverySchedule(id);
       invalidateFindAttackDiscoverySchedule();
       addSuccess(i18n.ENABLE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.StatusUpdateSuccess, {
+        status: 'enabled',
+      });
     },
     onError: (error) => {
       addError(error, { title: i18n.ENABLE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.StatusUpdateFailed, {
+        status: 'enabled',
+      });
     },
   });
 };

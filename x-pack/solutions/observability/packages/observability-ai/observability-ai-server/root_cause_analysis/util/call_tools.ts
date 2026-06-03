@@ -5,30 +5,19 @@
  * 2.0.
  */
 
-import {
+import type {
   Message,
   ToolDefinition,
   ToolChoice,
-  ToolCallsOf,
-  withoutChunkEvents,
-  withoutTokenCountEvents,
+  ToolCallOfToolOptions,
   ToolMessage,
   MessageOf,
-  MessageRole,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-common';
-import { Logger } from '@kbn/logging';
-import {
-  defer,
-  last,
-  merge,
-  Observable,
-  of,
-  OperatorFunction,
-  share,
-  switchMap,
-  toArray,
-} from 'rxjs';
+import { withoutChunkEvents, withoutTokenCountEvents, MessageRole } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import type { Observable, OperatorFunction } from 'rxjs';
+import { defer, last, merge, of, share, switchMap, toArray } from 'rxjs';
 
 interface CallToolOptions extends CallToolTools {
   system: string;
@@ -48,7 +37,7 @@ type CallbackOf<
   TEmittedMessage extends Message
 > = (parameters: {
   messages: Message[];
-  toolCalls: ToolCallsOf<TCallToolTools>['toolCalls'];
+  toolCalls: ToolCallOfToolOptions<TCallToolTools>[];
 }) => Observable<TEmittedMessage>;
 
 type GetNextRequestCallback<TCallToolTools extends CallToolTools> = ({
@@ -60,7 +49,7 @@ type GetNextRequestCallback<TCallToolTools extends CallToolTools> = ({
 }) => { system: string; messages: Message[] } & TCallToolTools;
 
 export function callTools<TCallToolOptions extends CallToolOptions>(
-  { system, messages, inferenceClient, connectorId, tools, toolChoice, logger }: TCallToolOptions,
+  options: TCallToolOptions,
   callback: CallbackOf<TCallToolOptions, ToolMessage>
 ): Observable<MessageOf<TCallToolOptions>>;
 

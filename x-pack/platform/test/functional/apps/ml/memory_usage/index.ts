@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
@@ -17,15 +17,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
       await ml.securityUI.loginAsMlPowerUser();
-    });
-
-    after(async () => {
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./memory_usage_page'));

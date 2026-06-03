@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 export function registerClusterSettingsRoute({
   router,
@@ -26,7 +26,7 @@ export function registerClusterSettingsRoute({
       },
       validate: {
         body: schema.object({
-          settings: schema.arrayOf(schema.string()),
+          settings: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
       },
     },

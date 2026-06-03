@@ -30,6 +30,7 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_VIEW_SWITCHER,
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
+  TIMELINE_DISCOVER_TAB,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
@@ -69,7 +70,7 @@ const handleIntercepts = () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/198066
+// Failing: See https://github.com/elastic/kibana/issues/236526
 describe.skip(
   'Discover Timeline State Integration',
   {
@@ -93,14 +94,15 @@ describe.skip(
         goToEsqlTab();
         cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
       });
-      it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
+
+      it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/restoring timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
         const column2 = 'ecs.version';
         assertFieldsAreLoaded();
-        addFieldToTable(column1);
-        addFieldToTable(column2);
+        addFieldToTable(column1, TIMELINE_DISCOVER_TAB);
+        addFieldToTable(column2, TIMELINE_DISCOVER_TAB);
 
         // create a custom timeline
         addNameToTimelineAndSave(timelineName);
@@ -124,6 +126,7 @@ describe.skip(
             );
           });
       });
+
       it('should save/restore esql tab dataview/timerange/filter/query/columns when timeline is opened via url', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
@@ -131,14 +134,14 @@ describe.skip(
         const column2 = 'ecs.version';
         addDiscoverEsqlQuery(esqlQuery);
         assertFieldsAreLoaded();
-        addFieldToTable(column1);
-        addFieldToTable(column2);
+        addFieldToTable(column1, TIMELINE_DISCOVER_TAB);
+        addFieldToTable(column2, TIMELINE_DISCOVER_TAB);
 
         // create a custom timeline
         addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_PATCH_REQ}`)
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
-          .then((timelineId) => {
+          .then(() => {
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
             // reload the page with the exact url
             cy.reload();
@@ -151,6 +154,7 @@ describe.skip(
             );
           });
       });
+
       it('should save/restore esql tab ES|QL when saving timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `ES|QL timeline-${timelineSuffix}`;
@@ -190,7 +194,7 @@ describe.skip(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved search for timeline - ${timelineName}`
+          `Saved Discover session for timeline - ${timelineName}`
         );
       });
 
@@ -214,15 +218,9 @@ describe.skip(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved search for timeline - ${renamedTimelineName}`
+          `Saved Discover session for timeline - ${renamedTimelineName}`
         );
       });
-    });
-
-    // Issue for enabling below tests: https://github.com/elastic/kibana/issues/165913
-    context.skip('Advanced Settings', () => {
-      it('rows per page in saved search should be according to the user selected number of pages', () => {});
-      it('rows per page in new search should be according to the value selected in advanced settings', () => {});
     });
   }
 );

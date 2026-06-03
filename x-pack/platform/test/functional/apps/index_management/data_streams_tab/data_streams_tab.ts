@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const es = getService('es');
   const security = getService('security');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   const TEST_DS_NAME_1 = 'test-ds-1';
@@ -59,10 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await log.debug('Navigating to the data streams tab');
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the data streams tab
-      await pageObjects.indexManagement.changeTabs('data_streamsTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');
     });
 
     after(async () => {
@@ -113,8 +111,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.click('saveButton');
 
           // Expect to see a success toast
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+          await retry.try(async () => {
+            const successToast = await toasts.getElementByIndex(1);
+            expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+          });
           // Clear up toasts for next test
           await toasts.dismissAll();
         });
@@ -133,8 +133,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.click('saveButton');
 
           // Expect to see a success toast
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
+          await retry.try(async () => {
+            const successToast = await toasts.getElementByIndex(1);
+            expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
+          });
           // Clear up toasts for next test
           await toasts.dismissAll();
         });
@@ -153,11 +155,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Submit the form
           await testSubjects.click('saveButton');
 
-          // Expect to see a success toast
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain(
-            'Data retention has been updated for 2 data streams.'
-          );
+          // Wait for the modal to close after successful submission
+          await testSubjects.missingOrFail('editDataRetentionModal');
+
+          // Wait for and verify the success toast appears
+          await retry.try(async () => {
+            await toasts.assertCount(1);
+            const successToastContent = await toasts.getContentByIndex(1);
+            expect(successToastContent).to.contain(
+              'Data retention has been updated for 2 data streams.'
+            );
+          });
           // Clear up toasts for next test
           await toasts.dismissAll();
         });
@@ -172,11 +180,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Submit the form
           await testSubjects.click('saveButton');
 
-          // Expect to see a success toast
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain(
-            'Data retention has been updated for 2 data streams.'
-          );
+          // Wait for the modal to close after successful submission
+          await testSubjects.missingOrFail('editDataRetentionModal');
+
+          // Wait for and verify the success toast appears
+          await retry.try(async () => {
+            await toasts.assertCount(1);
+            const successToastContent = await toasts.getContentByIndex(1);
+            expect(successToastContent).to.contain(
+              'Data retention has been updated for 2 data streams.'
+            );
+          });
           // Clear up toasts for next test
           await toasts.dismissAll();
         });
@@ -192,17 +206,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('configureFailureStoreButton');
 
         // Verify modal is open
-        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
+        expect(await testSubjects.exists('editFailureStoreModal')).to.be(true);
 
         // Enable failure store
-        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
+        await testSubjects.click('enableFailureStoreToggle');
 
         // Submit the form
-        await testSubjects.click('saveButton');
+        await testSubjects.click('failureStoreModalSaveButton');
 
         // Expect to see a success toast
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Failure store enabled');
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain('Failure store enabled');
+        });
         // Clear up toasts for next test
         await toasts.dismissAll();
       });
@@ -215,17 +231,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('configureFailureStoreButton');
 
         // Verify modal is open
-        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
+        expect(await testSubjects.exists('editFailureStoreModal')).to.be(true);
 
         // Disable failure store (toggle off if it's on)
-        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
+        await testSubjects.click('enableFailureStoreToggle');
 
         // Submit the form
-        await testSubjects.click('saveButton');
+        await testSubjects.click('failureStoreModalSaveButton');
 
         // Expect to see a success toast
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Failure store disabled');
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain('Failure store disabled');
+        });
         // Clear up toasts for next test
         await toasts.dismissAll();
       });

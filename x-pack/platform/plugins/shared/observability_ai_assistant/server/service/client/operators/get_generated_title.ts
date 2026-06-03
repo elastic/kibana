@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { catchError, mergeMap, Observable, of, tap, from } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Observable } from 'rxjs';
+import { catchError, mergeMap, of, tap, from } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import { Message, MessageRole } from '../../../../common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 export const getTitleSystemMessage = (scopes: AssistantScope[]) =>
   `You are a helpful assistant for ${
     scopes.includes('observability') ? 'Elastic Observability' : 'Elasticsearch'
-  }. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`;
+  }. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. DO NOT include any labels or prefixes like "Title:", "**Title:**", or similar. Only the actual title text should be returned. If the conversation content itself suggests a relevant prefix, that is acceptable, but do not add generic labels. This title is shown in a list of conversations to the user, so title it for the user, not for you.`;
 
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
@@ -55,7 +57,7 @@ export function getGeneratedTitle({
         {
           name: TITLE_CONVERSATION_FUNCTION_NAME,
           description:
-            'Use this function to title the conversation. Do not wrap the title in quotes',
+            'Use this function to title the conversation. Return only the actual title text, without any generic labels, quotes, or prefixes like "Title:".',
           parameters: {
             type: 'object',
             properties: {
@@ -73,7 +75,7 @@ export function getGeneratedTitle({
   ).pipe(
     mergeMap((response) => {
       let title: string =
-        (response.toolCalls[0].function.name
+        (response.toolCalls?.[0]?.function.name
           ? (response.toolCalls[0].function.arguments as { title: string }).title
           : response.content) || '';
 

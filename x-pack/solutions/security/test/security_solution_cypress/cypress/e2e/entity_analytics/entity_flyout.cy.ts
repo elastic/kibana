@@ -17,7 +17,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { USER_PANEL_HEADER } from '../../screens/users/flyout_user_panel';
 import { waitForAlerts } from '../../tasks/alerts';
 import { HOST_PANEL_HEADER } from '../../screens/hosts/flyout_host_panel';
-import { RISK_INPUT_PANEL_HEADER, ASSET_CRITICALITY_BADGE } from '../../screens/flyout_risk_panel';
+import { ASSET_CRITICALITY_BADGE, RISK_INPUT_PANEL_HEADER } from '../../screens/flyout_risk_panel';
 import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
 import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
 import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
@@ -35,12 +35,13 @@ const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
 describe(
   'Entity Flyout',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'newUserDetailsFlyoutManagedUser',
+            'disable:entityAnalyticsEntityStoreV2',
           ])}`,
         ],
       },

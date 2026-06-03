@@ -25,16 +25,18 @@ describe('useCanAssignArtifactPerPolicy()', () => {
   let item: ArtifactFormComponentProps['item'];
   let mode: ArtifactFormComponentProps['mode'];
   let hasItemBeenUpdated: boolean;
-  let renderHook: () => ReturnType<AppContextTestRender['renderHook']>;
+  let testContext: AppContextTestRender;
+
+  const renderHookWithLicenseType = (
+    licenseType: 'platinumPlus' | 'enterprise' = 'platinumPlus'
+  ) => {
+    return testContext.renderHook(() => {
+      return useCanAssignArtifactPerPolicy(item, mode, hasItemBeenUpdated, licenseType);
+    });
+  };
 
   beforeEach(() => {
-    const testContext = createAppRootMockRenderer();
-
-    renderHook = () => {
-      return testContext.renderHook(() => {
-        return useCanAssignArtifactPerPolicy(item, mode, hasItemBeenUpdated);
-      });
-    };
+    testContext = createAppRootMockRenderer();
 
     item = new ExceptionsListItemGenerator('seed').generateTrustedApp({
       tags: [buildPerPolicyTag('123')],
@@ -42,6 +44,7 @@ describe('useCanAssignArtifactPerPolicy()', () => {
     mode = 'edit';
     hasItemBeenUpdated = false;
     useLicenseMock().isPlatinumPlus.mockReturnValue(false);
+    useLicenseMock().isEnterprise.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -51,7 +54,15 @@ describe('useCanAssignArtifactPerPolicy()', () => {
   it('should return `true` when license is platinum plus', () => {
     mode = 'create';
     useLicenseMock().isPlatinumPlus.mockReturnValue(true);
-    const { result } = renderHook();
+    const { result } = renderHookWithLicenseType('platinumPlus');
+
+    expect(result.current).toEqual(true);
+  });
+
+  it('should return `true` when license is enterprise', () => {
+    mode = 'create';
+    useLicenseMock().isEnterprise.mockReturnValue(true);
+    const { result } = renderHookWithLicenseType('enterprise');
 
     expect(result.current).toEqual(true);
   });
@@ -59,19 +70,42 @@ describe('useCanAssignArtifactPerPolicy()', () => {
   it('should return `false` when license is not platinum and artifact is global', () => {
     mode = 'create';
     useLicenseMock().isPlatinumPlus.mockReturnValue(false);
-    const { result } = renderHook();
+    const { result } = renderHookWithLicenseType('platinumPlus');
+
+    expect(result.current).toEqual(false);
+  });
+
+  it('should return `false` when license is not enterprise and artifact is global', () => {
+    mode = 'create';
+    useLicenseMock().isEnterprise.mockReturnValue(false);
+    const { result } = renderHookWithLicenseType('enterprise');
 
     expect(result.current).toEqual(false);
   });
 
   it('should return `true` when license is not platinum but artifact is currently per-policy', () => {
-    const { result } = renderHook();
+    const { result } = renderHookWithLicenseType('platinumPlus');
+
+    expect(result.current).toEqual(true);
+  });
+
+  it('should return `true` when license is not enterprise but artifact is currently per-policy', () => {
+    const { result } = renderHookWithLicenseType('enterprise');
 
     expect(result.current).toEqual(true);
   });
 
   it('should return `true` when license is not platinum and per-policy item was updated to global', () => {
-    const { result, rerender } = renderHook();
+    const { result, rerender } = renderHookWithLicenseType('platinumPlus');
+    item.tags = [GLOBAL_ARTIFACT_TAG];
+    hasItemBeenUpdated = true;
+    rerender();
+
+    expect(result.current).toEqual(true);
+  });
+
+  it('should return `true` when license is not enterprise and per-policy item was updated to global', () => {
+    const { result, rerender } = renderHookWithLicenseType('enterprise');
     item.tags = [GLOBAL_ARTIFACT_TAG];
     hasItemBeenUpdated = true;
     rerender();

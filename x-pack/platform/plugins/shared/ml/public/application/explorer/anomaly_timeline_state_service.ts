@@ -24,7 +24,10 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
+import type { AnomalyExplorerSwimLaneUrlState } from '@kbn/ml-common-types/locator';
+import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
 import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
@@ -34,12 +37,7 @@ import type {
   ViewBySwimLaneData,
 } from './explorer_utils';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
-import {
-  ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIMLANE_TYPE,
-  VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
+import { VIEW_BY_JOB_LABEL } from './explorer_constants';
 import type { MlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import type { Refresh } from '../routing/use_refresh';
@@ -272,7 +270,6 @@ export class AnomalyTimelineStateService extends StateService {
         this.anomalyExplorerCommonStateService.influencerFilterQuery$,
         this.getViewBySwimlaneFieldName$(),
         this.getSwimLanePagination$(),
-        this.getSwimLaneCardinality$(),
         this.getSelectedCells$(),
         this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
@@ -284,7 +281,6 @@ export class AnomalyTimelineStateService extends StateService {
           InfluencersFilterQuery,
           string,
           SwimLanePagination,
-          number,
           AppStateSelectedCells,
           TimeBucketsInterval,
           TimeRangeBounds,
@@ -300,7 +296,6 @@ export class AnomalyTimelineStateService extends StateService {
             influencersFilterQuery,
             viewBySwimlaneFieldName,
             swimLanePagination,
-            swimLaneCardinality,
             selectedCells,
             swimLaneBucketInterval,
             timeBounds,
@@ -341,7 +336,10 @@ export class AnomalyTimelineStateService extends StateService {
 
   private _initViewBySwimLaneData() {
     return combineLatest([
-      this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
+      this._overallSwimLaneData$.pipe(
+        skipWhile((v) => !v),
+        distinctUntilChanged(isEqual)
+      ),
       this.anomalyExplorerCommonStateService.selectedJobs$,
       this.anomalyExplorerCommonStateService.influencerFilterQuery$,
       this._swimLaneSeverity$,
@@ -616,6 +614,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getContainerWidth$(): Observable<number | undefined> {
     return this._containerWidth$.pipe(
+      skipWhile((v) => v === 0),
       debounceTime(500),
       distinctUntilChanged((prev, curr) => {
         const delta = Math.abs(prev - curr);
@@ -650,7 +649,7 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   public getSwimLanePagination$(): Observable<SwimLanePagination> {
-    return this._swimLanePagination$.asObservable();
+    return this._swimLanePagination$.asObservable().pipe(distinctUntilChanged(isEqual));
   }
 
   public getSwimLanePagination(): SwimLanePagination {

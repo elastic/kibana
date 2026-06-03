@@ -11,10 +11,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 
-import { Position } from '@elastic/charts/dist/utils/common';
+import type { Position } from '@elastic/charts/dist/utils/common';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
-import { ClientPluginsStart } from '../../../../../plugin';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useAbsoluteDate } from '../../../hooks';
 
 export const StepDurationPanel = ({
@@ -32,6 +33,7 @@ export const StepDurationPanel = ({
   const { monitor } = useSelectedMonitor();
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   const isBrowser = monitor?.type === 'browser';
 
@@ -67,6 +69,7 @@ export const StepDurationPanel = ({
         reportType={ReportTypes.KPI}
         legendPosition={legendPosition}
         legendIsVisible={doBreakdown}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
         attributes={[
           {
             time,

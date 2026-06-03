@@ -6,14 +6,14 @@
  */
 
 import { Router } from '@kbn/shared-ux-router';
-import React from 'react';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { useMemo } from 'react';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import styled from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   DataAccessLayer,
   ResolverPluginSetup,
 } from '@kbn/security-solution-plugin/public/resolver/types';
@@ -77,17 +77,20 @@ const AppRoot = React.memo(
       <I18nProvider>
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
-            <Provider store={store}>
-              <Wrapper>
-                <ResolverWithoutProviders
-                  databaseDocumentID=""
-                  resolverComponentInstanceID="test"
-                  indices={[]}
-                  shouldUpdate={false}
-                  filters={{}}
-                />
-              </Wrapper>
-            </Provider>
+            <ExpandableFlyoutProvider>
+              <Provider store={store}>
+                <Wrapper>
+                  <ResolverWithoutProviders
+                    databaseDocumentID=""
+                    resolverComponentInstanceID="test"
+                    indices={[]}
+                    shouldUpdate={false}
+                    filters={{}}
+                    renderCellActions={() => <></>}
+                  />
+                </Wrapper>
+              </Provider>
+            </ExpandableFlyoutProvider>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>

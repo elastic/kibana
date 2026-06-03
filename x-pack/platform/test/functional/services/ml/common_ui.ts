@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ProvidedType } from '@kbn/test';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
 
@@ -424,7 +424,7 @@ export function MachineLearningCommonUIProvider({
           await this.ensureAllMenuPopoversClosed();
 
           await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
-          await find.existsByCssSelector('euiContextMenuPanel');
+          await find.byCssSelector('.euiContextMenuPanel');
 
           const isEnabled = await testSubjects.isEnabled(actionTestSubject);
 

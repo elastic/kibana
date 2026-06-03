@@ -14,12 +14,24 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
-import type { registerReactEmbeddableFactory } from './react_embeddable_system';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+  registerEmbeddablePublicDefinition,
+} from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import { EnhancementRegistryDefinition } from './enhancements/types';
-import { EmbeddableTransforms } from '../common';
+import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
+import type {
+  AddFromLibraryFormProps,
+  AddFromLibraryContentProps,
+} from './add_from_library/add_from_library_flyout';
+import type { registerDrilldown } from './drilldowns/registry';
+import type {
+  SearchLibraryRequestType,
+  SearchLibraryResponseType,
+} from '../server/search_route/types';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -32,6 +44,7 @@ export interface EmbeddableStartDependencies {
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface EmbeddableSetup {
@@ -64,24 +77,40 @@ export interface EmbeddableSetup {
   registerAddFromLibraryType: typeof registerAddFromLibraryType;
 
   /**
-   * Registers an async {@link ReactEmbeddableFactory} getter.
+   * Registers an async {@link DrilldownDefintion} getter.
    */
-  registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
-
-  registerTransforms: (
-    type: string,
-    getTransforms: () => Promise<EmbeddableTransforms<any, any> | undefined>
-  ) => void;
+  registerDrilldown: typeof registerDrilldown;
 
   /**
-   * @deprecated
+   * Registers an async {@link ReactEmbeddableFactory} getter.
    */
-  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  registerEmbeddablePublicDefinition: typeof registerEmbeddablePublicDefinition;
+
+  /**
+   * Register legacyURLTransform for an embeddable type.
+   * LegacyURLTransform is used to convert StoredEmbeddableState from URL into EmbeddableState.
+   */
+  registerLegacyURLTransform: (
+    type: string,
+    getTransformOut: (
+      transformDrilldownsOut: DrilldownTransforms['transformOut']
+    ) => Promise<EmbeddableTransforms['transformOut']>
+  ) => void;
 }
 
 export interface EmbeddableStart {
+  getAddFromLibraryComponent: () => Promise<React.FC<AddFromLibraryFormProps>>;
+  getAddFromLibraryContentComponent: () => Promise<React.FC<AddFromLibraryContentProps>>;
+  getEmbeddableDefinition: <
+    SerializedState extends object = object,
+    Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  >(
+    type: string
+  ) => Promise<EmbeddablePublicDefinition<SerializedState, Api>>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
-  hasTransforms: (type: string) => boolean;
-  getEnhancement: (enhancementId: string) => PersistableState;
+  getLegacyURLTransform: (
+    type: string
+  ) => Promise<EmbeddableTransforms['transformOut'] | undefined>;
+  hasLegacyURLTransform: (type: string) => boolean;
+  getSavedObjects: (request: SearchLibraryRequestType) => Promise<SearchLibraryResponseType>;
 }

@@ -8,28 +8,35 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
   EuiButton,
-  EuiToolTip,
-  EuiIcon,
   EuiIconTip,
   EuiHorizontalRule,
   EuiTitle,
   EuiSpacer,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectsImportSuccess, SavedObjectsImportWarning, IBasePath } from '@kbn/core/public';
+import type {
+  SavedObjectsImportSuccess,
+  SavedObjectsImportWarning,
+  IBasePath,
+  CoreStart,
+} from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StartDependencies } from '@kbn/content-management-plugin/public/types';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
+import type { FailedImport } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 
 const DEFAULT_ICON = 'apps';
 
@@ -146,7 +153,7 @@ const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
     case 'created':
       return (
         <EuiIconTip
-          type={'checkInCircleFilled'}
+          type={'checkCircleFill'}
           color={'success'}
           content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
             defaultMessage: 'Created',
@@ -198,9 +205,29 @@ const ImportWarnings: FC<{ warnings: SavedObjectsImportWarning[]; basePath: IBas
 };
 
 const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePath }> = ({
-  warning,
+  warning: providedWarning,
   basePath,
 }) => {
+  const kibana = useKibana<CoreStart & StartDependencies>();
+  const isUnifiedRulesPageEnabled = useMemo(
+    () => kibana.services.application?.isAppRegistered?.('rules') ?? false,
+    [kibana.services.application]
+  );
+
+  const isRulesWarning =
+    'actionPath' in providedWarning && providedWarning.actionPath.endsWith('triggersActions/rules');
+
+  const warning = useMemo(
+    () =>
+      isUnifiedRulesPageEnabled && isRulesWarning
+        ? {
+            ...providedWarning,
+            actionPath: '/app/rules',
+          }
+        : providedWarning,
+    [isUnifiedRulesPageEnabled, isRulesWarning, providedWarning]
+  );
+
   const warningContent = useMemo(() => {
     if (warning.type === 'action_required') {
       return (
@@ -209,6 +236,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
             <EuiButton
               size="s"
               color="warning"
+              data-test-subj="warningActionButton"
               href={basePath.prepend(warning.actionPath)}
               target="_blank"
             >
@@ -292,9 +320,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             data-test-subj="importSavedObjectsRow"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={typeLabel}>
-                <EuiIcon aria-label={typeLabel} type={icon} size="s" />
-              </EuiToolTip>
+              <EuiIconTip content={typeLabel} position="top" aria-label={typeLabel} type={icon} />
             </EuiFlexItem>
             <EuiFlexItem css={styles.title} data-test-subj="importSavedObjectsTitle">
               <EuiText size="s">

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const INDEX_NAME = 'newline';
 const VALUE_WITH_NEW_LINES = "Newline!\nHere's a newline.\nHere's a newline again.";
@@ -17,7 +17,6 @@ const VALUE_WITHOUT_NEW_LINES = VALUE_WITH_NEW_LINES.replaceAll('\n', ' ');
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
@@ -34,9 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await browser.setWindowSize(1200, 2000);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

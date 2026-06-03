@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiIcon,
@@ -26,7 +26,7 @@ import {
   FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { LegendDetails } from './legend_details';
-import { ILayer } from '../../../../../classes/layers/layer';
+import type { ILayer } from '../../../../../classes/layers/layer';
 import { isLayerGroup } from '../../../../../classes/layers/layer_group';
 
 function escapeLayerName(name: string) {
@@ -205,7 +205,7 @@ export class TOCEntry extends Component<Props, State> {
       quickActions.push(
         <EuiButtonIcon
           key="fitToBounds"
-          iconType="expand"
+          iconType="maximize"
           title={FIT_TO_DATA_LABEL}
           aria-label={FIT_TO_DATA_LABEL}
           onClick={this._fitToBounds}
@@ -227,7 +227,7 @@ export class TOCEntry extends Component<Props, State> {
       quickActions.push(
         <EuiButtonIcon
           key="reorder"
-          iconType="grab"
+          iconType="dragVertical"
           title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
           })}
@@ -275,8 +275,9 @@ export class TOCEntry extends Component<Props, State> {
         >
           <EuiIcon
             className="eui-alignBaseline"
-            type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'}
+            type={isLegendDetailsOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
             size="s"
+            aria-hidden={true}
           />
         </button>
       </span>
@@ -357,7 +358,7 @@ export class TOCEntry extends Component<Props, State> {
 
         {this.props.isFeatureEditorOpenForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
-            <EuiIcon type="vector" size="s" />
+            <EuiIcon type="vectorSquare" size="s" aria-hidden={true} />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">
               <FormattedMessage
                 id="xpack.maps.layerControl.tocEntry.EditFeatures"

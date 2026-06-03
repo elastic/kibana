@@ -5,47 +5,36 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiRange, EuiRangeProps } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
+import { EuiFieldNumber, EuiRange } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { i18n, TranslateArguments } from '@kbn/i18n';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import {
-  buildExpression,
-  buildExpressionFunction,
+import type { TranslateArguments } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { memoize } from 'lodash';
-import { OperationDefinition } from '.';
+import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
+import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getNumberParam,
 } from './helpers';
-import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey, groupByKey } from './get_group_by_key';
-
-export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof PERCENTILE_ID;
-  params: {
-    percentile: number;
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
-  };
-}
 
 const DEFAULT_PERCENTILE_VALUE = 95;
 const ALLOWED_DECIMAL_DIGITS = 4;
@@ -179,12 +168,11 @@ export const percentileOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
-    const existingPercentileParam =
-      previousColumn &&
-      isColumnOfType<PercentileIndexPatternColumn>(PERCENTILE_ID, previousColumn) &&
-      previousColumn.params.percentile;
+    const existingPercentileParam = hasOperationType(previousColumn, PERCENTILE_ID)
+      ? getNumberParam(previousColumn, 'percentile')
+      : undefined;
     const newPercentileParam =
-      columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
+      columnParams?.percentile ?? existingPercentileParam ?? DEFAULT_PERCENTILE_VALUE;
     return {
       label: ofName(
         getSafeName(field.name, indexPattern),
@@ -217,9 +205,11 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.timeShift) return;
-    return `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`;
+    return {
+      template: `PERCENTILE(${esql.col(column.sourceField)}, ${column.params.percentile})`,
+    };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(

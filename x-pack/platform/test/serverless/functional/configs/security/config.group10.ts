@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../../config.security.base.ts'));
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [
-      require.resolve('../../test_suites/context'), // 5 min
-      require.resolve('../../test_suites/discover/esql'), // 7 min
-    ],
+    testFiles: [require.resolve('../../test_suites/context')], // 5 min
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 10',
     },

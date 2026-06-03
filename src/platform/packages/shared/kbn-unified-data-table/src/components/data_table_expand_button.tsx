@@ -8,7 +8,8 @@
  */
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
 import { useControlColumn } from '../hooks/use_control_column';
@@ -19,7 +20,7 @@ import { useControlColumn } from '../hooks/use_control_column';
 export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
 
-  const toolTipRef = useRef<EuiToolTip>(null);
+  const toolTipRef = useRef<EuiToolTipRef>(null);
   const [pressed, setPressed] = useState<boolean>(false);
   const { expanded, setExpanded, componentsTourSteps } = useContext(UnifiedDataTableContext);
 
@@ -50,7 +51,6 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   return (
     <EuiToolTip
       content={buttonLabel}
-      delay="long"
       ref={toolTipRef}
       anchorClassName="unifiedDataTable__rowControl"
       disableScreenReaderOutput

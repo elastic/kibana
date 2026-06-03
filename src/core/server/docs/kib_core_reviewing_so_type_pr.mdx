@@ -11,12 +11,9 @@ tags: ['kibana','dev', 'contributor', 'api docs']
 
 ## How does automatic review assignment work when SO types are changed?
 
-PRs modifying / adding / deleting any SO type registration will be flagged by the integration
-test located at `src/core/server/integration_tests/saved_objects/migrations/check_registered_types.test.ts`.
+PRs that modify Saved Object type registrations are validated by the **Check changes in Saved Objects** CI step (`node scripts/check_saved_objects`). The check compares the current type registry against a GCS baseline snapshot and posts actionable feedback on the pull request when Saved Object types are added, updated, or removed.
 
-This test will fail any time a change is performed on an SO type registration that could risk having an impact on
-upgrades/migrations, and will force the PR's author to update the test's snapshot, which will trigger a review
-from the Core team.
+When the check detects migration-related changes, it fails CI and summarizes which types were affected, including reminders about two-step releases when applicable.
 
 ## What and how to review?
 
@@ -50,11 +47,24 @@ In that scenario, we should:
 
 The integration test mentioned in the previous section also detects those scenarios.
 
+Additionally, we have an automated check (`node scripts/check_saved_objects`) that:
+- Automatically detects when a previously registered SO type is no longer present
+- Prevents removed type names from being reused (to avoid migration conflicts)
+- Maintains a list of all removed types in `packages/kbn-check-saved-objects-cli/removed_types.json`
+
+<DocCallOut>
+For detailed instructions on how to properly remove a Saved Object type, see <DocLink id="kibDevTutorialSavedObject" section="removing-a-saved-object-type" text="Removing a Saved Object type"/>.
+</DocCallOut>
+
+When a type is removed, the check will fail with an error indicating which types were removed.
+
 Here, we need to check:
-- that `REMOVED_TYPES` (`src/core/packages/saved-objects/server-internal/src/constants.ts`) was properly updated
-  - (but, again, the integration test will fail otherwise)
-- that no other existing SO types may be referencing this type
+- that `removed_types.json` was properly updated with the removed type name(s)
+  - (the automated check will fail CI otherwise)
+- that no other existing SO types may be referencing this removed type
   - can't really be automated, will likely need to ask the owning team directly
+
+**Note:** Once a type name is added to `removed_types.json`, that name cannot be reused for new SO types. This prevents migration conflicts where a removed type's data could interfere with a new type using the same name.
 
 ### A new migration function was added
 

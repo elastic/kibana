@@ -72,7 +72,7 @@ describe('Cloud Plugin', () => {
         parseDeploymentIdFromDeploymentUrlMock.mockReturnValue('some-deployment-id');
         const { setup } = setupPlugin();
         expect(setup.deploymentId).toBe('some-deployment-id');
-        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledTimes(2); // called when registering the analytic context too
+        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledTimes(1);
         expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledWith(
           baseConfig.deployment_url
         );
@@ -160,6 +160,67 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectType).toBe('security');
       });
+      describe('exposes isInTrial', () => {
+        it('is `true` when `serverless.in_trial` is set', () => {
+          const { setup } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+              in_trial: true,
+            },
+          });
+
+          expect(setup.isInTrial()).toBe(true);
+        });
+        it('is `false` when `serverless.in_trial` is set to false', () => {
+          const { setup } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+              in_trial: false,
+            },
+          });
+          expect(setup.isInTrial()).toBe(false);
+        });
+        it('is `true` when `trial_end_date` is set and is in the future', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() + 10000).toISOString(),
+          });
+
+          expect(setup.isInTrial()).toBe(true);
+        });
+        it('is `false` when `trial_end_date` is set and is in the past', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() - 10000).toISOString(),
+          });
+
+          expect(setup.isInTrial()).toBe(false);
+        });
+        it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
+          const { setup } = setupPlugin({});
+          expect(setup.isInTrial()).toBe(false);
+        });
+      });
+      describe('exposes trialDaysLeft', () => {
+        it('returns positive number when `trial_end_date` is in the future', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          });
+          expect(setup.trialDaysLeft()).toBe(5);
+        });
+        it('returns 0 when `trial_end_date` is in the past', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() - 10000).toISOString(),
+          });
+          expect(setup.trialDaysLeft()).toBe(0);
+        });
+        it('returns undefined when `trial_end_date` is not set', () => {
+          const { setup } = setupPlugin({});
+          expect(setup.trialDaysLeft()).toBeUndefined();
+        });
+        it('returns undefined when `trial_end_date` is invalid', () => {
+          const { setup } = setupPlugin({ trial_end_date: 'invalid-date' });
+          expect(setup.trialDaysLeft()).toBeUndefined();
+        });
+      });
     });
   });
 
@@ -172,6 +233,75 @@ describe('Cloud Plugin', () => {
       it('exposes isCloudEnabled', () => {
         const { start } = setupPlugin();
         expect(start.isCloudEnabled).toBe(true);
+      });
+
+      describe('exposes isInTrial', () => {
+        it('is `true` when `serverless.in_trial` is set', () => {
+          const { start } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+              in_trial: true,
+            },
+          });
+
+          expect(start.isInTrial()).toBe(true);
+        });
+        it('is `false` when `serverless.in_trial` is set to false', () => {
+          const { start } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+              in_trial: false,
+            },
+          });
+          expect(start.isInTrial()).toBe(false);
+        });
+        it('is `true` when `trial_end_date` is set and is in the future', () => {
+          const { start } = setupPlugin({
+            trial_end_date: new Date(Date.now() + 10000).toISOString(),
+          });
+
+          expect(start.isInTrial()).toBe(true);
+        });
+        it('is `false` when `trial_end_date` is set and is in the past', () => {
+          const { start } = setupPlugin({
+            trial_end_date: new Date(Date.now() - 10000).toISOString(),
+          });
+
+          expect(start.isInTrial()).toBe(false);
+        });
+        it('is `false` when `trial_end_date` is not a valid date', () => {
+          const { start } = setupPlugin({
+            trial_end_date: 'invalid-date',
+          });
+
+          expect(start.isInTrial()).toBe(false);
+        });
+        it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
+          const { start } = setupPlugin({});
+          expect(start.isInTrial()).toBe(false);
+        });
+      });
+      describe('exposes trialDaysLeft', () => {
+        it('returns positive number when `trial_end_date` is in the future', () => {
+          const { start } = setupPlugin({
+            trial_end_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          });
+          expect(start.trialDaysLeft()).toBe(5);
+        });
+        it('returns 0 when `trial_end_date` is in the past', () => {
+          const { start } = setupPlugin({
+            trial_end_date: new Date(Date.now() - 10000).toISOString(),
+          });
+          expect(start.trialDaysLeft()).toBe(0);
+        });
+        it('returns undefined when `trial_end_date` is invalid', () => {
+          const { start } = setupPlugin({ trial_end_date: 'invalid-date' });
+          expect(start.trialDaysLeft()).toBeUndefined();
+        });
+        it('returns undefined when `trial_end_date` is not set', () => {
+          const { start } = setupPlugin({});
+          expect(start.trialDaysLeft()).toBeUndefined();
+        });
       });
     });
   });

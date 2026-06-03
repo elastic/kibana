@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiFilePicker,
@@ -53,27 +54,29 @@ export const PipelinesCsvUploader: FC<Props> = ({
 
   const options = getOptions(actionOptions);
 
+  const filePickerTitle = i18n.translate(
+    'xpack.ingestPipelines.createFromCsv.fileUpload.filePickerTitle',
+    {
+      defaultMessage: 'Upload file (up to {maxFileSize})',
+      values: { maxFileSize },
+    }
+  );
+
+  const filePickerDescription = i18n.translate(
+    'xpack.ingestPipelines.createFromCsv.fileUpload.selectOrDragAndDropFileDescription',
+    {
+      defaultMessage: 'Select or drag and drop a CSV file',
+    }
+  );
+
   return (
     <>
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.ingestPipelines.createFromCsv.fileUpload.filePickerTitle"
-            defaultMessage="Upload file (up to {maxFileSize})"
-            values={{ maxFileSize }}
-          />
-        }
-      >
+      <EuiFormRow fullWidth label={filePickerTitle}>
         <EuiFilePicker
           id="filePicker"
           data-test-subj="csvFilePicker"
-          initialPromptText={i18n.translate(
-            'xpack.ingestPipelines.createFromCsv.fileUpload.selectOrDragAndDropFileDescription',
-            {
-              defaultMessage: 'Select or drag and drop a CSV file',
-            }
-          )}
+          initialPromptText={filePickerDescription}
+          aria-label={`${filePickerTitle}. ${filePickerDescription}`}
           onChange={onFilePickerChange}
           accept=".csv"
         />
@@ -102,6 +105,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
           options={options}
           idSelected={action}
           onChange={(id) => setAction(id as FieldCopyAction)}
+          name="defaultAction"
         />
       </EuiFormRow>
 

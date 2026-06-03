@@ -8,7 +8,8 @@
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
 import { getEntryNestedMock } from './index.mock';
-import { entriesNested, EntryNested } from '.';
+import type { EntryNested } from '.';
+import { entriesNested } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEntryExistsMock } from '../entries_exist/index.mock';

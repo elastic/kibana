@@ -20,11 +20,11 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import type { FormSchema } from '../../../../shared_imports';
 import {
   useForm,
   Form,
   fieldValidators,
-  FormSchema,
   FIELD_TYPES,
   UseField,
   TextField,
@@ -35,7 +35,8 @@ import {
 import { useAppContext } from '../../../app_context';
 import { IndicesSelector } from './fields/indices_selector';
 import { documentationService } from '../../../services/documentation';
-import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
+import type { DraftPolicy } from '../create_policy_context';
+import { useCreatePolicyContext } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;
@@ -190,12 +191,16 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         component={SelectField}
         labelAppend={
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.configurationStep.typePopoverAriaLabel',
+              { defaultMessage: 'Policy type information' }
+            )}
             button={
               <EuiLink
                 data-test-subj="typePopoverIcon"
                 onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
               >
-                <EuiIcon type="question" />
+                <EuiIcon type="question" aria-hidden={true} />
               </EuiLink>
             }
             isOpen={isPopoverOpen}
@@ -348,7 +353,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
             fill
             color="primary"
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             disabled={form.isValid === false}
             data-test-subj="nextButton"
             onClick={onSubmit}

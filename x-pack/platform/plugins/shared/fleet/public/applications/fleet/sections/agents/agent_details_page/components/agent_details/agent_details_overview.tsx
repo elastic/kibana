@@ -17,36 +17,39 @@ import {
   EuiIcon,
   EuiSkeletonText,
   EuiToolTip,
+  EuiButton,
+  euiTextBreakWord,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
+import { useAgentVersion } from '../../../../../hooks';
+import { hasVersionSuffix } from '../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
-import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
 import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 import { AgentPolicyOutputsSummary } from '../../../agent_list_page/components/agent_policy_outputs_summary';
 import { formattedTime } from '../../../agent_list_page/components/agent_activity_flyout/helpers';
+import { AgentEffectiveConfigFlyout } from '../agent_effective_config_flyout';
 
-// Allows child text to be truncated
-const FlexItemWithMinWidth = styled(EuiFlexItem)`
-  min-width: 0px;
+const EuiButtonCompressed = styled(EuiButton)`
+  height: 32px;
 `;
 
 export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = memo(({ agent, agentPolicy, outputs }) => {
   const latestAgentVersion = useAgentVersion();
-
-  const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
-  const outputs = outputRes?.data?.item;
+  const [effectiveConfigFlyoutOpen, setEffectiveConfigFlyoutOpen] = React.useState(false);
 
   return (
     <EuiPanel>
@@ -57,7 +60,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
           data-test-subj="agentDetailsOverviewSection"
         >
           <EuiFlexGroup>
-            <FlexItemWithMinWidth grow={5}>
+            <EuiFlexItem grow={5}>
               <EuiFlexGroup direction="column" gutterSize="m">
                 {[
                   {
@@ -70,13 +73,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.cpuTitle"
                             defaultMessage="CPU"
                           />
                           &nbsp;
-                          <EuiIcon type="info" />
+                          <EuiIcon type="info" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     ),
@@ -92,13 +95,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.memoryTitle"
                             defaultMessage="Memory"
                           />
                           &nbsp;
-                          <EuiIcon type="info" />
+                          <EuiIcon type="info" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     ),
@@ -109,28 +112,39 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     typeof description === 'string' && description.length > 20 ? description : '';
                   return (
                     <EuiFlexGroup>
-                      <FlexItemWithMinWidth grow={8}>
+                      <EuiFlexItem grow={8}>
                         <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                      </FlexItemWithMinWidth>
-                      <FlexItemWithMinWidth grow={4}>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={4}>
                         <EuiToolTip position="top" content={tooltip}>
                           <EuiDescriptionListDescription className="eui-textTruncate">
                             {description}
                           </EuiDescriptionListDescription>
                         </EuiToolTip>
-                      </FlexItemWithMinWidth>
+                      </EuiFlexItem>
                     </EuiFlexGroup>
                   );
                 })}
               </EuiFlexGroup>
-            </FlexItemWithMinWidth>
-            <FlexItemWithMinWidth grow={5}>
-              <EuiFlexGroup justifyContent="flexEnd">
+            </EuiFlexItem>
+            <EuiFlexItem grow={5}>
+              <EuiFlexGroup justifyContent="flexStart" direction="column" alignItems="flexEnd">
                 <EuiFlexItem grow={false}>
                   <AgentDashboardLink agent={agent} agentPolicy={agentPolicy} />
                 </EuiFlexItem>
+                {agent.type === 'OPAMP' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonCompressed onClick={() => setEffectiveConfigFlyoutOpen(true)}>
+                      {' '}
+                      <FormattedMessage
+                        id="xpack.fleet.agentDetails.viewEffectiveConfigButtonLabel"
+                        defaultMessage="View Collector Configuration"
+                      />
+                    </EuiButtonCompressed>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
-            </FlexItemWithMinWidth>
+            </EuiFlexItem>
           </EuiFlexGroup>
           {[
             {
@@ -162,7 +176,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={hasVersionSuffix(agent.policy_id ?? '')}
+                />
               ) : (
                 <EuiSkeletonText lines={1} />
               ),
@@ -220,6 +239,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Output for integrations',
               }),
               description: outputs ? <AgentPolicyOutputsSummary outputs={outputs} /> : '-',
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.outputForMonitoringLabel', {
@@ -230,6 +250,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               ) : (
                 '-'
               ),
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.logLevel', {
@@ -239,13 +260,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 typeof agent.local_metadata?.elastic?.agent?.log_level === 'string'
                   ? agent.local_metadata.elastic.agent.log_level
                   : '-',
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.privilegeModeLabel', {
                 defaultMessage: 'Privilege mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                agent?.local_metadata.elastic?.agent.unprivileged === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
                     defaultMessage="Running as non-root"
@@ -256,6 +278,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     defaultMessage="Running as root"
                   />
                 ),
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
@@ -267,6 +290,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     ? 'snapshot'
                     : 'stable'
                   : '-',
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
@@ -296,6 +320,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               ) : (
                 <EuiSkeletonText lines={1} />
               ),
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
@@ -316,33 +341,75 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               ) : (
                 <EuiSkeletonText lines={1} />
               ),
+              hidden: agent.type === 'OPAMP',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
                 defaultMessage: 'Tags',
               }),
-              description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
+              description: (agent.tags ?? []).length > 0 ? agent.tags!.join(', ') : '-',
             },
-          ].map(({ title, description }) => {
-            const tooltip =
-              typeof description === 'string' && description.length > 20 ? description : '';
-            return (
-              <EuiFlexGroup>
-                <FlexItemWithMinWidth grow={3}>
-                  <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                </FlexItemWithMinWidth>
-                <FlexItemWithMinWidth grow={7}>
-                  <EuiToolTip position="top" content={tooltip}>
-                    <EuiDescriptionListDescription className="eui-textTruncate">
-                      {description}
-                    </EuiDescriptionListDescription>
-                  </EuiToolTip>
-                </FlexItemWithMinWidth>
-              </EuiFlexGroup>
-            );
-          })}
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
+                defaultMessage: 'FIPS mode',
+              }),
+              description:
+                agent.local_metadata.elastic?.agent.fips === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.fipsModeCompliantText"
+                    defaultMessage="Enabled"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Not enabled"
+                  />
+                ),
+              hidden: agent.type === 'OPAMP',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.capabilitiesLabel', {
+                defaultMessage: 'Collector capabilities',
+              }),
+              description: (
+                <EuiFlexGroup direction="column" alignItems="flexStart" justifyContent="flexStart">
+                  {agent.capabilities?.sort().map((capability) => (
+                    <EuiFlexItem grow={false} key={capability}>
+                      <EuiDescriptionListDescription
+                        css={`
+                          ${euiTextBreakWord()};
+                        `}
+                      >
+                        {capability}
+                      </EuiDescriptionListDescription>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              ),
+              hidden: !Array.isArray(agent.capabilities),
+            },
+          ]
+            .filter(({ hidden }) => !hidden)
+            .map(({ title, description }) => {
+              return (
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={3}>
+                    <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={7}>
+                    <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              );
+            })}
         </EuiFlexGroup>
       </EuiDescriptionList>
+      {effectiveConfigFlyoutOpen && (
+        <AgentEffectiveConfigFlyout
+          agent={agent}
+          onClose={() => setEffectiveConfigFlyoutOpen(false)}
+        />
+      )}
     </EuiPanel>
   );
 });

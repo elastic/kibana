@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
-import { SerializerFunc } from '../hook_form_lib';
+import type { EuiSelectableOption } from '@elastic/eui';
+import type { SerializerFunc } from '../hook_form_lib';
 
 type FuncType = (selectOptions: EuiSelectableOption[]) => SerializerFunc;
 

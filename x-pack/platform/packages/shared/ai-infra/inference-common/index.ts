@@ -23,8 +23,6 @@ export {
   type FromToolSchema,
   type ToolSchema,
   type UnvalidatedToolCall,
-  type ToolCallsOf,
-  type ToolCallbacksOf,
   type ToolCall,
   type ToolCallback,
   type ToolDefinition,
@@ -57,10 +55,12 @@ export {
   type ChatCompletionToolValidationError,
   type ChatCompletionTokenLimitReachedError,
   isToolValidationError,
-  isTokenLimitReachedError,
+  isOutputTokenLimitReachedError,
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type ChatCompleteAnonymizationMetadata,
+  type ChatCompleteAnonymizationTarget,
   type AnonymizationRule,
   type RegexAnonymizationRule,
   type NamedEntityRecognitionRule,
@@ -71,7 +71,20 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
-  type AnonymizationRegexWorkerTaskPayload,
+  type AnonymizationEntityClass,
+  type AnonymizationResponseMetadata,
+  type DeanonymizedMessageData,
+  type CustomToolChoice,
+  type ToolCallArgumentsOfToolDefinition,
+  type ToolCallOfToolDefinitions,
+  type ToolCallOfToolOptions,
+  type ToolCallbacksOfToolOptions,
+  type ToolNamesOf,
+  type ToolsOfChoice,
+  type ToolCallArguments,
+  type ToolCallbackResult,
+  type InferenceCallbacks,
+  type InferenceEventEmitter,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
@@ -137,12 +150,21 @@ export {
   contextWindowFromModelName,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
+  type RawConnector,
+  type RawInferenceConnector,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
   InferenceEndpointProvider,
   elasticModelIds,
+  type EisInferenceEndpointMetadata,
 } from './src/inference_endpoints';
+
+export {
+  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  type ApiInferenceConnector,
+  type InferenceConnectorsApiResponseBody,
+} from './src/inference_connectors_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 

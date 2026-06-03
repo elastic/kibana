@@ -10,7 +10,7 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '../../../../alerting_api_integration/common/lib/actions_simulations_utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
@@ -114,7 +114,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the first comment correctly', async () => {
         const comment = await find.byCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await comment.getVisibleText()).equal(`This is interesting. I am curious also.`);
@@ -129,7 +129,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the second comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
         const secondComment = comments[1];
 
@@ -142,7 +142,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the third comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
         const thirdComment = comments[2];
 
@@ -202,7 +202,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the fourth comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
 
         const thirdComment = comments[3];
@@ -291,6 +291,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Cases table', function () {
       before(async () => {
         await cases.navigation.navigateToApp();
+        await testSubjects.click('superDatePickerToggleQuickMenuButton');
+        await testSubjects.click('show-all-cases-link');
       });
 
       it('does not show any error toasters', async () => {

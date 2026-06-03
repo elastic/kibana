@@ -81,6 +81,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     if (!uiCapabilities.spaces?.manage) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
@@ -200,7 +201,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         <EuiButton
           color="primary"
           onClick={this.addSpacePrivilege}
-          iconType={'plusInCircle'}
+          iconType={'plusCircle'}
           data-test-subj={'addSpacePrivilegeButton'}
           isDisabled={!hasAvailableSpaces || !this.props.editable}
         >

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
-import { TableVisData, TableGroup, TableVisConfig, TableContext } from '../types';
+import type { TableVisData, TableGroup, TableVisConfig, TableContext } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
 import { createFormattedTable } from './create_formatted_table';
 
@@ -37,7 +37,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
       if (!Object.hasOwn(splitMap, splitValue)) {
         splitMap[splitValue] = splitIndex++;
         const tableGroup: TableGroup = {
-          title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
+          title: `${splitColumnFormatter.convertToText(splitValue)}: ${splitColumn.name}`,
           table: {
             columns: input.columns,
             rows: [],

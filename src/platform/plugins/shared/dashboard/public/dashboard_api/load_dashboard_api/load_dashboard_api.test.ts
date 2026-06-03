@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
+
 import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 import { loadDashboardApi } from './load_dashboard_api';
-
-jest.mock('../performance/query_performance_tracking', () => {
+jest.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
-    startQueryPerformanceTracking: () => {},
+    startTrackingDashboardLoadTelemetry: jest.fn(),
   };
 });
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -25,36 +28,45 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
   };
 });
 
-const lastSavedQuery = { query: 'memory:>220000', language: 'kuery' };
+jest.mock('../../dashboard_client', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const defaultState = require('../default_dashboard_state');
+  return {
+    dashboardClient: {
+      get: jest.fn().mockResolvedValue({
+        data: { ...defaultState.DEFAULT_DASHBOARD_STATE },
+      }),
+    },
+  };
+});
+
+const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
+  const userActivity$ = new Subject();
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
-      api: {},
+      api: { userActivity$ },
       cleanUp: jest.fn(),
       internalApi: {},
     });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_content_management_service').getDashboardContentManagementService =
-      () => ({
-        loadDashboardState: () => ({
-          dashboardFound: true,
-          dashboardInput: DEFAULT_DASHBOARD_STATE,
-          references: [],
-        }),
-      });
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../../services/dashboard_api_services').getDashboardBackupService = () => ({
       getState: () => ({
         query: lastSavedQuery,
       }),
     });
+
+    window.performance.getEntriesByName = jest.fn().mockReturnValue([
+      {
+        startTime: 12345,
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -71,10 +83,7 @@ describe('loadDashboardApi', () => {
       });
       expect(getDashboardApiMock).toHaveBeenCalled();
       // @ts-ignore
-      expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
-        ...DEFAULT_DASHBOARD_STATE,
-        references: [],
-      });
+      expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual(DEFAULT_DASHBOARD_STATE);
     });
 
     test('should overwrite saved object state with unsaved state', async () => {
@@ -88,14 +97,13 @@ describe('loadDashboardApi', () => {
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
-        references: [],
         query: lastSavedQuery,
       });
     });
 
     // dashboard app passes URL state as override state
     test('should overwrite saved object state and unsaved state with override state', async () => {
-      const queryFromUrl = { query: 'memory:>5000', language: 'kuery' };
+      const queryFromUrl = { expression: 'memory:>5000', language: 'kql' as const };
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: true,
@@ -109,9 +117,52 @@ describe('loadDashboardApi', () => {
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
-        references: [],
         query: queryFromUrl,
       });
+    });
+  });
+
+  describe('performance monitoring', () => {
+    test('should start performance tracking on load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+
+      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
+        DASHBOARD_DURATION_START_MARK,
+        'mark'
+      );
+      expect(startTrackingDashboardLoadTelemetry).toHaveBeenCalledWith(expect.any(Object), {
+        firstLoad: true,
+        creationStartTime: 12345,
+      });
+    });
+  });
+
+  describe('user activity', () => {
+    test('should not track view on load of brand new dashboard', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+      });
+      expect(nextSpy).toBeCalledTimes(0);
+    });
+
+    test('should track view on load of saved object', async () => {
+      const nextSpy = jest.spyOn(userActivity$, 'next');
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+      expect(nextSpy).toBeCalledTimes(1);
+      expect(nextSpy).toBeCalledWith(expect.objectContaining({ type: 'view' }));
     });
   });
 });

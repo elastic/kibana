@@ -13,7 +13,8 @@ import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import type { FieldIconProps } from '@kbn/react-field';
+import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
 interface Props {
@@ -24,6 +25,7 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
+  disableMultiFieldBadge?: boolean;
 }
 
 export function FieldName({
@@ -34,6 +36,7 @@ export function FieldName({
   displayNameOverride,
   scripted = false,
   highlight = '',
+  disableMultiFieldBadge = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
@@ -67,20 +70,14 @@ export function FieldName({
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
-            <EuiToolTip
-              position="top"
-              content={tooltip}
-              delay="long"
-              anchorClassName="eui-textBreakAll"
-            >
+            <EuiToolTip position="top" content={tooltip} anchorClassName="eui-textBreakAll">
               <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 
-          {isMultiField && (
+          {isMultiField && !disableMultiFieldBadge && (
             <EuiToolTip
               position="top"
-              delay="long"
               content={i18n.translate(
                 'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
                 {
@@ -89,6 +86,7 @@ export function FieldName({
               )}
             >
               <EuiBadge
+                tabIndex={0}
                 title=""
                 className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"

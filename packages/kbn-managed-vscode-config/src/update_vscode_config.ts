@@ -12,7 +12,7 @@ import * as t from '@babel/types';
 import generate from '@babel/generator';
 import Prettier from 'prettier';
 
-import { ManagedConfigKey } from './managed_config_keys';
+import type { ManagedConfigKey } from './managed_config_keys';
 
 type BasicObjectProp = t.ObjectProperty & {
   key: t.StringLiteral;

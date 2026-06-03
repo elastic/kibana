@@ -8,7 +8,8 @@
  */
 
 import * as Rx from 'rxjs';
-import React, { FC, PropsWithChildren, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
@@ -16,7 +17,8 @@ import createCache from '@emotion/cache';
 // However, we import this directly in the test to ensure our hardcoded selector is correct.
 // import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
-import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
+import type { EuiProviderProps } from '@elastic/eui';
+import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,
@@ -26,10 +28,6 @@ import {
 } from '@kbn/react-kibana-context-common';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-
-interface UserSettings {
-  contrastMode: 'system' | 'standard' | 'high';
-}
 
 /**
  * Props for the KibanaEuiProvider.
@@ -77,9 +75,19 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
+const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
+const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
+
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
     includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+    container: FLYOUT_CONTAINER_SELECTOR,
+  },
+  EuiPopover: {
+    repositionOnScroll: true,
+  },
+  EuiToolTip: {
+    repositionOnScroll: true,
   },
 };
 
@@ -120,7 +128,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const userProfileData = useObservable(getUserProfile$(), null);
 
   // If the high contrast mode value is undefined, EUI will use the OS level setting.
-  const userSettings = userProfileData?.userSettings as UserSettings | undefined;
+  const userSettings = userProfileData?.userSettings;
   let highContrastMode: boolean | undefined;
   if (userSettings?.contrastMode && userSettings?.contrastMode !== 'system') {
     highContrastMode = userSettings.contrastMode === 'high';

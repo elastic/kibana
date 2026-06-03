@@ -10,8 +10,8 @@ import {
   getTestScenarios,
   isUserAuthorizedAtSpace,
 } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { findTestSuiteFactory, getTestCases } from '../../common/suites/find';
 
 const {
@@ -47,11 +47,8 @@ const createTestCases = (currentSpace: string, crossSpaceSearch?: string[]) => {
   };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = findTestSuiteFactory(context);
   const createTests = (spaceId: string, user: TestUser) => {
     const currentSpaceCases = createTestCases(spaceId);
 

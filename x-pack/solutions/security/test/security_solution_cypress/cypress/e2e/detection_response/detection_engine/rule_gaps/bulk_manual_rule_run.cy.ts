@@ -10,18 +10,41 @@ import { MODAL_ERROR_BODY, TOASTER_BODY } from '../../../../screens/alerts_detec
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   disableAutoRefresh,
-  clickErrorToastBtn,
+  clickErrorToastBtnByContent,
   selectAllRules,
   selectRulesByName,
 } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { login } from '../../../../tasks/login';
+import { login, loginWithUser } from '../../../../tasks/login';
+import { IS_SERVERLESS } from '../../../../env_var_names_constants';
+import {
+  createUsersAndRoles,
+  deleteUsersAndRoles,
+  rulesReadManualRunAll,
+  rulesReadManualRunAllUser,
+} from '../../../../tasks/privileges';
 
 describe('Manual rule run', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    if (!Cypress.env(IS_SERVERLESS)) {
+      createUsersAndRoles([rulesReadManualRunAllUser], [rulesReadManualRunAll]);
+    }
+  });
+
+  after(() => {
+    if (!Cypress.env(IS_SERVERLESS)) {
+      deleteUsersAndRoles([rulesReadManualRunAllUser], [rulesReadManualRunAll]);
+    }
+  });
+
   beforeEach(() => {
-    login();
+    if (Cypress.env(IS_SERVERLESS)) {
+      login();
+    } else {
+      loginWithUser(rulesReadManualRunAllUser);
+    }
     deleteAlertsAndRules();
 
     const defaultValues = { enabled: true, interval: '5m', from: 'now-6m' };
@@ -63,15 +86,12 @@ describe('Manual rule run', { tags: ['@ess', '@serverless'] }, () => {
 
     const enabledCount = 3;
     const disabledCount = 2;
+    const toasterContent = `${disabledCount} rules failed to schedule manual rule run.See the full error`;
+
     scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
-    cy.contains(
-      TOASTER_BODY,
-      `${disabledCount} rules failed to schedule manual rule run.See the full error`
-    );
-
     // on error toast button click display error that it is not possible to schedule manual rule run for disabled rules
-    clickErrorToastBtn();
+    clickErrorToastBtnByContent(toasterContent);
     cy.contains(MODAL_ERROR_BODY, 'Cannot schedule manual rule run for a disabled rule');
   });
 });

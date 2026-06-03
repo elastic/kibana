@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { journeyScreenshotHandler } from '../../queries/journey_screenshots';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -17,6 +17,9 @@ export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () =>
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
+    }),
+    query: schema.object({
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async (routeProps) => {

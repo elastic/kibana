@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiSelectable } from '@elastic/eui';
 import { UseField } from '../../../form';
 
@@ -36,7 +37,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
                 size="xs"
                 color="text"
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 onClick={() => setOpen((x) => !x)}
                 data-test-subj="show-filters-button"
               >
@@ -44,7 +45,7 @@ export const UnitField: FunctionComponent<Props> = ({ path, options, euiFieldPro
               </EuiButtonEmpty>
             }
             ownFocus
-            panelPaddingSize="none"
+            panelPaddingSize="s"
             isOpen={open}
             closePopover={() => setOpen(false)}
             {...euiFieldProps}

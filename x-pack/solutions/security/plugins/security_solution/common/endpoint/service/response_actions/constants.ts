@@ -35,19 +35,19 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'upload',
   'scan',
   'runscript',
+  'cancel',
+  'memory-dump',
 ] as const;
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
-  'isolate',
-  // TODO: TC- Uncomment these when we go GA with automated process actions
-  // 'kill-process',
-  // 'suspend-process'
-];
+export type EnabledAutomatedResponseActionsCommands = Extract<
+  ResponseActionsApiCommandNames,
+  'isolate' | 'kill-process' | 'suspend-process' | 'runscript'
+>;
 
-export type EnabledAutomatedResponseActionsCommands =
-  (typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)[number];
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: Array<EnabledAutomatedResponseActionsCommands> =
+  ['isolate', 'kill-process', 'suspend-process', 'runscript'];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -62,6 +62,9 @@ export const ENDPOINT_CAPABILITIES = [
   'upload_file',
   'scan',
   'runscript',
+  'cancel',
+  'memdump_process',
+  'memdump_kernel',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
@@ -78,9 +81,11 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'get-file',
   'execute',
+  'memory-dump',
   'upload',
   'scan',
   'runscript',
+  'cancel',
 ] as const;
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
@@ -95,9 +100,10 @@ export type ResponseConsoleRbacControls =
 
 /**
  * maps the console command to the RBAC control (kibana feature control) that is required to access it via console
+ * Note: 'cancel' command is excluded as it uses dynamic permission checking via utility functions
  */
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
-  ConsoleResponseActionCommands,
+  Exclude<ConsoleResponseActionCommands, 'cancel'>,
   ResponseConsoleRbacControls
 > = Object.freeze({
   isolate: 'writeHostIsolation',
@@ -110,6 +116,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
   runscript: 'writeExecuteOperations',
+  'memory-dump': 'writeExecuteOperations',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -125,6 +132,8 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   upload: 'upload',
   scan: 'scan',
   runscript: 'runscript',
+  cancel: 'cancel',
+  'memory-dump': 'memory-dump',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
@@ -140,21 +149,25 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   upload: 'upload',
   scan: 'scan',
   runscript: 'runscript',
+  cancel: 'cancel',
+  'memory-dump': 'memory-dump',
 });
 
-export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
-  Record<ConsoleResponseActionCommands, EndpointCapabilities>
+export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = deepFreeze<
+  Record<ConsoleResponseActionCommands, EndpointCapabilities[]>
 >({
-  isolate: 'isolation',
-  release: 'isolation',
-  execute: 'execute',
-  'get-file': 'get_file',
-  processes: 'running_processes',
-  'kill-process': 'kill_process',
-  'suspend-process': 'suspend_process',
-  upload: 'upload_file',
-  scan: 'scan',
-  runscript: 'runscript',
+  isolate: ['isolation'],
+  release: ['isolation'],
+  execute: ['execute'],
+  'get-file': ['get_file'],
+  processes: ['running_processes'],
+  'kill-process': ['kill_process'],
+  'suspend-process': ['suspend_process'],
+  upload: ['upload_file'],
+  scan: ['scan'],
+  runscript: ['runscript'],
+  cancel: ['cancel'],
+  'memory-dump': ['memdump_process', 'memdump_kernel'],
 });
 
 /**
@@ -173,6 +186,29 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
   runscript: 'canWriteExecuteOperations',
+  cancel: 'canCancelAction', // Cancel uses specific cancel permission
+  'memory-dump': 'canWriteExecuteOperations',
+});
+
+/**
+ * The list of actions that can be cancelled, mapped to their required authorization.
+ * Used to calculate if a user has permission to cancel any response actions.
+ */
+export const CANCELLABLE_RESPONSE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
+  Record<ConsoleResponseActionCommands, EndpointAuthzKeyList[number]>
+>({
+  isolate: 'canIsolateHost',
+  release: 'canUnIsolateHost',
+  execute: 'canWriteExecuteOperations',
+  'get-file': 'canWriteFileOperations',
+  upload: 'canWriteFileOperations',
+  processes: 'canGetRunningProcesses',
+  'kill-process': 'canKillProcess',
+  'suspend-process': 'canSuspendProcess',
+  scan: 'canWriteScanOperations',
+  runscript: 'canWriteExecuteOperations',
+  cancel: 'canCancelAction',
+  'memory-dump': 'canWriteExecuteOperations',
 });
 
 // 4 hrs in seconds
@@ -238,3 +274,12 @@ export const RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES: Readonly<
   crowdstrike: ['crowdstrike'],
   microsoft_defender_endpoint: ['microsoft_defender_endpoint', 'm365_defender'],
 });
+
+/**
+ * The list of Alert ECS fields we check to try and determine the OS type for the host
+ */
+export const ECS_OS_TYPE_FIELDS = Object.freeze([
+  'host.os.type',
+  'host.os.name',
+  'host.os.platform',
+]);

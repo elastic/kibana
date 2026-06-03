@@ -7,44 +7,18 @@
 
 import { recurse } from 'cypress-recurse';
 import {
-  DISCOVER_ADD_FILTER,
-  DISCOVER_CONTAINER,
-  DISCOVER_DATA_GRID_UPDATING,
-  DISCOVER_DATA_VIEW_SWITCHER,
-  GET_DISCOVER_COLUMN_TOGGLE_BTN,
-  DISCOVER_FIELD_SEARCH,
-  DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
-  DISCOVER_FIELD_LIST_LOADING,
-  DISCOVER_ESQL_EDITABLE_INPUT,
   AVAILABLE_FIELD_COUNT,
+  DISCOVER_CONTAINER,
+  DISCOVER_ESQL_EDITABLE_INPUT,
   DISCOVER_ESQL_INPUT,
   DISCOVER_ESQL_INPUT_TEXT_CONTAINER,
+  DISCOVER_FIELD_LIST_LOADING,
+  DISCOVER_FIELD_SEARCH,
+  GET_DISCOVER_COLUMN_TOGGLE_BTN,
+  GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON,
+  GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
-
-export const switchDataViewTo = (dataviewName: string) => {
-  openDataViewSwitcher();
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.GET_DATA_VIEW(dataviewName)).trigger('click');
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('not.exist');
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', dataviewName);
-};
-
-export const switchDataViewToESQL = () => {
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.TEXT_BASE_LANG_SWITCHER).trigger('click');
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('contain.text', 'ES|QL');
-};
-
-export const openDataViewSwitcher = () => {
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).click();
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.INPUT).should('be.visible');
-};
-
-export const waitForDiscoverGridToLoad = () => {
-  cy.get(DISCOVER_DATA_GRID_UPDATING).should('be.visible');
-  cy.get(DISCOVER_DATA_GRID_UPDATING).should('not.exist');
-  cy.get(DISCOVER_FIELD_LIST_LOADING).should('be.visible');
-  cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
-};
 
 export const waitForDiscoverFieldsToLoad = () => {
   cy.get(AVAILABLE_FIELD_COUNT).should('be.visible');
@@ -118,43 +92,26 @@ export const submitDiscoverSearchBar = () => {
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).trigger('click');
 };
 
-export const openAddDiscoverFilterPopover = () => {
-  cy.log(DISCOVER_CONTAINER);
-  cy.log(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER));
-  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).should('be.enabled');
-  cy.get(DISCOVER_ADD_FILTER).should('be.visible');
-  cy.get(DISCOVER_ADD_FILTER).click();
-};
-
-export const searchForField = (fieldId: string) => {
-  cy.get(DISCOVER_FIELD_SEARCH).should('be.visible').type(fieldId);
+const searchForField = (fieldId: string) => {
+  cy.get(DISCOVER_FIELD_SEARCH).filter(':visible');
+  cy.get(DISCOVER_FIELD_SEARCH).type(fieldId);
 };
 
 export const clearFieldSearch = () => {
-  cy.get(DISCOVER_FIELD_SEARCH).first().clear();
+  cy.get(DISCOVER_FIELD_SEARCH).filter(':visible').clear();
 };
 
-export const addFieldToTable = (fieldId: string) => {
-  searchForField(fieldId);
-  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().should('exist');
-  cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().trigger('click');
+export const addFieldToTable = (fieldId: string, container: string) => {
+  cy.get(container).within(() => {
+    searchForField(fieldId);
+    cy.get(GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON(fieldId)).eq(0).click();
+  });
+  cy.get(GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON(fieldId)).should('exist');
+  cy.get(GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON(fieldId)).click();
+
   clearFieldSearch();
 };
 
 export const removeFieldFromTable = (fieldId: string) => {
   cy.get(GET_DISCOVER_COLUMN_TOGGLE_BTN(fieldId)).first().click();
-};
-
-export const createAdHocDataView = (name: string, indexPattern: string, save: boolean = false) => {
-  openDataViewSwitcher();
-  cy.get(DISCOVER_DATA_VIEW_SWITCHER.CREATE_NEW).trigger('click');
-  cy.get(DISCOVER_DATA_VIEW_EDITOR_FLYOUT.MAIN).should('be.visible');
-  cy.get(DISCOVER_DATA_VIEW_EDITOR_FLYOUT.NAME_INPUT).type(name);
-  cy.get(DISCOVER_DATA_VIEW_EDITOR_FLYOUT.INDEX_PATTERN_INPUT).type(indexPattern);
-  if (save) {
-    cy.get(DISCOVER_DATA_VIEW_EDITOR_FLYOUT.SAVE_DATA_VIEW_BTN).trigger('click');
-  } else {
-    cy.get(DISCOVER_DATA_VIEW_EDITOR_FLYOUT.USE_WITHOUT_SAVING_BTN).trigger('click');
-  }
-  cy.get(DISCOVER_DATA_VIEW_EDITOR_FLYOUT.MAIN).should('not.exist');
 };

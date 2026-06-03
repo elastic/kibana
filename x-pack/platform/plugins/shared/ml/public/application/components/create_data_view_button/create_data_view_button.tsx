@@ -46,7 +46,7 @@ export const CreateDataViewButton = ({
     <EuiButton
       onClick={createNewDataView}
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="newDataViewButton"
       disabled={!canEditDataView}
     >

@@ -5,110 +5,132 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import { useEffect, useMemo } from 'react';
+import type { InferenceConnector as CommonInferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { ObservabilityAIAssistantService } from '../types';
-import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
+import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID } from '../../common/feature';
 import { useKibana } from './use_kibana';
-import { isInferenceEndpointExists } from './inference_endpoint_exists';
-import { INFERENCE_CONNECTOR_ACTION_TYPE_ID } from '../utils/get_elastic_managed_llm_connector';
+import {
+  type InferenceConnector,
+  getInferenceConnectorInfo,
+} from '../../common/utils/get_inference_connector';
 
 export interface UseGenAIConnectorsResult {
-  connectors?: FindActionResult[];
+  connectors?: CommonInferenceConnector[];
   selectedConnector?: string;
   loading: boolean;
   error?: Error;
   selectConnector: (id: string) => void;
   reloadConnectors: () => void;
+  getConnector: (id: string) => InferenceConnector | undefined;
+  isConnectorSelectionRestricted: boolean;
+  defaultConnector?: string;
 }
+
+const toInferenceConnector = (connector: AIConnector): CommonInferenceConnector => ({
+  connectorId: connector.id,
+  name: connector.name,
+  type: connector.actionTypeId as InferenceConnectorType,
+  config: 'config' in connector ? connector.config ?? {} : {},
+  capabilities: {},
+  isInferenceEndpoint: connector.actionTypeId === InferenceConnectorType.Inference,
+  isPreconfigured: connector.isPreconfigured,
+  isEis: connector.isEis,
+  isDeprecated: connector.isDeprecated,
+  isConnectorTypeDeprecated: connector.isConnectorTypeDeprecated,
+  isMissingSecrets: connector.isMissingSecrets,
+});
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
-  const assistant = useObservabilityAIAssistant();
-
-  return useGenAIConnectorsWithoutContext(assistant);
+  return useGenAIConnectorsWithoutContext();
 }
 
-export function useGenAIConnectorsWithoutContext(
-  assistant: ObservabilityAIAssistantService
-): UseGenAIConnectorsResult {
-  const [connectors, setConnectors] = useState<FindActionResult[] | undefined>(undefined);
+export function useGenAIConnectorsWithoutContext(): UseGenAIConnectorsResult {
   const {
-    services: { http },
+    services: { http, settings, notifications },
   } = useKibana();
 
-  const [selectedConnector, setSelectedConnector] = useLocalStorage(
+  const [lastUsedConnector, setLastUsedConnector] = useLocalStorage(
     `xpack.observabilityAiAssistant.lastUsedConnector`,
     ''
   );
 
-  const [loading, setLoading] = useState(false);
+  const defaultConnectorId = settings!.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
+  const defaultConnectorOnly = settings!.client.get<boolean>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+    false
+  );
 
-  const [error, setError] = useState<Error | undefined>(undefined);
+  const isConnectorSelectionRestricted = defaultConnectorOnly && !!defaultConnectorId;
 
-  const controller = useMemo(() => new AbortController(), []);
-  const fetchConnectors = useCallback(async () => {
-    setLoading(true);
+  const {
+    data: aiConnectors,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useLoadConnectors({
+    http: http!,
+    toasts: notifications?.toasts,
+    featureId: OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
+    settings: settings!,
+  });
 
-    assistant
-      .callApi('GET /internal/observability_ai_assistant/connectors', {
-        signal: controller.signal,
-      })
-      .then((results) => {
-        return results
-          .reduce<Promise<FindActionResult[]>>(async (result, connector) => {
-            if (
-              connector.actionTypeId !== INFERENCE_CONNECTOR_ACTION_TYPE_ID ||
-              (connector.actionTypeId === INFERENCE_CONNECTOR_ACTION_TYPE_ID &&
-                (await isInferenceEndpointExists(
-                  http,
-                  (connector as FindActionResult)?.config?.inferenceId
-                )))
-            ) {
-              return [...(await result), connector];
-            }
-
-            return result;
-          }, Promise.resolve([]))
-          .then((c) => {
-            setConnectors(c);
-            setSelectedConnector((connectorId) => {
-              if (connectorId && c.findIndex((result) => result.id === connectorId) === -1) {
-                return '';
-              }
-              return connectorId;
-            });
-
-            setError(undefined);
-          });
-      })
-      .catch((err) => {
-        setError(err);
-        setConnectors(undefined);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [assistant, controller.signal, http, setSelectedConnector]);
+  const connectors = useMemo(() => aiConnectors?.map(toInferenceConnector), [aiConnectors]);
 
   useEffect(() => {
-    fetchConnectors();
+    if (connectors) {
+      setLastUsedConnector((connectorId) => {
+        if (connectorId && connectors.findIndex((c) => c.connectorId === connectorId) === -1) {
+          return '';
+        }
+        return connectorId;
+      });
+    }
+  }, [connectors, setLastUsedConnector]);
 
-    return () => {
-      controller.abort();
-    };
-  }, [assistant, controller, fetchConnectors, setSelectedConnector]);
+  const selectedConnector = useMemo(() => {
+    const hasConnector = (id: string | undefined) =>
+      id && connectors?.some((c) => c.connectorId === id);
+
+    if (isConnectorSelectionRestricted) {
+      return hasConnector(defaultConnectorId) ? defaultConnectorId : undefined;
+    }
+
+    if (hasConnector(lastUsedConnector)) {
+      return lastUsedConnector;
+    }
+
+    if (hasConnector(defaultConnectorId)) {
+      return defaultConnectorId;
+    }
+
+    return connectors?.[0]?.connectorId;
+  }, [isConnectorSelectionRestricted, defaultConnectorId, lastUsedConnector, connectors]);
+
+  const getConnector = (id: string) => {
+    const connector = connectors?.find((_connector) => _connector.connectorId === id);
+    return getInferenceConnectorInfo(connector);
+  };
 
   return {
     connectors,
     loading,
-    error,
-    selectedConnector: selectedConnector || connectors?.[0]?.id,
+    error: error ?? undefined,
+    selectedConnector,
     selectConnector: (id: string) => {
-      setSelectedConnector(id);
+      setLastUsedConnector(id);
     },
     reloadConnectors: () => {
-      fetchConnectors();
+      refetch();
     },
+    getConnector,
+    isConnectorSelectionRestricted,
+    defaultConnector: defaultConnectorId || undefined,
   };
 }

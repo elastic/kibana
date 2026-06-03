@@ -6,13 +6,14 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { RoleCredentials } from '../../../shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface User {
   username: string;
@@ -105,6 +106,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         duration: null,
         severity: request.severity ?? CaseSeverity.LOW,
         totalAlerts: 0,
+        totalEvents: 0,
         totalComment: 0,
         closed_by: null,
         created_by: defaultUser,
@@ -114,6 +116,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         category: null,
         customFields: [],
         observables: [],
+        total_observables: 0,
       };
     },
 
@@ -201,6 +204,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         },
         settings: {
           syncAlerts: true,
+          extractObservables: false,
         },
         owner,
         assignees: [],

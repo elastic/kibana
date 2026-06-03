@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel, EuiTitle, EuiCode, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
-import { ConnectorStatus } from '@kbn/search-connectors';
+import type { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useElasticsearchUrl } from '../../../hooks/use_elastisearch_url';

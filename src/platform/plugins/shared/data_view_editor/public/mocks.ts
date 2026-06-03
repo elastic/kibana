@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewEditorPlugin } from './plugin';
+import type { DataViewEditorPlugin } from './plugin';
 
 export type Start = jest.Mocked<ReturnType<DataViewEditorPlugin['start']>>;
 

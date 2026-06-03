@@ -12,6 +12,8 @@ export interface HostEcs {
 
   id?: string[];
 
+  hostname?: string[];
+
   ip?: string[];
 
   mac?: string[];

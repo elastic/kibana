@@ -25,6 +25,7 @@ const processSchema = schema.object({
     percentiles: schema.object({
       50: schema.number(),
       75: schema.number(),
+      90: schema.number(),
       95: schema.number(),
       99: schema.number(),
     }),

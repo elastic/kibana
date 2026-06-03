@@ -20,6 +20,7 @@ import {
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE,
   DASHBOARD_LOCATORS_IDS,
 } from '../../../../../../../common/constants';
 import { getDashboardIdForSpace } from '../../services/dashboard_helpers';
@@ -39,25 +40,39 @@ function isKibanaAssetsInstalledInSpace(spaceId: string | undefined, res?: GetIn
     (spaceId && installationInfo.additional_spaces_installed_kibana?.[spaceId])
   );
 }
-
-function useAgentDashboardLink(agent: Agent) {
-  const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
+function useAgentDashboardLink(agent: Agent, packageName: string) {
+  const { isLoading, data } = useGetPackageInfoByKeyQuery(packageName);
   const { spaceId } = useFleetStatus();
 
   const isInstalled = isKibanaAssetsInstalledInSpace(spaceId, data);
   const dashboardLocator = useDashboardLocator();
 
-  const link = dashboardLocator?.getRedirectUrl({
-    dashboardId: getDashboardIdForSpace(
-      spaceId,
-      data,
-      DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS
-    ),
-    query: {
-      language: 'kuery',
-      query: `elastic_agent.id:${agent.id}`,
-    },
-  });
+  let link: string | undefined;
+  if (agent.type === 'OPAMP') {
+    // 'elastic.display.name' is set by the Add Collector form (PR #262196) as the hostname/display
+    // name for the collector, and maps to service.instance.id in its self-telemetry. Fall back to
+    // agent.id for collectors enrolled before that field was introduced (9.4 compatibility).
+    const instanceId = agent.non_identifying_attributes?.['elastic.display.name'] ?? agent.id;
+    link = dashboardLocator?.getRedirectUrl({
+      dashboardId: DASHBOARD_LOCATORS_IDS.OTEL_COLLECTOR_INTERNAL_TELEMETRY,
+      query: {
+        language: 'kuery',
+        query: `service.instance.id:"${instanceId}"`,
+      },
+    });
+  } else {
+    link = dashboardLocator?.getRedirectUrl({
+      dashboardId: getDashboardIdForSpace(
+        spaceId,
+        data,
+        DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS
+      ),
+      query: {
+        language: 'kuery',
+        query: `elastic_agent.id:${agent.id}`,
+      },
+    });
+  }
 
   return {
     isLoading,
@@ -74,13 +89,18 @@ export const AgentDashboardLink: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
-  const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
+  const packageName =
+    agent.type === 'OPAMP'
+      ? FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE
+      : FLEET_ELASTIC_AGENT_PACKAGE;
+  const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
-  const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
+  const isMetricsEnabled =
+    agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP';
 
   const buttonArgs =
-    !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
+    !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
     <EuiButtonCompressed
@@ -97,26 +117,26 @@ export const AgentDashboardLink: React.FunctionComponent<{
     </EuiButtonCompressed>
   );
 
-  if (!isLoading && !isLogAndMetricsEnabled && agentPolicy) {
+  if (!isLoading && !isMetricsEnabled && agentPolicy) {
     return (
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoLogsAndMetricsTooltip"
-            defaultMessage="Logs and metrics for agent are not enabled in the agent policy."
+            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
+            defaultMessage="Metrics for agent are not enabled in the agent policy."
           />
         }
       >
         <EuiButtonCompressed
-          data-test-subj="agentDetails.enableLogsAndMetricsButton"
+          data-test-subj="agentDetails.enableMetricsButton"
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
           disabled={agentPolicy?.is_managed}
         >
           <FormattedMessage
-            id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"
-            defaultMessage="Enable logs and metrics"
+            id="xpack.fleet.agentDetails.enableMetricsLabel"
+            defaultMessage="Enable agent metrics"
           />
         </EuiButtonCompressed>
       </EuiToolTip>
@@ -129,7 +149,8 @@ export const AgentDashboardLink: React.FunctionComponent<{
         content={
           <FormattedMessage
             id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoIntegrationTooltip"
-            defaultMessage="Agent dashboard not found, you need to install the elastic_agent integration."
+            defaultMessage="Agent dashboard not found, you need to install the {integration} integration."
+            values={{ integration: packageName }}
           />
         }
       >

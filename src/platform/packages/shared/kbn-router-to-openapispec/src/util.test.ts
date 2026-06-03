@@ -8,7 +8,8 @@
  */
 
 import type { RouteMethod } from '@kbn/core-http-server';
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { GetOpId } from './util';
 import {
   buildGlobalTags,
   getXsrfHeaderForMethod,
@@ -16,12 +17,11 @@ import {
   prepareRoutes,
   getPathParameters,
   createOpIdGenerator,
-  GetOpId,
   assignToPaths,
   extractTags,
   setXState,
 } from './util';
-import { CustomOperationObject } from './type';
+import type { CustomOperationObject } from './type';
 
 describe('extractTags', () => {
   test.each([
@@ -366,11 +366,21 @@ describe('setXState', () => {
       {
         name: 'experimental with since',
         availability: { stability: 'experimental' as const, since: '8.0.0' },
-        expected: 'Technical Preview; added in 8.0.0',
+        expected: 'Experimental; added in 8.0.0',
       },
       {
         name: 'experimental without since',
         availability: { stability: 'experimental' as const },
+        expected: 'Experimental',
+      },
+      {
+        name: 'tech_preview with since',
+        availability: { stability: 'tech_preview' as const, since: '8.0.0' },
+        expected: 'Technical Preview; added in 8.0.0',
+      },
+      {
+        name: 'tech_preview without since',
+        availability: { stability: 'tech_preview' as const },
         expected: 'Technical Preview',
       },
       {
@@ -422,11 +432,21 @@ describe('setXState', () => {
       {
         name: 'experimental with since',
         availability: { stability: 'experimental' as const, since: '8.0.0' },
-        expected: 'Technical Preview',
+        expected: 'Experimental',
       },
       {
         name: 'experimental without since',
         availability: { stability: 'experimental' as const },
+        expected: 'Experimental',
+      },
+      {
+        name: 'tech_preview with since',
+        availability: { stability: 'tech_preview' as const, since: '8.0.0' },
+        expected: 'Technical Preview',
+      },
+      {
+        name: 'tech_preview without since',
+        availability: { stability: 'tech_preview' as const },
         expected: 'Technical Preview',
       },
       {

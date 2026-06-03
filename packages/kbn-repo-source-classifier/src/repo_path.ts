@@ -10,10 +10,10 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ImportResolver } from '@kbn/import-resolver';
+import type { ImportResolver } from '@kbn/import-resolver';
 import normalizePath from 'normalize-path';
 
-import { PkgInfo } from './pkg_info';
+import type { PkgInfo } from './pkg_info';
 
 const getNormal = Path.sep === '/' ? (path: string) => path : normalizePath;
 

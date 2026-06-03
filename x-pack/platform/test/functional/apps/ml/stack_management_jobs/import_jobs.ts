@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const testDataListPositive = [
     {
       filePath: require.resolve('./files_to_import/anomaly_detection_jobs_7.16.json'),
       expected: {
         jobType: 'anomaly-detector' as JobType,
-        jobIds: ['ad-test1', 'ad-test3'],
-        skippedJobIds: ['ad-test2'],
+        jobIds: ['ad-test1', 'ad-test2', 'ad-test3'],
+        skippedJobIds: ['ad-test4'],
+        jobIdsWithDatafeedWarnings: ['ad-test2'],
       },
     },
     {
@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         jobType: 'data-frame-analytics' as JobType,
         jobIds: ['dfa-test1'],
         skippedJobIds: ['dfa-test2'],
+        jobIdsWithDatafeedWarnings: [] as string[],
       },
     },
   ];
@@ -34,10 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
-      );
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createDataViewIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -64,7 +61,12 @@ export default function ({ getService }: FtrProviderContext) {
           testData.expected.jobType
         );
         await ml.stackManagementJobs.assertJobIdsExist(testData.expected.jobIds);
+
         await ml.stackManagementJobs.assertJobIdsSkipped(testData.expected.skippedJobIds);
+
+        await ml.stackManagementJobs.assertDatafeedWarnings(
+          testData.expected.jobIdsWithDatafeedWarnings.length
+        );
       });
 
       it('imports jobs', async () => {

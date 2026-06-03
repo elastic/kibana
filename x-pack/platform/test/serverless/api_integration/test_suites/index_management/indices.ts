@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SupertestWithRoleScopeType } from '../../services';
-import { RoleCredentials } from '../../../shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
 
@@ -139,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           'documents',
           'hidden',
           'isFrozen',
+          'mode',
           'name',
           'size',
         ]);

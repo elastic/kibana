@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('discover no data', function () {
-    this.tags(['skipSvlOblt']);
+    this.tags(['skipSvlOblt', 'skipSvlSec']);
 
     const kbnDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 

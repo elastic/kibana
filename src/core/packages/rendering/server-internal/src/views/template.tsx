@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, createElement } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { createElement } from 'react';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { i18n } from '@kbn/i18n';
-import { RenderingMetadata } from '../types';
+import type { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';
 import { Styles } from './styles';
@@ -26,6 +27,8 @@ export const Template: FunctionComponent<Props> = ({
     darkMode,
     stylesheetPaths,
     scriptPaths,
+    preloadFonts,
+    optimizeFontLoading,
     injectedMetadata,
     bootstrapScriptUrl,
     hardenPrototypes,
@@ -36,6 +39,7 @@ export const Template: FunctionComponent<Props> = ({
   const title = customBranding.pageTitle ?? 'Elastic';
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;
+  const colorScheme = darkMode === 'system' ? 'light dark' : darkMode ? 'dark' : 'light';
   const logo = customBranding.logo ? (
     <img src={customBranding.logo} width="64" height="64" alt="logo" />
   ) : (
@@ -48,12 +52,22 @@ export const Template: FunctionComponent<Props> = ({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
         <title>{title}</title>
-        <Fonts url={uiPublicUrl} />
+        {preloadFonts?.map((href) => (
+          <link
+            key={href}
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+            href={href}
+          />
+        ))}
+        <Fonts url={uiPublicUrl} optimizeFontLoading={optimizeFontLoading} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={favIconPng} />
         <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content={colorScheme} />
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />

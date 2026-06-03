@@ -8,51 +8,78 @@
  */
 
 import React from 'react';
-import { ViewMode } from '@kbn/presentation-publishing';
-import type { Reference } from '@kbn/content-management-utils';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { DashboardSaveOptions } from './types';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { DashboardSaveOptions, SaveDashboardReturn } from './types';
 import {
   coreServices,
-  dataService,
+  cpsService,
   savedObjectsTaggingService,
 } from '../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { DashboardState } from '../../../common';
-import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
+import type { DashboardState } from '../../../common';
+import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
+import { saveDashboard } from './save_dashboard';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { dashboardClient } from '../../dashboard_client';
 
 /**
  * @description exclusively for user directed dashboard save actions, also
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function openSaveModal({
-  controlGroupReferences,
-  dashboardState,
+  description,
   isManaged,
   lastSavedId,
-  panelReferences,
+  serializeState,
+  setTimeRestore,
+  setProjectRoutingRestore,
+  tags,
+  timeRestore,
+  projectRoutingRestore,
+  title,
   viewMode,
+  accessControl,
 }: {
-  controlGroupReferences?: Reference[];
-  dashboardState: DashboardState;
+  description?: string;
   isManaged: boolean;
   lastSavedId: string | undefined;
-  panelReferences: Reference[];
+  serializeState: () => DashboardState;
+  setTimeRestore: (timeRestore: boolean) => void;
+  setProjectRoutingRestore: (projectRoutingRestore: boolean) => void;
+  tags?: string[];
+  timeRestore: boolean;
+  projectRoutingRestore: boolean;
+  title: string;
   viewMode: ViewMode;
+  accessControl?: Partial<SavedObjectAccessControl>;
 }) {
   try {
     if (viewMode === 'edit' && isManaged) {
       return undefined;
     }
-    const dashboardContentManagementService = getDashboardContentManagementService();
-    const saveAsTitle = lastSavedId
-      ? await getSaveAsTitle(dashboardState.title)
-      : dashboardState.title;
+
+    /**
+     * Only add access control for new dashboards being created by a logged in user that is not an anonymous user or
+     * user authenticated via authenticating proxy.
+     */
+    const getShouldAddAccessControl = async () => {
+      try {
+        const currentProfileUid = (await coreServices.security.authc.getCurrentUser()).profile_uid;
+        const isCreatingNewDashboard = Boolean(!lastSavedId);
+        return isCreatingNewDashboard && Boolean(currentProfileUid);
+      } catch {
+        return false;
+      }
+    };
+
+    const shouldAddAccessControl = await getShouldAddAccessControl();
+
+    const saveAsTitle = lastSavedId ? await getSaveAsTitle(title) : title;
     return new Promise<(SaveDashboardReturn & { savedState: DashboardState }) | undefined>(
       (resolve) => {
         const onSaveAttempt = async ({
@@ -61,41 +88,24 @@ export async function openSaveModal({
           newDescription,
           newCopyOnSave,
           newTimeRestore,
-          onTitleDuplicate,
-          isTitleDuplicateConfirmed,
+          newAccessMode,
+          newProjectRoutingRestore,
         }: DashboardSaveOptions): Promise<SaveDashboardReturn> => {
           const saveOptions = {
             confirmOverwrite: false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
             saveAsCopy: lastSavedId ? true : newCopyOnSave,
           };
 
           try {
-            if (
-              !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
-                title: newTitle,
-                onTitleDuplicate,
-                lastSavedTitle: dashboardState.title,
-                copyOnSave: saveOptions.saveAsCopy,
-                isTitleDuplicateConfirmed,
-              }))
-            ) {
-              return {};
-            }
+            setTimeRestore(newTimeRestore);
+            setProjectRoutingRestore(newProjectRoutingRestore);
+            const dashboardState = serializeState();
 
             const dashboardStateToSave: DashboardState = {
               ...dashboardState,
               title: newTitle,
               tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
               description: newDescription,
-              timeRestore: newTimeRestore,
-              timeRange: newTimeRestore
-                ? dataService.query.timefilter.timefilter.getTime()
-                : undefined,
-              refreshInterval: newTimeRestore
-                ? dataService.query.timefilter.timefilter.getRefreshInterval()
-                : undefined,
             };
 
             // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
@@ -103,12 +113,11 @@ export async function openSaveModal({
 
             const beforeAddTime = window.performance.now();
 
-            const saveResult = await dashboardContentManagementService.saveDashboardState({
-              controlGroupReferences,
-              panelReferences,
+            const saveResult = await saveDashboard({
               saveOptions,
               dashboardState: dashboardStateToSave,
               lastSavedId,
+              accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;
@@ -117,7 +126,7 @@ export async function openSaveModal({
               eventName: SAVED_OBJECT_POST_TIME,
               duration: addDuration,
               meta: {
-                saved_object_type: DASHBOARD_CONTENT_ID,
+                saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
               },
             });
 
@@ -125,7 +134,7 @@ export async function openSaveModal({
             return saveResult;
           } catch (error) {
             coreServices.notifications.toasts.addDanger(
-              generateDashboardNotSavedToast(dashboardState.title, error.message)
+              generateDashboardNotSavedToast(title, error.message)
             );
             return error;
           }
@@ -133,29 +142,34 @@ export async function openSaveModal({
 
         showSaveModal(
           <DashboardSaveModal
-            tags={dashboardState.tags}
+            tags={tags}
+            lastSavedTitle={lastSavedId ? title : ''}
             title={saveAsTitle}
             onClose={() => resolve(undefined)}
-            timeRestore={dashboardState.timeRestore}
+            timeRestore={timeRestore}
+            projectRoutingRestore={projectRoutingRestore}
             showStoreTimeOnSave={!lastSavedId}
-            description={dashboardState.description ?? ''}
+            showStoreProjectRoutingOnSave={!lastSavedId && Boolean(cpsService?.cpsManager)}
+            description={description ?? ''}
             showCopyOnSave={false}
             onSave={onSaveAttempt}
-            customModalTitle={getCustomModalTitle(viewMode)}
+            accessControl={accessControl}
+            customModalTitle={getCustomModalTitle(viewMode, lastSavedId)}
+            showAccessContainer={shouldAddAccessControl}
           />
         );
       }
     );
   } catch (error) {
     coreServices.notifications.toasts.addDanger(
-      generateDashboardNotSavedToast(dashboardState.title, error.message)
+      generateDashboardNotSavedToast(title, error.message)
     );
     return undefined;
   }
 }
 
-function getCustomModalTitle(viewMode: ViewMode) {
-  if (viewMode === 'edit')
+function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined) {
+  if (!lastSavedId || viewMode === 'edit')
     return i18n.translate('dashboard.topNav.editModeInteractiveSave.modalTitle', {
       defaultMessage: 'Save as new dashboard',
     });
@@ -182,16 +196,22 @@ function generateDashboardNotSavedToast(title: string, errorMessage: any) {
 
 async function getSaveAsTitle(title: string) {
   const [baseTitle, baseCount] = extractTitleAndCount(title);
+
   let saveAsTitle = `${baseTitle} (${baseCount + 1})`;
-  await getDashboardContentManagementService().checkForDuplicateDashboardTitle({
-    title: saveAsTitle,
-    lastSavedTitle: title,
-    copyOnSave: true,
-    isTitleDuplicateConfirmed: false,
-    onTitleDuplicate(speculativeSuggestion) {
-      saveAsTitle = speculativeSuggestion;
-    },
+
+  const { dashboards } = await dashboardClient.search({
+    query: baseTitle,
+    per_page: 20,
   });
+
+  const hasTitleDuplicate = dashboards.some(({ data }) => data.title === title);
+
+  if (hasTitleDuplicate) {
+    const [largestDuplicationId] = dashboards
+      .map(({ data }) => extractTitleAndCount(data.title)[1])
+      .sort((a, b) => b - a);
+    saveAsTitle = `${baseTitle} (${largestDuplicationId + 1})`;
+  }
 
   return saveAsTitle;
 }

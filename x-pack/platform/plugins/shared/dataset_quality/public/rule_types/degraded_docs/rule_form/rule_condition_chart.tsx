@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/alerting-comparators';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import rison from '@kbn/rison';
 import React from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { PreviewChartResponse } from '../../../../common/api_types';
+import type { PreviewChartResponse } from '../../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { ChartPreview } from './chart_preview';
 import {
@@ -22,10 +22,6 @@ import {
   asPercent,
 } from './chart_preview/chart_preview_helper';
 
-interface ChartOptions {
-  interval?: string;
-}
-
 export interface RuleConditionChartProps {
   threshold: number[];
   comparator: COMPARATORS;
@@ -34,7 +30,6 @@ export interface RuleConditionChartProps {
   dataView?: DataView;
   groupBy?: string | string[];
   timeRange: TimeRange;
-  chartOptions?: ChartOptions;
 }
 
 export function RuleConditionChart({
@@ -45,15 +40,15 @@ export function RuleConditionChart({
   dataView,
   groupBy,
   timeRange,
-  chartOptions: { interval } = {},
 }: RuleConditionChartProps) {
   const {
     services: { http, uiSettings },
   } = useKibanaContextForPlugin();
+  const chartInterval = timeSize && timeUnit ? `${timeSize}${timeUnit}` : undefined;
 
   const { loading, value, error } = useAbortableAsync(
     async ({ signal }) => {
-      if (dataView && timeRange.from && timeRange.to) {
+      if (dataView && timeRange.from && timeRange.to && chartInterval) {
         return http.get<PreviewChartResponse>(
           '/internal/dataset_quality/rule_types/degraded_docs/chart_preview',
           {
@@ -61,14 +56,14 @@ export function RuleConditionChart({
               index: dataView?.getIndexPattern(),
               start: timeRange?.from,
               end: timeRange?.to,
-              interval: interval || `${timeSize}${timeUnit}`,
+              interval: chartInterval,
               groupBy: rison.encodeArray(Array.isArray(groupBy) ? groupBy : [groupBy]),
             },
           }
         );
       }
     },
-    [http, dataView, groupBy, interval, timeRange?.from, timeRange?.to, timeSize, timeUnit]
+    [http, dataView, groupBy, chartInterval, timeRange?.from, timeRange?.to]
   );
 
   return (

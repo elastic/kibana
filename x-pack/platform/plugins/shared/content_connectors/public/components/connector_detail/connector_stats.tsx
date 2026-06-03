@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 
 import {
   EuiBadge,
@@ -26,9 +27,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
+import type { Connector, ElasticsearchIndex } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
 
-import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
+import type { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
 import {
   CONNECTOR_DETAIL_TAB_PATH,
   CONNECTOR_INTEGRATION_DETAIL_PATH,
@@ -181,7 +183,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             >
               {connectorDefinition && connectorDefinition.iconPath && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={connectorDefinition.iconPath} size="xl" />
+                  <EuiIcon type={connectorDefinition.iconPath} size="xl" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -217,7 +219,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                         <EuiButtonIcon
                           onClick={copy}
                           color="text"
-                          iconType="copyClipboard"
+                          iconType="copy"
                           aria-label={i18n.translate(
                             'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                             {
@@ -236,6 +238,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   connector.status
                 ) && connector.index_name ? (
                   <EuiButtonEmptyTo
+                    data-test-subj="contentConnectorsConnectorStatsConfigureEmptyButton"
                     size="s"
                     to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
                       connectorId: connector.id,
@@ -246,6 +249,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   </EuiButtonEmptyTo>
                 ) : (
                   <EuiButtonTo
+                    data-test-subj="contentConnectorsConnectorStatsConfigureButton"
                     color="primary"
                     size="s"
                     fill
@@ -305,7 +309,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="documents" />
+                    <EuiIcon type="documents" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
@@ -323,6 +327,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmptyTo
+                  data-test-subj="contentConnectorsConnectorStatsSeeDocumentsButton"
                   isDisabled={!(connector.index_name && indexData)}
                   size="s"
                   to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
@@ -359,6 +364,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiLink
+                  data-test-subj="contentConnectorsConnectorStatsLink"
                   target={'_blank'}
                   external={false}
                   href={http?.basePath.prepend(
@@ -382,6 +388,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="contentConnectorsConnectorStatsElasticConnectorsButton"
                     isDisabled={!connector.service_type}
                     iconType="plugs"
                     color="text"
@@ -426,6 +433,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agentlessAgentExists && (
                     <EuiButtonEmpty
+                      data-test-subj="contentConnectorsConnectorStatsHostOverviewButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
                       size="s"
                       href={http?.basePath.prepend(
@@ -443,6 +451,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 <EuiFlexItem grow={false}>
                   {agnetlessPolicyExists ? (
                     <EuiButtonEmpty
+                      data-test-subj="contentConnectorsConnectorStatsManagePolicyButton"
                       isDisabled={!agentlessOverview || !agentlessOverview.policy.id}
                       size="s"
                       href={http?.basePath.prepend(

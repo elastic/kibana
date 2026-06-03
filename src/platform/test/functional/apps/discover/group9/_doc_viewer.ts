@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
@@ -29,9 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover doc viewer', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await browser.setWindowSize(1600, 1200);
     });
 
@@ -41,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        hideAnnouncements: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -61,9 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
       });
 
       afterEach(async () => {
@@ -141,9 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
       });
 
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
@@ -189,9 +180,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
+
+        // Clear any unexpected active type filters
+        const filterToggle = await testSubjects.find(
+          'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+        );
+        if ((await filterToggle.getVisibleText()) !== '0') {
+          await discover.openFilterByFieldTypeInDocViewer();
+          await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+          await discover.closeFilterByFieldTypeInDocViewer();
+        }
 
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const numberFieldsCount = 6;
@@ -255,6 +254,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('hide null values switch - data view mode', function () {
+      it('should hide fields with null values when toggled', async function () {
+        if (!(await testSubjects.exists('select-text-based-language-btn'))) {
+          await discover.selectDataViewMode();
+          await discover.waitUntilTabIsLoaded();
+        }
+
+        await dataGrid.clickRowToggle();
+        await discover.isShowingDocViewer();
+        await dataGrid.waitForDocViewerFieldsToRender();
+
+        await discover.openFilterByFieldTypeInDocViewer();
+        await testSubjects.click('typeFilter-keyword');
+
+        const initialFieldsCount = 8;
+        await retry.waitFor('filter applied', async () => {
+          return (
+            (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === initialFieldsCount
+          );
+        });
+        await discover.closeFilterByFieldTypeInDocViewer();
+
+        let hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
+        await hideNullValuesSwitch.click();
+
+        await retry.waitFor('fields to be hidden', async () => {
+          return (
+            (await find.allByCssSelector('.kbnDocViewer__fieldName')).length < initialFieldsCount
+          );
+        });
+
+        hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
+        await hideNullValuesSwitch.click();
+      });
+    });
+
     describe('show only selected fields in ES|QL mode', function () {
       beforeEach(async () => {
         await discover.selectTextBaseLang();
@@ -280,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
       });
 
@@ -309,7 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
 
         await showOnlySelectedFieldsSwitch.click();
@@ -317,7 +352,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching to show only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent.raw,agent';
+          return fieldNames.join(',') === '@timestamp,agent.raw,agent';
         });
 
         await dataGrid.togglePinActionInFlyout('agent');
@@ -325,7 +360,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after pinning the last field', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent,agent.raw';
+          return fieldNames.join(',') === 'agent,@timestamp,agent.raw';
         });
 
         await showOnlySelectedFieldsSwitch.click();
@@ -333,7 +368,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching from showing only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',').startsWith('agent,@message,@tags');
+          return fieldNames.join(',').startsWith('agent,@message,@message.raw');
         });
       });
     });
@@ -404,9 +439,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should be able to pin and unpin fields', async function () {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
+        await dataGrid.waitForDocViewerFieldsToRender();
 
         let fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
         let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));

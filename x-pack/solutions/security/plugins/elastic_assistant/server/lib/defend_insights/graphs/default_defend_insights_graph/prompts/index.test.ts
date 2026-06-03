@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import {
-  DefendInsightsCombinedPrompts,
-  getIncompatibleAntivirusPrompt,
-} from './incompatible_antivirus';
-import { getDefendInsightsPrompt } from '.';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+
+import type { DefendInsightsCombinedPrompts } from '.';
+import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
+import { getPolicyResponseFailurePrompt } from './policy_response_failure';
+import { getDefendInsightsPrompt } from '.';
 
 jest.mock('./incompatible_antivirus', () => ({
   getIncompatibleAntivirusPrompt: jest.fn(),
 }));
 
+jest.mock('./policy_response_failure', () => ({
+  getPolicyResponseFailurePrompt: jest.fn(),
+}));
+
 describe('getDefendInsightsPrompt', () => {
   const mockArgs = {
-    actionsClient: {} as unknown as PublicMethodsOf<ActionsClient>,
     connector: undefined,
     connectorId: 'mock-connector-id',
     model: 'mock-model',
@@ -43,11 +44,33 @@ describe('getDefendInsightsPrompt', () => {
     (getIncompatibleAntivirusPrompt as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
-      type: DefendInsightType.Enum.incompatible_antivirus,
+      type: DefendInsightType.enum.incompatible_antivirus,
       ...mockArgs,
     });
 
     expect(getIncompatibleAntivirusPrompt).toHaveBeenCalledWith(mockArgs);
+    expect(result).toBe(mockResponse);
+  });
+
+  it('should call getPolicyResponseFailurePrompt for policy_response_failure type', async () => {
+    const mockResponse: DefendInsightsCombinedPrompts = {
+      default: 'default prompt',
+      refine: 'refine prompt',
+      continue: 'continue prompt',
+      group: 'group value',
+      events: 'events value',
+      eventsId: 'events id',
+      eventsEndpointId: 'endpoint id',
+      eventsValue: 'events value content',
+    };
+    (getPolicyResponseFailurePrompt as jest.Mock).mockResolvedValue(mockResponse);
+
+    const result = await getDefendInsightsPrompt({
+      type: DefendInsightType.enum.policy_response_failure,
+      ...mockArgs,
+    });
+
+    expect(getPolicyResponseFailurePrompt).toHaveBeenCalledWith(mockArgs);
     expect(result).toBe(mockResponse);
   });
 

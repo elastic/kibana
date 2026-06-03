@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
@@ -15,6 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
+    },
+    uiSettings: {
+      ...functionalConfig.get('uiSettings'),
+      globalDefaults: {
+        ...functionalConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: false,
+      },
     },
   };
 }

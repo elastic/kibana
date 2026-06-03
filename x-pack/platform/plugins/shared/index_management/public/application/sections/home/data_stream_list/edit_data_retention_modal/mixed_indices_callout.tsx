@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { ScopedHistory } from '@kbn/core-application-browser';
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import { getIndexListUri } from '../../../../..';
 import { useAppContext } from '../../../../app_context';
 

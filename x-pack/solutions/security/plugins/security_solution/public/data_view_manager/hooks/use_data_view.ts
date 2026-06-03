@@ -7,12 +7,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
-
 import { useSelector } from 'react-redux';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { DataViewManagerScopeName } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { PageScope } from '../constants';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
 
@@ -20,13 +18,18 @@ const INITIAL_DV = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,
 });
 
+export interface UseDataViewReturnValue {
+  dataView: DataView;
+  status: SharedDataViewSelectionState['status'];
+}
+
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
  * selected data view.
  */
 export const useDataView = (
-  dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): { dataView: DataView; status: SharedDataViewSelectionState['status'] } => {
+  dataViewManagerScope: PageScope = PageScope.default
+): UseDataViewReturnValue => {
   const {
     services: { dataViews, notifications },
   } = useKibana();
@@ -34,7 +37,6 @@ export const useDataView = (
   const { dataViewId, status: internalStatus } = useSelector(
     sourcererAdapterSelector(dataViewManagerScope)
   );
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const [localStatus, setLocalStatus] =
     useState<SharedDataViewSelectionState['status']>('pristine');
   const [retrievedDataView, setRetrievedDataView] = useState<DataView>(INITIAL_DV);
@@ -42,10 +44,6 @@ export const useDataView = (
 
   useEffect(() => {
     (async () => {
-      if (!newDataViewPickerEnabled) {
-        return;
-      }
-
       if (!dataViewId || internalStatus !== 'ready') {
         return;
       }
@@ -73,13 +71,10 @@ export const useDataView = (
         setLocalStatus('error');
       }
     })();
-  }, [dataViews, dataViewId, internalStatus, notifications, newDataViewPickerEnabled]);
+  }, [dataViewManagerScope, dataViews, dataViewId, internalStatus, notifications]);
 
-  return useMemo(() => {
-    if (!newDataViewPickerEnabled) {
-      return { dataView: retrievedDataView, status: localStatus };
-    }
-
-    return { dataView: retrievedDataView, status: localStatus };
-  }, [newDataViewPickerEnabled, retrievedDataView, localStatus]);
+  return useMemo(
+    () => ({ dataView: retrievedDataView, status: localStatus }),
+    [retrievedDataView, localStatus]
+  );
 };

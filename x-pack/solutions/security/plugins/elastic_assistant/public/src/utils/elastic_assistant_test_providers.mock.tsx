@@ -12,7 +12,8 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import React from 'react';
 import { ReactQueryClientProvider } from '../context/query_client_context/elastic_assistant_query_client_provider';
 import { KibanaContextProvider } from '../context/typed_kibana_context/typed_kibana_context';
-import { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
+import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 interface Props {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export const ElasticAssistantTestProviders = ({ children, services }: Props) => 
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const elasticAssistantSharedState = elasticAssistantSharedStateMock.createStartContract();
   const notifications = notificationServiceMock.createStartContract();
+  const spaces = spacesPluginMock.createStartContract();
 
   return (
     <ReactQueryClientProvider>
@@ -39,6 +41,7 @@ export const ElasticAssistantTestProviders = ({ children, services }: Props) => 
           notifications,
           aiAssistantManagementSelection:
             {} as unknown as AIAssistantManagementSelectionPluginPublicStart,
+          spaces,
           ...services,
         }}
       >

@@ -6,7 +6,8 @@
  */
 
 import path from 'path';
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 
@@ -36,9 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'responseActionsTelemetryEnabled',
-        ])}`,
+        '--xpack.task_manager.invalidate_api_key_task.removalDelay="1s"',
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',

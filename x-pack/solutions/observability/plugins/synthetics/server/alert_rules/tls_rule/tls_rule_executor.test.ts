@@ -14,10 +14,10 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { randomUUID } from 'node:crypto';
-import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();

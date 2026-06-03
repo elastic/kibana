@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { BenchmarksCisId } from '../../types/benchmark';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { BenchmarksCisId } from '../../types/benchmark';
 import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
 export type {
   cspBenchmarkRuleMetadataSchema,
@@ -49,15 +50,17 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize is set to 50 to cover all available fields with room for future additions
+  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 
   /**
    *  The fields to perform the parsed query against.
    * Valid fields are fields which mapped to 'text' in cspBenchmarkRuleSavedObjectMapping
    */
+  // maxSize is set to 2 as there are only 2 valid search fields
   searchFields: schema.arrayOf(
     schema.oneOf([schema.literal('metadata.name.text'), schema.literal('metadata.section.text')]),
-    { defaultValue: ['metadata.name.text'] }
+    { defaultValue: ['metadata.name.text'], maxSize: 2 }
   ),
 
   /**
@@ -123,13 +126,15 @@ export interface PageUrlParams {
   ruleId?: string;
 }
 
+// maxSize is set to 500 as there are usually no more than 100 rules per benchmark
 export const rulesToUpdate = schema.arrayOf(
   schema.object({
     rule_id: schema.string(),
     benchmark_id: schema.string(),
     benchmark_version: schema.string(),
     rule_number: schema.string(),
-  })
+  }),
+  { maxSize: 500 }
 );
 
 export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({

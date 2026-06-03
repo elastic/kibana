@@ -80,6 +80,7 @@ export function createPluginSetupContext<
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
+    chrome: deps.chrome,
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
     featureFlags: deps.featureFlags,
@@ -105,6 +106,7 @@ export function createPluginSetupContext<
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
+    userStorage: deps.userStorage,
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
@@ -170,7 +172,6 @@ export function createPluginStartContext<
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
-    savedObjects: deps.savedObjects,
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
     theme: deps.theme,
@@ -178,6 +179,7 @@ export function createPluginStartContext<
       authc: deps.security.authc,
     },
     userProfile: deps.userProfile,
+    userStorage: deps.userStorage,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },

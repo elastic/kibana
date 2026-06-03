@@ -6,8 +6,10 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { isNumber, isEmpty } from 'lodash/fp';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { isEmpty, isNumber } from 'lodash/fp';
+import type { ComponentProps, FC } from 'react';
+import React from 'react';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
@@ -29,23 +31,30 @@ export const getValues = (field: string, data: TimelineNonEcsData[]): string[] |
 
 export const DETAILS_CLASS_NAME = 'details';
 
-export const Details = styled.div.attrs(() => ({
-  className: DETAILS_CLASS_NAME,
-}))`
-  margin: 5px 0 5px 10px;
-  & .euiBadge {
-    margin: 2px 0 2px 0;
-  }
-  & .euiFlexGroup {
-    justify-content: center;
-  }
-`;
-Details.displayName = 'Details';
+export const Details: FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...rest }) => (
+  <div
+    className={className ? `${DETAILS_CLASS_NAME} ${className}` : DETAILS_CLASS_NAME}
+    css={css`
+      margin: 5px 0 5px 10px;
+      & .euiBadge {
+        margin: 2px 0 2px 0;
+      }
+      & .euiFlexGroup {
+        justify-content: center;
+      }
+    `}
+    {...rest}
+  />
+);
 
-export const TokensFlexItem = styled(EuiFlexItem)`
-  margin-left: 3px;
-`;
-TokensFlexItem.displayName = 'TokensFlexItem';
+export const TokensFlexItem: FC<ComponentProps<typeof EuiFlexItem>> = (props) => (
+  <EuiFlexItem
+    css={css`
+      margin-left: 3px;
+    `}
+    {...props}
+  />
+);
 
 export function isNillEmptyOrNotFinite<T>(value: string | number | T[] | null | undefined) {
   return isNumber(value) ? !isFinite(value) : isEmpty(value);

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export type MlCustomUrls = ProvidedType<typeof MachineLearningCustomUrlsProvider>;
 

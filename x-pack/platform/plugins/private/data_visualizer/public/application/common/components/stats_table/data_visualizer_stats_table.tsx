@@ -147,12 +147,8 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         // EUI will automatically show an expander button when table is mobile view (where width <700)
         // so we need to not render any addition button
         dimensions.breakPoint !== 'small' ? (
-          <EuiButtonIcon
-            data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
-              expandAll ? 'expanded' : 'collapsed'
-            }`}
-            onClick={() => toggleExpandAll(!expandAll)}
-            aria-label={
+          <EuiToolTip
+            content={
               !expandAll
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
                     defaultMessage: 'Expand details for all fields',
@@ -161,8 +157,25 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                     defaultMessage: 'Collapse details for all fields',
                   })
             }
-            iconType={expandAll ? 'arrowDown' : 'arrowRight'}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
+                expandAll ? 'expanded' : 'collapsed'
+              }`}
+              onClick={() => toggleExpandAll(!expandAll)}
+              aria-label={
+                !expandAll
+                  ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
+                      defaultMessage: 'Expand details for all fields',
+                    })
+                  : i18n.translate('xpack.dataVisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
+                      defaultMessage: 'Collapse details for all fields',
+                    })
+              }
+              iconType={expandAll ? 'chevronSingleDown' : 'chevronSingleRight'}
+            />
+          </EuiToolTip>
         ) : null,
       align: RIGHT_ALIGNMENT,
       width: dimensions.expander,
@@ -170,12 +183,12 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
         if (item.fieldName === undefined) return null;
-        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowDown' : 'arrowRight';
+        const direction = expandedRowItemIds.includes(item.fieldName)
+          ? 'chevronSingleDown'
+          : 'chevronSingleRight';
         return (
-          <EuiButtonIcon
-            data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
-            onClick={() => toggleDetails(item)}
-            aria-label={
+          <EuiToolTip
+            content={
               expandedRowItemIds.includes(item.fieldName)
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
                     defaultMessage: 'Hide details for {fieldName}',
@@ -186,8 +199,25 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                     values: { fieldName: displayName },
                   })
             }
-            iconType={direction}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
+              onClick={() => toggleDetails(item)}
+              aria-label={
+                expandedRowItemIds.includes(item.fieldName)
+                  ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
+                      defaultMessage: 'Hide details for {fieldName}',
+                      values: { fieldName: displayName },
+                    })
+                  : i18n.translate('xpack.dataVisualizer.dataGrid.rowExpand', {
+                      defaultMessage: 'Show details for {fieldName}',
+                      values: { fieldName: displayName },
+                    })
+              }
+              iconType={direction}
+            />
+          </EuiToolTip>
         );
       },
       'data-test-subj': 'dataVisualizerTableColumnDetailsToggle',
@@ -287,7 +317,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: (
           <div className={'columnHeader__title'}>
             {dimensions.showIcon ? (
-              <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
+              <EuiIcon
+                aria-hidden={true}
+                type={'chartBarVertical'}
+                className={'columnHeader__icon'}
+              />
             ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
@@ -303,14 +337,15 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                         defaultMessage: 'Hide distributions',
                       })
                 }
+                disableScreenReaderOutput={true}
               >
                 <EuiButtonIcon
                   style={{ marginLeft: 4 }}
                   size={'s'}
-                  iconType={!showDistributions ? 'eye' : 'eyeClosed'}
+                  iconType={!showDistributions ? 'eye' : 'eyeSlash'}
                   onClick={() => toggleShowDistribution()}
                   aria-label={
-                    showDistributions
+                    !showDistributions
                       ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
                           defaultMessage: 'Show distributions',
                         })
@@ -388,6 +423,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
 
   const $panelWidthS = `calc(max(20%, 225px))`;
   const $panelWidthM = `calc(max(30%, 300px))`;
+  const $panelWidthL = `calc(max(35%, 400px))`;
 
   const dvTableCss = css({
     thead: {
@@ -399,6 +435,16 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
     },
     '.euiTableRow > .euiTableRowCell': {
       borderTop: 0,
+    },
+    '& .dvMap__wrapper': {
+      minWidth: 0,
+      height: '240px',
+      [useEuiMinBreakpoint('s')]: {
+        minWidth: $panelWidthM,
+      },
+      [useEuiMinBreakpoint('m')]: {
+        minWidth: $panelWidthL,
+      },
     },
     [useEuiMinBreakpoint('s')]: {
       '& .columnHeader__title': {
@@ -439,11 +485,12 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         },
       },
       '& .dvTopValues__wrapper': {
-        minWidth: 'fit-content',
+        minWidth: $panelWidthM,
+        maxWidth: $panelWidthL,
       },
       '& .dvPanel__wrapper': {
         '&.dvPanel--compressed': {
-          width: $panelWidthS,
+          minWidth: $panelWidthS,
         },
         '&.dvPanel--uniform': {
           minWidth: $panelWidthS,
@@ -455,10 +502,6 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       },
       '& .dvPanel__wrapper:last-child': {
         margin: `${euiTheme.size.xs} 0 ${euiTheme.size.m} 0`,
-      },
-
-      '& .dvMap__wrapper': {
-        height: '240px',
       },
       '& .dvText__wrapper': {
         minWidth: $panelWidthS,
@@ -489,7 +532,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <EuiInMemoryTable<T>
-            message={message}
+            noItemsMessage={message}
             css={dvTableCss}
             items={items}
             itemId={FIELD_NAME}
@@ -501,6 +544,11 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({
               'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
+            })}
+            tableCaption={i18n.translate('xpack.dataVisualizer.dataGrid.tableCaption', {
+              defaultMessage:
+                'Field statistics table showing {count, plural, one {# field} other {# fields}} with their types, document counts, distinct values, and value distributions.',
+              values: { count: items.length },
             })}
           />
         </div>

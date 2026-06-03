@@ -7,27 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', () => {
-    loadTestFile(require.resolve('./console'));
-    loadTestFile(require.resolve('./core'));
     loadTestFile(require.resolve('./custom_integration'));
-    loadTestFile(require.resolve('./dashboards'));
     loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./data_view_field_editor'));
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./kql_telemetry'));
-    loadTestFile(require.resolve('./saved_objects_management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./saved_queries'));
     loadTestFile(require.resolve('./scripts'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./short_url'));
-    loadTestFile(require.resolve('./suggestions'));
+    // suggestions migrated to Scout: src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions*.spec.ts
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));

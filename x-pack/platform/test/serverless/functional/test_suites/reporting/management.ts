@@ -6,7 +6,7 @@
  */
 
 import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -38,7 +38,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   };
 
-  describe('Reporting Management app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/246637
+  // FLAKY: https://github.com/elastic/kibana/issues/246638
+  describe.skip('Reporting Management app', () => {
     let job: ReportApiJSON;
     let path: string;
 

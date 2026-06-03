@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { get } from 'lodash';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
-import { BurnRateRuleParams } from '../types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { BURN_RATE_EXECUTOR_SPAN_NAMES } from '../constants';
+import type { SLODefinition } from '../../../../domain/models';
+import { Duration, toDurationUnit } from '../../../../domain/models';
+import type { BurnRateRuleParams } from '../types';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
+import type { EvaluationAfterKey } from './build_query';
 import {
   buildQuery,
-  EvaluationAfterKey,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateWindowId,
@@ -79,10 +82,14 @@ async function queryAllResults(
   lastAfterKey?: { instanceId: string }
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
-  const results = await esClient.search<undefined, EvalutionAggResults>({
-    index: SLI_DESTINATION_INDEX_PATTERN,
-    ...queryAndAggs,
-  });
+  const results = await withSpan(
+    { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ES_QUERY, type: 'rule' },
+    () =>
+      esClient.search<undefined, EvalutionAggResults>({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        ...queryAndAggs,
+      })
+  );
 
   if (!results.aggregations) {
     throw new Error('Elasticsearch query failed to return a valid aggregation');

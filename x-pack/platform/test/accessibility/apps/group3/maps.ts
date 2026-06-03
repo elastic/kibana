@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('maps');
       await retry.waitFor(
         'maps workpads visible',
-        async () => await testSubjects.exists('itemsInMemTable')
+        async () => await testSubjects.exists('listingTable-isLoaded')
       );
       await a11y.testAppSnapshot();
     });

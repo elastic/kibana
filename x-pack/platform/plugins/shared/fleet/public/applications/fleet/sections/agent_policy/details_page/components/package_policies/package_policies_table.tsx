@@ -12,7 +12,6 @@ import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiBadge,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -37,7 +36,14 @@ import {
   useGetOutputs,
   useDefaultOutput,
 } from '../../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
+
+import {
+  OTEL_INPUTS_MINIMUM_VERSION,
+  packagePolicyHasOtelInputs,
+} from '../../../../../../../../common/services/otelcol_helpers';
+
+import { PackagePolicyUpgradeCell } from '../../../../../../integrations/sections/epm/screens/detail/policies/components/package_policy_upgrade_cell';
 
 import { AddIntegrationFlyout } from './add_integration_flyout';
 
@@ -46,7 +52,7 @@ interface Props {
   agentPolicy: AgentPolicy;
   // Pass through props to InMemoryTable
   loading?: EuiInMemoryTableProps<InMemoryPackagePolicy>['loading'];
-  message?: EuiInMemoryTableProps<InMemoryPackagePolicy>['message'];
+  noItemsMessage?: EuiInMemoryTableProps<InMemoryPackagePolicy>['noItemsMessage'];
   refreshAgentPolicy: () => void;
 }
 
@@ -68,10 +74,16 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const canReadAgentPolicies = authz.fleet.readAgentPolicies;
   const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
-  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
+  const {
+    isPackagePolicyUpgradable,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+    getUpgradeVersion,
+  } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
+  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
 
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -95,6 +107,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           packageTitle: packagePolicy.package?.title ?? '',
           packageVersion: packagePolicy.package?.version ?? '',
           hasUpgrade,
+          upgradeVersion: getUpgradeVersion(packagePolicy),
+          pendingUpgradeReview: getPackagePolicyUpgradeReview(packagePolicy),
+          keepPoliciesUpToDate: getKeepPoliciesUpToDate(packagePolicy),
         };
       }
     );
@@ -103,7 +118,13 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       .sort(stringSortAscending)
       .map(toFilterOption);
     return [mappedPackagePolicies, namespaceFilterOptions];
-  }, [originalPackagePolicies, isPackagePolicyUpgradable]);
+  }, [
+    originalPackagePolicies,
+    isPackagePolicyUpgradable,
+    getUpgradeVersion,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+  ]);
 
   const getSharedPoliciesNumber = useCallback((packagePolicy: PackagePolicy) => {
     return packagePolicy.policy_ids.length || 0;
@@ -147,13 +168,29 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 {packagePolicy.description ? (
                   <span>
                     &nbsp;
-                    <EuiToolTip content={packagePolicy.description}>
-                      <EuiIcon type="question" />
-                    </EuiToolTip>
+                    <EuiIconTip content={packagePolicy.description} type="question" />
                   </span>
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
+            {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.containsOtelPackages"
+                      defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. To collect OTel data, Elastic Agents must be on version {minVersion} or later."
+                      values={{
+                        integrationTitle: packagePolicy.packageTitle,
+                        minVersion: OTEL_INPUTS_MINIMUM_VERSION,
+                      }}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            )}
             {canUseMultipleAgentPolicies &&
               canReadAgentPolicies &&
               canReadIntegrationPolicies &&
@@ -173,12 +210,13 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       color="subdued"
                       size="xs"
                       className="eui-textNoWrap"
+                      tabIndex={0}
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
                         defaultMessage="Shared"
                       />{' '}
-                      <EuiIcon type="info" />
+                      <EuiIcon type="info" aria-hidden={true} />
                     </EuiText>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -197,7 +235,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ),
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
                 <EuiLink
                   href={
@@ -233,37 +271,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexGroup>
                 </EuiLink>
               </EuiFlexItem>
-              {packagePolicy.hasUpgrade && (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={i18n.translate(
-                        'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
-                        { defaultMessage: 'Upgrade Available' }
-                      )}
-                    >
-                      <EuiIcon type="warning" color="warning" />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="PackagePoliciesTableUpgradeButton"
-                      size="s"
-                      minWidth="0"
-                      isDisabled={!canWriteIntegrationPolicies}
-                      href={`${getHref('upgrade_package_policy', {
-                        policyId: agentPolicy.id,
-                        packagePolicyId: packagePolicy.id,
-                      })}?from=fleet-policy-list`}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                        defaultMessage="Upgrade"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </>
-              )}
+              <PackagePolicyUpgradeCell
+                packagePolicy={packagePolicy}
+                agentPolicies={[agentPolicy]}
+                from="fleet-policy-list"
+              />
             </EuiFlexGroup>
           );
         },
@@ -378,6 +390,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       canReadIntegrationPolicies,
       getHref,
       agentPolicy,
+      enableOtelIntegrations,
       canUseMultipleAgentPolicies,
       canReadAgentPolicies,
       getSharedPoliciesNumber,
@@ -394,6 +407,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         itemId="id"
         items={packagePolicies}
         columns={columns}
+        tableCaption={i18n.translate(
+          'xpack.fleet.policyDetails.packagePoliciesTable.tableCaption',
+          {
+            defaultMessage: 'Integration policies',
+          }
+        )}
         sorting={{
           sort: {
             field: 'name',
@@ -410,7 +429,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     key="addPackagePolicyButton"
                     fill
                     isDisabled={!canWriteIntegrationPolicies}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => {
                       setShowAddIntegrationFlyout(true);
                     }}

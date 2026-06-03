@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { SeriesUrl } from '../types';
+import type { SeriesUrl } from '../types';
 
 export function SeriesColorPicker({ seriesId, series }: { seriesId: number; series: SeriesUrl }) {
   const { euiTheme } = useEuiTheme();
@@ -42,7 +42,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
         onClick={() => setIsOpen((prevState) => !prevState)}
         flush="both"
       >
-        <EuiIcon type="stopFilled" size="l" color={color} />
+        <EuiIcon type="stopFill" size="l" color={color} aria-hidden={true} />
       </EuiButtonEmpty>
     </EuiToolTip>
   );

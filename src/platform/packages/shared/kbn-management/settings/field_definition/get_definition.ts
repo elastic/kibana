@@ -10,8 +10,8 @@
 import { words } from 'lodash';
 
 import { Query } from '@elastic/eui';
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { UiSettingMetadata } from '@kbn/management-settings-types';
+import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import type { UiSettingMetadata } from '@kbn/management-settings-types';
 import { isSettingDefaultValue } from '@kbn/management-settings-utilities';
 
 /**
@@ -104,6 +104,7 @@ export const getFieldDefinition = <T extends SettingType>(
     value: defaultValue,
     solutionViews,
     technicalPreview,
+    experimental,
   } = setting;
 
   const { isCustom, isOverridden } = params;
@@ -148,6 +149,7 @@ export const getFieldDefinition = <T extends SettingType>(
     unsavedFieldId: `${id}-unsaved`,
     solutionViews,
     technicalPreview,
+    experimental,
   };
 
   // TODO: clintandrewhall - add validation (e.g. `select` contains non-empty `options`)

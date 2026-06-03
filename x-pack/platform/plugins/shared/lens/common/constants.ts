@@ -6,19 +6,30 @@
  */
 
 import rison from '@kbn/rison';
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { type RefreshInterval, type TimeRange } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { RouteAccess } from '@kbn/core-http-server';
+
+export * from './paths';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;
 export const DOC_TYPE = 'lens';
 export const LENS_APP_NAME = APP_ID;
-export const LENS_EMBEDDABLE_TYPE = DOC_TYPE;
+export const LENS_DASHBOARD_APP_TYPE = 'lens-dashboard-app';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
-export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 export const LENS_ICON = 'lensApp';
 export const STAGE_ID = 'production';
+
+export const LENS_API_VERSION = '2023-10-31';
+export const LENS_API_ACCESS: RouteAccess = 'public';
+export const LENS_INTERNAL_API_VERSION = '1';
+/**
+ * In the OpenAPISpec this represents the endpoint group name
+ */
+export const LENS_API_TAG = 'oas-tag:Visualizations';
 
 export const INDEX_PATTERN_TYPE = 'index-pattern';
 
@@ -93,3 +104,8 @@ export function getFullPath(id?: string) {
 }
 
 export const COLOR_MAPPING_OFF_BY_DEFAULT = false;
+
+// Do not change constan value - part of public REST API
+export const DISCOVER_DRILLDOWN_TYPE = 'discover_drilldown';
+// Only additive changes are allowed, part of public REST API
+export const DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER];

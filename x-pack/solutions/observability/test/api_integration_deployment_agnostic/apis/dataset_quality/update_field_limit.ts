@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 import { createBackingIndexNameWithoutVersion, rolloverDataStream } from './utils/es_utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

@@ -9,24 +9,26 @@
 
 import React, { Component } from 'react';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  keys,
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiFieldText,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFieldText,
+  EuiInMemoryTable,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
 
-import { SourceFiltersTableFilter } from '../../types';
+import type { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
   'indexPatternManagement.editIndexPattern.source.table.filterHeader',
@@ -52,6 +54,13 @@ const matchesDescription = i18n.translate(
   { defaultMessage: 'Language used for the field' }
 );
 
+const tableCaption = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.caption',
+  {
+    defaultMessage: 'Source filters',
+  }
+);
+
 const editAria = i18n.translate('indexPatternManagement.editIndexPattern.source.table.editAria', {
   defaultMessage: 'Edit',
 });
@@ -74,6 +83,15 @@ const cancelAria = i18n.translate(
   }
 );
 
+const matchesShowLessLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.matches.showLessLabel',
+  {
+    defaultMessage: 'Show less',
+  }
+);
+
+const MAX_VISIBLE_MATCHES = 20;
+
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 export interface TableProps {
@@ -88,6 +106,7 @@ export interface TableProps {
 export interface TableState {
   editingFilterId: string | number;
   editingFilterValue: string;
+  expandedMatchFilterIds: Array<string | number>;
 }
 
 class TableClass extends Component<
@@ -99,6 +118,7 @@ class TableClass extends Component<
     this.state = {
       editingFilterId: '',
       editingFilterValue: '',
+      expandedMatchFilterIds: [],
     };
   }
 
@@ -124,6 +144,17 @@ class TableClass extends Component<
     }
   };
 
+  toggleExpandedMatches = (filterId: string | number) => {
+    this.setState(({ expandedMatchFilterIds }) => {
+      const isExpanded = expandedMatchFilterIds.includes(filterId);
+      return {
+        expandedMatchFilterIds: isExpanded
+          ? expandedMatchFilterIds.filter((id) => id !== filterId)
+          : [...expandedMatchFilterIds, filterId],
+      };
+    });
+  };
+
   getColumns(): Array<EuiBasicTableColumn<SourceFiltersTableFilter>> {
     const { deleteFilter, fieldWildcardMatcher, indexPattern, saveFilter } = this.props;
 
@@ -132,6 +163,7 @@ class TableClass extends Component<
         field: 'value',
         name: filterHeader,
         description: filterDescription,
+        className: 'eui-alignTop',
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -167,7 +199,46 @@ class TableClass extends Component<
             .sort();
 
           if (matches.length) {
-            return <span>{matches.join(', ')}</span>;
+            const isExpanded = this.state.expandedMatchFilterIds.includes(filter.clientId);
+            const displayedMatches = isExpanded ? matches : matches.slice(0, MAX_VISIBLE_MATCHES);
+            const hiddenMatchesCount = matches.length - displayedMatches.length;
+
+            return (
+              <div>
+                <span>{displayedMatches.join(', ')}</span>
+                {matches.length > MAX_VISIBLE_MATCHES && (
+                  <div>
+                    <EuiButtonEmpty
+                      size="xs"
+                      flush="left"
+                      onClick={() => this.toggleExpandedMatches(filter.clientId)}
+                      aria-label={
+                        isExpanded
+                          ? matchesShowLessLabel
+                          : i18n.translate(
+                              'indexPatternManagement.editIndexPattern.source.table.matches.showMoreAria',
+                              {
+                                defaultMessage: 'Show {hiddenCount} more matches',
+                                values: { hiddenCount: hiddenMatchesCount },
+                              }
+                            )
+                      }
+                      data-test-subj={`toggle_matches_${filter.clientId}`}
+                    >
+                      {isExpanded
+                        ? matchesShowLessLabel
+                        : i18n.translate(
+                            'indexPatternManagement.editIndexPattern.source.table.matches.showMoreLabel',
+                            {
+                              defaultMessage: 'Show {hiddenCount} more',
+                              values: { hiddenCount: hiddenMatchesCount },
+                            }
+                          )}
+                    </EuiButtonEmpty>
+                  </div>
+                )}
+              </div>
+            );
           }
 
           return (
@@ -188,47 +259,55 @@ class TableClass extends Component<
           if (this.state.editingFilterId === filter.clientId) {
             return (
               <>
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => {
-                    saveFilter({
-                      clientId: this.state.editingFilterId,
-                      value: this.state.editingFilterValue,
-                    });
-                    this.stopEditingFilter();
-                  }}
-                  iconType="checkInCircleFilled"
-                  aria-label={saveAria}
-                  data-test-subj={`save_filter-${filter.value}`}
-                />
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => {
-                    this.stopEditingFilter();
-                  }}
-                  iconType="cross"
-                  aria-label={cancelAria}
-                />
+                <EuiToolTip content={saveAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={() => {
+                      saveFilter({
+                        clientId: this.state.editingFilterId,
+                        value: this.state.editingFilterValue,
+                      });
+                      this.stopEditingFilter();
+                    }}
+                    iconType="checkCircleFill"
+                    aria-label={saveAria}
+                    data-test-subj={`save_filter-${filter.value}`}
+                  />
+                </EuiToolTip>
+                <EuiToolTip content={cancelAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={() => {
+                      this.stopEditingFilter();
+                    }}
+                    iconType="cross"
+                    aria-label={cancelAria}
+                  />
+                </EuiToolTip>
               </>
             );
           }
 
           return (
             <>
-              <EuiButtonIcon
-                size="s"
-                onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
-                iconType="pencil"
-                aria-label={editAria}
-                data-test-subj={`edit_filter-${filter.value}`}
-              />
-              <EuiButtonIcon
-                size="s"
-                color="danger"
-                onClick={() => deleteFilter(filter)}
-                iconType="trash"
-                aria-label={deleteAria}
-              />
+              <EuiToolTip content={editAria} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  size="s"
+                  onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
+                  iconType="pencil"
+                  aria-label={editAria}
+                  data-test-subj={`edit_filter-${filter.value}`}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={deleteAria} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  size="s"
+                  color="danger"
+                  onClick={() => deleteFilter(filter)}
+                  iconType="trash"
+                  aria-label={deleteAria}
+                />
+              </EuiToolTip>
             </>
           );
         },
@@ -256,6 +335,7 @@ class TableClass extends Component<
         pagination={pagination}
         sorting={sorting}
         onTableChange={onTableChange}
+        tableCaption={tableCaption}
       />
     );
   }

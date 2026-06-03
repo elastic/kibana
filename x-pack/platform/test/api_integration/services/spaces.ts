@@ -6,13 +6,12 @@
  */
 
 import type { Space } from '@kbn/spaces-plugin/common';
-import Axios from 'axios';
-import Https from 'https';
+import { Agent, type Dispatcher } from 'undici';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
 import Url from 'url';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
 
@@ -22,7 +21,7 @@ interface SpaceCreate {
   description?: string;
   color?: string;
   initials?: string;
-  solution?: 'es' | 'oblt' | 'security' | 'chat' | 'classic';
+  solution?: 'es' | 'oblt' | 'security' | 'workplaceai' | 'vectordb' | 'classic';
   disabledFeatures?: string[];
 }
 
@@ -30,36 +29,76 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
-  const url = formatUrl(config.get('servers.kibana'));
+  const rawUrl = formatUrl(config.get('servers.kibana'));
+
+  // FTR's servers.kibana URL embeds `user:pass@host` credentials. Native fetch rejects URLs with
+  // embedded credentials, so we strip them out and forward the basic auth via the Authorization
+  // header instead.
+  const parsedUrl = new URL(rawUrl);
+  const authorization =
+    parsedUrl.username || parsedUrl.password
+      ? `Basic ${Buffer.from(
+          `${decodeURIComponent(parsedUrl.username)}:${decodeURIComponent(parsedUrl.password)}`
+        ).toString('base64')}`
+      : undefined;
+  parsedUrl.username = '';
+  parsedUrl.password = '';
+
+  const url = parsedUrl.toString();
   // used often in fleet_api_integration tests
   const TEST_SPACE_1 = 'test1';
 
   const certificateAuthorities = config.get('servers.kibana.certificateAuthorities');
-  const httpsAgent: Https.Agent | undefined = certificateAuthorities
-    ? new Https.Agent({
-        ca: certificateAuthorities,
-        // required for self-signed certificates used for HTTPS FTR testing
-        rejectUnauthorized: false,
+  const dispatcher: Dispatcher | undefined = certificateAuthorities
+    ? new Agent({
+        connect: {
+          ca: certificateAuthorities,
+          // required for self-signed certificates used for HTTPS FTR testing
+          rejectUnauthorized: false,
+        },
       })
     : undefined;
 
-  const axios = Axios.create({
-    headers: {
-      'kbn-xsrf': 'x-pack/ftr/services/spaces/space',
-    },
-    baseURL: url,
-    allowAbsoluteUrls: false,
-    maxRedirects: 0,
-    validateStatus: () => true, // we do our own validation below and throw better error messages
-    httpsAgent,
-  });
+  const request = async <T = unknown>(
+    method: string,
+    path: string,
+    body?: unknown
+  ): Promise<{ data: T; status: number; statusText: string }> => {
+    const response = await fetch(new URL(path, url), {
+      method,
+      headers: {
+        ...(authorization ? { Authorization: authorization } : {}),
+        'kbn-xsrf': 'x-pack/ftr/services/spaces/space',
+        ...(body !== undefined ? { 'content-type': 'application/json' } : {}),
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      redirect: 'manual',
+      ...(dispatcher ? { dispatcher } : {}),
+    });
+
+    const text = await response.text();
+    let data: unknown = text;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // body is not JSON, leave as text.
+      }
+    }
+
+    return {
+      data: data as T,
+      status: response.status,
+      statusText: response.statusText,
+    };
+  };
 
   return new (class SpacesService {
     public async create(_space?: SpaceCreate) {
       const space = { id: chance.guid(), name: 'foo', ..._space };
 
       log.debug(`creating space ${space.id}`);
-      const { data, status, statusText } = await axios.post('/api/spaces/space', space);
+      const { data, status, statusText } = await request('POST', '/api/spaces/space', space);
 
       if (status !== 200) {
         throw new Error(
@@ -84,7 +123,8 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
       { overwrite = true }: { overwrite?: boolean } = {}
     ) {
       log.debug(`updating space ${id}`);
-      const { data, status, statusText } = await axios.put(
+      const { data, status, statusText } = await request(
+        'PUT',
         `/api/spaces/space/${id}?overwrite=${overwrite}`,
         updatedSpace
       );
@@ -99,7 +139,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
     public async delete(spaceId: string) {
       log.debug(`deleting space id: ${spaceId}`);
-      const { data, status, statusText } = await axios.delete(`/api/spaces/space/${spaceId}`);
+      const { data, status, statusText } = await request('DELETE', `/api/spaces/space/${spaceId}`);
 
       if (status !== 204) {
         log.debug(
@@ -111,7 +151,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
     public async get(id: string) {
       log.debug(`retrieving space ${id}`);
-      const { data, status, statusText } = await axios.get<Space>(`/api/spaces/space/${id}`);
+      const { data, status, statusText } = await request<Space>('GET', `/api/spaces/space/${id}`);
 
       if (status !== 200) {
         throw new Error(
@@ -125,7 +165,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
 
     public async getAll() {
       log.debug('retrieving all spaces');
-      const { data, status, statusText } = await axios.get<Space[]>('/api/spaces/space');
+      const { data, status, statusText } = await request<Space[]>('GET', '/api/spaces/space');
 
       if (status !== 200) {
         throw new Error(

@@ -31,7 +31,8 @@ import type {
   AIAssistantManagementSelectionPluginPublicStart,
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
 
 export interface ObservabilityAIAssistantAppPublicStart {
@@ -55,6 +56,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   data: DataPublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
   spaces: SpacesPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {

@@ -6,15 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useState } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { getTestRunDetailRelativeLink } from '../../common/links/test_details_link';
+import {
+  getTestRunDetailLink,
+  getTestRunDetailRelativeLink,
+} from '../../common/links/test_details_link';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const FailedTestsList = ({
   failedTests,
@@ -36,6 +42,8 @@ export const FailedTestsList = ({
 
   const history = useHistory();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   const formatter = useDateFormat();
 
@@ -50,7 +58,14 @@ export const FailedTestsList = ({
         return (
           <EuiLink
             data-test-subj="failed-test-link"
-            href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
+            href={getTestRunDetailLink({
+              basePath,
+              monitorId,
+              checkGroup: item.monitor.check_group,
+              locationId: selectedLocation?.id,
+              spaceId,
+              remoteName,
+            })}
           >
             {formatter(value)}
           </EuiLink>
@@ -83,6 +98,8 @@ export const FailedTestsList = ({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
+              spaceId,
+              remoteName,
             })
           );
         },

@@ -27,13 +27,12 @@ import { useParams } from 'react-router-dom';
 import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  EncryptedSyntheticsSavedMonitor,
+import type {
   Ping,
+  SelectedSyntheticsMonitor,
   SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
@@ -44,6 +43,8 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const LastTestRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
@@ -85,6 +86,8 @@ export const LastTestRunComponent = ({
 
   const selectedLocation = useSelectedLocation();
   const { basePath } = useSyntheticsSettingsContext();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
@@ -92,6 +95,7 @@ export const LastTestRunComponent = ({
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
+          announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           style={{
             marginTop: euiTheme.base,
@@ -103,15 +107,17 @@ export const LastTestRunComponent = ({
           color="danger"
           iconType="warning"
         >
-          {isErrorDetails ? null : (
+          {isErrorDetails || !selectedLocation || !monitor?.[ConfigKey.CONFIG_ID] ? null : (
             <EuiButton
               data-test-subj="monitorTestRunViewErrorDetails"
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.[ConfigKey.CONFIG_ID]!,
-                locationId: selectedLocation!.id,
-                stateId: latestPing.state?.id!,
+                configId: monitor[ConfigKey.CONFIG_ID],
+                locationId: selectedLocation.id,
+                stateId: latestPing.state?.id ?? '',
+                spaceId,
+                remoteName,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
@@ -143,7 +149,7 @@ const PanelHeader = ({
   latestPing,
   loading,
 }: {
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SelectedSyntheticsMonitor | null;
   latestPing?: Ping;
   loading: boolean;
 }) => {
@@ -152,6 +158,8 @@ const PanelHeader = ({
   const { basePath } = useSyntheticsSettingsContext();
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
@@ -214,6 +222,8 @@ const PanelHeader = ({
                 monitorId,
                 checkGroup: latestPing?.monitor.check_group,
                 locationId: selectedLocation?.id,
+                spaceId,
+                remoteName,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {

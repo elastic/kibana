@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportingUsageType } from '@kbn/reporting-plugin/server/usage/reporting_usage_collector';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ReportingUsageType } from '@kbn/reporting-plugin/server/usage/reporting_usage_collector';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');

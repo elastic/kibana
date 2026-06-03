@@ -9,15 +9,15 @@
 
 import type { ProfileProviderServices } from '../profile_provider_services';
 import { createObservabilityLogDocumentProfileProvider } from './log_document_profile';
-import { createObservabilityTracesSpanDocumentProfileProvider } from './traces_document_profile/span_document_profile';
-import { createObservabilityTracesTransactionDocumentProfileProvider } from './traces_document_profile/transaction_document_profile';
+import { createObservabilityGenericDocumentProfileProvider } from './observability_document_profile/document_profile';
+import { createObservabilityTracesDocumentProfileProvider } from './traces_document_profile/document_profile';
 
 export const createObservabilityDocumentProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
   return [
     createObservabilityLogDocumentProfileProvider(providerServices),
-    createObservabilityTracesSpanDocumentProfileProvider(providerServices),
-    createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
+    createObservabilityTracesDocumentProfileProvider(providerServices),
+    createObservabilityGenericDocumentProfileProvider(providerServices),
   ];
 };

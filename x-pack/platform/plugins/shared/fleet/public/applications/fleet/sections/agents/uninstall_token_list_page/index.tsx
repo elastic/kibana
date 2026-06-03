@@ -6,28 +6,26 @@
  */
 
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiText, EuiIconTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import { EmptyPolicyNameHint } from '../../../../../components/uninstall_command_flyout/empty_policy_name_hint';
 
 import { ApiKeyField } from '../../../../../components/api_key_field';
 import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
 import {
-  sendGetUninstallToken,
+  getUninstallTokenValue,
   useGetUninstallTokens,
 } from '../../../../../hooks/use_request/uninstall_tokens';
 import { useBreadcrumbs, usePagination } from '../../../hooks';
 import { DefaultLayout } from '../../../layouts';
-import type { GetUninstallTokenResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
 import { UninstallCommandFlyout } from '../../../components';
 
 import {
@@ -123,14 +121,7 @@ export const UninstallTokenListPage = () => {
         name: TOKEN_TITLE,
         width: '300px',
         render: (uninstallTokenId: string) => (
-          <ApiKeyField
-            apiKeyId={uninstallTokenId}
-            sendGetAPIKey={sendGetUninstallToken}
-            tokenGetter={(response: SendRequestResponse<GetUninstallTokenResponse>) =>
-              response.data?.item.token
-            }
-            length={32}
-          />
+          <ApiKeyField apiKeyId={uninstallTokenId} getToken={getUninstallTokenValue} />
         ),
       },
       {
@@ -194,15 +185,16 @@ export const UninstallTokenListPage = () => {
           data-test-subj="uninstallTokensPolicyIdSearchInput"
         />
 
-        <EuiToolTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT}>
-          <EuiIcon type="info" />
-        </EuiToolTip>
+        <EuiIconTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT} type="info" />
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
       <EuiBasicTable<UninstallTokenMetadata>
         data-test-subj="uninstallTokenListTable"
+        tableCaption={i18n.translate('xpack.fleet.uninstallTokenList.tableCaption', {
+          defaultMessage: 'List of uninstall tokens',
+        })}
         items={tokens}
         columns={columns}
         itemId="id"

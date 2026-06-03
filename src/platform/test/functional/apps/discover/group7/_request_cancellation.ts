@@ -9,11 +9,10 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -29,18 +28,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.cleanStandardList();
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
@@ -76,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await testSubjects.click('queryCancelButton');
       await retry.try(async () => {
-        expect(await discover.hasNoResults()).to.be(true);
+        expect(await testSubjects.exists('searchResponseWarningsEmptyPrompt')).to.be(true);
         await testSubjects.existOrFail('querySubmitButton');
         await testSubjects.missingOrFail('queryCancelButton');
       });

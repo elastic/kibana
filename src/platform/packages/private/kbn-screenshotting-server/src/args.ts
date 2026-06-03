@@ -55,6 +55,8 @@ export const args = ({
     '--hide-scrollbars',
     // allow screenshot clip region to go outside of the viewport
     `--mainFrameClipsContent=false`,
+    // fix screenshot text kerning
+    '--font-render-hinting=none',
   ];
 
   if (windowSize) {
@@ -75,17 +77,11 @@ export const args = ({
     flags.push('--no-sandbox');
   }
 
-  // Headless mode in arm based macs is not working with `--disable-gpu`
-  // This is a known issue: headless uses swiftshader by default and swiftshader's support for WebGL is currently disabled on Arm pending the resolution of https://issuetracker.google.com/issues/165000222.
-  // As a workaround, we pass --enable-gpu to stop forcing swiftshader, see https://issues.chromium.org/issues/40256775#comment4
   if (os.arch() === 'arm64' && process.platform === 'darwin') {
     flags.push('--enable-gpu');
   } else {
-    flags.push('--disable-gpu');
-  }
-
-  if (os.arch() === 'linux') {
-    flags.push('--disable-setuid-sandbox');
+    // see: https://chromium.googlesource.com/chromium/src/+/refs/tags/147.0.7727.57/docs/gpu/swiftshader.md
+    flags.push('--disable-gpu', '--enable-unsafe-swiftshader');
   }
 
   return [...flags, 'about:blank'];

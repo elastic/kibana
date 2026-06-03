@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import {
   ALERT_ATTACK_DISCOVERY_USERS_NOT_EXISTS_KQL,
   EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL,
@@ -15,8 +15,7 @@ import {
   getUserFilter,
   getUserNameOrId,
 } from '.';
-
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 describe('getCombinedFilter', () => {
   describe('getSharedFilter', () => {
@@ -127,6 +126,26 @@ describe('getCombinedFilter', () => {
       const result = getAdditionalFilter(undefined);
 
       expect(result).toBe('');
+    });
+
+    it('returns an empty string when filter is an empty string', () => {
+      const result = getAdditionalFilter('');
+      expect(result).toBe('');
+    });
+
+    it('returns an empty string when filter is whitespace only', () => {
+      const result = getAdditionalFilter('   ');
+      expect(result).toBe('');
+    });
+
+    it('returns an empty string when filter is newline or tab only', () => {
+      const result = getAdditionalFilter('\n\t');
+      expect(result).toBe('');
+    });
+
+    it('preserves the surrounding whitespace when filter contains content', () => {
+      const result = getAdditionalFilter('  foo  ');
+      expect(result).toBe(' AND   foo  ');
     });
   });
 
@@ -273,7 +292,7 @@ describe('getCombinedFilter', () => {
       const filter = '';
       const result = getCombinedFilter({ authenticatedUser, filter, shared: false });
 
-      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" }) AND `);
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" })`);
     });
 
     it('returns correct filter when filter is whitespace', () => {
@@ -284,7 +303,7 @@ describe('getCombinedFilter', () => {
       const filter = ' ';
       const result = getCombinedFilter({ authenticatedUser, filter, shared: false });
 
-      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" }) AND  `);
+      expect(result).toBe(`(${ALERT_ATTACK_DISCOVERY_USERS}: { name: "test_user" })`);
     });
 
     it('returns correct filter when shared is null', () => {

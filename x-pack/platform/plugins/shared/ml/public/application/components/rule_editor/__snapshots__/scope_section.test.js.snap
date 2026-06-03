@@ -16,15 +16,21 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
+        data-test-subj="mlScopeEnableCheckbox"
         id="enable_scope_checkbox"
         type="checkbox"
       />
@@ -74,15 +80,21 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
+        data-test-subj="mlScopeEnableCheckbox"
         id="enable_scope_checkbox"
         type="checkbox"
       />
@@ -107,14 +119,20 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="empty"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="empty"
+              role="presentation"
+            />
+          </span>
           <input
             class="euiCheckbox__input emotion-euiCheckbox__input"
+            data-test-subj="mlScopeCheckbox_domain"
             id="scope_cb_domain"
             type="checkbox"
           />
@@ -149,6 +167,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
       >
         <button
           class="euiExpression emotion-euiExpression-isClickable-success"
+          data-test-subj="mlScopeExpressionFilterSelector"
         >
           <span
             class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -185,15 +204,21 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
+        data-test-subj="mlScopeEnableCheckbox"
         id="enable_scope_checkbox"
         type="checkbox"
       />
@@ -218,15 +243,21 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="check"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="check"
+              role="presentation"
+            />
+          </span>
           <input
             checked=""
             class="euiCheckbox__input emotion-euiCheckbox__input"
+            data-test-subj="mlScopeCheckbox_domain"
             id="scope_cb_domain"
             type="checkbox"
           />
@@ -261,6 +292,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
       >
         <button
           class="euiExpression emotion-euiExpression-isClickable-success"
+          data-test-subj="mlScopeExpressionFilterSelector"
         >
           <span
             class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -297,14 +329,20 @@ exports[`ScopeSection renders when not enabled 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="empty"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="empty"
+          role="presentation"
+        />
+      </span>
       <input
         class="euiCheckbox__input emotion-euiCheckbox__input"
+        data-test-subj="mlScopeEnableCheckbox"
         id="enable_scope_checkbox"
         type="checkbox"
       />
@@ -339,15 +377,21 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
     class="euiCheckbox emotion-euiCheckbox"
   >
     <div
-      class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="emotion-euiCheckbox__icon-check"
-        data-euiicon-type="check"
-      />
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+          role="presentation"
+        />
+      </span>
       <input
         checked=""
         class="euiCheckbox__input emotion-euiCheckbox__input"
+        data-test-subj="mlScopeEnableCheckbox"
         id="enable_scope_checkbox"
         type="checkbox"
       />
@@ -386,6 +430,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
         To configure scope, you must first use the 
         <button
           class="euiLink emotion-euiLink-primary"
+          data-test-subj="mlScopeNoFilterListsLink"
           type="button"
         >
           Filter Lists

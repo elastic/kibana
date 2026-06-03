@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,6 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_sidebar'));
-    loadTestFile(require.resolve('./_unsaved_changes_badge'));
+    loadTestFile(require.resolve('./_unsaved_changes_notification_indicator'));
   });
 }

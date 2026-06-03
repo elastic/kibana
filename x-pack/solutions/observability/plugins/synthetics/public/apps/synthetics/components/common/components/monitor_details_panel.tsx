@@ -24,13 +24,15 @@ import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
+  RemoteSyntheticsMonitor,
+  SelectedSyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
+import { ConfigKey, isRemoteSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useGetUrlParams } from '../../../hooks';
@@ -39,7 +41,7 @@ export interface MonitorDetailsPanelProps {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
-  monitor: SyntheticsMonitorWithId | EncryptedSyntheticsSavedMonitor | null;
+  monitor: SyntheticsMonitorWithId | SelectedSyntheticsMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
   hasBorder?: boolean;
@@ -62,8 +64,17 @@ export const MonitorDetailsPanel = ({
     return <EuiSkeletonText lines={8} />;
   }
 
-  const url = latestPing?.url?.full ?? (monitor as unknown as MonitorFields)[ConfigKey.URLS];
-  const labels = monitor[ConfigKey.LABELS];
+  // Remote monitors are read-only projections (no saved object on this cluster),
+  // so SO-only fields (schedule/labels/updated_at/project_id/enabled toggle)
+  // are unavailable and must be hidden from the panel. Cross-cast through the
+  // narrow guard to opt into typed access where applicable.
+  const isRemote = isRemoteSyntheticsMonitor(monitor as RemoteSyntheticsMonitor);
+  const savedMonitor = isRemote
+    ? null
+    : (monitor as EncryptedSyntheticsSavedMonitor | SyntheticsMonitorWithId);
+
+  const url = latestPing?.url?.full ?? (savedMonitor as unknown as MonitorFields)?.[ConfigKey.URLS];
+  const labels = savedMonitor?.[ConfigKey.LABELS];
 
   return (
     <PanelWithTitle
@@ -74,26 +85,30 @@ export const MonitorDetailsPanel = ({
       hasBorder={hasBorder}
     >
       <EuiSpacer size="s" />
-      <EuiDescriptionList type="column" columnWidths={[2, 3]} compressed align="left">
-        {!hideEnabled && (
+      <EuiDescriptionList
+        type="responsiveColumn"
+        columnWidths={[2, 3]}
+        compressed
+        align="left"
+        css={{ maxWidth: 550 }}
+      >
+        {!hideEnabled && savedMonitor && (
           <>
             <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {monitor && (
-                <MonitorEnabled
-                  initialLoading={loading}
-                  configId={configId}
-                  monitor={monitor}
-                  reloadPage={() => {
-                    dispatch(
-                      getMonitorAction.get({
-                        monitorId: configId,
-                        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-                      })
-                    );
-                  }}
-                />
-              )}
+              <MonitorEnabled
+                initialLoading={loading}
+                configId={configId}
+                monitor={savedMonitor}
+                reloadPage={() => {
+                  dispatch(
+                    getMonitorAction.get({
+                      monitorId: configId,
+                      ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+                    })
+                  );
+                }}
+              />
             </EuiDescriptionListDescription>
           </>
         )}
@@ -121,15 +136,19 @@ export const MonitorDetailsPanel = ({
             </EuiText>
           )}
         </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <Time timestamp={monitor.updated_at} />
-        </EuiDescriptionListDescription>
-        {monitor[ConfigKey.PROJECT_ID] && (
+        {savedMonitor && (
+          <>
+            <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <Time timestamp={savedMonitor.updated_at} />
+            </EuiDescriptionListDescription>
+          </>
+        )}
+        {savedMonitor?.[ConfigKey.PROJECT_ID] && (
           <>
             <EuiDescriptionListTitle>{PROJECT_ID_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {monitor[ConfigKey.PROJECT_ID]}
+              {savedMonitor[ConfigKey.PROJECT_ID]}
             </EuiDescriptionListDescription>
           </>
         )}
@@ -139,16 +158,24 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>
           <MonitorTypeBadge monitorType={monitor.type} />
         </EuiDescriptionListDescription>
-        <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {frequencyStr(monitor[ConfigKey.SCHEDULE])}
-        </EuiDescriptionListDescription>
+        {savedMonitor && (
+          <>
+            <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {frequencyStr(savedMonitor[ConfigKey.SCHEDULE])}
+            </EuiDescriptionListDescription>
+          </>
+        )}
 
         {!hideLocations && (
           <>
             <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+              <LocationsStatus
+                configId={configId}
+                monitorLocations={monitor.locations}
+                spaces={savedMonitor?.[ConfigKey.KIBANA_SPACES]}
+              />
             </EuiDescriptionListDescription>
           </>
         )}

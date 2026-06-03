@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   kqlQuerySchema,
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 
 export function convertSliApmParamsToApmAppDeeplinkUrl(
-  slo: SLOWithSummaryResponse | SLODefinitionResponse
+  slo: SLOWithSummaryResponse,
+  timeRangeOverride?: { from: string; to: string }
 ): string | undefined {
   if (
     !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
@@ -29,7 +29,6 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
       params: { environment, filter, service, transactionName, transactionType },
     },
     timeWindow: { duration },
-    groupBy,
   } = slo;
 
   const qs = new URLSearchParams('comparisonEnabled=true');
@@ -42,7 +41,10 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     qs.append('transactionType', transactionType === ALL_VALUE ? '' : transactionType);
   }
 
-  if (duration) {
+  if (timeRangeOverride) {
+    qs.append('rangeFrom', timeRangeOverride.from);
+    qs.append('rangeTo', timeRangeOverride.to);
+  } else if (duration) {
     qs.append('rangeFrom', `now-${duration}`);
     qs.append('rangeTo', 'now');
   }
@@ -55,13 +57,21 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(
     kueryParams.push(filter);
   }
 
-  if (groupBy !== ALL_VALUE && 'instanceId' in slo && slo.instanceId !== ALL_VALUE) {
-    kueryParams.push(`${groupBy} : "${slo.instanceId}"`);
+  const groupings = slo.groupings ?? {};
+
+  if ('instanceId' in slo && slo.instanceId !== ALL_VALUE) {
+    Object.entries(groupings).forEach(([field, value]) => {
+      if (field !== 'service.name' && value != null) {
+        kueryParams.push(`${field} : "${value}"`);
+      }
+    });
   }
 
   if (kueryParams.length > 0) {
     qs.append('kuery', kueryParams.join(' and '));
   }
 
-  return `/app/apm/services/${service}/overview?${qs.toString()}`;
+  const serviceName = groupings['service.name'] ?? service;
+
+  return `/app/apm/services/${serviceName}/overview?${qs.toString()}`;
 }

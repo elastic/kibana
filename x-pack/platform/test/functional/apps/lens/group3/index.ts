@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
@@ -71,11 +71,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~16 min
     loadTestFile(require.resolve('./add_to_dashboard')); // 12m 50s
     loadTestFile(require.resolve('./runtime_fields')); // 1m
-    loadTestFile(require.resolve('./terms')); // 1m 35s
-    loadTestFile(require.resolve('./epoch_millis')); // 30s
-    loadTestFile(require.resolve('./dashboard_inline_editing'));
   });
 };

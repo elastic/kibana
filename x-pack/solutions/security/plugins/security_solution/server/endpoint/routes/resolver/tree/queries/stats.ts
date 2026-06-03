@@ -12,6 +12,7 @@ import type { EventStats } from '../../../../../../common/endpoint/types';
 import type { NodeID } from '../utils';
 import type { ResolverQueryParams } from './base';
 import { BaseResolverQuery } from './base';
+import { createEventKindFilter } from '../../utils/event_kind_filters';
 
 interface AggBucket {
   key: string;
@@ -49,15 +50,14 @@ export class StatsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },
             ...(this.schema.agentId && this.agentId
               ? [{ term: { 'agent.id': this.agentId } }]
               : []),
-            {
-              term: { 'event.kind': 'event' },
-            },
+            createEventKindFilter(),
             {
               bool: {
                 must_not: {
@@ -94,6 +94,7 @@ export class StatsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },

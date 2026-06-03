@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 

@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
@@ -24,9 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover unified histogram breakdown', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -47,14 +43,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListAddBreakdownField('geo.dest');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
-      expect(list).to.eql(['CN', 'IN', 'US', 'Other']);
+      // With top 9 values, we get 9 countries + Other
+      expect(list).to.eql(['CN', 'IN', 'US', 'ID', 'PK', 'BR', 'RU', 'NG', 'JP', 'Other']);
     });
 
     it('should choose breakdown field', async () => {
       await discover.chooseBreakdownField('extension.raw');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
-      expect(list).to.eql(['jpg', 'css', 'png', 'Other']);
+      // With top 9 values and only 5 extension types, no Other bucket
+      expect(list).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
     });
 
     it('should add filter using histogram legend values', async () => {
@@ -75,7 +73,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.loadSavedSearch('with breakdown');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
-      expect(list).to.eql(['jpg', 'css', 'png', 'Other']);
+      // With top 9 values and only 5 extension types, no Other bucket
+      expect(list).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
+      expect(await discover.getBreakdownFieldValue()).to.be('Breakdown by extension.raw');
+    });
+
+    it('should clear breakdown field in persisted discover session', async () => {
+      const savedSearchName = 'with breakdown and then cleared';
+      await discover.chooseBreakdownField('geo.dest');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clearBreakdownField();
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.loadSavedSearch(savedSearchName);
+      await header.waitUntilLoadingHasFinished();
+      const list = await discover.getHistogramLegendList();
+      expect(list).to.eql([]);
+      expect(await discover.getBreakdownFieldValue()).to.be('No breakdown');
     });
   });
 }

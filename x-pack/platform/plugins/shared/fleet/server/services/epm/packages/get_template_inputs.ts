@@ -7,16 +7,20 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-import { dump } from 'js-yaml';
-import yamlDoc from 'yaml';
+import yaml, { type Pair } from 'yaml';
 
-import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
+import {
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+  createYamlKeysSorter,
+} from '../../../../common/services';
 
 import {
   getStreamsForInputType,
+  getInputEffectiveName,
   packageToPackagePolicy,
 } from '../../../../common/services/package_to_package_policy';
-import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
+import { _compilePackagePolicyInputs } from '../../package_policy';
 import { appContextService } from '../../app_context';
 import type {
   PackageInfo,
@@ -28,16 +32,37 @@ import type {
   PackagePolicyConfigRecordEntry,
   RegistryInput,
 } from '../../../../common/types';
-import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
+import { generateOtelcolConfig } from '../../agent_policies/otel_collector';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
+import { getInputsWithIds } from '../../package_policies/get_input_with_ids';
 
 import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
 import { getPackageInfo } from '.';
 import { getAgentTemplateAssetsMap } from './get';
-import { generateOtelcolConfig } from '../../agent_policies/full_agent_policy';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 
 type Format = 'yml' | 'json';
+
+const POLICY_KEYS_ORDER = [
+  'id',
+  'name',
+  'revision',
+  'dataset',
+  'type',
+  'outputs',
+  'fleet',
+  'output_permissions',
+  'agent',
+  'inputs',
+  'enabled',
+  'use_output',
+  'meta',
+  'input',
+  'download',
+  'signed',
+];
+
+const _sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER, yaml);
 
 type PackageWithInputAndStreamIndexed = Record<
   string,
@@ -45,7 +70,7 @@ type PackageWithInputAndStreamIndexed = Record<
     streams: Record<
       string,
       RegistryStream & {
-        data_stream: { type: string; dataset: string };
+        data_stream: { type?: string; dataset: string };
       }
     >;
   }
@@ -63,14 +88,18 @@ export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs.forEach((input) => {
     const streamsIdsMap = new Map();
 
+    const inputEffectiveName = getInputEffectiveName(input);
     const inputId = input.policy_template
-      ? `${input.policy_template}-${input.type}`
-      : `${input.type}`;
+      ? `${input.policy_template}-${inputEffectiveName}`
+      : inputEffectiveName;
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: inputId,
       type: input.type,
-      ...getFullInputStreams(input, true, streamsIdsMap),
+      ...getFullInputStreams(input, {
+        allStreamEnabled: true,
+        streamsOriginalIdsMap: streamsIdsMap,
+      }),
     };
 
     inputAndStreamsIdsMap?.set(fullInputStream.id, {
@@ -99,7 +128,8 @@ export async function getTemplateInputs(
   format: 'yml',
   isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<string>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
@@ -108,7 +138,8 @@ export async function getTemplateInputs(
   format: 'json',
   isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
@@ -117,7 +148,8 @@ export async function getTemplateInputs(
   format: Format,
   isInputIncluded: (input: TemplateAgentPolicyInput) => boolean = () => true,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting: boolean = false
 ) {
   const experimentalFeature = appContextService.getExperimentalFeatures();
 
@@ -131,16 +163,17 @@ export async function getTemplateInputs(
 
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
 
-  const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
+  const inputsWithStreamIds = getInputsWithIds(emptyPackagePolicy, undefined, true, packageInfo);
 
   const indexedInputsAndStreams = buildIndexedPackage(packageInfo);
 
   if (format === 'yml') {
     // Add a placeholder <VAR_NAME> to all variables without default value
     for (const inputWithStreamIds of inputsWithStreamIds) {
+      const inputEffectiveName = getInputEffectiveName(inputWithStreamIds);
       const inputId = inputWithStreamIds.policy_template
-        ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
-        : inputWithStreamIds.type;
+        ? `${inputWithStreamIds.policy_template}-${inputEffectiveName}`
+        : inputEffectiveName;
 
       const packageInput = indexedInputsAndStreams[inputId];
       if (!packageInput) {
@@ -167,9 +200,9 @@ export async function getTemplateInputs(
       }
     }
   }
-
+  const logger = appContextService.getLogger();
   const assetsMap = await getAgentTemplateAssetsMap({
-    logger: appContextService.getLogger(),
+    logger,
     packageInfo,
     savedObjectsClient: soClient,
     ignoreUnverified,
@@ -194,9 +227,35 @@ export async function getTemplateInputs(
     inputIdsDestinationMap
   ).filter(isInputIncluded);
 
+  if (injectWiredStreamsRouting) {
+    for (const input of inputs) {
+      const inputStreams = input.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<Record<string, unknown>>;
+      }>;
+      if (inputStreams) {
+        for (const stream of inputStreams) {
+          if (stream.data_stream?.type === 'logs') {
+            stream.processors = stream.processors || [];
+            stream.processors.unshift({
+              add_fields: {
+                target: '@metadata',
+                fields: { raw_index: 'logs.ecs' },
+              },
+            });
+          }
+        }
+      }
+    }
+  }
+
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(inputs);
+    otelcolConfig = generateOtelcolConfig({
+      inputs,
+      logger,
+      defaultPackageInfo: packageInfo,
+    });
   }
   // filter out the otelcol inputs, they will be added at the root of the config
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
@@ -204,14 +263,13 @@ export async function getTemplateInputs(
   if (format === 'json') {
     return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
   } else if (format === 'yml') {
-    const yaml = dump(
-      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) },
-      {
-        skipInvalid: true,
-        sortKeys: _sortYamlKeys,
-      }
-    );
-    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
+    const data = { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
+    const doc = new yaml.Document(data, {
+      sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
+      strict: false,
+    });
+    const yamlStr = doc.toString({ singleQuote: true });
+    return addCommentsToYaml(yamlStr, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
   return { inputs: [] };
@@ -240,10 +298,11 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
         const inputs = getNormalizedInputs(policyTemplate);
 
         inputs.forEach((packageInput) => {
-          const inputId = `${policyTemplate.name}-${packageInput.type}`;
+          const inputEffectiveName = getInputEffectiveName(packageInput);
+          const inputId = `${policyTemplate.name}-${inputEffectiveName}`;
 
           const streams = getStreamsForInputType(
-            packageInput.type,
+            inputEffectiveName,
             packageInfo,
             isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
               ? policyTemplate.data_streams
@@ -252,11 +311,11 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
             Record<
               string,
               RegistryStream & {
-                data_stream: { type: string; dataset: string };
+                data_stream: { type?: string; dataset: string };
               }
             >
           >((acc, stream) => {
-            const streamId = `${packageInput.type}-${stream.data_stream.dataset}`;
+            const streamId = `${inputEffectiveName}-${stream.data_stream.dataset}`;
             acc[streamId] = {
               ...stream,
             };
@@ -276,20 +335,20 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
 }
 
 function addCommentsToYaml(
-  yaml: string,
+  yamlStr: string,
   packageIndexInputAndStreams: PackageWithInputAndStreamIndexed,
   inputIdsDestinationMap: Map<string, { originalId: string; streams: Map<string, string> }>
 ) {
-  const doc = yamlDoc.parseDocument(yaml);
+  const doc = yaml.parseDocument(yamlStr);
   // Add input and streams comments
   const yamlInputs = doc.get('inputs');
-  if (yamlDoc.isCollection(yamlInputs)) {
+  if (yaml.isCollection(yamlInputs)) {
     yamlInputs.items.forEach((inputItem) => {
-      if (!yamlDoc.isMap(inputItem)) {
+      if (!yaml.isMap(inputItem)) {
         return;
       }
       const inputIdNode = inputItem.get('id', true);
-      if (!yamlDoc.isScalar(inputIdNode)) {
+      if (!yaml.isScalar(inputIdNode)) {
         return;
       }
       const inputId =
@@ -304,15 +363,15 @@ function addCommentsToYaml(
         commentVariablesInYaml(inputItem, pkgInput.vars ?? []);
 
         const yamlStreams = inputItem.get('streams');
-        if (!yamlDoc.isCollection(yamlStreams)) {
+        if (!yaml.isCollection(yamlStreams)) {
           return;
         }
         yamlStreams.items.forEach((streamItem) => {
-          if (!yamlDoc.isMap(streamItem)) {
+          if (!yaml.isMap(streamItem)) {
             return;
           }
           const streamIdNode = streamItem.get('id', true);
-          if (yamlDoc.isScalar(streamIdNode)) {
+          if (yaml.isScalar(streamIdNode)) {
             const streamId =
               inputIdsDestinationMap
                 .get(inputIdNode.value as string)
@@ -330,13 +389,13 @@ function addCommentsToYaml(
     });
   }
 
-  return doc.toString();
+  return doc.toString({ singleQuote: true });
 }
 
-function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[] = []) {
+function commentVariablesInYaml(rootNode: yaml.Node, vars: RegistryVarsEntry[] = []) {
   // Node need to be deleted after the end of the visit to be able to visit every node
   const toDeleteFn: Array<() => void> = [];
-  yamlDoc.visit(rootNode, {
+  yaml.visit(rootNode, {
     Scalar(key, node, path) {
       if (node.value) {
         const val = node.value.toString();
@@ -347,17 +406,17 @@ function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[
 
             const paths = [...path].reverse();
 
-            let prevPart: yamlDoc.Node | yamlDoc.Document | yamlDoc.Pair = node;
+            let prevPart: yaml.Node | yaml.Document | yaml.Pair = node;
 
             for (const pathPart of paths) {
-              if (yamlDoc.isCollection(pathPart)) {
+              if (yaml.isCollection(pathPart)) {
                 // If only one items in the collection comment the whole collection
                 if (pathPart.items.length === 1) {
                   continue;
                 }
               }
-              if (yamlDoc.isSeq(pathPart)) {
-                const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLSeq());
+              if (yaml.isSeq(pathPart)) {
+                const commentDoc = new yaml.Document(new yaml.YAMLSeq());
                 commentDoc.add(prevPart);
                 const commentStr = commentDoc.toString().trimEnd();
                 pathPart.comment = pathPart.comment
@@ -368,16 +427,16 @@ function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[
                 toDeleteFn.push(() => {
                   pathPart.items.forEach((item, index) => {
                     if (item === keyToDelete) {
-                      pathPart.delete(new yamlDoc.Scalar(index));
+                      pathPart.delete(new yaml.Scalar(index));
                     }
                   });
                 });
                 return;
               }
 
-              if (yamlDoc.isMap(pathPart)) {
-                if (yamlDoc.isPair(prevPart)) {
-                  const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLMap());
+              if (yaml.isMap(pathPart)) {
+                if (yaml.isPair(prevPart)) {
+                  const commentDoc = new yaml.Document(new yaml.YAMLMap());
                   commentDoc.add(prevPart);
                   const commentStr = commentDoc.toString().trimEnd();
 

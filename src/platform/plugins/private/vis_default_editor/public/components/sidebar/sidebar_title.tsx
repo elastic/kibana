@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,13 +22,15 @@ import {
   EuiTitle,
   EuiToolTip,
   type UseEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { ApplicationStart } from '@kbn/core/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -69,6 +71,7 @@ interface SidebarTitleProps {
 export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const styles = useMemoCss(linkedSearchStyles);
   const [showPopover, setShowPopover] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const {
     services: { application },
   } = useKibana<{ application: ApplicationStart }>();
@@ -101,7 +104,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
       css={[styles.titleContainer, styles.linkedSearch]}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="search" />
+        <EuiIcon type="magnify" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} className="eui-textTruncate">
@@ -121,6 +124,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
 
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-labelledby={popoverTitleId}
           anchorPosition="downRight"
           button={
             <EuiToolTip content={linkButtonAriaLabel} disableScreenReaderOutput>
@@ -136,7 +140,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           closePopover={closePopover}
           panelPaddingSize="s"
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={popoverTitleId}>
             <FormattedMessage
               id="visDefaultEditor.sidebar.savedSearch.popoverTitle"
               defaultMessage="Linked to Discover session"

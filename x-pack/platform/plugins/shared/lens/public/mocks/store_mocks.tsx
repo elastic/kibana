@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { PropsWithChildren, ReactElement } from 'react';
+import React from 'react';
+import type { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { Provider } from 'react-redux';
-import { PreloadedState } from '@reduxjs/toolkit';
-import { RenderOptions } from '@testing-library/react';
-import { LensAppServices } from '../app_plugin/types';
+import type { PreloadedState } from '@reduxjs/toolkit';
+import type { RenderOptions } from '@testing-library/react';
+import type {
+  LensAppState,
+  LensState,
+  LensStoreDeps,
+  DatasourceMap,
+  VisualizationMap,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';
-import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
+import { makeConfigureStore } from '../state_management';
 import { getResolvedDateRange } from '../utils';
-import { DatasourceMap, VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
@@ -35,7 +43,7 @@ export const mockStoreDeps = ({
 
 export function mockDatasourceStates() {
   return {
-    testDatasource: {
+    formBased: {
       state: {},
       isLoading: false,
     },
@@ -51,7 +59,7 @@ export const defaultState = {
   isSaveable: false,
   isLoading: false,
   isLinkedToOriginatingApp: false,
-  activeDatasourceId: 'testDatasource',
+  activeDatasourceId: 'formBased',
   visualization: {
     state: {},
     activeId: 'testVis',
@@ -86,7 +94,10 @@ export const renderWithReduxStore = (
     </Provider>
   );
 
-  const rtlRender = renderWithProviders(ui, { wrapper: Wrapper, ...options });
+  let rtlRender: ReturnType<typeof renderWithProviders>;
+  act(() => {
+    rtlRender = renderWithProviders(ui, { wrapper: Wrapper, ...options });
+  });
 
   return {
     store,
@@ -145,10 +156,13 @@ export const mountWithReduxStore = (
     };
   }
 
-  const instance = mountWithProviders(component, {
-    ...options,
-    wrappingComponent,
-  } as unknown as ReactWrapper);
+  let instance: ReactWrapper;
+  act(() => {
+    instance = mountWithProviders(component, {
+      ...options,
+      wrappingComponent,
+    } as unknown as ReactWrapper);
+  });
 
-  return { instance, lensStore, deps };
+  return { instance: instance!, lensStore, deps };
 };

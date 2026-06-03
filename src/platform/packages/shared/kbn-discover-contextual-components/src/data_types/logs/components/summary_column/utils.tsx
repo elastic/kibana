@@ -10,9 +10,11 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { css } from '@emotion/react';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { ReactNode } from 'react';
 import {
   AGENT_NAME_FIELD,
   DATASTREAM_TYPE_FIELD,
@@ -21,19 +23,24 @@ import {
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRANSACTION_DURATION_FIELD,
-  DataTableRecord,
   getFieldValue,
   INDEX_FIELD,
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
   TRANSACTION_NAME_FIELD,
+  OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  getAvailableResourceFields,
+  RESOURCE_FIELDS,
+  formatFieldValueReact,
 } from '@kbn/discover-utils';
-import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
+import type { TraceDocument } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldBadgeWithActionsProps } from '../cell_actions_popover';
+import { FieldBadgeWithActions } from '../cell_actions_popover';
 import { TransactionNameIcon } from './icons/transaction_name_icon';
+import { extractTextFromReactNode } from '../utils';
 
 type FieldKey = keyof DataTableRecord['flattened'];
 type FieldValue = NonNullable<DataTableRecord['flattened'][FieldKey]>;
@@ -65,6 +72,7 @@ const DurationIcon = () => {
       color="hollow"
       type="clock"
       size="m"
+      aria-hidden={true}
       css={css`
         margin-right: ${euiTheme.size.xs};
       `}
@@ -81,7 +89,8 @@ export interface ResourceFieldDescriptor {
   ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
   Icon?: () => JSX.Element;
   name: string;
-  value: string;
+  formattedValue: ReactNode;
+  textValue: string;
   property?: DataViewField;
   rawValue: unknown;
 }
@@ -107,9 +116,12 @@ const getResourceBadgeIcon = (
     case SERVICE_NAME_FIELD:
       return () => {
         const { euiTheme } = useEuiTheme();
+        const agentName = (fields[OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE] ||
+          fields[AGENT_NAME_FIELD]) as AgentName;
+
         return (
           <AgentIcon
-            agentName={fields[AGENT_NAME_FIELD] as AgentName}
+            agentName={agentName}
             size="m"
             css={css`
               margin-right: ${euiTheme.size.xs};
@@ -155,19 +167,60 @@ export const createResourceFields = ({
 
   return availableResourceFields.map((name) => {
     const property = dataView.getFieldByName(name);
-    const value = formatFieldValue(
-      resourceDoc[name],
-      row.raw,
+    const rawValue = resourceDoc[name];
+    const formattedValue = formatFieldValueReact({
+      value: rawValue,
+      hit: row.raw,
       fieldFormats,
       dataView,
-      property,
-      'html'
-    );
+      field: property,
+    });
+    const textValue = extractTextFromReactNode(formattedValue);
 
     return {
       name,
-      rawValue: resourceDoc[name],
-      value,
+      rawValue,
+      formattedValue,
+      textValue,
+      property,
+      ResourceBadge: getResourceBadgeComponent(name, core, share),
+      Icon: getResourceBadgeIcon(name, resourceDoc),
+    };
+  });
+};
+
+/**
+ * Enhanced version that uses OTel field fallbacks and returns resource fields with actual field names.
+ * This ensures badges display the correct field names (e.g., 'resource.attributes.service.name'
+ * instead of 'service.name' when the document uses OTel format).
+ */
+export const createResourceFieldsWithOtelFallback = ({
+  row,
+  dataView,
+  core,
+  share,
+  fieldFormats,
+}: Omit<ResourceFieldsProps, 'fields' | 'getAvailableFields'>): ResourceFieldDescriptor[] => {
+  const resourceDoc = getUnformattedFields(row, RESOURCE_FIELDS);
+  const availableFields = getAvailableResourceFields(row.flattened);
+
+  return availableFields.map((name) => {
+    const property = dataView.getFieldByName(name);
+    const rawValue = row.flattened[name];
+    const formattedValue = formatFieldValueReact({
+      value: rawValue,
+      hit: row.raw,
+      fieldFormats,
+      dataView,
+      field: property,
+    });
+    const textValue = extractTextFromReactNode(formattedValue);
+
+    return {
+      name,
+      rawValue,
+      formattedValue,
+      textValue,
       property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { ConfigKey } from '../../constants/monitor_management';
 
 export const MonitorSortFieldSchema = schema.maybe(
@@ -12,6 +13,7 @@ export const MonitorSortFieldSchema = schema.maybe(
     schema.literal('enabled'),
     schema.literal('status'),
     schema.literal('updated_at'),
+    schema.literal('urls'),
     schema.literal(`${ConfigKey.NAME}.keyword`),
     schema.literal(`${ConfigKey.TAGS}.keyword`),
     schema.literal(`${ConfigKey.PROJECT_ID}.keyword`),

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -171,6 +171,10 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
     async goToListingPageViaBreadcrumbs() {
       log.debug('CanvasPage.goToListingPageViaBreadcrumbs');
       await testSubjects.click('breadcrumb first');
+    },
+
+    async addNewLensPanel() {
+      await this.addNewPanel('Visualization');
     },
 
     async addNewPanel(actionName: string) {

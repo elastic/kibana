@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const commonConfig = await readConfigFile(require.resolve('./config'));

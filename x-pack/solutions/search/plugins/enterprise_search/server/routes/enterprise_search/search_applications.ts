@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AcknowledgedResponseBase, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AcknowledgedResponseBase,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import {
+import type {
   EnterpriseSearchApplication,
   EnterpriseSearchApplicationsResponse,
   EnterpriseSearchApplicationUpsertResponse,
@@ -119,13 +122,16 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
-          name: schema.maybe(schema.string()),
+          indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+          name: schema.maybe(schema.string({ maxLength: 1000 })),
           template: schema.maybe(
             schema.object({
               script: schema.object({
-                source: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
-                lang: schema.string(),
+                source: schema.oneOf([
+                  schema.string({ maxLength: 10000 }),
+                  schema.object({}, { unknowns: 'allow' }),
+                ]),
+                lang: schema.string({ maxLength: 512 }),
                 params: schema.maybe(schema.object({}, { unknowns: 'allow' })),
                 options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
               }),
@@ -277,7 +283,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         body: schema.object({
-          keyName: schema.string(),
+          keyName: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
           engine_name: schema.string(),

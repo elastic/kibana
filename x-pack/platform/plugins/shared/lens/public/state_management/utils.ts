@@ -6,8 +6,37 @@
  */
 
 import memoizeOne from 'memoize-one';
-import type { DatasourceMap, DatasourceLayers } from '../types';
-import type { DatasourceStates, DataViewsState } from './types';
+import type {
+  Datasource,
+  DatasourceMap,
+  DatasourceLayers,
+  DatasourceStates,
+  DataViewsState,
+  FramePublicAPI,
+} from '@kbn/lens-common';
+
+/**
+ * Creates an updated FramePublicAPI with the new datasource state for a specific layer.
+ */
+export function getUpdatedFrameWithDatasourceState(
+  framePublicAPI: FramePublicAPI,
+  datasource: Datasource,
+  newDatasourceState: unknown,
+  layerId: string
+): FramePublicAPI {
+  const updatedDatasourceLayer = datasource.getPublicAPI({
+    state: newDatasourceState,
+    layerId,
+    indexPatterns: framePublicAPI.dataViews.indexPatterns,
+  });
+  return {
+    ...framePublicAPI,
+    datasourceLayers: {
+      ...framePublicAPI.datasourceLayers,
+      [layerId]: updatedDatasourceLayer,
+    },
+  };
+}
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,

@@ -6,8 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Verifies user can view legacy tile_map visualization
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects }: FtrProviderContext) {
   const { common, visualize, maps, timePicker } = getPageObjects([
     'common',

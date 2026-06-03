@@ -20,8 +20,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
@@ -224,13 +223,16 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const valueLabel = useMemo(() => {
       return (
         <div>
-          <EuiToolTip
+          {VALUE_LABEL}&nbsp;
+          <EuiIconTip
+            color="subdued"
+            type="info"
+            className="eui-alignTop"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
             content={displaySingleValueInput ? SINGLE_VALUE_LABEL_HELPER : VALUE_LABEL_HELPER}
-          >
-            <>
-              {VALUE_LABEL} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
-            </>
-          </EuiToolTip>
+          />
         </div>
       );
     }, [displaySingleValueInput]);
@@ -646,6 +648,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
               name="value"
               value={blocklistEntry.value as string}
               fullWidth
+              isInvalid={valueVisited.value && !!Object.keys(errorsRef.current.value).length}
               onChange={handleSingleValueUpdate}
               onBlur={handleOnValueBlur}
               data-test-subj={getTestId('value-input')}
@@ -653,6 +656,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           ) : (
             <EuiComboBox
               selectedOptions={selectedValues}
+              isInvalid={valueVisited.value && !!Object.keys(errorsRef.current.value).length}
               onBlur={handleOnValueBlur}
               onSearchChange={handleOnValueTextChange}
               onChange={handleOnValueChange}

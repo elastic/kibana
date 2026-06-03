@@ -14,18 +14,18 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 
-import {
+import type {
   PromptResponse,
   PromptsBulkActionSkipResult,
   PromptsBulkCrudActionResponse,
   PromptsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PerformPromptsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
@@ -34,7 +34,10 @@ import {
   transformESToPrompts,
   transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
-import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
+import type {
+  EsPromptsSchema,
+  UpdatePromptSchema,
+} from '../../ai_assistant_data_clients/prompts/types';
 import { performChecks } from '../helpers';
 
 export interface BulkOperationError {

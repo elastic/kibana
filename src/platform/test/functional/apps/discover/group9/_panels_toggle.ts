@@ -8,10 +8,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
@@ -26,15 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   describe('discover panels toggle', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -48,31 +43,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    async function checkSidebarAndHistogram({
+    async function expectButtonDisabled(testSubject: string, shouldBeDisabled: boolean) {
+      const button = await testSubjects.find(testSubject);
+      expect((await button.getAttribute('disabled')) === 'true').to.be(shouldBeDisabled);
+    }
+
+    async function checkCollapsiblePanels({
       shouldSidebarBeOpen,
       shouldHistogramBeOpen,
+      shouldTableBeOpen,
       isChartAvailable,
       totalHits,
     }: {
       shouldSidebarBeOpen: boolean;
       shouldHistogramBeOpen: boolean;
+      shouldTableBeOpen: boolean;
       isChartAvailable: boolean;
       totalHits: string;
     }) {
-      expect(await discover.getHitCount()).to.be(totalHits);
+      if (shouldTableBeOpen) {
+        expect(await discover.getHitCount()).to.be(totalHits);
+      }
 
       if (shouldSidebarBeOpen) {
         expect(await discover.isSidebarPanelOpen()).to.be(true);
-        await testSubjects.existOrFail('unifiedFieldListSidebar__toggle-collapse');
+        await testSubjects.existOrFail('dscHideSidebarButton');
         await testSubjects.missingOrFail('dscShowSidebarButton');
       } else {
         expect(await discover.isSidebarPanelOpen()).to.be(false);
-        await testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+        await testSubjects.missingOrFail('dscHideSidebarButton');
         await testSubjects.existOrFail('dscShowSidebarButton');
       }
 
       if (isChartAvailable) {
         expect(await discover.isChartVisible()).to.be(shouldHistogramBeOpen);
+        expect(await discover.isTableVisible()).to.be(shouldTableBeOpen);
+
         if (shouldHistogramBeOpen) {
           await testSubjects.existOrFail('dscPanelsToggleInHistogram');
           await testSubjects.existOrFail('dscHideHistogramButton');
@@ -86,16 +92,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
           await testSubjects.missingOrFail('dscHideHistogramButton');
         }
+
+        if (shouldTableBeOpen) {
+          await testSubjects.existOrFail('dscHideTableButton');
+          await testSubjects.missingOrFail('dscShowTableButton');
+        } else {
+          await testSubjects.missingOrFail('dscHideTableButton');
+          await testSubjects.existOrFail('dscShowTableButton');
+        }
+
+        if (shouldHistogramBeOpen && shouldTableBeOpen) {
+          await expectButtonDisabled('dscHideHistogramButton', false);
+          await expectButtonDisabled('dscHideTableButton', false);
+        } else if (shouldHistogramBeOpen && !shouldTableBeOpen) {
+          await expectButtonDisabled('dscHideHistogramButton', true);
+        } else if (!shouldHistogramBeOpen && shouldTableBeOpen) {
+          await expectButtonDisabled('dscHideTableButton', true);
+        }
       } else {
         expect(await discover.isChartVisible()).to.be(false);
+        expect(await discover.isTableVisible()).to.be(true);
         await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
+        await testSubjects.existOrFail('dscPanelsToggleInPage');
+
         await testSubjects.missingOrFail('dscHideHistogramButton');
         await testSubjects.missingOrFail('dscShowHistogramButton');
+        await testSubjects.missingOrFail('dscHideTableButton');
+        await testSubjects.missingOrFail('dscShowTableButton');
 
         if (shouldSidebarBeOpen) {
-          await testSubjects.missingOrFail('dscPanelsToggleInPage');
+          await testSubjects.existOrFail('dscHideSidebarButton');
+          await testSubjects.missingOrFail('dscShowSidebarButton');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInPage');
+          await testSubjects.missingOrFail('dscHideSidebarButton');
+          await testSubjects.existOrFail('dscShowSidebarButton');
         }
       }
     }
@@ -108,27 +138,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       totalHits: string;
     }) {
       it('sidebar can be toggled', async () => {
-        await checkSidebarAndHistogram({
+        await checkCollapsiblePanels({
           shouldSidebarBeOpen: true,
           shouldHistogramBeOpen: true,
+          shouldTableBeOpen: true,
           isChartAvailable,
           totalHits,
         });
 
         await discover.closeSidebar();
 
-        await checkSidebarAndHistogram({
+        await checkCollapsiblePanels({
           shouldSidebarBeOpen: false,
           shouldHistogramBeOpen: true,
+          shouldTableBeOpen: true,
           isChartAvailable,
           totalHits,
         });
 
         await discover.openSidebar();
 
-        await checkSidebarAndHistogram({
+        await checkCollapsiblePanels({
           shouldSidebarBeOpen: true,
           shouldHistogramBeOpen: true,
+          shouldTableBeOpen: true,
           isChartAvailable,
           totalHits,
         });
@@ -136,36 +169,70 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (isChartAvailable) {
         it('histogram can be toggled', async () => {
-          await checkSidebarAndHistogram({
+          await checkCollapsiblePanels({
             shouldSidebarBeOpen: true,
             shouldHistogramBeOpen: true,
+            shouldTableBeOpen: true,
             isChartAvailable,
             totalHits,
           });
 
           await discover.closeHistogramPanel();
 
-          await checkSidebarAndHistogram({
+          await checkCollapsiblePanels({
             shouldSidebarBeOpen: true,
             shouldHistogramBeOpen: false,
+            shouldTableBeOpen: true,
             isChartAvailable,
             totalHits,
           });
 
           await discover.openHistogramPanel();
 
-          await checkSidebarAndHistogram({
+          await checkCollapsiblePanels({
             shouldSidebarBeOpen: true,
             shouldHistogramBeOpen: true,
+            shouldTableBeOpen: true,
+            isChartAvailable,
+            totalHits,
+          });
+        });
+
+        it('table can be toggled', async () => {
+          await checkCollapsiblePanels({
+            shouldSidebarBeOpen: true,
+            shouldHistogramBeOpen: true,
+            shouldTableBeOpen: true,
+            isChartAvailable,
+            totalHits,
+          });
+
+          await discover.closeTablePanel();
+
+          await checkCollapsiblePanels({
+            shouldSidebarBeOpen: true,
+            shouldHistogramBeOpen: true,
+            shouldTableBeOpen: false,
+            isChartAvailable,
+            totalHits,
+          });
+
+          await discover.openTablePanel();
+
+          await checkCollapsiblePanels({
+            shouldSidebarBeOpen: true,
+            shouldHistogramBeOpen: true,
+            shouldTableBeOpen: true,
             isChartAvailable,
             totalHits,
           });
         });
 
         it('sidebar and histogram can be toggled', async () => {
-          await checkSidebarAndHistogram({
+          await checkCollapsiblePanels({
             shouldSidebarBeOpen: true,
             shouldHistogramBeOpen: true,
+            shouldTableBeOpen: true,
             isChartAvailable,
             totalHits,
           });
@@ -173,9 +240,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.closeSidebar();
           await discover.closeHistogramPanel();
 
-          await checkSidebarAndHistogram({
+          await checkCollapsiblePanels({
             shouldSidebarBeOpen: false,
             shouldHistogramBeOpen: false,
+            shouldTableBeOpen: true,
             isChartAvailable,
             totalHits,
           });
@@ -183,9 +251,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.openSidebar();
           await discover.openHistogramPanel();
 
-          await checkSidebarAndHistogram({
+          await checkCollapsiblePanels({
             shouldSidebarBeOpen: true,
             shouldHistogramBeOpen: true,
+            shouldTableBeOpen: true,
             isChartAvailable,
             totalHits,
           });
@@ -234,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      checkPanelsToggle({ isChartAvailable: true, totalHits: '10' });
+      checkPanelsToggle({ isChartAvailable: true, totalHits: '1,000' });
     });
 
     describe('ES|QL with aggs chart', function () {
@@ -271,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      checkPanelsToggle({ isChartAvailable: false, totalHits: '10' });
+      checkPanelsToggle({ isChartAvailable: false, totalHits: '1,000' });
     });
   });
 }

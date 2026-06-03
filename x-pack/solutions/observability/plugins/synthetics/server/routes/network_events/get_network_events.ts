@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { getNetworkEvents } from '../../queries/get_network_events';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -17,15 +17,17 @@ export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
     query: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
+      remoteName: schema.maybe(schema.string()),
     }),
   },
   handler: async ({ syntheticsEsClient, request }): Promise<any> => {
-    const { checkGroup, stepIndex } = request.query;
+    const { checkGroup, stepIndex, remoteName } = request.query;
 
     return await getNetworkEvents({
       syntheticsEsClient,
       checkGroup,
-      stepIndex,
+      stepIndex: String(stepIndex),
+      remoteName,
     });
   },
 });

@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { Agent as SuperTestAgent } from 'supertest';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { Agent as SuperTestAgent } from 'supertest';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Based on the x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -55,21 +56,15 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const navigateToRulesPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      '/alerts/rules',
-      '',
-      { ensureCurrentUrl: false }
-    );
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '', '', {
+      ensureCurrentUrl: false,
+    });
   };
 
   const navigateToRulesLogsPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      '/alerts/rules/logs',
-      '',
-      { ensureCurrentUrl: false }
-    );
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '/logs', '', {
+      ensureCurrentUrl: false,
+    });
   };
 
   const navigateToAlertDetails = async (alertId: string) => {
@@ -83,10 +78,12 @@ export function ObservabilityAlertsCommonProvider({
 
   const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      `/alerts/rules/${ruleId}`,
+      'rules',
+      `rule/${encodeURIComponent(ruleId)}`,
       '?',
-      { ensureCurrentUrl: false }
+      {
+        ensureCurrentUrl: false,
+      }
     );
   };
 
@@ -158,7 +155,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataPageOrFail = async () => {
-    return await testSubjects.existOrFail('noDataPage');
+    return await testSubjects.existOrFail('kbnNoDataPage');
   };
 
   const getNoDataStateOrFail = async () => {

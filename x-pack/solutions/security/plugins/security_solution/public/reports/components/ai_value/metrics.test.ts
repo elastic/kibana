@@ -30,9 +30,9 @@ describe('metrics', () => {
       expect(metrics.filteredAlerts).toBe(12);
       expect(metrics.filteredAlertsPerc).toBeCloseTo(60);
       expect(metrics.escalatedAlertsPerc).toBeCloseTo(40);
-      expect(metrics.hoursSaved).toBeCloseTo(2);
+      expect(metrics.hoursSaved).toBeCloseTo(3.333);
       expect(metrics.totalAlerts).toBe(20);
-      expect(metrics.costSavings).toBeCloseTo(200);
+      expect(metrics.costSavings).toBeCloseTo(333.333);
     });
   });
 

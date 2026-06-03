@@ -6,23 +6,22 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
-
 import type { Filter } from '@kbn/es-query';
-import { TestProviders, createMockStore } from '../../../common/mock';
+import { createMockStore, TestProviders } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 import { Hosts } from './hosts';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTabs } from './hosts_tabs';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn().mockReturnValue({ tabName: 'allHosts' }),
 }));
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/components/empty_prompt');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -85,18 +84,14 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const myStore = createMockStore();
 
 describe('Hosts - rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  test('it renders the Setup Instructions text when no index is available', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-    });
 
+  test('it renders the Setup Instructions text when no index is available', async () => {
     render(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
@@ -109,10 +104,8 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      indexPattern: {},
-    });
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test']));
+
     render(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
@@ -124,11 +117,6 @@ describe('Hosts - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      indexPattern: {},
-    });
-
     render(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
@@ -172,10 +160,6 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      indexPattern: { fields: [], title: 'title' },
-    });
     render(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

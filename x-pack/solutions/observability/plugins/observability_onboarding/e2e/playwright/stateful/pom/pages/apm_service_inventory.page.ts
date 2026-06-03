@@ -14,7 +14,25 @@ export class ApmServiceInventoryPage {
     this.page = page;
   }
 
-  public async assertTransactionExists() {
-    await expect(this.page.getByTestId('apmTransactionDetailLinkLink')).toBeVisible();
+  // Inventory fetches /internal/apm/services once on mount. Reload to re-fire
+  // the request if the row has not aggregated yet.
+  public async waitForServiceRow(
+    serviceTestId: string,
+    { perAttemptTimeoutMs = 30_000, maxRetries = 3 } = {}
+  ): Promise<void> {
+    const locator = this.page.getByTestId(serviceTestId);
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        await locator.waitFor({ timeout: perAttemptTimeoutMs });
+        return;
+      } catch (error) {
+        if (attempt === maxRetries) throw error;
+        await this.page.reload();
+      }
+    }
+  }
+
+  public async assertTransactionExists(): Promise<void> {
+    await expect(this.page.getByTestId('apmTransactionDetailLinkLink').first()).toBeVisible();
   }
 }

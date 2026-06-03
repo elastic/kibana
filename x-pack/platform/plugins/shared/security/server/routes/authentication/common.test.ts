@@ -22,9 +22,16 @@ import {
   SAMLLogin,
 } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { securityTelemetry } from '../../otel/instrumentation';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
+
+jest.mock('../../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordLogoutAttempt: jest.fn(),
+  },
+}));
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
@@ -106,6 +113,10 @@ describe('Common authentication routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(unhandledException);
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'failure',
+      });
     });
 
     it('returns 500 if authenticator fails to logout.', async () => {
@@ -117,6 +128,10 @@ describe('Common authentication routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(failureReason);
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'failure',
+      });
     });
 
     it('returns 400 for AJAX requests that can not handle redirect.', async () => {
@@ -140,6 +155,10 @@ describe('Common authentication routes', () => {
       expect(response.payload).toBeUndefined();
       expect(response.options).toEqual({ headers: { location: 'https://custom.logout' } });
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+      });
     });
 
     it('redirects user to the base path if deauthentication succeeds.', async () => {
@@ -151,6 +170,10 @@ describe('Common authentication routes', () => {
       expect(response.payload).toBeUndefined();
       expect(response.options).toEqual({ headers: { location: '/mock-server-basepath/' } });
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+      });
     });
 
     it('redirects user to the base path if deauthentication is not handled.', async () => {
@@ -162,6 +185,10 @@ describe('Common authentication routes', () => {
       expect(response.payload).toBeUndefined();
       expect(response.options).toEqual({ headers: { location: '/mock-server-basepath/' } });
       expect(authc.logout).toHaveBeenCalledWith(mockRequest);
+
+      expect(securityTelemetry.recordLogoutAttempt).toHaveBeenCalledWith({
+        outcome: 'success',
+      });
     });
   });
 
@@ -314,7 +341,9 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
           UnknownArg: 'arg',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"[UnknownArg]: definition for this key is missing"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[UnknownArg]: Additional properties are not allowed ('UnknownArg' was unexpected)"`
+      );
 
       expect(() =>
         bodyValidator.validate({
@@ -432,6 +461,58 @@ describe('Common authentication routes', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[params.password]: value has length [0] but it must have a minimum length of [1]."`
       );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'a'.repeat(1025),
+          providerName: 'saml1',
+          currentURL: '/some-url',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerType]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'a'.repeat(1025),
+          currentURL: '/some-url',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerName]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: 'a'.repeat(8193),
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[currentURL]: value has length [8193] but it must have a maximum length of [8192]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/some-url',
+          params: { username: 'a'.repeat(1025), password: 'some-password' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[params.username]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/some-url',
+          params: { username: 'some-user', password: 'a'.repeat(1025) },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[params.password]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
     });
 
     it('returns 500 if login throws unhandled exception.', async () => {
@@ -478,6 +559,23 @@ describe('Common authentication routes', () => {
         payload: 'Unauthorized',
         options: {},
       });
+    });
+
+    it('returns 401 when providerType or providerName is an empty string.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.notHandled());
+
+      for (const body of [
+        { providerType: '', providerName: 'saml1', currentURL: '/some-url' },
+        { providerType: 'saml', providerName: '', currentURL: '/some-url' },
+      ]) {
+        const request = httpServerMock.createKibanaRequest({ body });
+
+        await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+          status: 401,
+          payload: 'Unauthorized',
+          options: {},
+        });
+      }
     });
 
     it('returns redirect location from authentication result if any.', async () => {

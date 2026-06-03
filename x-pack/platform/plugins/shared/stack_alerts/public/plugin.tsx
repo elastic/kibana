@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { registerRuleTypes } from './rule_types';
 
 export type Setup = void;

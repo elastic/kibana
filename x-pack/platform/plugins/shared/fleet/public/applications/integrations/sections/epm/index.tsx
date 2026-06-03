@@ -13,6 +13,8 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
 import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } from '../../hooks';
 
+import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
+
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
@@ -23,10 +25,15 @@ export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
   useBreadcrumbs('integrations');
 
+  const hasCreateIntegration = Boolean(automaticImport);
+
   return (
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
+      </Route>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_copy}>
+        <CopyPackagePolicyPage />
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
         <IntegrationsStateContextProvider>
@@ -40,8 +47,13 @@ export const EPMApp: React.FunctionComponent = () => {
           </React.Suspense>
         </IntegrationsStateContextProvider>
       </Route>
-      {automaticImport && (
+      {hasCreateIntegration && (
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_create}>
+          <CreateIntegration />
+        </Route>
+      )}
+      {hasCreateIntegration && (
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_upload}>
           <CreateIntegration />
         </Route>
       )}

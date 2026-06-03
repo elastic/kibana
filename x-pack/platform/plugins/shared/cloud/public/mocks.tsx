@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { CloudBasicUrls, CloudSetup, CloudStart } from './types';
 
-import type { CloudSetup, CloudStart } from './types';
+const mockCloudUrls: CloudBasicUrls = {
+  baseUrl: 'base-url',
+  kibanaUrl: 'kibana-url',
+  deploymentUrl: 'deployment-url',
+  profileUrl: 'profile-url',
+  organizationUrl: 'organization-url',
+};
 
 function createSetupMock(): jest.Mocked<CloudSetup> {
   return {
     cloudId: 'mock-cloud-id',
     deploymentId: 'mock-deployment-id',
     isCloudEnabled: true,
+    isEce: undefined,
     cname: 'cname',
-    baseUrl: 'base-url',
-    deploymentUrl: 'deployment-url',
-    profileUrl: 'profile-url',
-    organizationUrl: 'organization-url',
     fetchElasticsearchConfig: jest
       .fn()
       .mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
-    kibanaUrl: 'kibana-url',
     cloudHost: 'cloud-host',
     cloudDefaultPort: '443',
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    managedOtlp: {
+      url: undefined,
+    },
     onboarding: {},
     isServerlessEnabled: false,
     serverless: {
@@ -36,6 +43,11 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectType: undefined,
       productTier: undefined,
     },
+    getUrls: jest.fn().mockReturnValue({}),
+    getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+    isInTrial: jest.fn().mockReturnValue(false),
+    trialDaysLeft: jest.fn().mockReturnValue(undefined),
+    ...mockCloudUrls,
   };
 }
 
@@ -48,15 +60,19 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   CloudContextProvider: jest.fn(getContextProvider()),
   cloudId: 'mock-cloud-id',
   isCloudEnabled: true,
-  deploymentUrl: 'deployment-url',
-  billingUrl: 'billing-url',
-  profileUrl: 'profile-url',
-  organizationUrl: 'organization-url',
   isServerlessEnabled: false,
   serverless: {
     projectId: undefined,
   },
+  managedOtlp: {
+    url: undefined,
+  },
   fetchElasticsearchConfig: jest.fn().mockResolvedValue({ elasticsearchUrl: 'elasticsearch-url' }),
+  getUrls: jest.fn().mockReturnValue({}),
+  getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+  isInTrial: jest.fn().mockReturnValue(false),
+  trialDaysLeft: jest.fn().mockReturnValue(undefined),
+  ...mockCloudUrls,
 });
 
 export const cloudMock = {

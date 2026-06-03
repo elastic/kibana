@@ -7,21 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { TimeScaleUnit } from '../../../../../common/expressions';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import type { IndexPatternField } from '../../../../types';
+import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
+import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,
   getFilter,
   getFormatFromPreviousColumn,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -71,14 +70,6 @@ function ofName(
     reducedTimeRange
   );
 }
-
-export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
-  operationType: typeof COUNT_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
-};
 
 const SCALE = 'ratio';
 const IS_BUCKETED = false;
@@ -138,10 +129,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
-        emptyAsNull:
-          previousColumn && isColumnOfType<CountIndexPatternColumn>(COUNT_ID, previousColumn)
-            ? previousColumn.params?.emptyAsNull
-            : !columnParams?.usedInMath,
+        emptyAsNull: hasOperationType(previousColumn, COUNT_ID)
+          ? getBooleanParam(previousColumn, 'emptyAsNull')
+          : !columnParams?.usedInMath,
       },
     };
   },
@@ -150,7 +140,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CountIndexPatternColumn>) => {
+    euiTheme,
+  }: ParamEditorProps<CountIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -165,7 +156,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}
@@ -189,18 +180,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     const field = indexPattern?.getFieldByName(column.sourceField);
     return field?.format ?? { id: 'number' };
   },
-  toESQL: (column, columnId, indexPattern) => {
+  toESQL: (column, _columnId, indexPattern) => {
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
-    let esql = '';
     if (!field || field?.type === 'document') {
-      esql = `COUNT(*)`;
-    } else {
-      esql = `COUNT(${sanitazeESQLInput(field.name)})`;
+      return { template: 'COUNT(*)' };
     }
-
-    return esql;
+    return {
+      template: `COUNT(${esql.col(field.name)})`,
+    };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);

@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { AgentIcon } from '@kbn/custom-icons';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import React from 'react';
+import { EBT_CLICK_ACTIONS, getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { ServiceNameWithIcon } from './service_name_with_icon';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
 interface ServiceNameLinkProps {
   serviceName: string;
-  agentName: string;
+  agentName?: string;
   formattedServiceName: React.ReactNode;
+  'data-test-subj': string;
+  ebt: Omit<EbtClickAttrs, 'action'>;
 }
 
 export function ServiceNameLink({
   serviceName,
   agentName,
   formattedServiceName,
+  'data-test-subj': dataTestSubj,
+  ebt,
 }: ServiceNameLinkProps) {
   const {
     share: { url: urlService },
@@ -62,23 +66,15 @@ export function ServiceNameLink({
       })
     : undefined;
 
-  const content = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
-      {agentName && (
-        <EuiFlexItem grow={false}>
-          <AgentIcon agentName={agentName as AgentName} size="m" />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>{formattedServiceName}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const content = <ServiceNameWithIcon agentName={agentName} serviceName={formattedServiceName} />;
 
   return (
     <>
       {canViewApm && routeLinkProps ? (
         <EuiLink
           {...routeLinkProps}
-          data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
+          data-test-subj={dataTestSubj}
+          {...getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SERVICE, ...ebt })}
         >
           {content}
         </EuiLink>

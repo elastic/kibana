@@ -8,8 +8,8 @@
  */
 
 import { getFormatService } from '../../../services';
-import { Aspect } from './point_series';
-import { Table, Row } from '../../types';
+import type { Aspect } from './point_series';
+import type { Table, Row } from '../../types';
 
 type RowValue = number | string | object | 'NaN';
 interface Raw {
@@ -100,7 +100,7 @@ export function getPoint(
     point.series = series
       .map((s) => {
         const fieldFormatter = getFormatService().deserialize(s.format);
-        return fieldFormatter.convert(row[s.accessor]);
+        return fieldFormatter.convertToText(row[s.accessor]);
       })
       .join(' - ');
   } else if (y) {

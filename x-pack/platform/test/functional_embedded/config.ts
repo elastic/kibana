@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -42,6 +42,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     junit: {
       reportName: 'Kibana Embedded in iframe with X-Pack Security',
+    },
+
+    security: {
+      cookieLogin: false, // HTTPS with self-signed cert — native fetch() rejects it
     },
 
     esTestCluster: kibanaFunctionalConfig.get('esTestCluster'),

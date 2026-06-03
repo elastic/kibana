@@ -6,18 +6,18 @@
  */
 
 import * as uuid from 'uuid';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
-import {
+import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { Agent as SuperTestAgent } from 'supertest';
-import { FtrProviderContext } from '../api_integration/ftr_provider_context';
+import type { Agent as SuperTestAgent } from 'supertest';
+import type { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   log.warning(
@@ -84,6 +84,9 @@ export async function generateAgent(
       // anything less + above offline timeout will be offline
       const oneWeekAgoTimestamp = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
       data = { policy_revision_idx: 1, last_checkin: new Date(oneWeekAgoTimestamp).toISOString() };
+      break;
+    case 'offline-disconnected':
+      data = { policy_revision_idx: 1, last_checkin_status: 'disconnected' };
       break;
     case 'inactive':
       const threeWeeksAgoTimestamp = new Date().getTime() - 21 * 24 * 60 * 60 * 1000;
@@ -178,6 +181,59 @@ export async function enableSecrets(providerContext: FtrProviderContext) {
       id: 'fleet-default-settings',
       attributes: {
         secret_storage_requirements_met: true,
+      },
+      overwrite: true,
+    });
+  }
+}
+
+export async function enableActionSecrets(providerContext: FtrProviderContext) {
+  const settingsSO = await providerContext
+    .getService('kibanaServer')
+    .savedObjects.get({ type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, id: 'fleet-default-settings' })
+    .catch((err) => {});
+
+  if (settingsSO) {
+    await providerContext.getService('kibanaServer').savedObjects.update({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        action_secret_storage_requirements_met: true,
+      },
+      overwrite: false,
+    });
+  } else {
+    await providerContext.getService('kibanaServer').savedObjects.create({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        action_secret_storage_requirements_met: true,
+      },
+      overwrite: true,
+    });
+  }
+}
+export async function disableActionSecrets(providerContext: FtrProviderContext) {
+  const settingsSO = await providerContext
+    .getService('kibanaServer')
+    .savedObjects.get({ type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, id: 'fleet-default-settings' })
+    .catch((err) => {});
+
+  if (settingsSO) {
+    await providerContext.getService('kibanaServer').savedObjects.update({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        action_secret_storage_requirements_met: false,
+      },
+      overwrite: false,
+    });
+  } else {
+    await providerContext.getService('kibanaServer').savedObjects.create({
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      id: 'fleet-default-settings',
+      attributes: {
+        action_secret_storage_requirements_met: false,
       },
       overwrite: true,
     });

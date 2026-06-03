@@ -9,7 +9,6 @@
 
 import { join } from 'path';
 import { omit } from 'lodash';
-import JSON5 from 'json5';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -17,25 +16,20 @@ import {
   defaultKibanaIndex,
   defaultKibanaTaskIndex,
   startElasticsearch,
-  getAggregatedTypesCount,
   type KibanaMigratorTestKit,
   readLog,
   clearLog,
   currentVersion,
+  getKibanaMigratorTestKit,
   nextMinor,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
+import { BASELINE_TEST_ARCHIVE_LARGE } from '../kibana_migrator_archive_utils';
 import {
-  BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
-  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
-  BASELINE_TEST_ARCHIVE_LARGE,
-} from '../kibana_migrator_archive_utils';
-import {
-  getReindexingBaselineTypes,
-  getReindexingMigratorTestKit,
+  getCompatibleBaselineTypes,
+  getTransformErrorBaselineTypes,
   getUpToDateMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
-import { delay } from '../test_utils';
-import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
+} from '@kbn/migrator-test-kit/fixtures';
+import { expectDocumentsMigratedToHighestVersion } from '@kbn/migrator-test-kit/expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
 
@@ -46,12 +40,7 @@ describe('v2 migration', () => {
     esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
   });
 
-  afterAll(async () => {
-    if (esServer) {
-      await esServer.stop();
-      await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
-    }
-  });
+  afterAll(async () => await esServer?.stop());
 
   describe('to the current stack version', () => {
     let upToDateKit: KibanaMigratorTestKit;
@@ -70,7 +59,6 @@ describe('v2 migration', () => {
       const res = await upToDateKit.client.indices.getMapping({ index: defaultKibanaIndex });
       const mappings = res[`${defaultKibanaIndex}_${currentVersion}_001`].mappings;
 
-      expect(mappings._meta?.indexTypesMap[defaultKibanaIndex]).toContain('recent');
       expect(mappings.properties?.recent).toEqual({
         properties: {
           name: {
@@ -125,14 +113,15 @@ describe('v2 migration', () => {
 
       beforeAll(async () => {
         await clearLog(logFilePath);
-        unknownTypesKit = await getReindexingMigratorTestKit({
+        unknownTypesKit = await getKibanaMigratorTestKit({
           logFilePath,
           // we must exclude 'deprecated' from the list of registered types
           // so that it is considered unknown
-          types: getReindexingBaselineTypes(['server', 'task', 'deprecated']),
+          types: getCompatibleBaselineTypes(['server', 'task', 'deprecated']),
           // however we don't want to flag 'deprecated' as a removed type
           // because we want the migrator to consider it unknown
           removedTypes: ['server', 'task'],
+          kibanaVersion: nextMinor,
           settings: {
             migrations: {
               discardUnknownObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -154,35 +143,43 @@ describe('v2 migration', () => {
         expect(logs).toMatch(
           `[${defaultKibanaIndex}] Migration failed because some documents were found which use unknown saved object types: deprecated`
         );
-        expect(logs).toMatch(`[${defaultKibanaIndex}] CHECK_UNKNOWN_DOCUMENTS -> FATAL.`);
+        expect(logs).toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.`);
       });
     });
 
     describe('with transform errors', () => {
       let transformErrorsKit: KibanaMigratorTestKit;
       let logs: string;
-
+      // filter out 'task' objects in order to not spawn that migrator for this test
+      const removedTypes = ['deprecated', 'server', 'task'];
       beforeAll(async () => {
         await clearLog(logFilePath);
-        transformErrorsKit = await getReindexingMigratorTestKit({
+        transformErrorsKit = await getKibanaMigratorTestKit({
           logFilePath,
-          // filter out 'task' objects in order to not spawn that migrator for this test
-          removedTypes: ['deprecated', 'server', 'task'],
-          settings: {
-            migrations: {
-              discardCorruptObjects: currentVersion, // instead of the actual target, 'nextMinor'
-            },
-          },
+          removedTypes,
+          kibanaVersion: nextMinor,
+          types: getTransformErrorBaselineTypes(removedTypes),
         });
       });
 
       it('collects corrupt saved object documents across batches', async () => {
+        expect.hasAssertions();
         try {
           await transformErrorsKit.runMigrations();
         } catch (error) {
-          const lines = error.message
+          const complexLines = (error.message as string)
             .split('\n')
-            .filter((line: string) => line.includes(`'complex'`))
+            .filter((line: string) => line.includes(`'complex'`));
+          // Verify that errors are collected across batches (more than 10 = more than one batch)
+          expect(error.message).toMatch(/showing the first 10 - check the logs for the full list/);
+          // Verify the format of the error lines, redacting UUIDs to keep the assertion stable
+          const lines = complexLines
+            .map((line) =>
+              line.replace(
+                /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+                '<uuid>'
+              )
+            )
             .join('\n');
           expect(lines).toMatchSnapshot();
         }
@@ -193,42 +190,34 @@ describe('v2 migration', () => {
         expect(logs).toMatch(
           `Cannot convert 'complex' objects with values that are multiple of 100`
         );
-        expect(logs).toMatch(`[${defaultKibanaIndex}] REINDEX_SOURCE_TO_TEMP_READ -> FATAL.`);
-      });
-
-      it('closes reindex PIT upon failure', async () => {
-        const lineWithPit = logs
-          .split('\n')
-          .find((line) =>
-            line.includes(`[${defaultKibanaIndex}] REINDEX_SOURCE_TO_TEMP_OPEN_PIT PitId:`)
-          );
-
-        expect(lineWithPit).toBeTruthy();
-
-        const id = JSON5.parse(lineWithPit!).message.split(':')[1];
-        expect(id).toBeTruthy();
-
-        await expect(
-          transformErrorsKit.client.search({
-            pit: { id },
-          })
-          // throws an exception that cannot search with closed PIT
-        ).rejects.toThrow(/search_phase_execution_exception/);
+        expect(logs).toMatch(`[${defaultKibanaIndex}] OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL.`);
       });
     });
 
     describe('configured to discard transform errors and unknown types', () => {
       let kit: KibanaMigratorTestKit;
-      let migrationResults: MigrationResult[];
       let logs: string;
 
       beforeAll(async () => {
         await clearLog(logFilePath);
-        kit = await getReindexingMigratorTestKit({
+        kit = await getKibanaMigratorTestKit({
           logFilePath,
+          // we must exclude 'deprecated' from the list of registered types
+          // so that it is considered unknown
+          types: getTransformErrorBaselineTypes(['server', 'deprecated']),
+          // however we don't want to flag 'deprecated' as a removed type
+          // because we want the migrator to consider it unknown
+          removedTypes: ['server'],
+          kibanaVersion: nextMinor,
+          settings: {
+            migrations: {
+              discardUnknownObjects: nextMinor,
+              discardCorruptObjects: nextMinor,
+            },
+          },
         });
 
-        migrationResults = await kit.runMigrations();
+        await kit.runMigrations();
         logs = await readLog(logFilePath);
       });
 
@@ -267,108 +256,6 @@ describe('v2 migration', () => {
           expect(logs).toMatch(
             `[${defaultKibanaTaskIndex}] CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.`
           );
-        });
-      });
-
-      describe('a migrator performing a reindexing migration', () => {
-        describe('when an index contains SO types with incompatible mappings', () => {
-          it('executes the reindexing migration steps', () => {
-            expect(logs).toMatch(`[${defaultKibanaIndex}] INIT -> WAIT_FOR_YELLOW_SOURCE.`);
-            expect(logs).toMatch(
-              `[${defaultKibanaIndex}] WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.`
-            );
-            expect(logs).toMatch(
-              `[${defaultKibanaIndex}] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.`
-            );
-            expect(logs).toMatch(
-              `[${defaultKibanaIndex}] REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`
-            );
-            expect(logs).toMatch(
-              `[${defaultKibanaIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`
-            );
-            expect(logs).toMatch(
-              `[${defaultKibanaIndex}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`
-            );
-            expect(logs).toMatch(
-              `[${defaultKibanaIndex}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY.`
-            );
-            expect(logs).toMatch(`[${defaultKibanaIndex}] MARK_VERSION_INDEX_READY -> DONE.`);
-
-            expect(logs).not.toMatch(`[${defaultKibanaIndex}] CREATE_NEW_TARGET`);
-            expect(logs).not.toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED`);
-            expect(logs).not.toMatch(`[${defaultKibanaIndex}] PREPARE_COMPATIBLE_MIGRATION`);
-          });
-        });
-
-        it('updates mappings meta properties with the correct modelVersions (>=10.0.0)', async () => {
-          const res = await kit.client.indices.getMapping({ index: defaultKibanaIndex });
-          const indexMeta = Object.values(res)[0].mappings._meta!;
-          expect(indexMeta.mappingVersions.basic).toEqual('10.1.0');
-          expect(indexMeta.mappingVersions.complex).toEqual('10.2.0');
-          expect(indexMeta.mappingVersions.old).toEqual('10.0.0');
-          expect(indexMeta.mappingVersions.recent).toEqual('10.1.0');
-        });
-
-        describe('copies the right documents over to the target indices', () => {
-          let primaryIndexCounts: Record<string, number>;
-          let taskIndexCounts: Record<string, number>;
-
-          beforeAll(async () => {
-            primaryIndexCounts = await getAggregatedTypesCount(kit.client, defaultKibanaIndex);
-            taskIndexCounts = await getAggregatedTypesCount(kit.client, defaultKibanaTaskIndex);
-          });
-
-          it('copies documents to the right indices depending on their types', () => {
-            expect(primaryIndexCounts.basic).toBeDefined();
-            expect(primaryIndexCounts.complex).toBeDefined();
-            expect(primaryIndexCounts.task).not.toBeDefined();
-
-            expect(taskIndexCounts.basic).not.toBeDefined();
-            expect(taskIndexCounts.complex).not.toBeDefined();
-            expect(taskIndexCounts.task).toBeDefined();
-          });
-
-          it('discards REMOVED_TYPES', () => {
-            expect(primaryIndexCounts.server).not.toBeDefined();
-            expect(taskIndexCounts.server).not.toBeDefined();
-          });
-
-          it('discards unknown types', () => {
-            expect(primaryIndexCounts.deprecated).not.toBeDefined();
-            expect(taskIndexCounts.deprecated).not.toBeDefined();
-          });
-
-          it('copies all of the documents', () => {
-            expect(primaryIndexCounts.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
-            expect(taskIndexCounts.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
-          });
-
-          it('executes the excludeOnUpgrade hook', () => {
-            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER);
-          });
-        });
-
-        it('returns a migrated status for each SO index', () => {
-          // omit elapsedMs as it varies in each execution
-          expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toEqual([
-            {
-              destIndex: `${defaultKibanaIndex}_${nextMinor}_001`,
-              sourceIndex: `${defaultKibanaIndex}_${currentVersion}_001`,
-              status: 'migrated',
-            },
-            {
-              destIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
-              sourceIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
-              status: 'migrated',
-            },
-          ]);
-        });
-
-        it('each migrator takes less than 60 seconds', () => {
-          const painfulMigrator = (migrationResults as Array<{ elapsedMs?: number }>).find(
-            ({ elapsedMs }) => elapsedMs && elapsedMs > 60_000
-          );
-          expect(painfulMigrator).toBeUndefined();
         });
       });
     });

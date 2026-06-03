@@ -9,19 +9,21 @@
 
 import React from 'react';
 
-import { AutocompleteOptions, SettingsEditor } from '../../components/settings';
+import type { AutocompleteOptions } from '../../components/settings';
+import { SettingsEditor } from '../../components/settings';
 
 import { useServicesContext, useEditorActionContext } from '../../contexts';
-import { DevToolsSettings, Settings as SettingsService } from '../../../services';
+import type { DevToolsSettings, Settings as SettingsService } from '../../../services';
 
 const getAutocompleteDiff = (
   newSettings: DevToolsSettings,
   prevSettings: DevToolsSettings
 ): AutocompleteOptions[] => {
-  return Object.keys(newSettings.autocomplete).filter((key) => {
-    // @ts-ignore
+  const keys = Object.keys(newSettings.autocomplete) as AutocompleteOptions[];
+
+  return keys.filter((key) => {
     return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
-  }) as AutocompleteOptions[];
+  });
 };
 
 export function Settings() {

@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const DEFAULT_ROWS_PER_PAGE = 100;
 const DEFAULT_SAMPLE_SIZE = 500;
@@ -20,7 +20,6 @@ const SAVED_SEARCH_NAME = 'With sample size';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
@@ -39,15 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:sampleSize': DEFAULT_SAMPLE_SIZE,
     'discover:rowHeightOption': 0, // single line
     'discover:sampleRowsPerPage': DEFAULT_ROWS_PER_PAGE,
-    hideAnnouncements: true,
   };
 
   describe('discover data grid sample size', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -159,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should use the default sample size on Dashboard', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
 
       await dataGrid.clickGridSettings();
@@ -170,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should use custom sample size on Dashboard when specified', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(SAVED_SEARCH_NAME);
 
       await dataGrid.clickGridSettings();

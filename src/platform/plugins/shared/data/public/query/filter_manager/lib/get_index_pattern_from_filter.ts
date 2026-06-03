@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, DataViewBase } from '@kbn/es-query';
+import type { Filter, DataViewBase } from '@kbn/es-query';
 
 export function getIndexPatternFromFilter<T extends DataViewBase = DataViewBase>(
   filter: Filter,

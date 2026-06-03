@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { CommonlyUsed } from '../../page_objects/time_picker';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { CommonlyUsed } from '../../page_objects/time_picker';
 
 export function DashboardCustomizePanelProvider({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');
@@ -105,19 +105,26 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
 
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
-      let button: WebElementWrapper | undefined;
-      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
-        button = await this.findDatePickerQuickMenuButton();
-        return Boolean(button);
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('superDatePickerQuickMenu', { timeout: 1000 }))) {
+          const button = await this.findDatePickerQuickMenuButton();
+          if (button) {
+            await button.click();
+          }
+        }
+        await testSubjects.existOrFail('superDatePickerQuickMenu');
       });
-      if (button) {
-        await button.click();
-      }
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
       log.debug('clickCommonlyUsedTimeRange', time);
-      await testSubjects.click(`superDatePickerCommonlyUsed_${time}`);
+      const testSubj = `superDatePickerCommonlyUsed_${time}`;
+      await retry.try(async () => {
+        if (!(await testSubjects.exists(testSubj, { timeout: 1000 }))) {
+          await this.openDatePickerQuickMenu();
+        }
+        await testSubjects.click(testSubj);
+      });
     }
 
     public async clickToggleHidePanelTitle() {

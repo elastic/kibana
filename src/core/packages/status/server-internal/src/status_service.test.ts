@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
 import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
@@ -14,7 +15,8 @@ import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { first, take, toArray } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
@@ -50,8 +52,6 @@ describe('StatusService', () => {
     logOverallStatusChangesMock.mockReset();
   });
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -82,6 +82,7 @@ describe('StatusService', () => {
       },
       metrics: metricsServiceMock.createInternalSetupContract(),
       coreUsageData: coreUsageDataServiceMock.createSetupContract(),
+      loggingSystem: loggingSystemMock.create(),
       ...overrides,
     };
   };
@@ -312,20 +313,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(100);
+        await timer(100);
         elasticsearch$.next(available);
-        await delay(100);
+        await timer(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(100);
+        await timer(100);
         savedObjects$.next(degraded);
-        await delay(100);
+        await timer(100);
         savedObjects$.next(available);
-        await delay(100);
+        await timer(100);
         savedObjects$.next(available);
-        await delay(100);
+        await timer(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -375,9 +376,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(100);
+        await timer(100);
         savedObjects$.next(available);
-        await delay(100);
+        await timer(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -487,20 +488,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(100);
+        await timer(100);
         elasticsearch$.next(available);
-        await delay(100);
+        await timer(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(100);
+        await timer(100);
         savedObjects$.next(degraded);
-        await delay(100);
+        await timer(100);
         savedObjects$.next(available);
-        await delay(100);
+        await timer(100);
         savedObjects$.next(available);
-        await delay(100);
+        await timer(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -550,9 +551,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(100);
+        await timer(100);
         savedObjects$.next(available);
-        await delay(100);
+        await timer(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -620,6 +621,17 @@ describe('StatusService', () => {
             },
           ]
         `);
+      });
+    });
+
+    describe('logging service.state extension', () => {
+      it('should extend the logging service.state global info once it resolves a status', async () => {
+        const deps = setupDeps();
+        const setupContract = await service.setup(deps);
+        await firstValueFrom(setupContract.overall$);
+        expect(deps.loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+          service: { state: 'available' },
+        });
       });
     });
   });

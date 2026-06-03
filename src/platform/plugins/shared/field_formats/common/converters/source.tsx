@@ -9,7 +9,8 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 /** @public */
 export class SourceFormat extends FieldFormat {
@@ -17,5 +18,9 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  textConvert: TextContextTypeConvert = (value: string) => JSON.stringify(value);
+  textConvert: TextContextTypeConvert = (value: string) => {
+    const missing = this.checkForMissingValueText(value);
+    if (missing) return missing;
+    return JSON.stringify(value);
+  };
 }

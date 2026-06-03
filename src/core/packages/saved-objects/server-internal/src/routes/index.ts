@@ -14,8 +14,8 @@ import type {
   IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
-import { RouteDeprecationInfo } from '@kbn/core-http-server';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
@@ -41,7 +41,6 @@ export function registerRoutes({
   config,
   migratorPromise,
   kibanaVersion,
-  kibanaIndex,
   isServerless,
   docLinks,
 }: {
@@ -51,7 +50,6 @@ export function registerRoutes({
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
   kibanaVersion: string;
-  kibanaIndex: string;
   isServerless: boolean;
   docLinks: DocLinksServiceSetup;
 }) {
@@ -154,5 +152,5 @@ export function registerRoutes({
   );
 
   registerMigrateRoute(internalRouter, migratorPromise);
-  registerDeleteUnknownTypesRoute(internalRouter, { kibanaIndex, kibanaVersion });
+  registerDeleteUnknownTypesRoute(internalRouter, { kibanaVersion });
 }

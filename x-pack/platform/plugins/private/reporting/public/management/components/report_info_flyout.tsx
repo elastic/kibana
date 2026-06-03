@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
@@ -23,9 +24,11 @@ import {
   EuiPopover,
   EuiPortal,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ClientConfigType, Job, useInternalApiClient } from '@kbn/reporting-public';
+import type { ClientConfigType, Job } from '@kbn/reporting-public';
+import { useInternalApiClient } from '@kbn/reporting-public';
 
 import { InspectInConsoleButton } from './inspect_in_console_button/inspect_in_console_button';
 import { ReportInfoFlyoutContent } from './report_info_flyout_content';
@@ -37,6 +40,7 @@ interface Props {
 }
 
 export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, job }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
   const isMounted = useMountedState();
   const { apiClient } = useInternalApiClient();
 
@@ -70,7 +74,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
   const actionsButton = (
     <EuiButton
       data-test-subj="reportInfoFlyoutActionsButton"
-      iconType="arrowUp"
+      iconType="chevronSingleUp"
       onClick={() => setIsActionsPopoverOpen((isOpen) => !isOpen)}
     >
       {i18n.translate('xpack.reporting.reportInfoFlyout.actionsButtonLabel', {
@@ -98,7 +102,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
       data-test-subj="reportInfoFlyoutOpenInKibanaButton"
       disabled={!job.canLinkToKibanaApp}
       key="openInKibanaApp"
-      icon="popout"
+      icon="external"
       onClick={() => {
         window.open(apiClient.getKibanaAppHref(job), '_blank');
         window.focus();
@@ -118,12 +122,12 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
         ownFocus
         onClose={onClose}
         size="s"
-        aria-labelledby="flyoutTitle"
+        aria-labelledby={flyoutTitleId}
         data-test-subj="reportInfoFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="flyoutTitle">
+            <h2 id={flyoutTitleId}>
               {loadingError
                 ? i18n.translate('xpack.reporting.listing.table.reportInfoUnableToFetch', {
                     defaultMessage: 'Unable to fetch report info.',
@@ -155,6 +159,10 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   id="reportInfoFlyoutActionsPopover"
+                  aria-label={i18n.translate(
+                    'xpack.reporting.listing.flyout.actionsPopoverAriaLabel',
+                    { defaultMessage: 'Report actions' }
+                  )}
                   button={actionsButton}
                   isOpen={isActionsPopoverOpen}
                   closePopover={closePopover}

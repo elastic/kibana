@@ -6,9 +6,9 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
-import {
+import { useQuery } from '@kbn/react-query';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
@@ -52,12 +52,14 @@ export function useProductDoc(inferenceId: string | undefined): UseProductDoc {
     refetch();
   }, [inferenceId, refetch]);
 
+  const overallStatus = data && 'overall' in data ? data.overall : undefined;
+
   // poll the status if when is installing or uninstalling
   useEffect(() => {
     if (
       !(
-        data?.overall === 'installing' ||
-        data?.overall === 'uninstalling' ||
+        overallStatus === 'installing' ||
+        overallStatus === 'uninstalling' ||
         isInstalling ||
         isUninstalling
       )
@@ -71,7 +73,7 @@ export function useProductDoc(inferenceId: string | undefined): UseProductDoc {
     return () => {
       clearInterval(interval);
     };
-  }, [refetch, data?.overall, isInstalling, isUninstalling]);
+  }, [refetch, overallStatus, isInstalling, isUninstalling]);
 
   const status: InstallationStatus | undefined = useMemo(() => {
     if (!inferenceId || data?.inferenceId !== inferenceId) {
@@ -83,8 +85,8 @@ export function useProductDoc(inferenceId: string | undefined): UseProductDoc {
     if (isUninstalling) {
       return 'uninstalling';
     }
-    return data?.overall;
-  }, [inferenceId, isInstalling, isUninstalling, data]);
+    return overallStatus;
+  }, [inferenceId, isInstalling, isUninstalling, data, overallStatus]);
 
   return {
     status,

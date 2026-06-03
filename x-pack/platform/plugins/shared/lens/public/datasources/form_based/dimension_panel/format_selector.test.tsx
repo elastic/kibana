@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { FormatSelector, FormatSelectorProps } from './format_selector';
-import { GenericIndexPatternColumn } from '../../..';
+import type { FormatSelectorProps } from './format_selector';
+import { FormatSelector } from './format_selector';
+import type { GenericIndexPatternColumn } from '../../..';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 const props = {
@@ -35,15 +36,19 @@ const renderFormatSelector = (propsOverrides?: Partial<FormatSelectorProps>) => 
 describe('FormatSelector', () => {
   let user: UserEvent;
 
-  beforeEach(() => {
-    (props.onChange as jest.Mock).mockClear();
+  beforeAll(() => {
     jest.useFakeTimers();
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
-  afterEach(() => {
+  afterAll(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    (props.onChange as jest.Mock).mockClear();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
   it('updates the format decimals', async () => {
     renderFormatSelector();
@@ -63,7 +68,7 @@ describe('FormatSelector', () => {
   it('updates the suffix', async () => {
     renderFormatSelector();
     await user.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
 
@@ -83,7 +88,7 @@ describe('FormatSelector', () => {
       ).getByRole('combobox');
       await user.click(durationEndInput);
       fireEvent.click(screen.getByText('Hours'));
-      jest.advanceTimersByTime(256);
+      await act(async () => jest.advanceTimersByTime(256));
       expect(props.onChange).toBeCalledWith({
         id: 'duration',
         params: { toUnit: 'asHours' },
@@ -91,6 +96,27 @@ describe('FormatSelector', () => {
 
       expect(screen.queryByLabelText('Decimals')).toHaveValue(2);
       expect(screen.queryByTestId('lns-indexpattern-dimension-formatCompact')).toBeInTheDocument();
+    });
+
+    it('sets compact to true by default when selecting duration format', async () => {
+      renderFormatSelector({
+        selectedColumn: {
+          ...props.selectedColumn,
+          params: { format: { id: 'number' } },
+        },
+      });
+
+      // Change format from number to duration
+      const formatInput = within(screen.getByTestId('indexPattern-dimension-format')).getByRole(
+        'combobox'
+      );
+      await user.click(formatInput);
+      fireEvent.click(screen.getByText('Duration'));
+
+      expect(props.onChange).toBeCalledWith({
+        id: 'duration',
+        params: { decimals: 0, compact: true },
+      });
     });
   });
 });

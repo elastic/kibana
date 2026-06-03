@@ -6,12 +6,13 @@
  */
 
 import { queryPings } from './query_pings';
-import { SyntheticsEsClient } from '../lib';
+import type { SyntheticsEsClient } from '../lib';
 
 jest.mock('../lib'); // Mock the ES client module
 
 const mockEsClient: Partial<SyntheticsEsClient> = {
   search: jest.fn(),
+  heartbeatIndices: 'synthetics-*',
 };
 
 describe('queryPings', () => {
@@ -73,7 +74,13 @@ describe('queryPings', () => {
     const mockResponse = {
       body: {
         hits: {
-          hits: [{ _source: { '@timestamp': '2023-01-01T00:00:00Z' }, _id: 'doc1' }],
+          hits: [
+            {
+              _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              _id: 'doc1',
+              _index: 'synthetics-browser-default',
+            },
+          ],
           total: { value: 1 },
         },
       },
@@ -150,6 +157,63 @@ describe('queryPings', () => {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
   });
 
+  describe('CCS index targeting', () => {
+    const emptyResponse = {
+      body: {
+        hits: {
+          hits: [],
+          total: { value: 0 },
+        },
+      },
+    };
+
+    it('targets the local heartbeat indices when remoteName is absent', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe(mockEsClient.heartbeatIndices);
+    });
+
+    it('prefixes the index with remoteName when present', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        remoteName: 'cluster1',
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe('cluster1:synthetics-*');
+    });
+
+    it('also prefixes the index in the fields-only branch', async () => {
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(emptyResponse);
+
+      await queryPings({
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+        remoteName: 'cluster1',
+        fields: [{ field: 'monitor.id' }],
+        fieldsExtractorFn: (doc: any) => ({ fieldData: doc._source }),
+      });
+
+      const searchParams = (mockEsClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchParams.index).toBe('cluster1:synthetics-*');
+    });
+  });
+
   it('should throw an error if query fails to execute', async () => {
     const params = {
       syntheticsEsClient: mockEsClient as SyntheticsEsClient,
@@ -162,5 +226,214 @@ describe('queryPings', () => {
 
     await expect(queryPings(params)).rejects.toThrow('Query failed');
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+  });
+
+  describe('CCS remote decoration', () => {
+    it('should attach remote info to pings from a remote cluster', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'cluster1:synthetics-browser-default',
+                _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+            remote: {
+              remoteName: 'cluster1',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should not attach remote info for local pings', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'synthetics-browser-default',
+                _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+          },
+        ],
+      });
+    });
+
+    it('should attach remote info for unknown remote clusters', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'unknown-cluster:synthetics-browser-default',
+                _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+            remote: {
+              remoteName: 'unknown-cluster',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should include kibanaUrl in remote info when present in source', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'cluster1:synthetics-http-default',
+                _source: {
+                  '@timestamp': '2023-01-01T00:00:00Z',
+                  kibanaUrl: 'https://remote-kibana.example.com',
+                },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            kibanaUrl: 'https://remote-kibana.example.com',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+            remote: {
+              remoteName: 'cluster1',
+              kibanaUrl: 'https://remote-kibana.example.com',
+            },
+          },
+        ],
+      });
+    });
+
+    it('should not include kibanaUrl in remote info when absent from source', async () => {
+      const params = {
+        syntheticsEsClient: mockEsClient as SyntheticsEsClient,
+        dateRange: { from: '2023-01-01', to: '2023-01-02' },
+        size: 10,
+        pageIndex: 0,
+      };
+
+      const mockResponse = {
+        body: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _index: 'cluster1:synthetics-http-default',
+                _source: { '@timestamp': '2023-01-01T00:00:00Z' },
+              },
+            ],
+            total: { value: 1 },
+          },
+        },
+      };
+
+      (mockEsClient.search as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await queryPings(params);
+      expect(result).toEqual({
+        total: 1,
+        pings: [
+          {
+            '@timestamp': '2023-01-01T00:00:00Z',
+            docId: 'doc1',
+            timestamp: '2023-01-01T00:00:00Z',
+            remote: {
+              remoteName: 'cluster1',
+            },
+          },
+        ],
+      });
+    });
   });
 });

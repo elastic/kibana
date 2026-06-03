@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsAction } from './data_stream_types';
-export type {
-  ReindexStatusResponse,
-  IndexWarning,
-  IndexWarningType,
-} from '@kbn/upgrade-assistant-pkg-common';
-export { ReindexStep, ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
+export { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
 
 export * from './data_stream_types';
 
@@ -230,3 +225,14 @@ export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>
 export type DataSourceAutoResolution = Record<string, 'readOnly'>;
 
 export type IndicesResolutionType = 'readonly' | 'reindex' | 'unfreeze';
+
+export interface CloudStackVersionInfo {
+  currentVersion: string;
+  lookupVersionUsed: string;
+  latestAvailableVersion: string;
+  minVersionToUpgradeToLatest?: string;
+  directUpgradeableVersionRange?: {
+    min: string;
+    max: string;
+  };
+}

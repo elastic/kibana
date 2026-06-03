@@ -6,7 +6,8 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
@@ -21,7 +22,6 @@ import {
 import { RollupInterval } from '../../../../common/rollup';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { TransactionDetailRedirectInfo } from '../get_transaction_by_trace';
 
 export async function getTransactionByName({
   transactionName,
@@ -70,5 +70,7 @@ export async function getTransactionByName({
     fields: requiredFields,
   });
 
-  return unflattenKnownApmEventFields(maybe(resp.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(resp.hits.hits[0])?.fields;
+
+  return fields && accessKnownApmEventFields(fields).requireFields(requiredFields).unflatten();
 }

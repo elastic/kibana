@@ -58,14 +58,11 @@ export const fetchActionRequestById = async <
     )
     .catch(catchAndWrapError);
 
-  const actionRequest = searchResponse.hits.hits?.[0]?._source;
+  const actionRequest = searchResponse.hits?.hits?.[0]?._source;
 
   if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
-  } else if (
-    endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
-    !bypassSpaceValidation
-  ) {
+  } else if (!bypassSpaceValidation) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
       const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine if response action is accessible for space [${spaceId}]`;
 

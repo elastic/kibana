@@ -5,78 +5,100 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as i18n from './translations';
-import { ReprocessFailedRulesButton } from './reprocess_failed_rules';
+import React, { useCallback, memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
+import {
+  InstallTranslatedButton,
+  ReprocessFailedItemsButton,
+} from '../../../../common/components/bulk_actions';
+import { UpdateMissingIndex } from './update_missing_index';
+import { type RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+
+const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
+  ReprocessFailedItemsButton,
+  'rule',
+  'all'
+);
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
-  numberOfFailedRules: number;
-  numberOfTranslatedRules: number;
-  numberOfSelectedRules: number;
+  translationStats: GetRuleMigrationTranslationStatsResponse;
+  selectedRules: RuleMigrationRule[];
   installTranslatedRule?: () => void;
   installSelectedRule?: () => void;
   reprocessFailedRules?: () => void;
+  setMissingIndexPatternFlyoutOpen: () => void;
 }
 
 /**
  * Collection of buttons to perform bulk actions on migration rules within the SIEM Rules Migrations table.
  */
-export const BulkActions: React.FC<BulkActionsProps> = React.memo(
+export const BulkActions: React.FC<BulkActionsProps> = memo(
   ({
     isTableLoading,
-    numberOfFailedRules,
-    numberOfTranslatedRules,
-    numberOfSelectedRules,
+    translationStats,
+    selectedRules,
     installTranslatedRule,
     installSelectedRule,
     reprocessFailedRules,
+    setMissingIndexPatternFlyoutOpen,
   }) => {
-    const disableInstallTranslatedRulesButton = isTableLoading || !numberOfTranslatedRules;
-    const showInstallSelectedRulesButton = numberOfSelectedRules > 0;
+    const numberOfFailedRules = translationStats.rules.failed;
+    const numberOfTranslatedRules = translationStats.rules.success.installable;
+    const numberOfRulesWithMissingIndex = translationStats.rules.success.missing_index;
+    const showInstallSelectedRulesButton = numberOfTranslatedRules > 0;
     const showRetryFailedRulesButton = numberOfFailedRules > 0;
+    const showUpdateMissingIndexPatternButton = numberOfRulesWithMissingIndex > 0;
+    const reprocessFailedRulesCallback = useCallback(() => {
+      reprocessFailedRules?.();
+    }, [reprocessFailedRules]);
+    const installTranslatedRulesCallback = useCallback(() => {
+      installTranslatedRule?.();
+    }, [installTranslatedRule]);
+    const installSelectedRulesCallback = useCallback(() => {
+      installSelectedRule?.();
+    }, [installSelectedRule]);
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-        {showInstallSelectedRulesButton && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              color={'primary'}
-              onClick={() => installSelectedRule?.()}
-              disabled={isTableLoading}
-              isLoading={isTableLoading}
-              data-test-subj="installSelectedRulesButton"
-              aria-label={i18n.INSTALL_SELECTED_ARIA_LABEL}
-            >
-              {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={true}
+        data-test-subj="migrationsBulkActions"
+      >
+        {showUpdateMissingIndexPatternButton && (
+          <UpdateMissingIndex
+            setMissingIndexPatternFlyoutOpen={setMissingIndexPatternFlyoutOpen}
+            isTableLoading={isTableLoading}
+            selectedRules={selectedRules}
+            translationStats={translationStats}
+          />
         )}
         {showRetryFailedRulesButton && (
           <EuiFlexItem grow={false}>
             <ReprocessFailedRulesButton
-              onClick={() => reprocessFailedRules?.()}
               isDisabled={isTableLoading}
               isLoading={isTableLoading}
-              numberOfFailedRules={numberOfFailedRules}
+              numberOfFailedItems={numberOfFailedRules}
+              onClick={reprocessFailedRulesCallback}
+              selectedItems={selectedRules}
             />
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="plusInCircle"
-            onClick={() => installTranslatedRule?.()}
-            disabled={disableInstallTranslatedRulesButton}
-            isLoading={isTableLoading}
-            data-test-subj="installTranslatedRulesButton"
-            aria-label={i18n.INSTALL_TRANSLATED_ARIA_LABEL}
-          >
-            {numberOfTranslatedRules > 0
-              ? i18n.INSTALL_TRANSLATED_RULES(numberOfTranslatedRules)
-              : i18n.INSTALL_TRANSLATED_RULES_EMPTY_STATE}
-          </EuiButton>
-        </EuiFlexItem>
+        {showInstallSelectedRulesButton && (
+          <EuiFlexItem grow={false}>
+            <InstallTranslatedButton
+              disableInstallTranslatedItemsButton={isTableLoading}
+              installSelectedItem={installSelectedRulesCallback}
+              installTranslatedItems={installTranslatedRulesCallback}
+              isLoading={isTableLoading}
+              numberOfTranslatedItems={numberOfTranslatedRules}
+              selectedItems={selectedRules}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

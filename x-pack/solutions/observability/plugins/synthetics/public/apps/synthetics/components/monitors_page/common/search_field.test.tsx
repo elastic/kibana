@@ -8,7 +8,7 @@ import React from 'react';
 import * as URL from '../../../hooks/use_url_params';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { SyntheticsUrlParams } from '../../../utils/url_params/get_supported_url_params';
+import type { SyntheticsUrlParams } from '../../../utils/url_params/get_supported_url_params';
 import { SearchField } from './search_field';
 
 describe('SearchField', () => {
@@ -53,5 +53,30 @@ describe('SearchField', () => {
     const input = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
 
     expect(input.value).toEqual(searchInput);
+  });
+
+  it('re-syncs the input when the URL query is updated externally after the user has typed', async () => {
+    // Simulates the Error Insights flow: the user types something, the panel
+    // (e.g. an emerging-term card) then rewrites the `query` URL param, and
+    // the input must reflect the new URL value rather than the stale typed text.
+    useGetUrlParamsSpy.mockReturnValue({ query: '' } as SyntheticsUrlParams);
+
+    const { getByTestId, rerender } = render(<SearchField />);
+    const input = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: 'user typed' } });
+    expect(input.value).toBe('user typed');
+
+    await waitFor(() => {
+      expect(updateUrlParamsMock).toHaveBeenCalledWith({ query: 'user typed' });
+    });
+
+    useGetUrlParamsSpy.mockReturnValue({ query: 'external value' } as SyntheticsUrlParams);
+    rerender(<SearchField />);
+
+    await waitFor(() => {
+      const current = getByTestId('syntheticsOverviewSearchInput') as HTMLInputElement;
+      expect(current.value).toBe('external value');
+    });
   });
 });

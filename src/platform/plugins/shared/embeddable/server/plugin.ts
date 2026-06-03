@@ -7,23 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin, RequestHandlerContext } from '@kbn/core/server';
 import { identity } from 'lodash';
-import {
+import type {
   PersistableStateService,
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import {
-  EmbeddableFactoryRegistry,
-  EnhancementsRegistry,
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
-  EmbeddableRegistryDefinition,
-} from './types';
-import { EmbeddableStateWithType } from './persistable_state/types';
+import type { ObjectType, Type } from '@kbn/config-schema';
+import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
+import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -31,98 +25,89 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import { EmbeddableTransforms } from '../common';
+import type { EmbeddableTransforms } from '../common';
+import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
+import { getDrilldownRegistry } from './drilldowns/registry';
+import type { EmbeddableServerDefinition } from './embeddable_transforms/types';
+import { getEmbeddableServerRegistry } from './embeddable_transforms/registry';
+import { registerSearchRoute } from './search_route';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
-  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
-  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  /*
+   * Use registerDrilldown to register transforms and schema for a drilldown type.
+   */
+  registerDrilldown: <
+    StoredState extends DrilldownState = DrilldownState,
+    State extends DrilldownState = DrilldownState
+  >(
+    type: string,
+    drilldown: DrilldownSetup<StoredState, State>
+  ) => void;
+  /**
+   * Registers an embeddable server defintion.
+   * Be sure to register an embeddable public definition for this type.
+   */
+  registerEmbeddableServerDefinition: (
+    type: string,
+    transforms: EmbeddableServerDefinition<any, any>
+  ) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
-  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+  /**
+   * Returns all embeddable schemas registered with registerEmbeddableServerDefinition.
+   */
+  getAllEmbeddableSchemas: () => { [key: string]: { schema: ObjectType; title: string } };
+
+  getTransforms: (type: string) =>
+    | (EmbeddableTransforms & {
+        schema?: Type<object>;
+        throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
+      })
+    | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
-  private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
+  private drilldownRegistry = getDrilldownRegistry();
+  private transformsRegistry = getEmbeddableServerRegistry(this.drilldownRegistry);
 
-  public setup(core: CoreSetup) {
-    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory, this.getEnhancement);
+  public setup(core: CoreSetup): EmbeddableSetup {
+    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
+
+    const unversionedRouter = core.http.createRouter<RequestHandlerContext>();
+    registerSearchRoute(unversionedRouter);
+
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
-        if (this.transformsRegistry[type]) {
-          throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
-        }
-
-        this.transformsRegistry[type] = transforms;
-      },
-      registerEnhancement: this.registerEnhancement,
-      telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
-      extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
-      inject: getInjectFunction(this.getEmbeddableFactory, this.getEnhancement),
+      registerDrilldown: this.drilldownRegistry
+        .registerDrilldown as EmbeddableSetup['registerDrilldown'],
+      registerEmbeddableServerDefinition:
+        this.transformsRegistry.registerEmbeddableServerDefinition,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          Array.from(this.enhancements.values()),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
     return {
-      getTransforms: (type: string) => {
-        return this.transformsRegistry[type];
-      },
-      telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
-      extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
-      inject: getInjectFunction(this.getEmbeddableFactory, this.getEnhancement),
+      getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
+      getTransforms: this.transformsRegistry.getEmbeddableTransforms,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          Array.from(this.enhancements.values()),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
   public stop() {}
-
-  private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
-    if (this.enhancements.has(enhancement.id)) {
-      throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
-    }
-    this.enhancements.set(enhancement.id, {
-      id: enhancement.id,
-      telemetry: enhancement.telemetry || ((state, stats) => stats),
-      inject: enhancement.inject || identity,
-      extract:
-        enhancement.extract ||
-        ((state: SerializableRecord) => {
-          return { state, references: [] };
-        }),
-      migrations: enhancement.migrations || {},
-    });
-  };
-
-  private getEnhancement = (id: string): EnhancementRegistryItem => {
-    return (
-      this.enhancements.get(id) || {
-        id: 'unknown',
-        telemetry: (state, stats) => stats,
-        inject: identity,
-        extract: (state: SerializableRecord) => {
-          return { state, references: [] };
-        },
-        migrations: {},
-      }
-    );
-  };
 
   private registerEmbeddableFactory = (factory: EmbeddableRegistryDefinition) => {
     if (this.embeddableFactories.has(factory.id)) {

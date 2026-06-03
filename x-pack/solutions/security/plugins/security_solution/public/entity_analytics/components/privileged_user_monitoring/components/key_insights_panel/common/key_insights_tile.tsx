@@ -6,8 +6,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiText, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import { isLeft } from 'fp-ts/Either';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
@@ -16,10 +16,10 @@ import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/us
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { useVisualizationResponse } from '../../../../../../common/components/visualization_actions/use_visualization_response';
+import { VisualizationContextMenuActions } from '../../../../../../common/components/visualization_actions/types';
 import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
-const LENS_VISUALIZATION_HEIGHT = 150;
-const LENS_VISUALIZATION_MIN_WIDTH = 220;
+const LENS_VISUALIZATION_HEIGHT = 140;
 
 interface KeyInsightsTileProps {
   title: string;
@@ -91,15 +91,16 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="warning" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.keyInsightsTile.dataNotAvailable"
-                  defaultMessage="Data not available"
-                />
-              </EuiText>
+              <EuiTitle>
+                <h3>
+                  {i18n.translate(
+                    'xpack.securitySolution.privilegedUserMonitoring.keyInsights.NA',
+                    {
+                      defaultMessage: 'N/A',
+                    }
+                  )}
+                </h3>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -123,10 +124,17 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       lensAttributes={lensAttributes}
       id={id}
       timerange={timerange}
-      width={LENS_VISUALIZATION_MIN_WIDTH}
+      width={'100%'}
       height={LENS_VISUALIZATION_HEIGHT}
       disableOnClickFilter
       inspectTitle={inspectTitle}
+      withActions={[
+        VisualizationContextMenuActions.inspect,
+        VisualizationContextMenuActions.addToNewCase,
+        VisualizationContextMenuActions.addToExistingCase,
+        VisualizationContextMenuActions.saveToLibrary,
+        // Excluding VisualizationContextMenuActions.openInLens
+      ]}
     />
   );
 };

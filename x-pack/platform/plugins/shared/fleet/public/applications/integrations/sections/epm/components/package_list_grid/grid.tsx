@@ -6,6 +6,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import type { ListRowRenderer } from 'react-virtualized';
 import { List as VirtualizedList, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { css } from '@emotion/react';
@@ -32,6 +33,8 @@ interface GridColumnProps {
   showCardLabels?: boolean;
   scrollElementId?: string;
   emptyStateStyles?: Record<string, string>;
+  columnCount?: 1 | 2 | 3;
+  gutterSize?: 's' | 'm';
 }
 
 export const GridColumn = ({
@@ -41,6 +44,8 @@ export const GridColumn = ({
   isLoading,
   scrollElementId,
   emptyStateStyles,
+  columnCount = 3,
+  gutterSize = 'm',
 }: GridColumnProps) => {
   const windowScrollerRef = useRef<WindowScroller>(null);
   const listRef = useRef<VirtualizedList>(null);
@@ -51,18 +56,32 @@ export const GridColumn = ({
     })
   );
 
-  // Reset the row measurement cache when the list changes
+  // Reset the row measurement cache, update position, and recompute row height when the list changes
   useEffect(() => {
-    if (rowMeasurementCache.current) {
-      rowMeasurementCache.current.clearAll();
-    }
-  }, [list]);
+    rowMeasurementCache?.current?.clearAll();
+    windowScrollerRef.current?.updatePosition();
+    listRef.current?.recomputeRowHeights(0);
+  }, [list, columnCount, isLoading]);
+
+  // Use to work on small screen when categories are loaded
+  useEffect(() => {
+    const scrollerNode = windowScrollerRef.current;
+    if (!scrollerNode) return;
+    const element = ReactDOM.findDOMNode(scrollerNode) as Element | null;
+    if (!element?.parentElement) return;
+
+    const observer = new ResizeObserver(() => {
+      windowScrollerRef.current?.updatePosition();
+    });
+    observer.observe(element.parentElement);
+    return () => observer.disconnect();
+  }, [list.length, columnCount, isLoading]);
 
   if (isLoading) {
     return (
-      <EuiFlexGrid gutterSize="m" columns={3} alignItems="start">
+      <EuiFlexGrid gutterSize={gutterSize} columns={columnCount} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
-          <EuiFlexItem key={index} grow={3}>
+          <EuiFlexItem key={index} grow={columnCount}>
             <EuiSkeletonRectangle height="160px" width="100%" />
           </EuiFlexItem>
         ))}
@@ -73,13 +92,13 @@ export const GridColumn = ({
   if (!list.length) {
     return (
       <EuiFlexGrid
-        gutterSize="m"
-        columns={3}
+        gutterSize={gutterSize}
+        columns={columnCount}
         data-test-subj="emptyState"
         style={emptyStateStyles}
         alignItems="start"
       >
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={columnCount}>
           <EuiText>
             <p>
               {showMissingIntegrationMessage ? (
@@ -101,7 +120,7 @@ export const GridColumn = ({
   }
 
   const rowRenderer: ListRowRenderer = ({ index, key, parent, style }) => {
-    const items = list.slice(index * 3, index * 3 + 3);
+    const items = list.slice(index * columnCount, index * columnCount + columnCount);
     return (
       <CellMeasurer
         cache={rowMeasurementCache.current}
@@ -112,13 +131,14 @@ export const GridColumn = ({
       >
         {({ registerChild }) => (
           <div ref={registerChild} style={style}>
-            <EuiFlexGrid columns={3} gutterSize="m" alignItems="start">
+            <EuiFlexGrid columns={columnCount} gutterSize={gutterSize} alignItems="start">
               {items.map((item) => (
                 <EuiFlexItem
                   key={item.id}
                   // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
                   css={css`
                     align-self: stretch;
+                    min-width: 0;
                     & > .euiPopover,
                     & > .euiPopover > .euiCard {
                       height: 100%;
@@ -130,7 +150,7 @@ export const GridColumn = ({
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
-            <EuiSpacer size="m" />
+            <EuiSpacer size={gutterSize} />
           </div>
         )}
       </CellMeasurer>
@@ -146,9 +166,7 @@ export const GridColumn = ({
         window
       }
       onResize={() => {
-        if (rowMeasurementCache.current) {
-          rowMeasurementCache.current.clearAll();
-        }
+        rowMeasurementCache.current?.clearAll();
       }}
     >
       {({ height, isScrolling, onChildScroll, scrollTop }) => (
@@ -162,7 +180,7 @@ export const GridColumn = ({
               isScrolling={isScrolling}
               onScroll={onChildScroll}
               overscanRowCount={2}
-              rowCount={Math.ceil(list.length / 3)}
+              rowCount={Math.ceil(list.length / columnCount)}
               deferredMeasurementCache={rowMeasurementCache.current}
               rowHeight={rowMeasurementCache.current.rowHeight}
               rowRenderer={rowRenderer}

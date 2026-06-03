@@ -158,6 +158,13 @@ export const SYNC_ALERTS_LC = i18n.translate('xpack.cases.caseView.syncAlertsLow
   defaultMessage: `sync alerts`,
 });
 
+export const EXTRACT_OBSERVABLES_LC = i18n.translate(
+  'xpack.cases.caseView.extractObservablesLowercaseLabel',
+  {
+    defaultMessage: `extract observables`,
+  }
+);
+
 export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
   defaultMessage: 'This case does not exist',
 });
@@ -179,12 +186,8 @@ export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity',
   defaultMessage: 'Activity',
 });
 
-export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
-  defaultMessage: 'Files',
+export const ATTACHMENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.attachments', {
+  defaultMessage: 'Attachments',
 });
 
 export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observables', {
@@ -194,13 +197,6 @@ export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observa
 export const SIMILAR_CASES_TAB = i18n.translate('xpack.cases.caseView.tabs.similar', {
   defaultMessage: 'Similar cases',
 });
-
-export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
-  'xpack.cases.caseView.tabs.alerts.emptyDescription',
-  {
-    defaultMessage: 'No alerts have been added to this case.',
-  }
-);
 
 export const SEND_EMAIL_ARIA = (user: string) =>
   i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
@@ -236,3 +232,66 @@ export const TOTAL_USERS_ASSIGNED = (total: number) =>
     defaultMessage: '{total} assigned',
     values: { total },
   });
+
+export const ADDED_OBSERVABLES = (totalObservables: number): string =>
+  i18n.translate('xpack.cases.caseView.observables.addedObservables', {
+    values: { totalObservables },
+    defaultMessage:
+      'added {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
+  });
+
+export const EDIT_FIELD_ARIA_LABEL = (fieldName: string) =>
+  i18n.translate('xpack.cases.caseView.editFieldAriaLabel', {
+    values: { fieldName },
+    defaultMessage: 'Edit {fieldName}',
+  });
+
+export const DELETED_OBSERVABLES = (totalObservables: number): string =>
+  i18n.translate('xpack.cases.caseView.observables.deletedObservables', {
+    values: { totalObservables },
+    defaultMessage:
+      'deleted {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
+  });
+
+export const FIELD_NOT_DEFINED = i18n.translate('xpack.cases.caseView.fieldNotDefined', {
+  defaultMessage: 'Field not defined',
+});
+
+export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
+  i18n.translate('xpack.cases.caseView.observables.updatedObservables', {
+    values: { totalObservables },
+    defaultMessage:
+      'updated {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
+  });
+
+export const FIELD_SUBMISSION_ERROR = i18n.translate('xpack.cases.caseView.fieldSubmissionError', {
+  defaultMessage: 'Error submitting field',
+});
+
+export const TEMPLATE_CHANGED_SUCCESSFULLY = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.successToast',
+  {
+    defaultMessage: 'Template changed successfully.',
+  }
+);
+
+export const ERROR_CHANGING_TEMPLATE = i18n.translate(
+  'xpack.cases.caseView.changeAppliedTemplate.errorToast',
+  {
+    defaultMessage: 'Error changing template',
+  }
+);
+
+export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
+  'xpack.cases.caseView.attachments.noSearchResults.title',
+  {
+    defaultMessage: 'No results match your search criteria',
+  }
+);
+
+export const NO_SEARCH_RESULTS_BODY = i18n.translate(
+  'xpack.cases.caseView.attachments.noSearchResults.body',
+  {
+    defaultMessage: 'Try modifying your search.',
+  }
+);

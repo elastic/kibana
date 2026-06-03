@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -28,7 +29,6 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
   id: string;
   index?: number;
   type: string;
@@ -41,7 +41,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
-      dashboardContainerRef,
       id,
       index,
       type,
@@ -56,25 +55,35 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
     const [
+      hidePanelBorders,
       highlightPanelId,
       scrollToPanelId,
       expandedPanelId,
       focusedPanelId,
       useMargins,
       viewMode,
+      dashboardContainerRef,
+      arePanelsRelated,
     ] = useBatchedPublishingSubjects(
+      dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode$
+      dashboardApi.viewMode$,
+      dashboardInternalApi.dashboardContainerRef$,
+      dashboardInternalApi.arePanelsRelated$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel = focusedPanelId !== undefined && focusedPanelId !== id;
+    const blurPanel =
+      focusedPanelId !== undefined &&
+      focusedPanelId !== id &&
+      !arePanelsRelated(id, focusedPanelId);
+    const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -106,14 +115,14 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
+    const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
         showBadges: true,
-        showBorder: useMargins,
+        showBorder,
         showNotifications: true,
         showShadow: false,
         setDragHandles,
@@ -123,22 +132,25 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddableRenderer
           type={type}
           maybeId={id}
-          getParentApi={() => ({
-            ...dashboardApi,
-            reload$: dashboardInternalApi.panelsReload$,
-          })}
+          getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
+          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, dashboardInternalApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, showBorder, setDragHandles]);
+
+    const { euiTheme } = useEuiTheme();
+    const hoverActionsHeight = euiTheme.base * 2;
 
     const focusStyles = blurPanel
       ? styles.focusPanelBlur
       : css({
           scrollMarginTop: `${
-            dashboardContainerTopOffset + globalNavTopOffset + DASHBOARD_MARGIN_SIZE
+            dashboardContainerTopOffset +
+            globalNavTopOffset +
+            DASHBOARD_MARGIN_SIZE +
+            hoverActionsHeight
           }px`,
         });
 
@@ -222,6 +234,10 @@ const dashboardGridItemStyles = {
         },
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
+        },
+        // Call out focused panels with a simple border
+        '&.dshDashboardGrid__item--focused .embPanel': {
+          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
       },
       getHighlightStyles(context),

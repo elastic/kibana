@@ -6,13 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 import { upperFirst } from 'lodash';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
-import { MappedInputParams, MappedOutput, ModelType, TrainedModelsActions } from './trained_models';
+import type {
+  MappedInputParams,
+  MappedOutput,
+  ModelType,
+  TrainedModelsActions,
+} from './trained_models';
 
 export interface TrainedModelRowData {
   id: string;
@@ -536,10 +541,12 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertVCPUHelperText(expectedText: string) {
-      const helperText = await testSubjects.getVisibleText(
-        'mlModelsStartDeploymentModalVCPUHelperText'
-      );
-      expect(expectedText).to.eql(helperText);
+      await retry.try(async () => {
+        const helperText = await testSubjects.getVisibleText(
+          'mlModelsStartDeploymentModalVCPUHelperText'
+        );
+        expect(helperText).to.eql(expectedText);
+      });
     }
 
     public async assertAdvancedConfigurationOpen(expectedValue: boolean) {

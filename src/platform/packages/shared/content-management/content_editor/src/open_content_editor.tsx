@@ -8,12 +8,26 @@
  */
 
 import React, { useCallback, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 import { useServices } from './services';
 
 import { ContentEditorLoader } from './components';
 import type { ContentEditorFlyoutContentContainerProps } from './components';
+
+const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
+
+const getFlyoutTitle = ({ entityName }: { entityName: string }) =>
+  capitalize(
+    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
+      defaultMessage: '{entityName} details',
+      values: {
+        entityName,
+      },
+    })
+  );
 
 export type OpenContentEditorParams = Pick<
   ContentEditorFlyoutContentContainerProps,
@@ -28,8 +42,9 @@ export type OpenContentEditorParams = Pick<
 
 export function useOpenContentEditor() {
   const services = useServices();
-  const { openFlyout } = services;
+  const { openSystemFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'contentEditorFlyoutTitle' });
 
   return useCallback(
     (args: OpenContentEditorParams) => {
@@ -42,18 +57,30 @@ export function useOpenContentEditor() {
         flyout.current?.close();
       };
 
-      flyout.current = openFlyout(
-        <ContentEditorLoader {...args} onCancel={closeFlyout} services={services} />,
+      const flyoutTitle = getFlyoutTitle({ entityName: args.entityName });
+
+      flyout.current = openSystemFlyout(
+        <ContentEditorLoader
+          {...args}
+          flyoutTitle={flyoutTitle}
+          flyoutTitleId={flyoutTitleId}
+          services={services}
+        />,
         {
+          'aria-labelledby': flyoutTitleId,
+          title: flyoutTitle,
           maxWidth: 600,
           size: 'm',
           ownFocus: true,
-          hideCloseButton: true,
+          onClose: closeFlyout,
+          closeButtonProps: {
+            'data-test-subj': 'closeFlyoutButton',
+          },
         }
       );
 
       return closeFlyout;
     },
-    [openFlyout, services]
+    [openSystemFlyout, services, flyoutTitleId]
   );
 }

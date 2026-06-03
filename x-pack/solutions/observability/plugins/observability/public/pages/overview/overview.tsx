@@ -22,10 +22,8 @@ import {
   useFetcher,
 } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect, useMemo } from 'react';
-import {
-  ObservabilityOnboardingLocatorParams,
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-} from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
@@ -39,20 +37,11 @@ import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
-import {
-  DataContextApps,
-  HasDataMap,
-  appLabels,
-} from '../../context/has_data_context/has_data_context';
+import type { DataContextApps, HasDataMap } from '../../context/has_data_context/has_data_context';
+import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
-  const {
-    http,
-    observabilityAIAssistant,
-    kibanaVersion,
-    serverless: isServerless,
-    share,
-  } = useKibana().services;
+  const { http, observabilityAIAssistant, kibanaVersion, serverless, share } = useKibana().services;
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -69,16 +58,14 @@ export function OverviewPage() {
         }),
       },
     ],
-    {
-      classicOnly: true,
-    }
+    { serverless }
   );
 
   const { data: newsFeed } = useFetcher(() => {
-    if (!Boolean(isServerless)) {
+    if (!Boolean(serverless)) {
       return getNewsFeed({ http, kibanaVersion });
     }
-  }, [http, kibanaVersion, isServerless]);
+  }, [http, kibanaVersion, serverless]);
 
   const { hasDataMap } = useHasData();
   // we need to filter out unwanted apps

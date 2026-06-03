@@ -8,81 +8,113 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
-import {
-  loadDataViewList,
-  appendAdHocDataViews,
-  initializeSession,
-  replaceAdHocDataViewWithId,
-  setAdHocDataViews,
-  setDataView,
-  setDefaultProfileAdHocDataViews,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  updateTabAppStateAndGlobalState,
-  restoreTab,
-  clearAllTabs,
-  initializeTabs,
-} from './actions';
+import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
+import * as actions from './actions';
 
-export type {
-  DiscoverInternalState,
-  TabState,
-  TabStateGlobalState,
-  InternalStateDataRequestParams,
+export {
+  type DiscoverInternalState,
+  type TabState,
+  type TabStateGlobalState,
+  type RecentlyClosedTabState,
+  type DiscoverAppState,
+  type InternalStateDataRequestParams,
+  type CascadedDocumentsState,
+  type DefaultProfileStateField,
+  type DefaultProfileStateFields,
+  type DefaultProfileState,
+  type ProfileStateSnapshot,
+  type UpdateESQLQueryActionPayload,
+  DEFAULT_PROFILE_STATE_FIELDS,
+  TabInitializationStatus,
+  TabsBarVisibility,
 } from './types';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export { DEFAULT_EXPANDED_DOC_OWNER, DEFAULT_TAB_STATE } from './constants';
+
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  type InternalStateDependencies,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
-    'setDataViewId',
-    'setDefaultProfileAdHocDataViewIds'
+    'disconnectTab',
+    'setDefaultProfileAdHocDataViewIds',
+    'setAppState',
+    'syncProfileStateSnapshot'
   ),
-  loadDataViewList,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  setDataView,
-  setAdHocDataViews,
-  setDefaultProfileAdHocDataViews,
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
-  initializeSession,
-  updateTabAppStateAndGlobalState,
-  restoreTab,
-  clearAllTabs,
-  initializeTabs,
+  ...actions,
+  syncLocallyPersistedTabState,
 };
 
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateGetState,
+  useInternalStateSubscribe,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
+  useAppStateSelector,
   useCurrentTabAction,
   useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors';
+export {
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
+  selectTab,
+  selectTabAppState,
+  selectTabCombinedFilters,
+  selectIsTabsBarHidden,
+  selectHasUnsavedChanges,
+  searchSourceComparator,
+  selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
+} from './selectors';
 
 export {
   type RuntimeStateManager,
+  type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
   type InitialUnifiedHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  selectDataSourceProfileId,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
+  useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
 
-export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+export {
+  type TabActionInjector,
+  createTabActionInjector,
+  createTabItem,
+  getSerializedSearchSourceDataViewDetails,
+  parseControlGroupJson,
+  extractEsqlVariables,
+} from './utils';
+
+export {
+  fromSavedObjectTabToSearchSource,
+  fromSavedObjectTabToAppState,
+  fromSavedObjectTabToTabState,
+  fromSavedObjectTabToSavedSearch,
+  fromTabStateToSavedObjectTab,
+  fromSavedSearchToSavedObjectTab,
+} from './tab_mapping_utils';

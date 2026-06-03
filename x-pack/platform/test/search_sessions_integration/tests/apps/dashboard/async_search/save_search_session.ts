@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
@@ -53,7 +53,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
       await browser.get(savedSessionURL);
       await header.waitUntilLoadingHasFinished();
-      await searchSessions.expectState('restored');
       await testSubjects.existOrFail('embeddableError'); // expected that panel errors out because of non existing session
 
       const session1 = await dashboardPanelActions.getSearchSessionIdByTitle(
@@ -63,7 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await queryBar.clickQuerySubmitButton();
       await header.waitUntilLoadingHasFinished();
-      await searchSessions.expectState('completed');
       await dashboardExpect.noErrorEmbeddablesPresent();
       const session2 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension'
@@ -79,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       url = await browser.getCurrentUrl();
       expect(url).to.contain('searchSessionId');
       await header.waitUntilLoadingHasFinished();
-      await searchSessions.expectState('restored');
 
       expect(
         await dashboardPanelActions.getSearchSessionIdByTitle('Sum of Bytes by Extension')
@@ -87,13 +84,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Saves and restores a session', async () => {
-      await dashboard.loadSavedDashboard('Not Delayed');
+      await dashboard.loadSavedDashboard('Delayed 5s');
       await dashboard.waitForRenderComplete();
-      await searchSessions.expectState('completed');
-      await searchSessions.save();
-      await searchSessions.expectState('backgroundCompleted');
+      await searchSessions.save({ isSubmitButton: true, withRefresh: true });
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
+        'Sum of Bytes by Extension (Delayed 5s)'
       );
 
       // load URL to restore a saved session
@@ -104,13 +99,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       // Check that session is restored
-      await searchSessions.expectState('restored');
       await dashboardExpect.noErrorEmbeddablesPresent();
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched
       await dashboard.switchToEditMode();
-      await searchSessions.expectState('restored');
 
       const xyChartSelector = 'xyVisChart';
       await enableNewChartLibraryDebug();
@@ -124,28 +117,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('TSVB & Timelion', () => {
       it('Restore session with TSVB & Timelion', async () => {
-        await dashboard.loadSavedDashboard('TSVBwithTimelion');
+        await dashboard.loadSavedDashboard('TSVBwithTimelion + Delay 5s');
         await dashboard.waitForRenderComplete();
-        await searchSessions.expectState('completed');
-        await searchSessions.save();
-        await searchSessions.expectState('backgroundCompleted');
+        await searchSessions.save({ isSubmitButton: true, withRefresh: true });
 
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle('TSVB');
 
         // check that searches saved into the session
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
+        await searchSessionsManagement.goTo();
 
         const searchSessionList = await searchSessionsManagement.getList();
         const searchSessionItem = searchSessionList.find(
           (session) => session.id === savedSessionId
         )!;
-        expect(searchSessionItem.searchesCount).to.be(2);
+        expect(searchSessionItem.searchesCount).to.be(3);
 
         await searchSessionItem.view();
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
-        await searchSessions.expectState('restored');
         expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
       });
     });

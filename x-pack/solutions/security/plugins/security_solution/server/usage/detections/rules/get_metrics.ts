@@ -14,7 +14,10 @@ import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
+  getInitialAiCreatedRulesUsage,
   getInitialEventLogUsage,
+  getInitialRuleCustomizationStatus,
+  getInitialRuleDeprecatedStatus,
   getInitialRuleUpgradeStatus,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -30,6 +33,8 @@ import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
+import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
+import { getRuleCustomizationStatus } from './get_rule_customization_status';
 
 export interface GetRuleMetricsOptions {
   signalsIndex: string;
@@ -62,6 +67,9 @@ export const getRuleMetrics = async ({
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
         elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+        elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+        ai_created_rules: getInitialAiCreatedRulesUsage(),
         spaces_usage: getInitialSpacesUsage(),
       };
     }
@@ -134,17 +142,38 @@ export const getRuleMetrics = async ({
     // Only bring back rule detail on elastic prepackaged detection rules
     const elasticRuleObjects = rulesCorrelated.filter((hit) => hit.elastic_rule === true);
 
+    const installedElasticRuleIds = new Set(elasticRuleObjects.map((rule) => rule.rule_id));
+    const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
+    const numDeprecated = deprecatedAssets.filter((asset) =>
+      installedElasticRuleIds.has(asset.rule_id)
+    ).length;
+
     // calculate the rule usage
     const rulesUsage = rulesCorrelated.reduce(
       (usage, rule) => updateRuleUsage(rule, usage),
       getInitialRulesUsage()
     );
 
+    const aiCreatedRulesUsage = rulesCorrelated.reduce((acc, rule) => {
+      if (rule.ai_created) {
+        acc.total += 1;
+        if (rule.enabled) {
+          acc.enabled += 1;
+        } else {
+          acc.disabled += 1;
+        }
+      }
+      return acc;
+    }, getInitialAiCreatedRulesUsage());
+
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
       elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
+      elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
+      elastic_detection_rule_deprecated_status: { total: numDeprecated },
+      ai_created_rules: aiCreatedRulesUsage,
       spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
@@ -157,7 +186,36 @@ export const getRuleMetrics = async ({
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
       elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+      elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      elastic_detection_rule_deprecated_status: getInitialRuleDeprecatedStatus(),
+      ai_created_rules: getInitialAiCreatedRulesUsage(),
       spaces_usage: getInitialSpacesUsage(),
     };
   }
 };
+
+function prepareRuleCustomizationStatus(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
+) {
+  const ruleSources = ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
+    const ruleSource = ruleResult.attributes?.params?.ruleSource;
+    if (
+      !ruleSource ||
+      ruleSource?.type !== 'external' ||
+      typeof ruleSource.isCustomized !== 'boolean'
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        is_customized: ruleSource.isCustomized,
+        customized_fields: ruleSource.customizedFields ?? [],
+      },
+    ];
+  });
+
+  return ruleSources.length === 0
+    ? getInitialRuleCustomizationStatus()
+    : getRuleCustomizationStatus(ruleSources);
+}

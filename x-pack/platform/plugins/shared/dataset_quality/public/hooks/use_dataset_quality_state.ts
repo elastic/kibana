@@ -11,16 +11,18 @@ import { useDatasetQualityContext } from '../components/dataset_quality/context'
 export const useDatasetQualityState = () => {
   const { service } = useDatasetQualityContext();
 
-  const { datasetUserPrivileges, dataStreamStats } =
-    useSelector(service, (state) => state.context) ?? {};
+  const { datasetUserPrivileges } = useSelector(service, (state) => state.context) ?? {};
 
   const statsLoading = useSelector(
     service,
-    (state) => state.matches('initializing') || state.matches('main.stats.datasets.fetching')
+    (state) =>
+      state.matches('initializing') || state.matches({ main: { stats: { datasets: 'fetching' } } })
   );
 
   const canUserReadFailureStore = Boolean(
-    dataStreamStats?.some((ds) => ds.userPrivileges.canReadFailureStore)
+    Object.values(datasetUserPrivileges?.datasetsPrivilages ?? {})?.some(
+      (privilege) => privilege.canReadFailureStore
+    )
   );
 
   const canUserMonitorAnyDataset = Boolean(

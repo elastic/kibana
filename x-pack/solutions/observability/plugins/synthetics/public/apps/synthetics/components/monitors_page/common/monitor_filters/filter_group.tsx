@@ -12,12 +12,12 @@ import { useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 
-import {
+import type {
   SyntheticsMonitorFilterItem,
-  getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterChangeHandler,
   LabelWithCountValue,
 } from '../../../../utils/filters/filter_fields';
+import { getSyntheticsFilterDisplayValues } from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 
@@ -46,8 +46,15 @@ const mixUrlValues = (
 
 export const FilterGroup = ({
   handleFilterChange,
+  excludeFields,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
+  /**
+   * Fields to omit from the filter group. Useful on views (e.g. the global
+   * Errors tab) where some monitor-config filters (like `schedules`) don't
+   * apply because the data being filtered isn't backed by monitor configs.
+   */
+  excludeFields?: ReadonlyArray<SyntheticsMonitorFilterItem['field']>;
 }) => {
   const data = useFilters();
 
@@ -55,7 +62,7 @@ export const FilterGroup = ({
 
   const urlParams = useGetUrlParams();
 
-  const filters: SyntheticsMonitorFilterItem[] = [
+  const allFilters: SyntheticsMonitorFilterItem[] = [
     {
       label: TYPE_LABEL,
       field: 'monitorTypes',
@@ -106,7 +113,7 @@ export const FilterGroup = ({
   ];
 
   if ((data?.projects?.length || 0) > 0) {
-    filters.push({
+    allFilters.push({
       label: PROJECT_LABEL,
       field: 'projects',
       values: getSyntheticsFilterDisplayValues(
@@ -116,6 +123,9 @@ export const FilterGroup = ({
       ),
     });
   }
+
+  const excluded = new Set(excludeFields ?? []);
+  const filters = allFilters.filter((f) => !excluded.has(f.field));
 
   return (
     <EuiFilterGroup>

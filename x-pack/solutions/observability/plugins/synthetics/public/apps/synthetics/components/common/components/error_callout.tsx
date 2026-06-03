@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IHttpSerializedFetchError } from '../../../state';
+import type { IHttpSerializedFetchError } from '../../../state';
 
 /**
  * Use this component when displaying fetch-related errors.
@@ -45,7 +45,7 @@ export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
       title={i18n.translate('xpack.synthetics.monitorDetail.errorTitle', {
         defaultMessage: 'Error fetching monitor details',
       })}
-      iconType="alert"
+      iconType="warning"
     >
       <p>
         {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.description', {

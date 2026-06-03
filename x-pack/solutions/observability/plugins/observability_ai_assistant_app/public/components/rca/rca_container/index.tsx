@@ -11,7 +11,8 @@ import {
 } from '@kbn/observability-ai-common/root_cause_analysis';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AssistantMessage, MessageRole, ToolMessage } from '@kbn/inference-common';
+import type { AssistantMessage, ToolMessage } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import type {
   RootCauseAnalysisEvent,
   RootCauseAnalysisToolMessage,
@@ -106,7 +107,7 @@ export function RootCauseAnalysisContainer({
       onClick={() => {
         onClearAnalysisClick();
       }}
-      iconType="crossInCircle"
+      iconType="crossCircle"
     >
       {i18n.translate('xpack.observabilityAiAssistant.rca.clearButtonLabel', {
         defaultMessage: 'Clear',
@@ -156,7 +157,7 @@ export function RootCauseAnalysisContainer({
             errorMessage: error.message,
           },
         })}
-        iconType="alert"
+        iconType="warning"
         color="danger"
         button={
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -182,7 +183,7 @@ export function RootCauseAnalysisContainer({
             })}
           </EuiText>
         }
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         color="primary"
         button={
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -279,7 +280,7 @@ function getToolResponseErrorItem(response: ToolErrorMessage['response']) {
           errorMessage: response.error.message,
         },
       })}
-      iconType="alert"
+      iconType="warning"
       color="danger"
     />
   );

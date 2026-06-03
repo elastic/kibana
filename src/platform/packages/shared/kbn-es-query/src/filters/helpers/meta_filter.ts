@@ -8,7 +8,8 @@
  */
 
 import { omit, get } from 'lodash';
-import { Filter, FilterStateStore } from '../build_filters';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import type { Filter } from '../build_filters';
 
 /**
  *

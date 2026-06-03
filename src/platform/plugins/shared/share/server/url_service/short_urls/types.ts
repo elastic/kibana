@@ -8,8 +8,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/server';
-import { ShortUrlData } from '../../../common/url_service/short_urls/types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { ShortUrlData } from '../../../common/url_service/short_urls/types';
 
 /**
  * Interface used for persisting short URLs.

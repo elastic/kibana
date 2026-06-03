@@ -8,29 +8,32 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { StorageContext } from '@kbn/content-management-plugin/server';
-import {
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../common';
 import type { LinksItem, LinksSearchOut } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
-import {
+import type {
   LinksCreateOptions,
   LinksCreateOut,
   LinksGetOut,
-  savedObjectToItem,
-  itemToAttributes,
   LinksUpdateOptions,
   LinksUpdateOut,
   LinksSearchOptions,
   LinksState,
   StoredLinksState,
 } from './schema/latest';
+import { savedObjectToItem, itemToAttributes } from './schema/latest';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -96,6 +99,7 @@ export class LinksStorage {
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<LinksGetOut, LinksGetOut>(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -162,6 +166,7 @@ export class LinksStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<LinksItem>
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -231,6 +236,7 @@ export class LinksStorage {
       LinksUpdateOut,
       LinksUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -304,6 +310,7 @@ export class LinksStorage {
       LinksSearchOut,
       LinksSearchOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -337,6 +344,7 @@ export class LinksStorage {
         LinksItem,
         LinksItem
       >(
+        // @ts-expect-error - fix type error
         contentItem,
         undefined, // do not override version
         { validate: false } // validation is done above

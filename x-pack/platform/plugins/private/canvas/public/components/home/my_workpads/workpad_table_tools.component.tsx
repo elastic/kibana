@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { ConfirmModal } from '../../confirm_modal';
-import { FoundWorkpad } from '../../../services/canvas_workpad_service';
+import type { FoundWorkpad } from '../../../services/canvas_workpad_service';
 
 export interface Props {
   workpads: FoundWorkpad[];
@@ -49,7 +49,7 @@ export const WorkpadTableTools = ({
     <EuiButton
       color="success"
       onClick={() => onExportWorkpads(selectedWorkpadIds)}
-      iconType="exportAction"
+      iconType="upload"
       aria-label={strings.getExportButtonAriaLabel(selectedWorkpadIds.length)}
     >
       {strings.getExportButtonLabel(selectedWorkpadIds.length)}

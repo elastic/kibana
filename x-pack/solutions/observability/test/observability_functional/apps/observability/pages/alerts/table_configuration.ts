@@ -17,8 +17,9 @@ import {
   ALERT_STATUS,
   ALERT_INSTANCE_ID,
   TAGS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   describe('Observability alerts table configuration', function () {
@@ -73,6 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         ALERT_EVALUATION_VALUE,
         ALERT_EVALUATION_THRESHOLD,
         TAGS,
+        ALERT_WORKFLOW_TAGS,
         ALERT_REASON,
       ]) {
         expect(await testSubjects.exists(`dataGridHeaderCell-${colId}`)).to.be(true);

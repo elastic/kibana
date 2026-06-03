@@ -10,7 +10,8 @@
 import React from 'react';
 
 import { css } from '@emotion/react';
-import { EuiScreenReaderOnly, EuiText, EuiToolTip, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
 
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -22,6 +23,7 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
         position={'right'}
       >
         <EuiText
+          tabIndex={0}
           size="xs"
           aria-hidden={true}
           className="eui-textNumber"

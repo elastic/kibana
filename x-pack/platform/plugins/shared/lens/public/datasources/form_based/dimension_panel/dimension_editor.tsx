@@ -8,11 +8,11 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiListGroup,
   EuiFormRow,
   EuiSpacer,
-  EuiListGroupItemProps,
   EuiToolTip,
   EuiText,
   EuiIconTip,
@@ -23,9 +23,17 @@ import {
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
+import type {
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  LensLayerType as LayerType,
+  IndexPattern,
+  IndexPatternField,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
+import { getSingleValue } from '../pure_utils';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -34,23 +42,23 @@ import {
   updateColumnParam,
   updateDefaultLabels,
   resetIncomplete,
-  FieldBasedIndexPatternColumn,
   canTransition,
   adjustColumnReferencesForChangedColumn,
+  deleteColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { FormBasedLayer } from '../types';
-import { FormatSelector, FormatSelectorProps } from './format_selector';
+import type { FormatSelectorProps } from './format_selector';
+import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling, TimeScalingProps } from './time_scaling';
+import type { TimeScalingProps } from './time_scaling';
+import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
 import { TimeShift } from './time_shift';
-import type { LayerType } from '../../../../common/types';
 import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
   quickFunctionsName,
@@ -60,18 +68,16 @@ import {
   formulaOperationName,
   DimensionEditorButtonGroups,
   CalloutWarning,
-  DimensionEditorGroupsOptions,
   isLayerChangingDueToDecimalsPercentile,
   isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
-import type { TemporaryState } from './dimensions_editor_helpers';
+import type { TemporaryState, DimensionEditorGroupsOptions } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { ParamEditorProps } from '../operations/definitions';
+import type { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
 import { operationsButtonStyles } from './shared_styles';
-import type { IndexPattern, IndexPatternField } from '../../../types';
 import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends FormBasedDimensionEditorProps {
@@ -114,6 +120,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
     dataViews: props.dataViews,
+    kql: props.kql,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -466,7 +473,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <EuiText color="danger" size="s">
+            <EuiText color="danger" size="s" tabIndex={0}>
               <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
@@ -474,7 +481,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <span>{operationDisplay[operationType].displayName}</span>
+            <span tabIndex={0}>{operationDisplay[operationType].displayName}</span>
           </EuiToolTip>
         );
       } else if (!compatibleWithCurrentField) {
@@ -533,7 +540,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         id: operationType as string,
         label,
         isActive,
-        size: 's',
         isDisabled: !!disabledStatus,
         css: operationsButtonStyles(euiThemeContext),
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
@@ -619,13 +625,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
             const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
 
             let newLayer: FormBasedLayer;
-            if (possibleFields.size === 1) {
+            const singleField = getSingleValue(possibleFields);
+            if (singleField) {
               newLayer = insertOrReplaceColumn({
                 layer: props.state.layers[props.layerId],
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value!),
+                field: currentIndexPattern.getFieldByName(singleField),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
@@ -742,7 +749,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       >
         <EuiListGroup
           css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
-          gutterSize="none"
           color="primary"
           listItems={
             // add a padding item containing a non breakable space if the number of operations is not even
@@ -942,6 +948,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
   const hasButtonGroups = !isFullscreen && (hasFormula || supportStaticValue);
+
   const initialMethod = useMemo(() => {
     let methodId = '';
     if (showStaticValueFunction) {
@@ -1060,6 +1067,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
       selectedOperationDefinition.filterable ||
       selectedOperationDefinition.shiftable);
 
+  const activeTable = props.activeData?.[layerId];
+  const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
+  const resolvedDataType = activeColumnMeta?.type ?? selectedColumn?.dataType;
+
   return (
     <div id={columnId}>
       <div className="lnsIndexPatternDimensionEditor--padded">
@@ -1156,9 +1167,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 />
               ) : null,
             },
-            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
-              paramEditorProps
-            ) || []),
+            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.({
+              ...paramEditorProps,
+              euiTheme,
+            }) || []),
           ]}
         />
       )}
@@ -1207,7 +1219,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
-            (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
+            (resolvedDataType === 'number' || selectedColumn.operationType === 'range') ? (
               <FormatSelector
                 selectedColumn={selectedColumn}
                 onChange={onFormatChange}

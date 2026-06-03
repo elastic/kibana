@@ -6,14 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const securityService = getService('security');
   const config = getService('config');
-  const { common, error, visualize, header, security } = getPageObjects([
+  const { appMenu, common, error, visualize, header, security } = getPageObjects([
+    'appMenu',
     'common',
     'error',
     'visualize',
@@ -26,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('visualize feature controls security', () => {
     before(async () => {
@@ -209,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Visualize library']);
+        expect(navLinks).to.contain('Visualize library');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -239,9 +240,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('shareTopNavButton', {
-          timeout: config.get('timeouts.waitFor'),
-        });
+        await appMenu.existOrFail('shareTopNavButton');
         await testSubjects.missingOrFail('visualizeSaveButton', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -339,7 +338,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('shareTopNavButton', { timeout: 10000 });
+        await appMenu.existOrFail('shareTopNavButton');
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 

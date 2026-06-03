@@ -31,10 +31,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
+import type { DashboardSettings } from '../../dashboard_api/settings_manager';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -54,32 +54,31 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
 
   const isMounted = useMountedState();
 
-  const onTitleDuplicate = () => {
-    if (!isMounted()) return;
-    setIsTitleDuplicate(true);
-    setIsTitleDuplicateConfirmed(true);
-  };
-
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await getDashboardContentManagementService().checkForDuplicateDashboardTitle(
-      {
-        title: localSettings.title,
-        copyOnSave: false,
-        lastSavedTitle: dashboardApi.title$.value ?? '',
-        onTitleDuplicate,
-        isTitleDuplicateConfirmed,
+
+    const hasSameTitle = localSettings.title === dashboardApi.title$.value;
+    const checkForDuplicateTitle = isTitleDuplicateConfirmed ? false : !hasSameTitle;
+
+    if (checkForDuplicateTitle) {
+      try {
+        const hasTitleDuplicate = await hasLibraryItemWithTitle(localSettings.title);
+        if (!isMounted()) return;
+        if (hasTitleDuplicate) {
+          setIsTitleDuplicate(true);
+          setIsTitleDuplicateConfirmed(true);
+          setIsApplying(false);
+          return;
+        }
+      } catch (error) {
+        if (!isMounted()) return;
+        // Unable to determine if there is a duplicate title
+        // ignore error and apply settings
       }
-    );
-
-    if (!isMounted()) return;
-
-    setIsApplying(false);
-
-    if (validTitle) {
-      dashboardApi.setSettings(localSettings);
-      onClose();
     }
+
+    dashboardApi.setSettings(localSettings);
+    onClose();
   };
 
   const updateDashboardSetting = useCallback((newSettings: Partial<DashboardSettings>) => {
@@ -126,19 +125,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
     if (!savedObjectsTaggingApi) return;
 
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel"
-            defaultMessage="Tags"
-          />
-        }
-      >
-        <savedObjectsTaggingApi.ui.components.TagSelector
-          selected={localSettings.tags}
-          onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
-        />
-      </EuiFormRow>
+      <savedObjectsTaggingApi.ui.components.SavedObjectSaveModalTagSelector
+        initialSelection={localSettings.tags ?? []}
+        onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
+      />
     );
   };
 
@@ -221,8 +211,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
           >
             <EuiSwitch
               data-test-subj="storeTimeWithDashboard"
-              checked={localSettings.timeRestore}
-              onChange={(event) => updateDashboardSetting({ timeRestore: event.target.checked })}
+              checked={localSettings.time_restore}
+              onChange={(event) => updateDashboardSetting({ time_restore: event.target.checked })}
               label={
                 <FormattedMessage
                   id="dashboard.embeddableApi.showSettings.flyout.form.storeTimeWithDashboardFormRowLabel"
@@ -231,6 +221,30 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               }
             />
           </EuiFormRow>
+          {cpsService?.cpsManager && (
+            <EuiFormRow
+              helpText={
+                <FormattedMessage
+                  id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowHelpText"
+                  defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
+                />
+              }
+            >
+              <EuiSwitch
+                data-test-subj="storeProjectRoutingWithDashboard"
+                checked={localSettings.project_routing_restore}
+                onChange={(event) =>
+                  updateDashboardSetting({ project_routing_restore: event.target.checked })
+                }
+                label={
+                  <FormattedMessage
+                    id="dashboard.embeddableApi.showSettings.flyout.form.storeProjectRoutingWithDashboardFormRowLabel"
+                    defaultMessage="Store CPS scope with dashboard"
+                  />
+                }
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow>
             <EuiSwitch
               label={i18n.translate(
@@ -239,8 +253,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                   defaultMessage: 'Use margins between panels',
                 }
               )}
-              checked={localSettings.useMargins}
-              onChange={(event) => updateDashboardSetting({ useMargins: event.target.checked })}
+              checked={localSettings.use_margins}
+              onChange={(event) => updateDashboardSetting({ use_margins: event.target.checked })}
               data-test-subj="dashboardMarginsCheckbox"
             />
           </EuiFormRow>
@@ -253,13 +267,54 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                   defaultMessage: 'Show panel titles',
                 }
               )}
-              checked={!localSettings.hidePanelTitles}
+              checked={!localSettings.hide_panel_titles}
               onChange={(event) =>
-                updateDashboardSetting({ hidePanelTitles: !event.target.checked })
+                updateDashboardSetting({ hide_panel_titles: !event.target.checked })
               }
               data-test-subj="dashboardPanelTitlesCheckbox"
             />
           </EuiFormRow>
+
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate(
+                'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelBordersSwitchLabel',
+                {
+                  defaultMessage: 'Show panel borders',
+                }
+              )}
+              checked={!localSettings.hide_panel_borders}
+              onChange={(event) =>
+                updateDashboardSetting({ hide_panel_borders: !event.target.checked })
+              }
+              data-test-subj="dashboardPanelBordersCheckbox"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('dashboard.embeddableApi.flyout.formRow.controls', {
+              defaultMessage: 'Control panels',
+            })}
+          >
+            <>
+              <EuiFormRow>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'dashboard.embeddableApi.lyout.form.autoApplyFiltersSwitchLabel',
+                    {
+                      defaultMessage: 'Auto apply filters',
+                    }
+                  )}
+                  checked={localSettings.auto_apply_filters}
+                  onChange={(event) => {
+                    updateDashboardSetting({ auto_apply_filters: event.target.checked });
+                  }}
+                  data-test-subj="dashboardAutoApplyFiltersCheckbox"
+                />
+              </EuiFormRow>
+            </>
+          </EuiFormRow>
+
           <EuiFormRow
             label={i18n.translate(
               'dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel',
@@ -312,8 +367,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       />
                     </EuiText>
                   }
-                  checked={localSettings.syncColors}
-                  onChange={(event) => updateDashboardSetting({ syncColors: event.target.checked })}
+                  checked={localSettings.sync_colors}
+                  onChange={(event) =>
+                    updateDashboardSetting({ sync_colors: event.target.checked })
+                  }
                   data-test-subj="dashboardSyncColorsCheckbox"
                 />
               </EuiFormRow>
@@ -325,13 +382,13 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       defaultMessage: 'Sync cursor across panels',
                     }
                   )}
-                  checked={localSettings.syncCursor}
+                  checked={localSettings.sync_cursor}
                   onChange={(event) => {
                     const syncCursor = event.target.checked;
-                    if (!syncCursor && localSettings.syncTooltips) {
-                      updateDashboardSetting({ syncCursor, syncTooltips: false });
+                    if (!syncCursor && localSettings.sync_tooltips) {
+                      updateDashboardSetting({ sync_cursor: syncCursor, sync_tooltips: false });
                     } else {
-                      updateDashboardSetting({ syncCursor });
+                      updateDashboardSetting({ sync_cursor: syncCursor });
                     }
                   }}
                   data-test-subj="dashboardSyncCursorCheckbox"
@@ -345,10 +402,10 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                       defaultMessage: 'Sync tooltips across panels',
                     }
                   )}
-                  checked={localSettings.syncTooltips}
-                  disabled={!Boolean(localSettings.syncCursor)}
+                  checked={localSettings.sync_tooltips}
+                  disabled={!Boolean(localSettings.sync_cursor)}
                   onChange={(event) =>
-                    updateDashboardSetting({ syncTooltips: event.target.checked })
+                    updateDashboardSetting({ sync_tooltips: event.target.checked })
                   }
                   data-test-subj="dashboardSyncTooltipsCheckbox"
                 />

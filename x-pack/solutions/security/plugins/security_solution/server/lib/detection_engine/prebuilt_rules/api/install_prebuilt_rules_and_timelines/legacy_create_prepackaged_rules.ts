@@ -44,6 +44,7 @@ export const legacyCreatePrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const mlAuthz = context.getMlAuthz();
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -54,24 +55,47 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
-    ruleAssetsClient,
-    context,
+  await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
+
+  const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
+  const installedPrebuiltRules = rulesToMap(
+    await getExistingPrepackagedRules({ rulesClient, logger })
+  );
+  const rulesToInstall = await getRulesToInstall(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
+  const rulesToUpdate = await getRulesToUpdate(
+    latestPrebuiltRules,
+    installedPrebuiltRules,
+    mlAuthz
+  );
+
+  const installChangeTracking = {
+    metadata: {
+      bulkCount: rulesToInstall.length,
+    },
+  };
+  const ruleCreationResult = await createPrebuiltRules(
+    detectionRulesClient,
+    rulesToInstall,
+    installChangeTracking,
     logger
   );
 
-  const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
-  const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
-
-  const result = await createPrebuiltRules(detectionRulesClient, rulesToInstall);
-  if (result.errors.length > 0) {
-    throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
+  if (ruleCreationResult.errors.length > 0) {
+    throw new AggregateError(ruleCreationResult.errors, 'Error installing new prebuilt rules');
   }
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate);
+  const upgradeChangeTracking = {
+    metadata: {
+      bulkCount: rulesToUpdate.length,
+    },
+  };
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, upgradeChangeTracking, logger);
 
   return {
     rules_installed: rulesToInstall.length,

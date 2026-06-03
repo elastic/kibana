@@ -8,7 +8,7 @@
 import { from, takeUntil } from 'rxjs';
 
 import type { IStaticAssets } from '@kbn/core-http-browser';
-import {
+import type {
   GlobalSearchProviderResult,
   GlobalSearchResultProvider,
 } from '@kbn/global-search-plugin/server';

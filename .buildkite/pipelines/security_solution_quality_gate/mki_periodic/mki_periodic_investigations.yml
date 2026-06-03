@@ -8,13 +8,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 4
+        parallelism: 5
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -22,13 +24,31 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:data_view
+        label: 'Cypress MKI - Data View'
+        key: test_investigations_data_view
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:siem_migrations
         label: 'Cypress MKI - SIEM Integrations'
@@ -36,27 +56,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
-
-      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:sourcerer
-        label: 'Cypress MKI - Sourcerer'
-        key: test_investigations_sourcerer
-        env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
-        agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-4
-          # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
-        timeout_in_minutes: 300
-        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:threat_intelligence
         label: 'Cypress MKI - Threat Intelligence'
@@ -64,13 +72,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timeline_templates
         label: 'Cypress MKI - Timeline Templates'
@@ -78,13 +88,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timelines
         label: 'Cypress MKI - Timelines'
@@ -92,13 +104,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 2
+        parallelism: 3
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:filters
         label: 'Cypress MKI - Explore - Filters'
@@ -106,27 +120,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
-
-      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:guided_onboarding
-        label: 'Cypress MKI - Explore - Guided Onboarding'
-        key: test_explore_guided_onboarding
-        env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
-        agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-4
-        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
-        timeout_in_minutes: 300
-        parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:inspect
         label: 'Cypress MKI - Explore - Inspect'
@@ -134,13 +136,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:navigation
         label: 'Cypress MKI - Explore - Navigation'
@@ -148,13 +152,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:overview
         label: 'Cypress MKI - Explore - Overview'
@@ -162,13 +168,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:pagination
         label: 'Cypress MKI - Explore - Pagination'
@@ -176,13 +184,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:urls
         label: 'Cypress MKI - Explore - URLs'
@@ -190,13 +200,15 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
   - group: "API MKI - Investigations"
     key: api_test_investigations
@@ -205,7 +217,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:timeline:runner:qa:serverless
         key: investigations:timeline:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -214,12 +226,14 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - investigations:saved-objects:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
         key: investigations:saved-objects:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -228,12 +242,30 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - siem_migrations_rules:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh siem_migrations_rules:qa:serverless
+        key: siem_migrations_rules:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - explore:overview:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
+          image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
@@ -242,3 +274,5 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101

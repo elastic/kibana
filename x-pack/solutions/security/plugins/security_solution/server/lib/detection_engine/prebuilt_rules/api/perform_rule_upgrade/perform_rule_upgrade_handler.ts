@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { pick } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
+  FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   RuleUpgradeSpecifier,
   SkippedRuleUpgrade,
   ThreeWayDiff,
+  UpgradedRuleBasicInfo,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   ModeEnum,
@@ -23,30 +29,31 @@ import {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import { PREBUILT_RULE_BATCH_SIZE } from '../../constants';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
 import { validatePerformRuleUpgradeRequest } from './validate_perform_rule_upgrade_request';
-import type {
-  RuleResponse,
-  RuleSignatureId,
-  RuleVersion,
-} from '../../../../../../common/api/detection_engine';
+import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
+import type { RuleUpgradeContext } from './update_rule_telemetry';
+import {
+  sendRuleBulkUpgradeTelemetryEvent,
+  sendRuleUpdateTelemetryEvents,
+} from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<undefined, undefined, PerformRuleUpgradeRequestBody>,
-  response: KibanaResponseFactory
+  request: KibanaRequest<unknown, unknown, PerformRuleUpgradeRequestBody>,
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
 
@@ -58,6 +65,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
+    const analyticsService = ctx.securitySolution.getAnalytics();
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -75,9 +83,10 @@ export const performRuleUpgradeHandler = async (
     const filter = mode === ModeEnum.ALL_RULES ? request.body.filter : undefined;
 
     const skippedRules: SkippedRuleUpgrade[] = [];
-    const updatedRules: RuleResponse[] = [];
+    const updatedRules: UpgradedRuleBasicInfo[] = [];
     const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
+    const ruleUpgradeContextsMap = new Map<string, RuleUpgradeContext>();
 
     const ruleUpgradeQueue: Array<{
       rule_id: RuleSignatureId;
@@ -90,8 +99,15 @@ export const performRuleUpgradeHandler = async (
       const latestVersionsMap = new Map(
         allLatestVersions.map((version) => [version.rule_id, version])
       );
+      const kqlFilter = filter
+        ? convertRulesFilterToKQL({
+            filter: filter.name,
+            tags: filter.tags,
+            customizationStatus: filter.customization_status,
+          })
+        : undefined;
       const allCurrentVersions = await ruleObjectsClient.fetchInstalledRuleVersions({
-        filter,
+        kqlFilter,
       });
 
       const upgradableRules = await getPossibleUpgrades(
@@ -105,18 +121,21 @@ export const performRuleUpgradeHandler = async (
       ruleUpgradeQueue.push(...request.body.rules);
     }
 
-    const BATCH_SIZE = 100;
     while (ruleUpgradeQueue.length > 0) {
-      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, BATCH_SIZE);
+      const targetRulesForUpgrade = ruleUpgradeQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
 
-      const [currentRules, latestRules] = await Promise.all([
+      const [currentRules, latestRulesResult] = await Promise.all([
         ruleObjectsClient.fetchInstalledRulesByIds({
           ruleIds: targetRulesForUpgrade.map(({ rule_id: ruleId }) => ruleId),
         }),
         ruleAssetsClient.fetchAssetsByVersion(targetRulesForUpgrade),
       ]);
-      const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
-      const ruleVersionsMap = zipRuleVersions(currentRules, baseRules, latestRules);
+      const baseRulesResult = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
+      const ruleVersionsMap = zipRuleVersions(
+        currentRules,
+        baseRulesResult.assets,
+        latestRulesResult.assets
+      );
 
       const upgradeableRules: RuleTriad[] = [];
       targetRulesForUpgrade.forEach((targetRule) => {
@@ -164,13 +183,22 @@ export const performRuleUpgradeHandler = async (
               ? request.body.rules.find((x) => x.rule_id === targetRule.rule_id)
               : undefined;
 
-          const conflict = getRuleUpgradeConflictState(ruleVersions, ruleUpgradeSpecifier);
+          const { ruleDiff } = calculateRuleDiff(ruleVersions);
+          const conflict = getRuleUpgradeConflictState(ruleDiff, ruleUpgradeSpecifier);
 
           if (conflict !== ThreeWayDiffConflict.NONE) {
             skippedRules.push({
               rule_id: targetRule.rule_id,
               reason: SkipRuleUpgradeReasonEnum.CONFLICT,
               conflict,
+            });
+
+            ruleUpgradeContextsMap.set(targetRule.rule_id, {
+              ruleId: targetRule.rule_id,
+              ruleName: currentVersion.name,
+              hasBaseVersion: !!baseVersion,
+              isCustomized: isRuleCustomized(currentVersion),
+              fieldsDiff: ruleDiff.fields,
             });
             return;
           }
@@ -184,24 +212,43 @@ export const performRuleUpgradeHandler = async (
         });
       });
 
-      const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets({
-        upgradeableRules,
-        requestBody: request.body,
-        defaultPickVersion,
-      });
+      const { modifiedPrebuiltRuleAssets, processingErrors, ruleUpgradeContexts } =
+        createModifiedPrebuiltRuleAssets({
+          upgradeableRules,
+          requestBody: request.body,
+          defaultPickVersion,
+        });
       ruleErrors.push(...processingErrors);
+
+      ruleUpgradeContexts.forEach((ruleUpgradeContext) => {
+        ruleUpgradeContextsMap.set(ruleUpgradeContext.ruleId, ruleUpgradeContext);
+      });
 
       if (isDryRun) {
         updatedRules.push(
-          ...modifiedPrebuiltRuleAssets.map((rule) => convertPrebuiltRuleAssetToRuleResponse(rule))
+          ...modifiedPrebuiltRuleAssets.map((rule) => ({
+            id: uuidv4(),
+            rule_id: rule.rule_id,
+            version: rule.version,
+          }))
         );
       } else {
+        const changeTracking = {
+          metadata: {
+            bulkCount: modifiedPrebuiltRuleAssets.length,
+          },
+        };
+
         const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(
           detectionRulesClient,
-          modifiedPrebuiltRuleAssets
+          modifiedPrebuiltRuleAssets,
+          changeTracking,
+          logger
         );
         ruleErrors.push(...installationErrors);
-        updatedRules.push(...upgradeResults.map(({ result }) => result));
+        updatedRules.push(
+          ...upgradeResults.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
+        );
       }
     }
 
@@ -217,6 +264,26 @@ export const performRuleUpgradeHandler = async (
           message: timelineInstallationError,
           rules: [],
         });
+      }
+
+      sendRuleUpdateTelemetryEvents(
+        analyticsService,
+        ruleUpgradeContextsMap,
+        updatedRules,
+        ruleErrors,
+        skippedRules,
+        logger
+      );
+
+      if (mode === ModeEnum.ALL_RULES) {
+        sendRuleBulkUpgradeTelemetryEvent(
+          analyticsService,
+          ruleUpgradeContextsMap,
+          updatedRules,
+          ruleErrors,
+          skippedRules,
+          logger
+        );
       }
     }
 
@@ -245,11 +312,9 @@ export const performRuleUpgradeHandler = async (
 };
 
 function getRuleUpgradeConflictState(
-  ruleVersions: RuleVersions,
+  ruleDiff: FullThreeWayRuleDiff,
   ruleUpgradeSpecifier?: RuleUpgradeSpecifier
 ): ThreeWayDiffConflict {
-  const { ruleDiff } = calculateRuleDiff(ruleVersions);
-
   if (ruleDiff.num_fields_with_conflicts === 0) {
     return ThreeWayDiffConflict.NONE;
   }

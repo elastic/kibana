@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MessageRole, Model, Prompt, PromptVersion } from '@kbn/inference-common';
-import { ChatCompleteOptions } from '@kbn/inference-common';
+import type { Model, Prompt, PromptVersion } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { ChatCompleteOptions } from '@kbn/inference-common';
 import { omitBy, orderBy } from 'lodash';
 import Mustache from 'mustache';
 import { format } from 'util';
@@ -28,7 +29,7 @@ interface PromptToMessageOptionsResult {
 export function promptToMessageOptions(
   prompt: Prompt,
   input: unknown,
-  model: Model
+  model: Partial<Model>
 ): PromptToMessageOptionsResult {
   const matches = prompt.versions.flatMap((version) => {
     if (!version.models) {
@@ -49,7 +50,7 @@ export function promptToMessageOptions(
     throw new Error(`No model match found for ${format(model)}`);
   }
 
-  const { toolChoice, tools, temperature, template } = bestMatch;
+  const { tools, temperature, template } = bestMatch;
 
   const validatedInput = prompt.input.parse(input);
 
@@ -78,7 +79,6 @@ export function promptToMessageOptions(
         messages,
         system,
         tools,
-        toolChoice,
         temperature,
       },
       (val) => val === undefined

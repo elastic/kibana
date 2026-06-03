@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import type { Control, FieldErrors } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
 export function TagsField({
   tagsList,

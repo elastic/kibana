@@ -12,7 +12,8 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { createUsageTracker, createEmptyUsageTracker } from '../usage_tracker';
-import { AppUsageTracker } from '../types';
+import type { AppUsageTracker } from '../types';
+import { AnalyticsEvents } from '../analytics/constants';
 
 const UsageTrackerContext = createContext<AppUsageTracker>(createEmptyUsageTracker());
 
@@ -26,7 +27,7 @@ export function UsageTrackerContextProvider({
 }: UsageTrackerContextProviderProps) {
   const usageTracker = useMemo(() => {
     const homePageUsageTracker = createUsageTracker(usageCollection);
-    homePageUsageTracker.load('opened_app');
+    homePageUsageTracker.load(AnalyticsEvents.openedApp);
     return homePageUsageTracker;
   }, [usageCollection]);
   return (

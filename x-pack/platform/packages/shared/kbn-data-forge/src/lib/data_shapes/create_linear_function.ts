@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-import { Point } from '../../types';
+import type { Moment } from 'moment';
+import type { Point } from '../../types';
 
 export function createLinearFunction(start: Point, end: Point) {
   const slope = (end.y - start.y) / (end.x - start.x);

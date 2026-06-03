@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../lib/object_remover';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import {
   getConnectorByName,
@@ -39,7 +39,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await pageObjects.common.navigateToApp('triggersActionsConnectors');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await objectRemover.removeAll();
     });
 
@@ -50,7 +50,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('.index-card');
 
-      await find.clickByCssSelector('[data-test-subj="create-connector-flyout-back-btn"]');
+      await retry.try(async () => {
+        await find.clickByCssSelector('[data-test-subj="create-connector-flyout-back-btn"]');
+      });
 
       await testSubjects.click('.slack-card');
 
@@ -78,6 +80,79 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       objectRemover.add(connector.id, 'connector', 'actions');
     });
 
+    it('should create a connector with a custom user-defined ID', async () => {
+      const connectorName = generateUniqueKey();
+      const customConnectorId = `custom-${generateUniqueKey().slice(0, 28)}`;
+
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+      await testSubjects.click('.slack-card');
+
+      await testSubjects.setValue('nameInput', connectorName);
+
+      // Set custom connector ID
+      await testSubjects.setValue('connectorIdInput', customConnectorId);
+
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+
+      await find.clickByCssSelector(
+        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
+      );
+
+      const toastTitle = await toasts.getTitleAndDismiss();
+      expect(toastTitle).to.eql(`Created '${connectorName}'`);
+
+      // Verify the connector was created with the custom ID
+      const connector = await getConnectorByName(connectorName, supertest);
+      expect(connector.id).to.eql(customConnectorId);
+      objectRemover.add(connector.id, 'connector', 'actions');
+    });
+
+    it('should auto-populate connector ID from name', async () => {
+      const connectorName = 'My Test Connector';
+
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+      await testSubjects.click('.slack-card');
+
+      await testSubjects.setValue('nameInput', connectorName);
+
+      // Verify the connector ID was auto-populated
+      const connectorIdInput = await testSubjects.find('connectorIdInput');
+      const autoPopulatedId = await connectorIdInput.getAttribute('value');
+      expect(autoPopulatedId).to.eql('my-test-connector');
+    });
+
+    it('should show connector ID as disabled when editing an existing connector', async () => {
+      const connectorName = generateUniqueKey();
+      const createdConnector = await createSlackConnector({
+        name: connectorName,
+        getService,
+      });
+      objectRemover.add(createdConnector.id, 'connector', 'actions');
+      await browser.refresh();
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+      await retry.try(async () => {
+        const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResults.length).to.eql(1);
+      });
+
+      // Open edit flyout
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      // Verify connector ID field is disabled
+      const connectorIdInput = await testSubjects.find('connectorIdInput');
+      const isDisabled = await connectorIdInput.getAttribute('disabled');
+      expect(isDisabled).to.eql('true');
+
+      // Verify it shows the actual connector ID
+      const connectorIdValue = await connectorIdInput.getAttribute('value');
+      expect(connectorIdValue).to.eql(createdConnector.id);
+
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
@@ -89,9 +164,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -127,13 +203,17 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+      await retry.try(async () => {
+        await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+        await testSubjects.existOrFail('executeActionButton');
+      });
 
       // test success
       await find.setValueByClass('kibanaCodeEditor', '{ "key": "value" }');
@@ -157,13 +237,17 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeTest = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeTest.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+      await retry.try(async () => {
+        await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+        await testSubjects.existOrFail('executeActionButton');
+      });
 
       await find.setValueByClass('kibanaCodeEditor', '"test"');
 
@@ -188,9 +272,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -220,9 +305,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeDelete.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeDelete.length).to.eql(1);
+      });
 
       await testSubjects.click('deleteConnector');
       await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -233,9 +319,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      await retry.try(async () => {
+        const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsAfterDelete.length).to.eql(0);
+      });
     });
 
     it('should bulk delete connectors', async () => {
@@ -249,10 +336,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeDelete.length).to.eql(1);
-
+      await retry.try(async () => {
+        const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeDelete.length).to.eql(1);
+      });
       await find.clickByCssSelector('.euiTableRowCellCheckbox .euiCheckbox__input');
 
       await testSubjects.click('bulkDelete');
@@ -264,22 +351,26 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
-
-      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsAfterDelete.length).to.eql(0);
+      await retry.try(async () => {
+        const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsAfterDelete.length).to.eql(0);
+      });
     });
 
     it('should not be able to delete a preconfigured connector', async () => {
       const preconfiguredConnectorName = 'Serverlog';
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
-
-      const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResults.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResults.length).to.eql(1);
+      });
 
       expect(await testSubjects.exists('deleteConnector')).to.be(false);
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
 
-      const checkboxSelectRow = await testSubjects.find('checkboxSelectRow-my-server-log');
+      const checkboxSelectRow = await testSubjects.find(
+        'checkboxSelectRow-preconfigured_my-server-log'
+      );
       expect(await checkboxSelectRow.getAttribute('disabled')).to.be('true');
     });
 
@@ -287,9 +378,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const preconfiguredConnectorName = 'test-preconfigured-email';
 
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
-
-      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-      expect(searchResultsBeforeEdit.length).to.eql(1);
+      await retry.try(async () => {
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
+      });
 
       expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
@@ -303,7 +395,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
 
         const connectorName = generateUniqueKey();
         const createdConnector = await createSlackConnector({ name: connectorName, getService });

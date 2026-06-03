@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   GetUninstallTokensMetadataResponse,
   GetUninstallTokenResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
@@ -14,9 +14,9 @@ import {
   agentPolicyRouteService,
   uninstallTokensRouteService,
 } from '@kbn/fleet-plugin/common/services';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { testUsers } from '../test_users';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   addUninstallTokenToPolicy,
   generateAgentPolicy,
@@ -317,8 +317,10 @@ export default function (providerContext: FtrProviderContext) {
       describe('when `search` query param is used', () => {
         let generatedManagedPolicyArray: AgentPolicy[];
         let generatedPolicyArray: AgentPolicy[];
-        const specialCharactersForNameAndId = `!@#$%^&*-=_+()[]{}:;'\`|/<>,.?~`.split('');
-        const specialCharactersForNameOnly = `"\\`.split('');
+        // '/' and '.' are excluded from IDs: '/' is a path separator and repeated '.' forms '..' (traversal),
+        // both rejected by the Fleet ID validator. They are included in specialCharactersForNameOnly instead.
+        const specialCharactersForNameAndId = `!@#$%^&*-=_+()[]{}:;'\`|<>,?~`.split('');
+        const specialCharactersForNameOnly = `"\\/.`.split('');
 
         before(async () => {
           generatedPolicyArray = [];

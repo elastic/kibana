@@ -9,10 +9,8 @@
 
 export const BOREALIS_LIGHT = 'borealis.light';
 export const BOREALIS_DARK = 'borealis.dark';
-export const AMSTERDAM_LIGHT = 'amsterdam.light';
-export const AMSTERDAM_DARK = 'amsterdam.dark';
 
-export const THEMES = [BOREALIS_LIGHT, BOREALIS_DARK, AMSTERDAM_LIGHT, AMSTERDAM_DARK] as const;
+export const THEMES = [BOREALIS_LIGHT, BOREALIS_DARK] as const;
 
 export type Theme = (typeof THEMES)[number];
 
@@ -21,12 +19,10 @@ export const DEFAULT_THEME: Theme = 'borealis.light';
 export const THEME_TITLES: Record<Theme, string> = {
   [BOREALIS_LIGHT]: 'Borealis Light',
   [BOREALIS_DARK]: 'Borealis Dark',
-  [AMSTERDAM_LIGHT]: 'Amsterdam Light',
-  [AMSTERDAM_DARK]: 'Amsterdam Dark',
 };
 
 export const getColorMode = (theme: Theme) => {
-  if (theme === BOREALIS_DARK || theme === AMSTERDAM_DARK) {
+  if (theme === BOREALIS_DARK) {
     return 'dark';
   }
 
@@ -34,9 +30,6 @@ export const getColorMode = (theme: Theme) => {
 };
 
 export const getEuiThemeName = (theme: Theme) => {
-  if (theme === AMSTERDAM_LIGHT || theme === AMSTERDAM_DARK) {
-    return 'amsterdam';
-  }
   return 'borealis';
 };
 

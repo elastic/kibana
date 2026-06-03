@@ -9,8 +9,10 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import React, { useCallback, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
 import type { ConnectionRequestParams } from '@elastic/transport';
@@ -72,7 +74,14 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
     services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
   const shouldShowDevToolsLink = !!(requestParams && canShowDevTools);
   const handleDevToolsLinkClick = useCallback(
-    () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
+    (e: React.MouseEvent) => {
+      if (hasActiveModifierKey(e)) return;
+
+      if (consoleHref && navigateToUrl) {
+        e.preventDefault();
+        navigateToUrl(consoleHref);
+      }
+    },
     [consoleHref, navigateToUrl]
   );
 
@@ -86,7 +95,13 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
     services.application?.capabilities?.dev_tools.show && searchProfilerHref !== undefined;
   const shouldShowSearchProfilerLink = !!(indexPattern && canShowsearchProfiler);
   const handleSearchProfilerLinkClick = useCallback(
-    () => searchProfilerHref && navigateToUrl && navigateToUrl(searchProfilerHref),
+    (e: React.MouseEvent) => {
+      if (hasActiveModifierKey(e)) return;
+      if (searchProfilerHref && navigateToUrl) {
+        e.preventDefault();
+        navigateToUrl(searchProfilerHref);
+      }
+    },
     [searchProfilerHref, navigateToUrl]
   );
 
@@ -117,7 +132,7 @@ export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContent
         <EuiButtonEmpty
           size="xs"
           flush="right"
-          iconType="visBarHorizontal"
+          iconType="chartBarHorizontal"
           href={searchProfilerHref}
           onClick={handleSearchProfilerLinkClick}
           data-test-subj="inspectorRequestOpenInSearchProfilerButton"

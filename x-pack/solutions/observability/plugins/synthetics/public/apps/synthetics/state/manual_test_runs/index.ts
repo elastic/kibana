@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { createReducer, PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createReducer } from '@reduxjs/toolkit';
 
-import { WritableDraft } from 'immer/dist/types/types-external';
-import { IHttpFetchError } from '@kbn/core-http-browser';
+import type { WritableDraft } from 'immer/dist/types/types-external';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { ActionPayload } from '../utils/actions';
+import type { ActionPayload } from '../utils/actions';
+import type { TestNowPayload } from './actions';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
   manualTestMonitorAction,
   manualTestRunUpdateAction,
-  TestNowPayload,
   toggleTestNowFlyoutAction,
 } from './actions';
-import { ServiceLocationErrors } from '../../../../../common/runtime_types';
-import { EnrichedTestNowResponse } from './api';
+import type { ServiceLocationErrors } from '../../../../../common/runtime_types';
+import type { EnrichedTestNowResponse } from './api';
 
 export enum TestRunStatus {
   LOADING = 'loading',
@@ -93,9 +94,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
           const { name, message } = fetchError;
 
           const [, errorMonitor] =
-            Object.entries(state).find(
-              ([key]) => fetchError.request.url.indexOf(key) > -1 ?? false
-            ) ?? [];
+            Object.entries(state).find(([key]) => fetchError.request.url.indexOf(key) > -1) ?? [];
 
           if (errorMonitor) {
             state[errorMonitor.configId] = {

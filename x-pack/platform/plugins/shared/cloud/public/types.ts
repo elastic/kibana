@@ -9,19 +9,18 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { FC, PropsWithChildren } from 'react';
 
-export interface CloudStart {
+/**
+ * Represents basic URLs for the Cloud plugin, that do not require specific user roles to access.
+ */
+export interface CloudBasicUrls {
   /**
-   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
+   * This is the URL of the Cloud interface.
    */
-  CloudContextProvider: FC<PropsWithChildren<unknown>>;
+  baseUrl?: string;
   /**
-   * `true` when Kibana is running on Elastic Cloud.
+   * The full URL to the Kibana deployment.
    */
-  isCloudEnabled: boolean;
-  /**
-   * Cloud ID. Undefined if not running on Cloud.
-   */
-  cloudId?: string;
+  kibanaUrl?: string;
   /**
    * This is the path to the Cloud deployments management page. The value is already prepended with `baseUrl`.
    *
@@ -39,10 +38,6 @@ export interface CloudStart {
    */
   profileUrl?: string;
   /**
-   * The full URL to the billing page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  billingUrl?: string;
-  /**
    * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
    */
   organizationUrl?: string;
@@ -51,21 +46,78 @@ export interface CloudStart {
    */
   performanceUrl?: string;
   /**
-   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  usersAndRolesUrl?: string;
-  /**
    * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
    */
   projectsUrl?: string;
+  /**
+   * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
+   *
+   * @example `{deploymentUrl}/elasticsearch/snapshots`
+   */
+  snapshotsUrl?: string;
+}
+
+/**
+ * Represents privileged URLs that require specific user roles to access.
+ */
+export interface CloudPrivilegedUrls {
+  /**
+   * The full URL to the billing page on Elastic Cloud.
+   */
+  billingUrl?: string;
+  /**
+   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud,
+   * or if the user does not have the `manage_security` cluster privilege.
+   */
+  usersAndRolesUrl?: string;
+}
+
+export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;
+
+export interface CloudStart extends CloudBasicUrls {
+  /**
+   * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
+   */
+  CloudContextProvider: FC<PropsWithChildren<unknown>>;
+  /**
+   * `true` when Kibana is running on Elastic Cloud.
+   */
+  isCloudEnabled: boolean;
+  /**
+   * Cloud ID.
+   */
+  cloudId?: string;
   /**
    * Fetches the full URL to the elasticsearch cluster.
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
   /**
-   * The full URL to the Kibana deployment.
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
    */
-  kibanaUrl?: string;
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
+  /**
+   * Method to retrieve privileged URLs for the Cloud plugin.
+   */
+  getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
+  /**
+   * Method to retrieve basic URLs for the Cloud plugin.
+   */
+  getUrls: () => CloudBasicUrls;
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -90,10 +142,14 @@ export interface CloudStart {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: KibanaSolution;
+    /**
+     * Whether the serverless project belongs to an organization currently in trial.
+     */
+    organizationInTrial?: boolean;
   };
 }
 
-export interface CloudSetup {
+export interface CloudSetup extends CloudBasicUrls {
   /**
    * Cloud ID. Undefined if not running on Cloud.
    */
@@ -119,45 +175,17 @@ export interface CloudSetup {
    */
   csp?: string;
   /**
-   * This is the URL of the Cloud interface.
+   * Method to retrieve privileged URLs for the Cloud plugin.
    */
-  baseUrl?: string;
+  getPrivilegedUrls: () => Promise<CloudPrivilegedUrls>;
   /**
-   * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
-   *
-   * @example `{baseUrl}/deployments/bfdad4ef99a24212a06d387593686d63`
+   * Method to retrieve basic URLs for the Cloud plugin.
    */
-  deploymentUrl?: string;
-  /**
-   * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
-   */
-  projectsUrl?: string;
-  /**
-   * This is the path to the Cloud User Profile page. The value is already prepended with `baseUrl`.
-   *
-   * @example `{baseUrl}/user/settings/`
-   */
-  profileUrl?: string;
-  /**
-   * This is the path to the Cloud Account and Billing page. The value is already prepended with `baseUrl`.
-   *
-   * @example `{baseUrl}/account/`
-   */
-  organizationUrl?: string;
-  /**
-   * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
-   *
-   * @example `{deploymentUrl}/elasticsearch/snapshots`
-   */
-  snapshotsUrl?: string;
+  getUrls: () => CloudUrls;
   /**
    * Fetches the full URL to the elasticsearch cluster.
    */
   fetchElasticsearchConfig: () => Promise<PublicElasticsearchConfigType>;
-  /**
-   * The full URL to the Kibana deployment.
-   */
-  kibanaUrl?: string;
   /**
    * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
    */
@@ -170,6 +198,11 @@ export interface CloudSetup {
    * `true` when Kibana is running on Elastic Cloud.
    */
   isCloudEnabled: boolean;
+  /**
+   * `true` when running on ECE (Elastic Cloud Enterprise).
+   * `false` or `undefined` on ESS or self-managed.
+   */
+  isEce?: boolean;
   /**
    * The end date for the Elastic Cloud trial. Only available on Elastic Cloud.
    *
@@ -186,6 +219,16 @@ export interface CloudSetup {
    * @param contextProvider The React component from the Service Provider.
    */
   registerCloudService: (contextProvider: FC) => void;
+  /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
   /**
    * Onboarding configuration
    */
@@ -231,7 +274,20 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     orchestratorTarget?: string;
+    /**
+     * Whether the serverless project belongs to an organization currently in trial.
+     */
+    organizationInTrial?: boolean;
   };
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 export interface PublicElasticsearchConfigType {

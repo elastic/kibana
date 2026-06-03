@@ -7,12 +7,14 @@
 
 import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
-import {
-  EncryptedSyntheticsMonitorCodec,
+import type {
   Ping,
   PingsResponse,
-  PingsResponseType,
   SyntheticsMonitorWithId,
+} from '../../../../../common/runtime_types';
+import {
+  EncryptedSyntheticsMonitorCodec,
+  PingsResponseType,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
@@ -24,6 +26,7 @@ export interface MostRecentPingsRequest {
   size?: number;
   pageIndex?: number;
   statusFilter?: 'up' | 'down';
+  remoteName?: string;
 }
 
 export const fetchMonitorRecentPings = async ({
@@ -34,6 +37,7 @@ export const fetchMonitorRecentPings = async ({
   size = 10,
   pageIndex = 0,
   statusFilter,
+  remoteName,
 }: MostRecentPingsRequest): Promise<PingsResponse> => {
   const locations = JSON.stringify([locationId]);
   const sort = 'desc';
@@ -49,6 +53,7 @@ export const fetchMonitorRecentPings = async ({
       size,
       pageIndex,
       status: statusFilter,
+      ...(remoteName ? { remoteName } : {}),
     },
     PingsResponseType
   );

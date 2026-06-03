@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -20,7 +22,10 @@ import {
   getRemoteSyncedIntegrationsInfoHandler,
 } from './handler';
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, isServerless?: boolean) => {
+  if (isServerless) {
+    return;
+  }
   router.versioned
     .get({
       path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.STATUS_PATTERN,
@@ -32,21 +37,33 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Get CCR Remote synced integrations status`,
+      summary: `Get remote synced integrations status`,
+      description:
+        'Get the synchronization status of all remote integrations across connected remote clusters.',
       options: {
-        tags: ['oas-tag:CCR Remote synced integrations'],
+        tags: ['oas-tag:Fleet remote synced integrations'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_remote_synced_integrations_status.yaml'),
+        },
         validate: {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -66,21 +83,33 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Get CCR Remote synced integrations status by outputId`,
+      summary: `Get remote synced integrations status by outputId`,
+      description:
+        'Get the synchronization status of remote integrations for a specific output by its ID.',
       options: {
-        tags: ['oas-tag:CCR Remote synced integrations'],
+        tags: ['oas-tag:Fleet remote synced integrations'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_remote_synced_integrations_info.yaml'),
+        },
         validate: {
           request: GetRemoteSyncedIntegrationsInfoRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

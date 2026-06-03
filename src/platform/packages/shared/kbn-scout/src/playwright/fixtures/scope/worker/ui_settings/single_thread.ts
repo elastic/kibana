@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { UiSettingValues } from '@kbn/kbn-client';
 import { isValidUTCDate, formatTime } from '../../../../utils';
 import { coreWorkerFixtures } from '../core_fixtures';
-import { UiSettingsFixture } from '.';
+import type { UiSettingsFixture } from '.';
 
 /**
  * This fixture provides a way to interact with Kibana UI settings.
@@ -32,6 +32,14 @@ export const uiSettingsFixture = coreWorkerFixtures.extend<{}, { uiSettings: UiS
           await kbnClient.uiSettings.update({
             'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${untcTo}"}`,
           });
+        },
+
+        setKibanaTimeZoneToUTC: async () => {
+          await kbnClient.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+        },
+
+        resetKibanaTimeZone: async () => {
+          await kbnClient.uiSettings.unset('dateFormat:tz');
         },
       };
 

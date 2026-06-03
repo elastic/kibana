@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -37,7 +38,6 @@ const DATAFEED_CONFIG: Datafeed = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('single metric viewer', function () {
@@ -45,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with single metric job', function () {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -139,7 +138,6 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
         await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
         await ml.testResources.setKibanaTimeZoneToUTC();
         await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);

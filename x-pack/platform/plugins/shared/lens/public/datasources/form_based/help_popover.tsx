@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { EuiLinkButtonProps, EuiPopoverProps, EuiWrappingPopoverProps } from '@elastic/eui';
 import {
   EuiIcon,
   EuiLink,
-  EuiLinkButtonProps,
   EuiPopover,
-  EuiPopoverProps,
   EuiWrappingPopover,
-  EuiWrappingPopoverProps,
   EuiPopoverTitle,
   EuiText,
   type UseEuiTheme,
@@ -21,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { css } from '@emotion/react';
-import { StartServices } from '../../types';
+import type { LensStartServices as StartServices } from '@kbn/lens-common';
 
 export const HelpPopoverButton = ({
   children,
@@ -34,7 +33,12 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="question" css={helpPopoverStyles.button(euiThemeContext)} />
+        <EuiIcon
+          size="s"
+          type="question"
+          css={helpPopoverStyles.button(euiThemeContext)}
+          aria-hidden={true}
+        />
         {children}
       </EuiLink>
     </EuiText>
@@ -80,6 +84,7 @@ export const HelpPopover = ({
 }) => {
   return (
     <EuiPopover
+      aria-label={title}
       anchorPosition={anchorPosition}
       button={button}
       closePopover={closePopover}
@@ -113,6 +118,7 @@ export const WrappingHelpPopover = ({
   return (
     <KibanaRenderContextProvider {...startServices}>
       <EuiWrappingPopover
+        aria-label={title}
         anchorPosition={anchorPosition}
         button={button}
         closePopover={closePopover}

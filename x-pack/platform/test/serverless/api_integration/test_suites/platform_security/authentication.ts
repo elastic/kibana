@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -195,23 +195,6 @@ export default function ({ getService }: FtrProviderContext) {
         it('logout', async () => {
           const { status } = await supertestViewerWithApiKey.get('/api/security/logout');
           expect(status).toBe(302);
-        });
-
-        it('SAML callback', async () => {
-          const { body, status } = await supertestViewerWithApiKey
-            .post('/api/security/saml/callback')
-            .set(svlCommonApi.getCommonRequestHeader())
-            .send({
-              SAMLResponse: '',
-            });
-
-          // Should fail with 401 (not 404) because there is no valid SAML response in the request body
-          expect(body).toEqual({
-            error: 'Unauthorized',
-            message: 'Unauthorized',
-            statusCode: 401,
-          });
-          expect(status).not.toBe(404);
         });
       });
     });

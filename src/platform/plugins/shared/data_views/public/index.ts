@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 export {
   ILLEGAL_CHARACTERS_KEY,
@@ -43,6 +43,7 @@ export type {
 } from './types';
 
 export { INDEX_PATTERN_TYPE } from './types';
+export type { IndexKind } from './types';
 
 export type {
   DataViewsServicePublic,

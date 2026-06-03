@@ -16,9 +16,11 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import {
@@ -125,12 +127,19 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
         return null;
       }
       return (
-        <EuiButtonIcon
-          onClick={() => toggleExpandedFeature(featureId)}
-          data-test-subj={`expandPrivilegeSummaryRow`}
-          aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-          iconType={expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
-        />
+        <EuiToolTip
+          content={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleExpandedFeature(featureId)}
+            data-test-subj={`expandPrivilegeSummaryRow`}
+            aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+            iconType={
+              expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'
+            }
+          />
+        </EuiToolTip>
       );
     },
   };
@@ -179,7 +188,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
             />
           );
         } else {
-          iconTip = <EuiIcon size="s" type="empty" />;
+          iconTip = <EuiIcon size="s" type="empty" aria-hidden={true} />;
         }
         return (
           <span
@@ -228,7 +237,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       >
         {category.euiIconType ? (
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type={category.euiIconType} />
+            <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={1}>
@@ -282,6 +291,13 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               ),
             };
           }, {})}
+          tableCaption={i18n.translate(
+            'xpack.security.management.editRole.privilegeSummaryTable.categoryCaption',
+            {
+              defaultMessage: 'Privileges for {categoryLabel}',
+              values: { categoryLabel: category.label },
+            }
+          )}
         />
       </EuiAccordion>
     );

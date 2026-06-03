@@ -33,13 +33,19 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const mockSave = jest.fn();
+const mockHasLibraryItemWithTitle = jest.fn().mockResolvedValue(false);
+const mockClose = jest.fn();
+
 describe('SavedObjectSaveModal', () => {
   it('should render', async () => {
     const { findByTestId, getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -56,8 +62,10 @@ describe('SavedObjectSaveModal', () => {
     const { getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -75,8 +83,10 @@ describe('SavedObjectSaveModal', () => {
     const { getByText, rerender } = render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -90,8 +100,10 @@ describe('SavedObjectSaveModal', () => {
     rerender(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -109,8 +121,10 @@ describe('SavedObjectSaveModal', () => {
     render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
+          onSave={mockSave}
+          onClose={mockClose}
+          lastSavedTitle={''}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -130,8 +144,10 @@ describe('SavedObjectSaveModal', () => {
       <EuiProvider>
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
-            onClose={() => void 0}
+            onClose={mockClose}
+            lastSavedTitle={''}
             title={'Saved Object title'}
             objectType="visualization"
             showDescription={true}
@@ -160,8 +176,10 @@ describe('SavedObjectSaveModal', () => {
       render(
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title="Saved Object"
             objectType="visualization"
             showDescription={true}
@@ -184,8 +202,10 @@ describe('SavedObjectSaveModal', () => {
       render(
         <I18nProvider>
           <SavedObjectSaveModal
+            hasLibraryItemWithTitle={mockHasLibraryItemWithTitle}
             onSave={onSave}
             onClose={() => {}}
+            lastSavedTitle={''}
             title="Saved Object [1]"
             objectType="visualization"
             showDescription={true}

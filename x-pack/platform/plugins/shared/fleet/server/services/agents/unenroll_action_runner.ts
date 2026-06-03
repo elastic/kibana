@@ -15,9 +15,12 @@ import type { Agent } from '../../types';
 
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
+import { outputType } from '../../../common/constants';
+
 import { invalidateAPIKeys } from '../api_keys';
 
 import { appContextService } from '../app_context';
+import { outputService } from '../output';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
@@ -113,7 +116,7 @@ export async function unenrollBatch(
     await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
   } else {
     // Create unenroll action for each agent
-    await createAgentAction(esClient, {
+    await createAgentAction(esClient, soClient, {
       id: actionId,
       agents: agentIds,
       created_at: now,
@@ -144,7 +147,7 @@ export async function updateActionsForForceUnenroll(
 ) {
   // creating an action doc so that force unenroll shows up in activity
   const currentSpaceId = getCurrentNamespace(soClient);
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: agentIds,
     created_at: new Date().toISOString(),
@@ -215,34 +218,67 @@ async function getAgentsWithoutActionResults(
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {
-  const apiKeys = agents.reduce<string[]>((keys, agent) => {
+  // Identify which output IDs are remote ES so their keys are not sent to the
+  // local cluster's invalidation API.
+  // Remote output keys are handled by Fleet Server using its own service-account
+  // credentials. Kibana cannot do this directly because the service token is
+  // stored in Fleet secrets, readable only by Fleet Server.
+  const allOutputIds = new Set<string>();
+  for (const agent of agents) {
+    if (agent.outputs) {
+      for (const outputId of Object.keys(agent.outputs)) {
+        allOutputIds.add(outputId);
+      }
+    }
+  }
+
+  const remoteOutputIds = new Set<string>();
+  await Promise.all(
+    [...allOutputIds].map(async (outputId) => {
+      try {
+        const output = await outputService.get(outputId);
+        if (output.type === outputType.RemoteElasticsearch) {
+          remoteOutputIds.add(outputId);
+        }
+      } catch {
+        // Output was deleted or not found, do nothing.
+      }
+    })
+  );
+
+  const localKeys: string[] = [];
+
+  for (const agent of agents) {
     if (agent.access_api_key_id) {
-      keys.push(agent.access_api_key_id);
+      localKeys.push(agent.access_api_key_id);
     }
     if (agent.default_api_key_id) {
-      keys.push(agent.default_api_key_id);
+      localKeys.push(agent.default_api_key_id);
     }
     if (agent.default_api_key_history) {
-      agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
+      agent.default_api_key_history.forEach((apiKey) => localKeys.push(apiKey.id));
     }
     if (agent.outputs) {
-      Object.values(agent.outputs).forEach((output) => {
-        if (output.api_key_id) {
-          keys.push(output.api_key_id);
+      for (const [outputId, outputEntry] of Object.entries(agent.outputs)) {
+        if (remoteOutputIds.has(outputId)) {
+          appContextService
+            .getLogger()
+            .debug(`Skipping local API key invalidation for remote output ${outputId}`);
+          continue;
         }
-        if (output.to_retire_api_key_ids) {
-          Object.values(output.to_retire_api_key_ids).forEach((apiKey) => {
-            if (apiKey?.id) {
-              keys.push(apiKey.id);
-            }
+        if (outputEntry.api_key_id) {
+          localKeys.push(outputEntry.api_key_id);
+        }
+        if (outputEntry.to_retire_api_key_ids) {
+          outputEntry.to_retire_api_key_ids.forEach((apiKey) => {
+            if (apiKey?.id) localKeys.push(apiKey.id);
           });
         }
-      });
+      }
     }
-    return keys;
-  }, []);
+  }
 
-  if (apiKeys.length) {
-    await invalidateAPIKeys(apiKeys);
+  if (localKeys.length) {
+    await invalidateAPIKeys(localKeys);
   }
 }

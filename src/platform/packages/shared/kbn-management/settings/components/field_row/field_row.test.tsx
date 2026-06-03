@@ -10,9 +10,9 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
-import { SettingType } from '@kbn/management-settings-types';
+import type { SettingType } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
+import type { KnownTypeToMetadata } from '@kbn/management-settings-types/metadata';
 
 import { DATA_TEST_SUBJ_SCREEN_READER_MESSAGE, FieldRow } from './field_row';
 import { wrap } from './mocks';
@@ -363,6 +363,42 @@ describe('Field', () => {
         );
 
         expect(queryByText('Technical preview')).not.toBeInTheDocument();
+      });
+
+      it('should render experimental badge if it is experimental', () => {
+        const { getByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting: { ...setting, experimental: true },
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(getByText('Experimental')).toBeInTheDocument();
+      });
+
+      it('should NOT render experimental badge if experimental is false or unspecified', () => {
+        const { queryByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting,
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(queryByText('Experimental')).not.toBeInTheDocument();
       });
 
       it('should render unsaved value if there are unsaved changes', () => {

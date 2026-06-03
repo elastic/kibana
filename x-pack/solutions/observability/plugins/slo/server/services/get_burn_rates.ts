@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/core/server';
-import { GetSLOBurnRatesResponse } from '@kbn/slo-schema';
-import { Duration } from '../domain/models';
+import { addTransactionLabels } from '@kbn/apm-utils';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/core/server';
+import type { GetSLOBurnRatesResponse } from '@kbn/slo-schema';
+import type { Duration } from '../domain/models';
 import { DefaultBurnRatesClient } from './burn_rates_client';
-import { SloDefinitionClient } from './slo_definition_client';
-import { KibanaSavedObjectsSLORepository } from './slo_repository';
+import { SLODefinitionClient } from './slo_definition_client';
+import { DefaultSLODefinitionRepository } from './slo_definition_repository';
+import { getSloApmLabels } from './utils';
 
 interface Services {
   soClient: SavedObjectsClientContract;
@@ -44,11 +46,12 @@ export async function getBurnRates({
 }: Params): Promise<GetSLOBurnRatesResponse> {
   const { soClient, esClient, logger } = services;
 
-  const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+  const repository = new DefaultSLODefinitionRepository(soClient, logger);
   const burnRatesClient = new DefaultBurnRatesClient(esClient);
-  const definitionClient = new SloDefinitionClient(repository, esClient, logger);
+  const definitionClient = new SLODefinitionClient(repository, esClient, logger);
 
   const { slo } = await definitionClient.execute(sloId, spaceId, remoteName);
+  addTransactionLabels(getSloApmLabels(slo));
   const burnRates = await burnRatesClient.calculate(slo, instanceId, windows, remoteName);
 
   return { burnRates };

@@ -8,47 +8,36 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  CONTROL_WIDTH_LARGE,
-  CONTROL_WIDTH_MEDIUM,
-  CONTROL_WIDTH_SMALL,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-constants';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
-export const controlWidthSchema = schema.oneOf(
-  [
-    schema.literal(CONTROL_WIDTH_SMALL),
-    schema.literal(CONTROL_WIDTH_MEDIUM),
-    schema.literal(CONTROL_WIDTH_LARGE),
-  ],
-  {
-    defaultValue: DEFAULT_CONTROL_WIDTH,
-    meta: { description: 'Minimum width of the control panel in the control group.' },
-  }
-);
+export const controlTitleSchema = schema.object({
+  title: schema.maybe(
+    schema.string({ meta: { description: 'A human-readable title for the control.' } })
+  ),
+});
 
-export const controlSchema = schema.object(
-  {
-    type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-    controlConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    id: schema.maybe(
-      schema.string({
-        meta: { description: 'The unique ID of the control.' },
-      })
-    ),
-    order: schema.number({
-      meta: {
-        description: 'The order of the control panel in the control group.',
-      },
-    }),
-    width: schema.maybe(controlWidthSchema),
-    grow: schema.maybe(
-      schema.boolean({
-        defaultValue: DEFAULT_CONTROL_GROW,
-        meta: { description: 'Expand width of the control panel to fit available space.' },
-      })
-    ),
-  },
-  { unknowns: 'allow' }
-);
+export const dataControlSchema = schema.object({
+  ...controlTitleSchema.getPropSchemas(),
+  data_view_id: schema.string({
+    meta: { description: 'The ID of the data view that provides field options for this control.' }, // this will generate a reference
+    minLength: 1,
+  }),
+  field_name: schema.string({
+    meta: { description: 'The name of the field in the data view that this control filters on.' },
+    minLength: 1,
+  }),
+  use_global_filters: schema.boolean({
+    defaultValue: DEFAULT_DATA_CONTROL_STATE.use_global_filters,
+    meta: {
+      description:
+        "When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.",
+    },
+  }),
+  ignore_validations: schema.boolean({
+    defaultValue: DEFAULT_DATA_CONTROL_STATE.ignore_validations,
+    meta: {
+      description:
+        'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.',
+    },
+  }),
+});

@@ -6,10 +6,17 @@
  */
 
 import React, { useRef } from 'react';
-import d3, { ZoomEvent } from 'd3';
+import type { ZoomEvent } from 'd3';
+import d3 from 'd3';
 import { css } from '@emotion/react';
 import { type UseEuiTheme, euiTextTruncate, useEuiTheme } from '@elastic/eui';
-import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
+import type {
+  Workspace,
+  WorkspaceNode,
+  TermIntersect,
+  ControlType,
+  WorkspaceEdge,
+} from '../../types';
 import { makeNodeId } from '../../services/persistence';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 import { noUserSelectStyles } from '../../styles';
@@ -146,6 +153,7 @@ export function GraphVisualization({
                     edgeClick(edge);
                   }}
                   className="gphEdge gphEdge--clickable"
+                  data-test-subj="graphClickableEdge"
                   style={{ strokeWidth: Math.max(edge.width, 15) }}
                   css={[
                     styles.edge(euiThemeContext),
@@ -184,6 +192,7 @@ export function GraphVisualization({
                     cx={kx}
                     cy={ky}
                     r={node.scaledSize}
+                    data-test-subj="graphNodeCircle"
                     css={[
                       css`
                         fill: ${node.color};

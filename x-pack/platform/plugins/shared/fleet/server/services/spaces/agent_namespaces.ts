@@ -6,15 +6,20 @@
  */
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import type { Agent } from '../../types';
 
 import { isSpaceAwarenessEnabled } from './helpers';
 
-export const DEFAULT_NAMESPACES_FILTER = `(namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*)`;
+export const DEFAULT_NAMESPACES_FILTER = `(namespaces:"${DEFAULT_SPACE_ID}" or namespaces:"${ALL_SPACES_ID}" or not namespaces:*)`;
 
 export async function isAgentInNamespace(agent: Agent, namespace?: string) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness) {
+    return true;
+  }
+
+  if (agent.namespaces?.includes(ALL_SPACES_ID)) {
     return true;
   }
 
@@ -37,5 +42,30 @@ export async function agentsKueryNamespaceFilter(namespace?: string) {
   if (!useSpaceAwareness || !namespace) {
     return;
   }
-  return namespace === DEFAULT_SPACE_ID ? DEFAULT_NAMESPACES_FILTER : `namespaces:(${namespace})`;
+  return namespace === DEFAULT_SPACE_ID
+    ? DEFAULT_NAMESPACES_FILTER
+    : `namespaces:(${namespace}) or namespaces:"*"`;
+}
+
+/**
+ * Safely combines a namespace filter with a user-provided kuery by wrapping
+ * each part in parentheses before joining with AND. This prevents KQL operator
+ * precedence issues where OR clauses in the user kuery could bypass the
+ * namespace filter.
+ */
+export function buildFilterWithNamespace(
+  namespaceFilter: string | undefined,
+  kuery: string | undefined
+): string | undefined {
+  const filters: string[] = [];
+  if (namespaceFilter) {
+    filters.push(namespaceFilter);
+  }
+  if (kuery && kuery.trim() !== '') {
+    filters.push(kuery);
+  }
+  if (filters.length === 0) {
+    return undefined;
+  }
+  return filters.map((filter) => `(${filter})`).join(' AND ');
 }

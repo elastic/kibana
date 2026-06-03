@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
@@ -102,10 +102,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const charts = await pageObjects.infraMetricsExplorer.getCharts();
         const chartType = await pageObjects.infraMetricsExplorer.getChartType(charts[0]);
         expect(chartType).to.equal('bar chart');
-      });
-
-      it('renders the metrics explorer survey link', async () => {
-        await pageObjects.infraMetricsExplorer.ensureMetricsExplorerFeedbackLinkIsVisible();
       });
 
       it('should not allow adding more than 20 metrics', async () => {

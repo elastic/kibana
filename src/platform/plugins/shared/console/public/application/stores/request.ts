@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Reducer } from 'react';
+import type { Reducer } from 'react';
 import { cloneDeep } from 'lodash';
-import { BaseResponseType } from '../../types/common';
-import { RequestResult } from '../hooks/use_send_current_request/send_request';
+import type { BaseResponseType } from '../../types/common';
+import type { RequestResult } from '../hooks/use_send_current_request/send_request';
 
 export type Actions =
   | { type: 'sendRequest'; payload: undefined }
+  | { type: 'setRequestInFlight'; payload: boolean }
   | { type: 'cleanRequest'; payload: undefined }
   | { type: 'requestSuccess'; payload: { data: RequestResult[] } }
   | { type: 'requestFail'; payload: RequestResult<string> | undefined };
@@ -42,6 +43,11 @@ export const reducer: Reducer<Store, Actions> = (state, action) => {
   if (action.type === 'sendRequest') {
     draft.requestInFlight = true;
     draft.lastResult = initialResultValue;
+    return draft;
+  }
+
+  if (action.type === 'setRequestInFlight') {
+    draft.requestInFlight = action.payload;
     return draft;
   }
 

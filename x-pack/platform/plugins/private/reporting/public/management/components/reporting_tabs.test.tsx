@@ -7,13 +7,14 @@
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 
-import ReportingTabs, { MatchParams, ReportingTabsProps } from './reporting_tabs';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { MatchParams, ReportingTabsProps } from './reporting_tabs';
+import ReportingTabs from './reporting_tabs';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   applicationServiceMock,
   coreMock,
@@ -21,18 +22,18 @@ import {
   notificationServiceMock,
 } from '@kbn/core/public/mocks';
 import { InternalApiClientProvider, ReportingAPIClient } from '@kbn/reporting-public';
-import { Observable } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { Observable } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-types';
+import type { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataService } from '@kbn/controls-plugin/public/services/kibana_services';
 import { shareService } from '@kbn/dashboard-plugin/public/services/kibana_services';
-import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
-import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
+import type { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
+import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { mockConfig } from '../__test__/report_listing.test.helpers';

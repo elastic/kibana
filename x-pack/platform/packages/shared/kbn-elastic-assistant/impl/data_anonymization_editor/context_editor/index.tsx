@@ -20,15 +20,19 @@ import { getColumns } from './get_columns';
 import { getSelectionColumns } from './get_columns/get_selection_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
-import { ContextEditorRow, FIELDS } from './types';
+import type { ContextEditorRow } from './types';
+import { FIELDS } from './types';
 import { useAssistantContext } from '../../assistant_context';
-import { ServerSidePagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
+import type { ServerSidePagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
 import type { UseSelectionReturn } from './selection/use_selection';
 import type {
   HandlePageReset,
   HandleRowReset,
   OnListUpdated,
 } from '../../assistant/settings/use_settings_updater/use_anonymization_updater';
+
+import { ANONYMIZATION_FIELDS_TABLE_CAPTION } from './translations';
+
 import type { FindAnonymizationFieldsClientResponse } from './selection/types';
 
 const Wrapper = styled.div`
@@ -137,7 +141,6 @@ const ContextEditorComponent: React.FC<Props> = ({
     [
       anonymizationPageFields.data,
       anonymizationPageFields.total,
-      compressed,
       handlePageChecked,
       handlePageReset,
       handlePageUnchecked,
@@ -145,9 +148,10 @@ const ContextEditorComponent: React.FC<Props> = ({
       handleRowReset,
       handleRowUnChecked,
       hasUpdateAIAssistantAnonymization,
+      selectedFields,
+      compressed,
       onListUpdated,
       rawData,
-      selectedFields,
     ]
   );
   const toolbar = useMemo(
@@ -178,6 +182,7 @@ const ContextEditorComponent: React.FC<Props> = ({
       <EuiSearchBar box={search.box} filters={search.filters} onChange={handleSearch} />
       {hasUpdateAIAssistantAnonymization ? toolbar : undefined}
       <EuiBasicTable
+        tableCaption={ANONYMIZATION_FIELDS_TABLE_CAPTION}
         columns={columns}
         compressed={compressed}
         data-test-subj="contextEditor"

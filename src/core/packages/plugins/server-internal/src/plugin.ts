@@ -24,13 +24,8 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { toContainerModule } from '@kbn/core-di-internal';
-import {
-  CoreSetup as CoreSetupService,
-  CoreStart as CoreStartService,
-  PluginInitializer as PluginInitializerService,
-} from '@kbn/core-di-server';
+import { Setup, Start } from '@kbn/core-di';
+import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -112,7 +107,7 @@ export class PluginWrapper<
   public async init() {
     this.log.debug('Initializing plugin');
 
-    this.definition = this.getPluginDefinition();
+    this.definition = await this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
 
     if (!('plugin' in this.definition || 'module' in this.definition)) {
@@ -144,9 +139,7 @@ export class PluginWrapper<
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
       this.container.loadSync(this.definition.module);
-      this.container.loadSync(toContainerModule(this.initializerContext, PluginInitializerService));
-      this.container.loadSync(toContainerModule(setupContext, CoreSetupService));
-      this.container.loadSync(toContainerModule(plugins, PluginSetup));
+      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [
@@ -171,9 +164,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.loadSync(toContainerModule(startContext, CoreStartService));
-    this.container?.loadSync(toContainerModule(plugins, PluginStart));
-
+    this.container?.loadSync(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.get<TStart>(Start),
@@ -205,11 +196,11 @@ export class PluginWrapper<
     this.container = undefined;
   }
 
-  public getConfigDescriptor(): PluginConfigDescriptor | null {
+  public async getConfigDescriptor(): Promise<PluginConfigDescriptor | null> {
     if (!this.manifest.server) {
       return null;
     }
-    const definition = this.getPluginDefinition();
+    const definition = await this.getPluginDefinition();
     if (!definition.config) {
       this.log.debug(`Plugin "${this.name}" does not export "config" (${this.path}).`);
       return null;
@@ -222,8 +213,10 @@ export class PluginWrapper<
     return config;
   }
 
-  protected getPluginDefinition(): PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart> {
-    return require(join(this.path, 'server')) ?? {};
+  protected async getPluginDefinition(): Promise<
+    PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  > {
+    return (await import(join(this.path, 'server'))) ?? {};
   }
 
   protected async createPluginInstance() {

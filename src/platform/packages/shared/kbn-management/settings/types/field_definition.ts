@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
-import { UiCounterMetricType } from '@kbn/analytics';
-import {
+import type { UiCounterMetricType } from '@kbn/analytics';
+import type {
   DeprecationSettings,
   TechnicalPreviewSettings,
   UiSettingsSolutions,
 } from '@kbn/core-ui-settings-common';
 
-import { KnownTypeToValue, SettingType } from './setting_type';
+import type { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
  * A {@link FieldDefinition} adapts a {@link UiSettingMetadata} object to be more
@@ -98,10 +98,16 @@ export interface FieldDefinition<
    */
   solutionViews?: UiSettingsSolutions;
   /**
-   * Technical preview information for the field
+   * Technical preview information for the field.
+   * A setting should carry at most one maturity badge — avoid setting both this and {@link FieldDefinition.experimental}.
    * @see {@link TechnicalPreviewSettings}
    */
   technicalPreview?: TechnicalPreviewSettings;
+  /**
+   * Experimental information for the field. Supports the same options as {@link TechnicalPreviewSettings}.
+   * A setting should carry at most one maturity badge — avoid setting both this and {@link FieldDefinition.technicalPreview}.
+   */
+  experimental?: TechnicalPreviewSettings;
 }
 
 /**

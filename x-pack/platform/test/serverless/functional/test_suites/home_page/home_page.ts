@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getService('svlCommonNavigation');
 
   describe('home page', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await svlCommonPage.loginAsViewer();
     });

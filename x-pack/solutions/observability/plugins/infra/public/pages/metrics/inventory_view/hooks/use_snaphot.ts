@@ -7,6 +7,8 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -14,26 +16,17 @@ import type {
 } from '../../../../../common/http_api/snapshot_api';
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
-export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries'> {
+export interface UseSnapshotRequest extends Omit<SnapshotRequest, 'timerange' | 'schema'> {
   currentTime: number;
-  includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
+  schema?: DataSchemaFormat | null;
 }
 
 export function useSnapshot(
   props: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
-  const payload = useMemo(
-    () =>
-      JSON.stringify(
-        buildPayload({
-          ...props,
-        })
-      ),
-    [props]
-  );
+  const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
 
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
@@ -66,7 +59,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     dropPartialBuckets = true,
     kuery,
     groupBy = null,
-    includeTimeseries = true,
+    includeTimeseries,
     metrics,
     nodeType,
     overrideCompositeSize,
@@ -87,7 +80,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
-    schema,
+    schema: schema ?? DEFAULT_SCHEMA,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

@@ -10,15 +10,15 @@ import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/swimlane/constants';
 
-const CONNECTOR_TYPE_ID = '.swimlane';
 let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }
@@ -26,7 +26,7 @@ beforeAll(() => {
 
 describe('connectorTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
-    expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
@@ -39,7 +39,7 @@ describe('swimlane action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
         'subActionParams.incident.alertId': [],
@@ -52,7 +52,7 @@ describe('swimlane action params validation', () => {
       subActionParams: { incident: {} },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': ['Rule name is required.'],
         'subActionParams.incident.alertId': ['Alert ID is required.'],
@@ -65,7 +65,7 @@ describe('swimlane action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
         'subActionParams.incident.alertId': [],

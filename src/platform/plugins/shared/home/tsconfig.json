@@ -1,11 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "../../../../../typings/emotion.d.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/data-views-plugin",
     "@kbn/custom-integrations-plugin",
@@ -27,13 +28,12 @@
     "@kbn/es-query",
     "@kbn/ebt-tools",
     "@kbn/core-analytics-server",
-    "@kbn/storybook",
     "@kbn/shared-ux-router",
     "@kbn/core-http-common",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ROWS_NEEDED_FOR_PAGINATION = 10;
 const DEFAULT_ROWS_PER_PAGE = 50;
@@ -116,9 +116,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('Previous page button is disabled', async () => {
-          const prevButtonDisabledValue =
-            await observability.alerts.pagination.getPrevButtonDisabledValue();
-          expect(prevButtonDisabledValue).to.be('true');
+          await observability.alerts.common.alertDataHasLoaded();
+          await retry.try(async () => {
+            const prevButtonDisabledValue =
+              await observability.alerts.pagination.getPrevButtonDisabledValue();
+            expect(prevButtonDisabledValue).to.be('true');
+          });
         });
 
         it('Goes to nth page', async () => {

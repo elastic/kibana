@@ -6,12 +6,13 @@
  */
 
 import { createHash } from 'crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { ReindexSavedObject, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexSavedObject } from './types';
 
 export type Credential = Record<string, any>;
 
@@ -21,7 +22,7 @@ const getHash = (reindexOp: ReindexSavedObject) => {
   // This needs further investigation, see: https://github.com/elastic/kibana/issues/123752
   const { reindexOptions, ...attributes } = reindexOp.attributes;
   return createHash('sha256')
-    .update(stringify({ id: reindexOp.id, ...attributes }))
+    .update(stableStringify({ id: reindexOp.id, ...attributes }))
     .digest('base64');
 };
 

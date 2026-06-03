@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MutableRefObject } from 'react';
-import type { monaco } from '@kbn/monaco';
-import type { CSSProperties, HTMLAttributes } from 'react';
-
-import type { ExpressionFunction } from '@kbn/expressions-plugin/common';
-
 import type { OnSaveProps, SaveModalState } from '@kbn/saved-objects-plugin/public';
 
 interface SaveModalDocumentInfo {
@@ -21,56 +15,51 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
-export interface SaveModalDashboardProps {
+/** The options for saving a dashboard. */
+export type DashboardSavingOption = 'new' | 'existing' | null;
+
+interface SaveModalDashboardBaseProps<SaveResponse = void> {
+  /** Information about the document being saved. */
   documentInfo: SaveModalDocumentInfo;
-  canSaveByReference: boolean;
+  /** The type of object being saved. */
   objectType: string;
+  /** Callback invoked when the modal is closed. */
   onClose: () => void;
-  onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
+  /** Callback invoked when the save action is triggered. */
+  onSave: (
+    props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }
+  ) => Promise<SaveResponse>;
+  /** Optional tag selector element or render function. */
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-  // include a message if the user has to copy on save
+  /** Message displayed when the user must copy on save. */
   mustCopyOnSaveMessage?: string;
+  /** Custom title for the save modal. */
+  customModalTitle?: React.ReactNode;
+  /** Whether to hide the dashboard destination options. */
+  hideDashboardOptions?: boolean;
+  /** Whether to always save by reference and hide the add-to-library checkbox. */
+  forceSaveByReference?: boolean;
+  /** The initially selected dashboard saving option. */
+  initialDashboardOption?: DashboardSavingOption;
+  /** Callback invoked when the copy-on-save option changes. */
+  onCopyOnSaveChangeCb?: (newCopyOnSave: boolean) => void;
 }
 
-/**
- * A type for any React Ref that can be used to store a reference to the Monaco editor within the
- * ExpressionInput.
- */
-export type ExpressionInputEditorRef = MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
-
-export type OnExpressionInputEditorDidMount = (
-  editor: monaco.editor.IStandaloneCodeEditor | null
-) => void;
-
-/**
- * React Props for the ExpressionInput component.
- */
-export interface ExpressionInputProps
-  extends Pick<HTMLAttributes<HTMLDivElement>, 'style' | 'className'> {
-  /** A collection of ExpressionFunctions to use in the autocomplete */
-  expressionFunctions: ExpressionFunction[];
-
-  /** Value of expression */
-  expression: string;
-
-  /** Function invoked when expression value is changed */
-  onChange: (value?: string) => void;
-
-  /** In full screen mode or not */
-  isCompact?: boolean;
-
-  /**
-   * The CodeEditor requires a set height, either on itself, or set to 100% with the parent
-   * container controlling the height.  This prop is required so consumers understand this
-   * limitation and are intentional in using the component.
-   */
-  height: CSSProperties['height'];
-
-  /**
-   * An optional ref in order to access the Monaco editor instance from consuming components,
-   * (e.g. to determine if the editor is focused, etc).
-   */
-  editorRef?: ExpressionInputEditorRef;
-
-  onEditorDidMount?: OnExpressionInputEditorDidMount;
+interface SaveModalDashboardByValueProps<SaveResponse = void>
+  extends SaveModalDashboardBaseProps<SaveResponse> {
+  /** object can not be saved by reference. */
+  canSaveByReference: false;
 }
+
+interface SaveModalDashboardByValueAndByReferenceProps<SaveResponse = void>
+  extends SaveModalDashboardBaseProps<SaveResponse> {
+  /** object can be saved by reference. */
+  canSaveByReference: true;
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
+  lastSavedTitle: string;
+}
+
+/** Props for the save modal with dashboard options. */
+export type SaveModalDashboardProps<SaveResponse = void> =
+  | SaveModalDashboardByValueProps<SaveResponse>
+  | SaveModalDashboardByValueAndByReferenceProps<SaveResponse>;

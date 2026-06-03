@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth } from '@kbn/esql-ast';
-import { QueryOperator, Params, Query } from '../types';
+import { synth } from '@elastic/esql';
+import type { QueryOperator, Params, Query } from '../types';
 
 export function append({ command, params }: { command: string; params?: Params }): QueryOperator {
   return (source): Query => {

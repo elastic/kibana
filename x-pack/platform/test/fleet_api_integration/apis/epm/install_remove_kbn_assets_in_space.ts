@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
         } catch (err) {
           resDashboard = err;
         }
-        expect(resDashboard.response.data.statusCode).equal(404);
+        expect(resDashboard.status).equal(404);
 
         let resVis;
         try {
@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
         } catch (err) {
           resVis = err;
         }
-        expect(resVis.response.data.statusCode).equal(404);
+        expect(resVis.status).equal(404);
         let resSearch;
         try {
           resVis = await kibanaServer.savedObjects.get({
@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         } catch (err) {
           resSearch = err;
         }
-        expect(resSearch.response.data.statusCode).equal(404);
+        expect(resSearch.status).equal(404);
       });
     });
   });

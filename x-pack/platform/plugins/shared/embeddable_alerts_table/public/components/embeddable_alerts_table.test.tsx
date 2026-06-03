@@ -8,10 +8,10 @@
 /* eslint-disable no-console */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from './embeddable_alerts_table';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
@@ -165,8 +165,6 @@ describe('EmbeddableAlertsTable', () => {
           height: 'flex',
           variant: 'transparent',
         },
-        flyoutOwnsFocus: true,
-        flyoutPagination: false,
         openLinksInNewTab: true,
         browserFields: {},
       }),
@@ -272,8 +270,6 @@ describe('EmbeddableAlertsTable', () => {
           height: 'flex',
           variant: 'transparent',
         },
-        flyoutOwnsFocus: true,
-        flyoutPagination: false,
         openLinksInNewTab: true,
         browserFields: {},
       }),
@@ -327,4 +323,88 @@ describe('EmbeddableAlertsTable', () => {
       );
     }
   );
+
+  it('should forward `lastReloadRequestTime` to the alerts table to trigger re-queries', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EmbeddableAlertsTable
+          id={TABLE_ID}
+          timeRange={{
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-01T01:00:00.000Z',
+          }}
+          lastReloadRequestTime={1234}
+          services={services}
+        />
+      </QueryClientProvider>
+    );
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+    expect(mockAlertsTable).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lastReloadRequestTime: 1234 }),
+      {}
+    );
+  });
+
+  it("should propagate the table's loading state through `onLoadingChange`", async () => {
+    const onLoadingChange = jest.fn();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EmbeddableAlertsTable
+          id={TABLE_ID}
+          timeRange={{
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-01T01:00:00.000Z',
+          }}
+          onLoadingChange={onLoadingChange}
+          services={services}
+        />
+      </QueryClientProvider>
+    );
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+
+    const { onUpdate } = mockAlertsTable.mock.calls.at(-1)![0];
+
+    act(() => {
+      onUpdate({ isLoading: true });
+    });
+    expect(onLoadingChange).toHaveBeenLastCalledWith(true);
+
+    act(() => {
+      onUpdate({ isLoading: false });
+    });
+    expect(onLoadingChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('should keep a stable query reference across re-renders when the time range values are unchanged', async () => {
+    const sharedProps = {
+      id: TABLE_ID,
+      timeRange: {
+        from: '2025-01-01T00:00:00.000Z',
+        to: '2025-01-01T01:00:00.000Z',
+      },
+      services,
+    };
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <EmbeddableAlertsTable {...sharedProps} />
+      </QueryClientProvider>
+    );
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+    const firstQuery = mockAlertsTable.mock.calls.at(-1)![0].query;
+
+    // Re-render with a brand new `timeRange` object that carries identical `from`/`to`
+    // values, mimicking the fresh reference `useFetchContext` returns on every fetch.
+    // The memoized query must keep the same reference to avoid infinite re-query loops.
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <EmbeddableAlertsTable
+          {...sharedProps}
+          timeRange={{ from: sharedProps.timeRange.from, to: sharedProps.timeRange.to }}
+        />
+      </QueryClientProvider>
+    );
+    const secondQuery = mockAlertsTable.mock.calls.at(-1)![0].query;
+
+    expect(secondQuery).toBe(firstQuery);
+  });
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { CriteriaWithPagination, EuiInMemoryTableProps, EuiTableSortingType } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiInMemoryTableProps,
+  EuiTableSortingType,
+} from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { DEFAULT_ASSISTANT_NAMESPACE } from '../../../../../assistant_context/constants';

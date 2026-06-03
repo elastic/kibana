@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
 import { useUptimeDataView } from '../../../../hooks';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   query: string;
@@ -24,9 +24,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
 
   const {
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
 
   const [inputVal, setInputVal] = useState<string>(query);
@@ -39,7 +37,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
   return (
     <QueryStringInput
       indexPatterns={dataView ? [dataView] : []}
-      iconType="search"
+      iconType="magnify"
       isClearable={true}
       onChange={(queryN) => {
         setInputVal(queryN?.query as string);

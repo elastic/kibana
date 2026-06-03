@@ -12,10 +12,14 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useDismissableTour } from '../../../../hooks/use_dismissable_tour';
 import type { Section } from '../../sections';
 import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
+import { InlineReleaseBadge } from '../../../../components';
 import { WithHeaderLayout } from '../../../../layouts';
+import { TourManagerProvider } from '../../../../hooks/use_tour_manager';
 
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
 import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
+
+import { ExperimentalFeaturesService } from '../../services';
 
 import { DefaultPageTitle } from './default_page_title';
 
@@ -109,17 +113,31 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       href: getHref('settings'),
       'data-test-subj': 'fleet-settings-tab',
     },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.appNavigation.collectorsLinkText"
+          defaultMessage="Collectors"
+        />
+      ),
+      isHidden: !ExperimentalFeaturesService.get().enableOtelUI,
+      isSelected: section === 'collectors',
+      href: getHref('collectors'),
+      'data-test-subj': 'fleet-collectors-tab',
+      append: <InlineReleaseBadge release="preview" />,
+    },
   ]
     // Removed hidden tabs
     .filter(({ isHidden }) => !isHidden)
     .map(({ isHidden, ...tab }) => tab);
 
   return (
-    <>
+    <TourManagerProvider>
       {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
         <EuiCallOut
+          announceOnMount
           size="s"
-          iconType="cheer"
+          iconType="popper"
           onDismiss={granularPrivilegesCallout.dismiss}
           title={
             <>
@@ -128,7 +146,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 defaultMessage="We've added new privileges that let you define more granularly who can view or edit Fleet agents, policies, and settings. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
-                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external>
+                    <EuiLink href={docLinks.links.fleet.roleAndPrivileges} external target="_blank">
                       <strong>
                         <FormattedMessage
                           id="xpack.fleet.granularPrivileges.learnMoreLinkText"
@@ -149,6 +167,6 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       {canEnableAutomaticAgentUpgrades ? (
         <AutoUpgradeAgentsTour anchor="#fleet-agent-policies-tab" />
       ) : null}
-    </>
+    </TourManagerProvider>
   );
 };

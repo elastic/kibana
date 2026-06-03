@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_OVERVIEW_VIEW,
-  MonitorOverviewState,
-  OverviewView,
-  isOverviewView,
-} from '../../state';
+import type { MonitorOverviewState, OverviewView } from '../../state';
+import { DEFAULT_OVERVIEW_VIEW, isOverviewView } from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
-import { CLIENT_DEFAULTS, UseLogicalAndField } from '../../../../../common/constants';
+import type { UseLogicalAndField } from '../../../../../common/constants';
+import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
 // TODO: Change for Synthetics App if needed (Copied from legacy_uptime)
@@ -31,7 +28,14 @@ export interface SyntheticsUrlParams {
   tags?: string[];
   locations?: string[];
   monitorTypes?: string[] | string;
+  statusCodes?: string[];
+  configIds?: string[];
   status?: string[];
+  // Certificates page quick filters, persisted so a filtered view is shareable.
+  browserResourceTypes?: string[];
+  party?: string[];
+  issuers?: string[];
+  expiringWithin?: string;
   locationId?: string;
   projects?: string[] | string;
   schedules?: string[] | string;
@@ -42,6 +46,7 @@ export interface SyntheticsUrlParams {
   spaceId?: string;
   useLogicalAndFor?: UseLogicalAndField[];
   view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
+  remoteName?: string;
 }
 
 const { ABSOLUTE_DATE_RANGE_START, ABSOLUTE_DATE_RANGE_END, SEARCH, FILTERS, STATUS_FILTER } =
@@ -90,6 +95,8 @@ export const getSupportedUrlParams = (params: {
     query,
     tags,
     monitorTypes,
+    statusCodes,
+    configIds,
     locations,
     locationId,
     projects,
@@ -100,6 +107,11 @@ export const getSupportedUrlParams = (params: {
     spaceId,
     useLogicalAndFor,
     view,
+    remoteName,
+    browserResourceTypes,
+    party,
+    issuers,
+    expiringWithin,
   } = filteredParams;
 
   return {
@@ -126,6 +138,8 @@ export const getSupportedUrlParams = (params: {
     query: query || '',
     tags: parseFilters(tags),
     monitorTypes: parseFilters(monitorTypes),
+    statusCodes: parseFilters(statusCodes),
+    configIds: parseFilters(configIds),
     locations: parseFilters(locations),
     projects: parseFilters(projects),
     schedules: parseFilters(schedules),
@@ -134,6 +148,11 @@ export const getSupportedUrlParams = (params: {
     spaceId: spaceId || undefined,
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
+    remoteName: remoteName || undefined,
+    browserResourceTypes: parseFilters(browserResourceTypes),
+    party: parseFilters(party),
+    issuers: parseFilters(issuers),
+    expiringWithin: expiringWithin || undefined,
   };
 };
 

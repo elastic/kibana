@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import type { ServiceHealthStatusesResponse } from './get_health_statuses';
-import type { ServicesWithoutTransactionsResponse } from './get_services_without_transactions';
+import type { SloStatus } from '../../../../common/service_inventory';
+import type { ServiceAnomalyScoresResponse } from './get_service_anomaly_scores';
 import type { ServiceAlertsResponse } from './get_service_alerts';
+import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import type { ServiceHealthStatus } from '../../../../common/service_health_status';
 
 export interface MergedServiceStat {
   serviceName: string;
@@ -22,43 +21,45 @@ export interface MergedServiceStat {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
+  anomalyScore?: number;
   alertsCount?: number;
+  sloStatus?: SloStatus;
+  sloCount?: number;
 }
 
 export function mergeServiceStats({
   serviceStats,
-  servicesWithoutTransactions,
-  healthStatuses,
+  anomalyScores,
   alertCounts,
+  sloStats,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
-  servicesWithoutTransactions: ServicesWithoutTransactionsResponse['services'];
-  healthStatuses: ServiceHealthStatusesResponse;
+  anomalyScores: ServiceAnomalyScoresResponse;
   alertCounts: ServiceAlertsResponse;
+  sloStats: ServiceSloStatsResponse;
 }): MergedServiceStat[] {
-  const foundServiceNames = serviceStats.map(({ serviceName }) => serviceName);
+  const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  const servicesWithOnlyMetricDocuments = servicesWithoutTransactions.filter(
-    ({ serviceName }) => !foundServiceNames.includes(serviceName)
+  // Make sure to exclude anomaly scores, alerts, and SLO stats from services
+  // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
+  const matchedAnomalyScores = anomalyScores.filter(({ serviceName }) =>
+    allServiceNames.includes(serviceName)
   );
 
-  const allServiceNames = foundServiceNames.concat(
-    servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
+  const matchedAlertCounts = alertCounts.filter(({ serviceName }) =>
+    allServiceNames.includes(serviceName)
   );
 
-  // make sure to exclude health statuses from services
-  // that are not found in APM data
-  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+  const matchedSloStats = sloStats.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
   return joinByKey(
     asMutableArray([
       ...serviceStats,
-      ...servicesWithoutTransactions,
-      ...matchedHealthStatuses,
-      ...alertCounts,
+      ...matchedAnomalyScores,
+      ...matchedAlertCounts,
+      ...matchedSloStats,
     ] as const),
     'serviceName',
     function merge(a, b) {
@@ -70,7 +71,7 @@ export function mergeServiceStats({
         ...a,
         ...b,
         ...{ agentName: agentNameA || agentNameB },
-        environments: uniq(aEnvs.concat(bEnvs)),
+        environments: [...new Set(aEnvs.concat(bEnvs))],
       };
     }
   );

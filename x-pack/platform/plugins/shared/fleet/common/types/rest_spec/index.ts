@@ -8,6 +8,7 @@
 export type * from './agent_policy';
 export * from './agent';
 export type * from './app';
+export type * from './cloud_connector';
 export type * from './common';
 export type * from './data_stream';
 export type * from './download_sources';
@@ -21,5 +22,8 @@ export type * from './settings';
 export type * from './health_check';
 export type * from './fleet_server_hosts';
 export type * from './standalone_agent_api_key';
+export type * from './managed_otlp_api_key';
 export type * from './remote_synced_integrations';
 export type * from './custom_integrations';
+export type * from './agentless_policy';
+export type * from './collector';

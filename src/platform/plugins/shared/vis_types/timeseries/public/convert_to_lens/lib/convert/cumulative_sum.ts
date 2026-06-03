@@ -11,7 +11,7 @@ import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { SUPPORTED_METRICS, getPipelineSeriesFormula } from '../metrics';
 import { createFormulaColumn } from './formula';
 import { computeParentPipelineColumns } from './parent_pipeline';
-import { CommonColumnsConverterArgs } from './types';
+import type { CommonColumnsConverterArgs } from './types';
 
 export const convertToCumulativeSumColumns = (
   { series, metrics, dataView }: CommonColumnsConverterArgs,

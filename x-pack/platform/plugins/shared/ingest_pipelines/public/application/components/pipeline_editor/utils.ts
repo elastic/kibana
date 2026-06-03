@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorSelector } from './types';
+import type { ProcessorSelector } from './types';
 
 export const selectorToDataTestSubject = (selector: ProcessorSelector) => selector.join('>');
 
@@ -156,6 +156,7 @@ export const collapseEscapedStrings = (data: string): string => {
 const fieldToConvertToJson = [
   'inference_config',
   'field_map',
+  'input_output',
   'params',
   'pattern_definitions',
   'processor',

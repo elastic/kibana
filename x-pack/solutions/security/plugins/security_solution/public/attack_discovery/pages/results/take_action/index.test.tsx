@@ -8,21 +8,42 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
+jest.mock('@kbn/elastic-assistant-common', () => {
+  const actual = jest.requireActual('@kbn/elastic-assistant-common');
+  return {
+    ...actual,
+    // `TakeAction` always generates markdown; keep it cheap for unit tests.
+    getAttackDiscoveryMarkdown: jest.fn(() => 'markdown'),
+  };
+});
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
 import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
 import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TakeAction } from '.';
+
+const defaultAgentBuilderAvailability = {
+  isAgentBuilderEnabled: true,
+  hasAgentBuilderPrivilege: true,
+  isAgentChatExperienceEnabled: false,
+  hasValidAgentBuilderLicense: true,
+};
 
 const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
-
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn().mockReturnValue(defaultAgentBuilderAvailability),
+}));
 jest.mock('../../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(),
 }));
 
 const mockUseAssistantAvailability = useAssistantAvailability as jest.Mock;
+const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability);
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -30,10 +51,6 @@ jest.mock('../../../../common/lib/kibana', () => ({
 
 jest.mock('../../use_attack_discovery_bulk', () => ({
   useAttackDiscoveryBulk: jest.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
-}));
-
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn(() => ({ attackDiscoveryAlertsEnabled: true })),
 }));
 
 jest.mock('./use_add_to_case', () => ({
@@ -45,7 +62,11 @@ jest.mock('./use_add_to_existing_case', () => ({
 }));
 
 jest.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: jest.fn(() => ({ showAssistantOverlay: jest.fn(), disabled: false })),
+  useViewInAiAssistant: jest.fn(() => ({
+    showAssistantOverlay: jest.fn(),
+    disabled: false,
+    isAssistantVisible: true,
+  })),
 }));
 
 jest.mock('./use_update_alerts_status', () => ({
@@ -56,6 +77,17 @@ jest.mock('../../utils/is_attack_discovery_alert', () => ({
   isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
     ad?.alertWorkflowStatus !== undefined,
 }));
+
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+
+jest.mock(
+  '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items',
+  () => ({
+    useAttackRunWorkflowContextMenuItems: jest.fn(() => ({ items: [], panels: [] })),
+  })
+);
+
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
@@ -68,7 +100,7 @@ const defaultProps = {
 describe('TakeAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    mockUseAgentBuilderAvailability.mockReturnValue(defaultAgentBuilderAvailability);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -100,15 +132,14 @@ describe('TakeAction', () => {
           },
           ui: {},
         },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
-        },
       },
     });
 
     mockUseAssistantAvailability.mockReturnValue({
-      hasSearchAILakeConfigurations: false, // AI for SOC is not configured
+      hasSearchAILakeConfigurations: false, // EASE is not configured
     });
+
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
   it('renders the Add to new case action', () => {
@@ -145,6 +176,25 @@ describe('TakeAction', () => {
     openPopover();
 
     expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
+  });
+
+  it('renders the Add to chat action disabled when license is invalid', () => {
+    mockUseAgentBuilderAvailability.mockReturnValue({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    });
+
+    render(
+      <TestProviders>
+        <TakeAction {...defaultProps} />
+      </TestProviders>
+    );
+
+    openPopover();
+
+    expect(screen.getByTestId('viewInAgentBuilder')).toBeDisabled();
   });
 
   it('does NOT render View in AI Assistant when multiple discoveries are selected', () => {
@@ -282,6 +332,8 @@ describe('TakeAction', () => {
 
   describe('actions when multiple alerts are selected', () => {
     const alerts = getMockAttackDiscoveryAlerts(); // <-- multiple alerts
+    alerts[0].alertWorkflowStatus = 'open';
+    alerts[1].alertWorkflowStatus = 'closed';
     const testCases = [
       {
         testId: 'markAsAcknowledged',
@@ -312,7 +364,7 @@ describe('TakeAction', () => {
     });
   });
 
-  describe('when AI for SOC is the configured project', () => {
+  describe('when EASE is the configured project', () => {
     let alert: ReturnType<typeof getMockAttackDiscoveryAlerts>[0];
     let setSelectedAttackDiscoveries: jest.Mock;
 
@@ -326,7 +378,7 @@ describe('TakeAction', () => {
       });
 
       mockUseAssistantAvailability.mockReturnValue({
-        hasSearchAILakeConfigurations: true, // AI for SOC IS configured
+        hasSearchAILakeConfigurations: true, // EASE IS configured
       });
     });
 
@@ -424,44 +476,6 @@ describe('TakeAction', () => {
     });
   });
 
-  describe('when attackDiscoveryAlertsEnabled is disabled', () => {
-    beforeEach(() => {
-      // Mock useKibanaFeatureFlags to return false
-      const { useKibanaFeatureFlags } = jest.requireMock('../../use_kibana_feature_flags');
-      useKibanaFeatureFlags.mockReturnValue({ attackDiscoveryAlertsEnabled: false });
-    });
-
-    it('does not render workflow status actions', () => {
-      const alert = { ...getMockAttackDiscoveryAlerts()[0], alertWorkflowStatus: 'open' };
-
-      render(
-        <TestProviders>
-          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
-        </TestProviders>
-      );
-
-      openPopover();
-
-      expect(screen.queryByTestId('markAsOpen')).toBeNull();
-      expect(screen.queryByTestId('markAsAcknowledged')).toBeNull();
-      expect(screen.queryByTestId('markAsClosed')).toBeNull();
-    });
-
-    it('renders case actions and view in AI assistant', () => {
-      render(
-        <TestProviders>
-          <TakeAction {...defaultProps} />
-        </TestProviders>
-      );
-
-      openPopover();
-
-      expect(screen.getByTestId('addToCase')).toBeInTheDocument();
-      expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
-      expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
-    });
-  });
-
   describe('case interactions', () => {
     const mockOnAddToNewCase = jest.fn();
     const mockOnAddToExistingCase = jest.fn();
@@ -542,9 +556,6 @@ describe('TakeAction', () => {
             },
             ui: {},
           },
-          featureFlags: {
-            getBooleanValue: jest.fn().mockReturnValue(true),
-          },
           application: {
             capabilities: {
               assistant: {
@@ -568,7 +579,7 @@ describe('TakeAction', () => {
       });
     });
 
-    it('disables case actions when the user lacks permissions', () => {
+    it('does not render case actions when the user lacks permissions', () => {
       render(
         <TestProviders>
           <TakeAction {...defaultProps} />
@@ -577,11 +588,8 @@ describe('TakeAction', () => {
 
       openPopover();
 
-      const addToCaseButton = screen.getByTestId('addToCase');
-      const addToExistingCaseButton = screen.getByTestId('addToExistingCase');
-
-      expect(addToCaseButton).toBeDisabled();
-      expect(addToExistingCaseButton).toBeDisabled();
+      expect(screen.queryByTestId('addToCase')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('addToExistingCase')).not.toBeInTheDocument();
     });
   });
 
@@ -595,6 +603,7 @@ describe('TakeAction', () => {
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,
+        isAssistantVisible: true,
       });
     });
 
@@ -605,6 +614,7 @@ describe('TakeAction', () => {
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: true,
+        isAssistantVisible: true,
       });
 
       render(
@@ -617,6 +627,61 @@ describe('TakeAction', () => {
       const viewInAiAssistantButton = screen.getByTestId('viewInAiAssistant');
 
       expect(viewInAiAssistantButton).toBeDisabled();
+    });
+
+    it('does not render view in AI assistant when isAssistantVisible is false', () => {
+      const { useViewInAiAssistant } = jest.requireMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
+      useViewInAiAssistant.mockReturnValue({
+        showAssistantOverlay: mockShowAssistantOverlay,
+        disabled: false,
+        isAssistantVisible: false,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+      expect(screen.queryByTestId('viewInAiAssistant')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when the user does not have alert edit privileges', () => {
+    beforeEach(() => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
+    });
+
+    it('does not render mark as open action', () => {
+      const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'closed', id: 'id1' };
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      expect(screen.queryByTestId('markAsOpen')).not.toBeInTheDocument();
+    });
+
+    it('does not render mark as closed/acknowledged action', () => {
+      const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'open', id: 'id1' };
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      expect(screen.queryByTestId('markAsAcknowledged')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('markAsClosed')).not.toBeInTheDocument();
     });
   });
 });

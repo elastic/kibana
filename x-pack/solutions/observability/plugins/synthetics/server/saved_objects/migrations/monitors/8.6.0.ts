@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import {
-  ConfigKey,
-  SyntheticsMonitorWithSecretsAttributes,
-} from '../../../../common/runtime_types';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SyntheticsMonitorWithSecretsAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor/legacy_synthetics_monitor';
 
 export type SyntheticsMonitorWithSecretsAttributes860 = Omit<

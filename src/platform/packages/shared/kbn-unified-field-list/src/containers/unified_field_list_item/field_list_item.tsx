@@ -10,11 +10,11 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { isESQLFieldGroupable } from '@kbn/esql-utils';
 import type { SearchMode } from '../../types';
@@ -211,6 +211,10 @@ export interface UnifiedFieldListItemProps {
    * Custom filters to apply for the field list, ex: namespace custom filter
    */
   additionalFilters?: Filter[];
+  /**
+   * Optional stream name to fetch stream-specific field descriptions
+   */
+  streamNames?: string[];
 }
 
 function UnifiedFieldListItemComponent({
@@ -236,6 +240,7 @@ function UnifiedFieldListItemComponent({
   itemIndex,
   size,
   additionalFilters,
+  streamNames,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -412,6 +417,7 @@ function UnifiedFieldListItemComponent({
           onDeleteField={onDeleteField}
           onEditField={onEditField}
           services={services}
+          streamNames={streamNames}
           {...customPopoverHeaderProps}
         />
       )}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TraverseChildDocumentContext, TraverseDocumentContext } from './types/context';
+import type { TraverseChildDocumentContext, TraverseDocumentContext } from './types/context';
 
 export function isChildContext(
   context: TraverseDocumentContext

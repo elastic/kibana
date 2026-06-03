@@ -7,29 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { render as rtlRender, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { EuiThemeProvider } from '@elastic/eui';
+import { waitFor } from '@testing-library/react';
 
-import { coreServices, dataViewsService } from '../../../services/kibana_services';
-import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
+import { dataViewsService } from '../../../services/kibana_services';
+import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
-
-const render = (ui: React.ReactElement) => {
-  return rtlRender(ui, { wrapper: EuiThemeProvider });
-};
+import { optionsListDSLControlSchema } from '@kbn/controls-schemas';
+import { firstValueFrom, of } from 'rxjs';
+import type { OptionsListControlApi } from './types';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
-  const controlGroupApi = getMockedControlGroupApi();
   const factory = getOptionsListControlFactory();
-  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
+  const finalizeApi = getMockedFinalizeApi(uuid, factory);
 
-  dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
+  const getDataView = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
       throw new Error(`Simulated error: no data view found for id ${id}`);
     }
@@ -52,43 +47,116 @@ describe('Options List Control Api', () => {
     });
     stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
       return {
-        getConverterFor: () => {
-          return (value: string) => `${value}:formatted`;
-        },
+        convertToText: (value: string) => `${value}:formatted`,
         toJSON: (value: any) => JSON.stringify(value),
       };
     });
     return stubDataView;
-  });
+  };
 
-  describe('filters$', () => {
-    test('should not set filters$ when selectedOptions is not provided', async () => {
-      const { api } = await factory.buildControl({
-        initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-        },
-        finalizeApi,
-        uuid,
-        controlGroupApi,
+  describe('initialization', () => {
+    let dataviewDelayPromise: Promise<void> | undefined;
+
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(async (id: string) => {
+        if (dataviewDelayPromise) await dataviewDelayPromise;
+        return getDataView(id);
       });
-      expect(api.filters$.value).toBeUndefined();
     });
 
-    test('should set filters$ when selectedOptions is provided', async () => {
-      const { api } = await factory.buildControl({
+    it('returns api immediately when no initial selections are configured', async () => {
+      let resolveDataView: (() => void) | undefined;
+      let apiReturned = false;
+      dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
+      (async () => {
+        await factory.buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: {
+            ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
+          },
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        });
+        apiReturned = true;
+      })();
+      await new Promise((r) => setTimeout(r, 1));
+      expect(apiReturned).toBe(true);
+      resolveDataView?.();
+      dataviewDelayPromise = undefined;
+    });
+
+    it('waits until data view is available before returning api when initial selections are configured', async () => {
+      let resolveDataView: (() => void) | undefined;
+      let apiReturned = false;
+      dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
+      (async () => {
+        await factory.buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: {
+            ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
+            selected_options: ['cool', 'test'],
+          },
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        });
+        apiReturned = true;
+      })();
+
+      // even after 10ms the API should not have returned yet because the data view was not available
+      await new Promise((r) => setTimeout(r, 10));
+      expect(apiReturned).toBe(false);
+
+      // resolve the data view and ensure the api returns
+      resolveDataView?.();
+      await new Promise((r) => setTimeout(r, 10));
+      expect(apiReturned).toBe(true);
+      dataviewDelayPromise = undefined;
+    });
+  });
+
+  describe('appliedFilters$', () => {
+    beforeAll(() => {
+      dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
+    test('should not set appliedFilters$ when selectedOptions is not provided', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['cool', 'test'],
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: {},
       });
-      expect(api.filters$.value).toEqual([
+      expect(api.appliedFilters$.value).toBeUndefined();
+    });
+
+    test('should set appliedFilters$ when selectedOptions is provided', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['cool', 'test'],
+        },
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+      expect(api.appliedFilters$.value).toEqual([
         {
           meta: {
+            controlledBy: 'myControl1',
             index: 'myDataViewId',
             key: 'myFieldName',
             params: ['cool', 'test'],
@@ -115,20 +183,23 @@ describe('Options List Control Api', () => {
       ]);
     });
 
-    test('should set filters$ when exists is selected', async () => {
-      const { api } = await factory.buildControl({
+    test('should set appliedFilters$ when exists is selected', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: {},
       });
-      expect(api.filters$.value).toEqual([
+      expect(api.appliedFilters$.value).toEqual([
         {
           meta: {
+            controlledBy: 'myControl1',
             index: 'myDataViewId',
             key: 'myFieldName',
           },
@@ -141,21 +212,24 @@ describe('Options List Control Api', () => {
       ]);
     });
 
-    test('should set filters$ when exclude is selected', async () => {
-      const { api } = await factory.buildControl({
+    test('should set appliedFilters$ when exclude is selected', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
           exclude: true,
         },
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: {},
       });
-      expect(api.filters$.value).toEqual([
+      expect(api.appliedFilters$.value).toEqual([
         {
           meta: {
+            controlledBy: 'myControl1',
             index: 'myDataViewId',
             key: 'myFieldName',
             negate: true,
@@ -168,186 +242,114 @@ describe('Options List Control Api', () => {
         },
       ]);
     });
+
+    test('should set appliedFilters$ when option is selected', async () => {
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+        },
+        finalizeApi,
+        uuid,
+        parentApi: {},
+      });
+      api.setSelectedOptions(['woof']);
+      await waitFor(() => {
+        expect(api.appliedFilters$.value).toEqual([
+          {
+            meta: { controlledBy: uuid, index: 'myDataViewId', key: 'myFieldName' },
+            query: {
+              match_phrase: {
+                myFieldName: 'woof',
+              },
+            },
+          },
+        ]);
+      });
+    });
   });
 
-  describe('make selection', () => {
-    beforeAll(() => {
-      coreServices.http.fetch = jest.fn().mockResolvedValue({
-        suggestions: [
-          { value: 'woof', docCount: 10 },
-          { value: 'bark', docCount: 15 },
-          { value: 'meow', docCount: 12 },
-        ],
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = optionsListDSLControlSchema.validate({
+        data_view_id: 'oldDataViewId',
+        field_name: 'myFieldName',
       });
-    });
-
-    test('clicking another option unselects "Exists"', async () => {
-      const { Component } = await factory.buildControl({
-        initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
-        },
+      const initialState = {
+        ...lastSavedState,
+        data_view_id: 'newDataViewId',
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
       });
-
-      const control = render(<Component className={'controlPanel'} />);
-      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
-      await waitFor(() => {
-        expect(control.getAllByRole('option').length).toBe(4);
-      });
-
-      expect(control.getByTestId('optionsList-control-selection-exists')).toBeChecked();
-      const option = control.getByTestId('optionsList-control-selection-woof');
-
-      await userEvent.click(option);
-      await waitFor(async () => {
-        expect(option).toBeChecked();
-      });
-
-      expect(control.getByTestId('optionsList-control-selection-exists')).not.toBeChecked();
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
     });
 
-    test('clicking "Exists" unselects all other selections', async () => {
-      const { Component } = await factory.buildControl({
-        initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
-        },
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = optionsListDSLControlSchema.validate({
+        data_view_id: 'myDataViewId',
+        field_name: 'myFieldName',
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
         finalizeApi,
         uuid,
-        controlGroupApi,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
       });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
+    });
+  });
 
-      const control = render(<Component className={'controlPanel'} />);
-      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
-      await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
-      });
-
-      const existsOption = control.getByTestId('optionsList-control-selection-exists');
-      expect(existsOption).not.toBeChecked();
-      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
-      expect(control.getByTestId('optionsList-control-selection-bark')).toBeChecked();
-      expect(control.getByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-      await userEvent.click(existsOption);
-      await waitFor(async () => {
-        expect(existsOption).toBeChecked();
-      });
-
-      expect(control.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
-      expect(control.getByTestId('optionsList-control-selection-bark')).not.toBeChecked();
-      expect(control.getByTestId('optionsList-control-selection-meow')).not.toBeChecked();
+  describe('anyStateChange$', () => {
+    let embeddableApi: OptionsListControlApi;
+    beforeEach((done) => {
+      factory
+        .buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: optionsListDSLControlSchema.validate({
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
+          }),
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
     });
 
-    test('deselects when showOnlySelected is true', async () => {
-      const { Component, api } = await factory.buildControl({
-        initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
-        },
-        finalizeApi,
-        uuid,
-        controlGroupApi,
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      embeddableApi.anyStateChange$.subscribe(() => {
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
+        }
+        done();
       });
-
-      const control = render(<Component className={'controlPanel'} />);
-      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
-      await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
-      });
-      await userEvent.click(control.getByTestId('optionsList-control-show-only-selected'));
-
-      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
-      expect(control.getByTestId('optionsList-control-selection-bark')).toBeChecked();
-      expect(control.queryByTestId('optionsList-control-selection-meow')).toBeNull();
-
-      await userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
-      await waitFor(async () => {
-        expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
-      });
-
-      expect(control.queryByTestId('optionsList-control-selection-bark')).toBeNull();
-      expect(control.queryByTestId('optionsList-control-selection-meow')).toBeNull();
-
-      expect(api.filters$.value).toEqual([
-        {
-          meta: {
-            index: 'myDataViewId',
-            key: 'myFieldName',
-          },
-          query: {
-            match_phrase: {
-              myFieldName: 'woof',
-            },
-          },
-        },
-      ]);
-    });
-
-    test('replace selection when singleSelect is true', async () => {
-      const { Component, api } = await factory.buildControl({
-        initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          singleSelect: true,
-          selectedOptions: ['woof'],
-        },
-        finalizeApi,
-        uuid,
-        controlGroupApi,
-      });
-
-      const control = render(<Component className={'controlPanel'} />);
-
-      expect(api.filters$.value).toEqual([
-        {
-          meta: {
-            index: 'myDataViewId',
-            key: 'myFieldName',
-          },
-          query: {
-            match_phrase: {
-              myFieldName: 'woof',
-            },
-          },
-        },
-      ]);
-
-      await userEvent.click(control.getByTestId(`optionsList-control-${uuid}`));
-      await waitFor(() => {
-        expect(control.getAllByRole('option').length).toEqual(4);
-      });
-      expect(control.getByTestId('optionsList-control-selection-woof')).toBeChecked();
-      expect(control.queryByTestId('optionsList-control-selection-bark')).not.toBeChecked();
-      expect(control.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-      await userEvent.click(control.getByTestId('optionsList-control-selection-bark'));
-      await waitFor(async () => {
-        expect(control.getByTestId('optionsList-control-selection-woof')).not.toBeChecked();
-      });
-
-      expect(control.queryByTestId('optionsList-control-selection-bark')).toBeChecked();
-      expect(control.queryByTestId('optionsList-control-selection-meow')).not.toBeChecked();
-
-      expect(api.filters$.value).toEqual([
-        {
-          meta: {
-            index: 'myDataViewId',
-            key: 'myFieldName',
-          },
-          query: {
-            match_phrase: {
-              myFieldName: 'bark',
-            },
-          },
-        },
-      ]);
+      embeddableApi.setTitle('cute puppies');
     });
   });
 });

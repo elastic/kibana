@@ -19,8 +19,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiButtonIcon,
   EuiIconTip,
-  EuiLink,
+  EuiToolTip,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -73,13 +74,6 @@ const SCATTERPLOT_MATRIX_DEFAULT_FETCH_SIZE = 1000;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_MIN_SIZE = 1;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_MAX_SIZE = 10000;
 
-const TOGGLE_ON = i18n.translate('xpack.ml.splom.toggleOn', {
-  defaultMessage: 'On',
-});
-const TOGGLE_OFF = i18n.translate('xpack.ml.splom.toggleOff', {
-  defaultMessage: 'Off',
-});
-
 const sampleSizeOptions = [100, 1000, 10000].map((d) => ({ value: d, text: '' + d }));
 
 interface OptionLabelWithIconTipProps {
@@ -88,16 +82,11 @@ interface OptionLabelWithIconTipProps {
 }
 
 const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
-  <>
+  <span aria-label={label}>
     {label}
-    <EuiIconTip
-      content={tooltip}
-      iconProps={{
-        className: 'eui-alignTop',
-      }}
-      size="s"
-    />
-  </>
+    &nbsp;
+    <EuiIconTip content={tooltip} size="s" />
+  </span>
 );
 
 function filterChartableItems(items: estypes.SearchHit[], resultsField?: string) {
@@ -120,6 +109,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
+  projectRouting?: string;
   dataView?: DataView;
   query?: Query;
 }
@@ -132,6 +122,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   legendType,
   searchQuery,
   runtimeMappings,
+  projectRouting,
   dataView,
   query,
 }) => {
@@ -328,6 +319,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           ...(isRuntimeMappings(combinedRuntimeMappings)
             ? { runtime_mappings: combinedRuntimeMappings }
             : {}),
+          ...(projectRouting ? { project_routing: projectRouting } : {}),
         };
 
         const promises = [
@@ -510,7 +502,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 <EuiSwitch
                   data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
-                  label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
+                  label=""
+                  showLabel={false}
                   checked={randomizeQuery}
                   onChange={randomizeQueryOnChange}
                   disabled={isLoading}
@@ -535,7 +528,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 >
                   <EuiSwitch
                     name="mlScatterplotMatrixDynamicSize"
-                    label={dynamicSize ? TOGGLE_ON : TOGGLE_OFF}
+                    label=""
+                    showLabel={false}
                     checked={dynamicSize}
                     onChange={dynamicSizeOnChange}
                     disabled={isLoading}
@@ -545,25 +539,31 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             )}
             {splom ? (
               <EuiFlexItem grow={false}>
-                <EuiLink
-                  onClick={async () => {
-                    const customVisLink = getCustomVisualizationLink();
-                    await application.navigateToApp('visualize#', {
-                      path: customVisLink.path,
-                      openInNewTab: false,
-                    });
-                  }}
-                  data-test-subj="mlSplomExploreInCustomVisualizationLink"
+                <EuiToolTip
+                  content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
+                    defaultMessage: 'Explore scatterplot charts in Vega based custom visualization',
+                  })}
                 >
-                  <EuiIconTip
-                    content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
-                      defaultMessage:
-                        'Explore scatterplot charts in Vega based custom visualization',
-                    })}
-                    type="visVega"
-                    size="l"
+                  <EuiButtonIcon
+                    role="link"
+                    iconType="code"
+                    iconSize="l"
+                    aria-label={i18n.translate(
+                      'xpack.ml.splom.exploreInCustomVisualizationAriaLabel',
+                      {
+                        defaultMessage: 'Explore scatterplot charts',
+                      }
+                    )}
+                    onClick={async () => {
+                      const customVisLink = getCustomVisualizationLink();
+                      await application.navigateToApp('visualize#', {
+                        path: customVisLink.path,
+                        openInNewTab: false,
+                      });
+                    }}
+                    data-test-subj="mlSplomExploreInCustomVisualizationLink"
                   />
-                </EuiLink>
+                </EuiToolTip>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
@@ -571,7 +571,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           {splom.messages.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut color="warning">
+              <EuiCallOut announceOnMount color="warning">
                 {splom.messages.map((m) => (
                   <span key={stringHash(m)}>
                     {m}

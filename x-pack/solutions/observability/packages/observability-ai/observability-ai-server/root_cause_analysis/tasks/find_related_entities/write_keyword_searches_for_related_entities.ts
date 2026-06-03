@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FieldPatternResultWithChanges, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
-import { InferenceClient } from '@kbn/inference-common';
+import type { FieldPatternResultWithChanges, FormattedDocumentAnalysis } from '@kbn/ai-tools';
+import type { InferenceClient } from '@kbn/inference-common';
 import { RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 import { toBlockquote } from '../../util/to_blockquote';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 const SYSTEM_PROMPT_ADDENDUM = `# Guide: Constructing Keyword Searches to Find Related Entities
 
@@ -122,7 +122,7 @@ export async function writeKeywordSearchForRelatedEntities({
   connectorId: string;
   inferenceClient: InferenceClient;
   entity: Record<string, string>;
-  analysis: TruncatedDocumentAnalysis;
+  analysis: FormattedDocumentAnalysis;
   ownPatterns: FieldPatternResultWithChanges[];
   context: string;
   kbEntries: ScoredKnowledgeBaseEntry[];

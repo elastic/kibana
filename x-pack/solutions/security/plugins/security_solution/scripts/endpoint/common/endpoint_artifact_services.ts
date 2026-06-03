@@ -7,9 +7,6 @@
 
 import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
-  ENDPOINT_LIST_DESCRIPTION,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_LIST_NAME,
   EXCEPTION_LIST_ITEM_URL,
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -20,7 +17,8 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { memoize } from 'lodash';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/endpoint_exceptions/constants';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
@@ -28,6 +26,15 @@ import { BLOCKLISTS_LIST_DEFINITION } from '../../../public/management/pages/blo
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/host_isolation_exceptions/constants';
 import type { NewTrustedApp } from '../../../common/endpoint/types';
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
+import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../common/endpoint/constants';
+import type {
+  OptInStatusMetadata,
+  ReferenceDataSavedObject,
+} from '../../../server/endpoint/lib/reference_data';
+import {
+  REF_DATA_KEYS,
+  REFERENCE_DATA_SAVED_OBJECT_TYPE,
+} from '../../../server/endpoint/lib/reference_data';
 
 export const ensureArtifactListExists = memoize(
   async (
@@ -54,13 +61,7 @@ export const ensureArtifactListExists = memoize(
         break;
 
       case 'endpointExceptions':
-        listDefinition = {
-          name: ENDPOINT_LIST_NAME,
-          namespace_type: 'agnostic',
-          description: ENDPOINT_LIST_DESCRIPTION,
-          list_id: ENDPOINT_LIST_ID,
-          type: ExceptionListTypeEnum.ENDPOINT,
-        };
+        listDefinition = ENDPOINT_EXCEPTIONS_LIST_DEFINITION;
         break;
 
       default:
@@ -147,4 +148,57 @@ export const createEndpointException = async (
 ): Promise<ExceptionListItemSchema> => {
   await ensureArtifactListExists(kbnClient, 'hostIsolationExceptions');
   return createExceptionListItem(kbnClient, data);
+};
+
+export const findEndpointExceptionsPerPolicyOptInSO = async (
+  kbnClient: KbnClient
+): Promise<SavedObjectsFindResult<ReferenceDataSavedObject<OptInStatusMetadata>> | undefined> => {
+  const foundReferenceDataSavedObjects = await kbnClient.savedObjects.find<
+    ReferenceDataSavedObject<OptInStatusMetadata>
+  >({
+    type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
+  });
+
+  return foundReferenceDataSavedObjects.saved_objects.find(
+    (obj) => obj.id === REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+  );
+};
+
+export const deleteEndpointExceptionsPerPolicyOptInSO = async (
+  kbnClient: KbnClient
+): Promise<void> => {
+  const foundSO = await findEndpointExceptionsPerPolicyOptInSO(kbnClient);
+
+  if (foundSO) {
+    await kbnClient.savedObjects.delete({
+      type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
+      id: foundSO.id,
+    });
+  }
+};
+
+export const optInForPerPolicyEndpointExceptions = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
+    headers: {
+      'x-elastic-internal-origin': 'kibana',
+      'Elastic-Api-Version': '1',
+      'kbn-xsrf': 'true',
+    },
+  });
+};
+
+export const disablePerPolicyEndpointExceptions = async (kbnClient: KbnClient): Promise<void> => {
+  await kbnClient.savedObjects.create({
+    type: REFERENCE_DATA_SAVED_OBJECT_TYPE,
+    id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
+    attributes: {
+      id: REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus,
+      owner: 'EDR',
+      type: 'OPT_IN_STATUS',
+      metadata: { status: false, reason: undefined },
+    } as ReferenceDataSavedObject<OptInStatusMetadata>,
+    overwrite: true,
+  });
 };

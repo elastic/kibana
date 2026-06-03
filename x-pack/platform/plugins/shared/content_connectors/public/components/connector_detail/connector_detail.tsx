@@ -12,8 +12,10 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiButton, EuiPageTemplate, EuiTabProps } from '@elastic/eui';
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { EuiTabProps } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -87,15 +89,12 @@ export const ConnectorDetail: React.FC = () => {
         defaultMessage: 'Overview',
       }),
       onClick: () => {
-        application?.navigateToUrl(
-          `${generateEncodedPath(
-            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId,
-              tabId: ConnectorDetailTabId.OVERVIEW,
-            }
-          )}`
-        );
+        application?.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.OVERVIEW,
+          })}`,
+        });
       },
     },
     {
@@ -110,15 +109,12 @@ export const ConnectorDetail: React.FC = () => {
         }
       ),
       onClick: () => {
-        application?.navigateToUrl(
-          `${generateEncodedPath(
-            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId,
-              tabId: ConnectorDetailTabId.DOCUMENTS,
-            }
-          )}`
-        );
+        application?.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.DOCUMENTS,
+          })}`,
+        });
       },
     },
     {
@@ -133,45 +129,36 @@ export const ConnectorDetail: React.FC = () => {
         }
       ),
       onClick: () =>
-        application?.navigateToUrl(
-          generateEncodedPath(
-            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId,
-              tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
-            }
-          )
-        ),
+        application?.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
+          })}`,
+        }),
     },
   ];
 
   const CONNECTOR_TABS = [
-    ...(hasFilteringFeature
-      ? [
-          {
-            content: <ConnectorSyncRules />,
-            disabled: !index,
-            id: ConnectorDetailTabId.SYNC_RULES,
-            isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
-            label: i18n.translate(
-              'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
-              {
-                defaultMessage: 'Sync rules',
-              }
-            ),
-            onClick: () =>
-              application?.navigateToUrl(
-                generateEncodedPath(
-                  `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-                  {
-                    connectorId,
-                    tabId: ConnectorDetailTabId.SYNC_RULES,
-                  }
-                )
-              ),
-          },
-        ]
-      : []),
+    {
+      content: <ConnectorSyncRules />,
+      disabled: !index || !hasFilteringFeature,
+      id: ConnectorDetailTabId.SYNC_RULES,
+      isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
+      label: i18n.translate(
+        'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
+        {
+          defaultMessage: 'Sync rules',
+        }
+      ),
+      onClick: () =>
+        application?.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.SYNC_RULES,
+          })}`,
+        }),
+    },
+
     {
       content: <ConnectorScheduling />,
       disabled: !connector?.index_name,
@@ -184,15 +171,12 @@ export const ConnectorDetail: React.FC = () => {
         }
       ),
       onClick: () =>
-        application?.navigateToUrl(
-          generateEncodedPath(
-            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId,
-              tabId: ConnectorDetailTabId.SCHEDULING,
-            }
-          )
-        ),
+        application?.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.SCHEDULING,
+          })}`,
+        }),
     },
   ];
 
@@ -208,37 +192,14 @@ export const ConnectorDetail: React.FC = () => {
         }
       ),
       onClick: () =>
-        application?.navigateToUrl(
-          generateEncodedPath(
-            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId,
-              tabId: ConnectorDetailTabId.CONFIGURATION,
-            }
-          )
-        ),
+        application?.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.CONFIGURATION,
+          })}`,
+        }),
     },
   ];
-
-  /* const PIPELINES_TAB = {
-    content: <SearchIndexPipelines />,
-    disabled: !index,
-    id: ConnectorDetailTabId.PIPELINES,
-    isSelected: tabId === ConnectorDetailTabId.PIPELINES,
-    label: i18n.translate(
-      'xpack.contentConnectors.connectors.connectorDetail.pipelinesTabLabel',
-      {
-        defaultMessage: 'Pipelines',
-      }
-    ),
-    onClick: () =>
-      application?.navigateToUrl(
-        generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-          connectorId,
-          tabId: ConnectorDetailTabId.PIPELINES,
-        })
-      ),
-  }; */
 
   interface TabMenuItem {
     content: JSX.Element;
@@ -251,12 +212,7 @@ export const ConnectorDetail: React.FC = () => {
     testSubj?: string;
   }
 
-  const tabs: TabMenuItem[] = [
-    ...ALL_INDICES_TABS,
-    ...CONNECTOR_TABS,
-    // ...[PIPELINES_TAB],
-    ...CONFIG_TAB,
-  ];
+  const tabs: TabMenuItem[] = [...ALL_INDICES_TABS, ...CONNECTOR_TABS, ...CONFIG_TAB];
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);

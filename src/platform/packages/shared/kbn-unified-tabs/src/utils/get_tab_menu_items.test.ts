@@ -9,7 +9,8 @@
 
 import { getTabMenuItemsFn } from './get_tab_menu_items';
 import { getNewTabPropsForIndex } from '../hooks/use_new_tab_props';
-import { TabMenuItem, TabMenuItemName } from '../types';
+import type { TabMenuItem } from '../types';
+import { TabMenuItemName } from '../types';
 
 const items = Array.from({ length: 5 }).map((_, i) => getNewTabPropsForIndex(i));
 

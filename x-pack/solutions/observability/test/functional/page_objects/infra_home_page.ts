@@ -8,21 +8,24 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'header']);
   const comboBox = getService('comboBox');
 
   return {
-    async goToTime(time: string) {
-      const datePickerInput = await find.byCssSelector(
+    async getDatePickerInput() {
+      return find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
+    },
+    async goToTime(time: string) {
+      const datePickerInput = await this.getDatePickerInput();
 
       // explicitly focus to trigger tooltip
       await datePickerInput.focus();
@@ -32,8 +35,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
       // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
       await this.dismissDatePickerTooltip();
-
-      await datePickerInput.pressKeys(browser.keys.ESCAPE);
 
       await this.waitForLoading();
     },
@@ -137,23 +138,31 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async enterSearchTerm(query: string) {
       const input = await this.clearSearchTerm();
-      await input.type(query);
-
       // wait for input value to echo the input before submitting
       // this ensures the React state has caught up with the events
       await retry.tryForTime(5000, async () => {
+        await input.type(query);
         const value = await input.getAttribute('value');
         expect(value).to.eql(query);
       });
 
-      await input.type(browser.keys.RETURN);
+      await input.pressKeys(browser.keys.ESCAPE);
+      await input.pressKeys(browser.keys.RETURN);
       await this.waitForLoading();
     },
 
     async clearSearchTerm() {
       const input = await testSubjects.find('queryInput');
-      await input.clearValueWithKeyboard();
-      await input.pressKeys(browser.keys.ENTER);
+
+      // wait for input value to be cleared before submitting
+      // this ensures the React state has caught up with the events
+      await retry.tryForTime(5000, async () => {
+        await input.clearValueWithKeyboard();
+        const value = await input.getAttribute('value');
+        expect(value).to.eql('');
+      });
+
+      await input.pressKeys(browser.keys.RETURN);
       return input;
     },
 
@@ -287,11 +296,11 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async noDataPromptExists() {
-      return testSubjects.existOrFail('noDataPage');
+      return testSubjects.existOrFail('kbnNoDataPage');
     },
 
     async noDataPromptAddDataClick() {
-      return testSubjects.click('noDataDefaultFooterAction');
+      return testSubjects.click('noDataDefaultActionButton');
     },
 
     async getNoMetricsDataPrompt() {
@@ -310,7 +319,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async getInfraMissingRemoteClusterIndicesCallout() {
-      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
+      return testSubjects.find('infraIndicesPanelSettingsDangerCallout');
     },
 
     async openSourceConfigurationFlyout() {
@@ -337,10 +346,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async clickHostsAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesHostComboBoxItem');
       await testSubjects.click('anomaliesHostComboBoxItem');
     },
     async clickK8sAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesK8sComboBoxItem');
       await testSubjects.click('anomaliesK8sComboBoxItem');
     },
     async findAnomalies() {
@@ -386,13 +397,18 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async dismissDatePickerTooltip() {
-      const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-        timeout: 3000,
-      });
+      const datePicker = await this.getDatePickerInput();
+      return retry.try(async () => {
+        const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
+          timeout: 3000,
+        });
 
-      if (isTooltipOpen) {
-        await testSubjects.click(`waffleDatePickerIntervalTooltip`);
-      }
+        if (isTooltipOpen) {
+          await datePicker.pressKeys(browser.keys.ESCAPE);
+        }
+
+        return !isTooltipOpen;
+      });
     },
 
     async openInventoryAlertFlyout() {
@@ -472,10 +488,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.find('infraSuggestionsPanel');
     },
 
-    async ensureInventoryFeedbackLinkIsVisible() {
-      await testSubjects.existOrFail('infraInventoryFeedbackLink');
-    },
-
     async ensureKubernetesTourIsVisible() {
       const container = await testSubjects.find('infra-kubernetesTour-text');
       const containerText = await container.getVisibleText();
@@ -486,16 +498,33 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
     },
 
-    async ensureKubernetesFeedbackLinkIsVisible() {
-      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
-    },
-
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
     },
 
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    /**
+     * Closes the host/asset details flyout using Escape (EuiFlyout closes on Escape).
+     * Retries until the flyout is closed or timeout, then waits for the overlay mask
+     * to disappear so the next click (e.g. open flyout button) is not intercepted.
+     */
+    async closeFlyoutWithEscape() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const flyoutClosed = !(await testSubjects.exists('euiFlyoutCloseButton', {
+          timeout: 1000,
+        }));
+        if (!flyoutClosed) {
+          throw new Error('Flyout still open');
+        }
+      });
+      await retry.waitFor('flyout overlay mask to disappear', async () => {
+        const overlays = await find.allByCssSelector('.euiOverlayMask', 1000);
+        return overlays.length === 0;
+      });
     },
 
     async clickCustomMetricDropdown() {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/connector-schemas/sentinelone';
+
 /**
  * The `activity` document ingested from SentinelOne via the integration
  *
@@ -49,6 +51,12 @@ export interface SentinelOneAgentEsDoc {
       agent: {
         id: string;
       };
+      uuid: string;
+      last_active_date: string;
+      network_status: string;
+      is_active: boolean;
+      is_pending_uninstall: boolean;
+      is_uninstalled: boolean;
     };
   };
 }
@@ -175,3 +183,17 @@ export interface SentinelOneRunScriptResponseMeta {
   /** The SentinelOne task ID associated with the completion of the run script action */
   taskId: string;
 }
+
+/**
+ * A subset of properties from the SentinelOne Script API response
+ */
+export type SentinelOneScript = Pick<
+  SentinelOneGetRemoteScriptsResponse['data'][number],
+  | 'id'
+  | 'scriptDescription'
+  | 'osTypes'
+  | 'inputInstructions'
+  | 'inputExample'
+  | 'inputRequired'
+  | 'shortFileName'
+>;

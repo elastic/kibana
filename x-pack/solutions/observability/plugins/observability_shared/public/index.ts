@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginInitializerContext } from '@kbn/core/public';
+
 import { ObservabilitySharedPlugin } from './plugin';
 export type {
   ObservabilitySharedPlugin,
@@ -12,8 +12,8 @@ export type {
   ObservabilitySharedPluginStart,
   ProfilingLocators,
 } from './plugin';
-export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new ObservabilitySharedPlugin(initializerContext);
+export const plugin = () => {
+  return new ObservabilitySharedPlugin();
 };
 
 export type {
@@ -95,10 +95,6 @@ export {
 } from './components/profiling/embeddables';
 
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
-export {
-  FeatureFeedbackButton,
-  getSurveyFeedbackURL,
-} from './components/feature_feedback_button/feature_feedback_button';
 export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
 export { FieldValueSelection, FieldValueSuggestions } from './components';
 

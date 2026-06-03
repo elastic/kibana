@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiSuperSelect, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import type { TopNOption } from './helpers';
-import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
+import { getPageScope, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
@@ -53,7 +53,6 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   field: AlertsStackByField;
   filters: Filter[];
   dataView: DataView;
-  dataViewSpec?: DataViewSpec;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -72,7 +71,6 @@ const TopNComponent: React.FC<Props> = ({
   field,
   from,
   dataView,
-  dataViewSpec,
   options,
   paddingSize,
   query,
@@ -88,7 +86,7 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const sourcererScopeId = getSourcererScopeName({ scopeId, view });
+  const sourcererScopeId = getPageScope({ scopeId, view });
 
   useEffect(() => {
     setView(defaultView);
@@ -126,7 +124,6 @@ const TopNComponent: React.FC<Props> = ({
             from={from}
             headerChildren={headerChildren}
             dataView={dataView}
-            dataViewSpec={dataViewSpec}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
@@ -149,13 +146,15 @@ const TopNComponent: React.FC<Props> = ({
         )}
       </div>
 
-      <EuiButtonIcon
-        css={styles.closeButton}
-        aria-label={i18n.CLOSE}
-        data-test-subj="close"
-        iconType="cross"
-        onClick={toggleTopN}
-      />
+      <EuiToolTip content={i18n.CLOSE} disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.closeButton}
+          aria-label={i18n.CLOSE}
+          data-test-subj="close"
+          iconType="cross"
+          onClick={toggleTopN}
+        />
+      </EuiToolTip>
     </div>
   );
 };

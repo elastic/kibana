@@ -10,7 +10,11 @@ import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
-
+import {
+  isAgentMigrationSupported,
+  isAgentPrivilegeLevelChangeSupported,
+  isRootPrivilegeRequired,
+} from '../../../../../../common/services';
 import type { Agent } from '../../../types';
 
 import {
@@ -25,15 +29,20 @@ import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
+  AgentRemoveCollectorModal,
   AgentUpgradeAgentModal,
   FleetServerCloudUnhealthyCallout,
   FleetServerMissingEncryptionKeyCallout,
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
+import { isAgentSelectable as isAgentSelectableService } from '../services/is_agent_selectable';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
+import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
+import { AgentRollbackModal } from '../components/agent_rollback_modal';
+import { AgentPolicyYamlFlyout } from '../../../components';
 
 import type { SelectionMode } from './components/types';
 
@@ -44,9 +53,11 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentActivityFlyout,
   AgentMigrateFlyout,
+  ChangeAgentPrivilegeLevelFlyout,
 } from './components';
-import { AgentActivityFlyout } from './components/agent_activity_flyout';
+import { AddCollectorFlyout } from './components/add_collector_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -83,13 +94,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [agentToChangePrivilege, setAgentToChangePrivilege] = useState<Agent | undefined>(
+    undefined
+  );
+  const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
+  const [agentToViewPolicy, setAgentToViewPolicy] = useState<Agent | undefined>(undefined);
+  const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+  const [agentToRemoveCollector, setAgentToRemoveCollector] = useState<Agent | undefined>(
+    undefined
+  );
 
-  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+  const [isAddCollectorFlyoutOpen, setAddCollectorFlyoutOpen] = useState(false);
 
-  // migrateAgentState
-  const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
-  const [protectedAndFleetAgents, setProtectedAndFleetAgents] = useState<Agent[]>([]);
-  const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
   const {
     allTags,
@@ -102,14 +120,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
-    search,
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
-    sortField,
-    setSortField,
-    sortOrder,
-    setSortOrder,
+    sort,
     selectedStatus,
     setSelectedStatus,
     selectedTags,
@@ -117,85 +131,84 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
-    pagination,
+    page,
     pageSizeOptions,
-    setPagination,
     kuery,
     draftKuery,
     setDraftKuery,
     fetchData,
-    currentRequestRef,
+    queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    isUsingFilter,
+    onTableChange,
+    clearFilters: clearFiltersFromSession,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
       setSearch(newKuery);
-      setPagination({
-        ...pagination,
-        currentPage: 1,
+      onTableChange({
+        page: { index: 0, size: page.size },
       });
     },
-    [setSearch, pagination, setPagination]
-  );
-
-  const isUsingFilter = !!(
-    search.trim() ||
-    selectedAgentPolicies.length ||
-    selectedStatus.length ||
-    selectedTags.length ||
-    showUpgradeable
+    [setSearch, onTableChange, page.size]
   );
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
-    setSearch('');
-    setSelectedAgentPolicies([]);
-    setSelectedStatus([]);
-    setSelectedTags([]);
-    setShowUpgradeable(false);
-  }, [
-    setDraftKuery,
-    setSearch,
-    setSelectedAgentPolicies,
-    setSelectedStatus,
-    setSelectedTags,
-    setShowUpgradeable,
-  ]);
+    clearFiltersFromSession();
+  }, [setDraftKuery, clearFiltersFromSession]);
 
-  const onTableChange = ({
-    page,
-    sort,
-  }: {
-    page?: { index: number; size: number };
-    sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
-  }) => {
-    const newPagination = {
-      ...pagination,
-      currentPage: page!.index + 1,
-      pageSize: page!.size,
-    };
-    setPagination(newPagination);
-    setSortField(sort!.field);
-    setSortOrder(sort!.direction);
-  };
+  const unsupportedMigrateAgents = useMemo(() => {
+    const protectedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter(
+          (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+        )
+      : [];
+    const fleetAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+          )
+        )
+      : [];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentMigrationSupported(agent))
+      : [];
+    return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
+  }, [selectedAgents, agentPoliciesIndexedById]);
 
-  const openMigrateFlyout = (agents: Agent[]) => {
-    const protectedAgents = agents.filter(
-      (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
-    );
-    const fleetAgents = agents.filter((agent) =>
-      agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
-        (p) => p.package?.name === FLEET_SERVER_PACKAGE
-      )
-    );
-
-    const unallowedAgents = [...protectedAgents, ...fleetAgents];
-    setProtectedAndFleetAgents(unallowedAgents);
-    setAgentsToMigrate(agents.filter((agent) => !unallowedAgents.some((a) => a.id === agent.id)));
-    setMigrateFlyoutOpen(true);
-  };
+  const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
+    const alreadyUnprivilegedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter(
+          (agent) => agent.local_metadata?.elastic?.agent?.unprivileged === true
+        )
+      : [];
+    const rootAccessNeededAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          isRootPrivilegeRequired(
+            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies || []
+          )
+        )
+      : [];
+    const fleetServerAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+          )
+        )
+      : [];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentPrivilegeLevelChangeSupported(agent))
+      : [];
+    return [
+      ...alreadyUnprivilegedAgents,
+      ...rootAccessNeededAgents,
+      ...fleetServerAgents,
+      ...unsupportedVersionAgents,
+    ];
+  }, [selectedAgents, agentPoliciesIndexedById]);
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -219,19 +232,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
-        onMigrateAgentClick={() => openMigrateFlyout([agent])}
+        onMigrateAgentClick={() => setAgentToMigrate(agent)}
+        onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
+        onViewAgentJsonClick={() => setAgentToViewJson(agent)}
+        onViewAgentPolicyClick={() => setAgentToViewPolicy(agent)}
+        onRollbackClick={() => setAgentToRollback(agent)}
+        onRemoveCollectorClick={() => setAgentToRemoveCollector(agent)}
       />
     );
   };
 
   const isAgentSelectable = useCallback(
-    (agent: Agent) => {
-      if (!agent.active) return false;
-      if (!agent.policy_id) return true;
-      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-      const isHosted = agentPolicy?.is_managed === true;
-      return !isHosted;
-    },
+    (agent: Agent) => isAgentSelectableService(agent, agentPoliciesIndexedById),
     [agentPoliciesIndexedById]
   );
 
@@ -301,13 +313,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
-    setShowAgentActivityTour({ isOpen: true });
+    setShowAgentActivityTour(true);
   };
-
-  const isCurrentRequestIncremented = currentRequestRef?.current === 1;
 
   return (
     <>
+      {isAddCollectorFlyoutOpen && (
+        <EuiPortal>
+          <AddCollectorFlyout
+            onClose={() => setAddCollectorFlyoutOpen(false)}
+            onClickViewAgents={() => {
+              setAddCollectorFlyoutOpen(false);
+              fetchData();
+            }}
+          />
+        </EuiPortal>
+      )}
       {isAgentActivityFlyoutOpen ? (
         <EuiPortal>
           <AgentActivityFlyout
@@ -370,6 +391,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToRemoveCollector && (
+        <EuiPortal>
+          <AgentRemoveCollectorModal
+            agents={[agentToRemoveCollector]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRemoveCollector(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
       {agentToGetUninstallCommand?.policy_id && (
         <EuiPortal>
           <UninstallCommandFlyout
@@ -417,7 +450,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             // close popover if agent is going to disappear from view to prevent UI error
             if (
               tagsToAdd.length > 0 &&
-              (selectedTags[0] === 'No Tags' || kuery.includes('not tags:*'))
+              (selectedTags[0] === 'No tags' || kuery.includes('not tags:*'))
             ) {
               setShowTagsAddRemove(false);
             }
@@ -427,22 +460,64 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }}
         />
       )}
-      {migrateFlyoutOpen && (
+      {agentToMigrate && (
         <EuiPortal>
           <AgentMigrateFlyout
-            agents={agentsToMigrate ?? []}
-            protectedAndFleetAgents={protectedAndFleetAgents ?? []}
+            agents={[agentToMigrate]}
+            agentCount={1}
+            unsupportedMigrateAgents={[]}
             onClose={() => {
-              setAgentsToMigrate(undefined);
-              setProtectedAndFleetAgents([]);
-              setMigrateFlyoutOpen(false);
+              setAgentToMigrate(undefined);
             }}
             onSave={() => {
-              setAgentsToMigrate(undefined);
-              setProtectedAndFleetAgents([]);
-              setMigrateFlyoutOpen(false);
+              setAgentToMigrate(undefined);
               refreshAgents();
             }}
+          />
+        </EuiPortal>
+      )}
+      {agentToChangePrivilege && (
+        <EuiPortal>
+          <ChangeAgentPrivilegeLevelFlyout
+            agents={[agentToChangePrivilege]}
+            agentCount={1}
+            unsupportedAgents={[]}
+            onClose={() => {
+              setAgentToChangePrivilege(undefined);
+            }}
+            onSave={() => {
+              setAgentToChangePrivilege(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToRollback && (
+        <EuiPortal>
+          <AgentRollbackModal
+            agents={[agentToRollback]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRollback(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToViewJson && (
+        <EuiPortal>
+          <AgentDetailsJsonFlyout
+            agent={agentToViewJson}
+            onClose={() => setAgentToViewJson(undefined)}
+          />
+        </EuiPortal>
+      )}
+      {agentToViewPolicy && agentToViewPolicy.policy_id && (
+        <EuiPortal>
+          <AgentPolicyYamlFlyout
+            policyId={agentToViewPolicy.policy_id}
+            revision={agentToViewPolicy.policy_revision}
+            onClose={() => setAgentToViewPolicy(undefined)}
           />
         </EuiPortal>
       )}
@@ -492,13 +567,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
+        onClickAddCollector={() => setAddCollectorFlyoutOpen(true)}
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
-        showAgentActivityTour={showAgentActivityTour}
+        shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
-        sortField={sortField}
-        sortOrder={sortOrder}
-        onBulkMigrateClicked={(agents: Agent[]) => openMigrateFlyout(agents)}
+        sortField={sort.field}
+        sortOrder={sort.direction}
+        unsupportedMigrateAgents={unsupportedMigrateAgents}
+        unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
@@ -522,9 +599,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent list table */}
       <AgentListTable
         agents={agentsOnCurrentPage}
-        sortField={sortField}
-        pageSizeOptions={pageSizeOptions}
-        sortOrder={sortOrder}
+        sortField={sort.field}
+        sortOrder={sort.direction}
         isLoading={isLoading}
         agentPoliciesIndexedById={agentPoliciesIndexedById}
         renderActions={renderActions}
@@ -532,13 +608,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selected={selectedAgents}
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
-        pagination={pagination}
+        pagination={{
+          currentPage: page.index + 1, // Convert from 0-based to 1-based
+          pageSize: page.size,
+        }}
+        pageSizeOptions={pageSizeOptions}
         totalAgents={Math.min(nAgentsInTable, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
-        isCurrentRequestIncremented={isCurrentRequestIncremented}
+        queryHasChanged={queryHasChanged}
       />
+      <EuiSpacer size="l" />
     </>
   );
 };

@@ -23,12 +23,21 @@ interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   ruleType: ApmRuleType | null;
+  serviceName?: string;
+  transactionName?: string;
 }
 
 export function AlertingFlyout(props: Props) {
-  const { addFlyoutVisible, setAddFlyoutVisibility, ruleType } = props;
+  const {
+    addFlyoutVisible,
+    setAddFlyoutVisibility,
+    ruleType,
+    serviceName: serviceNameProp,
+    transactionName: transactionNameProp,
+  } = props;
 
-  const serviceName = useServiceName();
+  const serviceNameFromUrl = useServiceName();
+  const serviceName = serviceNameProp ?? serviceNameFromUrl;
   const { query, path } = useApmParams('/*');
 
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
@@ -38,7 +47,8 @@ export function AlertingFlyout(props: Props) {
 
   const environment = 'environment' in query ? query.environment! : ENVIRONMENT_ALL.value;
   const transactionType = 'transactionType' in query ? query.transactionType : undefined;
-  const transactionName = 'transactionName' in query ? query.transactionName : undefined;
+  const transactionNameFromUrl = 'transactionName' in query ? query.transactionName : undefined;
+  const transactionName = transactionNameProp ?? transactionNameFromUrl;
   const errorGroupingKey = 'groupId' in path ? path.groupId : undefined;
 
   const {

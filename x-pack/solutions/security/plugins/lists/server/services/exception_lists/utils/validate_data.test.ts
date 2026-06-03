@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  CreateExceptionListItemSchema,
-  createExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { createExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getCreateExceptionListItemOptionsMock } from '../exception_list_client.mock';
 

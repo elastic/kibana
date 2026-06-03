@@ -23,8 +23,8 @@ import {
   euiYScroll,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isMac } from '@kbn/shared-ux-utility';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
 const listItems = [
@@ -46,6 +46,36 @@ const listItems = [
     ),
     description: i18n.translate('esqlEditor.query.commentKeyboardShortcutsLabel', {
       defaultMessage: 'Comment/uncomment line',
+    }),
+  },
+  {
+    title: (
+      <>
+        <kbd>{COMMAND_KEY}</kbd> <kbd>K</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
+      defaultMessage: 'Open quick search',
+    }),
+  },
+  {
+    title: (
+      <>
+        <kbd>{COMMAND_KEY}</kbd> <kbd>I</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
+      defaultMessage: 'Prettify query',
+    }),
+  },
+  {
+    title: (
+      <>
+        <kbd>{COMMAND_KEY}</kbd> <kbd>J</kbd>
+      </>
+    ),
+    description: i18n.translate('esqlEditor.query.generateFromCommentKeyboardShortcutsLabel', {
+      defaultMessage: 'Generate ES|QL from comment',
     }),
   },
 ];
@@ -77,19 +107,21 @@ export function KeyboardShortcuts() {
   return (
     <>
       <EuiPopover
+        aria-labelledby={labelId}
         data-test-subj="editorKeyboardShortcutsPopover"
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         anchorPosition="downRight"
         panelPaddingSize="none"
         button={
-          <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+          <EuiToolTip content={label} disableScreenReaderOutput>
             <EuiButtonIcon
               size="xs"
               iconType="keyboard"
               data-test-subj="editorKeyboardShortcutsButton"
               onClick={() => setIsOpen(!isOpen)}
               aria-label={label}
+              color="text"
             />
           </EuiToolTip>
         }

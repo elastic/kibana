@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -36,6 +36,9 @@
     "@kbn/core-feature-flags-server",
     "@kbn/core-pricing-server",
     "@kbn/core-di",
+    "@kbn/core-data-streams-server",
+    "@kbn/core-user-activity-server",
+    "@kbn/core-user-storage-server",
   ],
   "exclude": [
     "target/**/*",

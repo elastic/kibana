@@ -83,7 +83,7 @@ exports[`it renders without crashing 1`] = `
                     },
                   ]
                 }
-                placeholder="Add an action…"
+                placeholder="Add a privilege…"
                 selectedOptions={Array []}
                 singleSelection={false}
                 sortMatchesBy="none"
@@ -135,12 +135,17 @@ exports[`it renders without crashing 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonIcon
-        aria-label="Delete index privilege"
-        color="danger"
-        iconType="trash"
-        onClick={[MockFunction]}
-      />
+      <EuiToolTip
+        content="Delete index privilege"
+        disableScreenReaderOutput={true}
+      >
+        <EuiButtonIcon
+          aria-label="Delete index privilege"
+          color="danger"
+          iconType="trash"
+          onClick={[MockFunction]}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
 </Fragment>

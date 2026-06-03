@@ -36,7 +36,6 @@ export function registerActionStatusRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -72,11 +71,9 @@ export const actionStatusRequestHandler = function (
         ? [...new Set(req.query.agent_ids)]
         : [req.query.agent_ids];
 
-      if (endpointContext.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        await endpointContext.service
-          .getInternalFleetServices(spaceId)
-          .ensureInCurrentSpace({ agentIds: agentIDs });
-      }
+      await endpointContext.service
+        .getInternalFleetServices(spaceId)
+        .ensureInCurrentSpace({ agentIds: agentIDs });
 
       const response = await getPendingActionsSummary(endpointContext.service, spaceId, agentIDs);
 

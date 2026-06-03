@@ -7,9 +7,9 @@
 
 import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -20,26 +20,28 @@ import type {
   SharePluginStart,
   ExportShare,
   ExportShareDerivatives,
+  ShareContext,
 } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { durationToNumber } from '@kbn/reporting-common';
+import { durationToNumber, SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
-
 import {
   getSharedComponents,
-  reportingCsvExportProvider,
-  reportingPDFExportProvider,
-  reportingPNGExportProvider,
+  reportingCsvExportShareIntegration,
+  reportingPDFExportShareIntegration,
+  reportingPNGExportShareIntegration,
 } from '@kbn/reporting-public/share';
-import { InjectedIntl } from '@kbn/i18n-react';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
-import { StartServices } from './types';
+import type { StartServices } from './types';
 import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
+import { shouldRegisterReportingIntegration } from './management/integrations/should_register_reporting_integration';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
@@ -88,10 +90,12 @@ export class ReportingPublicPlugin
   private config: ClientConfigType;
   private contract?: ReportingSetup;
   private startServices$?: StartServices$;
+  private isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   private getContract(apiClient: ReportingAPIClient, startServices$: StartServices$) {
@@ -129,6 +133,7 @@ export class ReportingPublicPlugin
             rendering: start.rendering,
             uiSettings: start.uiSettings,
             chrome: start.chrome,
+            userProfile: start.userProfile,
           },
           ...rest,
         ];
@@ -206,7 +211,7 @@ export class ReportingPublicPlugin
       visibleIn: [],
     });
 
-    uiActionsSetup.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'generateCsvReport', async () => {
+    uiActionsSetup.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'generateCsvReport', async () => {
       const { ReportingCsvPanelAction } = await import('@kbn/reporting-csv-share-panel');
       return new ReportingCsvPanelAction({
         core,
@@ -216,49 +221,63 @@ export class ReportingPublicPlugin
       });
     });
 
-    shareSetup.registerShareIntegration<ExportShare>(
+    shareSetup.registerShareIntegration<ExportShare<ReportingCSVSharingData>>(
       'search',
       // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-      reportingCsvExportProvider({
+      reportingCsvExportShareIntegration({
         apiClient,
         startServices$,
+        isServerless: this.isServerless,
+        csvConfig: this.config.csv,
       })
     );
 
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPDFExportProvider({
-          apiClient,
-          startServices$,
-        })
+        reportingPDFExportShareIntegration({ apiClient, startServices$ })
       );
 
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        reportingPNGExportProvider({
-          apiClient,
-          startServices$,
-        })
+        reportingPNGExportShareIntegration({ apiClient, startServices$ })
       );
     }
 
-    import('./management/integrations/scheduled_report_share_integration').then(
-      async ({
-        shouldRegisterScheduledReportShareIntegration,
-        createScheduledReportShareIntegration,
-      }) => {
-        const [coreStart, startDeps] = await getStartServices();
-        if (await shouldRegisterScheduledReportShareIntegration(core.http)) {
-          shareSetup.registerShareIntegration<ExportShareDerivatives>(
-            createScheduledReportShareIntegration({
-              apiClient,
-              services: { ...coreStart, ...startDeps, actions: actionsSetup },
-            })
-          );
+    shouldRegisterReportingIntegration(core.http)
+      .then((shouldRegister) => {
+        if (shouldRegister) {
+          shareSetup.registerShareIntegration<ExportShareDerivatives>({
+            id: 'scheduledReports',
+            groupId: 'exportDerivatives',
+            getShareIntegrationConfig: async (shareOpts: ShareContext) => {
+              const [[coreStart, startDeps], { getReportingShareIntegrationConfig }] =
+                await Promise.all([
+                  getStartServices(),
+                  import('./management/integrations/scheduled_report_share_integration'),
+                ]);
+              return getReportingShareIntegrationConfig(
+                apiClient,
+                { ...coreStart, ...startDeps, actions: actionsSetup },
+                shareOpts
+              );
+            },
+            prerequisiteCheck: ({ license }) => {
+              if (!license || !license.type) {
+                return false;
+              }
+              return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
+            },
+          });
         }
-      }
-    );
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Could not register 'scheduledReports' share integration. 'shouldRegisterReportingIntegration' threw error:`,
+          e
+        );
+      });
 
     this.startServices$ = startServices$;
     return this.getContract(apiClient, startServices$);

@@ -9,18 +9,19 @@ import { schema } from '@kbn/config-schema';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
-import { sendMessageEvent, SendMessageEventData } from './analytics/events';
+import type { SendMessageEventData } from './analytics/events';
+import { sendMessageEvent } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import { handleStreamResponse } from './utils/handle_stream_response';
-import {
-  APIRoutes,
+import type {
   DefineRoutesOptions,
   ElasticsearchRetrieverContentField,
   QueryTestResponse,
 } from './types';
+import { APIRoutes } from './types';
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
@@ -74,7 +75,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
         }),
       },
     },
@@ -104,14 +105,14 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       validate: {
         body: schema.object({
           data: schema.object({
-            connector_id: schema.string(),
-            indices: schema.string(),
-            prompt: schema.string(),
+            connector_id: schema.string({ maxLength: 255 }),
+            indices: schema.string({ maxLength: 512 }),
+            prompt: schema.string({ maxLength: 4096 }),
             citations: schema.boolean(),
-            elasticsearch_query: schema.string(),
-            summarization_model: schema.maybe(schema.string()),
+            elasticsearch_query: schema.string({ maxLength: 10000 }),
+            summarization_model: schema.maybe(schema.string({ maxLength: 512 })),
             doc_size: schema.number(),
-            source_fields: schema.string(),
+            source_fields: schema.string({ maxLength: 10000 }),
           }),
           messages: schema.any(),
         }),
@@ -226,7 +227,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       validate: {
         query: schema.object({
           search_query: schema.maybe(schema.string()),
-          size: schema.number({ defaultValue: 10, min: 0 }),
+          size: schema.number({ defaultValue: 10, min: 0, max: 1000 }),
           exact: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
@@ -262,10 +263,10 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       },
       validate: {
         body: schema.object({
-          search_query: schema.string(),
-          elasticsearch_query: schema.string(),
-          indices: schema.arrayOf(schema.string()),
-          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          search_query: schema.string({ maxLength: 10000 }),
+          elasticsearch_query: schema.string({ maxLength: 10000 }),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0, max: 100 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
         }),
       },
@@ -347,7 +348,7 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
         }),
       },
     },
@@ -398,14 +399,14 @@ export function defineRoutes(routeOptions: DefineRoutesOptions) {
       },
       validate: {
         body: schema.object({
-          query: schema.string(),
-          elasticsearch_query: schema.string(),
-          indices: schema.arrayOf(schema.string()),
-          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          query: schema.string({ maxLength: 10000 }),
+          elasticsearch_query: schema.string({ maxLength: 10000 }),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0, max: 100 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
           chat_context: schema.maybe(
             schema.object({
-              source_fields: schema.string(),
+              source_fields: schema.string({ maxLength: 10000 }),
               doc_size: schema.number(),
             })
           ),

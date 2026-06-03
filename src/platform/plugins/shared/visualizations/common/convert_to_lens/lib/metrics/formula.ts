@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { isFieldValid, SchemaConfig } from '../../..';
+import type { DataView, DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { SchemaConfig } from '../../..';
+import { isFieldValid } from '../../utils';
 import { Operations } from '../../constants';
-import { isMetricWithField, getStdDeviationFormula, ExtendedColumnConverterArgs } from '../convert';
+import type { ExtendedColumnConverterArgs } from '../convert';
+import { isMetricWithField, getStdDeviationFormula } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
 import {
   getAggIdAndValue,

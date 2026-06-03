@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   let roleMapping: { id: string; name: string; api_key: string; encoded: string };
@@ -194,7 +194,6 @@ export default function ({ getService }: FtrProviderContext) {
               bool: { must: [{ match: { invalidated: { query: false, operator: 'and' } } }] },
             },
             sort: { field: 'creation', direction: 'desc' },
-            from: 0,
             size: 1,
           };
 

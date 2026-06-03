@@ -14,49 +14,51 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import type { DiscoverSessionAttributes } from '../../server';
+import type { SavedSearch, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
-import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
+import { fromDiscoverSessionAttributesToSavedSearch } from './saved_searches_utils';
 
 export interface GetSavedSearchDependencies {
   searchSourceCreate: ISearchStartSearchSource['create'];
   getSavedSrch: (id: string) => Promise<SavedSearchCrudTypes['GetOut']>;
+  handleGetSavedSrchError?: (error: unknown, savedSearchId: string) => void;
   spaces?: SpacesApi;
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 const getSavedSearchUrlConflictMessage = async (json: string) =>
   i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
-    defaultMessage: `This Discover session has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+    defaultMessage: `This Discover session has the same URL as a legacy alias. Disable the alias to resolve this error: {json}`,
     values: { json },
   });
 
 export const getSearchSavedObject = async (
   savedSearchId: string,
-  { spaces, getSavedSrch }: GetSavedSearchDependencies
+  { spaces, getSavedSrch, handleGetSavedSrchError }: GetSavedSearchDependencies
 ) => {
-  const so = await getSavedSrch(savedSearchId);
+  try {
+    const so = await getSavedSrch(savedSearchId);
 
-  // @ts-expect-error
-  if (so.error) {
-    throw new Error(`Could not locate that Discover session (id: ${savedSearchId})`);
+    if (so.meta.outcome === 'conflict') {
+      throw new Error(
+        await getSavedSearchUrlConflictMessage(
+          JSON.stringify({
+            targetType: SAVED_SEARCH_TYPE,
+            sourceId: savedSearchId,
+            // front end only
+            targetSpace: (await spaces?.getActiveSpace())?.id,
+          })
+        )
+      );
+    }
+
+    return so;
+  } catch (e) {
+    handleGetSavedSrchError?.(e, savedSearchId);
+    throw e;
   }
-
-  if (so.meta.outcome === 'conflict') {
-    throw new Error(
-      await getSavedSearchUrlConflictMessage(
-        JSON.stringify({
-          targetType: SAVED_SEARCH_TYPE,
-          sourceId: savedSearchId,
-          // front end only
-          targetSpace: (await spaces?.getActiveSpace())?.id,
-        })
-      )
-    );
-  }
-
-  return so;
 };
 
 export const convertToSavedSearch = async <
@@ -71,7 +73,7 @@ export const convertToSavedSearch = async <
     managed,
   }: {
     savedSearchId: string | undefined;
-    attributes: SavedSearchAttributes;
+    attributes: DiscoverSessionAttributes;
     references: Reference[];
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;
@@ -79,8 +81,9 @@ export const convertToSavedSearch = async <
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies,
   serialized?: Serialized
 ): Promise<ReturnType> => {
+  const [tab] = attributes.tabs;
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    tab.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
@@ -97,15 +100,15 @@ export const convertToSavedSearch = async <
     ? searchSourceValues
     : await searchSourceCreate(searchSourceValues);
 
-  const returnVal = fromSavedSearchAttributes(
+  const returnVal = fromDiscoverSessionAttributesToSavedSearch(
     savedSearchId,
     attributes,
     tags,
-    references,
     searchSource,
-    sharingSavedObjectProps,
     Boolean(managed),
-    serialized
+    serialized,
+    sharingSavedObjectProps,
+    references
   );
 
   return returnVal as ReturnType;
@@ -134,17 +137,3 @@ export const getSavedSearch = async <
 
   return savedSearch as ReturnType;
 };
-
-/**
- * Returns a new saved search
- * Used when e.g. Discover is opened without a saved search id
- * @param search
- */
-export const getNewSavedSearch = ({
-  searchSource,
-}: {
-  searchSource: ISearchStartSearchSource;
-}): SavedSearch => ({
-  searchSource: searchSource.createEmpty(),
-  managed: false,
-});

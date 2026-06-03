@@ -7,25 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ChangeEvent } from 'react';
-import { shallow } from 'enzyme';
-import { EuiFieldNumber } from '@elastic/eui';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { createFieldFormatMock } from '../test_utils';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { sample } from './sample';
+import { screen } from '@testing-library/react';
 import { TruncateFormatEditor } from './truncate';
 
 const fieldType = 'string';
-const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input: string) => input.substring(0, 10)),
-  getParamDefaults: jest.fn().mockImplementation(() => {
-    return { fieldLength: 10 };
-  }),
-};
+
+const format = createFieldFormatMock({
+  getParamDefaults: jest.fn().mockImplementation(() => ({ fieldLength: 10 })),
+  convertToReact: jest.fn().mockImplementation((input: string) => input.substring(0, 10)),
+});
+
 const formatParams = {
   fieldLength: 5,
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
+
+const renderTruncateFormatEditor = () =>
+  renderWithI18n(
+    <TruncateFormatEditor
+      fieldType={fieldType}
+      format={format}
+      formatParams={formatParams}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
 
 describe('TruncateFormatEditor', () => {
   beforeEach(() => {
@@ -34,70 +48,49 @@ describe('TruncateFormatEditor', () => {
   });
 
   it('should have a formatId', () => {
-    expect(TruncateFormatEditor.formatId).toEqual('truncate');
+    expect(TruncateFormatEditor.formatId).toEqual(formatId);
   });
 
-  it('should render normally', async () => {
-    const component = shallow(
-      <TruncateFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  it('should render normally', () => {
+    renderTruncateFormatEditor();
+
+    expect(screen.getByText('Field length')).toBeVisible();
+    expect(screen.getByDisplayValue('5')).toBeVisible();
+    expect(screen.getByText(sample)).toBeVisible();
+    expect(screen.getByText('Lorem ipsu')).toBeVisible();
   });
 
   it('should fire error, when input is invalid', async () => {
-    const component = shallow(
-      <TruncateFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-    const input = component.find(EuiFieldNumber);
+    const user = userEvent.setup();
 
-    const changeEvent = {
-      target: {
-        value: '123.3',
-        checkValidity: () => false,
-        validationMessage: 'Error!',
-      },
-    };
+    renderTruncateFormatEditor();
 
-    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
+    const input = screen.getByTestId('truncateEditorLength');
 
-    expect(onError).toBeCalledWith(changeEvent.target.validationMessage);
-    expect(onChange).not.toBeCalled();
+    await user.clear(input);
+    onChange.mockClear();
+    onError.mockClear();
+
+    await user.type(input, '-5');
+
+    expect(onError).toHaveBeenCalledWith('Constraints not satisfied');
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('should fire change, when input changed and is valid', async () => {
-    const component = shallow(
-      <TruncateFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-    const input = component.find(EuiFieldNumber);
+    const user = userEvent.setup();
 
-    const changeEvent = {
-      target: {
-        value: '123',
-        checkValidity: () => true,
-        validationMessage: null,
-      },
-    };
+    renderTruncateFormatEditor();
+
+    const input = screen.getByTestId('truncateEditorLength');
+
+    await user.clear(input);
+    onChange.mockClear();
     onError.mockClear();
-    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
-    expect(onError).not.toBeCalled();
-    expect(onChange).toBeCalledWith({ fieldLength: 123 });
+
+    await user.type(input, '123');
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith({ fieldLength: 123 });
   });
 });

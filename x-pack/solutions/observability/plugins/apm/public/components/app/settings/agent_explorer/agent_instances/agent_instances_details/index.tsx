@@ -213,6 +213,9 @@ export function AgentInstancesDetails({
     <>
       <EuiInMemoryTable
         items={items}
+        tableCaption={i18n.translate('xpack.apm.agentInstanceDetails.tableCaption', {
+          defaultMessage: 'Agent instances overview',
+        })}
         columns={getInstanceColumns({
           serviceName,
           agentName,
@@ -233,7 +236,7 @@ export function AgentInstancesDetails({
             direction: 'desc',
           },
         }}
-        message={
+        noItemsMessage={
           isLoading
             ? i18n.translate('xpack.apm.agentInstanceDetails.table.loading', {
                 defaultMessage: 'Loading...',

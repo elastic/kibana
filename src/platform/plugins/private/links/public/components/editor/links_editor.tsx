@@ -10,12 +10,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
+import type { DropResult, EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
-  DropResult,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiDragDropContext,
   euiDragDropReorder,
   EuiDraggable,
@@ -29,20 +28,15 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
-import {
-  LINKS_HORIZONTAL_LAYOUT,
-  LINKS_VERTICAL_LAYOUT,
-  LinksLayoutType,
-} from '../../../common/content_management';
+import type { LinksLayoutType } from '../../../common/content_management';
+import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
-import { getOrderedLinkList } from '../../lib/resolve_links';
 import { coreServices } from '../../services/kibana_services';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 import { LinksStrings } from '../links_strings';
 import { TooltipWrapper } from '../tooltip_wrapper';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
@@ -100,7 +94,7 @@ export const LinksEditor = ({
       setOrderedLinks([]);
       return;
     }
-    setOrderedLinks(getOrderedLinkList(initialLinks));
+    setOrderedLinks(initialLinks);
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
@@ -108,7 +102,7 @@ export const LinksEditor = ({
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {
-            return { ...link, order: i };
+            return link;
           }
         );
         setOrderedLinks(newList);
@@ -130,16 +124,13 @@ export const LinksEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order } as ResolvedLink;
+                return newLink as ResolvedLink;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([
-            ...orderedLinks,
-            { ...newLink, order: orderedLinks.length } as ResolvedLink,
-          ]);
+          setOrderedLinks([...orderedLinks, newLink as ResolvedLink]);
         }
       }
     },
@@ -230,7 +221,7 @@ export const LinksEditor = ({
                   <EuiButtonEmpty
                     flush="left"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => addOrEditLink()}
                     data-test-subj="links--panelEditor--addLinkBtn"
                   >
@@ -335,7 +326,7 @@ const styles = {
       opacity: 0;
       transform: translateX(100%);
     }
-  
+
     100% {
       opacity: 1;
       transform: translateX(0%);
@@ -347,7 +338,7 @@ const styles = {
       opacity: 1;
       transform: translateX(0%);
     }
-  
+
     100% {
       opacity: 0;
       transform: translateX(100%);
@@ -356,7 +347,7 @@ const styles = {
     return css({
       '.linkEditor': {
         maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
-        height: 'var(--kbn-application--content-height)',
+        height: 'var(--kbn-layout--application-height)',
         position: 'fixed',
         display: 'flex',
         inlineSize: '50vw',

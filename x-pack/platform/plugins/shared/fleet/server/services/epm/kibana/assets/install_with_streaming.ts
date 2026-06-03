@@ -19,7 +19,9 @@ import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
-import type { ArchiveAsset, InstallAssetContext } from './install';
+import { indexPatternTypes } from '../index_pattern/install';
+
+import type { ArchiveAsset } from './install';
 import {
   KibanaSavedObjectTypeMapping,
   createSavedObjectKibanaAsset,
@@ -43,7 +45,6 @@ export async function installKibanaAssetsWithStreaming({
   spaceId,
   packageInstallContext,
   savedObjectsClient,
-  assetTags,
   pkgName,
 }: InstallKibanaAssetsWithStreamingArgs): Promise<KibanaAssetReference[]> {
   const { archiveIterator } = packageInstallContext;
@@ -59,12 +60,6 @@ export async function installKibanaAssetsWithStreaming({
   const assetRefs: KibanaAssetReference[] = [];
   let batch: ArchiveAsset[] = [];
 
-  const context: InstallAssetContext = {
-    pkgName,
-    spaceId,
-    assetTags,
-  };
-
   await archiveIterator.traverseEntries(async ({ path, buffer }) => {
     if (!buffer || !isKibanaAssetType(path)) {
       return;
@@ -77,8 +72,22 @@ export async function installKibanaAssetsWithStreaming({
     }
 
     if (
-      soType === KibanaSavedObjectType.alert &&
+      soType === KibanaSavedObjectType.alertingRuleTemplate &&
       !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+    ) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.sloTemplate &&
+      !appContextService.getExperimentalFeatures().enableSloTemplates
+    ) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.indexPattern &&
+      indexPatternTypes.some((pattern) => `${pattern}-*` === savedObject.id)
     ) {
       return;
     }
@@ -90,7 +99,6 @@ export async function installKibanaAssetsWithStreaming({
       await bulkCreateSavedObjects({
         savedObjectsClient: savedObjectClientWithSpace,
         kibanaAssets: batch,
-        context,
         refresh: false,
       });
       batch = [];
@@ -102,14 +110,13 @@ export async function installKibanaAssetsWithStreaming({
     await bulkCreateSavedObjects({
       savedObjectsClient: savedObjectClientWithSpace,
       kibanaAssets: batch,
-      context,
       // Use wait_for with the last batch to ensure all assets are readable once the install is complete
       refresh: 'wait_for',
     });
   }
 
   // Update the installation saved object with installed kibana assets
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId);
 
   return assetRefs;
 }
@@ -118,20 +125,16 @@ async function bulkCreateSavedObjects({
   savedObjectsClient,
   kibanaAssets,
   refresh,
-  context,
 }: {
   kibanaAssets: ArchiveAsset[];
   savedObjectsClient: SavedObjectsClientContract;
   refresh?: boolean | 'wait_for';
-  context: InstallAssetContext;
 }) {
   if (!kibanaAssets.length) {
     return [];
   }
 
-  const toBeSavedObjects = kibanaAssets.map((asset) =>
-    createSavedObjectKibanaAsset(asset, context)
-  );
+  const toBeSavedObjects = kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset));
 
   const { saved_objects: createdSavedObjects } = await savedObjectsClient.bulkCreate(
     toBeSavedObjects,

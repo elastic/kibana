@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { isInterval } from '../../lib/intervals';
-import { scheduleRruleSchemaV1, scheduleRruleSchemaV2 } from './rrule';
+import { scheduleRruleSchemaV1, scheduleRruleSchemaV2, scheduleRruleSchemaV3 } from './rrule';
 
 export function validateDuration(duration: string) {
   if (!isInterval(duration)) {
@@ -76,4 +76,32 @@ export const taskSchemaV5 = taskSchemaV4.extends({
 
 export const taskSchemaV6 = taskSchemaV5.extends({
   schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchemaV2])),
+});
+
+export const taskSchemaV7 = taskSchemaV6.extends({
+  schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchemaV3])),
+});
+
+export const taskSchemaV8 = taskSchemaV7.extends({
+  cost: schema.maybe(
+    schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
+  ),
+});
+
+export const taskSchemaV9 = taskSchemaV8.extends({
+  uiamApiKey: schema.maybe(schema.string()),
+  userScope: schema.maybe(
+    schema.object({
+      apiKeyId: schema.string(),
+      uiamApiKeyId: schema.maybe(schema.string()),
+      spaceId: schema.string(),
+      apiKeyCreatedByUser: schema.boolean(),
+    })
+  ),
+});
+
+export const taskSchemaV10 = taskSchemaV9.extends({
+  // Make cost more lenient to allow for future cost values without breaking forward compatibility.
+  // Coerced to 'normal' in V10->V9 forward compatibility function if value is not recognized.
+  cost: schema.maybe(schema.string({ maxLength: 100 })),
 });

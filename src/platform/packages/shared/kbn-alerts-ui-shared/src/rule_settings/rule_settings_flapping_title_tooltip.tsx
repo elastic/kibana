@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
-  EuiPopoverProps,
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
@@ -84,6 +84,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
         repositionOnScroll
         isOpen={isOpen}
         anchorPosition={anchorPosition}
+        aria-label={alertFlappingTitleInfo}
         panelStyle={{
           width: 500,
         }}

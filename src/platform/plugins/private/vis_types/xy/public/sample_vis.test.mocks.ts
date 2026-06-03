@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 
 const mockUiStateGet = jest.fn().mockReturnValue(() => false);
 
@@ -16,7 +16,7 @@ export const sampleAreaVis = {
     name: 'area',
     title: 'Area',
     description: 'Emphasize the quantity beneath a line chart',
-    icon: 'visArea',
+    icon: 'chartArea',
     stage: 'production',
     options: {
       showTimePicker: true,

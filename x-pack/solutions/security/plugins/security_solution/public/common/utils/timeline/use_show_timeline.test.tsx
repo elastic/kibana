@@ -6,12 +6,19 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { useUserPrivileges } from '../../components/user_privileges';
 import { useShowTimeline } from './use_show_timeline';
 
+import { EVENT_FILTERS_PATH, TRUSTED_APPS_PATH } from '../../../../common/constants';
 import { TestProviders } from '../../mock';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 import type { LinkInfo } from '../../links';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withMatchedIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../components/user_privileges');
 jest.mock('../../../helpers_access', () => ({ hasAccessToSecuritySolution: jest.fn(() => true) }));
@@ -31,15 +38,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const mockUseSourcererDataView = jest.fn(
-  (): { indicesExist: boolean; dataViewId: string | null } => ({
-    indicesExist: true,
-    dataViewId: null,
-  })
-);
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
+jest.mocked(useDataView).mockImplementation(withMatchedIndices);
 
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
@@ -79,6 +78,20 @@ describe('use show timeline', () => {
     const { result } = renderUseShowTimeline();
     await waitFor(() => expect(result.current).toEqual([false]));
   });
+
+  it('hides timeline on artifact tab routes when link path targets a different tab', async () => {
+    mockUseNormalizedAppLinks.mockReturnValueOnce([
+      {
+        id: SecurityPageName.artifacts,
+        path: EVENT_FILTERS_PATH,
+        hideTimeline: true,
+      },
+    ] as LinkInfo[]);
+    mockUseLocation.mockReturnValueOnce({ pathname: TRUSTED_APPS_PATH });
+    const { result } = renderUseShowTimeline();
+    await waitFor(() => expect(result.current).toEqual([false]));
+  });
+
   it('hides timeline for users without timeline access', async () => {
     mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: false } });
 
@@ -97,26 +110,25 @@ it('shows timeline for users with timeline read access', async () => {
 
 describe('sourcererDataView', () => {
   it('should show timeline when indices exist', () => {
-    mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: true, dataViewId: 'test' });
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
   it('should show timeline when dataViewId is null', () => {
-    mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: null });
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });
 
-  it('should not show timeline when dataViewId is not null and indices does not exist', () => {
-    mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
+  it('should show timeline even when indices do not exist (data view state does not gate visibility)', () => {
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
     const { result } = renderUseShowTimeline();
-    expect(result.current).toEqual([false]);
+    expect(result.current).toEqual([true]);
   });
 });
 
 describe('Security solution capabilities', () => {
   it('should show timeline when user has read capabilities', () => {
+    jest.mocked(useDataView).mockImplementation(withMatchedIndices);
     const { result } = renderUseShowTimeline();
     expect(result.current).toEqual([true]);
   });

@@ -16,7 +16,7 @@ import type {
 import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import _ from 'lodash';
-import { ILayer } from '../../classes/layers/layer';
+import type { ILayer } from '../../classes/layers/layer';
 
 class MockMbMap {
   private _style: StyleSpecification;

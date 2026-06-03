@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray, once } from 'lodash';
+import { castArray } from 'lodash';
 import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { OTLPMetricExporter as OTLPMetricExporterProto } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
-import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
+import type { resources } from '@elastic/opentelemetry-node/sdk';
+import { api, metrics } from '@elastic/opentelemetry-node/sdk';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
+import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
+import { duration } from 'moment';
 import { PrometheusExporter } from './prometheus_exporter';
 
 /**
@@ -42,6 +46,7 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
   const { resource, metricsConfig, monitoringCollectionConfig } = initMetricsOptions;
 
   const globalExportIntervalMillis = metricsConfig.interval.asMilliseconds();
+  const globalExportTimeoutMillis = metricsConfig.timeout?.asMilliseconds();
 
   const readers: metrics.IMetricReader[] = [];
 
@@ -68,14 +73,32 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
     } = otlpConfig;
 
     if (url) {
+      const temporalityPreference =
+        (process.env.OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE as 'cumulative' | 'delta') ??
+        'cumulative';
+
       // We just need to push it as another grpc config
-      exporters.push({ grpc: { url, headers, exportIntervalMillis } });
+      exporters.push({
+        grpc: {
+          url,
+          headers,
+          exportInterval: duration(exportIntervalMillis, 'ms'),
+          temporalityPreference,
+        },
+      });
     }
   }
 
   readers.push(
     ...exporters.map((exporterConfig) => {
       const variant = fromExternalVariant(exporterConfig);
+
+      const commonConfig = {
+        temporalityPreference:
+          variant.value.temporalityPreference === 'delta'
+            ? metrics.AggregationTemporality.DELTA
+            : metrics.AggregationTemporality.CUMULATIVE,
+      };
 
       let exporter: metrics.PushMetricExporter;
       switch (variant.type) {
@@ -85,27 +108,47 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
             metadata.add(key, value);
           });
           exporter = new OTLPMetricExporterGrpc({
+            ...commonConfig,
             metadata,
             url: variant.value.url,
-            temporalityPreference: metrics.AggregationTemporality.DELTA,
           });
           break;
         }
         case 'http':
           exporter = new OTLPMetricExporterHttp({
+            ...commonConfig,
             headers: variant.value.headers,
             url: variant.value.url,
-            temporalityPreference: metrics.AggregationTemporality.DELTA,
+          });
+          break;
+        case 'proto':
+          exporter = new OTLPMetricExporterProto({
+            ...commonConfig,
+            headers: variant.value.headers,
+            url: variant.value.url,
           });
           break;
       }
 
-      const exportInterval = variant.value.exportIntervalMillis ?? globalExportIntervalMillis;
+      const exportInterval = variant.value.exportInterval ?? globalExportIntervalMillis;
+      const exportIntervalMillis =
+        typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds();
+
+      // If the exporter's export timeout is not provided, use the global export timeout only if it is less than the export interval (the client fails if the timeout is higher than the interval).
+      // Otherwise, we use the export interval.
+      let exportTimeoutMillis = variant.value.exportTimeout?.asMilliseconds();
+      if (typeof exportTimeoutMillis !== 'number') {
+        if (globalExportTimeoutMillis && globalExportTimeoutMillis <= exportIntervalMillis) {
+          exportTimeoutMillis = globalExportTimeoutMillis;
+        } else {
+          exportTimeoutMillis = exportIntervalMillis;
+        }
+      }
 
       return new metrics.PeriodicExportingMetricReader({
         exporter,
-        exportIntervalMillis:
-          typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds(),
+        exportIntervalMillis,
+        exportTimeoutMillis,
       });
     })
   );
@@ -118,9 +161,5 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
 
   api.metrics.setGlobalMeterProvider(meterProvider);
 
-  const shutdown = once(() => meterProvider.shutdown());
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('beforeExit', shutdown);
-  process.on('uncaughtExceptionMonitor', shutdown);
+  cleanupBeforeExit(() => meterProvider.shutdown());
 }

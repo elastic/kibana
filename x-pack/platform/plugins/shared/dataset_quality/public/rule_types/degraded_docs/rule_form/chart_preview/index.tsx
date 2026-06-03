@@ -27,8 +27,9 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
-import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
-import { Maybe, TimeLabelForData, getDomain } from './chart_preview_helper';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import type { Maybe } from './chart_preview_helper';
+import { TimeLabelForData, getDomain } from './chart_preview_helper';
 
 function getTimeZone(uiSettings?: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
@@ -65,7 +66,11 @@ export function ChartPreview({
 
   const barSeries = useMemo(() => {
     return series.flatMap((serie) =>
-      serie.data.map((point) => ({ ...point, groupBy: serie.name }))
+      serie.data.map((point) => ({
+        ...point,
+        y: point.y ?? 0,
+        groupBy: serie.name,
+      }))
     );
   }, [series]);
 
@@ -73,7 +78,15 @@ export function ChartPreview({
 
   const chartSize = 120;
 
-  const { yMax, xMin, xMax } = getDomain(series);
+  const seriesWithNumericY = useMemo(
+    () =>
+      series.map((s) => ({
+        ...s,
+        data: s.data.map((d) => ({ x: d.x, y: d.y ?? 0 })),
+      })),
+    [series]
+  );
+  const { yMax, xMin, xMax } = getDomain(seriesWithNumericY);
 
   const chartDomain = {
     max: Math.max(yMax === 0 ? 1 : yMax, Math.max(...threshold)) * 1.1, // Add 10% headroom.

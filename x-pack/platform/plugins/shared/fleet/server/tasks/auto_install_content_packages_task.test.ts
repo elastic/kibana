@@ -19,7 +19,7 @@ import * as Registry from '../services/epm/registry';
 import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
 
 import type { PackageClient } from '../services';
-import { appContextService } from '../services';
+import { appContextService, dataStreamService } from '../services';
 
 import { getInstalledPackages } from '../services/epm/packages';
 
@@ -115,21 +115,24 @@ describe('AutoInstallContentPackagesTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      esClient.esql.query.mockResolvedValue({
-        took: 100,
-        values: [
-          [1, 'system.cpu'],
-          [2, 'system.memory'],
-          [3, 'system.test'],
-        ],
-      } as any);
+      (dataStreamService.getAllFleetDataStreams as jest.Mock).mockResolvedValue([
+        {
+          name: 'logs-system.cpu-default',
+        } as any,
+        {
+          name: 'logs-system.memory-default',
+        } as any,
+        {
+          name: 'logs-system.test-default',
+        } as any,
+      ]);
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
@@ -172,12 +175,6 @@ describe('AutoInstallContentPackagesTask', () => {
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(2);
-      expect(esClient.esql.query).toHaveBeenCalledWith({
-        query: `FROM logs-*,metrics-*,traces-* 
-      | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 10 minutes 
-      | STATS COUNT(*) BY data_stream.dataset `,
-      });
     });
 
     it('should install content packages and filter out installed datasets', async () => {
@@ -199,12 +196,6 @@ describe('AutoInstallContentPackagesTask', () => {
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
-      expect(esClient.esql.query).toHaveBeenCalledWith({
-        query: `FROM logs-*,metrics-*,traces-* 
-      | KEEP @timestamp, data_stream.dataset 
-      | WHERE @timestamp > NOW() - 10 minutes 
-      | STATS COUNT(*) BY data_stream.dataset | WHERE data_stream.dataset NOT IN ("system.test")`,
-      });
     });
 
     it('should not call registry if cached', async () => {
@@ -256,7 +247,58 @@ describe('AutoInstallContentPackagesTask', () => {
       await runTask();
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-      expect(esClient.esql.query).not.toHaveBeenCalled();
+      expect(dataStreamService.getAllFleetDataStreams).not.toHaveBeenCalled();
+    });
+
+    it('should not downgrade package when a newer prerelease version is installed', async () => {
+      // Registry has 1.1.0, but a prerelease 2.0.0-preview is already installed.
+      // The task must not downgrade to 1.1.0.
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '2.0.0-preview',
+          },
+          {
+            name: 'test_package',
+            version: '2.0.0-preview',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('should not downgrade one package while upgrading another', async () => {
+      // kubernetes_otel has a prerelease installed (must not downgrade),
+      // test_package has an older version installed (must upgrade).
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '2.0.0-preview',
+          },
+          {
+            name: 'test_package',
+            version: '1.0.0',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'test_package',
+        pkgVersion: '1.1.0',
+        useStreaming: true,
+        automaticInstall: true,
+      });
+      expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pkgName: 'kubernetes_otel' })
+      );
     });
   });
 });

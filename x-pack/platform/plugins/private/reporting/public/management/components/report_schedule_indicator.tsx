@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Frequency } from '@kbn/rrule';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 
 interface ReportScheduleIndicatorProps {
   schedule: ScheduledReportApiJSON['schedule'];
 }
 
 const translations = {
+  [Frequency.HOURLY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.hourly', {
+    defaultMessage: 'Hourly',
+  }),
   [Frequency.DAILY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.daily', {
     defaultMessage: 'Daily',
   }),
@@ -32,6 +36,7 @@ export const ReportScheduleIndicator: FC<ReportScheduleIndicatorProps> = ({ sche
     return null;
   }
 
+  // @ts-ignore to be fixed by https://github.com/elastic/kibana/pull/234121
   const statusText = translations[schedule.rrule.freq];
 
   if (!statusText) {

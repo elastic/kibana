@@ -8,8 +8,9 @@
  */
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { Observable } from 'rxjs';
+import type { IconType } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import type { Trigger } from '../types';
 
 /**
  * During action execution we can provide additional information,
@@ -47,7 +48,7 @@ export interface ActionMenuItemProps<Context extends object> {
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
   Required<Pick<Action<Context>, 'getCompatibilityChangesSubject' | 'couldBecomeCompatible'>>;
 
-export interface Action<Context extends object = object>
+export interface Action<Context extends object = object, ActionExtension extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -68,7 +69,7 @@ export interface Action<Context extends object = object>
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: ActionExecutionContext<Context>): string | undefined;
+  getIconType(context: ActionExecutionContext<Context>): IconType | undefined;
 
   /**
    * Returns a title to be displayed to the user.
@@ -114,23 +115,31 @@ export interface Action<Context extends object = object>
   couldBecomeCompatible?: (context: Context) => boolean;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
+  /**
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
+   */
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if notification should be shown in menu for that action
    *
    */
   showNotification?: boolean;
+
+  extension?: ActionExtension;
 }
 
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<Context extends object = object>
-  extends Partial<Presentable<ActionDefinitionContext<Context>>> {
+export type ActionDefinition<
+  Context extends object = object,
+  ActionExtension extends object = {}
+> = Partial<Presentable<ActionDefinitionContext<Context>>> & { extension?: ActionExtension } & {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -167,10 +176,14 @@ export interface ActionDefinition<Context extends object = object>
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
 
   /**
-   * action is disabled or not
-   *
+   * Determines if the action is disabled or not
    */
-  disabled?: boolean;
+  isDisabled?(context: ActionDefinitionContext<Context>): boolean;
+
+  /**
+   * @returns an Observable that emits when this action's disabled state should be recalculated.
+   */
+  getDisabledStateChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if notification should be shown in menu for that action
@@ -189,6 +202,6 @@ export interface ActionDefinition<Context extends object = object>
    * is any chance that `isCompatible` could return true in the future.
    */
   couldBecomeCompatible?: (context: Context) => boolean;
-}
+};
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

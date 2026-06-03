@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import moment from 'moment';
 
 export const arrayOfStringsSchema = z.array(z.string());
@@ -175,3 +175,10 @@ export const historySettingsSchema = z
       lookbackPeriod: settings?.lookbackPeriod || durationSchema.parse('1h'),
     };
   });
+
+export enum EntityStoreCapability {
+  HISTORICAL_VIEWS = 'HISTORICAL_VIEWS',
+  CRUD_API = 'CRUD_API',
+}
+
+export const capabilitySchema = z.nativeEnum(EntityStoreCapability);

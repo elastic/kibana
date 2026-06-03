@@ -6,14 +6,10 @@
  */
 
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { LazySavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import {
-  EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-  LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
-} from '@kbn/aiops-log-rate-analysis/constants';
+import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuProps } from '@elastic/eui';
@@ -28,17 +24,14 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
-import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import { getDataviewReferences } from '../../../embeddables/get_dataview_references';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 interface LogRateAnalysisAttachmentsMenuProps {
   windowParameters?: WindowParameters;
@@ -80,28 +73,23 @@ export const LogRateAnalysisAttachmentsMenu = ({
   const isCasesAttachmentEnabled = showLogRateAnalysisResults && significantItems.length > 0;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
-
-      const embeddableInput: Partial<LogRateAnalysisEmbeddableState> = {
-        title: newTitle,
-        description: newDescription,
-        dataViewId: dataView.id,
-        hidePanelTitles: false,
-        ...(applyTimeRange && { timeRange }),
-      };
 
       const state = {
         serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME),
+          title: newTitle,
+          description: newDescription,
+          data_view_id: dataView.id,
+          hide_title: false,
+          ...(applyTimeRange && { time_range: timeRange }),
         },
         type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', { state, path });
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', { state: [state], path });
     },
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );
@@ -155,9 +143,9 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   onClick: () => {
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
-                      dataViewId: dataView.id,
-                      timeRange: absoluteTimeRange,
-                      ...(windowParameters && { windowParameters }),
+                      data_view_id: dataView.id,
+                      time_range: absoluteTimeRange,
+                      ...(windowParameters && { window_parameters: windowParameters }),
                     });
                   },
                 },
@@ -224,19 +212,32 @@ export const LogRateAnalysisAttachmentsMenu = ({
       {!!panels[0]?.items?.length && (
         <EuiFlexItem>
           <EuiPopover
+            aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsPopoverAriaLabel', {
+              defaultMessage: 'Attachments',
+            })}
             button={
-              <EuiButtonIcon
-                data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
-                aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
-                color="text"
-                display="base"
-                size="s"
-                isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
-                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
+                  aria-label={i18n.translate(
+                    'xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Attachments',
+                    }
+                  )}
+                  color="text"
+                  display="base"
+                  size="s"
+                  isSelected={isActionMenuOpen}
+                  iconType="boxesVertical"
+                  onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                />
+              </EuiToolTip>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
-import type { MessageDescriptor, Formatters } from '@formatjs/intl';
+import { createIntl, createIntlCache } from '@formatjs/intl';
+import type { MessageDescriptor, Formatters, IntlConfig, IntlShape } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
-import { Translation, TranslationInput } from '../translation';
+import type { Translation, TranslationInput } from '../translation';
 import { defaultEnFormats } from './formats';
-import { FormatXMLElementFn, PrimitiveType } from './types';
+import type { FormatXMLElementFn, PrimitiveType } from './types';
 
 const EN_LOCALE = 'en';
 const defaultLocale = EN_LOCALE;
@@ -167,6 +167,20 @@ export function translate(
     );
   } catch (e) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
+  }
+}
+
+/**
+ * Formats a list of values using the current locale.
+ * @param type - The type of list formatting (e.g., 'conjunction', 'disjunction', 'unit').
+ * @param value - The array of string values to format.
+ * @returns The formatted list string.
+ */
+export function formatList(type: 'conjunction' | 'disjunction' | 'unit', value: string[]): string {
+  try {
+    return intl.formatList(value, { type });
+  } catch (e) {
+    throw new Error(`[I18n] Error formatting list ${JSON.stringify(value)}: ${e}`);
   }
 }
 

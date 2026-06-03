@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 
 export const SupportedEntityTypesRT = rt.keyof({
   host: null,
+  pod: null,
 });
 
 export const EntityTypeRT = rt.type({

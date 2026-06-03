@@ -8,13 +8,13 @@
 import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
+import type { Error } from '../../../../shared_imports';
 import {
   PageLoading,
   PageError,
-  Error,
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
@@ -26,7 +26,8 @@ import {
 import { useLoadRepositories, useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
-import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
+import type { SnapshotListParams } from '../../../lib';
+import { useDecodedParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
 
 import { SnapshotDetails } from './snapshot_details';
 import {
@@ -171,6 +172,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <>
         <EuiCallOut
+          announceOnMount={false}
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryWarningTitle"

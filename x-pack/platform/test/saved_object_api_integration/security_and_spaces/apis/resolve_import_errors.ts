@@ -8,14 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ResolveImportErrorsTestDefinition } from '../../common/suites/resolve_import_errors';
 import {
   resolveImportErrorsTestSuiteFactory,
   resolveImportErrorsTestCaseFailures,
   TEST_CASES as CASES,
   SPECIAL_TEST_CASES,
-  ResolveImportErrorsTestDefinition,
 } from '../../common/suites/resolve_import_errors';
 
 const {
@@ -114,13 +114,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   return { group1Importable, group1NonImportable, group1All, group2, refOrigins };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
+export default function (context: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
+    resolveImportErrorsTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     // use singleRequest to reduce execution time and/or test combined cases
     const singleRequest = true;

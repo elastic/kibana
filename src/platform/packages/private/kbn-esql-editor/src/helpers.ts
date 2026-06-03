@@ -7,40 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { monaco, type MonacoMessage } from '@kbn/code-editor';
+import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { monaco } from '@kbn/monaco';
-import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { MapCache } from 'lodash';
 import {
-  EDITOR_MIN_HEIGHT,
   EDITOR_MAX_HEIGHT,
+  EDITOR_MIN_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
 } from './esql_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
-
-export type MonacoMessage = monaco.editor.IMarkerData;
-
-interface IntegrationsResponse {
-  items: Array<{
-    name: string;
-    title?: string;
-    dataStreams: Array<{
-      name: string;
-      title?: string;
-    }>;
-  }>;
-}
-
-const INTEGRATIONS_API = '/api/fleet/epm/packages/installed';
-const API_VERSION = '2023-10-31';
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -49,7 +31,7 @@ export const useDebounceWithOptions = (
   deps?: React.DependencyList | undefined
 ) => {
   const isFirstRender = useRef(true);
-  const newDeps = [...(deps || []), isFirstRender];
+  const newDeps = deps || [];
 
   return useDebounce(
     () => {
@@ -79,49 +61,45 @@ const maxWarningLength = 1000;
 export const parseWarning = (warning: string): MonacoMessage[] => {
   // we limit the length to reduce ReDoS risks
   const truncatedWarning = warning.substring(0, maxWarningLength);
-  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
-    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
-    if (matches) {
-      return matches.map((message) => {
-        // replaces the quotes only if they are not escaped,
-        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
-        let startColumn = 1;
-        let startLineNumber = 1;
-        // initialize the length to 10 in case no error word found
-        let errorLength = 10;
-        // if there's line number encoded in the message use it as new positioning
-        // and replace the actual message without it
-        if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
-            warningMessage.split(':');
-          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
-          warningMessage = additionalInfoMessage ?? innerMessage;
-          if (!Number.isNaN(Number(encodedColumn))) {
-            startColumn = Number(encodedColumn);
-            startLineNumber = Number(encodedLine.replace('Line ', ''));
-          }
-          const openingSquareBracketIndex = warningMessage.indexOf('[');
-          if (openingSquareBracketIndex !== -1) {
-            const closingSquareBracketIndex = warningMessage.indexOf(
-              ']',
-              openingSquareBracketIndex
-            );
-            if (closingSquareBracketIndex !== -1) {
-              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
-            }
+  const matches = truncatedWarning.match(quotedWarningMessageRegexp);
+  if (matches) {
+    return matches.map((message) => {
+      // replaces the quotes only if they are not escaped,
+      let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
+      let startColumn = 1;
+      let startLineNumber = 1;
+      // initialize the length to 10 in case no error word found
+      let errorLength = 10;
+      // if there's line number encoded in the message use it as new positioning
+      // and replace the actual message without it
+      if (/Line (\d+):(\d+):/.test(warningMessage)) {
+        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+          warningMessage.split(':');
+        // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+        warningMessage = additionalInfoMessage ?? innerMessage;
+        if (!Number.isNaN(Number(encodedColumn))) {
+          startColumn = Number(encodedColumn);
+          startLineNumber = Number(encodedLine.replace('Line ', ''));
+        }
+        const openingSquareBracketIndex = warningMessage.indexOf('[');
+        if (openingSquareBracketIndex !== -1) {
+          const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
+          if (closingSquareBracketIndex !== -1) {
+            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
           }
         }
+      }
 
-        return {
-          message: warningMessage.trimStart(),
-          startColumn,
-          startLineNumber,
-          endColumn: startColumn + errorLength - 1,
-          endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Warning,
-        };
-      });
-    }
+      return {
+        message: warningMessage.trimStart(),
+        startColumn,
+        startLineNumber,
+        endColumn: startColumn + errorLength - 1,
+        endLineNumber: startLineNumber,
+        severity: monaco.MarkerSeverity.Warning,
+        code: 'warningFromES',
+      };
+    });
   }
   // unknown warning message
   return [
@@ -132,150 +110,106 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       endColumn: 10,
       endLineNumber: 1,
       severity: monaco.MarkerSeverity.Warning,
+      code: 'unknown',
     },
   ];
 };
 
+const ES_PROBLEM_MARKER_REGEX = /line (\d+):(\d+):/g;
+
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
-  return errors.map((error) => {
-    if (
-      // Found while testing random commands (as inlinestats)
-      !error.message.includes('esql_illegal_argument_exception') &&
-      error.message.includes('line')
-    ) {
-      const text = error.message.split('line')[1];
-      const [lineNumber, startPosition, errorMessage] = text.split(':');
-      // initialize the length to 10 in case no error word found
-      let errorLength = 10;
-      const [_, wordWithError] = errorMessage.split('[');
-      if (wordWithError) {
-        errorLength = wordWithError.length - 1;
+  return errors.flatMap((error): MonacoMessage[] => {
+    const errorMessage = typeof error.message === 'string' ? error.message : String(error.message);
+    try {
+      if (
+        // Found while testing random commands (as inlinestats)
+        !errorMessage.includes('esql_illegal_argument_exception') &&
+        errorMessage.includes('line')
+      ) {
+        const markers: Array<{ line: number; column: number; end: number; start: number }> = [];
+        for (const match of errorMessage.matchAll(ES_PROBLEM_MARKER_REGEX)) {
+          markers.push({
+            line: Number(match[1]),
+            column: Number(match[2]),
+            start: match.index ?? 0,
+            end: (match.index ?? 0) + match[0].length,
+          });
+        }
+
+        if (markers.length > 0) {
+          return markers.map((marker, i) => {
+            const messageEnd = i + 1 < markers.length ? markers[i + 1].start : errorMessage.length;
+            const message = errorMessage.slice(marker.end, messageEnd).replace(/\s+$/, '');
+            const bracketed = message.match(/\[([^\]]*)\]/);
+            const errorLength = bracketed ? bracketed[1].length : 10;
+            return {
+              message,
+              startColumn: marker.column,
+              startLineNumber: marker.line,
+              endColumn: marker.column + errorLength + 1,
+              endLineNumber: marker.line,
+              severity: monaco.MarkerSeverity.Error,
+              code: 'errorFromES',
+            };
+          });
+        }
       }
-      return {
-        message: errorMessage,
-        startColumn: Number(startPosition),
-        startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength + 1,
-        endLineNumber: Number(lineNumber),
-        severity: monaco.MarkerSeverity.Error,
-      };
-    } else if (error.message.includes('expression was aborted')) {
-      return {
-        message: i18n.translate('esqlEditor.query.aborted', {
-          defaultMessage: 'Request was aborted',
-        }),
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Warning,
-      };
-    } else {
-      // unknown error message
-      return {
-        message: error.message,
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Error,
-      };
+
+      if (errorMessage.includes('expression was aborted')) {
+        return [
+          {
+            message: i18n.translate('esqlEditor.query.aborted', {
+              defaultMessage: 'Request was aborted',
+            }),
+            startColumn: 1,
+            startLineNumber: 1,
+            endColumn: 10,
+            endLineNumber: 1,
+            severity: monaco.MarkerSeverity.Warning,
+            code: 'abortedRequest',
+          },
+        ];
+      }
+
+      return [
+        {
+          message: errorMessage,
+          startColumn: 1,
+          startLineNumber: 1,
+          endColumn: 10,
+          endLineNumber: 1,
+          severity: monaco.MarkerSeverity.Error,
+          code: 'unknownError',
+        },
+      ];
+    } catch (e) {
+      return [
+        {
+          message: errorMessage,
+          startColumn: 1,
+          startLineNumber: 1,
+          endColumn: 10,
+          endLineNumber: 1,
+          severity: monaco.MarkerSeverity.Error,
+          code: 'unknownError',
+        },
+      ];
     }
-  });
-};
-
-export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
-  const indices = await dataViews.getIndices({
-    showAllIndices: false,
-    pattern: '*',
-    isRollupIndex: () => false,
-  });
-
-  return indices.map((index) => {
-    const [tag] = index?.tags ?? [];
-    return { name: index.name, hidden: index.name.startsWith('.'), type: tag?.name ?? 'Index' };
-  });
-};
-
-export const getRemoteIndicesList = async (
-  dataViews: DataViewsPublicPluginStart,
-  areRemoteIndicesAvailable: boolean
-) => {
-  if (!areRemoteIndicesAvailable) {
-    return [];
-  }
-  const indices = await dataViews.getIndices({
-    showAllIndices: false,
-    pattern: '*:*',
-    isRollupIndex: () => false,
-  });
-  const finalIndicesList = indices.filter((source) => {
-    const [_, index] = source.name.split(':');
-    return !index.startsWith('.') && !Boolean(source.item.indices);
-  });
-
-  return finalIndicesList.map((source) => {
-    const [tag] = source?.tags ?? [];
-    return { name: source.name, hidden: false, type: tag?.name ?? 'Index' };
   });
 };
 
 // refresh the esql cache entry after 10 minutes
-const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+export const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+export const DATA_SOURCES_CACHE_KEY = 'dataSources';
+export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
 
-export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
-  if (cache.has(esqlQuery)) {
-    const cacheEntry = cache.get(esqlQuery);
+export const clearCacheWhenOld = (cache: MapCache, key: string) => {
+  if (cache.has(key)) {
+    const cacheEntry = cache.get(key);
     if (Date.now() - cacheEntry.timestamp > CACHE_INVALIDATE_DELAY) {
-      cache.delete(esqlQuery);
+      cache.delete(key);
     }
   }
-};
-
-const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) => {
-  const fleetCapabilities = core.application.capabilities.fleet;
-  if (!fleetCapabilities?.read) {
-    return [];
-  }
-  // Ideally we should use the Fleet plugin constants to fetch the integrations
-  // import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
-  // but it complicates things as we need to use an x-pack plugin as dependency to get 2 constants
-  // and this needs to be done in various places in the codebase which use the editor
-  // https://github.com/elastic/kibana/issues/186061
-  const response = (await core.http
-    .get(INTEGRATIONS_API, { query: { showOnlyActiveDataStreams: true }, version: API_VERSION })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch integrations', error);
-    })) as IntegrationsResponse;
-
-  return (
-    response?.items
-      ?.filter(({ dataStreams }) => dataStreams.length)
-      .map((source) => ({
-        name: source.name,
-        hidden: false,
-        title: source.title,
-        dataStreams: source.dataStreams,
-        type: 'Integration',
-      })) ?? []
-  );
-};
-
-export const getESQLSources = async (
-  dataViews: DataViewsPublicPluginStart,
-  core: Pick<CoreStart, 'application' | 'http'>,
-  getLicense: (() => Promise<ILicense | undefined>) | undefined
-) => {
-  const ls = await getLicense?.();
-  const ccrFeature = ls?.getFeature('ccr');
-  const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-  const [remoteIndices, localIndices, integrations] = await Promise.all([
-    getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
-    getIndicesList(dataViews),
-    getIntegrations(core),
-  ]);
-  return [...localIndices, ...remoteIndices, ...integrations];
 };
 
 export const onMouseDownResizeHandler = (
@@ -341,12 +275,63 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
-    .monaco-hover {
-      display: block !important;
+    .monaco-editor .suggest-details .scrollbar {
+      display: none !important;
     }
-    .hover-row.status-bar {
+
+    .monaco-hover {
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
+      line-height: 1.5rem;
+      border-radius: ${theme.euiTheme.border.radius.medium} !important;
+      box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+      z-index: ${theme.euiTheme.levels.flyout};
+    }
+
+    // Fixes inline suggestions hover styles and only
+    .monaco-hover:has(.inlineSuggestionsHints) {
+      height: auto !important;
+      width: auto !important;
+      overflow-y: hidden !important;
+      a {
+        color: ${theme.euiTheme.colors.textParagraph} !important;
+      }
+      .inlineSuggestionStatusBarItemLabel {
+        font-size: 10px !important;
+        display: flex;
+        align-items: center;
+        color: ${theme.euiTheme.colors.textParagraph} !important;
+      }
+      .slider {
+        display: none;
+      }
+      .keybinding {
+        opacity: 1 !important;
+      }
+      .monaco-keybinding-key {
+        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued} !important;
+        box-shadow: none !important;
+        border: 1px solid ${theme.euiTheme.colors.borderBasePlain} !important;
+      }
+      .codicon-toolbar-more {
+        opacity: 0 !important;
+      }
+      .codicon-inline-suggestion-hints-next {
+        margin-right: ${theme.euiTheme.size.xs} !important;
+      }
+      .codicon-inline-suggestion-hints-previous,
+      .codicon-inline-suggestion-hints-next {
+        color: ${theme.euiTheme.colors.textParagraph} !important;
+      }
+    }
+
+    /* Hide View Problem action, it's always the first action */
+    .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
       display: none;
     }
+    .monaco-editor .action-widget {
+      min-width: calc(${theme.euiTheme.size.xl} * 6);
+    }
+
     .margin-view-overlays .line-numbers {
       color: ${theme.euiTheme.colors.textDisabled};
     }
@@ -358,15 +343,25 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
+      // Suggestions must be rendered above flyouts
+      z-index: ${theme.euiTheme.levels.toast} !important;
+    }
+
+    .suggest-widget.message {
+      display: none !important;
     }
 
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
+
     .suggest-details {
-      padding-left: ${theme.euiTheme.size.s};
+      padding-left: ${theme.euiTheme.size.m};
+      padding-right: ${theme.euiTheme.size.m};
+      text-align: justify;
     }
+
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
@@ -374,12 +369,133 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details > .monaco-scrollable-element > .body > .header > .type {
       white-space: normal !important;
     }
+
+    .suggest-details .rendered-markdown h1 {
+      display: block;
+      margin-top: ${theme.euiTheme.size.m};
+      font-size: ${theme.euiTheme.size.base};
+      font-weight: ${theme.euiTheme.font.weight.bold};
+    }
+
+    .suggest-details [data-code] {
+      overflow-x: auto !important;
+    }
   `;
 };
 
-export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    const code = typeof error.code === 'object' ? error.code.value : error.code;
-    return code !== 'unknownIndex' && code !== 'unknownColumn';
+    return !['unknownIndex', 'unknownColumn', 'unmappedColumnWarning'].includes(error.code);
   });
+};
+
+/**
+ * Filters warning messages that overlap with error messages ranges.
+ */
+export const filterOutWarningsOverlappingWithErrors = (
+  errors: MonacoMessage[],
+  warnings: MonacoMessage[]
+): MonacoMessage[] => {
+  const hasOverlap = (warning: MonacoMessage) => {
+    return errors.some((error) => {
+      const isOverlappingLine =
+        warning.startLineNumber <= error.endLineNumber &&
+        warning.endLineNumber >= error.startLineNumber;
+      const isOverlappingColumn =
+        warning.startColumn <= error.endColumn && warning.endColumn >= error.startColumn;
+
+      return isOverlappingLine && isOverlappingColumn;
+    });
+  };
+
+  return warnings.filter((warning) => !hasOverlap(warning));
+};
+
+export const filterDuplicatedWarnings = (
+  warnings: (MonacoMessage & { code: string })[]
+): MonacoMessage[] => {
+  return uniqBy(warnings, (warning) => {
+    return warning.message;
+  });
+};
+
+/**
+ * Computes toggled comment lines for a set of lines, following standard IDE behavior:
+ * comment all lines if any line is uncommented, uncomment all only if every line
+ * is already commented.
+ */
+export const getToggleCommentLines = (lines: string[]): string[] => {
+  const allCommented = lines.every((line) => line.startsWith('//'));
+  const shouldComment = !allCommented;
+
+  return lines.map((line) => {
+    const isCommented = line.startsWith('//');
+    if (shouldComment && !isCommented) {
+      return `//${line}`;
+    }
+    if (!shouldComment && isCommented) {
+      return line.replace('//', '');
+    }
+    return line;
+  });
+};
+
+/**
+ * Keeps suggestions alive when the text before the cursor ends with:
+ * - a token character (`[\w`]`)
+ * - a space
+ * - `::`
+ * - `.`
+ */
+export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): boolean => {
+  const lastCharacter = lineContentBeforeCursor.at(-1);
+  const spaceHasBeenTyped = lineContentBeforeCursor.endsWith(' ');
+  const inlineCastHasBeenTyped = lineContentBeforeCursor.endsWith('::');
+  const dotHasBeenTyped = lineContentBeforeCursor.endsWith('.');
+  const currentTokenHasBeenTyped = Boolean(lastCharacter && /[\w`]/.test(lastCharacter));
+
+  return spaceHasBeenTyped || inlineCastHasBeenTyped || dotHasBeenTyped || currentTokenHasBeenTyped;
+};
+
+/**
+ * Tracks the Monaco suggest-widget visibility so the editor can avoid
+ * re-triggering autocomplete while the popup is already open.
+ */
+export const trackSuggestionPopupState = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
+) => {
+  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
+    | (monaco.editor.IEditorContribution & {
+        widget?: {
+          value?: {
+            onDidShow?: (cb: () => void) => void;
+            onDidHide?: (cb: () => void) => void;
+          };
+        };
+      })
+    | undefined;
+  const suggestionWidget = suggestionController?.widget?.value;
+
+  if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
+    suggestionWidget.onDidShow(() => {
+      isSuggestionPopupOpenRef.current = true;
+    });
+    suggestionWidget.onDidHide(() => {
+      isSuggestionPopupOpenRef.current = false;
+    });
+  }
+};
+
+/**
+ * Checks if the code actions menu is being displayed.
+ * @param editor
+ * @returns
+ */
+export const isCodeActionMenuVisible = (editor: monaco.editor.IStandaloneCodeEditor): boolean => {
+  const actionWidgetList = editor.getDomNode()?.querySelector('.action-widget .actionList');
+  if (actionWidgetList) {
+    return Array.from(actionWidgetList.children).length > 0;
+  }
+  return false;
 };

@@ -9,13 +9,15 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { HostOptions, SamlSessionManager } from '@kbn/test';
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import axios from 'axios';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import { MOCK_IDP_UIAM_ORGANIZATION_ID } from '@kbn/mock-idp-utils';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
 
 export const samlAuthentication = async (
@@ -36,6 +38,8 @@ export const samlAuthentication = async (
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
+  // TODO: Add support for serverless projects with different tiers
+  // ref https://github.com/elastic/kibana/pull/229919
   const rolesPath =
     '../../../../../../src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
 
@@ -67,6 +71,11 @@ export const samlAuthentication = async (
     log,
     isCloud: config.env.CLOUD_SERVERLESS,
     cloudUsersFilePath,
+    serverless: {
+      uiam: true,
+      projectType: 'security',
+      organizationId: MOCK_IDP_UIAM_ORGANIZATION_ID,
+    },
   });
 
   const adminCookieHeader = await sessionManager.getApiCredentialsForRole('admin');
@@ -145,8 +154,8 @@ export const samlAuthentication = async (
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
-      const { full_name: fullName } = await sessionManager.getUserData(role);
-      return fullName;
+      const { full_name: fullName, email, username } = await sessionManager.getUserData(role);
+      return fullName || email || username;
     },
     getUsername: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE

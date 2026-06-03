@@ -17,7 +17,7 @@ import {
 } from '../../state/selectors/workpad';
 
 import { Toolbar as ToolbarComponent } from './toolbar.component';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
 export const Toolbar = connect((state: State) => ({
   workpadName: getWorkpadName(state),

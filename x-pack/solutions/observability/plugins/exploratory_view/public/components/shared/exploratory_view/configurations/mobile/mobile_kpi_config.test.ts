@@ -11,9 +11,9 @@ import { METRIC_SYSTEM_MEMORY_USAGE, SERVICE_NAME } from '../constants/elasticse
 import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { testMobileKPIAttr } from '../test_data/mobile_test_attribute';
 import { getLayerConfigs } from '../../hooks/use_lens_attributes';
-import { DataViewState } from '../../hooks/use_app_data_view';
+import type { DataViewState } from '../../hooks/use_app_data_view';
 import { ReportTypes } from '../../../../..';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 describe('Mobile kpi config test', function () {
   mockAppDataView();

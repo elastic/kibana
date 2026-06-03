@@ -13,7 +13,9 @@ import { SyntheticsSettingsContext } from '../../../contexts';
 
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
 import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screenshot_preview';
-import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
+import type { ScreenshotImageSize } from './screenshot_size';
+import { THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
+import { useGetUrlParams } from '../../../hooks';
 
 interface Props {
   timestamp?: string;
@@ -44,8 +46,10 @@ export const JourneyStepScreenshotContainer = ({
 
   const { basePath } = useContext(SyntheticsSettingsContext);
 
+  const { remoteName } = useGetUrlParams();
+
   const imgPath = checkGroup
-    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber })
+    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber, remoteName })
     : '';
 
   const intersection = useIntersection(intersectionRef, {

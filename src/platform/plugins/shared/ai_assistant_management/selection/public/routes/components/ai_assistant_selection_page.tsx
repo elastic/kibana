@@ -8,12 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiCallOut,
   EuiCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
@@ -23,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '@kbn/doc-links';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
@@ -33,20 +36,27 @@ export function AiAssistantSelectionPage() {
     buildFlavor,
     kibanaBranch,
     securityAIAssistantEnabled,
+    chatExperience$,
   } = useAppContext();
-  const aiAssistantManagementSelection =
-    capabilities.management.kibana.aiAssistantManagementSelection;
-  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
+
+  const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
+
+  const observabilityAIAssistantEnabled =
+    capabilities.observabilityAIAssistant?.show && chatExperience !== AIChatExperience.Agent;
+
+  const securityAIAssistantVisibility = Boolean(
+    capabilities.securitySolutionAssistant['ai-assistant']
+  );
+  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && securityAIAssistantVisibility;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
-  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
-  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && aiAssistantManagementSelection;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant.home;
 
   useEffect(() => {
     setBreadcrumbs([
       {
         text: i18n.translate('aiAssistantManagementSelection.breadcrumb.index', {
-          defaultMessage: 'AI Assistant',
+          defaultMessage: 'AI Assistants',
         }),
       },
     ]);
@@ -59,7 +69,7 @@ export function AiAssistantSelectionPage() {
           {i18n.translate(
             'aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel',
             {
-              defaultMessage: 'AI Assistant',
+              defaultMessage: 'AI Assistants',
             }
           )}
         </h2>
@@ -89,6 +99,7 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
+                      announceOnMount
                       iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
@@ -130,7 +141,7 @@ export function AiAssistantSelectionPage() {
                     data-test-subj="pluginsAiAssistantSelectionPageButton"
                     onClick={() =>
                       navigateToApp('management', {
-                        path: 'kibana/observabilityAiAssistantManagement',
+                        path: 'ai/observabilityAiAssistantManagement',
                       })
                     }
                   >
@@ -144,7 +155,22 @@ export function AiAssistantSelectionPage() {
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoObservability" />}
+            icon={
+              <EuiFlexGroup
+                gutterSize="m"
+                alignItems="center"
+                responsive={false}
+                direction="row"
+                justifyContent="center"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoObservability" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoEnterpriseSearch" aria-hidden={true} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isDisabled={!observabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
@@ -161,6 +187,7 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
+                      announceOnMount
                       iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(
@@ -196,26 +223,25 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                {
+                {isSecurityAIAssistantEnabled && (
                   <EuiButton
                     data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
                     iconType="gear"
                     onClick={() =>
-                      navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
+                      navigateToApp('management', { path: 'ai/securityAiAssistantManagement' })
                     }
-                    disabled={!isSecurityAIAssistantEnabled}
                   >
                     {i18n.translate(
                       'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
                       { defaultMessage: 'Manage Settings' }
                     )}
                   </EuiButton>
-                }
+                )}
               </div>
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoSecurity" />}
+            icon={<EuiIcon size="xxl" type="logoSecurity" aria-hidden={true} />}
             isDisabled={!isSecurityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',

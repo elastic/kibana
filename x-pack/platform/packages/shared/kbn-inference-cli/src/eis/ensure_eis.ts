@@ -5,124 +5,182 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
-import Path from 'path';
+import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  EIS_ES_ARG,
+  createBasicAuth,
+  eisHttpRequest,
+  resolveCcmApiKey,
+  setCcmApiKey,
+  type EisElasticsearchConnection,
+} from '@kbn/es';
 import chalk from 'chalk';
-import { assertDockerAvailable } from '../util/assert_docker_available';
-import { getDockerComposeYaml } from './get_docker_compose_yaml';
-import { getEisGatewayConfig } from './get_eis_gateway_config';
-import { DATA_DIR, writeFile } from '../util/file_utils';
-import { getNginxConf } from './get_nginx_conf';
-import { getEisCredentials } from './get_eis_credentials';
-import { untilContainerReady } from '../util/until_container_ready';
 
-const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
-const NGINX_CONF_FILE_PATH = Path.join(DATA_DIR, 'nginx.conf');
-
-function getPreconfiguredConnectorConfig({ modelId }: { modelId: string }) {
-  return `xpack.actions.preconfigured:
-  elastic-llm:
-    name: Elastic LLM
-    actionTypeId: .inference
-    exposeConfig: true
-    config:
-      provider: 'elastic'
-      taskType: 'chat_completion'
-      inferenceId: '.rainbow-sprinkles-elastic'
-      providerConfig:
-        model_id: '${modelId}'`;
+interface ElasticsearchCredentials {
+  username: string;
+  password: string;
 }
 
-async function down(cleanup: boolean = true) {
-  await execa
-    .command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup })
-    .catch(() => {});
-}
+const EIS_URL_FLAG = `-E ${EIS_ES_ARG}`;
 
-export async function ensureEis({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
-  log.info(`Ensuring EIS is available`);
-
-  await assertDockerAvailable();
-
-  const credentials = await getEisCredentials({
-    log,
-    dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
-  });
-
-  log.debug(`Stopping existing containers`);
-
-  await down();
-
-  const eisGatewayConfig = await getEisGatewayConfig({
-    credentials,
-    log,
-    signal,
-  });
-
-  const nginxConf = getNginxConf({ eisGatewayConfig });
-
-  log.debug(`Wrote nginx config to ${NGINX_CONF_FILE_PATH}`);
-
-  await writeFile(NGINX_CONF_FILE_PATH, nginxConf);
-
-  const dockerComposeYaml = getDockerComposeYaml({
-    config: {
-      eisGateway: eisGatewayConfig,
-      nginx: {
-        file: NGINX_CONF_FILE_PATH,
+const testCredentials = async (
+  baseUrl: string,
+  credentials: ElasticsearchCredentials,
+  ssl: boolean,
+  log: ToolingLog
+): Promise<boolean> => {
+  try {
+    const { statusCode } = await eisHttpRequest(
+      baseUrl,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${createBasicAuth(credentials.username, credentials.password)}`,
+        },
+        rejectUnauthorized: false,
       },
-    },
-  });
+      undefined,
+      ssl
+    );
 
-  await writeFile(DOCKER_COMPOSE_FILE_PATH, dockerComposeYaml);
+    return statusCode === 200;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'EPROTO') {
+      log.debug('Protocol mismatch detected — attempting to connect with HTTP');
+      throw new Error('Protocol mismatch error');
+    }
 
-  log.debug(`Wrote docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
+    throw new Error('Failed to connect to Elasticsearch', { cause: error as Error });
+  }
+};
 
-  untilContainerReady({
-    containerName: 'gateway-proxy',
-    signal,
-    log,
-    dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
-    condition: ['.State.Health.Status', 'healthy'],
-  })
-    .then(() => {
-      log.write('');
+const getES = async (log: ToolingLog): Promise<EisElasticsearchConnection> => {
+  const rawHost = process.env.ES_HOST || 'localhost';
+  const port = process.env.ES_PORT || '9200';
 
-      log.write(
-        `${chalk.green(
-          `✔`
-        )} EIS Gateway started. Start Elasticsearch with "-E xpack.inference.elastic.url=http://localhost:${
-          eisGatewayConfig.ports[0]
-        }" to connect`
-      );
+  const protocolMatch = rawHost.match(/^(https?):\/\/(.+)$/);
+  const protocols = protocolMatch ? [protocolMatch[1]] : ['https', 'http'];
+  const hostname = protocolMatch ? protocolMatch[2] : rawHost;
+  const esAddress = `${hostname}:${port}`;
 
-      log.write('');
+  const envUsername = process.env.ES_USERNAME || process.env.ELASTICSEARCH_USERNAME;
+  const envPassword = process.env.ES_PASSWORD || process.env.ELASTICSEARCH_PASSWORD;
 
-      log.write(
-        `${chalk.green(
-          `📋`
-        )} Paste the following config in kibana.(dev.).yml if you don't already have a connector:`
-      );
+  const credentialsToTry: Array<{ username: string; password: string; type: string }> = [];
 
-      const lines = getPreconfiguredConnectorConfig({ modelId: eisGatewayConfig.model.id }).split(
-        '\n'
-      );
-
-      log.write('');
-
-      lines.forEach((line) => {
-        if (line) {
-          log.write(line);
-        }
-      });
-    })
-    .catch((error) => {
-      log.error(error);
+  if (envUsername && envPassword) {
+    credentialsToTry.push({
+      username: envUsername,
+      password: envPassword,
+      type: 'environment variable',
     });
+  }
 
-  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up`, {
-    stdio: 'inherit',
-    cleanup: true,
-  });
-}
+  credentialsToTry.push(
+    { username: 'elastic', password: 'changeme', type: 'default' },
+    { username: 'elastic_serverless', password: 'changeme', type: 'default' }
+  );
+
+  for (const protocol of protocols) {
+    const baseUrl = `${protocol}://${esAddress}`;
+
+    for (const credentials of credentialsToTry) {
+      const isSsl = protocol === 'https';
+      try {
+        log.debug(`Trying ${credentials.type} credentials: ${credentials.username}`);
+
+        const isValid = await testCredentials(baseUrl, credentials, isSsl, log);
+
+        if (isValid) {
+          log.info(
+            `Connected to Elasticsearch at ${chalk.cyan(baseUrl)} (${
+              credentials.type
+            } credentials: ${credentials.username})`
+          );
+
+          return { baseUrl, credentials, ssl: isSsl };
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Protocol mismatch error') {
+          break; // stop trying creds, move to next protocol
+        }
+      }
+    }
+  }
+
+  throw new Error(
+    [
+      `Could not connect to Elasticsearch at ${esAddress}.`,
+      '',
+      `Make sure Elasticsearch is running with the EIS URL flag:`,
+      '',
+      `  ${chalk.cyan(EIS_URL_FLAG)}`,
+      '',
+      'If using custom credentials, set ES_USERNAME and ES_PASSWORD environment variables.',
+    ].join('\n')
+  );
+};
+
+const getEisEndpoint = async (
+  es: EisElasticsearchConnection,
+  log: ToolingLog
+): Promise<string | undefined> => {
+  try {
+    const { statusCode, data } = await eisHttpRequest(
+      `${es.baseUrl}/_cluster/settings?include_defaults=true&flat_settings=true`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${createBasicAuth(
+            es.credentials.username,
+            es.credentials.password
+          )}`,
+        },
+        rejectUnauthorized: false,
+      },
+      undefined,
+      es.ssl
+    );
+
+    if (statusCode !== 200) {
+      log.warning(`Failed to get cluster settings: HTTP ${statusCode}`);
+      return undefined;
+    }
+
+    const settings = JSON.parse(data);
+    return (
+      settings.persistent?.['xpack.inference.elastic.url'] ||
+      settings.transient?.['xpack.inference.elastic.url'] ||
+      settings.defaults?.['xpack.inference.elastic.url'] ||
+      undefined
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log.warning(`Error fetching cluster settings: ${message}`);
+    return undefined;
+  }
+};
+
+export const ensureEis = async ({ log }: { log: ToolingLog }): Promise<void> => {
+  log.info('Setting up Cloud Connected Mode for EIS');
+
+  const es = await getES(log);
+
+  const eisEndpoint = await getEisEndpoint(es, log);
+  if (eisEndpoint) {
+    log.info(`EIS endpoint: ${chalk.cyan(eisEndpoint)}`);
+  } else {
+    log.warning(
+      `Could not detect xpack.inference.elastic.url — make sure Elasticsearch was started with ${chalk.cyan(
+        '-E xpack.inference.elastic.url=...'
+      )}`
+    );
+  }
+
+  const apiKey = await resolveCcmApiKey(log);
+  await setCcmApiKey(apiKey, es, log);
+
+  log.write('');
+  log.write(`${chalk.green('✔')} EIS API key successfully set in Cloud Connected Mode`);
+  log.write('');
+};

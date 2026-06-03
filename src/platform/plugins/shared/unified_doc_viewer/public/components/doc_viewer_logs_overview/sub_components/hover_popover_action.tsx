@@ -8,19 +8,19 @@
  */
 
 import React, { useRef, useState } from 'react';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
   EuiPopoverTitle,
   EuiToolTip,
-  PopoverAnchorPosition,
   type EuiPopoverProps,
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTruncateText } from '@kbn/react-hooks';
-import { useUIFieldActions } from '../../../hooks/use_field_actions';
+import { useUIFieldActions } from '@kbn/unified-doc-viewer';
 
 interface HoverPopoverActionProps {
   children: React.ReactChild;
@@ -107,6 +107,10 @@ export const HoverActionPopover = ({
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display={display}
+        aria-label={i18n.translate(
+          'unifiedDocViewer.observability.traces.details.hoverPopover.ariaLabel',
+          { defaultMessage: 'Field value details' }
+        )}
       >
         {(title as string) && (
           <EuiPopoverTitle

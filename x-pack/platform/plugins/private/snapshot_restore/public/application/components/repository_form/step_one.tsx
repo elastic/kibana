@@ -14,6 +14,7 @@ import {
   EuiCard,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFlexGroup,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
@@ -24,20 +25,24 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
+import type { Error } from '@kbn/es-ui-shared-plugin/public';
+import { SectionError } from '@kbn/es-ui-shared-plugin/public';
+
+import type { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common';
-import { SectionError, Error } from '../../../shared_imports';
 
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
-import { RepositoryValidation } from '../../services/validation';
-import { SectionLoading, RepositoryTypeLogo } from '..';
+import type { RepositoryValidation } from '../../services/validation';
+import { SectionLoading } from '../loading';
+import { RepositoryTypeLogo } from '../repository_type_logo';
 import { useCore } from '../../app_context';
 import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 
 interface Props {
   repository: Repository | EmptyRepository;
   onNext: () => void;
+  onCancel: () => void;
   updateRepository: (updatedFields: any) => void;
   validation: RepositoryValidation;
 }
@@ -45,6 +50,7 @@ interface Props {
 export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   repository,
   onNext,
+  onCancel,
   updateRepository,
   validation,
 }) => {
@@ -194,6 +200,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     if (!repositoryTypes.length) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorTitle"
@@ -325,19 +332,31 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   );
 
   const renderActions = () => (
-    <EuiButton
-      color="primary"
-      onClick={onNext}
-      fill
-      iconType="arrowRight"
-      iconSide="right"
-      data-test-subj="nextButton"
-    >
-      <FormattedMessage
-        id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"
-        defaultMessage="Next"
-      />
-    </EuiButton>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty flush="left" onClick={onCancel} data-test-subj="cancelButton">
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="primary"
+          onClick={onNext}
+          fill
+          iconType="chevronSingleRight"
+          iconSide="right"
+          data-test-subj="nextButton"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const renderFormValidationError = () => {

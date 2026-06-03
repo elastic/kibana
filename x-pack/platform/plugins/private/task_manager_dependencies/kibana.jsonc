@@ -18,6 +18,10 @@
     "requiredPlugins": [
       "taskManager",
       "encryptedSavedObjects",
+      "eventLog",
     ],
+    "optionalPlugins": [
+      "security",
+    ]
   },
 }

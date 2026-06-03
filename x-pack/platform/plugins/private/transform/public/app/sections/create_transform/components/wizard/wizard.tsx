@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
+import React, { type FC, useEffect, useRef, useState, createContext, useMemo } from 'react';
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSteps } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -23,7 +24,13 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
+import {
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+  TRANSFORM_FUNCTION,
+} from '../../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
@@ -46,6 +53,14 @@ import {
 import { WizardNav } from '../wizard_nav';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
+
+const styles = {
+  steps: css`
+    .euiStep__content {
+      padding-right: 0;
+    }
+  `,
+};
 
 const localStorage = new Storage(window.localStorage);
 
@@ -124,8 +139,38 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   // The DETAILS state
   const [stepDetailsState, setStepDetailsState] = useState(
-    applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
+    applyTransformConfigToDetailsState(
+      getDefaultStepDetailsState(
+        cloneConfig && isLatestTransform(cloneConfig) ? TRANSFORM_FUNCTION.LATEST : undefined
+      ),
+      cloneConfig
+    )
   );
+
+  // When the transform function changes (pivot ↔ latest), reset max_page_search_size to the
+  // new type's default — but only if the user hasn't explicitly changed it from the old default.
+  const prevTransformFunctionRef = useRef(stepDefineState.transformFunction);
+  useEffect(() => {
+    const prev = prevTransformFunctionRef.current;
+    const next = stepDefineState.transformFunction;
+    if (prev === next) return;
+    prevTransformFunctionRef.current = next;
+
+    const oldDefault =
+      prev === TRANSFORM_FUNCTION.LATEST
+        ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+        : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE;
+    const newDefault =
+      next === TRANSFORM_FUNCTION.LATEST
+        ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+        : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE;
+
+    setStepDetailsState((s) =>
+      s.transformSettingsMaxPageSearchSize === oldDefault
+        ? { ...s, transformSettingsMaxPageSearchSize: newDefault }
+        : s
+    );
+  }, [stepDefineState.transformFunction]);
 
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
@@ -195,6 +240,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
           {currentStep === WIZARD_STEPS.CREATE ? (
             <StepCreateForm
               createDataView={stepDetailsState.createDataView}
+              deferValidation={stepDetailsState.deferValidation}
               transformId={stepDetailsState.transformId}
               transformConfig={transformConfig}
               onChange={setStepCreateState}
@@ -215,6 +261,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     currentStep,
     setCurrentStep,
     stepDetailsState.createDataView,
+    stepDetailsState.deferValidation,
     stepDetailsState.transformId,
     transformConfig,
     setStepCreateState,
@@ -262,7 +309,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         <UrlStateProvider>
           <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
             <DatePickerContextProvider {...datePickerDeps}>
-              <EuiSteps className="transform__steps" steps={stepsConfig} />
+              <EuiSteps css={styles.steps} steps={stepsConfig} />
             </DatePickerContextProvider>
           </StorageContextProvider>
         </UrlStateProvider>

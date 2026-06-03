@@ -9,8 +9,9 @@ import { useEuiTheme } from '@elastic/eui';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSyntheticsDataViewIndexPatterns } from '../hooks/use_synthetics_data_view_index_patterns';
 import { AVAILABILITY_LABEL } from './availability_panel';
 
 interface AvailabilitySparklinesProps {
@@ -27,6 +28,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
   } = useKibana<ClientPluginsStart>();
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const { euiTheme } = useEuiTheme();
+  const dataTypesIndexPatterns = useSyntheticsDataViewIndexPatterns();
 
   if (!queryIdFilter) {
     return null;
@@ -40,6 +42,7 @@ export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
+      dataTypesIndexPatterns={dataTypesIndexPatterns}
       attributes={[
         {
           seriesType: 'area',

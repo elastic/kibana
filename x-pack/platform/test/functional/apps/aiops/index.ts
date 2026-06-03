@@ -19,23 +19,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.createMlUsers();
     });
 
-    after(async () => {
-      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-      await ml.securityUI.logout();
-
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./log_rate_analysis'));
     loadTestFile(require.resolve('./log_rate_analysis_anomaly_table'));
     loadTestFile(require.resolve('./log_rate_analysis_dashboard_embeddable'));
-    loadTestFile(require.resolve('./log_rate_analysis_cases'));
     loadTestFile(require.resolve('./change_point_detection'));
     loadTestFile(require.resolve('./change_point_detection_dashboard'));
-    loadTestFile(require.resolve('./change_point_detection_cases'));
     loadTestFile(require.resolve('./log_pattern_analysis'));
     loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));
     loadTestFile(require.resolve('./log_pattern_analysis_esql_in_discover'));

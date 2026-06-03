@@ -6,8 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Lens choropleth map smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, maps } = getPageObjects(['visualize', 'lens', 'maps']);
   const testSubjects = getService('testSubjects');

@@ -6,6 +6,7 @@
  */
 
 import type {
+  AiCreatedRulesUsage,
   EventLogStatusMetric,
   MaxAvgMin,
   RulesTypeUsage,
@@ -16,6 +17,9 @@ import type {
   FeatureTypeUsage,
   ResponseActionsUsage,
   UpgradeableRulesSummary,
+  ThreatMatchFeatureTypeUsage,
+  RuleCustomizationCounts,
+  DeprecatedRulesSummary,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -61,6 +65,11 @@ export const getInitialFeatureTypeUsage = (): FeatureTypeUsage => ({
   has_exceptions: 0,
 });
 
+export const getInitialThreatMatchFeatureTypeUsage = (): ThreatMatchFeatureTypeUsage => ({
+  ...getInitialFeatureTypeUsage(),
+  has_does_not_match_condition: 0,
+});
+
 /**
  * Default detection rule usage count, split by type + elastic/custom
  */
@@ -73,8 +82,8 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
   eql_custom: getInitialFeatureTypeUsage(),
   machine_learning: getInitialFeatureTypeUsage(),
   machine_learning_custom: getInitialFeatureTypeUsage(),
-  threat_match: getInitialFeatureTypeUsage(),
-  threat_match_custom: getInitialFeatureTypeUsage(),
+  threat_match: getInitialThreatMatchFeatureTypeUsage(),
+  threat_match_custom: getInitialThreatMatchFeatureTypeUsage(),
   new_terms: getInitialFeatureTypeUsage(),
   new_terms_custom: getInitialFeatureTypeUsage(),
   esql: getInitialFeatureTypeUsage(),
@@ -166,4 +175,37 @@ export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
   customized: 0,
   enabled: 0,
   disabled: 0,
+});
+
+export const getInitialRuleDeprecatedStatus = (): DeprecatedRulesSummary => ({
+  total: 0,
+});
+
+export const getInitialAiCreatedRulesUsage = (): AiCreatedRulesUsage => ({
+  total: 0,
+  enabled: 0,
+  disabled: 0,
+});
+
+export const getInitialRuleCustomizationStatus = (): RuleCustomizationCounts => ({
+  alert_suppression: 0,
+  anomaly_threshold: 0,
+  data_view_id: 0,
+  description: 0,
+  filters: 0,
+  from: 0,
+  index: 0,
+  interval: 0,
+  investigation_fields: 0,
+  name: 0,
+  new_terms_fields: 0,
+  note: 0,
+  query: 0,
+  risk_score: 0,
+  severity: 0,
+  setup: 0,
+  tags: 0,
+  threat_query: 0,
+  threshold: 0,
+  timeline_id: 0,
 });

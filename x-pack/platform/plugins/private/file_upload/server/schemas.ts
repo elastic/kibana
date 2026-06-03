@@ -24,6 +24,7 @@ export const analyzeFileQuerySchema = schema.object({
   timeout: schema.maybe(schema.string()),
   timestamp_field: schema.maybe(schema.string()),
   timestamp_format: schema.maybe(schema.string()),
+  includePreview: schema.maybe(schema.boolean()),
 });
 
 const ingestPipeline = schema.object({
@@ -38,13 +39,13 @@ export const initializeImportFileBodySchema = schema.object({
   /** Mappings */
   mappings: schema.any(),
   /** Ingest pipeline definition */
-  ingestPipelines: schema.arrayOf(ingestPipeline),
+  ingestPipelines: schema.arrayOf(ingestPipeline, { maxSize: 50000 }),
   existingIndex: schema.maybe(schema.boolean()),
 });
 
 export const importFileBodySchema = schema.object({
   index: schema.string(),
-  data: schema.arrayOf(schema.any()),
+  data: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   ingestPipelineId: schema.maybe(schema.string()),
 });
 

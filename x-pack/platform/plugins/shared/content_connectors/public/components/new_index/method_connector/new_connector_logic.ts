@@ -5,36 +5,35 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { Connector, ConnectorDefinition } from '@kbn/search-connectors';
+import type { Connector, ConnectorDefinition } from '@kbn/search-connectors';
 
-import { HttpSetup, NavigateToUrlOptions } from '@kbn/core/public';
-import {
-  AddConnectorApiLogic,
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import type {
   AddConnectorApiLogicActions,
   AddConnectorApiLogicArgs,
   AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
-import {
-  GenerateConfigApiActions,
-  GenerateConfigApiLogic,
-} from '../../../api/connector/generate_connector_config_api_logic';
-import {
-  GenerateConnectorNamesApiLogic,
+import type { GenerateConfigApiActions } from '../../../api/connector/generate_connector_config_api_logic';
+import { GenerateConfigApiLogic } from '../../../api/connector/generate_connector_config_api_logic';
+import type {
   GenerateConnectorNamesApiLogicActions,
   GenerateConnectorNamesApiResponse,
 } from '../../../api/connector/generate_connector_names_api_logic';
+import { GenerateConnectorNamesApiLogic } from '../../../api/connector/generate_connector_names_api_logic';
 
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-import {
-  ConnectorViewActions,
-  ConnectorViewLogic,
-} from '../../connector_detail/connector_view_logic';
-import { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
-import { APIKeyResponse, Status } from '../../../../common/types/api';
-import { Actions } from '../../../api/api_logic/create_api_logic';
+import type { ConnectorViewActions } from '../../connector_detail/connector_view_logic';
+import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
+import type { ConnectorCreationSteps } from '../../connectors/create_connector/create_connector';
+import type { APIKeyResponse } from '../../../../common/types/api';
+import { Status } from '../../../../common/types/api';
+import type { Actions } from '../../../api/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../shared/encode_path_params';
 import { SearchIndexTabId } from '../../../../common/constants';
 
@@ -93,7 +92,7 @@ type NewConnectorActions = {
 
 export interface NewConnectorLogicProps {
   http?: HttpSetup;
-  navigateToUrl?: (url: string, options?: NavigateToUrlOptions) => Promise<void>;
+  navigateToApp?: ApplicationStart['navigateToApp'];
 }
 
 export const NewConnectorLogic = kea<
@@ -101,7 +100,7 @@ export const NewConnectorLogic = kea<
 >({
   key: (props) => ({
     http: props.http,
-    navigateToUrl: props.navigateToUrl,
+    navigateToApp: props.navigateToApp,
   }),
   actions: {
     createConnector: ({
@@ -141,16 +140,13 @@ export const NewConnectorLogic = kea<
   },
   listeners: ({ actions, values, props }) => ({
     connectorCreated: ({ id, uiFlags }) => {
-      if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToUrl) {
-        props.navigateToUrl(
-          generateEncodedPath(
-            `app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId: id,
-              tabId: SearchIndexTabId.CONFIGURATION,
-            }
-          )
-        );
+      if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToApp) {
+        props.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId: id,
+            tabId: SearchIndexTabId.CONFIGURATION,
+          })}`,
+        });
       } else {
         actions.fetchConnector({ connectorId: id, http: props.http });
         if (!uiFlags || uiFlags.shouldGenerateAfterCreate) {

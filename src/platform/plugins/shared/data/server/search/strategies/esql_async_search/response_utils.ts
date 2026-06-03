@@ -8,19 +8,19 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlAsyncQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'http';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
 export function toAsyncKibanaSearchResponse(
-  response: SqlGetAsyncResponse,
+  response: EsqlAsyncQueryResponse,
   headers: IncomingHttpHeaders,
   requestParams?: ConnectionRequestParams
-): IKibanaSearchResponse<SqlGetAsyncResponse> {
+): IKibanaSearchResponse<EsqlAsyncQueryResponse> {
   const responseIsStream = response.id === undefined;
   return {
     id: responseIsStream ? (headers['x-elasticsearch-async-id'] as string) : response.id,

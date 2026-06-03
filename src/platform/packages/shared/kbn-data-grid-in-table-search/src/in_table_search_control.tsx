@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput } from './in_table_search_input';
-import { UseFindMatchesProps } from './types';
+import type { UseFindMatchesProps } from './types';
 import { BUTTON_TEST_SUBJ, INPUT_TEST_SUBJ } from './constants';
 import { getHighlightColors } from './get_highlight_colors';
 import { getActiveMatchCss } from './get_active_match_css';
@@ -188,12 +188,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
             defaultMessage: 'Find in table',
           })}
-          delay="long"
         >
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}
             buttonRef={buttonRef}
-            iconType="search"
+            iconType="magnify"
             size="xs"
             color="text"
             className="dataGridInTableSearch__button"

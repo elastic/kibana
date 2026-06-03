@@ -15,9 +15,14 @@ Object {
   "elasticsearchUrl": undefined,
   "instanceSizeMb": undefined,
   "isCloudEnabled": true,
+  "isEce": undefined,
   "isElasticStaffOwned": undefined,
+  "isInTrial": [Function],
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
+  "managedOtlp": Object {
+    "url": undefined,
+  },
   "onboarding": Object {
     "defaultSolution": undefined,
   },
@@ -25,11 +30,13 @@ Object {
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "serverless": Object {
     "orchestratorTarget": undefined,
+    "organizationInTrial": undefined,
     "productTier": undefined,
     "projectId": undefined,
     "projectName": undefined,
     "projectType": undefined,
   },
+  "trialDaysLeft": [Function],
   "trialEndDate": undefined,
 }
 `;
@@ -38,6 +45,8 @@ exports[`Cloud Plugin #start interface snapshot 1`] = `
 Object {
   "baseUrl": "https://cloud.elastic.co",
   "isCloudEnabled": true,
+  "isInTrial": [Function],
   "projectsUrl": "https://cloud.elastic.co/projects/",
+  "trialDaysLeft": [Function],
 }
 `;

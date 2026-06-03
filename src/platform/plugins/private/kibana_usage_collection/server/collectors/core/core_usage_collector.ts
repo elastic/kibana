@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CoreUsageDataStart } from '@kbn/core/server';
-import { CoreUsageData } from '@kbn/core-usage-data-server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CoreUsageDataStart } from '@kbn/core/server';
+import type { CoreUsageData } from '@kbn/core-usage-data-server';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -71,12 +71,6 @@ export function getCoreUsageCollector(
             _meta: {
               description:
                 'Time in milliseconds to wait for responses from the back end or Elasticsearch.',
-            },
-          },
-          pingTimeoutMs: {
-            type: 'long',
-            _meta: {
-              description: 'Time in milliseconds to wait for Elasticsearch to respond to pings.',
             },
           },
           logQueries: {

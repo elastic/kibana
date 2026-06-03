@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface CommonSavedObjectAttributes {
   id?: string | null;
@@ -39,7 +40,21 @@ export function SvlCasesOmitServiceProvider({}: FtrProviderContext) {
     },
 
     removeServerGeneratedPropertiesFromCase(theCase: Case): Partial<Case> {
-      return this.removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, ['closed_at']);
+      return this.removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, [
+        'closed_at',
+        'incremental_id',
+      ]);
+    },
+
+    removeServerGeneratedPropertiesFromFindCasesResponse(
+      response: CasesFindResponse
+    ): Omit<CasesFindResponse, 'cases'> & { cases: Array<Partial<Case>> } {
+      return {
+        ...response,
+        cases: response.cases.map((theCase) =>
+          this.removeServerGeneratedPropertiesFromCase(theCase)
+        ),
+      };
     },
 
     removeServerGeneratedPropertiesFromComments(

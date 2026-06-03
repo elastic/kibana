@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
 
   return {
@@ -154,8 +155,15 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     },
 
     async getApiKeyUpdateSuccessToast() {
-      const toast = await testSubjects.find('updateApiKeySuccessToast');
-      return toast.getVisibleText();
+      let text = '';
+      await retry.try(async () => {
+        const toast = await testSubjects.find('updateApiKeySuccessToast');
+        text = await toast.getVisibleText();
+        if (!text) {
+          throw new Error('Toast text not yet rendered');
+        }
+      });
+      return text;
     },
 
     async clickExpiryFilters(type: 'active' | 'expired') {
@@ -185,6 +193,33 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       const searchBar = await testSubjects.find('apiKeysSearchBar');
       await searchBar.clearValue();
       return searchBar.type(query);
+    },
+
+    async clickNextPageButton() {
+      return await testSubjects.click('apiKeysTableNextPageButton');
+    },
+
+    async clickPreviousPageButton() {
+      return await testSubjects.click('apiKeysTablePreviousPageButton');
+    },
+
+    async clickRefreshButton() {
+      return await testSubjects.click('apiKeysTableRefreshButton');
+    },
+
+    async isNextPageButtonEnabled() {
+      const button = await testSubjects.find('apiKeysTableNextPageButton');
+      return await button.isEnabled();
+    },
+
+    async isPreviousPageButtonEnabled() {
+      const button = await testSubjects.find('apiKeysTablePreviousPageButton');
+      return await button.isEnabled();
+    },
+
+    async getDisplayedApiKeyCount() {
+      const rows = await testSubjects.findAll('~apiKeyRowName');
+      return rows.length;
     },
   };
 }

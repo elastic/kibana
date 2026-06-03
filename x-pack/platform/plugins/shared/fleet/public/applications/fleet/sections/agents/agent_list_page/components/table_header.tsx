@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, SimplifiedAgentStatus } from '../../../../types';
@@ -44,8 +44,8 @@ export const AgentTableHeader: React.FunctionComponent<{
 }) => {
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <AgentsSelectionStatus
               totalAgents={totalAgents}
@@ -60,12 +60,12 @@ export const AgentTableHeader: React.FunctionComponent<{
           </EuiFlexItem>
           {isUsingFilter ? (
             <EuiFlexItem grow={false}>
-              <EuiLink onClick={() => clearFilters()}>
+              <EuiButtonEmpty size="xs" flush="left" onClick={() => clearFilters()}>
                 <FormattedMessage
                   id="xpack.fleet.agentList.header.clearFiltersLinkText"
-                  defaultMessage="Clear filters"
+                  defaultMessage="Reset filters"
                 />
-              </EuiLink>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

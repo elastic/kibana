@@ -8,6 +8,7 @@
 import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -25,6 +26,10 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
+import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -40,6 +45,7 @@ export function ServiceOverviewThroughputChart({
   kuery: string;
   transactionName?: string;
 }) {
+  const license = useLicenseContext();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
@@ -158,24 +164,67 @@ export function ServiceOverviewThroughputChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-                defaultMessage: 'Throughput',
-              })}
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+                    defaultMessage: 'Throughput',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+                  defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
+                })}
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-              defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
-            })}
-            position="right"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <OpenAnomalies
+                dataTestSubj="apmServiceOverviewThroughputChartOpenAnomalies"
+                hasValidMlLicense={license?.getFeature('ml').isAvailable}
+                mlJobId={preferredAnomalyTimeseries?.jobId}
+                detectorType={AnomalyDetectorType.txThroughput}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OpenInDiscover
+                dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+                variant="iconButton"
+                label={i18n.translate(
+                  'xpack.apm.serviceOverviewThroughputChart.openTracesInDiscover',
+                  {
+                    defaultMessage: 'Open traces in Discover',
+                  }
+                )}
+                indexType="traces"
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                queryParams={{
+                  kuery,
+                  serviceName,
+                  environment,
+                  transactionName,
+                  transactionType,
+                  sortDirection: 'DESC',
+                }}
+                ebt={{
+                  element: APM_CHART_EBT_ELEMENTS.THROUGHPUT,
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 

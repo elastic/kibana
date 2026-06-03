@@ -33,12 +33,28 @@ export type {
   IRuleTypeAlerts,
   GetViewInAppRelativeUrlFnOpts,
   DataStreamAdapter,
+  CpsData,
 } from './types';
 export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export type { AlertingServerSetup, AlertingServerStart } from './plugin';
-export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
+export type {
+  RuleQueryInspectorFn,
+  RuleQueryInspectorResponse,
+  RuleQueryInspectorResult,
+  RuleQueryInspectorTimeRange,
+} from './rule_query_inspector/types';
+export type { RulesClientCreateOptions } from './rules_client_factory';
+export type {
+  FindResult,
+  BulkEditOperation,
+  BulkOperationError,
+  GetRuleHistoryParams,
+  RuleChangeHistoryDocument,
+  GetRuleHistoryResult,
+  RuleChangeTrackingDisabledError,
+} from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
@@ -51,6 +67,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   DEFAULT_ALERTS_ILM_POLICY,
@@ -88,14 +105,8 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
     rulesSettings: { enabled: true },
-    maintenanceWindow: { enabled: true },
     disabledRuleTypes: true,
     enabledRuleTypes: true,
   },
-  deprecations: ({ renameFromRoot, deprecate }) => [
-    deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
-      level: 'warning',
-      message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
-    }),
-  ],
+  deprecations: autocompleteConfigDeprecationProvider,
 };

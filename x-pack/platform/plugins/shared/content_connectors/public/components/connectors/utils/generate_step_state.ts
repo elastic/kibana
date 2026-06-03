@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiStepStatus } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 
 type Steps = 'start' | 'configure' | 'deployment' | 'finish';
 

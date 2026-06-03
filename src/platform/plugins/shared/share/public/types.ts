@@ -9,19 +9,18 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import {
-  EuiContextMenuPanelDescriptor,
-  type EuiCodeProps,
-  type EuiIconProps,
-  type EuiFlyoutProps,
-} from '@elastic/eui';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
-import { AnonymousAccessServiceContract } from '../common/anonymous_access';
+import type { AnonymousAccessServiceContract } from '../common/anonymous_access';
+import type { DraftModeCalloutProps } from './components/common/draft_mode_callout';
 
 export interface ShareRegistryApiStart {
   capabilities: Capabilities;
@@ -30,7 +29,7 @@ export interface ShareRegistryApiStart {
   getLicense: () => ILicense | undefined;
 }
 
-type ShareActionConfigArgs = ShareContext &
+export type ShareActionConfigArgs<S extends SharingData = SharingData> = ShareContext<S> &
   Pick<ShareRegistryApiStart, 'anonymousAccessServiceProvider' | 'urlService'>;
 
 export type ShareTypes = 'link' | 'embed' | 'legacy' | 'integration';
@@ -39,9 +38,14 @@ export type InternalShareActionIntent = Exclude<ShareTypes, 'integration' | 'leg
 
 type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string, unknown>> = {
   /**
-   * The title of the share action
+   * The draft mode callout content to be shown when there are unsaved changes.
+   * - `true`: Shows the default callout.
+   * - `false` or `undefined`: Shows no callout.
+   * - `DraftModeCalloutProps`:
+   *   - `message`: callout message custom content
    */
-  draftModeCallOut?: ReactNode;
+
+  draftModeCallOut?: boolean | DraftModeCalloutProps;
   helpText?: ReactNode;
   CTAButtonConfig?: {
     id: string;
@@ -58,15 +62,19 @@ export interface ShareMenuProviderLegacy {
 
 type ShareImplementationFactory<
   T extends Omit<ShareTypes, 'legacy'>,
-  C extends Record<string, unknown> = Record<string, unknown>
+  C extends Record<string, unknown> = Record<string, unknown>,
+  S extends SharingData = SharingData
 > = T extends 'integration'
   ? {
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareActionConfigArgs) => C;
       /**
-       * when provided, this method will be used to evaluate if this integration should be available,
+       * Callback that yields the configured methods for the current share implementation as a promise, enables the possibility to dynamically fetch the share configuration
+       */
+      config: (ctx: ShareActionConfigArgs<S>) => Promise<C>;
+      /**
+       * When provided, this method will be used to evaluate if this integration should be available,
        * given the current license and capabilities of kibana
        */
       prerequisiteCheck?: (args: {
@@ -77,12 +85,12 @@ type ShareImplementationFactory<
     }
   : {
       shareType: T;
-      config: (ctx: ShareActionConfigArgs) => C | null;
+      config: (ctx: ShareActionConfigArgs<S>) => C | null;
     };
 
-// New type definition to extract the config return type
+// Type definition to resolve the configured share implementation methods from the implementation factory
 type ShareImplementation<T> = Omit<T, 'config'> & {
-  config: T extends ShareImplementationFactory<any, infer R> ? R : never;
+  config: T extends ShareImplementationFactory<ShareTypes, infer R> ? R : never;
 };
 
 /**
@@ -96,7 +104,7 @@ export type LinkShare = ShareImplementationFactory<
 >;
 
 /**
- * @description implementation definition for creating a share action for sharing embed links
+ * @description Implementation definition for creating a share action for sharing embed links
  */
 export type EmbedShare = ShareImplementationFactory<
   'embed',
@@ -107,14 +115,15 @@ export type EmbedShare = ShareImplementationFactory<
 >;
 
 /**
- * @description skeleton definition for implementing a share action integration
+ * @description Skeleton definition for implementing a share action integration
  */
 export type ShareIntegration<
-  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
-> = ShareImplementationFactory<'integration', IntegrationParameters>;
+  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>,
+  S extends SharingData = SharingData
+> = ShareImplementationFactory<'integration', IntegrationParameters, S>;
 
 /**
- * @description implementation definition to support legacy share implementation
+ * @description Implementation definition to support legacy share implementation
  */
 export interface ShareLegacy {
   shareType: 'legacy';
@@ -125,7 +134,7 @@ export interface ShareLegacy {
 /**
  * @description Share integration implementation definition for performing exports within kibana
  */
-export interface ExportShare
+export interface ExportShare<S extends SharingData = SharingData>
   extends ShareIntegration<
     {
       /**
@@ -152,6 +161,11 @@ export interface ExportShare
       requiresSavedState?: boolean;
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
+      /**
+       * indicates if the export integration supports generating it exports with absolute time ranges
+       */
+      supportsAbsoluteTime?: boolean;
+      renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
     } & (
       | {
           generateAssetComponent?: never;
@@ -167,30 +181,32 @@ export interface ExportShare
           generateAssetComponent?: never;
           copyAssetURIConfig?: never;
         }
-    )
+    ),
+    S
   > {
   groupId: 'export';
+}
+
+export interface ExportShareParameters extends Record<string, unknown> {
+  label: React.FC<{ openFlyout: () => void }>;
+  toolTipContent?: ReactNode;
+  flyoutContent: React.FC<{
+    closeFlyout: () => void;
+    flyoutRef: React.RefObject<HTMLDivElement>;
+  }>;
+  flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+  shouldRender: ({
+    availableExportItems,
+  }: {
+    availableExportItems: ExportShareConfig[];
+  }) => boolean;
 }
 
 /**
  * @description Share integration implementation definition that build off exports within kibana,
  * reach out to the shared ux team before settling on using this interface
  */
-export interface ExportShareDerivatives
-  extends ShareIntegration<{
-    label: React.FC<{ openFlyout: () => void }>;
-    toolTipContent?: ReactNode;
-    flyoutContent: React.FC<{
-      closeFlyout: () => void;
-      flyoutRef: React.RefObject<HTMLDivElement>;
-    }>;
-    flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
-    shouldRender: ({
-      availableExportItems,
-    }: {
-      availableExportItems: ExportShareConfig[];
-    }) => boolean;
-  }> {
+export interface ExportShareDerivatives extends ShareIntegration<ExportShareParameters> {
   groupId: 'exportDerivatives';
 }
 
@@ -246,19 +262,55 @@ export interface ShareUIConfig {
   };
 }
 
-export interface SharingData {
+/**
+ * One locator (typical link/export flows) or several (e.g. CSV reporting).
+ */
+export type SharingDataLocatorParams<P extends SerializableRecord = SerializableRecord> =
+  | {
+      id: string;
+      params: P;
+      version?: string;
+    }
+  | Array<{
+      id: string;
+      params: P;
+      version?: string;
+    }>;
+
+export interface SharingData<P extends SerializableRecord = SerializableRecord>
+  extends Record<string, unknown> {
   title: string;
-  locatorParams: {
-    id: string;
-    params: Record<string, unknown>;
-  };
+  locatorParams: SharingDataLocatorParams<P>;
 }
 
-interface ShareRegistryInternalApi {
-  registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
-  registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+export type ShareIntegrationMapKey = `integration-${string}`;
 
-  resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+/**
+ * Registration payload for a share integration.
+ * We infer sharing-data `S` from `I` instead of constraining `I extends ShareIntegration` (defaults on
+ * `ShareIntegration` use `SharingData`, and `config`'s `ctx` is contravariant in `S`, so
+ * `ExportShare<ReportingCSVSharingData>` is not assignable to the default `ShareIntegration`).
+ */
+export type RegisterShareIntegrationArgs<I = ShareIntegration> = I extends ShareIntegration<
+  infer P,
+  infer S
+>
+  ? P extends Record<string, unknown>
+    ? S extends SharingData
+      ? Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> & {
+          getShareIntegrationConfig: (ctx: ShareActionConfigArgs<S>) => ReturnType<I['config']>;
+        }
+      : never
+    : never
+  : never;
+
+export interface ShareRegistryInternalApi {
+  registerShareIntegration<I>(shareObject: string, arg: RegisterShareIntegrationArgs<I>): void;
+  registerShareIntegration<I>(arg: RegisterShareIntegrationArgs<I>): void;
+
+  resolveShareItemsForShareContext<S extends SharingData = SharingData>(
+    args: ShareContext<S> & { isServerless: boolean }
+  ): Promise<ShareConfigs[]>;
 }
 
 export abstract class ShareRegistryPublicApi {
@@ -279,6 +331,10 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
+export type ShareableLocatorParams = SerializableRecord & {
+  timeRange: TimeRange | undefined;
+};
+
 /**
  * @public
  * Properties of the current object to share. Registered share
@@ -288,7 +344,7 @@ export type BrowserUrlService = UrlService<
  * It is possible to use the static function `toggleShareContextMenu`
  * to render the menu as a popover.
  * */
-export interface ShareContext {
+export interface ShareContext<S extends SharingData = SharingData> {
   /**
    * The type of the object to share. for example lens, dashboard, etc.
    */
@@ -325,10 +381,10 @@ export interface ShareContext {
    */
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
+    locator: LocatorPublic<SerializableRecord>;
+    params: ShareableLocatorParams;
   };
-  sharingData: { [key: string]: unknown };
+  sharingData: S;
   isDirty: boolean;
   onClose: () => void;
 }
@@ -375,12 +431,22 @@ export interface UrlParamExtension {
 }
 
 /** @public */
-export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
+export interface ShowShareMenuOptions<
+  /**
+   * Specifies the type of the locator params for the sharing data.
+   */
+  P extends SerializableRecord = SerializableRecord,
+  /**
+   * Specifies the type of the sharing data.
+   */
+  S extends Record<string, unknown> = Record<string, unknown>
+> extends Omit<ShareContext<SharingData<P> & S>, 'onClose'> {
   asExport?: boolean;
   anchorElement?: HTMLElement;
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
+  onSave?: () => Promise<void>;
 }
 
 export interface ClientConfigType {

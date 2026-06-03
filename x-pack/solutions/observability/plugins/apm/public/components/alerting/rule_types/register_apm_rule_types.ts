@@ -21,13 +21,29 @@ import {
   transactionErrorRateRecoveryMessage,
 } from '../../../../common/rules/default_action_message';
 import type { AlertParams } from './anomaly_rule_type';
+import { getDescriptionFields } from './get_description_fields';
+import {
+  createLazyApmComponentWithContext,
+  type ApmAlertingSetupDeps,
+  type ApmCoreSetup,
+} from '../utils/create_lazy_component_with_context';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
-export function registerApmRuleTypes(observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) {
+export function registerApmRuleTypes(
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
+  coreSetup: ApmCoreSetup,
+  setupDeps?: ApmAlertingSetupDeps
+) {
+  const alertDetailsAppSection = createLazyApmComponentWithContext(
+    coreSetup,
+    () => import('../ui_components/alert_details_app_section'),
+    setupDeps
+  );
+
   observabilityRuleTypeRegistry.register({
     id: ApmRuleType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
@@ -51,10 +67,12 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
     defaultRecoveryMessage: errorCountRecoveryMessage,
     priority: 80,
+    getDescriptionFields,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -82,11 +100,12 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(() => import('../ui_components/alert_details_app_section')),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     defaultRecoveryMessage: transactionDurationRecoveryMessage,
     priority: 60,
+    getDescriptionFields,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -112,10 +131,12 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
     defaultRecoveryMessage: transactionErrorRateRecoveryMessage,
     priority: 70,
+    getDescriptionFields,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -139,6 +160,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     },
     ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
     validate: validateAnomalyRule,
+    alertDetailsAppSection,
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
     defaultRecoveryMessage: anomalyRecoveryMessage,

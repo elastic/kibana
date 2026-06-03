@@ -10,10 +10,8 @@
 import {
   createLogsContextService,
   type LogsContextService,
-  createTracesContextService,
-  type TracesContextService,
-  createApmErrorsContextService,
-  type ApmErrorsContextService,
+  type ApmContextService,
+  createApmContextService,
 } from '@kbn/discover-utils';
 
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -23,41 +21,37 @@ import type { DiscoverServices } from '../../build_services';
 /**
  * Dependencies required by profile provider implementations
  */
-export interface ProfileProviderDeps extends DiscoverServices {
+export interface ProfileProviderSharedServicesDeps {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
 
 /**
+ * Shared services provided to profile provider implementations
+ */
+export interface ProfileProviderSharedServices {
+  logsContextService: LogsContextService;
+  apmContextService: ApmContextService;
+}
+
+/**
  * Services provided to profile provider implementations
  */
-export interface ProfileProviderServices extends DiscoverServices {
-  /**
-   * A service containing methods used for logs profiles
-   */
-  logsContextService: LogsContextService;
-  tracesContextService: TracesContextService;
-  apmErrorsContextService: ApmErrorsContextService;
-}
+export type ProfileProviderServices = ProfileProviderSharedServices & DiscoverServices;
 
 /**
  * Creates the profile provider services
  * @param _deps Profile provider dependencies
  * @returns Profile provider services
  */
-export const createProfileProviderServices = async (
-  discoverServices: ProfileProviderDeps
-): Promise<ProfileProviderServices> => {
-  return {
-    ...discoverServices,
-    logsContextService: await createLogsContextService({
-      logsDataAccess: discoverServices.logsDataAccess,
-    }),
-    tracesContextService: await createTracesContextService({
-      apmSourcesAccess: discoverServices.apmSourcesAccess,
-    }),
-    apmErrorsContextService: await createApmErrorsContextService({
-      apmSourcesAccess: discoverServices.apmSourcesAccess,
-    }),
-  };
+export const createProfileProviderSharedServices = async ({
+  logsDataAccess,
+  apmSourcesAccess,
+}: ProfileProviderSharedServicesDeps): Promise<ProfileProviderSharedServices> => {
+  const [logsContextService, apmContextService] = await Promise.all([
+    createLogsContextService({ logsDataAccess }),
+    createApmContextService({ apmSourcesAccess }),
+  ]);
+
+  return { logsContextService, apmContextService };
 };

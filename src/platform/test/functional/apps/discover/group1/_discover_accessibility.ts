@@ -9,13 +9,12 @@
 
 import expect from '@kbn/expect';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -38,10 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
     });
@@ -61,9 +56,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       const expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed = async (
-        menuButtonTestSubject: string
+        menuButtonTestSubject: string,
+        isInOverflowMenu: boolean = false,
+        hasPopoverItems: boolean = false
       ) => {
-        await focusAndPressButton(menuButtonTestSubject);
+        if (isInOverflowMenu) {
+          await focusAndPressButton('app-menu-overflow-button');
+        }
+        if (!hasPopoverItems) {
+          await focusAndPressButton(menuButtonTestSubject);
+        }
+
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(false);
         });
@@ -71,42 +74,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await new Promise((resolve) => setTimeout(resolve, 500));
         await browser.pressKeys(browser.keys.ESCAPE);
         await retry.try(async () => {
-          expect(await hasFocus(menuButtonTestSubject)).to.be(true);
+          expect(
+            await hasFocus(isInOverflowMenu ? 'app-menu-overflow-button' : menuButtonTestSubject)
+          ).to.be(true);
         });
       };
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton', true));
 
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverAlertsButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed(
+          'discoverAlertsButton',
+          true,
+          true
+        ));
 
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
-        await focusAndPressButton('discoverAlertsButton');
-        expect(await hasFocus('discoverAlertsButton')).to.be(false);
-        await focusAndPressButton('discoverCreateAlertButton');
-        expect(await testSubjects.exists('addRuleFlyoutTitle')).to.be(true);
+        await testSubjects.click('app-menu-overflow-button');
+        await testSubjects.existOrFail('discoverAlertsButton');
+        await testSubjects.click('discoverAlertsButton');
+        await testSubjects.existOrFail('discoverCreateAlertButton');
+        await testSubjects.click('discoverCreateAlertButton');
+        await testSubjects.existOrFail('addRuleFlyoutTitle');
+        await testSubjects.existOrFail('euiFlyoutCloseButton');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
+        await testSubjects.existOrFail('app-menu-overflow-button');
+
         await retry.try(async () => {
-          await browser.pressKeys(browser.keys.ESCAPE);
-          // A bug exists with the create rule flyout where sometimes the confirm modal
-          // shows even though the form hasn't been touched, so this works around it
-          if (await testSubjects.exists('confirmRuleCloseModal', { timeout: 0 })) {
-            await focusAndPressButton(
-              await testSubjects.findDescendant(
-                'confirmModalConfirmButton',
-                await testSubjects.find('confirmRuleCloseModal')
-              )
-            );
-          }
-          expect(await hasFocus('discoverAlertsButton')).to.be(true);
+          expect(await hasFocus('app-menu-overflow-button')).to.be(true);
         });
       });
 
       it('should return focus to the share button when dismissing the share popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
-
-      it('should return focus to the inspect button when dismissing the inspector flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton'));
 
       it('should return focus to the save button when dismissing the save modal', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));

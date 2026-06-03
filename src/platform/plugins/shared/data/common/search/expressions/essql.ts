@@ -15,23 +15,16 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
-import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
+import type { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { UiSettingsCommon } from '../..';
-import {
-  KibanaContext,
-  SqlRequestParams,
-  SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse,
-  SQL_SEARCH_STRATEGY,
-} from '..';
+import type { UiSettingsCommon } from '../..';
+import type { KibanaContext, SqlRequestParams } from '..';
 
 type Input = KibanaContext | null;
-type Output = Observable<Datatable>;
+type Output = Promise<Datatable>;
 
 interface Arguments {
   query: string;
@@ -54,12 +47,32 @@ interface EssqlFnArguments {
 
 interface EssqlStartDependencies {
   nowProvider?: NowProviderPublicContract;
-  search: ISearchGeneric;
+  searchService: ISearchMethods;
   uiSettings: UiSettingsCommon;
 }
 
 function sanitize(value: string) {
   return value.replace(/[\(\)]/g, '_');
+}
+
+function mapResponseToDatatable(body: SqlQueryResponse): Datatable {
+  const columns =
+    body.columns?.map(({ name, type }) => ({
+      id: sanitize(name),
+      name: sanitize(name),
+      meta: { type: esFieldTypeToKibanaFieldType(type) },
+    })) ?? [];
+  const columnNames = columns.map(({ name }) => name);
+  const rows = body.rows.map((row) => zipObject(columnNames, row));
+
+  return {
+    type: 'datatable',
+    meta: {
+      type: 'essql',
+    },
+    columns,
+    rows,
+  } as Datatable;
 }
 
 export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
@@ -112,152 +125,135 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         }),
       },
     },
-    fn(
+    async fn(
       input,
       { count, parameter, query, timeField, timezone },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
-      return defer(() =>
-        getStartDependencies(() => {
-          const request = getKibanaRequest?.();
-          if (!request) {
-            throw new Error(
-              'A KibanaRequest is required to run queries on the server. ' +
-                'Please provide a request object to the expression execution params.'
-            );
-          }
-
-          return request;
-        })
-      ).pipe(
-        switchMap(({ nowProvider, search, uiSettings }) => {
-          const params: SqlRequestParams = {
-            query,
-            fetch_size: count,
-            time_zone: timezone,
-            params: parameter,
-            field_multi_value_leniency: true,
-          };
-
-          if (input) {
-            const esQueryConfigs = getEsQueryConfig(
-              uiSettings as Parameters<typeof getEsQueryConfig>[0]
-            );
-            const timeFilter =
-              input.timeRange &&
-              getTime(undefined, input.timeRange, {
-                fieldName: timeField,
-                forceNow: nowProvider?.get(),
-              });
-
-            params.filter = buildEsQuery(
-              undefined,
-              input.query || [],
-              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
-              esQueryConfigs
-            );
-          }
-
-          let startTime = Date.now();
-          const logInspectorRequest = () => {
-            if (!inspectorAdapters.requests) {
-              inspectorAdapters.requests = new RequestAdapter();
-            }
-
-            const request = inspectorAdapters.requests.start(
-              i18n.translate('data.search.dataRequest.title', {
-                defaultMessage: 'Data',
-              }),
-              {
-                description: i18n.translate('data.search.es_search.dataRequest.description', {
-                  defaultMessage:
-                    'This request queries Elasticsearch to fetch the data for the visualization.',
-                }),
-              },
-              startTime
-            );
-            startTime = Date.now();
-
-            return request;
-          };
-
-          return search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
-            { params },
-            { abortSignal, strategy: SQL_SEARCH_STRATEGY }
-          ).pipe(
-            catchError((error) => {
-              if (!error.attributes) {
-                error.message = `Unexpected error from Elasticsearch: ${error.message}`;
-              } else {
-                const { type, reason } = error.attributes;
-                if (type === 'parsing_exception') {
-                  error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
-                } else {
-                  error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
-                }
-              }
-
-              return throwError(() => error);
-            }),
-            tap({
-              next({ rawResponse, requestParams, took }) {
-                logInspectorRequest()
-                  .stats({
-                    hits: {
-                      label: i18n.translate('data.search.es_search.hitsLabel', {
-                        defaultMessage: 'Hits',
-                      }),
-                      value: `${rawResponse.rows.length}`,
-                      description: i18n.translate('data.search.es_search.hitsDescription', {
-                        defaultMessage: 'The number of documents returned by the query.',
-                      }),
-                    },
-                    queryTime: {
-                      label: i18n.translate('data.search.es_search.queryTimeLabel', {
-                        defaultMessage: 'Query time',
-                      }),
-                      value: i18n.translate('data.search.es_search.queryTimeValue', {
-                        defaultMessage: '{queryTime}ms',
-                        values: { queryTime: took },
-                      }),
-                      description: i18n.translate('data.search.es_search.queryTimeDescription', {
-                        defaultMessage:
-                          'The time it took to process the query. ' +
-                          'Does not include the time to send the request or parse it in the browser.',
-                      }),
-                    },
-                  })
-                  .json(params)
-                  .ok({ json: rawResponse, requestParams });
-              },
-              error(error) {
-                logInspectorRequest().error({
-                  json: 'attributes' in error ? error.attributes : { message: error.message },
-                });
-              },
-            })
+      const { nowProvider, searchService, uiSettings } = await getStartDependencies(() => {
+        const request = getKibanaRequest?.();
+        if (!request) {
+          throw new Error(
+            'A KibanaRequest is required to run queries on the server. ' +
+              'Please provide a request object to the expression execution params.'
           );
-        }),
-        map(({ rawResponse: body }) => {
-          const columns =
-            body.columns?.map(({ name, type }) => ({
-              id: sanitize(name),
-              name: sanitize(name),
-              meta: { type: esFieldTypeToKibanaFieldType(type) },
-            })) ?? [];
-          const columnNames = columns.map(({ name }) => name);
-          const rows = body.rows.map((row) => zipObject(columnNames, row));
+        }
 
-          return {
-            type: 'datatable',
-            meta: {
-              type: 'essql',
+        return request;
+      });
+
+      const params: SqlRequestParams = {
+        query,
+        fetch_size: count,
+        time_zone: timezone,
+        params: parameter,
+        field_multi_value_leniency: true,
+      };
+
+      if (input) {
+        const esQueryConfigs = getEsQueryConfig(
+          uiSettings as Parameters<typeof getEsQueryConfig>[0]
+        );
+        const timeFilter =
+          input.timeRange &&
+          getTime(undefined, input.timeRange, {
+            fieldName: timeField,
+            forceNow: nowProvider?.get(),
+          });
+
+        params.filter = buildEsQuery(
+          undefined,
+          input.query || [],
+          [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+          esQueryConfigs
+        );
+      }
+
+      let startTime = Date.now();
+      const logInspectorRequest = () => {
+        if (!inspectorAdapters.requests) {
+          inspectorAdapters.requests = new RequestAdapter();
+        }
+
+        const request = inspectorAdapters.requests.start(
+          i18n.translate('data.search.dataRequest.title', {
+            defaultMessage: 'Data',
+          }),
+          {
+            description: i18n.translate('data.search.es_search.dataRequest.description', {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the visualization.',
+            }),
+          },
+          startTime
+        );
+        startTime = Date.now();
+
+        return request;
+      };
+
+      try {
+        const { rawResponse, took, requestParams } = await searchService.sql(
+          {
+            query,
+            params: parameter,
+            fetchSize: count,
+            filter: params.filter,
+          },
+          {
+            abortSignal,
+            timeZone: timezone,
+          }
+        );
+
+        logInspectorRequest()
+          .stats({
+            hits: {
+              label: i18n.translate('data.search.es_search.hitsLabel', {
+                defaultMessage: 'Hits',
+              }),
+              value: `${rawResponse.rows.length}`,
+              description: i18n.translate('data.search.es_search.hitsDescription', {
+                defaultMessage: 'The number of documents returned by the query.',
+              }),
             },
-            columns,
-            rows,
-          } as Datatable;
-        })
-      );
+            queryTime: {
+              label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                defaultMessage: 'Query time',
+              }),
+              value: i18n.translate('data.search.es_search.queryTimeValue', {
+                defaultMessage: '{queryTime}ms',
+                values: { queryTime: took },
+              }),
+              description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                defaultMessage:
+                  'The time it took to process the query. ' +
+                  'Does not include the time to send the request or parse it in the browser.',
+              }),
+            },
+          })
+          .json(params)
+          .ok({ json: rawResponse, requestParams });
+
+        return mapResponseToDatatable(rawResponse);
+      } catch (error) {
+        logInspectorRequest().error({
+          json: 'attributes' in error ? error.attributes : { message: error.message },
+        });
+
+        if (!error.attributes) {
+          error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+        } else {
+          const { type, reason } = error.attributes;
+          if (type === 'parsing_exception') {
+            error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+          } else {
+            error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+          }
+        }
+
+        throw error;
+      }
     },
   };
 

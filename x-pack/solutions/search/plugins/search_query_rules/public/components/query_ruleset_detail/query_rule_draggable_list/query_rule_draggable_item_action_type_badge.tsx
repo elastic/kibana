@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,7 +30,7 @@ export const QueryRuleDraggableListItemActionTypeBadge: React.FC<{
     >
       <EuiFlexItem grow={false}>
         <div css={ActionTypeIconBadgeContainer(euiTheme)}>
-          <EuiBadge iconType={queryRule.type === 'exclude' ? 'eyeClosed' : 'pinFilled'}>
+          <EuiBadge iconType={queryRule.type === 'exclude' ? 'eyeSlash' : 'pinFill'}>
             {queryRule.type === 'exclude' ? (
               <FormattedMessage
                 id="xpack.search.queryRulesetDetail.draggableList.excludeLabel"

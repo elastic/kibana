@@ -8,12 +8,14 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { IBasePath, Logger } from '@kbn/core/server';
+import type { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import type { CoreSetup, IBasePath, Logger } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { customThresholdParamsSchema } from '@kbn/response-ops-rule-params/custom_threshold';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
@@ -32,13 +34,12 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from './translations';
-import {
-  createCustomThresholdExecutor,
-  CustomThresholdLocators,
-} from './custom_threshold_executor';
+import type { CustomThresholdLocators } from './custom_threshold_executor';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import { createQueryInspector } from './query_inspector';
 import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { ObservabilityConfig } from '../../..';
-import { CustomThresholdAlert } from './types';
+import type { ObservabilityConfig } from '../../..';
+import type { CustomThresholdAlert } from './types';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
@@ -63,6 +64,7 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAle
 };
 
 export function thresholdRuleType(
+  core: CoreSetup,
   basePath: IBasePath,
   config: ObservabilityConfig,
   logger: Logger,
@@ -130,5 +132,16 @@ export function thresholdRuleType(
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
+    queryInspector: createQueryInspector(
+      () =>
+        core.getStartServices().then(([coreStart, pluginStart]) => [
+          coreStart,
+          {
+            dataViews: (pluginStart as { dataViews: DataViewsServerPluginStart }).dataViews,
+            data: (pluginStart as { data: DataPluginStart }).data,
+          },
+        ]),
+      { compositeSize: config.customThresholdRule.groupByPageSize }
+    ),
   };
 }

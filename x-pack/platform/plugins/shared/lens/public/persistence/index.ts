@@ -6,4 +6,3 @@
  */
 
 export * from './lens_document_service';
-export type * from './types';

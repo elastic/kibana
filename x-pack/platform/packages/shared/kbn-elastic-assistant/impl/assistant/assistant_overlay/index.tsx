@@ -11,27 +11,16 @@ import { EuiFlyoutResizable } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
-import { createGlobalStyle } from 'styled-components';
-import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
+import { isMac } from '@kbn/shared-ux-utility';
+import { i18n } from '@kbn/i18n';
+import type { ShowAssistantOverlayProps } from '../../assistant_context';
+import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 import {
   useAssistantLastConversation,
   useAssistantSpaceId,
   type LastConversation,
 } from '../use_space_aware_context';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-/**
- * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
- * component currently has focus and any specific context it may provide through the SAssInterface.
- */
-
-export const UnifiedTimelineGlobalStyles = createGlobalStyle`
-  body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
-    z-index: 1003 !important;
-  }
-`;
 
 export const AssistantOverlay = React.memo(() => {
   const spaceId = useAssistantSpaceId();
@@ -41,7 +30,7 @@ export const AssistantOverlay = React.memo(() => {
     undefined
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay, setIsOverlayOpen } = useAssistantContext();
   const { getLastConversation } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
@@ -80,6 +69,31 @@ export const AssistantOverlay = React.memo(() => {
     setIsModalVisible(!isModalVisible);
   }, [isModalVisible, getLastConversation, assistantTelemetry]);
 
+  const hasOpenedFromUrl = useRef(false);
+
+  const handleOpenFromUrlState = useCallback(
+    (id: string) => {
+      if (!isModalVisible) {
+        setSelectedConversation(getLastConversation({ id }));
+        assistantTelemetry?.reportAssistantInvoked({
+          invokedBy: 'url',
+        });
+        setIsModalVisible(true);
+      }
+    },
+    [isModalVisible, getLastConversation, assistantTelemetry]
+  );
+
+  useEffect(() => {
+    if (hasOpenedFromUrl.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const assistantId = params.get('assistant');
+    if (assistantId && !isModalVisible) {
+      hasOpenedFromUrl.current = true;
+      handleOpenFromUrlState(assistantId);
+    }
+  }, [handleOpenFromUrlState, isModalVisible]);
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -92,11 +106,26 @@ export const AssistantOverlay = React.memo(() => {
   );
   useEvent('keydown', onKeyDown);
 
-  // Modal control functions
+  const flyoutRef = useRef<HTMLElement>(null);
+
+  const triggerElementRef = useRef<Element | null>(null);
+
+  useEffect(() => {
+    setIsOverlayOpen(isModalVisible);
+    if (isModalVisible) {
+      triggerElementRef.current = document.activeElement;
+    }
+  }, [isModalVisible, setIsOverlayOpen]);
+
   const cleanupAndCloseModal = useCallback(() => {
+    const shouldRestoreFocus = document.activeElement?.matches(':focus-visible');
     setIsModalVisible(false);
     setPromptContextId(undefined);
     setSelectedConversation(lastConversation);
+    if (shouldRestoreFocus && triggerElementRef.current instanceof HTMLElement) {
+      triggerElementRef.current.focus();
+    }
+    triggerElementRef.current = null;
   }, [lastConversation]);
 
   const handleCloseModal = useCallback(() => {
@@ -118,13 +147,17 @@ export const AssistantOverlay = React.memo(() => {
     });
   }, []);
 
-  const flyoutRef = useRef<HTMLDivElement>();
-
   if (!isModalVisible) return null;
 
   return (
     <>
       <EuiFlyoutResizable
+        aria-label={i18n.translate(
+          'xpack.elasticAssistant.assistantOverlay.euiFlyoutResizable.ariaLabel',
+          {
+            defaultMessage: 'AI Assistant chat flyout',
+          }
+        )}
         ref={flyoutRef}
         css={css`
           max-inline-size: calc(100% - 20px);
@@ -134,6 +167,7 @@ export const AssistantOverlay = React.memo(() => {
           }
         `}
         onClose={handleCloseModal}
+        focusTrapProps={{ returnFocus: false }}
         data-test-subj="ai-assistant-flyout"
         paddingSize="none"
         hideCloseButton
@@ -146,7 +180,6 @@ export const AssistantOverlay = React.memo(() => {
           setChatHistoryVisible={toggleChatHistory}
         />
       </EuiFlyoutResizable>
-      <UnifiedTimelineGlobalStyles />
     </>
   );
 });

@@ -6,8 +6,8 @@
  */
 
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
-import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
 export interface Props {
   isOpen: boolean;
@@ -20,19 +20,17 @@ export interface Props {
   className?: string;
 }
 
-export const ConfirmModal: FunctionComponent<Props> = (props) => {
-  const {
-    isOpen,
-    title,
-    message,
-    onConfirm,
-    onCancel,
-    confirmButtonText,
-    cancelButtonText,
-    className,
-    ...rest
-  } = props;
-
+export const ConfirmModal: FunctionComponent<Props> = ({
+  isOpen,
+  title = 'Confirm',
+  message,
+  onConfirm,
+  onCancel,
+  confirmButtonText = 'Confirm',
+  cancelButtonText = 'Cancel',
+  className,
+  ...rest
+}) => {
   const modalTitleId = useGeneratedHtmlId();
 
   // render nothing if this component isn't open
@@ -58,21 +56,4 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
       {message}
     </EuiConfirmModal>
   );
-};
-
-ConfirmModal.propTypes = {
-  isOpen: PropTypes.bool,
-  title: PropTypes.string,
-  message: PropTypes.string.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  onCancel: PropTypes.func.isRequired,
-  cancelButtonText: PropTypes.string,
-  confirmButtonText: PropTypes.string,
-  className: PropTypes.string,
-};
-
-ConfirmModal.defaultProps = {
-  title: 'Confirm',
-  confirmButtonText: 'Confirm',
-  cancelButtonText: 'Cancel',
 };

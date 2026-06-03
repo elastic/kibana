@@ -6,12 +6,11 @@
  */
 
 import { USER } from '../../../services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'dashboard']);
   const ml = getService('ml');
-  const esArchiver = getService('esArchiver');
 
   const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
 
@@ -60,7 +59,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('for user with no ML access and Kibana features access', function () {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.securityUI.loginAs(USER.ML_DISABLED);
         await ml.api.cleanMlIndices();

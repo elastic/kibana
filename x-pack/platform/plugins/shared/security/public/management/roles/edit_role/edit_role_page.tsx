@@ -621,7 +621,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return (
       <EuiButton
         {...reactRouterNavigate(history, '')}
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         data-test-subj="roleFormReturnButton"
       >
         <FormattedMessage
@@ -837,6 +837,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
               <Fragment>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   title={getExtendedRoleDeprecationNotice(role)}
                   color="warning"
                   iconType="warning"

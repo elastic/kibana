@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -26,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAppContext } from '../../../app_context';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
@@ -36,7 +37,7 @@ import { NewConnectorLogic } from '../../new_index/method_connector/new_connecto
 
 import { ChooseConnector } from './components/choose_connector';
 import { ManualConfiguration } from './components/manual_configuration';
-import { SelfManagePreference } from './create_connector';
+import type { SelfManagePreference } from './create_connector';
 import { isValidIndexName } from '../utils/validate_index_name';
 import { NEXT_BUTTON_LABEL } from '../translations';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
@@ -72,9 +73,9 @@ const StartStep: React.FC<StartStepProps> = ({
     isGenerateLoading,
     isCreateLoading,
     isFormDirty,
-  } = useValues(NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl }));
+  } = useValues(NewConnectorLogic({ http, navigateToApp: application?.navigateToApp }));
   const { setRawName, createConnector, generateConnectorName, setFormDirty } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { connector } = useValues(ConnectorViewLogic({ http }));
 
@@ -361,13 +362,13 @@ const StartStep: React.FC<StartStepProps> = ({
               ) : (
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <AiButton
                       data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
                       data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-                      disabled={
+                      isDisabled={
                         !canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)
                       }
-                      fill
+                      variant="accent"
                       iconType="sparkles"
                       isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
@@ -383,7 +384,7 @@ const StartStep: React.FC<StartStepProps> = ({
                           defaultMessage: 'Generate configuration',
                         }
                       )}
-                    </EuiButton>
+                    </AiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ManualConfiguration

@@ -5,30 +5,47 @@
  * 2.0.
  */
 
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndicesDataStream,
+  IndicesGetDataStreamResponse,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
-import { AssetClient } from './assets/asset_client';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { QueryClient } from './assets/query/query_client';
+import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
+import type { RoutingStatus } from '@kbn/streams-schema';
+import {
+  Streams,
+  convertUpsertRequestIntoDefinition,
+  deriveQueryType,
+  getAncestors,
+  getParentId,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+} from '@kbn/streams-schema';
+import type { StreamSummary } from '../../../common';
+import type { QueryClient } from './assets/query/query_client';
+import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
-import { State } from './state_management/state';
-import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
+import { createRootStreamDefinition } from './root_stream_definition';
+import { State } from './state_management/state';
+import type { StreamsStorageClient } from './storage/streams_storage_client';
+import { checkAccess, checkAccessBulk } from './stream_crud';
+import { upsertDataStream } from './data_streams/manage_data_streams';
+import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
+import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -61,49 +78,77 @@ export class StreamsClient {
   constructor(
     private readonly dependencies: {
       lockManager: LockManagerService;
-      scopedClusterClient: IScopedClusterClient;
-      assetClient: AssetClient;
-      queryClient: QueryClient;
+      esClientAsInternalUser: ElasticsearchClient;
+      esClient: ElasticsearchClient;
+      attachmentClient: AttachmentClient;
+      getQueryClient?: () => Promise<QueryClient>;
+      getFeatureClient?: () => Promise<FeatureClient>;
       storageClient: StreamsStorageClient;
       logger: Logger;
-      request: KibanaRequest;
       isServerless: boolean;
+      isSecurityEnabled: boolean;
+      isWiredStreamViewsEnabled: boolean;
       isDev: boolean;
     }
   ) {}
 
   /**
    * Streams is considered enabled when:
-   * - the logs root stream exists
-   * - it is a wired stream (as opposed to an ingest stream)
+   * - both new streams (logs.otel and logs.ecs) are enabled
+   * - it throws if any stream has a conflict
    */
   async isStreamsEnabled(): Promise<boolean> {
     const streamsStatus = await this.checkStreamStatus();
 
-    if (streamsStatus === 'conflict') {
+    // Check for ANY conflicts
+    const hasConflict =
+      streamsStatus[LOGS_ROOT_STREAM_NAME] === 'conflict' ||
+      streamsStatus[LOGS_OTEL_STREAM_NAME] === 'conflict' ||
+      streamsStatus[LOGS_ECS_STREAM_NAME] === 'conflict';
+
+    if (hasConflict) {
       throw new StreamsStatusConflictError(
         'Streams status conflict: Elasticsearch and root stream status do not match, enable/disable streams again'
       );
     }
 
-    return streamsStatus;
+    // Enabled only when BOTH new streams are enabled
+    return (
+      streamsStatus[LOGS_OTEL_STREAM_NAME] === true && streamsStatus[LOGS_ECS_STREAM_NAME] === true
+    );
   }
 
-  public async checkStreamStatus(): Promise<boolean | 'conflict'> {
-    const rootLogsStreamExists = await this.checkRootLogsStreamExists();
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return rootLogsStreamExists;
-    }
-    const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
-    if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
-      return 'conflict';
-    }
-    return rootLogsStreamExists;
+  public async checkStreamStatus(): Promise<{
+    logs: boolean | 'conflict';
+    [LOGS_OTEL_STREAM_NAME]: boolean | 'conflict';
+    [LOGS_ECS_STREAM_NAME]: boolean | 'conflict';
+  }> {
+    const [kibanaStreams, esStreams] = await Promise.all([
+      this.checkRootStreamsExistence(),
+      this.checkElasticsearchStreamsStatus(),
+    ]);
+
+    return {
+      [LOGS_ROOT_STREAM_NAME]:
+        kibanaStreams[LOGS_ROOT_STREAM_NAME] !== esStreams[LOGS_ROOT_STREAM_NAME]
+          ? 'conflict'
+          : kibanaStreams[LOGS_ROOT_STREAM_NAME],
+      [LOGS_OTEL_STREAM_NAME]:
+        kibanaStreams[LOGS_OTEL_STREAM_NAME] !== esStreams[LOGS_OTEL_STREAM_NAME]
+          ? 'conflict'
+          : kibanaStreams[LOGS_OTEL_STREAM_NAME],
+      [LOGS_ECS_STREAM_NAME]:
+        kibanaStreams[LOGS_ECS_STREAM_NAME] !== esStreams[LOGS_ECS_STREAM_NAME]
+          ? 'conflict'
+          : kibanaStreams[LOGS_ECS_STREAM_NAME],
+    };
   }
 
-  private async checkRootLogsStreamExists() {
-    return await this.getStream(LOGS_ROOT_STREAM_NAME)
+  /**
+   * Checks if a specific root stream exists in Kibana storage
+   */
+  private async checkRootStreamExists(streamName: string): Promise<boolean> {
+    return await this.getStream(streamName)
       .then((definition) => Streams.WiredStream.Definition.is(definition))
       .catch((error) => {
         if (isDefinitionNotFoundError(error)) {
@@ -114,101 +159,239 @@ export class StreamsClient {
   }
 
   /**
-   * Enabling streams means creating the logs root stream.
-   * If it is already enabled, it is a noop.
+   * Checks which root streams exist in Kibana storage
+   * Returns: { logs: boolean, 'logs.otel': boolean, 'logs.ecs': boolean }
    */
-  async enableStreams(): Promise<EnableStreamsResponse> {
-    try {
-      const isEnabled = await this.isStreamsEnabled();
+  private async checkRootStreamsExistence(): Promise<{
+    logs: boolean;
+    [LOGS_OTEL_STREAM_NAME]: boolean;
+    [LOGS_ECS_STREAM_NAME]: boolean;
+  }> {
+    const [logsExists, logsOtelExists, logsEcsExists] = await Promise.all([
+      this.checkRootStreamExists(LOGS_ROOT_STREAM_NAME),
+      this.checkRootStreamExists(LOGS_OTEL_STREAM_NAME),
+      this.checkRootStreamExists(LOGS_ECS_STREAM_NAME),
+    ]);
 
-      if (isEnabled) {
-        return { acknowledged: true, result: 'noop' };
-      }
-    } catch (error) {
-      if (error.name !== 'StreamsStatusConflictError') {
-        throw error;
-      }
+    return {
+      logs: logsExists,
+      [LOGS_OTEL_STREAM_NAME]: logsOtelExists,
+      [LOGS_ECS_STREAM_NAME]: logsEcsExists,
+    };
+  }
+
+  /**
+   * Checks Elasticsearch enable status for all root streams
+   * Returns: { logs: boolean, 'logs.otel': boolean, 'logs.ecs': boolean }
+   */
+  private async checkElasticsearchStreamsStatus(): Promise<{
+    logs: boolean;
+    [LOGS_OTEL_STREAM_NAME]: boolean;
+    [LOGS_ECS_STREAM_NAME]: boolean;
+  }> {
+    const response = (await this.dependencies.esClientAsInternalUser.transport.request({
+      method: 'GET',
+      path: '/_streams/status',
+    })) as {
+      logs?: { enabled: boolean };
+      [LOGS_OTEL_STREAM_NAME]?: { enabled: boolean };
+      [LOGS_ECS_STREAM_NAME]?: { enabled: boolean };
+    };
+
+    return {
+      logs: response.logs?.enabled ?? false,
+      [LOGS_OTEL_STREAM_NAME]: response[LOGS_OTEL_STREAM_NAME]?.enabled ?? false,
+      [LOGS_ECS_STREAM_NAME]: response[LOGS_ECS_STREAM_NAME]?.enabled ?? false,
+    };
+  }
+
+  /**
+   * Materializes backing data streams for root wired streams that exist in
+   * Kibana storage but are missing their backing ES data stream. This can
+   * happen when enableStreams was previously called with defer: true.
+   *
+   * Returns true if any data streams were materialized, false otherwise.
+   */
+  private async materializeDeferredRootDataStreams(
+    kibanaStreams: Record<string, boolean>
+  ): Promise<boolean> {
+    const existingRootStreamNames = ROOT_STREAM_NAMES.filter(
+      (name) => kibanaStreams[name as keyof typeof kibanaStreams]
+    );
+
+    const rootsNeedingMaterialization = (
+      await Promise.all(
+        existingRootStreamNames.map(async (name) => {
+          const dataStreamExists = await this.dependencies.esClient.indices.exists({
+            index: name,
+          });
+          return { name, exists: dataStreamExists as boolean };
+        })
+      )
+    )
+      .filter(({ exists }) => !exists)
+      .map(({ name }) => name);
+
+    if (rootsNeedingMaterialization.length === 0) {
+      return false;
     }
 
-    const rootStreamExists = await this.checkRootLogsStreamExists();
+    await Promise.all(
+      rootsNeedingMaterialization.map((name) =>
+        upsertDataStream({
+          esClient: this.dependencies.esClient,
+          name,
+          logger: this.dependencies.logger,
+        })
+      )
+    );
+    return true;
+  }
 
-    if (!rootStreamExists) {
+  /**
+   * Enabling streams means creating the necessary root streams.
+   * For fresh installs: creates logs.otel and logs.ecs
+   * For existing users: keeps logs, adds logs.otel and logs.ecs
+   *
+   * If all required streams are already enabled, it is a noop.
+   */
+  async enableStreams({ defer = false }: { defer?: boolean } = {}): Promise<EnableStreamsResponse> {
+    // Step 1: Check current state
+    const [kibanaStreams, esStreams] = await Promise.all([
+      this.checkRootStreamsExistence(),
+      this.checkElasticsearchStreamsStatus(),
+    ]);
+
+    // Step 2: Determine which streams to create/enable
+    const streamsToCreate: string[] = [];
+    const streamsToEnableInES: string[] = [];
+
+    // Legacy stream conflict handling
+    if (!kibanaStreams.logs && esStreams.logs) {
+      streamsToCreate.push(LOGS_ROOT_STREAM_NAME);
+    }
+    if (kibanaStreams.logs && !esStreams.logs) {
+      streamsToEnableInES.push(LOGS_ROOT_STREAM_NAME);
+    }
+
+    if (!kibanaStreams[LOGS_OTEL_STREAM_NAME]) {
+      streamsToCreate.push(LOGS_OTEL_STREAM_NAME);
+    }
+    if (!kibanaStreams[LOGS_ECS_STREAM_NAME]) {
+      streamsToCreate.push(LOGS_ECS_STREAM_NAME);
+    }
+
+    if (!esStreams[LOGS_OTEL_STREAM_NAME]) {
+      streamsToEnableInES.push(LOGS_OTEL_STREAM_NAME);
+    }
+    if (!esStreams[LOGS_ECS_STREAM_NAME]) {
+      streamsToEnableInES.push(LOGS_ECS_STREAM_NAME);
+    }
+
+    // Step 3: Check if this is a noop
+    if (streamsToCreate.length === 0 && streamsToEnableInES.length === 0) {
+      if (!defer) {
+        const materialized = await this.materializeDeferredRootDataStreams(kibanaStreams);
+        if (materialized) {
+          return { acknowledged: true, result: 'created' };
+        }
+      }
+      return { acknowledged: true, result: 'noop' };
+    }
+
+    // Step 4: Create Kibana definitions for missing streams
+    if (streamsToCreate.length > 0) {
       await State.attemptChanges(
-        [
-          {
-            type: 'upsert',
-            definition: rootStreamDefinition,
-          },
-        ],
+        streamsToCreate.map((streamName) => ({
+          type: 'upsert',
+          definition: createRootStreamDefinition(streamName),
+        })),
         {
           ...this.dependencies,
           streamsClient: this,
+          deferRootDataStreamMaterialization: defer,
         }
       );
     }
 
-    if (!this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
-
-      if (!elasticsearchStreamsEnabled) {
-        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-          method: 'POST',
-          path: '_streams/logs/_enable',
-        });
-      }
+    // Step 5: Enable streams in Elasticsearch (parallel calls)
+    if (streamsToEnableInES.length > 0) {
+      await Promise.all(
+        streamsToEnableInES.map((streamName) =>
+          this.dependencies.esClient.transport.request({
+            method: 'POST',
+            path: `_streams/${streamName}/_enable`,
+          })
+        )
+      );
     }
 
     return { acknowledged: true, result: 'created' };
   }
 
   /**
-   * Disabling streams means deleting the logs root stream
-   * AND its descendants, including any Elasticsearch objects,
-   * such as data streams. That means it deletes all data
-   * belonging to wired streams.
+   * Disabling streams means deleting root streams AND their descendants,
+   * including any Elasticsearch objects, such as data streams.
+   * That means it deletes all data belonging to wired streams.
+   *
+   * For legacy users (with logs stream): deletes all 3 streams
+   * For new users: deletes only logs.otel and logs.ecs
    *
    * It does NOT delete classic streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
-    try {
-      const isEnabled = await this.isStreamsEnabled();
+    // Get current state
+    const [kibanaStreams, esStreams] = await Promise.all([
+      this.checkRootStreamsExistence(),
+      this.checkElasticsearchStreamsStatus(),
+    ]);
 
-      if (!isEnabled) {
-        return { acknowledged: true, result: 'noop' };
-      }
-    } catch (error) {
-      if (error.name !== 'StreamsStatusConflictError') {
-        throw error;
-      }
+    const streamsToDelete: string[] = [];
+    const streamsToDisableInES: string[] = [];
+
+    // Determine which streams to delete/disable
+    if (kibanaStreams.logs) streamsToDelete.push(LOGS_ROOT_STREAM_NAME);
+    if (kibanaStreams[LOGS_OTEL_STREAM_NAME]) streamsToDelete.push(LOGS_OTEL_STREAM_NAME);
+    if (kibanaStreams[LOGS_ECS_STREAM_NAME]) streamsToDelete.push(LOGS_ECS_STREAM_NAME);
+
+    if (esStreams.logs) streamsToDisableInES.push(LOGS_ROOT_STREAM_NAME);
+    if (esStreams[LOGS_OTEL_STREAM_NAME]) streamsToDisableInES.push(LOGS_OTEL_STREAM_NAME);
+    if (esStreams[LOGS_ECS_STREAM_NAME]) streamsToDisableInES.push(LOGS_ECS_STREAM_NAME);
+
+    // Check if this is a noop
+    if (streamsToDelete.length === 0 && streamsToDisableInES.length === 0) {
+      return { acknowledged: true, result: 'noop' };
     }
 
-    const rootStreamExists = await this.checkRootLogsStreamExists();
-    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
-
-    if (rootStreamExists) {
+    // Delete Kibana definitions
+    if (streamsToDelete.length > 0) {
       await State.attemptChanges(
-        [
-          {
-            type: 'delete',
-            name: rootStreamDefinition.name,
-          },
-        ],
+        streamsToDelete.map((name) => ({ type: 'delete' as const, name })),
         {
           ...this.dependencies,
           streamsClient: this,
         }
       );
 
-      const { assetClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), storageClient.clean()]);
+      const { attachmentClient, getQueryClient, storageClient } = this.dependencies;
+      const cleanOps: Array<Promise<unknown>> = [attachmentClient.clean(), storageClient.clean()];
+      if (getQueryClient) {
+        const queryClient = await getQueryClient();
+        cleanOps.push(queryClient.clean());
+      }
+      await Promise.all(cleanOps);
     }
 
-    if (elasticsearchStreamsEnabled) {
-      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-        method: 'POST',
-        path: '_streams/logs/_disable',
-      });
+    // Disable in Elasticsearch (parallel calls)
+    if (streamsToDisableInES.length > 0) {
+      await Promise.all(
+        streamsToDisableInES.map((streamName) =>
+          this.dependencies.esClient.transport.request({
+            method: 'POST',
+            path: `_streams/${streamName}/_disable`,
+          })
+        )
+      );
     }
 
     return { acknowledged: true, result: 'deleted' };
@@ -245,7 +428,7 @@ export class StreamsClient {
     name: string;
     request: Streams.all.UpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: Streams.all.Definition = { ...request.stream, name };
+    const stream = convertUpsertRequestIntoDefinition(name, request);
 
     const result = await State.attemptChanges(
       [
@@ -260,7 +443,7 @@ export class StreamsClient {
       }
     );
 
-    await this.syncAssets(stream.name, request);
+    await this.syncAssets(stream, request);
 
     return {
       acknowledged: true,
@@ -269,10 +452,14 @@ export class StreamsClient {
   }
 
   async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
+    const definitions = streams.map(({ name, request }) => {
+      return { request, definition: convertUpsertRequestIntoDefinition(name, request) };
+    });
+
     const result = await State.attemptChanges(
-      streams.map(({ name, request }) => ({
+      definitions.map(({ definition }) => ({
         type: 'upsert',
-        definition: { ...request.stream, name } as Streams.all.Definition,
+        definition,
       })),
       {
         ...this.dependencies,
@@ -280,7 +467,9 @@ export class StreamsClient {
       }
     );
 
-    await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
+    await Promise.all(
+      definitions.map(({ definition, request }) => this.syncAssets(definition, request))
+    );
 
     return {
       acknowledged: true,
@@ -294,11 +483,15 @@ export class StreamsClient {
   async forkStream({
     parent,
     name,
-    if: condition,
+    where: condition,
+    status,
+    draft,
   }: {
     parent: string;
     name: string;
-    if: Condition;
+    where: Condition;
+    status: RoutingStatus;
+    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -308,19 +501,23 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
+    const now = new Date().toISOString();
     await State.attemptChanges(
       [
         {
           type: 'upsert',
           definition: {
             ...parentDefinition,
+            updated_at: now,
             ingest: {
               ...parentDefinition.ingest,
               wired: {
                 ...parentDefinition.ingest.wired,
                 routing: parentDefinition.ingest.wired.routing.concat({
                   destination: name,
-                  if: condition,
+                  where: condition,
+                  status,
+                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -329,16 +526,52 @@ export class StreamsClient {
         {
           type: 'upsert',
           definition: {
+            type: 'wired',
             name,
             description: '',
+            updated_at: now,
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: { steps: [], updated_at: now },
+              settings: {},
               wired: {
                 fields: {},
                 routing: [],
+                ...(draft ? { draft: true } : {}),
               },
+              failure_store: { inherit: {} },
             },
+          },
+        },
+      ],
+      { ...this.dependencies, streamsClient: this }
+    );
+
+    return { acknowledged: true, result: 'created' };
+  }
+
+  async createQueryStream({
+    name,
+    query,
+    field_descriptions,
+  }: {
+    name: string;
+    query: Streams.QueryStream.UpsertRequest['stream']['query'];
+    field_descriptions?: Record<string, string>;
+  }): Promise<UpsertStreamResponse> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: {
+            type: 'query',
+            name,
+            description: '',
+            updated_at: new Date().toISOString(),
+            query_streams: [],
+            query,
+            ...(field_descriptions && { field_descriptions }),
           },
         },
       ],
@@ -394,7 +627,6 @@ export class StreamsClient {
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
    * - if a data stream exists (creates an ingest definition on the fly)
-   * - if a group stream definition exists
    *
    * Throws when:
    * - no definition is found
@@ -409,7 +641,8 @@ export class StreamsClient {
       if (Streams.ingest.all.Definition.is(streamDefinition)) {
         const privileges = await checkAccess({
           name,
-          scopedClusterClient: this.dependencies.scopedClusterClient,
+          esClient: this.dependencies.esClient,
+          isSecurityEnabled: this.dependencies.isSecurityEnabled,
         });
         if (!privileges.read) {
           throw new SecurityError(`Cannot read stream, insufficient privileges`);
@@ -437,24 +670,24 @@ export class StreamsClient {
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);
       }),
-      checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
-        (privileges) => {
-          if (!privileges.read) {
-            throw new SecurityError(`Cannot read stream, insufficient privileges`);
-          }
+      checkAccess({
+        name,
+        esClient: this.dependencies.esClient,
+        isSecurityEnabled: this.dependencies.isSecurityEnabled,
+      }).then((privileges) => {
+        if (!privileges.read) {
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
-      ),
+      }),
     ]).then(([wiredDefinition]) => {
       return wiredDefinition;
     });
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
-    return wrapEsCall(
-      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
-    ).then((response) => {
-      if (response.data_streams.length === 0) {
-        throw new errors.ResponseError({
+    return wrapEsCall(this.dependencies.esClient.indices.getDataStream({ name })).then(
+      (response) => {
+        const notFoundErrorBody = {
           meta: {
             aborted: false,
             attempts: 1,
@@ -466,56 +699,140 @@ export class StreamsClient {
           warnings: [],
           body: 'resource_not_found_exception',
           statusCode: 404,
-        });
-      }
+        };
+        if (response.data_streams.length === 0) {
+          throw new errors.ResponseError(notFoundErrorBody);
+        }
 
-      const dataStream = response.data_streams[0];
-      return dataStream;
-    });
+        const dataStream = response.data_streams[0];
+        if (!dataStream) {
+          throw new errors.ResponseError(notFoundErrorBody);
+        }
+        return dataStream;
+      }
+    );
   }
 
   /**
-   * Checks whether the user has the required privileges to manage the stream.
+   * Checks whether the user has the required privileges to manage the stream (or streams).
    * Managing a stream means updating the stream properties. It does not
    * include the dashboard links.
+   *
+   * In case multiple streams are provided, it checks whether the user has
+   * the required privileges on all streams, and returns the least-privileged
+   * result.
    */
-  async getPrivileges(name: string) {
-    const REQUIRED_MANAGE_PRIVILEGES = [
+  async getPrivileges(nameOrNames: string | string[]) {
+    const names = Array.isArray(nameOrNames) ? nameOrNames : [nameOrNames];
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return {
+        manage: true,
+        monitor: true,
+        view_index_metadata: true,
+        lifecycle: true,
+        simulate: true,
+        text_structure: true,
+        read_failure_store: true,
+        manage_failure_store: true,
+        create_snapshot_repository: true,
+      };
+    }
+
+    const privileges = await this.checkIndexPrivileges(names);
+
+    const isServerless = this.dependencies.isServerless;
+    const REQUIRED_MANAGE_PRIVILEGES = this.getRequiredManagePrivileges();
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+
+    return {
+      manage:
+        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
+        names.every((name) =>
+          Object.values(privileges.index[name]).every((privilege) => privilege === true)
+        ),
+      monitor: names.every((name) => privileges.index[name].monitor),
+      view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
+      lifecycle: isServerless
+        ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
+        : names.every(
+            (name) =>
+              privileges.index[name].manage_data_stream_lifecycle &&
+              privileges.index[name].manage_ilm
+          ),
+      simulate:
+        privileges.cluster.read_pipeline && names.every((name) => privileges.index[name].create),
+      text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
+      read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
+      manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
+      create_snapshot_repository:
+        privileges.cluster[CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE] === true,
+    };
+  }
+
+  async getPrivilegesPerStream(
+    names: string[]
+  ): Promise<Record<string, { read_failure_store: boolean }>> {
+    if (!this.dependencies.isSecurityEnabled) {
+      const result: Record<string, { read_failure_store: boolean }> = {};
+      names.forEach((name) => {
+        result[name] = { read_failure_store: true };
+      });
+      return result;
+    }
+
+    const privileges = await this.checkIndexPrivileges(names);
+
+    const result: Record<string, { read_failure_store: boolean }> = {};
+    names.forEach((name) => {
+      result[name] = {
+        read_failure_store: privileges.index[name]?.read_failure_store ?? false,
+      };
+    });
+
+    return result;
+  }
+
+  private getRequiredManagePrivileges(): string[] {
+    const privileges = [
       'manage_index_templates',
       'manage_ingest_pipelines',
       'manage_pipeline',
       'read_pipeline',
     ];
+    if (!this.dependencies.isServerless) {
+      privileges.push('monitor_text_structure');
+    }
+    return privileges;
+  }
 
-    const privileges =
-      await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
-        index: [
-          {
-            names: [name],
-            privileges: [
-              'read',
-              'write',
-              'create',
-              'manage',
-              'monitor',
-              'manage_data_stream_lifecycle',
-              'manage_ilm',
-            ],
-          },
-        ],
-      });
+  private getRequiredIndexPrivileges(): string[] {
+    const privileges = [
+      'read',
+      'write',
+      'create',
+      'manage',
+      'monitor',
+      'view_index_metadata',
+      'manage_data_stream_lifecycle',
+      'read_failure_store',
+      'manage_failure_store',
+    ];
+    if (!this.dependencies.isServerless) {
+      privileges.push('manage_ilm');
+    }
+    return privileges;
+  }
 
-    return {
-      manage:
-        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
-        Object.values(privileges.index[name]).every((privilege) => privilege === true),
-      monitor: privileges.index[name].monitor,
-      lifecycle:
-        privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
-      simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
-      text_structure: privileges.cluster.monitor_text_structure,
-    };
+  private async checkIndexPrivileges(names: string[]) {
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+    return this.dependencies.esClient.security.hasPrivileges({
+      cluster: [
+        ...this.getRequiredManagePrivileges(),
+        CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE,
+      ],
+      index: [{ names, privileges: this.getRequiredIndexPrivileges() }],
+    });
   }
 
   /**
@@ -525,13 +842,19 @@ export class StreamsClient {
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
   ): Streams.ClassicStream.Definition {
+    const timestamp = new Date(0).toISOString();
+
     const definition: Streams.ClassicStream.Definition = {
+      type: 'classic',
       name: dataStream.name,
       description: '',
+      updated_at: timestamp,
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [], updated_at: timestamp },
+        settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
 
@@ -553,6 +876,20 @@ export class StreamsClient {
       });
 
     return exists;
+  }
+
+  /**
+   * Fetches a summary (name, type, description) for each requested stream name.
+   * Stream names for which no managed stream exists are ignored.
+   */
+  async getStreamSummaries(names: string[]): Promise<StreamSummary[]> {
+    if (names.length === 0) {
+      return [];
+    }
+    const streams = await this.getManagedStreams({
+      query: { terms: { name: names } },
+    });
+    return streams.map(({ name, type, description }) => ({ name, type, description }));
   }
 
   /**
@@ -596,19 +933,34 @@ export class StreamsClient {
    * stored definition).
    */
   private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
-    const response = await wrapEsCall(
-      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
-    );
+    let response: IndicesGetDataStreamResponse;
+    try {
+      response = await wrapEsCall(this.dependencies.esClient.indices.getDataStream());
+    } catch (e) {
+      // if permissions are insufficient, we just return an empty list
+      if (e instanceof Error && 'statusCode' in e && e.statusCode === 403) {
+        return [];
+      }
+      throw e;
+    }
 
-    return response.data_streams.map((dataStream) => ({
-      name: dataStream.name,
-      description: '',
-      ingest: {
-        lifecycle: { inherit: {} },
-        processing: [],
-        classic: {},
-      },
-    }));
+    const now = new Date().toISOString();
+
+    return response.data_streams
+      .filter((dataStream) => !shouldExcludeFromStreamsList(dataStream))
+      .map((dataStream) => ({
+        type: 'classic' as const,
+        name: dataStream.name,
+        description: '',
+        updated_at: now,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: now },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      }));
   }
 
   /**
@@ -617,7 +969,7 @@ export class StreamsClient {
   private async getManagedStreams({ query }: { query?: QueryDslQueryContainer } = {}): Promise<
     Streams.all.Definition[]
   > {
-    const { scopedClusterClient, storageClient } = this.dependencies;
+    const { esClient, storageClient } = this.dependencies;
 
     const streamsSearchResponse = await storageClient.search({
       size: 10000,
@@ -626,34 +978,28 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) =>
-      this.getStreamDefinitionFromSource(hit._source)
-    );
+    const streams = streamsSearchResponse.hits.hits
+      .filter(
+        ({ _source: definition }) => !('group' in definition) // Filter out old Group streams
+      )
+      .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return streams;
+    }
 
     const privileges = await checkAccessBulk({
       names: streams
-        .filter((stream) => !Streams.GroupStream.Definition.is(stream))
+        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
-      scopedClusterClient,
+      esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
     return streams.filter((stream) => {
-      if (Streams.GroupStream.Definition.is(stream)) return true;
+      if (Streams.QueryStream.Definition.is(stream)) return true;
       return privileges[stream.name]?.read === true;
     });
-  }
-
-  private async checkElasticsearchStreamStatus(): Promise<boolean> {
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return false;
-    }
-    const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
-      method: 'GET',
-      path: '/_streams/status',
-    })) as { logs: { enabled: boolean } };
-
-    return response.logs.enabled;
   }
 
   /**
@@ -663,22 +1009,45 @@ export class StreamsClient {
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
     const definition = await this.getStream(name);
 
-    if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {
-      throw new StatusError('Cannot delete root stream', 400);
+    if (Streams.ClassicStream.Definition.is(definition)) {
+      // attempting to delete a classic stream that was not previously stored
+      // results in a noop so we make sure to make it available in the state first
+      await this.ensureStream(name);
     }
 
-    await State.attemptChanges(
-      [
-        {
-          type: 'delete',
-          name,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
+    const isRootStream =
+      Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined;
+
+    if (isRootStream) {
+      // Only allow deletion of the legacy 'logs' root stream
+      // logs.otel and logs.ecs remain protected
+      if (name !== LOGS_ROOT_STREAM_NAME) {
+        throw new StatusError('Cannot delete root stream', 400);
       }
-    );
+    }
+
+    // Delete from Kibana
+    await State.attemptChanges([{ type: 'delete', name }], {
+      ...this.dependencies,
+      streamsClient: this,
+    });
+
+    // For root streams, also disable in Elasticsearch
+    if (isRootStream) {
+      try {
+        await this.dependencies.esClient.transport.request({
+          method: 'POST',
+          path: `_streams/${name}/_disable`,
+        });
+      } catch (error) {
+        // Log but don't fail - stream might not exist in ES or already be disabled
+        this.dependencies.logger.warn(
+          `Failed to disable stream ${name} in Elasticsearch after deletion: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -725,20 +1094,38 @@ export class StreamsClient {
     }).then((streams) => streams.filter(Streams.WiredStream.Definition.is));
   }
 
-  private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
-    const { dashboards, queries } = request;
+  private async syncAssets(definition: Streams.all.Definition, request: Streams.all.UpsertRequest) {
+    const { dashboards, queries, rules } = request;
 
-    // sync dashboards as before
-    await this.dependencies.assetClient.syncAssetList(
-      name,
-      dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      'dashboard'
-    );
+    const ops: Array<Promise<unknown>> = [
+      this.dependencies.attachmentClient.syncAttachmentList(
+        definition.name,
+        dashboards.map((dashboard) => ({
+          id: dashboard,
+          type: 'dashboard' as const,
+        })),
+        'dashboard'
+      ),
+      this.dependencies.attachmentClient.syncAttachmentList(
+        definition.name,
+        rules.map((rule) => ({
+          id: rule,
+          type: 'rule' as const,
+        })),
+        'rule'
+      ),
+    ];
 
-    // sync rules with asset links
-    await this.dependencies.queryClient.syncQueries(name, queries);
+    if (this.dependencies.getQueryClient) {
+      const queryClient = await this.dependencies.getQueryClient();
+      ops.push(
+        queryClient.syncQueries(
+          definition,
+          queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
+        )
+      );
+    }
+
+    await Promise.all(ops);
   }
 }

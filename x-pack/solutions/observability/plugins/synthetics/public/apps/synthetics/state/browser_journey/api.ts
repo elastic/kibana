@@ -6,28 +6,30 @@
  */
 
 import { apiService } from '../../../../utils/api_service';
-import {
-  FailedStepsApiResponse,
-  FailedStepsApiResponseType,
+import type {
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
-  SyntheticsJourneyApiResponseType,
   Ping,
-  PingType,
 } from '../../../../../common/runtime_types';
+import { SyntheticsJourneyApiResponseType, PingType } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
+  remoteName?: string;
 }
 
-export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
+export async function fetchScreenshotBlockSet(
+  hashes: string[],
+  remoteName?: string
+): Promise<ScreenshotBlockDoc[]> {
   const response = await apiService.post<{ result: ScreenshotBlockDoc[] }>(
     SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
     {
-      hashes: params,
+      hashes,
+      ...(remoteName ? { remoteName } : {}),
     }
   );
   return response.result;
@@ -38,20 +40,8 @@ export async function fetchBrowserJourney(
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    undefined,
+    params.remoteName ? { remoteName: params.remoteName } : undefined,
     SyntheticsJourneyApiResponseType
-  );
-}
-
-export async function fetchJourneysFailedSteps({
-  checkGroups,
-}: {
-  checkGroups: string[];
-}): Promise<FailedStepsApiResponse> {
-  return apiService.get(
-    SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
-    { checkGroups },
-    FailedStepsApiResponseType
   );
 }
 
@@ -60,11 +50,13 @@ export async function fetchLastSuccessfulCheck({
   timestamp,
   stepIndex,
   location,
+  remoteName,
 }: {
   monitorId: string;
   timestamp: string;
   stepIndex: number;
   location?: string;
+  remoteName?: string;
 }): Promise<Ping> {
   return await apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
@@ -73,6 +65,7 @@ export async function fetchLastSuccessfulCheck({
       timestamp,
       stepIndex,
       location,
+      ...(remoteName ? { remoteName } : {}),
     },
     PingType
   );

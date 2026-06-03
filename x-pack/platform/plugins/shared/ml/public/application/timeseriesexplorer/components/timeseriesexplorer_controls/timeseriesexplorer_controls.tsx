@@ -16,26 +16,24 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPopover,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
-import type { CombinedJobWithStats } from '../../../../../server/shared';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { MlEntity } from '../../../../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
-import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
 import { ForecastingModal } from '../forecasting_modal/forecasting_modal';
 import type { Entity } from '../entity_control/entity_control';
 
@@ -64,8 +62,6 @@ interface Props {
   earliestRecordTimestamp: number;
   latestRecordTimestamp: number;
 }
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 function getDefaultEmbeddablePanelConfig(jobId: JobId, queryString?: string) {
   return {
@@ -171,14 +167,14 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
           jobIds: [selectedJobId],
           selectedDetectorIndex,
           selectedEntities,
-          timeRange: globalTimeRange,
+          time_range: globalTimeRange,
         });
       }),
     });
   }
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
       const config = getDefaultEmbeddablePanelConfig(selectedJobId);
 
@@ -193,14 +189,14 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -283,23 +279,39 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
             <EuiFormRow hasEmptyLabelSpace>
               <EuiPopover
                 button={
-                  <EuiButtonIcon
-                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.timeSeriesExplorer.controlsActionsTooltip', {
                       defaultMessage: 'Actions',
                     })}
-                    color="text"
-                    display="base"
-                    isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
-                    onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                    data-test-subj="mlAnomalyTimelinePanelMenu"
-                    size="m"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.ml.timeSeriesExplorer.controlsActionsAriaLabel',
+                        {
+                          defaultMessage: 'Actions',
+                        }
+                      )}
+                      color="text"
+                      display="base"
+                      isSelected={isMenuOpen}
+                      iconType="boxesVertical"
+                      onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                      data-test-subj="mlTimeSeriesExplorerActionsMenu"
+                      size="m"
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isMenuOpen}
                 closePopover={setIsMenuOpen.bind(null, false)}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                aria-label={i18n.translate(
+                  'xpack.ml.timeSeriesExplorer.controls.popoverAriaLabel',
+                  {
+                    defaultMessage: 'Single metric viewer actions',
+                  }
+                )}
               >
                 <EuiContextMenu initialPanelId={0} panels={menuPanels} />
               </EuiPopover>

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PageObjects, createCorePageObjects } from '../../../../page_objects';
-import { ScoutTestConfig } from '../../worker';
+import type { PageObjects } from '../../../../page_objects';
+import { createCorePageObjects } from '../../../../page_objects';
+import type { ScoutTestConfig } from '../../worker';
 import { scoutPageFixture } from '../scout_page';
 
 /**
@@ -25,8 +26,8 @@ export const pageObjectsFixture = scoutPageFixture.extend<
   },
   { config: ScoutTestConfig }
 >({
-  pageObjects: async ({ page, log, config }, use) => {
-    const corePageObjects = createCorePageObjects({ page, config, log });
+  pageObjects: async ({ page, log, config, kbnUrl }, use) => {
+    const corePageObjects = createCorePageObjects({ page, config, log, kbnUrl });
     log.serviceLoaded('pageObjects');
     await use(corePageObjects);
   },

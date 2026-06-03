@@ -10,16 +10,20 @@
 import { readFileSync } from 'fs';
 import { access } from 'fs/promises';
 
-import { resolve, dirname } from 'path';
+import { basename, resolve, dirname } from 'path';
 import { asyncForEach } from '@kbn/std';
 import { Jsonc } from '@kbn/repo-packages';
-import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-server-internal';
+import {
+  discoverAllTranslationPaths,
+  getKibanaTranslationFiles,
+} from '@kbn/core-i18n-server-internal';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
 import globby from 'globby';
 
-import { mkdirp, compressTar, Task, copyAll, write } from '../lib';
+import type { Task } from '../lib';
+import { mkdirp, compressTar, copyAll, write } from '../lib';
 
 export const CreateCdnAssets: Task = {
   description: 'Creating CDN assets',
@@ -36,9 +40,16 @@ export const CreateCdnAssets: Task = {
 
     const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
 
-    // translation files
+    // translation files: discover every locale that any plugin or package
+    // ships a translation file for, and bundle one CDN asset per locale.
+    // This allows admins to enable plugin- or admin-supplied locales via
+    // `i18n.locales` at runtime without rebuilding Kibana.
     const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));
-    for (const locale of supportedLocale) {
+    const allTranslationPaths = await discoverAllTranslationPaths(pluginPaths);
+    const discoveredLocales = Array.from(
+      new Set(['en', ...allTranslationPaths.map((path) => basename(path, '.json'))])
+    );
+    for (const locale of discoveredLocales) {
       const translationFileContent = await generateTranslationFile(locale, pluginPaths);
       await write(
         resolve(assets, buildSha, `translations`, `${locale}.json`),
@@ -85,10 +96,18 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-src')
     );
-    await copyAll(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      resolve(bundles, 'core')
-    );
+    // [rspack-transition] When the legacy optimizer is removed, delete the else branch.
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+      // Rspack: all bundles (core + plugins) are in the unified output directory.
+      // Copy into the CDN bundles root so URLs like /bundles/kibana.bundle.js
+      // and /bundles/chunks/<hash>.js resolve correctly.
+      await copyAll(resolve(buildSource, 'target/public/bundles'), resolve(bundles));
+    } else {
+      await copyAll(
+        resolve(buildSource, 'node_modules/@kbn/core/target/public'),
+        resolve(bundles, 'core')
+      );
+    }
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),
       resolve(bundles, 'kbn-monaco')
@@ -107,12 +126,7 @@ export const CreateCdnAssets: Task = {
     await compressTar({
       source: assets,
       destination: config.resolveFromTarget(`kibana-${buildVersion}-cdn-assets.tar.gz`),
-      archiverOptions: {
-        gzip: true,
-        gzipOptions: {
-          level: 9,
-        },
-      },
+      gzipLevel: 6,
       createRootDirectory: true,
       rootDirectoryName: `kibana-${buildVersion}-cdn-assets`,
     });

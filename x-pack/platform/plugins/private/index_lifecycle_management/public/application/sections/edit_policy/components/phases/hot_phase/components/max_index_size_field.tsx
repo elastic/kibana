@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
@@ -45,6 +46,7 @@ export const MaxIndexSizeField: FunctionComponent = () => {
                   type="warning"
                   aria-label={i18nTexts.deprecationMessage}
                   content={i18nTexts.deprecationMessage}
+                  disableScreenReaderOutput
                 />
               ),
               append: (

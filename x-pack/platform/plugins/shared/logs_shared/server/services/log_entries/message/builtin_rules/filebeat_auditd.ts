@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogMessageFormattingRule } from '../rule_types';
+import type { LogMessageFormattingRule } from '../rule_types';
 import { labelFieldsPrefix } from './helpers';
 
 const commonActionField = [{ constant: '[AuditD][' }, { field: 'event.action' }, { constant: ']' }];

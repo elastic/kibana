@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UserActionFinder } from './find';
@@ -24,7 +23,6 @@ describe('UserActionsService: Finder', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
   const attributesToValidateIfMissing = ['created_at', 'created_by', 'owner', 'action', 'payload'];
@@ -36,7 +34,6 @@ describe('UserActionsService: Finder', () => {
     finder = new UserActionFinder({
       log: mockLogger,
       unsecuredSavedObjectsClient,
-      persistableStateAttachmentTypeRegistry,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
     });
@@ -67,6 +64,47 @@ describe('UserActionsService: Finder', () => {
       const commentId = res.saved_objects[0].attributes.comment_id;
 
       expect(commentId).toBe(null);
+    });
+
+    describe('types filter', () => {
+      beforeEach(() => {
+        const userAction = createUserActionSO();
+        const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
+        mockFind(soFindRes);
+      });
+
+      it('filters by type=comment and action=create when types includes "user"', async () => {
+        await finder.find({ caseId: '1', types: ['user'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({
+                      value: 'cases-user-actions.attributes.type',
+                    }),
+                    expect.objectContaining({
+                      value: 'comment',
+                    }),
+                  ]),
+                }),
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({
+                      value: 'cases-user-actions.attributes.action',
+                    }),
+                    expect.objectContaining({
+                      value: 'create',
+                    }),
+                  ]),
+                }),
+              ]),
+            }),
+          })
+        );
+      });
     });
   });
 

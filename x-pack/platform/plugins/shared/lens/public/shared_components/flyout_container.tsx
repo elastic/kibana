@@ -6,18 +6,20 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import {
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFocusTrap,
-  type UseEuiTheme,
+  EuiTitle,
+  EuiToolTip,
   euiBreakpoint,
+  type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -51,6 +53,7 @@ export function FlyoutContainer({
   children,
   customFooter,
   isInlineEditing,
+  overrideContainerCss,
 }: {
   isOpen: boolean;
   handleClose: () => void;
@@ -61,6 +64,7 @@ export function FlyoutContainer({
   panelContainerRef?: (el: HTMLDivElement) => void;
   customFooter?: React.ReactElement;
   isInlineEditing?: boolean;
+  overrideContainerCss?: Interpolation<Theme>;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const euiThemeContext = useEuiTheme();
@@ -88,6 +92,8 @@ export function FlyoutContainer({
     return null;
   }
 
+  const hideShadow = isInlineEditing || isFullscreen;
+
   return (
     <div ref={panelRef}>
       <EuiFocusTrap
@@ -107,13 +113,14 @@ export function FlyoutContainer({
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
             css`
-              box-shadow: ${isInlineEditing || isFullscreen ? 'none !important' : 'inherit'};
+              box-shadow: ${hideShadow ? 'none !important' : 'inherit'};
             `,
             flyoutContainerStyles(euiThemeContext),
             dimensionContainerStyles.self(euiThemeContext),
+            overrideContainerCss,
           ]}
           onAnimationEnd={() => {
-            if (isOpen) {
+            if (isOpen && !isInlineEditing) {
               // EuiFocusTrap interferes with animating elements with absolute position:
               // running this onAnimationEnd, otherwise the flyout pushes content when animating.
               setFocusTrapIsEnabled(true);
@@ -124,16 +131,26 @@ export function FlyoutContainer({
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-dimensionContainerBack"
-                    className="lnsDimensionContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="sortLeft"
-                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
                       defaultMessage: 'Close configuration',
                     })}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      data-test-subj="lns-indexPattern-dimensionContainerBack"
+                      className="lnsDimensionContainer__backIcon"
+                      onClick={closeFlyout}
+                      iconType="sortLeft"
+                      aria-label={i18n.translate(
+                        'xpack.lens.dimensionContainer.closeConfiguration',
+                        {
+                          defaultMessage: 'Close configuration',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={true}>
@@ -144,16 +161,26 @@ export function FlyoutContainer({
 
               {!isInlineEditing && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    data-test-subj="lns-indexPattern-dimensionContainerBack"
-                    className="lnsDimensionContainer__backIcon"
-                    onClick={closeFlyout}
-                    iconType="cross"
-                    aria-label={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.dimensionContainer.closeConfiguration', {
                       defaultMessage: 'Close configuration',
                     })}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      data-test-subj="lns-indexPattern-dimensionContainerBack"
+                      className="lnsDimensionContainer__backIcon"
+                      onClick={closeFlyout}
+                      iconType="cross"
+                      aria-label={i18n.translate(
+                        'xpack.lens.dimensionContainer.closeConfiguration',
+                        {
+                          defaultMessage: 'Close configuration',
+                        }
+                      )}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

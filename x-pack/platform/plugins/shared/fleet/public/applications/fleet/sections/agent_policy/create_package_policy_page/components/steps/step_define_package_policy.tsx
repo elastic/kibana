@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useMemo } from 'react';
+import React, { memo, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,20 +23,45 @@ import {
   EuiSelect,
   type EuiComboBoxOptionOption,
   EuiIconTip,
+  EuiSwitch,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
 import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
-import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
-import { Loading } from '../../../../../components';
-import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
+import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
 
-import { isAdvancedVar } from '../../services';
+import { PackagePolicyCustomFields } from '../../../../../components/custom_fields';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  RegistryVarsEntry,
+  AgentPolicy,
+} from '../../../../../types';
+
+import { Loading } from '../../../../../components';
+import {
+  useGetEpmDatastreams,
+  useStartServices,
+  useVarGroupCloudConnector,
+} from '../../../../../hooks';
+
+import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { PackagePolicyInputVarField } from './components';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
+
+import {
+  PackagePolicyConditionField,
+  PackagePolicyInputVarField,
+  VarGroupSelector,
+  useVarGroupSelections,
+} from './components';
 import { useOutputs } from './components/hooks';
+import { useNamespaceCustomization } from './use_namespace_customization';
 
 // on smaller screens, fields should be displayed in one column
 const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
@@ -56,6 +81,10 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
+  isAgentlessSelected?: boolean;
+  agentPolicies?: AgentPolicy[];
+  onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
+  packagePolicyId?: string;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -66,25 +95,80 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     submitAttempted,
     noAdvancedToggle = false,
     isEditPage = false,
+    isAgentlessSelected = false,
+    agentPolicies,
+    onNamespaceCustomizationEnabledChange,
+    packagePolicyId,
   }) => {
-    const { docLinks } = useStartServices();
+    const { docLinks, cloud } = useStartServices();
+    const { enableVarGroups } = ExperimentalFeaturesService.get();
+
+    const varGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+
+    const isAgentless =
+      (isEditPage || isAgentlessSelected) && Boolean(packagePolicy.supports_agentless);
+    const allInputsAreOtel =
+      packagePolicy.inputs.length > 0 &&
+      packagePolicy.inputs.every((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE);
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Package-level vars
-    const requiredVars: RegistryVarsEntry[] = [];
-    const advancedVars: RegistryVarsEntry[] = [];
-
-    if (packageInfo.vars) {
-      packageInfo.vars.forEach((varDef) => {
-        if (isAdvancedVar(varDef)) {
-          advancedVars.push(varDef);
-        } else {
-          requiredVars.push(varDef);
-        }
+    const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
+      useVarGroupSelections({
+        varGroups,
+        savedSelections: packagePolicy.var_group_selections,
+        isAgentlessEnabled: isAgentlessSelected,
+        onSelectionsChange: updatePackagePolicy,
+        packagePolicy,
       });
-    }
+
+    const {
+      isSelected: isCloudConnectorSelected,
+      cloudProvider,
+      accountType,
+      iacTemplateUrl,
+      cloudConnectorVars,
+      handleCloudConnectorUpdate,
+    } = useVarGroupCloudConnector({
+      varGroups,
+      varGroupSelections,
+      packagePolicy,
+      updatePackagePolicy,
+    });
+
+    // Package-level vars, filtered by var_group visibility
+    // and hiding deprecated vars on new installations
+    const { requiredVars, advancedVars } = useMemo(() => {
+      const _requiredVars: RegistryVarsEntry[] = [];
+      const _advancedVars: RegistryVarsEntry[] = [];
+
+      if (packageInfo.vars) {
+        packageInfo.vars.forEach((varDef) => {
+          if (cloudConnectorVars.has(varDef.name) || (!isEditPage && !!varDef.deprecated)) {
+            return;
+          }
+
+          // Check if var should be shown based on var_group selections
+          if (
+            varGroups &&
+            varGroups.length > 0 &&
+            !shouldShowVar(varDef.name, varGroups, varGroupSelections)
+          ) {
+            return; // Skip this var, it's hidden by var_group selection
+          }
+
+          if (isAdvancedVar(varDef, varGroups, varGroupSelections)) {
+            _advancedVars.push(varDef);
+          } else {
+            _requiredVars.push(varDef);
+          }
+        });
+      }
+
+      return { requiredVars: _requiredVars, advancedVars: _advancedVars };
+    }, [packageInfo.vars, varGroups, varGroupSelections, cloudConnectorVars, isEditPage]);
 
     // Outputs
     const {
@@ -133,14 +217,37 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     const advancedOptionsTitleId = useGeneratedHtmlId();
 
-    // Managed policy
+    // True only if the package policy itself is managed (e.g. Synthetics-created policies).
+    // Controls the read-only callout, readonly name/description fields, and hidden advanced toggle.
     const isManaged = packagePolicy.is_managed;
+
+    // Output is also disabled when any parent agent policy is managed (e.g. Elastic Cloud Agent Policy).
+    const isOutputDisabled = isManaged || agentPolicies?.some((p) => p.is_managed) === true;
+
+    const {
+      showToggle: showNamespaceCustomizationToggle,
+      currentNamespace,
+      isPrefixAllowed: isNamespacePrefixAllowed,
+      isToggleDisabled: isNamespaceCustomizationInputDisabled,
+      namespaceCustomizationEnabled,
+      showOptInImpactWarning,
+      showOptOutImpactWarning,
+      otherPoliciesCount,
+      handleToggleChange: handleNamespaceCustomizationToggleChange,
+    } = useNamespaceCustomization({
+      packageInfo,
+      namespace: packagePolicy.namespace,
+      onEnabledChange: onNamespaceCustomizationEnabledChange,
+      isManaged: !!isManaged,
+      packagePolicyId,
+    });
 
     return validationResults ? (
       <>
         {isManaged && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
@@ -234,11 +341,47 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               </EuiFormRow>
             </EuiFlexItem>
 
+            {/* Var Group Selectors */}
+            {varGroups?.map((varGroup) => (
+              <EuiFlexItem key={varGroup.name}>
+                <VarGroupSelector
+                  varGroup={varGroup}
+                  selectedOptionName={varGroupSelections[varGroup.name]}
+                  onSelectionChange={handleVarGroupSelectionChange}
+                  isAgentlessEnabled={isAgentlessSelected}
+                  disabled={isEditPage && isCloudConnectorSelected}
+                />
+              </EuiFlexItem>
+            ))}
+
+            {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
+            {isCloudConnectorSelected && cloudProvider && (
+              <EuiFlexItem>
+                <CloudConnectorSetup
+                  newPolicy={packagePolicy}
+                  packageInfo={packageInfo}
+                  updatePolicy={handleCloudConnectorUpdate}
+                  isEditPage={isEditPage}
+                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                  cloud={cloud}
+                  cloudProvider={cloudProvider}
+                  templateName={packageInfo.name}
+                  iacTemplateUrl={iacTemplateUrl}
+                  accountType={accountType}
+                />
+              </EuiFlexItem>
+            )}
+
             {/* Required vars */}
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
               if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
               const value = packagePolicy.vars[varName].value;
+              const requiredByVarGroup = isVarRequiredByVarGroup(
+                varName,
+                varGroups,
+                varGroupSelections
+              );
 
               return (
                 <EuiFlexItem key={varName}>
@@ -259,6 +402,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     errors={validationResults?.vars?.[varName] ?? []}
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
+                    isRequiredByVarGroup={requiredByVarGroup}
                   />
                 </EuiFlexItem>
               );
@@ -271,7 +415,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"
-                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                      iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                       flush="left"
                       aria-expanded={isShowingAdvanced}
@@ -326,15 +470,159 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     />
                   </EuiFlexItem>
 
+                  {showNamespaceCustomizationToggle && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          !currentNamespace
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledMissingNamespace',
+                                {
+                                  defaultMessage:
+                                    'Enter a namespace to enable namespace index templates.',
+                                }
+                              )
+                            : !isNamespacePrefixAllowed
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledPrefix',
+                                {
+                                  defaultMessage:
+                                    'This namespace does not match an allowed prefix for this space, so namespace index templates cannot be enabled.',
+                                }
+                              )
+                            : isManaged
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledManaged',
+                                {
+                                  defaultMessage:
+                                    'Namespace index templates cannot be enabled on a managed integration policy.',
+                                }
+                              )
+                            : undefined
+                        }
+                      >
+                        <EuiSwitch
+                          data-test-subj="packagePolicyNamespaceCustomizationToggle"
+                          label={i18n.translate(
+                            'xpack.fleet.createPackagePolicy.namespaceCustomization.label',
+                            { defaultMessage: 'Use dedicated index templates for this namespace' }
+                          )}
+                          checked={namespaceCustomizationEnabled}
+                          disabled={isNamespaceCustomizationInputDisabled}
+                          onChange={(e) =>
+                            handleNamespaceCustomizationToggleChange(e.target.checked)
+                          }
+                        />
+                      </EuiToolTip>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.namespaceCustomization.helpText"
+                          defaultMessage="Enables independent settings and mappings for this namespace's data streams. {learnMoreLink}"
+                          values={{
+                            learnMoreLink: (
+                              <EuiLink
+                                href={docLinks.links.fleet.datastreams}
+                                external={true}
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.namespaceCustomization.learnMoreLink"
+                                  defaultMessage="Learn more"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </EuiText>
+                      {showOptInImpactWarning && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            announceOnMount
+                            iconType="warning"
+                            color="warning"
+                            size="s"
+                            data-test-subj="packagePolicyNamespaceCustomizationOptInImpactWarning"
+                            title={i18n.translate(
+                              'xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactTitle',
+                              {
+                                defaultMessage:
+                                  'Enabling namespace index templates will affect {count, plural, one {# other policy} other {# other policies}}',
+                                values: { count: otherPoliciesCount },
+                              }
+                            )}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
+                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling them here will apply them to all of them."
+                              values={{
+                                packageTitle: packageInfo.title,
+                                namespace: <strong>{currentNamespace}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                        </>
+                      )}
+                      {showOptOutImpactWarning && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            announceOnMount
+                            iconType="warning"
+                            color="warning"
+                            size="s"
+                            data-test-subj="packagePolicyNamespaceCustomizationOptOutImpactWarning"
+                            title={i18n.translate(
+                              'xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactTitle',
+                              {
+                                defaultMessage:
+                                  'Disabling namespace index templates will affect {count, plural, one {# other policy} other {# other policies}}',
+                                values: { count: otherPoliciesCount },
+                              }
+                            )}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
+                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling them here will remove them from all of them."
+                              values={{
+                                packageTitle: packageInfo.title,
+                                namespace: <strong>{currentNamespace}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                        </>
+                      )}
+                    </EuiFlexItem>
+                  )}
+
                   {/* Output */}
                   {canUseOutputPerIntegration && (
                     <EuiFlexItem>
                       <EuiFormRow
                         label={
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInputLabel"
-                            defaultMessage="Output"
-                          />
+                          <>
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInputLabel"
+                              defaultMessage="Output"
+                            />
+                            {isOutputDisabled && (
+                              <>
+                                {' '}
+                                <EuiIconTip
+                                  type="question"
+                                  color="subdued"
+                                  content={
+                                    <FormattedMessage
+                                      id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputDisabledTooltip"
+                                      defaultMessage="Output cannot be modified because this integration is used by a managed agent policy."
+                                    />
+                                  }
+                                />
+                              </>
+                            )}
+                          </>
                         }
                         helpText={
                           <FormattedMessage
@@ -344,6 +632,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         }
                       >
                         <EuiSelect
+                          disabled={isOutputDisabled}
                           data-test-subj="packagePolicyOutputInput"
                           isLoading={isOutputsLoading}
                           options={[
@@ -451,6 +740,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const { name: varName, type: varType } = varDef;
                     if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
                     const value = packagePolicy.vars![varName].value;
+                    const requiredByVarGroup = isVarRequiredByVarGroup(
+                      varName,
+                      varGroups,
+                      varGroupSelections
+                    );
                     return (
                       <EuiFlexItem key={varName}>
                         <PackagePolicyInputVarField
@@ -470,10 +764,31 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           errors={validationResults?.vars?.[varName] ?? []}
                           forceShowErrors={submitAttempted}
                           isEditPage={isEditPage}
+                          isRequiredByVarGroup={requiredByVarGroup}
                         />
                       </EuiFlexItem>
                     );
                   })}
+                  {/* Integration-level condition — hidden for agentless and all-otelcol */}
+                  {!isAgentless && !allInputsAreOtel && (
+                    <EuiFlexItem>
+                      <PackagePolicyConditionField
+                        value={packagePolicy.condition ?? ''}
+                        onChange={(v) => updatePackagePolicy({ condition: v })}
+                        isInvalid={submitAttempted && Boolean(validationResults?.condition)}
+                        errors={validationResults?.condition ?? null}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {/* Custom fields — agentless only */}
+                  {isAgentlessSelected && (
+                    <EuiFlexItem>
+                      <PackagePolicyCustomFields
+                        packagePolicy={packagePolicy}
+                        updatePackagePolicy={updatePackagePolicy}
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             ) : null}

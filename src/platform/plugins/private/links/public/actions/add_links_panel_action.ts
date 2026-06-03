@@ -11,15 +11,16 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   apiPublishesDescription,
   apiPublishesTitle,
   apiPublishesSavedObjectId,
+  apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
-import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LinksEmbeddableState } from '../../common';
+import type { LinksEmbeddableState } from '../../common';
+import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
 import { getEditorFlyout } from '../editor/get_editor_flyout';
@@ -43,28 +44,24 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       core: coreServices,
       parentApi: embeddable,
       loadContent: async ({ closeFlyout }) => {
-        return await getEditorFlyout({
+        return getEditorFlyout({
           parentDashboard: embeddable,
           closeFlyout,
           onCompleteEdit: async (newState) => {
             if (!newState) return;
 
-            const { layout, links, savedObjectId } = newState;
+            const { layout, links, refId } = newState;
 
             function serializeState() {
-              if (savedObjectId !== undefined) {
+              if (refId !== undefined) {
                 return {
-                  rawState: {
-                    savedObjectId,
-                  },
+                  ref_id: refId,
                 };
               }
 
               return {
-                rawState: {
-                  layout,
-                  links: serializeResolvedLinks(links ?? []),
-                },
+                layout,
+                links: serializeResolvedLinks(links ?? []),
               };
             }
 
@@ -77,6 +74,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       },
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
+        isResizable: false,
       },
     });
   },

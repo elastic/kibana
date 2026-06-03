@@ -323,7 +323,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         id: searchInputId,
       }}
       isPreFiltered
-      listProps={{ onFocusBadge: false, rowHeight: 48 }}
+      listProps={{ onFocusBadge: false, rowHeight: 32, paddingSize: 's' }}
       loadingMessage={loadingMessage}
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
@@ -401,6 +401,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
             <>
               <EuiHorizontalRule margin="none" />
               <EuiCallOut
+                announceOnMount
                 title={
                   limitReachedMessage ? (
                     limitReachedMessage(limit)

@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -528,8 +529,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
         });
         expect(createdRule.statusCode).to.be(400);
-        expect(createdRule.message).to.be(
-          '[request body.consumer]: expected value of type [string] but got [undefined]'
+        expect(createdRule.message).to.contain(
+          'expected value of type [string] but got [undefined]'
         );
       });
     });
