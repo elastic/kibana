@@ -190,7 +190,6 @@ export interface CallKibanaApiParams {
    * event-chain headers, Content-Type) are managed by the engine and cannot be overridden.
    */
   headers?: Record<string, string>;
-  signal?: AbortSignal;
 }
 
 /**
