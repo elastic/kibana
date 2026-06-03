@@ -51,6 +51,9 @@ spaceTest.describe(
         });
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
+        const fieldsBefore = await pageObjects.discover.getDataGridRows();
+        expect(fieldsBefore.every((row) => row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(true);
+
         const filterBadge = page.testSubj.locator(
           `~filter & ~filter-key-${TEST_ANCHOR_FILTER_FIELD}`
         );
@@ -61,10 +64,8 @@ spaceTest.describe(
         await page.testSubj.click('negateFilter');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const dataRows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
-        const rowTexts = await dataRows.allInnerTexts();
-        const allMatchFilter = rowTexts.every((row) => row.includes(TEST_ANCHOR_FILTER_VALUE));
-        expect(allMatchFilter).toBe(false);
+        const fieldsAfter = await pageObjects.discover.getDataGridRows();
+        expect(fieldsAfter.every((row) => row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(false);
       }
     );
 

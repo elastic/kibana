@@ -84,6 +84,11 @@ spaceTest.describe(
             enabled: true,
           })
         ).toBe(true);
+
+        await page.testSubj.locator('euiFlyoutCloseButton').click();
+
+        const fields = await pageObjects.discover.getDataGridRows();
+        expect(fields.map((row) => row[2]).every((v) => v === TEST_ANCHOR_FILTER_VALUE)).toBe(true);
       }
     );
 
@@ -111,6 +116,11 @@ spaceTest.describe(
             enabled: false,
           })
         ).toBe(true);
+
+        const fields = await pageObjects.discover.getDataGridRows();
+        expect(fields.map((row) => row[2]).every((v) => v === TEST_ANCHOR_FILTER_VALUE)).toBe(
+          false
+        );
       }
     );
 
@@ -173,6 +183,8 @@ spaceTest.describe(
         await addFilterWithoutStrictCheck(page, 'extension', 'png');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
+        const filterBadges = page.testSubj.locator('^filter-badge');
+        await expect(filterBadges).toHaveCount(2);
         expect(
           await pageObjects.filterBar.hasFilter({
             field: TEST_ANCHOR_FILTER_FIELD,
@@ -184,10 +196,16 @@ spaceTest.describe(
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);
+
+        const fields = await pageObjects.discover.getDataGridRows();
+        expect(fields.every((row) => row[1] === 'png' && row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(
+          true
+        );
 
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
+        await expect(filterBadges).toHaveCount(2);
         expect(
           await pageObjects.filterBar.hasFilter({
             field: TEST_ANCHOR_FILTER_FIELD,
@@ -198,6 +216,11 @@ spaceTest.describe(
         ).toBe(true);
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
+        ).toBe(true);
+
+        const fieldsAfterRefresh = await pageObjects.discover.getDataGridRows();
+        expect(
+          fieldsAfterRefresh.every((row) => row[1] === 'png' && row[2] === TEST_ANCHOR_FILTER_VALUE)
         ).toBe(true);
       }
     );
@@ -214,10 +237,19 @@ spaceTest.describe(
 
         const filterBadges = page.testSubj.locator('^filter-badge');
         await expect(filterBadges).toHaveCount(1);
+        expect(
+          await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
+        ).toBe(true);
+
+        const fieldsWithFilter = await pageObjects.discover.getDataGridRows();
+        expect(fieldsWithFilter.every((row) => row[1] === 'png')).toBe(true);
 
         await page.goBack();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
         await expect(filterBadges).toHaveCount(0);
+
+        const fieldsWithoutFilter = await pageObjects.discover.getDataGridRows();
+        expect(fieldsWithoutFilter.every((row) => row[1] === 'png')).toBe(false);
 
         await page.goForward();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
@@ -226,6 +258,9 @@ spaceTest.describe(
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);
+
+        const fieldsRestored = await pageObjects.discover.getDataGridRows();
+        expect(fieldsRestored.every((row) => row[1] === 'png')).toBe(true);
       }
     );
   }

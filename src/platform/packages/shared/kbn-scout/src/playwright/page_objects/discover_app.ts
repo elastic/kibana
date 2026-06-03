@@ -475,6 +475,46 @@ export class DiscoverApp {
     return headers.join(',');
   }
 
+  /**
+   * Returns structured row data from the data grid, excluding control columns.
+   * Each inner array contains the visible text of each data cell in that row.
+   * When `isAnchorRow` is true, only the highlighted anchor row (context view) is returned.
+   */
+  async getDataGridRows(options?: { isAnchorRow?: boolean }): Promise<string[][]> {
+    const cellSelector = options?.isAnchorRow
+      ? '.euiDataGridRowCell.unifiedDataTable__cell--highlight'
+      : '.euiDataGridRowCell';
+
+    await this.page.locator(`${cellSelector} >> nth=0`).waitFor({
+      state: 'visible',
+      timeout: 30_000,
+    });
+
+    return this.page.evaluate((sel: string) => {
+      const cells = document.querySelectorAll(sel);
+      const rows: string[][] = [];
+      let rowIdx = -1;
+      let prevVisibleRowIndex = -1;
+
+      cells.forEach((cell) => {
+        const visibleRowIndex = Number(cell.getAttribute('data-gridcell-visible-row-index'));
+        if (prevVisibleRowIndex !== visibleRowIndex) {
+          rowIdx++;
+          rows[rowIdx] = [];
+          prevVisibleRowIndex = visibleRowIndex;
+        }
+        if (!cell.classList.contains('euiDataGridRowCell--controlColumn')) {
+          const content =
+            cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ??
+            (cell as HTMLElement);
+          rows[rowIdx].push(content.innerText.trim());
+        }
+      });
+
+      return rows;
+    }, cellSelector);
+  }
+
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
   }
