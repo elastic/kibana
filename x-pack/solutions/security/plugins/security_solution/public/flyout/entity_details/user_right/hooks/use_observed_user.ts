@@ -6,23 +6,21 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import deepmerge from 'deepmerge';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { inputsSelectors, sourcererSelectors, type inputsModel } from '../../../../common/store';
+import { type inputsModel, inputsSelectors } from '../../../../common/store';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import type { UserItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { isActiveTimeline } from '../../../../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { InspectResponse } from '../../../../types';
 import type {
-  EntityStoreRecord,
   EntityFromStoreResult,
+  EntityStoreRecord,
 } from '../../shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '..';
@@ -49,13 +47,7 @@ export const useObservedUser = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
   const useEntityStoreObservedData = Boolean(
     entityFromStore?.entityRecord ?? entityFromStore?.entity
@@ -67,7 +59,7 @@ export const useObservedUser = (
       startDate: from,
       userName,
       entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
-      indexNames: securityDefaultPatterns,
+      indexNames: indexPatterns,
       id: USER_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
     });
@@ -84,7 +76,7 @@ export const useObservedUser = (
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
     field: 'user.name',
     value: userName,
-    defaultIndex: securityDefaultPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     skip: useEntityStoreObservedData,
@@ -93,7 +85,7 @@ export const useObservedUser = (
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
     field: 'user.name',
     value: userName,
-    defaultIndex: securityDefaultPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     skip: useEntityStoreObservedData,
