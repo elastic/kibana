@@ -5,73 +5,65 @@
  * 2.0.
  */
 
-import { isBoom } from '@hapi/boom';
-import type { Logger } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
-import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import pLimit from 'p-limit';
-import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
-import { STREAMS_CONSUMER } from '../../../../../common/constants';
+import {
+  STREAMS_RULE_CONSUMER,
+  STREAMS_ESQL_RULE_TYPE_ID,
+  type CreateRuleBody,
+  type IRulesManagementClient,
+  type UpdateRuleBody,
+} from './rules/rules_management_client';
 import { TIMESTAMP } from '../fields';
 
 const RULE_INSTALL_CONCURRENCY = 10;
 const RULE_TAG = 'streams';
 const RULE_SCHEDULE_INTERVAL = '1m';
 
-export function toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
-  const { rule_id: ruleId, query } = queryLink;
-
+export function toCreateRuleBody(
+  queryLink: QueryLink,
+  definition: Streams.all.Definition
+): CreateRuleBody {
+  const { query } = queryLink;
   return {
-    data: {
-      name: query.title,
-      consumer: STREAMS_CONSUMER,
-      alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
-      actions: [],
-      params: {
-        timestampField: TIMESTAMP,
-        query: query.esql.query,
-      },
-      enabled: true,
-      tags: [RULE_TAG, definition.name],
-      schedule: {
-        interval: RULE_SCHEDULE_INTERVAL,
-      },
+    name: query.title,
+    consumer: STREAMS_RULE_CONSUMER,
+    alertTypeId: STREAMS_ESQL_RULE_TYPE_ID,
+    actions: [] as never[],
+    params: {
+      timestampField: TIMESTAMP,
+      query: query.esql.query,
     },
-    options: {
-      id: ruleId,
+    enabled: true,
+    tags: [RULE_TAG, definition.name],
+    schedule: {
+      interval: RULE_SCHEDULE_INTERVAL,
     },
   };
 }
 
-export function toUpdateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
-  const { rule_id: ruleId, query } = queryLink;
-
+export function toUpdateRuleBody(
+  queryLink: QueryLink,
+  definition: Streams.all.Definition
+): UpdateRuleBody {
+  const { query } = queryLink;
   return {
-    id: ruleId,
-    data: {
-      name: query.title,
-      actions: [],
-      params: {
-        timestampField: TIMESTAMP,
-        query: query.esql.query,
-      },
-      tags: [RULE_TAG, definition.name],
-      schedule: {
-        interval: RULE_SCHEDULE_INTERVAL,
-      },
+    name: query.title,
+    actions: [] as never[],
+    params: {
+      timestampField: TIMESTAMP,
+      query: query.esql.query,
+    },
+    tags: [RULE_TAG, definition.name],
+    schedule: {
+      interval: RULE_SCHEDULE_INTERVAL,
     },
   };
 }
 
-/**
- * Install (or update on 409 conflict) a set of backing rules. The 409 path
- * handles the case where a rule with the deterministic id already exists in
- * the rules SO index — we update in place rather than fail.
- */
 export async function installQueries(
-  rulesClient: RulesClient,
+  client: IRulesManagementClient,
   queriesToCreate: QueryLink[],
   queriesToUpdate: QueryLink[],
   definition: Streams.all.Definition
@@ -80,40 +72,16 @@ export async function installQueries(
 
   await Promise.all([
     ...queriesToCreate.map((queryLink) =>
-      limiter(() =>
-        rulesClient
-          .create<EsqlRuleParams>(toCreateRuleParams(queryLink, definition))
-          .catch((error) => {
-            if (isBoom(error) && error.output.statusCode === 409) {
-              return rulesClient.update<EsqlRuleParams>(toUpdateRuleParams(queryLink, definition));
-            }
-            throw error;
-          })
-      )
+      limiter(() => client.createRule(queryLink.rule_id, toCreateRuleBody(queryLink, definition)))
     ),
     ...queriesToUpdate.map((queryLink) =>
-      limiter(() =>
-        rulesClient
-          .update<EsqlRuleParams>(toUpdateRuleParams(queryLink, definition))
-          .catch((error) => {
-            if (isBoom(error) && error.output.statusCode === 404) {
-              return rulesClient.create<EsqlRuleParams>(toCreateRuleParams(queryLink, definition));
-            }
-            throw error;
-          })
-      )
+      limiter(() => client.updateRule(queryLink.rule_id, toUpdateRuleBody(queryLink, definition)))
     ),
   ]);
 }
 
-/**
- * Bulk-uninstall the backing rules for a set of query links. 400 errors from
- * `bulkDeleteRules` (typically: rule already gone) are logged and swallowed
- * — the storage tombstone will run regardless.
- */
 export async function uninstallQueries(
-  rulesClient: RulesClient,
-  logger: Logger,
+  client: IRulesManagementClient,
   queries: QueryLink[]
 ): Promise<void> {
   if (queries.length === 0) {
@@ -125,15 +93,5 @@ export async function uninstallQueries(
     return;
   }
 
-  await rulesClient
-    .bulkDeleteRules({ ids: ruleIds, ignoreInternalRuleTypes: false })
-    .catch((error) => {
-      if (isBoom(error) && error.output.statusCode === 400) {
-        logger.warn(
-          `bulkDeleteRules returned 400 for ${ruleIds.length} rule(s) — some rules may not have existed: ${error.message}`
-        );
-        return;
-      }
-      throw error;
-    });
+  await client.bulkDeleteRules(ruleIds);
 }

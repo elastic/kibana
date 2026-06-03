@@ -81,7 +81,11 @@ function makeClient(): {
   const deps: KnowledgeIndicatorClientDeps = {
     dataStreamClient,
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
-    rulesClient: {} as KnowledgeIndicatorClientDeps['rulesClient'],
+    rulesManagementClient: {
+      createRule: jest.fn().mockResolvedValue(undefined),
+      updateRule: jest.fn().mockResolvedValue(undefined),
+      bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    },
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
@@ -423,7 +427,11 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     const deps: KnowledgeIndicatorClientDeps = {
       dataStreamClient,
       esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
-      rulesClient: {} as KnowledgeIndicatorClientDeps['rulesClient'],
+      rulesManagementClient: {
+        createRule: jest.fn().mockResolvedValue(undefined),
+        updateRule: jest.fn().mockResolvedValue(undefined),
+        bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+      },
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
     };

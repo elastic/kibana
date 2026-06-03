@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { Feature, StreamQuery } from '@kbn/streams-schema';
+import type { IRulesManagementClient } from './rules/rules_management_client';
 import type { knowledgeIndicatorsMappings } from '../data_stream';
 import type { StoredKnowledgeIndicator } from '../data_stream';
 import type { KnowledgeIndicatorType } from '../fields';
@@ -45,7 +45,7 @@ export type KIBulkOperation =
 export interface KnowledgeIndicatorClientDeps {
   dataStreamClient: KnowledgeIndicatorDataStreamClient;
   esClient: ElasticsearchClient;
-  rulesClient: RulesClient;
+  rulesManagementClient: IRulesManagementClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
 }

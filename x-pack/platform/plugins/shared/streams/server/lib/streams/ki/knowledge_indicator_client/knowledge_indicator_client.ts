@@ -62,7 +62,7 @@ export class KnowledgeIndicatorClient {
       revisionReader
     );
     this.orchestrator = new QueryRuleOrchestrator(
-      deps.rulesClient,
+      deps.rulesManagementClient,
       deps.logger,
       isSignificantEventsEnabled,
       this.writer,

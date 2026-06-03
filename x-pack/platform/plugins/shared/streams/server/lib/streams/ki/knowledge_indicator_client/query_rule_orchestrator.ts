@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
@@ -14,12 +13,13 @@ import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
 import { KI_TYPE_QUERY } from '../fields';
 import type { KIBulkOperation } from './types';
+import type { IRulesManagementClient } from './rules/rules_management_client';
 import type { IndicatorWriter } from './indicator_writer';
 import type { IndicatorReader } from './indicator_reader';
 
 export class QueryRuleOrchestrator {
   constructor(
-    private readonly rulesClient: RulesClient,
+    private readonly rulesManagementClient: IRulesManagementClient,
     private readonly logger: Logger,
     private readonly isSignificantEventsEnabled: boolean,
     private readonly writer: IndicatorWriter,
@@ -98,12 +98,12 @@ export class QueryRuleOrchestrator {
     );
 
     try {
-      await installQueries(this.rulesClient, toCreate, toUpdate, definition);
+      await installQueries(this.rulesManagementClient, toCreate, toUpdate, definition);
     } catch (installError) {
       this.logger.error(
         `installQueries failed during syncQueries for stream "${stream}". Compensating by uninstalling created rules.`
       );
-      await uninstallQueries(this.rulesClient, this.logger, toCreate).catch((compensateError) => {
+      await uninstallQueries(this.rulesManagementClient, toCreate).catch((compensateError) => {
         this.logger.error(
           `Failed to compensate after installQueries failure for stream "${stream}": ${
             compensateError instanceof Error ? compensateError.message : String(compensateError)
@@ -116,7 +116,7 @@ export class QueryRuleOrchestrator {
     // Install succeeded — safe to remove stale and replaced rules now.
     // Doing this after install preserves monitoring coverage during ESQL-change
     // transitions: the old rule keeps firing until the new one is ready.
-    await uninstallQueries(this.rulesClient, this.logger, toUninstall);
+    await uninstallQueries(this.rulesManagementClient, toUninstall);
 
     // Append revisions for every next query and a tombstone for every
     // current link that's no longer in the input set.
@@ -144,7 +144,7 @@ export class QueryRuleOrchestrator {
       this.logger.error(
         `Storage append failed after rule install for stream "${stream}". Compensating by uninstalling new rules.`
       );
-      await uninstallQueries(this.rulesClient, this.logger, toCreate).catch((compensateError) => {
+      await uninstallQueries(this.rulesManagementClient, toCreate).catch((compensateError) => {
         this.logger.error(
           `Failed to compensate after bulk failure for stream "${stream}": ${
             compensateError instanceof Error ? compensateError.message : String(compensateError)
@@ -199,7 +199,7 @@ export class QueryRuleOrchestrator {
     }
 
     if (target.rule_backed) {
-      await uninstallQueries(this.rulesClient, this.logger, [target]);
+      await uninstallQueries(this.rulesManagementClient, [target]);
     }
     await this.writer.bulk(stream, [{ delete: { type: KI_TYPE_QUERY, id: queryId } }]);
   }
@@ -215,7 +215,7 @@ export class QueryRuleOrchestrator {
     const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap([streamName]);
     const ruleBacked = currentLinks.filter((link) => link.rule_backed);
     if (ruleBacked.length > 0) {
-      await uninstallQueries(this.rulesClient, this.logger, ruleBacked);
+      await uninstallQueries(this.rulesManagementClient, ruleBacked);
     }
     if (currentLinks.length === 0) {
       return;
@@ -261,7 +261,7 @@ export class QueryRuleOrchestrator {
       return { promoted: 0, skipped_stats: skippedStats.length };
     }
 
-    await installQueries(this.rulesClient, toPromote, [], definition);
+    await installQueries(this.rulesManagementClient, toPromote, [], definition);
 
     try {
       await this.writer.bulk(
@@ -280,7 +280,7 @@ export class QueryRuleOrchestrator {
       this.logger.error(
         `Storage append failed after installing rules for stream "${streamName}". Compensating by uninstalling.`
       );
-      await uninstallQueries(this.rulesClient, this.logger, toPromote).catch((uninstallError) => {
+      await uninstallQueries(this.rulesManagementClient, toPromote).catch((uninstallError) => {
         this.logger.error(
           `Failed to compensate — orphaned rules may remain for stream "${streamName}": ${
             uninstallError instanceof Error ? uninstallError.message : String(uninstallError)
@@ -358,7 +358,7 @@ export class QueryRuleOrchestrator {
       return { demoted: 0 };
     }
 
-    await uninstallQueries(this.rulesClient, this.logger, toDemote);
+    await uninstallQueries(this.rulesManagementClient, toDemote);
 
     await this.writer.bulk(
       streamName,
