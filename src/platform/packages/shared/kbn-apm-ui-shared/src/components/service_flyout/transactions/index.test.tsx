@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { LatencyAggregationType } from '@kbn/apm-types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
 
 const START = '2024-01-01T00:00:00.000Z';
@@ -46,7 +47,7 @@ const locators = {
   get: (id: string) => ({
     getRedirectUrl: () => `#mock-${id}`,
   }),
-};
+} as unknown as SharePluginStart['url']['locators'];
 
 const BASE_PROPS = {
   http,

@@ -12,6 +12,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { LatencyAggregationType } from '@kbn/apm-types';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
 
 export default {
@@ -88,7 +89,7 @@ const mockLocators = {
   get: (id: string) => ({
     getRedirectUrl: () => `#mock-${id}`,
   }),
-};
+} as unknown as SharePluginStart['url']['locators'];
 
 const BASE_PROPS = {
   serviceName: 'frontend-node',

@@ -20,6 +20,7 @@ import {
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TransactionGroup } from '../../transactions_table/types';
 import { TransactionsTable } from '../../transactions_table';
 import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
@@ -46,12 +47,6 @@ const MAX_GROUPS_TOOLTIP = (
   </EuiText>
 );
 
-interface LocatorClient {
-  get<P extends Record<string, unknown>>(
-    id: string
-  ): { getRedirectUrl(params: P): string } | undefined;
-}
-
 interface ServiceFlyoutTransactionsSectionProps {
   http: HttpStart;
   serviceName: string;
@@ -60,7 +55,7 @@ interface ServiceFlyoutTransactionsSectionProps {
   end: string;
   transactionType?: string;
   latencyAggregationType?: LatencyAggregationType;
-  locators?: LocatorClient;
+  locators?: SharePluginStart['url']['locators'];
 }
 
 export function ServiceFlyoutTransactionsSection({
