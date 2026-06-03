@@ -598,6 +598,11 @@ export class DashboardPageObject extends FtrService {
       if (saveOptions.saveAsNew) {
         await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
       } else {
+        if (typeof saveOptions.storeTimeWithDashboard === 'boolean' || saveOptions.tags) {
+          throw new Error(
+            `Unable to update settings with quick save. Call 'modifySettings' before calling 'saveDashboard'.`
+          );
+        }
         await this.clickQuickSave();
       }
 
