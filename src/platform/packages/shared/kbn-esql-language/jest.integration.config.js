@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setup } from './helpers';
-import { runColumnExistenceValidationSuite } from './column_existence_suite';
-
-runColumnExistenceValidationSuite(setup);
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-language'],
+};

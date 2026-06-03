@@ -8,6 +8,6 @@
  */
 
 import { setup } from './helpers';
-import { runColumnExistenceValidationSuite } from './column_existence_suite';
+import { runValidationParamsSuite } from './params_suite';
 
-runColumnExistenceValidationSuite(setup);
+runValidationParamsSuite(setup);
