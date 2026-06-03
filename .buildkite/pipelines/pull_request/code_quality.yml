@@ -1,6 +1,10 @@
 steps:
   - command: .buildkite/scripts/steps/code_quality/fallow_analysis.sh
     label: 'Code Quality Analysis'
+    env:
+      FALLOW_SAVE_SNAPSHOT: 'true'
+      KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      SLACK_NOTIFICATIONS_CHANNEL: '#search-code-quality-check-test'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
