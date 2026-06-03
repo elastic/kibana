@@ -58,15 +58,6 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }) => {
-<<<<<<< HEAD
-  registerAgentBuilderTools({
-    agentBuilder,
-    getScopedClients,
-    server,
-    logger,
-    telemetry,
-  });
-=======
   agentBuilder.attachments.registerType(
     createSignificantEventAttachmentType({
       logger: logger.get('significant_event_attachment'),
@@ -82,7 +73,6 @@ export const registerStreamsAgentBuilder = async ({
   );
 
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
->>>>>>> fdbc2dd858de ([Sig Events] Register Sig Event attachment type)
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
 
   const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
