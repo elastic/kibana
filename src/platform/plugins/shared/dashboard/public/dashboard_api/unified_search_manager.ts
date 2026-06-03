@@ -40,7 +40,7 @@ import {
 import { dataService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import type { DashboardCreationOptions } from './types';
+import type { DashboardApi, DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
@@ -51,6 +51,7 @@ export function initializeUnifiedSearchManager(
   timeRestore$: PublishingSubject<boolean>,
   waitForPanelsToLoad$: Observable<void>,
   getLastSavedState: () => DashboardState | undefined,
+  userActivity$: DashboardApi['userActivity$'],
   creationOptions?: DashboardCreationOptions
 ) {
   const {

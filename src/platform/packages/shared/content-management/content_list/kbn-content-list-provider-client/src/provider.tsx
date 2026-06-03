@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { SearchFilterConfig } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type {
   ContentEditorFeatureConfig,
@@ -27,6 +28,8 @@ import {
   MANAGED_USER_LABEL,
   NO_CREATOR_USER_LABEL,
   SENTINEL_KEYS,
+  TAG_FILTER_ID,
+  CREATED_BY_FILTER_ID,
 } from '@kbn/content-list-provider';
 import {
   SAVED_OBJECTS_PER_PAGE_ID,
@@ -49,20 +52,24 @@ import type { ItemDecorator } from './strategy';
 import { ProfilePrimeEffect } from './profile_prime_effect';
 import type { ContentEditorConfig } from './content_editor';
 import { useContentEditorOpen } from './content_editor';
+import { ClientStrategyContext } from './client_strategy_context';
+import type { ClientStrategyContextValue } from './client_strategy_context';
+import { defineContentListFilter, type ContentListFilterMap } from './filters';
+import type { ResolvedContentListFilter } from './filters';
+import { CustomFilterRenderer } from './custom_filter_renderer';
+import type { ContentListSortFieldMap } from './sorting';
+import { resolveSortFieldMap, toSortField } from './sorting';
 
 /**
- * Compute per-key item counts from the full item set.
- *
- * @param items - The item set to count.
- * @param keyFn - Extracts zero or more keys from a single item.
+ * Compute per-value item counts from the full item set.
  */
-const computeCounts = (
+const computeFilterCounts = (
   items: UserContentCommonSchema[],
-  keyFn: (item: UserContentCommonSchema) => string[]
+  filter: ResolvedContentListFilter
 ): Record<string, number> => {
   const counts: Record<string, number> = {};
   for (const item of items) {
-    for (const key of keyFn(item)) {
+    for (const key of filter.normalizeValues(item)) {
       counts[key] = (counts[key] ?? 0) + 1;
     }
   }
@@ -73,8 +80,21 @@ const computeCounts = (
 const tagKeys = (item: UserContentCommonSchema): string[] =>
   item.references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id) ?? [];
 
-/** Extract the creator key for an item, aligned with {@link getCreatorKey} in `strategy.ts`. */
-const createdByKeys = (item: UserContentCommonSchema): string[] => [getCreatorKey(item)];
+const EMPTY_SORT_FIELDS: ContentListSortFieldMap = {};
+const BUILT_IN_FILTER_IDS = new Set<string>([TAG_FILTER_ID, CREATED_BY_FILTER_ID]);
+
+const resolveFilterDimensions = (
+  filters: ContentListClientFeatures['filters'],
+  defaults: ContentListFilterMap
+): ContentListFilterMap => {
+  const merged = !filters
+    ? defaults
+    : typeof filters === 'function'
+    ? filters(defaults)
+    : { ...defaults, ...filters };
+
+  return Object.fromEntries(Object.values(merged).map((filter) => [filter.fieldName, filter]));
+};
 
 /**
  * Bridges React Query's `useFavorites()` data into the strategy's decorator
@@ -243,21 +263,6 @@ const ContentListClientProviderInner = ({
     core.uiSettings.get<number>(SAVED_OBJECTS_LISTING_LIMIT_ID)
   );
 
-  const { findItems, onInvalidate, onRefresh, getItems } = useMemo(
-    () =>
-      createClientStrategy(
-        tableListViewFindItems,
-        starredEnabled ? decorate : undefined,
-        listingLimit
-      ),
-    [tableListViewFindItems, starredEnabled, decorate, listingLimit]
-  );
-
-  const dataSource: DataSourceConfig = useMemo(
-    () => ({ findItems, onInvalidate, onRefresh, onFetchSuccess }),
-    [findItems, onInvalidate, onRefresh, onFetchSuccess]
-  );
-
   const tagsService = services?.tags;
   const userProfilesService = services?.userProfiles;
 
@@ -268,6 +273,105 @@ const ContentListClientProviderInner = ({
   }
   const profileCache = profileCacheRef.current;
 
+  const builtInFilters = useMemo((): ContentListFilterMap => {
+    const filters: ContentListFilterMap = {};
+
+    if (featuresProp.tags !== false && tagsService?.getTagList) {
+      filters[TAG_FILTER_ID] = defineContentListFilter({
+        id: TAG_FILTER_ID,
+        title: 'Tags',
+        getItemValue: tagKeys,
+      });
+    }
+
+    if (featuresProp.userProfiles !== false && userProfilesService && profileCache) {
+      filters[CREATED_BY_FILTER_ID] = defineContentListFilter({
+        id: CREATED_BY_FILTER_ID,
+        title: 'Created by',
+        getItemValue: getCreatorKey,
+      });
+    }
+
+    return filters;
+  }, [
+    featuresProp.tags,
+    featuresProp.userProfiles,
+    tagsService,
+    userProfilesService,
+    profileCache,
+  ]);
+
+  const filterDimensions = useMemo(
+    () => resolveFilterDimensions(featuresProp.filters, builtInFilters),
+    [builtInFilters, featuresProp.filters]
+  );
+
+  const customFilters = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(filterDimensions).filter(([id]) => !BUILT_IN_FILTER_IDS.has(id))
+      ),
+    [filterDimensions]
+  );
+
+  const sortingConfig = featuresProp.sorting;
+  const { sortingFeature, customSortFields } = useMemo<{
+    sortingFeature: ContentListFeatures['sorting'];
+    customSortFields: ContentListSortFieldMap;
+  }>(() => {
+    const sorting = sortingConfig;
+    if (sorting === false || typeof sorting !== 'object') {
+      return { sortingFeature: sorting, customSortFields: EMPTY_SORT_FIELDS };
+    }
+    const { fields: sortFields, ...baseSorting } = sorting;
+    if (!sortFields) {
+      return { sortingFeature: baseSorting, customSortFields: EMPTY_SORT_FIELDS };
+    }
+    const resolvedFields = resolveSortFieldMap(sortFields);
+    return {
+      customSortFields: resolvedFields,
+      sortingFeature: {
+        ...baseSorting,
+        fields: Object.values(resolvedFields).map(toSortField),
+      },
+    };
+  }, [sortingConfig]);
+
+  const filterDimensionsRef = useRef(filterDimensions);
+  useEffect(() => {
+    filterDimensionsRef.current = filterDimensions;
+  }, [filterDimensions]);
+
+  const customSortFieldsRef = useRef(customSortFields);
+  useEffect(() => {
+    customSortFieldsRef.current = customSortFields;
+  }, [customSortFields]);
+
+  const { findItems, onInvalidate, onRefresh, getItems, subscribe } = useMemo(
+    () =>
+      createClientStrategy(
+        tableListViewFindItems,
+        starredEnabled ? decorate : undefined,
+        listingLimit,
+        () => filterDimensionsRef.current,
+        () => customSortFieldsRef.current
+      ),
+    [tableListViewFindItems, starredEnabled, decorate, listingLimit]
+  );
+
+  const dataSource: DataSourceConfig = useMemo(
+    () => ({ findItems, onInvalidate, onRefresh, onFetchSuccess }),
+    [findItems, onInvalidate, onRefresh, onFetchSuccess]
+  );
+
+  const clientStrategyContext = useMemo<ClientStrategyContextValue>(
+    () => ({ getItemsSnapshot: getItems, subscribe, filters: filterDimensions }),
+    [getItems, subscribe, filterDimensions]
+  );
+
+  const tagFilter = filterDimensions[TAG_FILTER_ID];
+  const createdByFilter = filterDimensions[CREATED_BY_FILTER_ID];
+
   // Build `FilterFacetConfig<Tag>` for tags when the tags service is available
   // and the feature isn't explicitly disabled or already configured.
   const tagsFeature = useMemo((): ContentListFeatures['tags'] => {
@@ -277,15 +381,15 @@ const ContentListClientProviderInner = ({
     if (typeof featuresProp.tags === 'object') {
       return featuresProp.tags;
     }
-    if (!tagsService?.getTagList) {
+    if (!tagsService?.getTagList || !tagFilter) {
       return featuresProp.tags;
     }
 
     const { getTagList } = tagsService;
     const config: FilterFacetConfig<Tag> = {
       getFacets: async ({ filters }) => {
-        const narrowed = filterItems(getItems(), filters);
-        const tagCounts = computeCounts(narrowed, tagKeys);
+        const narrowed = filterItems(getItems(), filters, filterDimensions);
+        const tagCounts = computeFilterCounts(narrowed, tagFilter);
         const tags = getTagList();
         return tags.map((tag) => ({
           key: tag.id ?? tag.name,
@@ -296,7 +400,7 @@ const ContentListClientProviderInner = ({
       },
     };
     return config;
-  }, [featuresProp.tags, tagsService, getItems]);
+  }, [featuresProp.tags, tagsService, tagFilter, getItems, filterDimensions]);
 
   // Build `FilterFacetConfig<UserProfileEntry>` for user profiles when the
   // service is available and the feature isn't explicitly disabled or already
@@ -311,15 +415,15 @@ const ContentListClientProviderInner = ({
     if (typeof featuresProp.userProfiles === 'object') {
       return featuresProp.userProfiles;
     }
-    if (!userProfilesService || !profileCache) {
+    if (!userProfilesService || !profileCache || !createdByFilter) {
       return featuresProp.userProfiles;
     }
 
     const cache = profileCache;
     const config: FilterFacetConfig<UserProfileEntry> = {
       getFacets: async ({ filters }) => {
-        const narrowed = filterItems(getItems(), filters);
-        const userCounts = computeCounts(narrowed, createdByKeys);
+        const narrowed = filterItems(getItems(), filters, filterDimensions);
+        const userCounts = computeFilterCounts(narrowed, createdByFilter);
         const allKeys = Object.keys(userCounts);
         if (allKeys.length === 0) {
           return [];
@@ -359,7 +463,14 @@ const ContentListClientProviderInner = ({
       },
     };
     return config;
-  }, [featuresProp.userProfiles, userProfilesService, profileCache, getItems]);
+  }, [
+    featuresProp.userProfiles,
+    userProfilesService,
+    profileCache,
+    createdByFilter,
+    getItems,
+    filterDimensions,
+  ]);
 
   // Read page size from uiSettings once at mount. Not reactive — page size
   // setting changes during a session are not expected to take effect until reload.
@@ -404,13 +515,29 @@ const ContentListClientProviderInner = ({
   // `{ open }` shape (or drop it). Every other field passes through unchanged.
   const features: ContentListFeatures = useMemo(() => {
     const baseContentEditor: ContentEditorFeatureConfig | undefined = open ? { open } : undefined;
+    const { filters: _filters, sorting: _sorting, ...baseFeatures } = featuresProp;
+    const toolbarFilters: Record<string, SearchFilterConfig> = Object.fromEntries(
+      Object.values(customFilters).map((filter) => [
+        filter.id,
+        {
+          type: 'custom_component' as const,
+          component: (props) => <CustomFilterRenderer {...props} filterDefinition={filter} />,
+        },
+      ])
+    );
     return {
-      ...featuresProp,
+      ...baseFeatures,
+      sorting: sortingFeature,
+      fields: [
+        ...(featuresProp.fields ?? []),
+        ...Object.values(customFilters).map((filter) => filter.toFieldDefinition()),
+      ],
+      toolbarFilters,
       tags: tagsFeature,
       userProfiles: userProfilesFeature,
       contentEditor: baseContentEditor,
     };
-  }, [featuresProp, tagsFeature, userProfilesFeature, open]);
+  }, [featuresProp, customFilters, sortingFeature, tagsFeature, userProfilesFeature, open]);
 
   // Merge: explicit pagination: false > explicit initialPageSize > uiSettings > base default.
   const resolvedFeatures = useMemo<ContentListFeatures>(() => {
@@ -436,18 +563,20 @@ const ContentListClientProviderInner = ({
   }, [features, uiSettingsPageSize]);
 
   return (
-    <ContentListProvider
-      dataSource={dataSource}
-      features={resolvedFeatures}
-      services={services}
-      profileCache={profileCache}
-      item={itemConfigProp}
-      {...rest}
-      queryKeyScope={queryKeyScope}
-    >
-      {starredEnabled && <FavoritesSyncEffect favoriteIdsRef={favoriteIdsRef} />}
-      {profileCache && <ProfilePrimeEffect getItems={getItems} />}
-      {children}
-    </ContentListProvider>
+    <ClientStrategyContext.Provider value={clientStrategyContext}>
+      <ContentListProvider
+        dataSource={dataSource}
+        features={resolvedFeatures}
+        services={services}
+        profileCache={profileCache}
+        item={itemConfigProp}
+        {...rest}
+        queryKeyScope={queryKeyScope}
+      >
+        {starredEnabled && <FavoritesSyncEffect favoriteIdsRef={favoriteIdsRef} />}
+        {profileCache && <ProfilePrimeEffect getItems={getItems} />}
+        {children}
+      </ContentListProvider>
+    </ClientStrategyContext.Provider>
   );
 };
