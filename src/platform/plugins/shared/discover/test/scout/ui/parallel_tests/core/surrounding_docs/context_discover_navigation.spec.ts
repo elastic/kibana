@@ -7,12 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
 
 const TEST_COLUMN_NAMES = ['@message'];
-const TEST_FILTER_FIELD = 'extension.raw';
-const TEST_FILTER_VALUE = 'jpg';
+const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
+  ['extension.raw', 'jpg'],
+  ['geo.src', 'IN'],
+];
+
+async function addFilterWithoutStrictCheck(page: ScoutPage, field: string, value: string) {
+  await page.testSubj.click('addFilter');
+  await page.testSubj.waitForSelector('addFilterPopover');
+  await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', field);
+  await page.click(`.euiComboBoxOption[title="${field}"]`);
+  await expect(page.testSubj.locator('filterOperatorList')).not.toHaveClass(
+    /euiComboBox-isDisabled/
+  );
+  await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'is');
+  await page.click('.euiComboBoxOption[title="is"]');
+  const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
+  await expect(filterParamsInput).toBeEditable();
+  await filterParamsInput.focus();
+  await page.typeWithDelay('[data-test-subj="filterParams"] input', value);
+  await page.testSubj.click('saveFilter');
+  await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
+}
+
+async function addAllFilters(page: ScoutPage) {
+  for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+    await addFilterWithoutStrictCheck(page, field, value);
+  }
+}
 
 spaceTest.describe(
   'Discover context - navigation from Discover',
@@ -78,30 +105,24 @@ spaceTest.describe(
 
     spaceTest(
       'should open context view with filters disabled',
-      async ({ browserAuth, pageObjects }) => {
+      async ({ browserAuth, page, pageObjects }) => {
         await browserAuth.loginAsViewer();
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await pageObjects.filterBar.addFilter({
-          field: TEST_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_FILTER_VALUE,
-        });
+        await addAllFilters(page);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
         await pageObjects.contextPage.clickRowAction(1);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_FILTER_FIELD,
-            value: TEST_FILTER_VALUE,
-            enabled: false,
-          })
-        ).toBe(true);
+        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: false })).toBe(
+            true
+          );
+        }
       }
     );
 

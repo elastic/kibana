@@ -7,11 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
 
-const TEST_FILTER_FIELD = 'extension';
-const TEST_FILTER_VALUE = 'jpg';
+const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
+  [
+    'agent',
+    'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
+  ],
+  ['extension', 'jpg'],
+];
+
+async function addFilterWithoutStrictCheck(page: ScoutPage, field: string, value: string) {
+  await page.testSubj.click('addFilter');
+  await page.testSubj.waitForSelector('addFilterPopover');
+  await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', field);
+  await page.click(`.euiComboBoxOption[title="${field}"]`);
+  await expect(page.testSubj.locator('filterOperatorList')).not.toHaveClass(
+    /euiComboBox-isDisabled/
+  );
+  await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'is');
+  await page.click('.euiComboBoxOption[title="is"]');
+  const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
+  await expect(filterParamsInput).toBeEditable();
+  await filterParamsInput.focus();
+  await page.typeWithDelay('[data-test-subj="filterParams"] input', value);
+  await page.testSubj.click('saveFilter');
+  await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
+}
+
+async function addAllFilters(page: ScoutPage) {
+  for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+    await addFilterWithoutStrictCheck(page, field, value);
+  }
+}
 
 spaceTest.describe(
   'Discover context - back navigation',
@@ -36,11 +66,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await pageObjects.filterBar.addFilter({
-          field: TEST_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_FILTER_VALUE,
-        });
+        await addAllFilters(page);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         const initialHitCount = await pageObjects.discover.getHitCountInt();
@@ -70,11 +96,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await pageObjects.filterBar.addFilter({
-          field: TEST_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_FILTER_VALUE,
-        });
+        await addAllFilters(page);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
@@ -85,13 +107,9 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_FILTER_FIELD,
-            value: TEST_FILTER_VALUE,
-            enabled: true,
-          })
-        ).toBe(true);
+        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
+        }
       }
     );
 
@@ -103,11 +121,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await pageObjects.filterBar.addFilter({
-          field: TEST_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_FILTER_VALUE,
-        });
+        await addAllFilters(page);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
@@ -121,13 +135,9 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_FILTER_FIELD,
-            value: TEST_FILTER_VALUE,
-            enabled: true,
-          })
-        ).toBe(true);
+        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
+        }
       }
     );
 
@@ -139,11 +149,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await pageObjects.filterBar.addFilter({
-          field: TEST_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_FILTER_VALUE,
-        });
+        await addAllFilters(page);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
@@ -153,13 +159,9 @@ spaceTest.describe(
         await page.testSubj.click('~breadcrumb & ~first');
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_FILTER_FIELD,
-            value: TEST_FILTER_VALUE,
-            enabled: true,
-          })
-        ).toBe(true);
+        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
+        }
       }
     );
   }
