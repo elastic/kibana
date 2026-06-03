@@ -68,7 +68,7 @@ describe('persistenceLoop', () => {
 
   it('passes the task abort signal to workflow log flushes', async () => {
     const abortController = new AbortController();
-    const params = makeParams({ status: ExecutionStatus.RUNNING });
+    const params = makeParams({ isExecuting: true });
 
     const loopPromise = persistenceLoop(params, abortController.signal);
 
