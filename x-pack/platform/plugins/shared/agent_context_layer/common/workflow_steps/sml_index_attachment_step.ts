@@ -22,15 +22,53 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
  */
 export const SmlIndexAttachmentStepTypeId = 'agentContextLayer.smlIndexAttachment';
 
+// Per-field upper bounds. Values are conservative: identifier-like fields
+// stay well below the 32 KB Elasticsearch keyword limit, and `content` /
+// `description` (indexed as `semantic_text`) cap at 50 KB / 8 KB — already
+// far past the ~512-token window the embedding model truncates to. These
+// bounds exist primarily to harden the public input surface against
+// pathological payloads (CodeQL DoS rule), not to reflect storage limits.
+const MAX_SML_IDENTIFIER_LENGTH = 256;
+const MAX_SML_TITLE_LENGTH = 1024;
+const MAX_SML_DESCRIPTION_LENGTH = 8192;
+const MAX_SML_CONTENT_LENGTH = 50_000;
+const MAX_SML_REFERENCES = 100;
+const MAX_SML_PERMISSIONS = 100;
+
 const ChunkSchema = z.object({
-  type: z.string().min(1).describe('Chunk type (e.g., "visualization", "dashboard").'),
-  title: z.string().min(1).describe('Display title for the chunk.'),
-  content: z.string().min(1).describe('Searchable content (indexed as semantic_text).'),
-  description: z.string().optional().describe('Optional longer summary indexed as semantic_text.'),
-  user_id: z.string().optional().describe('Optional owner/last-modifier user id.'),
-  references: z.array(z.string()).optional().describe('Optional list of referenced SML chunk ids.'),
+  type: z
+    .string()
+    .min(1)
+    .max(MAX_SML_IDENTIFIER_LENGTH)
+    .describe('Chunk type (e.g., "visualization", "dashboard").'),
+  title: z
+    .string()
+    .min(1)
+    .max(MAX_SML_TITLE_LENGTH)
+    .describe('Display title for the chunk.'),
+  content: z
+    .string()
+    .min(1)
+    .max(MAX_SML_CONTENT_LENGTH)
+    .describe('Searchable content (indexed as semantic_text).'),
+  description: z
+    .string()
+    .max(MAX_SML_DESCRIPTION_LENGTH)
+    .optional()
+    .describe('Optional longer summary indexed as semantic_text.'),
+  user_id: z
+    .string()
+    .max(MAX_SML_IDENTIFIER_LENGTH)
+    .optional()
+    .describe('Optional owner/last-modifier user id.'),
+  references: z
+    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
+    .max(MAX_SML_REFERENCES)
+    .optional()
+    .describe('Optional list of referenced SML chunk ids.'),
   permissions: z
-    .array(z.string())
+    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
+    .max(MAX_SML_PERMISSIONS)
     .optional()
     .describe('Optional Kibana privilege strings required to view the chunk later.'),
 });
@@ -59,23 +97,28 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
     originId: z
       .string()
       .min(1)
+      .max(MAX_SML_IDENTIFIER_LENGTH)
       .describe('Stable identifier for the source object (e.g., saved object id).'),
-    attachmentType: z.string().min(1).describe('SML attachment type id (chunk namespace).'),
+    attachmentType: z
+      .string()
+      .min(1)
+      .max(MAX_SML_IDENTIFIER_LENGTH)
+      .describe('SML attachment type id (chunk namespace).'),
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
   }),
   z.object({
-    originId: z.string().min(1),
-    attachmentType: z.string().min(1),
+    originId: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
+    attachmentType: z.string().min(1).max(MAX_SML_IDENTIFIER_LENGTH),
     action: z.literal('delete'),
   }),
 ]);
 
 export const SmlIndexAttachmentOutputSchema = z.object({
-  originId: z.string(),
-  attachmentType: z.string(),
+  originId: z.string().max(MAX_SML_IDENTIFIER_LENGTH),
+  attachmentType: z.string().max(MAX_SML_IDENTIFIER_LENGTH),
   action: z.enum(['upsert', 'delete']),
-  spaceId: z.string(),
+  spaceId: z.string().max(MAX_SML_IDENTIFIER_LENGTH),
   /**
    * Number of chunks the workflow asked the step to index. Reflects the
    * caller-supplied `chunks.length` (0 for `delete`), not the count of
