@@ -173,8 +173,9 @@ export const GraphStreamsDemoPage = () => {
 
   // ---- preset / graph state ----
   const [selectedPresetId, setSelectedPresetId] = useState<string>(GRAPH_PRESETS[0].id);
+  const [selectedDocIdx, setSelectedDocIdx] = useState(0);
   const [docText, setDocText] = useState<string>(() =>
-    JSON.stringify(GRAPH_PRESETS[0].sampleDocument, null, 2)
+    JSON.stringify(GRAPH_PRESETS[0].sampleDocuments[0].document, null, 2)
   );
 
   // ---- route test state ----
@@ -194,7 +195,10 @@ export const GraphStreamsDemoPage = () => {
     const id = e.target.value;
     setSelectedPresetId(id);
     const preset = GRAPH_PRESETS.find((p) => p.id === id);
-    if (preset) setDocText(JSON.stringify(preset.sampleDocument, null, 2));
+    if (preset) {
+      setSelectedDocIdx(0);
+      setDocText(JSON.stringify(preset.sampleDocuments[0].document, null, 2));
+    }
     setRouteTestResult(null);
   }, []);
 
@@ -396,11 +400,30 @@ export const GraphStreamsDemoPage = () => {
             <p>
               {i18n.translate('xpack.streams.graphDemo.routeTestHint', {
                 defaultMessage:
-                  'Edit the sample document and click "Test route" to see which node it lands in. ' +
+                  'Pick a sample document, edit if needed, then click "Test route". ' +
                   'Uses ES cluster-level simulate ingest — no data is persisted.',
               })}
             </p>
           </EuiText>
+          <EuiSpacer size="s" />
+          {/* Sample document picker */}
+          <EuiFlexGroup gutterSize="s" wrap>
+            {selectedPreset.sampleDocuments.map((doc, idx) => (
+              <EuiFlexItem key={idx} grow={false}>
+                <EuiButton
+                  size="s"
+                  fill={selectedDocIdx === idx}
+                  onClick={() => {
+                    setSelectedDocIdx(idx);
+                    setDocText(JSON.stringify(doc.document, null, 2));
+                    setRouteTestResult(null);
+                  }}
+                >
+                  {doc.label}
+                </EuiButton>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate('xpack.streams.graphDemo.entrySourceLabel', {
@@ -411,7 +434,7 @@ export const GraphStreamsDemoPage = () => {
           >
             <EuiTextArea
               fullWidth
-              rows={10}
+              rows={8}
               value={docText}
               onChange={(e) => setDocText(e.target.value)}
               style={{ fontFamily: 'monospace', fontSize: 12 }}

@@ -26,6 +26,12 @@ export interface GraphDsl {
   routing: GraphDslEdge[];
 }
 
+export interface SampleDocument {
+  /** Short label shown on the button, e.g. "monitoring → platform logs" */
+  label: string;
+  document: Record<string, unknown>;
+}
+
 export interface GraphPreset {
   id: string;
   label: string;
@@ -33,7 +39,8 @@ export interface GraphPreset {
   topology: GraphDsl;
   /** ID of the entry source node (where the sample doc is submitted). */
   entrySource: string;
-  sampleDocument: Record<string, unknown>;
+  /** Up to 3 sample docs that exercise different paths through the topology. */
+  sampleDocuments: SampleDocument[];
 }
 
 // ---------------------------------------------------------------------------
@@ -313,13 +320,37 @@ export const GRAPH_PRESETS: GraphPreset[] = [
       'Non-Kubernetes docs are retained in the intake stream.',
     topology: k8sTopology,
     entrySource: 'k8s_otlp_in',
-    sampleDocument: {
-      '@timestamp': '2026-06-02T10:00:00Z',
-      'body.message': '2026-06-02T10:00:00Z INFO Pod started successfully',
-      'resource.attributes.k8s.namespace.name': 'monitoring',
-      'resource.attributes.k8s.pod.name': 'prometheus-0',
-      'resource.attributes.service.name': 'prometheus',
-    },
+    sampleDocuments: [
+      {
+        label: 'monitoring ns → k8s_platform_logs',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'body.message': '2026-06-03T10:00:00Z INFO Prometheus scrape complete',
+          'resource.attributes.k8s.namespace.name': 'monitoring',
+          'resource.attributes.k8s.pod.name': 'prometheus-0',
+          'resource.attributes.service.name': 'prometheus',
+        },
+      },
+      {
+        label: 'kube-system ns → k8s_system_logs',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'body.message': '2026-06-03T10:00:00Z WARN Node memory pressure detected',
+          'resource.attributes.k8s.namespace.name': 'kube-system',
+          'resource.attributes.k8s.pod.name': 'kube-proxy-xj7k2',
+          'resource.attributes.service.name': 'kube-proxy',
+        },
+      },
+      {
+        label: 'no namespace → retained in k8s_otlp_in',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'body.message': '2026-06-03T10:00:00Z INFO VM metrics collected',
+          'resource.attributes.service.name': 'node-exporter',
+          'resource.attributes.host.name': 'bare-metal-01',
+        },
+      },
+    ],
   },
   {
     id: 'ecommerce',
@@ -329,32 +360,87 @@ export const GRAPH_PRESETS: GraphPreset[] = [
       'Payment events go through a redaction pipeline before landing in the PCI index (365-day retention).',
     topology: ecommerceTopology,
     entrySource: 'orders_otlp_in',
-    sampleDocument: {
-      '@timestamp': '2026-06-02T10:00:00Z',
-      'resource.attributes.service.name': 'orders-service',
-      'attributes.event_type': 'payment',
-      'attributes.order_id': 'ord-9182',
-      'attributes.amount': 149.99,
-      'attributes.card_number': '4111-1111-1111-1111',
-    },
+    sampleDocuments: [
+      {
+        label: 'payment → payment_pci_logs (2 hops)',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'resource.attributes.service.name': 'orders-service',
+          'attributes.event_type': 'payment',
+          'attributes.order_id': 'ord-9182',
+          'attributes.amount': 149.99,
+          'attributes.card_number': '4111-1111-1111-1111',
+        },
+      },
+      {
+        label: 'fulfillment → fulfillment_logs',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'resource.attributes.service.name': 'orders-service',
+          'attributes.event_type': 'fulfillment',
+          'attributes.order_id': 'ord-9182',
+          'attributes.warehouse': 'us-east-2',
+        },
+      },
+      {
+        label: 'non-orders service → retained in orders_otlp_in',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'resource.attributes.service.name': 'web-frontend',
+          'attributes.event_type': 'page_view',
+          'attributes.path': '/checkout',
+        },
+      },
+    ],
   },
   {
     id: 'firewall',
     label: 'Multi-vendor firewall / SIEM',
     description:
       'Parses syslog from three firewall vendors and routes critical-severity events to a shared ' +
-      'SIEM alert index (2-year retention). All other events go to vendor-specific indices.',
+      'SIEM alert index (730-day retention). All other events go to vendor-specific indices.',
     topology: firewallTopology,
     entrySource: 'firewall_syslog_in',
-    sampleDocument: {
-      '@timestamp': '2026-06-02T10:00:00Z',
-      'resource.attributes.vendor': 'paloalto',
-      'attributes.severity': 'critical',
-      'attributes.src_ip': '203.0.113.42',
-      'attributes.dst_ip': '10.0.0.5',
-      'attributes.action': 'block',
-      'body.message': '2026-06-02T10:00:00,paloalto,THREAT,critical,203.0.113.42,10.0.0.5',
-    },
+    sampleDocuments: [
+      {
+        label: 'PaloAlto critical → siem_high_severity_alerts',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'resource.attributes.vendor': 'paloalto',
+          'attributes.severity': 'critical',
+          'attributes.src_ip': '203.0.113.42',
+          'attributes.dst_ip': '10.0.0.5',
+          'attributes.action': 'block',
+          'body.message': '2026-06-03T10:00:00,paloalto,THREAT,critical,203.0.113.42,10.0.0.5',
+        },
+      },
+      {
+        label: 'Checkpoint → checkpoint_firewall_logs',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'resource.attributes.vendor': 'checkpoint',
+          'attributes.severity': 'info',
+          'attributes.src_ip': '10.1.2.3',
+          'attributes.dst_ip': '8.8.8.8',
+          'attributes.action': 'accept',
+          'body.message':
+            '2026-06-03T10:00:00 fw-cp-01 accept src=10.1.2.3 dst=8.8.8.8 severity=info',
+        },
+      },
+      {
+        label: 'Fortinet → fortinet_firewall_logs',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'resource.attributes.vendor': 'fortinet',
+          'attributes.severity': 'warning',
+          'attributes.src_ip': '172.16.0.10',
+          'attributes.dst_ip': '1.1.1.1',
+          'attributes.action': 'deny',
+          'body.message':
+            'date=2026-06-03 time=10:00:00 devname=FGT60F level=warning action=deny srcip=172.16.0.10 dstip=1.1.1.1',
+        },
+      },
+    ],
   },
   {
     id: 'security',
@@ -364,12 +450,27 @@ export const GRAPH_PRESETS: GraphPreset[] = [
       'Demonstrates sequential multi-stage processing before a routing decision.',
     topology: securityTopology,
     entrySource: 'raw_syslog_in',
-    sampleDocument: {
-      '@timestamp': '2026-06-03T10:00:00Z',
-      'body.message':
-        'Jun  3 10:00:01 prod-firewall-01 sshd[1234]: Failed password for root from 185.220.101.42 port 54321',
-      'resource.attributes.host.name': 'prod-firewall-01',
-      'resource.attributes.service.name': 'syslog',
-    },
+    sampleDocuments: [
+      {
+        label: 'prod-firewall-01 → siem_critical (all 4 stages)',
+        document: {
+          '@timestamp': '2026-06-03T10:00:00Z',
+          'body.message':
+            'Jun  3 10:00:01 prod-firewall-01 sshd[1234]: Failed password for root from 185.220.101.42 port 54321',
+          'resource.attributes.host.name': 'prod-firewall-01',
+          'resource.attributes.service.name': 'syslog',
+        },
+      },
+      {
+        label: 'backup-firewall-02 → siem_archive (all 4 stages)',
+        document: {
+          '@timestamp': '2026-06-03T10:01:00Z',
+          'body.message':
+            'Jun  3 10:01:00 backup-firewall-02 sshd[5678]: Accepted publickey for deploy from 10.0.1.5 port 22',
+          'resource.attributes.host.name': 'backup-firewall-02',
+          'resource.attributes.service.name': 'syslog',
+        },
+      },
+    ],
   },
 ];
