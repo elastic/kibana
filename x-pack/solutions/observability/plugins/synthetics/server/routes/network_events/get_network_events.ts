@@ -17,7 +17,7 @@ export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
     query: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
-      remoteName: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async ({ syntheticsEsClient, request }): Promise<any> => {
