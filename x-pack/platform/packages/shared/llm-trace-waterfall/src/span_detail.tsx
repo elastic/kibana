@@ -135,14 +135,19 @@ const AttrTable: React.FC<{ attrs: Record<string, unknown> }> = ({ attrs }) => (
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={strValue}>
                     {(copy) => (
-                      <EuiButtonIcon
-                        iconType="copy"
-                        aria-label={i18n.getCopyAttributeAriaLabel(key)}
-                        onClick={copy}
-                        size="xs"
-                        color="text"
-                        style={{ opacity: 0.4 }}
-                      />
+                      <EuiToolTip
+                        content={i18n.getCopyAttributeAriaLabel(key)}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="copy"
+                          aria-label={i18n.getCopyAttributeAriaLabel(key)}
+                          onClick={copy}
+                          size="xs"
+                          color="text"
+                          style={{ opacity: 0.4 }}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiCopy>
                 </EuiFlexItem>
@@ -195,12 +200,14 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, onClose, useTabs =
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={i18n.CLOSE_DETAIL_ARIA}
-            onClick={onClose}
-            size="s"
-          />
+          <EuiToolTip content={i18n.CLOSE_DETAIL_ARIA} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={i18n.CLOSE_DETAIL_ARIA}
+              onClick={onClose}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -239,13 +246,15 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, onClose, useTabs =
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={span.span_id}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                aria-label={i18n.COPY_SPAN_ID_ARIA}
-                onClick={copy}
-                size="xs"
-                color="text"
-              />
+              <EuiToolTip content={i18n.COPY_SPAN_ID_ARIA} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copy"
+                  aria-label={i18n.COPY_SPAN_ID_ARIA}
+                  onClick={copy}
+                  size="xs"
+                  color="text"
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>
         </EuiFlexItem>

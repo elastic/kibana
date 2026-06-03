@@ -24,9 +24,7 @@ interface AgentBuilderSpanProcessorOpts {
  * Built-in agent IDs are kept in plain text; user-owned IDs are hashed
  * using the same scheme as EBT telemetry (SHA-256, 16-char hex prefix).
  */
-function hashSensitiveAttributes(
-  attributes: Record<string, unknown>
-): Record<string, unknown> {
+function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<string, unknown> {
   const result = { ...attributes };
 
   const agentId = result[GenAISemanticConventions.GenAIAgentId];
