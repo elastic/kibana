@@ -544,7 +544,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          selector: 'trustedDevices-form-fieldSelect',
+          selector: 'trustedDevices-form-entry0fieldSelect',
         },
         {
           type: 'click',
@@ -552,7 +552,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'input',
-          selector: 'trustedDevices-form-valueField',
+          selector: 'trustedDevices-form-entry0valueField',
           value: 'test-host',
         },
       ],
@@ -585,11 +585,11 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'clear',
-          selector: 'trustedDevices-form-valueField',
+          selector: 'trustedDevices-form-entry0valueField',
         },
         {
           type: 'input',
-          selector: 'trustedDevices-form-valueField',
+          selector: 'trustedDevices-form-entry0valueField',
           value: 'updated-host',
         },
       ],
