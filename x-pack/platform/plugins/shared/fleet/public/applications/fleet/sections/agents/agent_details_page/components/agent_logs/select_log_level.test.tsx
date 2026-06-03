@@ -118,6 +118,8 @@ describe('SelectLogLevel', () => {
       target: { value: 'debug' },
     });
 
+    fireEvent.click(result.getByTestId('applyLogLevelBtn'));
+
     await waitFor(() => {
       expect(mockSendPostAgentAction).toHaveBeenCalledTimes(1);
       expect(mockSendPostAgentAction).toHaveBeenCalledWith('agent1', {
