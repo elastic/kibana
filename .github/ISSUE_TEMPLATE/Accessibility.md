@@ -44,8 +44,7 @@ Provide a concise description of the accessibility issue:
 
 **WCAG criterion (if known)**
 <!--
-Optional. If you are familiar with WCAG, include the relevant WCAG 2.2 success criterion.
-If you are unsure, leave this section unchanged and the Accessibility team can triage it.
+Optional. If you are familiar with WCAG, include the relevant WCAG 2.2 success criterion. If you are unsure, leave this section unchanged and the Accessibility team can triage it.
 -->
 
 - [Understanding SC #.#.# Criterion Name](https://www.w3.org/WAI/WCAG22/Understanding/<criterion-slug>.html)
