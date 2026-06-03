@@ -275,6 +275,59 @@ describe('convert', () => {
     ).not.toHaveProperty('required');
   });
 
+  test('does not require nullable fields that are optional at runtime', () => {
+    const type = schema.object({
+      str: schema.string(),
+      nullableStr: schema.nullable(schema.string()),
+    });
+
+    expect(convert(type)).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          str: {
+            type: 'string',
+          },
+          nullableStr: {
+            default: null,
+            nullable: true,
+            type: 'string',
+          },
+        },
+        required: ['str'],
+        type: 'object',
+      },
+      shared: {},
+    });
+  });
+
+  test('ignores inner defaultValue when converting schema.nullable', () => {
+    expect(
+      convert(
+        schema.object({
+          nullableStr: schema.nullable(
+            schema.string({
+              defaultValue: 'ignored',
+            })
+          ),
+        })
+      )
+    ).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          nullableStr: {
+            default: null,
+            nullable: true,
+            type: 'string',
+          },
+        },
+        type: 'object',
+      },
+      shared: {},
+    });
+  });
+
   test('materializes function defaults once for referenced schemas', () => {
     const defaultValue = jest.fn(() => ({ b: 'default' }));
     const objectWithFunctionDefaultSchema = schema.object(
