@@ -1675,7 +1675,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/services/index.ts @elastic/observability-ui
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/observability-ui
 
 ### Observability Plugins
 
@@ -1977,9 +1976,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 # Uptime
 /x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional_with_es_ssl/ftr_provider_context.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/apps/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
