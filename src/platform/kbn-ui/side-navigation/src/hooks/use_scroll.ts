@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 export const useScroll = (withMask: boolean = false) => {
   const scrollStyles = css`
     ${useEuiOverflowScroll('y', withMask)}
-    --secondary-menu-header-height: 44px;
+    --secondary-menu-header-height: 42px;
     scroll-padding-top: var(--secondary-menu-header-height);
   `;
 

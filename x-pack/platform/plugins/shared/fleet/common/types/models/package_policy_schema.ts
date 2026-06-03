@@ -95,8 +95,7 @@ const PackagePolicyStreamsSchema = {
   condition: schema.maybe(
     schema.string({
       meta: {
-        description:
-          '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+        description: 'Agent condition expression to evaluate whether to apply this stream.',
       },
     })
   ),
@@ -118,8 +117,7 @@ export const PackagePolicyInputsSchema = {
   condition: schema.maybe(
     schema.string({
       meta: {
-        description:
-          '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+        description: 'Agent condition expression to evaluate whether to apply this input.',
       },
     })
   ),
@@ -291,7 +289,7 @@ export const PackagePolicyBaseSchema = {
     schema.string({
       meta: {
         description:
-          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+          'Agent condition expression to evaluate whether to apply this integration to its inputs.',
       },
     })
   ),
@@ -322,48 +320,6 @@ export const NewPackagePolicySchema = schema.object(
     force: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'new_package_policy' } }
-);
-
-/**
- * Snapshot of the package policy SO schema as of model version 10.22.0.
- * Permissive on enabled, inputs, and package so the SO layer can store
- * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
- * gains new fields, create PackagePolicySchemaV{next} that extends this one.
- */
-export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
-  {
-    enabled: schema.maybe(schema.boolean()),
-    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
-    package: schema.maybe(schema.any()),
-    global_data_tags: undefined,
-    condition: undefined,
-  },
-  { unknowns: 'ignore', meta: { id: 'package_policy_v22' } }
-);
-
-/**
- * Snapshot of the package policy SO schema as of model version 10.23.0.
- * Permissive on enabled, inputs, and package so the SO layer can store
- * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
- * gains new fields, create PackagePolicySchemaV{next} that extends this one.
- */
-export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
-  {
-    global_data_tags: NewPackagePolicySchema.getPropSchemas().global_data_tags,
-  },
-  { unknowns: 'ignore', meta: { id: 'package_policy_v23' } }
-);
-
-/**
- * Snapshot of the package policy SO schema as of model version 10.24.0.
- * Re-introduces the `condition` field at the integration level — V22/V23 excluded it
- * to preserve their hashes when `condition` was added to PackagePolicyBaseSchema.
- */
-export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
-  {
-    condition: NewPackagePolicySchema.getPropSchemas().condition,
-  },
-  { unknowns: 'ignore', meta: { id: 'package_policy_v24' } }
 );
 
 const CreatePackagePolicyProps = {
@@ -457,8 +413,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       condition: schema.maybe(
         schema.string({
           meta: {
-            description:
-              '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+            description: 'Agent condition expression to evaluate whether to apply this input.',
           },
         })
       ),
@@ -480,7 +435,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
               schema.string({
                 meta: {
                   description:
-                    '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+                    'Agent condition expression to evaluate whether to apply this stream.',
                 },
               })
             ),
@@ -575,7 +530,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
       schema.string({
         meta: {
           description:
-            '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+            'Agent condition expression to evaluate whether to apply this integration to its inputs.',
         },
       })
     ),
@@ -721,6 +676,67 @@ export const PackagePolicySchema = schema.object(
     ),
   },
   { meta: { id: 'package_policy' } }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.22.0.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). Based on
+ * NewPackagePolicySchema rather than PackagePolicySchema — this is intentional
+ * to preserve the schema hash; do not modify.
+ */
+export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
+  {
+    enabled: schema.maybe(schema.boolean()),
+    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
+    package: schema.maybe(schema.any()),
+    global_data_tags: undefined,
+    condition: undefined,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.23.0.
+ * Adds `global_data_tags` — excluded from V22 to preserve its hash.
+ * Do not modify.
+ */
+export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
+  {
+    global_data_tags: NewPackagePolicySchema.getPropSchemas().global_data_tags,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.24.0.
+ * Re-introduces the `condition` field at the integration level — V22/V23 excluded it
+ * to preserve their hashes when `condition` was added to PackagePolicyBaseSchema.
+ * Do not modify.
+ */
+export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
+  {
+    condition: NewPackagePolicySchema.getPropSchemas().condition,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.25.0.
+ * Re-bases on PackagePolicySchema (the full stored shape) rather than the
+ * create-API schema used by V22–V24, ensuring all indexed mapping fields are
+ * covered. V22–V24 remain frozen.
+ */
+export const PackagePolicySchemaV25 = PackagePolicySchema.extends(
+  {
+    // id is the SO document ID — not stored in SO attributes.
+    id: schema.maybe(schema.string({ maxLength: 255 })),
+    // Internal SO mapping fields absent from the public API schema.
+    bump_agent_policy_revision: schema.maybe(schema.boolean()),
+    // May be absent in SOs created before the field was introduced.
+    latest_revision: schema.maybe(schema.boolean()),
+  },
+  { unknowns: 'ignore' }
 );
 
 export const PackagePolicyResponseSchema = PackagePolicySchema.extends(

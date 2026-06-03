@@ -12,12 +12,12 @@ import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
+import { EsqlResponseError } from '../../../common/errors/esql_response_error';
 import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
 import { ERROR_TYPE } from '../../../utils/error_labels';
-import { EsqlResponseError } from '../utils/esql_response_error';
 import {
   type ReportChartSectionErrorArgs,
   useReportChartSectionError,

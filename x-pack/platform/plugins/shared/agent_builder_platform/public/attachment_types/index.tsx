@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type {
+  AgentsServiceStartContract,
+  AttachmentServiceStartContract,
+} from '@kbn/agent-builder-browser';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { CoreStart } from '@kbn/core/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
@@ -23,10 +26,12 @@ import { createToolAttachmentDefinition } from './tool_attachment/tool_attachmen
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
+  agents,
   locators,
   core,
 }: {
   attachments: AttachmentServiceStartContract;
+  agents: AgentsServiceStartContract;
   locators: ILocatorClient;
   core: CoreStart;
 }) => {
@@ -40,6 +45,7 @@ export const registerAttachmentUiDefinitions = ({
       http: core.http,
       notifications: core.notifications,
       application: core.application,
+      agents,
     })
   );
   attachments.addAttachmentType(

@@ -15,11 +15,14 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiTitle, EuiFlexItem } from '
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { ApplicationStart } from '@kbn/core/public';
+import { AppStatus, type ApplicationStart } from '@kbn/core/public';
+import useObservable from 'react-use/lib/useObservable';
 import type { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
+
+const MANAGEMENT_APP_ID = 'management';
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -34,11 +37,15 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
     ?.useUrl({ sectionId: '' });
+  const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+    application.capabilities.navLinks;
+  const applications = useObservable(application.applications$);
+  const managementApp = applications?.get(MANAGEMENT_APP_ID);
+  const isManagementAppAccessible = Boolean(
+    isManagementEnabled && managementApp?.status === AppStatus.accessible
+  );
 
   if (features.length) {
-    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
-      application.capabilities.navLinks;
-
     return (
       <KibanaPageTemplate.Section
         bottomBorder
@@ -55,7 +62,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             </EuiTitle>
           </EuiFlexItem>
 
-          {isDevToolsEnabled || isManagementEnabled ? (
+          {isDevToolsEnabled || isManagementAppAccessible ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" responsive={false} wrap>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
@@ -75,7 +82,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                   </EuiFlexItem>
                 ) : null}
 
-                {isManagementEnabled ? (
+                {isManagementAppAccessible ? (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="homeManage"

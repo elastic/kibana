@@ -32,7 +32,11 @@ import {
   SeeDataStep,
 } from './step_components';
 
-const STEP_COMPONENTS: Record<string, React.ComponentType> = {
+interface StepComponentProps {
+  onNext: () => void;
+}
+
+const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> = {
   connect: ConnectStep,
   services: ServicesStep,
   'name-and-scope': NameAndScopeStep,
@@ -63,7 +67,7 @@ export function OnboardingShell() {
     }
   }, [meta, history]);
 
-  const { completedSteps, firstIncompleteStepId } = useStepState(integrationId);
+  const { completedSteps, markStepComplete, firstIncompleteStepId } = useStepState(integrationId);
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
@@ -76,7 +80,7 @@ export function OnboardingShell() {
 
   const stepsConfig: EuiStepProps[] = useMemo(
     () =>
-      ONBOARDING_STEPS.map((step) => {
+      ONBOARDING_STEPS.map((step, index) => {
         const isCurrent = step.id === currentStepId;
         const isComplete = completedSteps.has(step.id);
 
@@ -88,11 +92,18 @@ export function OnboardingShell() {
         }
 
         const StepComponent = isCurrent ? STEP_COMPONENTS[step.id] : undefined;
+        const nextStep = ONBOARDING_STEPS[index + 1];
+        const onNext = () => {
+          markStepComplete(step.id);
+          if (nextStep) {
+            history.push({ ...location, hash: `#${nextStep.id}` });
+          }
+        };
 
         return {
           title: step.title,
           status,
-          children: StepComponent ? <StepComponent /> : null,
+          children: StepComponent ? <StepComponent onNext={onNext} /> : null,
           'data-test-subj': `onboardingStepIndicator-${step.id}`,
           ...(isComplete && !isCurrent
             ? {
@@ -101,7 +112,7 @@ export function OnboardingShell() {
             : {}),
         };
       }),
-    [currentStepId, completedSteps, history, location]
+    [currentStepId, completedSteps, markStepComplete, history, location]
   );
 
   if (!meta || !isValidStep) {
