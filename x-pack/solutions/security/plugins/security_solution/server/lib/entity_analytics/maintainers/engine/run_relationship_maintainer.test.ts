@@ -1039,7 +1039,7 @@ describe('runRelationshipMaintainer', () => {
       ).rejects.toThrow(/metadata transport failure/);
     });
 
-    it('sets Maintainer.kind to "accesses_frequently_and_infrequently" and Maintainer.lookback_window to LOOKBACK_WINDOW on every emitted doc', async () => {
+    it('sets Maintainer.kind to the relationship kind and Maintainer.lookback_window to LOOKBACK_WINDOW on every emitted doc', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkAppend } = makeCrudClient();
       search.mockResolvedValueOnce(
@@ -1058,9 +1058,9 @@ describe('runRelationshipMaintainer', () => {
       ];
       expect(docs.length).toBeGreaterThan(0);
       for (const d of docs) {
-        // The maintainer kind documents which Phase 3a maintainer produced the
-        // record. Hardcoded at the runRelationshipMaintainer call site.
-        expect(d.Maintainer.kind).toBe('accesses_frequently_and_infrequently');
+        // Maintainer.kind mirrors the relationship kind written (relType), not
+        // the maintainer engine name. baseConfig emits 'accesses_frequently' docs.
+        expect(d.Maintainer.kind).toBe('accesses_frequently');
         // Lookback window mirrors the engine constant LOOKBACK_WINDOW
         // (`engine/constants.ts:8`) — assert against the imported constant so
         // this test stays correct if the engine's lookback period changes.

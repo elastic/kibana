@@ -13,7 +13,6 @@ import type { EntityRelationshipRecord } from './types';
 
 interface WriteRelationshipMetadataContext {
   scanId: string;
-  maintainerKind: string;
   lookbackWindow: string;
   entitySource: string;
   observedAt: string;
@@ -47,7 +46,7 @@ function buildRelationshipMetadata(
     'entity.id': record.entityId,
     'entity.source': context.entitySource,
     Maintainer: {
-      kind: context.maintainerKind,
+      kind: relType,
       scan_id: context.scanId,
       lookback_window: context.lookbackWindow,
     },

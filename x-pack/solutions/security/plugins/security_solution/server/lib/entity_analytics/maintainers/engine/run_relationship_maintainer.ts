@@ -27,8 +27,6 @@ import { writeRelationshipMetadatas } from './write_relationship_metadatas';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 
-const MAINTAINER_KIND = 'accesses_frequently_and_infrequently';
-
 interface CompositeAggregations {
   users: {
     buckets: CompositeBucket[];
@@ -228,7 +226,6 @@ async function runIntegration(
   const write = await writeEntityIds(crudClient, logger, records);
   await writeRelationshipMetadatas(crudClient, logger, records, {
     scanId: metadataContext.scanId,
-    maintainerKind: MAINTAINER_KIND,
     lookbackWindow: LOOKBACK_WINDOW,
     entitySource: config.id,
     observedAt: metadataContext.observedAt,

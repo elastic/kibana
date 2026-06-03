@@ -18,7 +18,6 @@ import { LOOKBACK_WINDOW } from './constants';
 // engine if the lookback period ever changes.
 const baseContext = {
   scanId: '11111111-1111-1111-1111-111111111111',
-  maintainerKind: 'accesses_frequently_and_infrequently',
   lookbackWindow: LOOKBACK_WINDOW,
   entitySource: 'elastic_defend',
   observedAt: '2026-05-15T10:30:00.000Z',
@@ -175,8 +174,8 @@ describe('writeRelationshipMetadatas', () => {
       expect(docs[0]['entity.relationships.accesses_frequently.target']).toBe('host:laptopA');
     });
 
-    it('sets Maintainer.kind to context.maintainerKind', () => {
-      expect(docs[0].Maintainer.kind).toBe('accesses_frequently_and_infrequently');
+    it('sets Maintainer.kind to the relationship kind (relType)', () => {
+      expect(docs[0].Maintainer.kind).toBe('accesses_frequently');
     });
 
     it('sets Maintainer.scan_id to context.scanId', () => {
