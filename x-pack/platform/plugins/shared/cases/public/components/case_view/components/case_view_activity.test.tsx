@@ -89,10 +89,6 @@ const caseData: CaseUI = {
 
 const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
 };
 
 const userActivityQueryParams = {

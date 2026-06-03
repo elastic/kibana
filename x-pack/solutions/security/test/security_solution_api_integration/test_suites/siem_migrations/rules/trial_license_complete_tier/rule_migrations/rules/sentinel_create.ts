@@ -21,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
   const migrationResourcesRoutes = ruleMigrationResourcesRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Create Sentinel Rules API', () => {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Create Sentinel Rules API', () => {
     let migrationId: string;
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
