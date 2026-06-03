@@ -5,9 +5,8 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt, stringFromBufferRt } from '@kbn/io-ts-utils';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { stringFromBufferRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { sourceMapRt } from './source_map_types';
 

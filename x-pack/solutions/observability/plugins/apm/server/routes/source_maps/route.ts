@@ -7,9 +7,8 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt, toNumberRt, stringFromBufferRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { stringFromBufferRt } from '@kbn/apm-types';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
