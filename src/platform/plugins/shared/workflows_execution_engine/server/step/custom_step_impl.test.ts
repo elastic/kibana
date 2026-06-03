@@ -198,6 +198,7 @@ describe('CustomStepImpl', () => {
     expect(stepExecutionRuntime.contextManager.callKibanaApi).toHaveBeenCalledWith({
       method: 'GET',
       path: '/api/status',
+      signal: stepExecutionRuntime.abortController.signal,
     });
     expect(result.output).toEqual({ status: 200, headers: {}, body: { ok: true } });
   });
