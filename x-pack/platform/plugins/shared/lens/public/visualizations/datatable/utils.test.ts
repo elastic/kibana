@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DecorationFillConfig } from '@kbn/lens-common';
+import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
   getDefaultFillConfig,
@@ -47,7 +47,9 @@ describe('datatable progress bar utils', () => {
   });
 
   describe('getProgressBarDomain', () => {
-    const single = (overrides: Partial<DecorationFillConfig> = {}): DecorationFillConfig => ({
+    const single = (
+      overrides: Partial<CellDecorationFillConfig> = {}
+    ): CellDecorationFillConfig => ({
       fillMode: 'single',
       ...overrides,
     });

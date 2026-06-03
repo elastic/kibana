@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MeterFillStyle, MeterSize } from '@elastic/charts';
 import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
-import type { DecorationFillConfig } from '@kbn/lens-common';
+import type { CellDecorationFillConfig } from '@kbn/lens-common';
 import {
   ProgressBarCell,
   getMeterFill,
@@ -21,8 +21,18 @@ import {
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
-  return { ...actual, Meter: () => <div data-test-subj="mockMeter" /> };
+  const mockMeter = jest.fn((_props: Record<string, unknown>) => null);
+  return {
+    ...actual,
+    Meter: (props: Record<string, unknown>) => {
+      mockMeter(props);
+      return <div data-test-subj="mockMeter" />;
+    },
+    __mockMeter: mockMeter,
+  };
 });
+
+const meterMock = (jest.requireMock('@elastic/charts') as { __mockMeter: jest.Mock }).__mockMeter;
 
 describe('progress bar cell helpers', () => {
   describe('getProgressBarSize', () => {
@@ -52,7 +62,7 @@ describe('progress bar cell helpers', () => {
 
   describe('getMeterFill', () => {
     it('builds a single fill from the configured color', () => {
-      const config: DecorationFillConfig = { fillMode: 'single', color: '#123456' };
+      const config: CellDecorationFillConfig = { fillMode: 'single', color: '#123456' };
       expect(getMeterFill(config, [], '#fallback')).toEqual({
         type: MeterFillStyle.Single,
         color: '#123456',
@@ -60,7 +70,7 @@ describe('progress bar cell helpers', () => {
     });
 
     it('falls back to the fallback color when single has no color', () => {
-      const config: DecorationFillConfig = { fillMode: 'single' };
+      const config: CellDecorationFillConfig = { fillMode: 'single' };
       expect(getMeterFill(config, [], '#fallback')).toEqual({
         type: MeterFillStyle.Single,
         color: '#fallback',
@@ -68,7 +78,7 @@ describe('progress bar cell helpers', () => {
     });
 
     it('builds a solid palette fill with the provided stops', () => {
-      const config: DecorationFillConfig = { fillMode: 'solid' };
+      const config: CellDecorationFillConfig = { fillMode: 'solid' };
       const stops = [{ color: '#a', stop: 0 }];
       expect(getMeterFill(config, stops, '#fallback')).toEqual({
         type: 'palette',
@@ -79,7 +89,7 @@ describe('progress bar cell helpers', () => {
     });
 
     it('builds a gradient palette fill', () => {
-      const config: DecorationFillConfig = { fillMode: 'gradient' };
+      const config: CellDecorationFillConfig = { fillMode: 'gradient' };
       const fill = getMeterFill(config, [], '#fallback');
       expect(fill).toMatchObject({ type: 'palette', style: MeterFillStyle.Gradient });
     });
@@ -150,6 +160,40 @@ describe('progress bar cell helpers', () => {
       render(<ProgressBarCell {...baseProps} alignment="right" labelWidthCh={5} />);
       const label = screen.getByTestId('lnsTableProgressBarLabel');
       expect(getComputedStyle(label).textAlign).toBe('left');
+    });
+  });
+
+  describe('ProgressBarCell baseline', () => {
+    const baseProps = {
+      value: 42,
+      label: '42',
+      domain: [0, 100] as [number, number],
+      fill: { type: MeterFillStyle.Single, color: '#123' } as ReturnType<typeof getMeterFill>,
+      size: MeterSize.Medium,
+      alignment: 'right' as const,
+    };
+
+    beforeEach(() => meterMock.mockClear());
+
+    it('defaults the fill baseline to 0 and rounds the start at the domain edge', () => {
+      render(<ProgressBarCell {...baseProps} />);
+      expect(meterMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ baseline: 0, roundFillStart: true })
+      );
+    });
+
+    it('leaves the start square when the domain crosses below the baseline', () => {
+      render(<ProgressBarCell {...baseProps} domain={[-50, 100]} />);
+      expect(meterMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ baseline: 0, roundFillStart: false })
+      );
+    });
+
+    it('honors an explicit baseline inside the domain and squares the start', () => {
+      render(<ProgressBarCell {...baseProps} domain={[0, 200]} baseline={50} />);
+      expect(meterMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ baseline: 50, roundFillStart: false })
+      );
     });
   });
 });

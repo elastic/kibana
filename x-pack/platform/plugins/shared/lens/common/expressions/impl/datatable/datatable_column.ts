@@ -9,7 +9,11 @@ import type { Direction } from '@elastic/eui';
 import type { PaletteOutput, CustomPaletteParams, ColorMapping } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { SortingHint, ColumnCellDecorationMode, DecorationFillConfig } from '@kbn/lens-common';
+import type {
+  SortingHint,
+  ColumnCellDecorationMode,
+  CellDecorationFillConfig,
+} from '@kbn/lens-common';
 import type { CollapseFunction } from '../../defs/collapse';
 
 const LENS_DATATABLE_COLUMN = 'lens_datatable_column';
@@ -25,7 +29,7 @@ export interface DatatableColumnConfig {
 export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping' | 'fillStyle'> & {
   palette?: PaletteOutput<CustomPaletteState>;
   colorMapping?: string;
-  /** JSON-serialized {@link DecorationFillConfig}, mirroring how `colorMapping` is passed. */
+  /** JSON-serialized {@link CellDecorationFillConfig}, mirroring how `colorMapping` is passed. */
   fillStyle?: string;
   summaryRowValue?: unknown;
   sortingHint?: SortingHint;
@@ -47,7 +51,7 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMapping?: ColorMapping.Config;
   colorMode?: ColumnCellDecorationMode;
-  fillStyle?: DecorationFillConfig;
+  fillStyle?: CellDecorationFillConfig;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;

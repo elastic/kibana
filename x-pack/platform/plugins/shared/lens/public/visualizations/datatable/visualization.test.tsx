@@ -571,6 +571,33 @@ describe('Datatable Visualization', () => {
             ]);
           }
         );
+
+        it('shows a single color swatch (no palette) for a single-fill progress bar', () => {
+          params.state.columns[0].colorMode = 'progress';
+          params.state.columns[0].fillStyle = { fillMode: 'single', color: '#abcdef' };
+          expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+            { columnId: 'b', triggerIconType: 'color', color: '#abcdef' },
+          ]);
+        });
+
+        it('falls back to the default progress color when a single fill has no color', () => {
+          params.state.columns[0].colorMode = 'progress';
+          params.state.columns[0].fillStyle = { fillMode: 'single' };
+          const [accessor] = datatableVisualization.getConfiguration(params).groups[2].accessors;
+          expect(accessor).toMatchObject({ columnId: 'b', triggerIconType: 'color' });
+          expect((accessor as { color?: string }).color).toBeDefined();
+        });
+
+        it.each<'solid' | 'gradient'>(['solid', 'gradient'])(
+          'shows the palette preview for a %s-fill progress bar',
+          (fillMode) => {
+            params.state.columns[0].colorMode = 'progress';
+            params.state.columns[0].fillStyle = { fillMode };
+            expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+              { columnId: 'b', palette: mockStops, triggerIconType: 'colorBy' },
+            ]);
+          }
+        );
       });
     });
 

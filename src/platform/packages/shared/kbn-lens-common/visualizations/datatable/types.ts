@@ -81,16 +81,17 @@ export type ColumnCellDecorationMode = 'none' | 'cell' | 'text' | 'badge' | 'pro
 /**
  * Fill style for a value-driven cell decoration.
  *
- * Generic (not progress-specific) so other decorations can adopt the same
- * single/solid/gradient model in the future.
+ * Shared by the datatable cell decorations (the `progress` decoration today),
+ * shaped so another cell decoration can adopt the same single/solid/gradient
+ * model without a new type.
  * - `single`: one fixed color for the whole fill.
  * - `solid`: one palette-resolved color, derived from the cell value.
  * - `gradient`: the palette gradient revealed inside the filled extent.
  */
-export type DecorationFillMode = 'single' | 'solid' | 'gradient';
+export type CellDecorationFillMode = 'single' | 'solid' | 'gradient';
 
 /**
- * Value range that drives a decoration's domain.
+ * Value range that drives a cell decoration's domain.
  * - `auto`: derive the domain from the loaded column values.
  * - `custom`: use an explicit `[min, max]` domain (supports a negative `min`).
  *
@@ -98,27 +99,37 @@ export type DecorationFillMode = 'single' | 'solid' | 'gradient';
  * fills the range is kept in sync with the palette color bounds
  * (`palette.params.rangeMin`/`rangeMax`).
  */
-export interface DecorationValueRange {
+export interface CellDecorationValueRange {
   mode: 'auto' | 'custom';
   min?: number;
   max?: number;
 }
 
 /**
- * Reusable fill configuration for a value-driven cell decoration.
+ * Fill configuration for a value-driven cell decoration.
  *
- * Consumed today by the `progress` decoration; shaped so a future decoration
- * (e.g. a gradient cell background) can reuse it without a new type.
+ * Consumed today by the `progress` decoration; shaped so a future cell
+ * decoration (e.g. a gradient cell background) can reuse it without a new type.
  */
-export interface DecorationFillConfig {
-  fillMode: DecorationFillMode;
+export interface CellDecorationFillConfig {
+  fillMode: CellDecorationFillMode;
   /** Fill color for the `single` style. Ignored for `solid`/`gradient`. */
   color?: string;
   /**
    * Value range driving the domain. For `solid`/`gradient` the custom bounds
    * mirror `palette.params.rangeMin`/`rangeMax`; for `single` they live here.
    */
-  valueRange?: DecorationValueRange;
+  valueRange?: CellDecorationValueRange;
+  /**
+   * Anchor value at which the fill starts, expressed in the column's value units
+   * (defaults to `0`). The fill grows from this baseline toward the value, so a
+   * baseline inside the domain (e.g. the 25th percentile) leaves part of the
+   * track empty before the fill begins.
+   *
+   * Not configurable from the editor yet; exposed for the as-code API and
+   * agentic configuration, and consumed by the renderer when present.
+   */
+  baseline?: number;
 }
 
 export interface ColumnState {
@@ -139,9 +150,10 @@ export interface ColumnState {
   // Categorical color mapping configuration
   colorMapping?: ColorMapping.Config;
   colorMode?: ColumnCellDecorationMode;
-  // Fill configuration for value-driven decorations (currently the "progress"
-  // cell decoration for numeric data). Generic so other decorations can reuse it.
-  fillStyle?: DecorationFillConfig;
+  // Fill configuration for value-driven cell decorations (currently the
+  // "progress" cell decoration for numeric data). Shared so other cell
+  // decorations can reuse it.
+  fillStyle?: CellDecorationFillConfig;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;

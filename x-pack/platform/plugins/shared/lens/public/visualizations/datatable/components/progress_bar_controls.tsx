@@ -23,7 +23,11 @@ import type {
   PaletteRegistry,
 } from '@kbn/coloring';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { ColumnState, DecorationFillMode, DecorationFillConfig } from '@kbn/lens-common';
+import type {
+  ColumnState,
+  CellDecorationFillMode,
+  CellDecorationFillConfig,
+} from '@kbn/lens-common';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { DEFAULT_PROGRESS_BAR_COLOR, getDecorationCustomRange, isPaletteFillMode } from '../utils';
@@ -32,7 +36,7 @@ const idPrefix = htmlIdGenerator()();
 
 const barColorOptions: Array<{
   id: string;
-  value: DecorationFillMode;
+  value: CellDecorationFillMode;
   label: string;
   'data-test-subj': string;
 }> = [
@@ -137,7 +141,7 @@ function getFormatUnit(formatter?: IFieldFormat): string | undefined {
 
 export interface ProgressBarControlsProps {
   column: ColumnState;
-  fillStyle: DecorationFillConfig;
+  fillStyle: CellDecorationFillConfig;
   dataBounds: DataBounds;
   palette: PaletteOutput<CustomPaletteParams>;
   paletteService: PaletteRegistry;
@@ -168,10 +172,10 @@ export function ProgressBarControls({
   const isCustomRange = effectiveRange.mode === 'custom';
 
   const setBarColor = useCallback(
-    (nextFillMode: DecorationFillMode) => {
+    (nextFillMode: CellDecorationFillMode) => {
       if (nextFillMode === fillMode) return;
 
-      const nextFillStyle: DecorationFillConfig = { ...fillStyle, fillMode: nextFillMode };
+      const nextFillStyle: CellDecorationFillConfig = { ...fillStyle, fillMode: nextFillMode };
       const update: Partial<ColumnState> = {};
 
       if (nextFillMode === 'single') {

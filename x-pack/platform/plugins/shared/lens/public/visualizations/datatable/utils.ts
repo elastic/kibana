@@ -19,16 +19,16 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   hasPaletteStops,
 } from '@kbn/coloring';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   ColumnCellDecorationMode,
-  DecorationFillMode,
-  DecorationFillConfig,
-  DecorationValueRange,
+  CellDecorationFillMode,
+  CellDecorationFillConfig,
+  CellDecorationValueRange,
 } from '@kbn/lens-common';
 import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_components';
+import { getCellDecorationCapabilities } from './cell_decoration';
 
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
@@ -140,41 +140,29 @@ export function getColorDefaults({
   return { palette, colorMapping: undefined };
 }
 
-/** Default single-bar fill color: Datavis Color 2 (per elastic/kibana#250708). */
-export const DEFAULT_PROGRESS_BAR_COLOR = euiThemeVars.euiColorVis2;
-
-/**
- * Returns the default fill color a decoration should seed when none is set, or
- * `undefined` when the decoration has no opinion (falling back to the existing
- * palette/contrast defaults).
- *
- * Centralizes per-decoration defaults so each mode dictates its own default from
- * a single code path. Only `progress` seeds an explicit color today.
- */
-export function getDecorationDefaultColor(colorMode: ColumnCellDecorationMode): string | undefined {
-  switch (colorMode) {
-    case 'progress':
-      return DEFAULT_PROGRESS_BAR_COLOR;
-    default:
-      return undefined;
-  }
-}
+// Per-decoration defaults live in the cell-decoration capability registry; these
+// re-exports keep the existing `../utils` import surface stable for consumers.
+export { DEFAULT_PROGRESS_BAR_COLOR, getDecorationDefaultColor } from './cell_decoration';
 
 /**
  * Seeds a fresh fill config for a decoration. Applied only when a column has no
  * existing `fillStyle`, so persisted values are never overridden.
+ *
+ * The fill mode and color are taken from the decoration's capabilities, so each
+ * decoration dictates its own seed from a single source of truth.
  */
 export function getDefaultFillConfig(
   colorMode: ColumnCellDecorationMode = 'progress'
-): DecorationFillConfig {
+): CellDecorationFillConfig {
+  const { defaultFillMode, defaultColor } = getCellDecorationCapabilities(colorMode);
   return {
-    fillMode: 'single',
-    color: getDecorationDefaultColor(colorMode),
+    fillMode: defaultFillMode ?? 'single',
+    color: defaultColor,
     valueRange: { mode: 'auto' },
   };
 }
 
-export function isPaletteFillMode(fillMode: DecorationFillMode): boolean {
+export function isPaletteFillMode(fillMode: CellDecorationFillMode): boolean {
   return fillMode === 'solid' || fillMode === 'gradient';
 }
 
@@ -190,7 +178,7 @@ export function isPaletteFillMode(fillMode: DecorationFillMode): boolean {
  * a stable zero anchor.
  */
 export interface DecorationColumnLike {
-  fillStyle?: DecorationFillConfig;
+  fillStyle?: CellDecorationFillConfig;
   // Accepts either editor (`CustomPaletteParams`) or render (`CustomPaletteState`)
   // palette params; only the numeric range bounds are read here.
   palette?: { params?: { rangeMin?: number; rangeMax?: number } };
@@ -297,7 +285,7 @@ function finiteOr(value: number | undefined, fallback: number): number {
 export function getDecorationCustomRange(
   column: DecorationColumnLike,
   dataBounds: DataBounds
-): DecorationValueRange {
+): CellDecorationValueRange {
   const { fillStyle, palette } = column;
   if (!fillStyle) {
     return { mode: 'auto' };

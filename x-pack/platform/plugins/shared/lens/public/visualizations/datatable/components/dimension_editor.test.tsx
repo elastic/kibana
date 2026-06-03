@@ -25,6 +25,7 @@ import type {
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import type { TableDimensionEditorProps } from './dimension_editor';
 import { TableDimensionEditor } from './dimension_editor';
+import { getCellDecorationLabel } from '../cell_decoration';
 import type { ColumnState } from '../../../../common/expressions';
 import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';
@@ -42,12 +43,10 @@ describe('data table dimension editor', () => {
 
   let props: TableDimensionEditorProps;
 
-  const getDynamicColoringLabel = (colorMode: ColumnState['colorMode']) => {
-    const normalizedColorMode = colorMode ?? 'none';
-    // The stored value 'cell' is surfaced in the editor as "Background".
-    if (normalizedColorMode === 'cell') return 'Background';
-    return normalizedColorMode.charAt(0).toUpperCase() + normalizedColorMode.slice(1);
-  };
+  // Resolve display labels from the same capability registry the editor uses, so
+  // the stored value (e.g. 'cell' -> "Background") and the visible label never drift.
+  const getDynamicColoringLabel = (colorMode: ColumnState['colorMode']) =>
+    getCellDecorationLabel(colorMode ?? 'none');
 
   function testState(): DatatableVisualizationState {
     return {
@@ -238,7 +237,7 @@ describe('data table dimension editor', () => {
   it('should set the coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    await btnGroups.colorMode.select('Background');
+    await btnGroups.colorMode.select(getDynamicColoringLabel('cell'));
     await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -258,7 +257,7 @@ describe('data table dimension editor', () => {
   it('should set the badge coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    await btnGroups.colorMode.select('Badge');
+    await btnGroups.colorMode.select(getDynamicColoringLabel('badge'));
     await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -393,7 +392,7 @@ describe('data table dimension editor', () => {
 
     renderTableDimensionEditor();
 
-    await btnGroups.colorMode.select('None');
+    await btnGroups.colorMode.select(getDynamicColoringLabel('none'));
 
     await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toBeCalledWith({
@@ -429,7 +428,7 @@ describe('data table dimension editor', () => {
       mockFirstColumn({ dataType: 'number' });
       renderTableDimensionEditor();
 
-      await btnGroups.colorMode.select('Progress bar');
+      await btnGroups.colorMode.select(getDynamicColoringLabel('progress'));
       await act(async () => jest.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(
@@ -443,7 +442,7 @@ describe('data table dimension editor', () => {
       mockFirstColumn({ isBucketed: true, dataType: 'string' });
       renderTableDimensionEditor();
 
-      await btnGroups.colorMode.select('Progress bar');
+      await btnGroups.colorMode.select(getDynamicColoringLabel('progress'));
       await act(async () => jest.advanceTimersByTime(256));
 
       // No "progress" colorMode should ever be produced for a terms column.
@@ -459,7 +458,7 @@ describe('data table dimension editor', () => {
       state.columns[0].alignment = 'center';
       renderTableDimensionEditor();
 
-      await btnGroups.colorMode.select('Progress bar');
+      await btnGroups.colorMode.select(getDynamicColoringLabel('progress'));
       await act(async () => jest.advanceTimersByTime(256));
 
       expect(props.setState).toHaveBeenCalledWith(

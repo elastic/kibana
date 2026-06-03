@@ -21,6 +21,7 @@ import {
   hasPaletteStops,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -76,6 +77,8 @@ import {
   getDataBoundsForAccessor,
   getColorDefaults,
   getColorByValuePalette,
+  isPaletteFillMode,
+  DEFAULT_PROGRESS_BAR_COLOR,
 } from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -389,6 +392,35 @@ export const getDatatableVisualization = ({
       );
     };
 
+    /**
+     * Builds the dimension-trigger color indicator for a column.
+     *
+     * Mirrors the metric chart's static/dynamic split: a single-fill progress
+     * decoration shows a solid swatch (`color`) with no palette gradient, while
+     * palette-driven coloring (cell/text/badge, or solid/gradient progress) shows
+     * the palette preview (`colorBy` + stops).
+     */
+    const getColorIndicator = (
+      accessor: string
+    ): Pick<AccessorConfig, 'triggerIconType' | 'palette' | 'color'> => {
+      const { colorMode = 'none', hidden, fillStyle } = columnMap[accessor] ?? {};
+
+      if (hidden) return { triggerIconType: 'invisible' };
+
+      if (colorMode === 'progress' && fillStyle && !isPaletteFillMode(fillStyle.fillMode)) {
+        return {
+          triggerIconType: 'color',
+          color: fillStyle.color ?? DEFAULT_PROGRESS_BAR_COLOR,
+        };
+      }
+
+      const stops = getResolvedDisplayColors(accessor);
+      const hasColoring = colorMode !== 'none' && stops.length > 0;
+      return hasColoring
+        ? { triggerIconType: 'colorBy', palette: stops }
+        : { triggerIconType: undefined };
+    };
+
     return {
       groups: [
         // In this group we get columns that are not transposed and are not on the metric dimension
@@ -418,21 +450,13 @@ export const getDatatableVisualization = ({
               return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
             })
             .map((accessor) => {
-              const { colorMode = 'none', hidden, collapseFn } = columnMap[accessor] ?? {};
-              const stops = getResolvedDisplayColors(accessor);
-              const hasColoring = colorMode !== 'none' && stops.length > 0;
-
-              return {
-                columnId: accessor,
-                triggerIconType: hidden
-                  ? 'invisible'
-                  : hasColoring
-                  ? 'colorBy'
-                  : collapseFn
-                  ? 'aggregate'
-                  : undefined,
-                palette: hasColoring ? stops : undefined,
-              };
+              const { collapseFn } = columnMap[accessor] ?? {};
+              const indicator = getColorIndicator(accessor);
+              // A collapsed row with no coloring shows the aggregate icon.
+              if (indicator.triggerIconType === undefined && collapseFn) {
+                return { columnId: accessor, triggerIconType: 'aggregate' as const };
+              }
+              return { columnId: accessor, ...indicator };
             }),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
@@ -499,17 +523,7 @@ export const getDatatableVisualization = ({
               }
               return !operation?.isBucketed;
             })
-            .map((accessor) => {
-              const { colorMode = 'none', hidden } = columnMap[accessor] ?? {};
-              const stops = getResolvedDisplayColors(accessor);
-              const hasColoring = colorMode !== 'none' && stops.length > 0;
-
-              return {
-                columnId: accessor,
-                triggerIconType: hidden ? 'invisible' : hasColoring ? 'colorBy' : undefined,
-                palette: hasColoring ? stops : undefined,
-              };
-            }),
+            .map((accessor) => ({ columnId: accessor, ...getColorIndicator(accessor) })),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           isMetricDimension: true,

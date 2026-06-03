@@ -13,7 +13,8 @@ import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
-import type { DataGridDensity, DecorationFillConfig } from '@kbn/lens-common';
+import { safeJsonParse } from '@kbn/std';
+import type { DataGridDensity, CellDecorationFillConfig } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
@@ -41,15 +42,11 @@ import {
 } from './progress_bar_cell';
 
 /** Safely parses the JSON-serialized decoration fill config carried on the expression args. */
-const parseFillConfig = (raw: unknown): DecorationFillConfig | undefined => {
+const parseFillConfig = (raw: unknown): CellDecorationFillConfig | undefined => {
   if (raw == null) return undefined;
-  if (typeof raw === 'object') return raw as DecorationFillConfig;
+  if (typeof raw === 'object') return raw as CellDecorationFillConfig;
   if (typeof raw !== 'string') return undefined;
-  try {
-    return JSON.parse(raw) as DecorationFillConfig;
-  } catch {
-    return undefined;
-  }
+  return safeJsonParse<CellDecorationFillConfig | undefined>(raw, () => undefined);
 };
 
 export const createGridCell = (
@@ -134,7 +131,12 @@ export const createGridCell = (
       // Size the value gutter to the column's widest formatted bound so every
       // row's bar shares the same edge regardless of digit count.
       const labelWidthCh = getProgressBarLabelWidthCh(formatter, dataBounds.min, dataBounds.max);
-      return { domain: [min, max] as [number, number], fill, labelWidthCh };
+      return {
+        domain: [min, max] as [number, number],
+        fill,
+        labelWidthCh,
+        baseline: fillStyle.baseline,
+      };
     }, [renderMode, fillStyle, rawValue, minMaxByColumnId, columnId, palette, formatter]);
 
     const badgeColor = useMemo(() => {
@@ -208,6 +210,7 @@ export const createGridCell = (
             size={progressBarSize}
             alignment={alignment}
             labelWidthCh={progressBarProps.labelWidthCh}
+            baseline={progressBarProps.baseline}
             fitRowToContent={fitRowToContent}
             ariaLabel={formatter?.convertToText(rawValue) ?? fallbackText}
             onLabelClick={isClickable ? onFilter : undefined}

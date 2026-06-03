@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { Meter, MeterFillStyle, MeterSize } from '@elastic/charts';
 import type { MeterColorStop, MeterFill } from '@elastic/charts';
-import type { DataGridDensity, DecorationFillConfig } from '@kbn/lens-common';
+import type { DataGridDensity, CellDecorationFillConfig } from '@kbn/lens-common';
 import { LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
 import { getCellClassName, type Alignment } from './cell_value_helpers';
 
@@ -60,7 +60,7 @@ export function toMeterColorStops(
  * Single fills use a fixed color; solid/gradient fills reveal the palette via the stops.
  */
 export function getMeterFill(
-  fillStyle: DecorationFillConfig,
+  fillStyle: CellDecorationFillConfig,
   colorStops: MeterColorStop[],
   fallbackColor: string
 ): MeterFill {
@@ -89,6 +89,12 @@ export interface ProgressBarCellProps {
    * formatted value; falls back to a small default.
    */
   labelWidthCh?: number;
+  /**
+   * Value at which the fill starts (defaults to `0`). The fill grows from this
+   * baseline toward the value, leaving the track empty before it when the
+   * baseline sits inside the domain.
+   */
+  baseline?: number;
   fitRowToContent?: boolean;
   ariaLabel?: string;
   /** When set, the value label becomes a one-click filter trigger. */
@@ -150,8 +156,9 @@ const valueLabelBase = css`
  * right alignment, following the column's text alignment so the bar grows away
  * from the value (matching the cell-decoration mockup).
  *
- * The baseline is fixed at `0`. When the domain extends below zero the start fill
- * edge is left square so the bar reads cleanly as it crosses the baseline.
+ * The fill starts from `baseline` (default `0`). When the fill does not begin at
+ * the domain's lower edge — i.e. the baseline sits inside the domain — the start
+ * fill edge is left square so the bar reads cleanly as it grows from the anchor.
  */
 export const ProgressBarCell = ({
   value,
@@ -161,12 +168,14 @@ export const ProgressBarCell = ({
   size,
   alignment,
   labelWidthCh,
+  baseline = 0,
   ariaLabel,
   onLabelClick,
 }: ProgressBarCellProps) => {
   const { euiTheme } = useEuiTheme();
   const [min] = domain;
-  const hasNegativeDomain = min < 0;
+  // The start edge is rounded only when the fill begins at the lower domain edge.
+  const fillStartsAtDomainEdge = baseline <= min;
   // Right-aligned columns keep the value on the trailing edge; everything else
   // (left/default) keeps it on the leading edge.
   const valueOnTrailingSide = alignment === 'right';
@@ -202,8 +211,8 @@ export const ProgressBarCell = ({
         value={value}
         domain={domain}
         fill={fill}
-        baseline={0}
-        roundFillStart={!hasNegativeDomain}
+        baseline={baseline}
+        roundFillStart={fillStartsAtDomainEdge}
         size={size}
         orientation="horizontal"
         trackColor={euiTheme.colors.lightShade}
