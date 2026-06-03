@@ -7,21 +7,17 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
-import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
-import { inject, injectable } from 'inversify';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
 import type { IResourceInitializer } from './resource_manager';
-import { EsServiceInternalToken } from '../es_service/tokens';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-@injectable()
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
-    @inject(LoggerToken) private readonly logger: Logger,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {}
 
