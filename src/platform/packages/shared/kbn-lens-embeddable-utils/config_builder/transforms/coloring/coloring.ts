@@ -61,11 +61,15 @@ export function getContinuity(
  * `fromColorByValueLensStateToAPI` to encode an open upper bound for
  * single-stop palettes (continuity 'all' or 'above').
  *
+ * This only applies to the exact two-step shape produced for a single logical
+ * stop. Genuine multi-stop palettes whose last two bands happen to share a color
+ * and have an open upper bound must be preserved as-is.
+ *
  * The trailing step is identified as: same color as the previous step,
  * contiguous boundary (`gte` === prev `lt`/`lte`), and no upper bound.
  */
 function mergeTrailingSameColorStep(steps: ColorByValueStep[]): ColorByValueStep[] {
-  if (steps.length < 2) return steps;
+  if (steps.length !== 2) return steps;
 
   const last = steps.at(-1)!;
   const prev = steps.at(-2)!;
@@ -164,7 +168,9 @@ export function fromColorByValueLensStateToAPI(
 
   // Continuity drives the open/closed bounds on the first and last API steps.
   // An open bound (no gte/lte) signals that the color extends beyond the defined range.
-  const continuity = rawContinuity ?? 'above';
+  // When the SO omits `continuity` (common for older/real panels), fall back to deriving
+  // it from the range bounds, matching `getContinuity` used by the reverse transform.
+  const continuity = rawContinuity ?? getContinuity(rangeMin, rangeMax);
   const isOpenBelow = continuity === 'below' || continuity === 'all';
   const isOpenAbove = continuity === 'above' || continuity === 'all';
   const needsPaletteShift =
@@ -220,17 +226,18 @@ export function fromColorByValueLensStateToAPI(
     };
   });
 
-  // For single-stop palettes the i===0 branch always emits `lt`, which prevents the
-  // last-step branch from running. Add a trailing step so the full range is covered:
-  // open upper bound (continuity 'all'/'above') or closed at rangeMax ('none'/'below').
+  // For single-stop palettes the i===0 branch always emits a closed `lt`, which prevents
+  // the last-step branch from running. When the upper bound is open (continuity 'all'/'above')
+  // append a trailing open step (`gte` with no upper bound) to encode that openness;
+  // the reverse transform merges it back into the single stop. For a closed upper bound
+  // ('none'/'below') the single `lt` step already fully describes the range.
   const steps: ColorByValueStep[] =
-    stops.length === 1
+    stops.length === 1 && isOpenAbove
       ? [
           ...mappedSteps,
           {
             gte: stops[0].stop,
             color: stops[0].color,
-            ...(!isOpenAbove && rangeMax !== null && { lte: rangeMax }),
           },
         ]
       : mappedSteps;
