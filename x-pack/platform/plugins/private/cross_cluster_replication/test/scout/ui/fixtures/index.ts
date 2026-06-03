@@ -6,27 +6,25 @@
  */
 
 import { test as base } from '@kbn/scout';
-import type { PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { CrossClusterReplicationPage } from './page_objects/cross_cluster_replication_page';
 
-import type { CcrPageObjects } from './page_objects';
-import { extendPageObjects } from './page_objects';
-
-export interface CcrTestFixtures extends ScoutTestFixtures {
-  pageObjects: CcrPageObjects;
+interface CcrFixtures extends ScoutTestFixtures {
+  pageObjects: ScoutTestFixtures['pageObjects'] & {
+    crossClusterReplication: CrossClusterReplicationPage;
+  };
 }
 
-export const test = base.extend<CcrTestFixtures, ScoutWorkerFixtures>({
+export const test = base.extend<CcrFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: PageObjects;
-      page: ScoutPage;
-    },
-    use: (pageObjects: CcrPageObjects) => Promise<void>
+    { pageObjects, page }: { pageObjects: ScoutTestFixtures['pageObjects']; page: ScoutPage },
+    use
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
-    await use(extendedPageObjects);
+    await use({
+      ...pageObjects,
+      crossClusterReplication: new CrossClusterReplicationPage(page),
+    } as CcrFixtures['pageObjects']);
   },
 });
+
+export { CUSTOM_ROLES } from './custom_roles';

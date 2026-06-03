@@ -69,6 +69,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Navigate directly to the editor for a saved Lens visualization by id and
+     * wait for the rendered chart to settle. Prefer this over going through
+     * the visualize listing page (search + click) when the saved object id is
+     * known (e.g. fixture-loaded visualizations).
+     *
+     * @param id - the saved object id of the Lens visualization
+     * @param visDataTestSubj - the chart container `data-test-subj`.
+     *   example: `xyVisChart` (line/bar/area), `partitionVisChart`
+     *   (pie/treemap/donut), `mtrVis` (new metric), `legacyMtrVis` (legacy
+     *   metric), `heatmapChart`, `lnsVisualizationContainer` (datatable).
+     */
+    async openEditor(id: string, visDataTestSubj: string) {
+      await common.navigateToApp('lens', { hash: `#/edit/${id}` });
+      await this.waitForVisualization(visDataTestSubj);
+    },
+
+    /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
@@ -1587,7 +1604,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickAddLensPanel();
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();

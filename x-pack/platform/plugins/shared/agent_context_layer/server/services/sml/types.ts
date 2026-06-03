@@ -112,6 +112,17 @@ export interface SmlTypeDefinition {
 }
 
 /**
+ * How a chunk was produced.
+ *
+ * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
+ *   origin-mode call (content fetched via `getSmlData`).
+ * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
+ *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
+ *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
+ */
+export type SmlIngestionMethod = 'manual' | 'crawled';
+
+/**
  * An SML document as stored in the system index.
  */
 export interface SmlDocument {
@@ -139,6 +150,8 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /** How this chunk was produced. */
+  ingestion_method: SmlIngestionMethod;
 }
 
 /**
@@ -218,6 +231,64 @@ export interface SmlUpsertResult {
 export type { SmlSearchFilters } from '../../../common/http_api/sml';
 
 /**
+ * Mode discriminator for `indexAttachment`.
+ *
+ * The two mixins below define the discriminated half of the parameter object. They are
+ * combined with a layer-specific "base" (public vs internal) to form the full unions:
+ * `SmlIndexAttachmentParams` (public, in `server/types.ts`) and `SmlIndexerParams`
+ * (internal, below).
+ *
+ * Origin mode — content is produced by the registered type's `getSmlData` hook.
+ * Resulting chunks are tagged `ingestion_method: 'crawled'`. If the target `origin_id`
+ * already has any `ingestion_method: 'manual'` chunks, the call is a no-op unless
+ * `force: true` is provided.
+ */
+export interface SmlIndexAttachmentOriginMode {
+  /** Override existing manual entries. Default: false. */
+  force?: boolean;
+  content?: undefined;
+}
+
+/**
+ * Content mode — caller supplies pre-built chunks directly; `getSmlData` is not called.
+ * Resulting chunks are tagged `ingestion_method: 'manual'`. Always overwrites existing
+ * chunks for the `origin_id`.
+ */
+export interface SmlIndexAttachmentContentMode {
+  /** Pre-built chunks; skips getSmlData; marks `ingestion_method='manual'`. */
+  content: SmlChunk[];
+  force?: undefined;
+}
+
+/**
+ * Common params shared by both modes of the internal `indexAttachment` flow
+ * (`SmlService.indexAttachment` and `SmlIndexer.indexAttachment`).
+ *
+ * Unlike the public-contract `SmlIndexAttachmentParams` (`server/types.ts`), this
+ * type has no `request` / `spaceId` — by the time the call reaches the service or
+ * indexer, the public wrapper has already resolved a scoped saved-objects client,
+ * an internal ES client, and the space list.
+ */
+interface SmlIndexerBaseParams {
+  originId: string;
+  attachmentType: string;
+  action: SmlIndexAction;
+  spaces: string[];
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  logger: Logger;
+}
+
+export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;
+export type SmlIndexerContentParams = SmlIndexerBaseParams & SmlIndexAttachmentContentMode;
+
+/**
+ * Discriminated union for the internal `indexAttachment` flow. Shared between
+ * `SmlService.indexAttachment` and `SmlIndexer.indexAttachment`.
+ */
+export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
+
+/**
  * SML service interface — exposed on the plugin start contract.
  */
 export interface SmlService {
@@ -253,16 +324,8 @@ export interface SmlService {
     request: KibanaRequest;
   }) => Promise<Map<string, boolean>>;
 
-  /** Index a single attachment (event-driven) */
-  indexAttachment: (params: {
-    originId: string;
-    attachmentType: string;
-    action: SmlIndexAction;
-    spaces: string[];
-    esClient: ElasticsearchClient;
-    savedObjectsClient: SavedObjectsClientContract;
-    logger: Logger;
-  }) => Promise<void>;
+  /** Index a single attachment (event-driven or manual). See {@link SmlIndexerParams}. */
+  indexAttachment: (params: SmlIndexerParams) => Promise<void>;
 
   /**
    * Fetch SML documents by their chunk IDs, scoped to a space.

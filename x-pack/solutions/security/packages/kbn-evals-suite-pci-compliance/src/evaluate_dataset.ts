@@ -100,7 +100,7 @@ export function createEvaluatePciDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task: async ({ input }) => {
           const response = await chatClient.converse({ message: input.question });
 

@@ -189,6 +189,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should allow hide/show histogram, persisted after navigating away and back', async () => {
+      const from = 'Jan 1, 2010 @ 00:00:00.000';
+      const to = 'Mar 21, 2019 @ 00:00:00.000';
+      await prepareTest({ from, to });
+      let canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(true);
+      await discover.toggleChartVisibility();
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(false);
+      });
+      await dashboard.navigateToApp();
+      await header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      canvasExists = await elasticChart.canvasExists();
+      expect(canvasExists).to.be(false);
+      await discover.toggleChartVisibility();
+      await header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        canvasExists = await elasticChart.canvasExists();
+        expect(canvasExists).to.be(true);
+      });
+    });
+
     it('should allow hiding the histogram, persisted in saved search', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';

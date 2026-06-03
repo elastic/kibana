@@ -1,0 +1,19 @@
+{
+  "sha1": "2df8d3c27effa34a2dcfeb34293edab933334979",
+  "tests": [
+    {
+      "id": "70a0a35dd08286e-9bea428d7c47a33",
+      "title": "Cross-Cluster Replication shows both tabs and their primary action buttons for a user with CCR privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
+        "line": 15,
+        "column": 7
+      }
+    }
+  ]
+}
