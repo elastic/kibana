@@ -10,6 +10,7 @@
 import { fromStoredDataViewToAsCodeSavedSchema } from '@kbn/as-code-data-views-transforms';
 import type { DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
+import { omit } from 'lodash';
 
 export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
@@ -19,9 +20,11 @@ export class DataViewsAsCodeService {
   }
 
   private async mapDataView(dataView: DataViewLazy) {
+    const dataViewAsCode = fromStoredDataViewToAsCodeSavedSchema(await dataView.toSpec());
+
     return {
       id: dataView.id,
-      data: fromStoredDataViewToAsCodeSavedSchema(await dataView.toSpec()),
+      data: omit(dataViewAsCode, 'id'),
       meta: {
         managed: dataView.managed,
         version: dataView.version,

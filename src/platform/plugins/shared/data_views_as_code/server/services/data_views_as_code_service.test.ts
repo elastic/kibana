@@ -119,6 +119,32 @@ describe('DataViewsAsCodeService', () => {
       });
     });
 
+    it('should omit id from data when the transform includes it', async () => {
+      const { service, mockDataViewsService } = createService();
+
+      const mockDataView = createMockDataViewLazy({
+        id: 'dv-4',
+        spec: { title: 'events-*', id: 'dv-4' },
+      });
+      mockDataViewsService.getDataViewLazy.mockResolvedValue(mockDataView);
+      fromStoredDataViewToAsCodeSavedSchemaMock.mockReturnValue({
+        id: 'dv-4',
+        index_pattern: 'events-*',
+      });
+
+      const result = await service.get('dv-4');
+
+      expect(result).toEqual({
+        id: 'dv-4',
+        data: { index_pattern: 'events-*' },
+        meta: {
+          managed: false,
+          version: '1',
+          namespaces: ['default'],
+        },
+      });
+    });
+
     it('should pass the spec from toSpec to the transform function', async () => {
       const { service, mockDataViewsService } = createService();
 

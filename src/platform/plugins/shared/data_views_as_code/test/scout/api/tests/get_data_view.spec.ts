@@ -43,10 +43,9 @@ apiTest.describe('GET /api/data_views/{id} - as code', { tag: tags.deploymentAgn
     // Validate the id
     expect(getResponse.body.id).toBe(MOCK_DATA_VIEW.id);
 
-    // Validate the data
+    // Validate the data (id is only on the top-level response, not in data)
     expect(getResponse.body.data).toMatchObject({
       index_pattern: MOCK_DATA_VIEW.title,
-      id: MOCK_DATA_VIEW.id,
     });
 
     // Validate the meta
