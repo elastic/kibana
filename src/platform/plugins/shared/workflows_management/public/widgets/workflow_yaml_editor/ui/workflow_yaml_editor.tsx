@@ -145,6 +145,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   suggest: {
     snippetsPreventQuickSuggestions: false,
     showSnippets: true,
+    showInlineDetails: true,
     filterGraceful: true, // Better filtering
     localityBonus: true, // Prioritize matches near cursor
   },
