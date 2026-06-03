@@ -32,7 +32,7 @@ Provide a concise description of the accessibility issue:
 
 **Context**
 - **Breadcrumbs (if applicable):** <!-- Breadcrumbs of the page where the issue is detected. -->
-- **Affected area selector (optional, but preferred):** <!-- `data-test-subj` or another unique selector. -->
+- **Affected area selector (optional, but preferred):** <!-- provide a `data-test-subj` or another unique selector if available. -->
 
 **Steps to reproduce**
 1. Go to `[URL or route]`.
