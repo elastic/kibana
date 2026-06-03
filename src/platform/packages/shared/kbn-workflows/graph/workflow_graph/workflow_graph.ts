@@ -86,9 +86,16 @@ export class WorkflowGraph {
   }
 
   public getNodeStack(nodeId: string): string[] {
+    const currentNode = this.getNode(nodeId);
+
+    if (!currentNode) {
+      return [];
+    }
+
     const predecessors = this.getAllPredecessors(nodeId).toReversed();
 
     const stack: string[] = [];
+
     for (const node of predecessors) {
       if (node.type.startsWith('enter-')) {
         stack.push(node.id);
