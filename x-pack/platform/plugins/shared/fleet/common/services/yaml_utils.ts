@@ -13,8 +13,11 @@
 export interface YamlModule {
   Document: new (data: unknown, options?: any) => { toString(): string };
   isScalar: (node: unknown) => boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  visit: (node: any, visitor: { Scalar(key: unknown, node: { value?: unknown; type?: string }): void }) => void;
+
+  visit: (
+    node: any,
+    visitor: { Scalar(key: unknown, node: { value?: unknown; type?: string }): void }
+  ) => void;
 }
 
 /**
