@@ -8,7 +8,7 @@
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test, fillIndexThresholdForm } from '../fixtures';
 
 // Migrated from: x-pack/platform/test/functional_with_es_ssl/apps/rules/rules_page/create_rule_flow.ts
 // Rule type substitution: test.noop (FTR-only, no required params) → .index-threshold
@@ -20,50 +20,22 @@ const RULES_DETAILS_URL_RE = /\/app\/rules\/rule\//;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// Opens the index popover, picks the first index option after typing '.kibana',
-// selects the first date field that loads, then closes the popover.
-// Mirrors the FTR defineEsQueryAlert / screenshot_creation patterns.
-const fillIndexThresholdForm = async (page: ScoutPage, name: string) => {
-  await page.testSubj.locator('ruleDetailsNameInput').fill(name);
-
-  await page.testSubj.click('selectIndexExpression');
-
-  // Type to trigger the debounced index search (250 ms debounce)
-  const comboInput = page.testSubj.locator('thresholdIndexesComboBox').locator('input');
-  await comboInput.fill('.kibana');
-
-  // Wait for the listbox to appear; even if no real indices match, the "Choose…"
-  // fallback group always renders the typed pattern as a selectable option.
-  const listbox = page.locator('[role="listbox"]');
-  await listbox.waitFor({ state: 'visible', timeout: 15_000 });
-  await listbox.locator('[role="option"]:first-child').click();
-
-  // After index selection the form calls getFieldsForWildcard async.
-  // Wait for at least one real time-field option to appear (index 0 is the
-  // "Select a field" placeholder, index 1 is the first real date field).
-  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
-  await expect(timeFieldSelect.locator('option:nth-child(2)')).toBeAttached({ timeout: 15_000 });
-
-  const firstFieldValue = await timeFieldSelect
-    .locator('option:nth-child(2)')
-    .getAttribute('value');
-  await timeFieldSelect.selectOption(firstFieldValue!);
-
-  await page.testSubj.click('closePopover');
-};
-
 // Saves the rule form, confirms the "no actions" modal if it appears, waits for
 // redirect to the rule details page, and returns the new rule ID from the URL.
 const saveRuleAndGetId = async (page: ScoutPage): Promise<string> => {
   await page.testSubj.click('rulePageFooterSaveButton');
 
   // Admin creating a rule with no actions sees a confirmation modal. Wait up to
-  // 3 s for it; if it never appears, proceed (the form may have saved directly).
+  // 3 s for it; if it never appears (modal skipped), proceed normally.
+  // Only TimeoutError is suppressed — any other error (network, validation) is
+  // re-thrown so the root cause is immediately visible.
   await page.testSubj
     .locator('confirmCreateRuleModal')
     .waitFor({ state: 'visible', timeout: 3_000 })
     .then(() => page.testSubj.click('confirmModalConfirmButton'))
-    .catch(() => {});
+    .catch((e: unknown) => {
+      if (e instanceof Error && e.name !== 'TimeoutError') throw e;
+    });
 
   await page.waitForURL(RULES_DETAILS_URL_RE);
   const match = page.url().match(/\/app\/rules\/rule\/([^/?#]+)/);
