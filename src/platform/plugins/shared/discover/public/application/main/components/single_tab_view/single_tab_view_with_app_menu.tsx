@@ -10,30 +10,34 @@
 import React, { useMemo } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
+import { getChromeHeaderTitle } from '../../../../utils/title';
 import { SingleTabView, type SingleTabViewProps } from '.';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { useInternalStateSelector } from '../../state_management/redux';
 
-export interface SingleTabViewWithAppMenuProps extends SingleTabViewProps {
-  headerTitle: string;
-}
-
 export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
-  const { chrome } = useDiscoverServices();
+  const { chrome, embeddableEditor } = useDiscoverServices();
   const topNavMenuItems = useTopNavMenuItems();
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
+
   const isChromeNextProjectHeader = useMemo(
     () => chrome.next.isEnabled && chrome.getChromeStyle() === 'project',
     [chrome]
   );
 
-  const chromeNextHeaderTitle = useMemo(
-    () => persistedDiscoverSession?.title ?? '',
-    [persistedDiscoverSession?.title]
-  );
+  const chromeNextHeaderTitle = useMemo(() => {
+    if (!isChromeNextProjectHeader) {
+      return '';
+    }
+
+    return getChromeHeaderTitle({
+      embeddableEditor,
+      sessionTitle: persistedDiscoverSession?.title,
+    });
+  }, [embeddableEditor, isChromeNextProjectHeader, persistedDiscoverSession?.title]);
 
   return (
     <>

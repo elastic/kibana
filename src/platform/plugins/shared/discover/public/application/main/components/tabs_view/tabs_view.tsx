@@ -26,6 +26,7 @@ import {
   useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { getChromeHeaderTitle } from '../../../../utils/title';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 
@@ -87,22 +88,25 @@ export const TabsView = (props: SingleTabViewProps) => {
     if (!isChromeNextProjectHeader) {
       return undefined;
     }
-
+    const title = getChromeHeaderTitle({
+      embeddableEditor: services.embeddableEditor,
+      sessionTitle: persistedDiscoverSession?.title,
+    });
     return (tabsBar) => (
       <AppHeader
-        title={
-          persistedDiscoverSession?.title ??
-          i18n.translate('discover.pageTitleNewSession', {
-            defaultMessage: 'New session',
-          })
-        }
+        title={title}
         menu={topNavMenuItems}
         sticky={false}
         padding="m"
         titleAppend={tabsBar}
       />
     );
-  }, [isChromeNextProjectHeader, persistedDiscoverSession?.title, topNavMenuItems]);
+  }, [
+    isChromeNextProjectHeader,
+    services.embeddableEditor,
+    persistedDiscoverSession?.title,
+    topNavMenuItems,
+  ]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {
