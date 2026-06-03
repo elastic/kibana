@@ -350,6 +350,7 @@ src/core/packages/user-profile/server-mocks @elastic/kibana-core
 src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
+src/core/packages/user-settings/types @elastic/kibana-security
 src/core/packages/user-storage/browser @elastic/appex-sharedux
 src/core/packages/user-storage/browser-internal @elastic/appex-sharedux
 src/core/packages/user-storage/browser-mocks @elastic/appex-sharedux
@@ -1341,6 +1342,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/sec
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
@@ -1911,14 +1913,12 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 
 # Actionable Observability (formerly Observability UX Management) team
 
-/src/platform/test/api_integration/apis/suggestions  @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_api_integration @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/182243
 /x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/slo/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_functional @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration/apis/security/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
@@ -2203,6 +2203,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/query_bar.ts @elastic/appex-qa
 /src/platform/test/functional/services/menu_toggle.ts @elastic/appex-qa
 /src/platform/test/functional/services/listing_table.ts @elastic/appex-qa
+/src/platform/test/functional/services/content_list.ts @elastic/appex-qa
 /src/platform/test/common/fixtures/plugins/coverage @elastic/appex-qa
 /src/platform/test/functional/services/index.ts @elastic/appex-qa
 /src/platform/test/functional/services/global_nav.ts @elastic/appex-qa
@@ -3260,7 +3261,6 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_anal
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
@@ -3539,6 +3539,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /src/cli/ @elastic/kibana-operations
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
+/.github/workflows/failed-test-investigator.md @elastic/kibana-operations @elastic/appex-qa
 /.github/aw/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /moon.yml @elastic/kibana-operations
