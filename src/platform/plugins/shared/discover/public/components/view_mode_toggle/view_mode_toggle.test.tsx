@@ -30,7 +30,7 @@ describe('Document view mode toggle component', () => {
     const services = createDiscoverServicesMock();
     const originalGet = services.uiSettings.get;
 
-    services.uiSettings.get = jest.fn((key: string) => {
+    services.uiSettings.get = jest.fn().mockImplementation((key: string) => {
       if (key === 'discover:showFieldStatistics') {
         return showFieldStatistics;
       }
