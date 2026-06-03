@@ -74,6 +74,26 @@ describe('use_hosts_kpis_esql query builders', () => {
     expect(semconvNoCpu).toContain('memoryUsage = AVG(host_memoryUsage)');
   });
 
+  it('drops only the metrics whose fields are absent (ECS)', () => {
+    // No filesystem field: disk is dropped, the rest stay.
+    const noDisk = new Set(ECS_FIELDS);
+    noDisk.delete('system.filesystem.used.pct');
+    const ecsNoDisk = buildEcsQuery('metrics-*', 100, noDisk)!;
+    expect(ecsNoDisk).not.toContain('system.filesystem.used.pct');
+    expect(ecsNoDisk).not.toContain('diskUsage');
+    expect(ecsNoDisk).toContain('cpuUsage = AVG(host_cpuUsage)');
+    expect(ecsNoDisk).toContain('memoryUsage = AVG(host_memoryUsage)');
+
+    // No cpu field: cpu is dropped but load/memory/disk survive.
+    const noCpu = new Set(ECS_FIELDS);
+    noCpu.delete('system.cpu.total.norm.pct');
+    const ecsNoCpu = buildEcsQuery('metrics-*', 100, noCpu)!;
+    expect(ecsNoCpu).not.toContain('system.cpu.total.norm.pct');
+    expect(ecsNoCpu).not.toContain('cpuUsage');
+    expect(ecsNoCpu).toContain('normalizedLoad1m = AVG(host_normalizedLoad1m)');
+    expect(ecsNoCpu).toContain('diskUsage = MAX(host_diskUsage)');
+  });
+
   it('drops the state pre-filter when only normalized load remains', () => {
     const query = buildSemconvQuery(
       'metrics-*',
