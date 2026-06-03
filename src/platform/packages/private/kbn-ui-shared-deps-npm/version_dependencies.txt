@@ -14,11 +14,11 @@
 @babel/types@7.29.0
 @base2/pretty-print-object@1.0.1
 @elastic/apm-rum-core@5.25.2
-@elastic/charts@71.6.1
-@elastic/esql@4.1.0
+@elastic/charts@71.7.0
+@elastic/esql@4.4.0
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
-@elastic/eui@116.0.0
+@elastic/eui@116.2.0
 @elastic/numeral@2.5.1
 @elastic/prismjs-esql@1.1.2
 @emotion/babel-plugin@11.13.5
@@ -95,7 +95,7 @@ ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
 ajv@6.14.0
-ajv@8.18.0
+ajv@8.20.0
 antlr4@4.13.2
 aria-hidden@1.2.2
 array-union@1.0.2
@@ -212,7 +212,7 @@ evp_bytestokey@1.0.3
 extend@3.0.2
 fast-deep-equal@3.1.3
 fast-json-stable-stringify@2.1.0
-fast-uri@3.0.3
+fast-uri@3.1.2
 fastest-levenshtein@1.0.16
 file-selector@0.4.0
 find-root@1.1.0
@@ -437,7 +437,7 @@ safe-regex-test@1.1.0
 scheduler@0.23.2
 schema-utils@3.3.0
 schema-utils@4.3.2
-semver@7.7.4
+semver@7.8.0
 set-function-length@1.2.2
 setimmediate@1.0.5
 sha.js@2.4.12
@@ -508,7 +508,6 @@ util@0.12.5
 utility-types@3.11.0
 uuid@11.1.0
 uuid@14.0.0
-uuid@8.3.2
 value-equal@0.4.0
 vfile-location@3.0.1
 vfile-message@2.0.4

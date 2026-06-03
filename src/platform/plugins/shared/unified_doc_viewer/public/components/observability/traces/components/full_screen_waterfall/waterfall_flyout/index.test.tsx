@@ -70,13 +70,44 @@ describe('WaterfallFlyout', () => {
 
       expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('not found state', () => {
+    it('should display the not found empty prompt when the fetch finishes with no hit', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={null} loading={false} />);
+
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutNotFound')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutFetchError')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('fetch error state', () => {
+    it('should display the fetch error empty prompt with the error message when no hit and an error is set', () => {
+      render(
+        <WaterfallFlyout {...defaultProps} hit={null} loading={false} error="Boom: timeout" />
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutFetchError')).toBeInTheDocument();
+      expect(screen.getByText('Boom: timeout')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
     });
 
-    it('should display skeleton when hit is unavailable', () => {
-      render(<WaterfallFlyout {...defaultProps} hit={null} />);
+    it('should still render the tabs when a hit is present even if error is set', () => {
+      render(<WaterfallFlyout {...defaultProps} loading={false} error="Refetch failed" />);
 
-      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
-      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customChildren')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutFetchError')
+      ).not.toBeInTheDocument();
     });
   });
 

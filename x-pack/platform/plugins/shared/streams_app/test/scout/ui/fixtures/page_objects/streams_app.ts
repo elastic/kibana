@@ -43,6 +43,7 @@ export class StreamsApp {
   public readonly deleteQueryStreamModalInput;
   public readonly queryStreamDeletedSuccessToast;
   public readonly queryStreamCreateErrorToast;
+  public readonly fetchMoreMatchingSamplesButton;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -99,6 +100,9 @@ export class StreamsApp {
     );
     this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
     this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
+    this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
+      'streamsAppFetchMoreMatchingSamplesButton'
+    );
   }
 
   async goto() {
@@ -173,6 +177,7 @@ export class StreamsApp {
       .locator('a[data-test-subj^="breadcrumb"]')
       .filter({ hasText: /^Streams$/ })
       .click();
+    await this.expectStreamsTableVisible();
   }
 
   // Streams table utility methods
@@ -362,7 +367,7 @@ export class StreamsApp {
 
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
-    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 30_000 });
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
   }
 
   async saveRoutingRule() {
@@ -1417,6 +1422,24 @@ export class StreamsApp {
     await this.openCreateChildQueryStreamForm();
     await this.fillChildQueryStreamForm(childName, esqlQuery);
     await this.saveChildQueryStream();
+  }
+
+  async clickFetchMoreUntilThresholdReached({ maxClicks = 10 } = {}) {
+    let clicks = 0;
+    while (await this.fetchMoreMatchingSamplesButton.isVisible()) {
+      if (clicks >= maxClicks) {
+        throw new Error(
+          `Fetch more button still visible after ${maxClicks} clicks. ` +
+            `The match rate may not have crossed the threshold — check that enough matching data exists in ES.`
+        );
+      }
+      await this.fetchMoreMatchingSamplesButton.click();
+      clicks++;
+      // Wait for the button to either disappear or become clickable again
+      await this.fetchMoreMatchingSamplesButton
+        .waitFor({ state: 'hidden', timeout: 10000 })
+        .catch(() => {});
+    }
   }
 
   async deleteQueryStreamFromAdvancedTab(streamName: string) {

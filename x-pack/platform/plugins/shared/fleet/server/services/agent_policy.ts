@@ -6,6 +6,7 @@
  */
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import pMap from 'p-map';
@@ -46,12 +47,12 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
-  AGENT_POLICY_VERSION_SEPARATOR,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -76,6 +77,7 @@ import type { AgentPolicyAgentVersionCondition } from '../../common/types/models
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
@@ -468,6 +470,8 @@ class AgentPolicyService {
     } = {}
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('create');
+
+    validateFleetSavedObjectId(options.id);
 
     const savedObjectType = await getAgentPolicySavedObjectType();
     // Ensure an ID is provided, so we can include it in the audit logs below
@@ -961,8 +965,11 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            // Wildcard outside quotes so KQL treats * as wildcard for version-specific policies
-            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" or ${AGENTS_PREFIX}.policy_id:${agentPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+              agentPolicy.id
+            )}" or ${AGENTS_PREFIX}.policy_id:${escapeKuery(
+              agentPolicy.id
+            )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
@@ -1607,7 +1614,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(id)}"`,
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -2807,7 +2814,7 @@ function buildVerifierCredentialVars(
   if (provider === 'aws') {
     const awsVars = connectorVars as AwsCloudConnectorVars;
     vars.credentials_role_arn = awsVars.role_arn;
-    vars.credentials_external_id = awsVars.external_id;
+    vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
   } else if (provider === 'azure') {
     const azureVars = connectorVars as AzureCloudConnectorVars;
     vars.credentials_tenant_id = azureVars.tenant_id;

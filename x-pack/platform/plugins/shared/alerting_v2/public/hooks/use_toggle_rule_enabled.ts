@@ -19,14 +19,16 @@ export const useToggleRuleEnabled = () => {
   return useMutation({
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
       rulesApi.updateRule(id, { enabled }),
-    onSuccess: (_data, variables) => {
+    onSuccess: (data, variables) => {
       toasts.addSuccess(
         variables.enabled
           ? i18n.translate('xpack.alertingV2.hooks.useToggleRuleEnabled.enabledMessage', {
-              defaultMessage: 'Rule enabled',
+              defaultMessage: 'Rule "{ruleName}" enabled',
+              values: { ruleName: data.metadata.name },
             })
           : i18n.translate('xpack.alertingV2.hooks.useToggleRuleEnabled.disabledMessage', {
-              defaultMessage: 'Rule disabled',
+              defaultMessage: 'Rule "{ruleName}" disabled',
+              values: { ruleName: data.metadata.name },
             })
       );
       queryClient.invalidateQueries(ruleKeys.lists());

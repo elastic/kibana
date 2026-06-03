@@ -332,7 +332,7 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <nav
-            aria-label="Pagination for table: "
+            aria-label="Pagination for table: Inspector data"
             class="euiPagination emotion-euiPagination"
           >
             <span
@@ -625,7 +625,7 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <nav
-            aria-label="Pagination for table: "
+            aria-label="Pagination for table: Inspector data"
             class="euiPagination emotion-euiPagination"
           >
             <span

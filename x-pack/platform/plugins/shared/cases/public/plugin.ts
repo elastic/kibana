@@ -181,6 +181,11 @@ export class CasesUiPlugin
     return {
       config: {
         templatesEnabled: config?.templates?.enabled ?? false,
+        casesRedesign: {
+          list: config?.casesRedesign?.list ?? false,
+          details: config?.casesRedesign?.details ?? false,
+          settings: config?.casesRedesign?.settings ?? false,
+        },
       },
       api: createClientAPI({ http: core.http }),
       ui: {

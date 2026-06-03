@@ -11,7 +11,9 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'home', 'svlCommonPage']);
 
-  describe('Sample data in serverless', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/266763
+  describe.skip('Sample data in serverless', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });

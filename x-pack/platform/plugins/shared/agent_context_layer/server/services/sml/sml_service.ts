@@ -14,14 +14,23 @@ import type {
   SmlService,
   SmlSearchResult,
   SmlDocument,
+  SmlDocumentInput,
   SmlTypeDefinition,
+  SmlUpsertResult,
   SmlSearchFilters,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
-import { smlIndexName } from './sml_storage';
+import { smlIndexName, createSmlStorage } from './sml_storage';
+import { SmlResultWindowExceededError } from './sml_errors';
+
+// ES client usage pattern in this module:
+// - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
+//   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
+// - Write operations (upsert, delete) use `createSmlStorage` / `smlClient` so that
+//   StorageIndexAdapter auto-creates the index on first write.
 
 export interface SmlServiceSetup {
   /**
@@ -114,6 +123,30 @@ class SmlServiceImpl implements SmlServiceInstance {
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
       },
+      listDocuments: async ({ spaceId, esClient, page, perPage, type, originId }) => {
+        return listDocuments({
+          spaceId,
+          esClient,
+          logger,
+          page,
+          perPage,
+          type,
+          originId,
+        });
+      },
+      upsertDocument: async ({ id, spaceId, document, esClient }) => {
+        return upsertDocument({
+          id,
+          spaceId,
+          document,
+          esClient,
+          logger,
+          indexer: this.getIndexer(),
+        });
+      },
+      deleteDocument: async ({ id, spaceId, esClient }) => {
+        return deleteDocument({ id, spaceId, esClient, logger });
+      },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
       },
@@ -133,6 +166,27 @@ class SmlServiceImpl implements SmlServiceInstance {
 
 export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
+};
+
+const isResultWindowExceededError = (error: unknown): boolean => {
+  if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
+  const body = error.body as
+    | {
+        error?: {
+          reason?: string;
+          caused_by?: { reason?: string };
+          root_cause?: Array<{ reason?: string }>;
+        };
+      }
+    | undefined;
+  const reasons = [
+    body?.error?.reason,
+    body?.error?.caused_by?.reason,
+    ...(body?.error?.root_cause?.map((rc) => rc.reason) ?? []),
+  ];
+  return reasons.some(
+    (reason) => typeof reason === 'string' && reason.includes('Result window is too large')
+  );
 };
 
 /**
@@ -410,6 +464,131 @@ export const buildTypeFilters = (
 };
 
 /**
+ * Fields that must be present in every SML document on disk. Missing any of
+ * these indicates a data-integrity problem (corruption, partial write, schema
+ * drift), not a normal "field is optional" situation — so we drop the hit and
+ * log a warning rather than fabricate empty values that would mask the bug.
+ */
+const REQUIRED_SML_FIELDS = [
+  'id',
+  'type',
+  'title',
+  'origin_id',
+  'created_at',
+  'updated_at',
+] as const;
+
+/**
+ * Fields shared 1:1 by `SmlDocument` and `SmlSearchResult`. Extracted once so
+ * the two converters below don't drift.
+ */
+type SmlBaseFields = Pick<
+  SmlDocument,
+  | 'id'
+  | 'type'
+  | 'title'
+  | 'origin_id'
+  | 'created_at'
+  | 'updated_at'
+  | 'spaces'
+  | 'permissions'
+  | 'ingestion_method'
+>;
+
+/**
+ * Validate that an ES `_source` has every required SML field and pre-build the
+ * base shape shared by `SmlDocument` and `SmlSearchResult`. Returns `undefined`
+ * (and logs `warn`) for malformed sources so callers can simply filter the
+ * result out of the response.
+ */
+const validateSmlSource = (
+  source: Partial<SmlDocument> | undefined,
+  logger: Logger
+): { base: SmlBaseFields; source: Partial<SmlDocument> } | undefined => {
+  if (!source) return undefined;
+
+  for (const field of REQUIRED_SML_FIELDS) {
+    if (!source[field]) {
+      logger.warn(
+        `SML: skipping malformed document (id='${
+          source.id ?? '<unknown>'
+        }', missing required field '${field}')`
+      );
+      return undefined;
+    }
+  }
+
+  return {
+    base: {
+      id: source.id!,
+      type: source.type!,
+      title: source.title!,
+      origin_id: source.origin_id!,
+      created_at: source.created_at!,
+      updated_at: source.updated_at!,
+      spaces: source.spaces ?? [],
+      permissions: source.permissions ?? [],
+      ingestion_method: source.ingestion_method ?? 'crawled',
+    },
+    source,
+  };
+};
+
+/**
+ * Convert an ES `_source` into a complete `SmlDocument`. Returns `undefined`
+ * (with a warn log) for malformed sources or sources missing `content`.
+ *
+ * Use this for `get`/`list` style reads where the full document is expected.
+ * For search hits (which may legitimately omit `content` via `skipContent`),
+ * use {@link esHitToSmlSearchResult} instead.
+ */
+const esSourceToSmlDocument = (
+  source: Partial<SmlDocument> | undefined,
+  logger: Logger
+): SmlDocument | undefined => {
+  const validated = validateSmlSource(source, logger);
+  if (!validated) return undefined;
+
+  if (validated.source.content === undefined) {
+    logger.warn(`SML: skipping document missing 'content' (id='${validated.base.id}')`);
+    return undefined;
+  }
+
+  const doc: SmlDocument = {
+    ...validated.base,
+    content: validated.source.content,
+  };
+  if (validated.source.description !== undefined) doc.description = validated.source.description;
+  if (validated.source.user_id !== undefined) doc.user_id = validated.source.user_id;
+  if (validated.source.references !== undefined) doc.references = validated.source.references;
+  return doc;
+};
+
+/**
+ * Convert an ES search hit into an `SmlSearchResult`. Unlike
+ * {@link esSourceToSmlDocument}, `content` (and `description`) may legitimately
+ * be missing when the search excluded them via `skipContent`, so they are
+ * passed through as-is rather than required.
+ */
+const esHitToSmlSearchResult = (
+  hit: { _source?: Partial<SmlDocument>; _score?: number | null },
+  logger: Logger
+): SmlSearchResult | undefined => {
+  const validated = validateSmlSource(hit._source, logger);
+  if (!validated) return undefined;
+
+  const result: SmlSearchResult = {
+    ...validated.base,
+    score: hit._score ?? 0,
+  };
+  if (validated.source.content !== undefined) result.content = validated.source.content;
+  if (validated.source.description !== undefined) result.description = validated.source.description;
+  if (validated.source.user_id !== undefined) result.user_id = validated.source.user_id;
+  if (validated.source.references !== undefined) result.references = validated.source.references;
+  return result;
+};
+
+/**
  * Search the SML index. When the index hasn't been created yet,
  * the function returns empty results silently.
  */
@@ -472,25 +651,8 @@ const searchSml = async ({
         : response.hits.total?.value ?? 0;
 
     const results: SmlSearchResult[] = response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => {
-        const source = hit._source!;
-        return {
-          id: source.id ?? '',
-          type: source.type ?? '',
-          title: source.title ?? '',
-          origin_id: source.origin_id ?? '',
-          content: source.content,
-          description: source.description,
-          references: source.references,
-          created_at: source.created_at ?? '',
-          updated_at: source.updated_at ?? '',
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
-          user_id: source.user_id,
-          score: hit._score ?? 0,
-        };
-      });
+      .map((hit) => esHitToSmlSearchResult(hit, logger))
+      .filter((result): result is SmlSearchResult => result !== undefined);
 
     logger.debug(`SML search: returned ${results.length} result(s), total=${total}`);
 
@@ -544,28 +706,8 @@ const getDocumentsByIds = async ({
     });
 
     for (const hit of response.hits.hits) {
-      if (!hit._source) continue;
-      const source = hit._source;
-      const doc: SmlDocument = {
-        id: source.id ?? '',
-        type: source.type ?? '',
-        title: source.title ?? '',
-        origin_id: source.origin_id ?? '',
-        content: source.content ?? '',
-        created_at: source.created_at ?? '',
-        updated_at: source.updated_at ?? '',
-        spaces: source.spaces ?? [],
-        permissions: source.permissions ?? [],
-      };
-      if (source.description !== undefined) {
-        doc.description = source.description;
-      }
-      if (source.user_id !== undefined) {
-        doc.user_id = source.user_id;
-      }
-      if (source.references !== undefined) {
-        doc.references = source.references;
-      }
+      const doc = esSourceToSmlDocument(hit._source, logger);
+      if (!doc) continue;
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -575,4 +717,264 @@ const getDocumentsByIds = async ({
   }
 
   return docMap;
+};
+
+/**
+ * Fetch a single SML document by id, scoped to a space.
+ * Returns `undefined` when the document does not exist or is not in the space.
+ */
+const getDocumentById = async ({
+  id,
+  spaceId,
+  esClient,
+  logger,
+}: {
+  id: string;
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<SmlDocument | undefined> => {
+  try {
+    const response = await esClient.asInternalUser.search<SmlDocument>({
+      index: smlIndexName,
+      size: 1,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { id } },
+            {
+              bool: {
+                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    return esSourceToSmlDocument(response.hits.hits[0]?._source, logger);
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return undefined;
+    }
+    logger.warn(`SML getDocument failed: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
+ * List SML documents in a space with optional filters and pagination.
+ *
+ * Pagination follows the standard Kibana convention (`page` is 1-based,
+ * `per_page` bounds the page size).
+ */
+const listDocuments = async ({
+  spaceId,
+  esClient,
+  logger,
+  page = 1,
+  perPage = 20,
+  type,
+  originId,
+}: {
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  page?: number;
+  perPage?: number;
+  type?: string;
+  originId?: string;
+}): Promise<{ total: number; results: SmlDocument[] }> => {
+  const filters: Array<Record<string, unknown>> = [
+    {
+      bool: {
+        should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+  if (type) {
+    filters.push({ term: { type } });
+  }
+  if (originId) {
+    filters.push({ term: { origin_id: originId } });
+  }
+
+  try {
+    const response = await esClient.asInternalUser.search<SmlDocument>({
+      index: smlIndexName,
+      from: (page - 1) * perPage,
+      size: perPage,
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: filters,
+        },
+      },
+      sort: [{ updated_at: { order: 'desc' } }],
+    });
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    const results: SmlDocument[] = response.hits.hits
+      .map((hit) => esSourceToSmlDocument(hit._source, logger))
+      .filter((doc): doc is SmlDocument => doc !== undefined);
+
+    return { total, results };
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return { total: 0, results: [] };
+    }
+    if (isResultWindowExceededError(error)) {
+      const responseError = error as errors.ResponseError;
+      const body = responseError.body as
+        | { error?: { root_cause?: Array<{ reason?: string }>; reason?: string } }
+        | undefined;
+      const reason =
+        body?.error?.root_cause?.[0]?.reason ?? body?.error?.reason ?? responseError.message;
+      throw new SmlResultWindowExceededError(reason);
+    }
+    logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
+ * Upsert an SML document by id, scoped to a space.
+ *
+ * On create, `spaces` is set to `[spaceId]`. On update, `created_at` and the
+ * existing `spaces` are preserved (callers cannot widen or narrow space
+ * membership through this endpoint), and `updated_at` is refreshed.
+ *
+ * Returns `null` when a document with this id exists but is not visible from
+ * `spaceId` — callers cannot clobber documents in other spaces.
+ */
+const upsertDocument = async ({
+  id,
+  spaceId,
+  document,
+  esClient,
+  logger,
+  indexer,
+}: {
+  id: string;
+  spaceId: string;
+  document: SmlDocumentInput;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  indexer: SmlIndexer;
+}): Promise<SmlUpsertResult | null> => {
+  // TODO: Implement optimistic concurrency using _seq_no/_primary_term to prevent lost-update
+  // races. The current get-then-index pattern allows two concurrent upserts to silently overwrite
+  // each other. A fix should use esClient.asInternalUser.get() (which reliably returns
+  // _seq_no/_primary_term) and pass if_seq_no/if_primary_term to the index call.
+  // Note: StorageIndexAdapter.get() uses search internally and does not request
+  // seq_no_primary_term, so _seq_no is unreliable via that path.
+
+  // We use smlClient.get() rather than the space-aware getDocumentById() here intentionally:
+  // we need to detect documents that exist in another space (to block cross-space overwrites).
+  // getDocumentById() would return undefined for those, causing us to silently overwrite them.
+  const internalEsClient = esClient.asInternalUser;
+  const storage = createSmlStorage({ logger, esClient: internalEsClient });
+  const smlClient = storage.getClient();
+
+  let existing: SmlDocument | undefined;
+  try {
+    const existingResponse = await smlClient.get({ id });
+    if (existingResponse?.found && existingResponse._source) {
+      existing = existingResponse._source;
+    }
+  } catch (error) {
+    if (!isNotFoundError(error)) {
+      logger.warn(`SML upsertDocument lookup failed: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
+  if (existing && !isVisibleInSpace(existing.spaces, spaceId)) {
+    return null;
+  }
+
+  const now = new Date().toISOString();
+  const created = !existing;
+  const fullDocument: SmlDocument = {
+    id,
+    type: document.type,
+    title: document.title,
+    origin_id: document.origin_id,
+    content: document.content,
+    created_at: existing?.created_at ?? now,
+    updated_at: now,
+    spaces: existing?.spaces ?? [spaceId],
+    permissions: document.permissions ?? [],
+    // HTTP upserts are by definition manual writes; tagging here lets the crawler
+    // (and origin-mode indexAttachment) skip these entries to avoid clobbering them.
+    ingestion_method: 'manual',
+  };
+
+  await smlClient.index({ id, document: fullDocument });
+
+  // Manual upserts supersede crawler output for the same `origin_id`: any chunks the
+  // crawler previously indexed would otherwise linger forever, since the crawler now
+  // sees the manual entry and skips re-indexing the origin. Wipe only crawled chunks
+  // so other manual entries (including ours, and any from content-mode writes) survive.
+  await indexer.deleteChunks({
+    originId: fullDocument.origin_id,
+    esClient: internalEsClient,
+    ingestionMethod: 'crawled',
+  });
+
+  return { document: fullDocument, created };
+};
+
+const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
+  if (!spaces || spaces.length === 0) return false;
+  return spaces.includes(spaceId) || spaces.includes('*');
+};
+
+/**
+ * Delete an SML document by id, scoped to a space.
+ *
+ * The space scope is enforced via a lookup before the delete: documents
+ * that exist but are not visible in `spaceId` are reported as not found.
+ * Returns `true` when a document was deleted, `false` otherwise.
+ */
+const deleteDocument = async ({
+  id,
+  spaceId,
+  esClient,
+  logger,
+}: {
+  id: string;
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<boolean> => {
+  const existing = await getDocumentById({ id, spaceId, esClient, logger });
+  if (!existing) {
+    return false;
+  }
+
+  const internalEsClient = esClient.asInternalUser;
+  const storage = createSmlStorage({ logger, esClient: internalEsClient });
+  const smlClient = storage.getClient();
+
+  try {
+    const response = await smlClient.delete({ id });
+    return response.result === 'deleted';
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return false;
+    }
+    logger.warn(`SML deleteDocument failed: ${(error as Error).message}`);
+    throw error;
+  }
 };
