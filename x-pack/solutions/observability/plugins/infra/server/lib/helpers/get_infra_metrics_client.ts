@@ -8,9 +8,6 @@ import type {
   SearchRequest as ESSearchRequest,
   MsearchMultisearchHeader,
   SearchSearchRequestBody,
-  EsqlQueryRequest,
-  EsqlQueryResponse,
-  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -115,87 +112,6 @@ export async function getInfraMetricsClient({
           throw error;
         }
       );
-    },
-    // ES|QL execution path. Bypasses `framework.callWithRequest` (which only
-    // types `search` / `msearch`) and calls `asCurrentUser.esql.query`
-    // directly so we can pass the official `EsqlQueryRequest` shape
-    // end-to-end. Excluded-tier filtering composes via the request's
-    // `filter` field; the caller may pass an extra `filter` (typically the
-    // unified-search KQL converted via `buildEsQuery`) and the two are
-    // merged with a top-level `bool { filter: [...] }`.
-    async esql<TRow extends Record<string, unknown> = Record<string, unknown>>(
-      params: {
-        query: string;
-        filter?: QueryDslQueryContainer;
-        esqlParams?: EsqlQueryRequest['params'];
-      },
-      operationName?: string
-    ): Promise<{ columns: EsqlQueryResponse['columns']; values: unknown[][]; rows: TRow[] }> {
-      const startTime = Date.now();
-      const collector = request ? inspectableEsQueriesMap.get(request) : undefined;
-      const { elasticsearch } = await context.core;
-
-      const mergedFilter: QueryDslQueryContainer | undefined =
-        params.filter && excludedQuery
-          ? { bool: { filter: [params.filter, ...excludedQuery] } }
-          : params.filter ?? (excludedQuery ? { bool: { filter: excludedQuery } } : undefined);
-
-      const esqlRequest: EsqlQueryRequest = {
-        query: params.query,
-        drop_null_columns: false,
-        ...(mergedFilter ? { filter: mergedFilter } : {}),
-        ...(params.esqlParams ? { params: params.esqlParams } : {}),
-      };
-
-      try {
-        const response = (await elasticsearch.client.asCurrentUser.esql.query(
-          esqlRequest
-        )) as unknown as EsqlQueryResponse;
-
-        const columns = response.columns ?? [];
-        const values = response.values ?? [];
-        const rows = values.map((row) => {
-          const obj: Record<string, unknown> = {};
-          for (let i = 0; i < columns.length; i++) {
-            obj[columns[i].name] = row[i];
-          }
-          return obj as TRow;
-        });
-
-        if (collector && request) {
-          collector.push(
-            getInspectResponse({
-              esError: null,
-              // `getInspectResponse` is DSL-shaped; surfacing the ES|QL query
-              // text + filter as `esRequestParams` is good enough for the
-              // `_inspect` UI today (Kibana renders it as a JSON blob).
-              esRequestParams: esqlRequest as unknown as Record<string, unknown>,
-              esRequestStatus: RequestStatus.OK,
-              esResponse: response as unknown as Record<string, unknown>,
-              kibanaRequest: request,
-              operationName: operationName ?? 'infra metrics esql',
-              startTime,
-            })
-          );
-        }
-
-        return { columns, values, rows };
-      } catch (error) {
-        if (collector && request) {
-          collector.push(
-            getInspectResponse({
-              esError: error,
-              esRequestParams: esqlRequest as unknown as Record<string, unknown>,
-              esRequestStatus: RequestStatus.ERROR,
-              esResponse: null,
-              kibanaRequest: request,
-              operationName: operationName ?? 'infra metrics esql',
-              startTime,
-            })
-          );
-        }
-        throw error;
-      }
     },
     msearch<TDocument, TParams extends MSearchParams>(
       searchParams: TParams[],

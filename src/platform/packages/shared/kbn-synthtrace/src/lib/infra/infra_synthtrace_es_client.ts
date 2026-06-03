@@ -106,7 +106,12 @@ export class InfraSynthtraceEsClientImpl
         }`
       );
     } catch (error) {
-      this.logger.warning(`Failed to create index template "${templateName}": ${error}`);
+      // Fail loud: a missing/half-applied template silently changes the index
+      // mapping (TSDS vs plain), which would skew anything indexed against it.
+      // Rethrow so `index()` leaves `otelTemplateCreated` false and the caller
+      // sees the failure instead of producing misleading data.
+      this.logger.error(`Failed to create index template "${templateName}": ${error}`);
+      throw error;
     }
   }
 

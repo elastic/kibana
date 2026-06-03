@@ -120,9 +120,14 @@ export const journey = new Journey({
     // the same `index.mode: time_series` code path the Hosts UI exercises in
     // production — matching the PoC benchmark.
     setupClient: (client) => {
-      if ('setOtelDataStreamTemplateOptions' in client) {
-        client.setOtelDataStreamTemplateOptions({ tsds: true, lookBackTime: LOOK_BACK_TIME });
+      // Fail loud rather than seed plain data streams: this journey's numbers
+      // are only comparable to the PoC when indexed against a TSDS template.
+      if (!('setOtelDataStreamTemplateOptions' in client)) {
+        throw new Error(
+          'infra_hosts_view_kpi requires an InfraSynthtraceEsClient (setOtelDataStreamTemplateOptions) to seed a TSDS OTel data stream.'
+        );
       }
+      client.setOtelDataStreamTemplateOptions({ tsds: true, lookBackTime: LOOK_BACK_TIME });
     },
     generator: generateHostsSemconvData,
     options: {

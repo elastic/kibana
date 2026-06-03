@@ -37,11 +37,8 @@ export const normalizedLoad1m: SchemaBasedAggregations = {
     load_1m: {
       avg: {
         // OTel hostmetricsreceiver lands these gauges under the `metrics.*`
-        // prefix in `metrics-hostmetricsreceiver.otel-*`. See the equivalent
-        // formula in `formulas/cpu.ts` for the matching field references —
-        // omitting the prefix here made the snapshot agg return null and
-        // the `bucket_script` ratio fall back to `null / null = 0`, which
-        // showed as a flat 0 normalized load against real OTel data.
+        // prefix (matching `formulas/cpu.ts`); the unprefixed fields returned
+        // null and made the `bucket_script` ratio fall back to a flat 0.
         field: 'metrics.system.cpu.load_average.1m',
       },
     },

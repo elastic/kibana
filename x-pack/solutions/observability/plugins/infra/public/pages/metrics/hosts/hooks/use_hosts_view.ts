@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -26,7 +19,7 @@ import { useUnifiedSearchContext } from './use_unified_search';
 // the client-side ES|QL KPI query start in the same animation frame (max,
 // not sum).
 import { useHostsPageReady } from './use_hosts_page_ready';
-import { markOnce, measureSince } from '../utils/perf_marks';
+import { useReadyMark } from './use_ready_mark';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
@@ -94,17 +87,13 @@ export const useHostsView = () => {
   );
 
   const loading = isPending(status);
-  const hasMarkedTableReadyRef = useRef(false);
-  const prevLoadingRef = useRef<boolean | null>(null);
 
-  useEffect(() => {
-    if (prevLoadingRef.current === true && !loading && !hasMarkedTableReadyRef.current) {
-      markOnce('infra.hosts.tableReady');
-      measureSince('infra.hosts.tableReadyDuration', 'infra.hosts.navigationStart');
-      hasMarkedTableReadyRef.current = true;
-    }
-    prevLoadingRef.current = loading;
-  }, [loading]);
+  useReadyMark({
+    mark: 'infra.hosts.tableReady',
+    measure: 'infra.hosts.tableReadyDuration',
+    loading,
+    succeeded: !!data && !error,
+  });
 
   return {
     loading,

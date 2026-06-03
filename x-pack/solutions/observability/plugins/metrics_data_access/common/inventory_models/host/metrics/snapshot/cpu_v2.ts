@@ -25,13 +25,9 @@ export const cpuV2: SchemaBasedAggregations = {
       aggs: {
         avg: {
           avg: {
-            // Field name must match the OTel hostmetricsreceiver shape that
-            // the Elastic exporter lands in `metrics-hostmetricsreceiver.otel-*`
-            // — `metrics.system.cpu.utilization`. The pre-`metrics.` shape
-            // here was stale relative to the Lens formula in
-            // `formulas/cpu.ts` (which already uses the prefix) and produced
-            // a null `cpu_idle.avg` against real OTel data, which the
-            // downstream `bucket_script` then coerced to `1 - 0 = 100%`.
+            // OTel hostmetricsreceiver lands this gauge under the `metrics.*`
+            // prefix (matching the Lens formula in `formulas/cpu.ts`); the
+            // unprefixed field returned null and coerced to `1 - 0 = 100%`.
             field: 'metrics.system.cpu.utilization',
           },
         },

@@ -30,7 +30,7 @@ jest.mock('../../hooks/use_unified_search', () => ({
 //
 // The real `findInventoryModel` returns a stable singleton from its catalog,
 // so `inventoryModel.metrics` keeps the same reference across renders. The
-// mock MUST do the same: `HostKpiTiles` passes `inventoryModel.metrics` into a
+// mock MUST do the same: `KpiCharts` passes `inventoryModel.metrics` into a
 // `useAsync` dependency array, so returning a fresh object per call would
 // change the dep every render and spin an infinite re-render loop.
 const mockInventoryModel = {
@@ -46,6 +46,10 @@ const mockInventoryModel = {
 };
 jest.mock('@kbn/metrics-data-access-plugin/common', () => ({
   findInventoryModel: () => mockInventoryModel,
+  CPU_USAGE_LABEL: 'CPU Usage',
+  MEMORY_USAGE_LABEL: 'Memory Usage',
+  NORMALIZED_LOAD_LABEL: 'Normalized Load',
+  DISK_USAGE_LABEL: 'Disk Usage',
 }));
 
 jest.mock('../../../../../components/lens', () => ({
@@ -93,7 +97,7 @@ describe('KpiCharts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseHostsKpis.mockReturnValue({ kpis: KPIS, hostCount: 10, loading: false, error: null });
+    mockUseHostsKpis.mockReturnValue({ kpis: KPIS, loading: false, error: null });
     mockUseHostCountContext.mockReturnValue({ loading: false, count: 10 });
     mockUseUnifiedSearchContext.mockReturnValue({
       searchCriteria: { preferredSchema: 'semconv', limit: 100 },
@@ -142,6 +146,23 @@ describe('KpiCharts', () => {
       expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
         'data-subtitle',
         'Average (of 100 hosts)'
+      );
+    });
+  });
+
+  it('surfaces a distinct subtitle when the KPI query fails', async () => {
+    mockUseHostsKpis.mockReturnValue({
+      kpis: { cpuUsage: null, normalizedLoad1m: null, memoryUsage: null, diskUsage: null },
+      loading: false,
+      error: new Error('boom'),
+    });
+
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Unable to load'
       );
     });
   });
