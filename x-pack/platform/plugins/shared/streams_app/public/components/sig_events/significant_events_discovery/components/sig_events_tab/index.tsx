@@ -22,6 +22,7 @@ import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
 import type { SigEvent } from '@kbn/streams-schema';
 import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -31,7 +32,7 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { STATUS_OPTIONS, getStatusColor } from './filter_constants';
+import { getStatusColor } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -126,9 +127,12 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
       defaultMessage: 'Action',
     }),
     width: '100px',
-    render: (action: string) => (
-      <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
-    ),
+    render: (action?: string) =>
+      action ? (
+        <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
+      ) : (
+        '-'
+      ),
   },
 ];
 
@@ -194,8 +198,11 @@ export const SigEventsTab = () => {
         ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.statusAriaLabel', {
           defaultMessage: 'Filter by status',
         }),
-        options: buildSelectableOptions({ values: STATUS_OPTIONS, selected: statusFilter }),
-        numFilters: STATUS_OPTIONS.length,
+        options: buildSelectableOptions({
+          values: SIG_EVENT_STATUS_OPTIONS,
+          selected: statusFilter,
+        }),
+        numFilters: SIG_EVENT_STATUS_OPTIONS.length,
         numActiveFilters: statusFilter.length,
         onChange: onStatusChange,
       },

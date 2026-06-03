@@ -87,6 +87,10 @@ export interface GetWorkflowsParams {
   _full?: boolean;
 }
 
+export interface GetWorkflowAggsOptions {
+  managedFilter?: GetWorkflowsParams['managedFilter'];
+}
+
 export interface DeleteWorkflowsResponse {
   total: number;
   deleted: number;
@@ -926,8 +930,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
-    return this.workflowsService.getWorkflowAggs(fields, spaceId);
+  public async getWorkflowAggs(
+    fields: string[] = [],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ) {
+    return options
+      ? this.workflowsService.getWorkflowAggs(fields, spaceId, options)
+      : this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getAvailableConnectors(
