@@ -12,13 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
-import {
-  ALERT_REASON,
-  ALERT_RISK_SCORE,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_UUID,
-  ALERT_SEVERITY,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -39,9 +33,6 @@ import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provid
 import { SecuritySolutionFlyout } from '../../flyout';
 import { RulePreviewAlertsTable } from '../../detection_engine/rule_creation_ui/components/rule_preview/rule_preview_alerts_table';
 
-const ALERT_ORIGINAL_TIME = 'kibana.alert.original_time' as const;
-const ALERTS_TABLE_SIZE = 5;
-
 interface RulePreviewAttachmentData {
   previewId: string;
   attachmentLabel?: string;
@@ -57,7 +48,6 @@ interface PreviewMetadataState {
   ruleType: Type;
   timeframeStart: moment.Moment;
   timeframeEnd: moment.Moment;
-  alerts: PreviewAlertRow[];
 }
 
 interface RulePreviewAttachmentServices {
@@ -73,25 +63,7 @@ interface RulePreviewMetadataAggregations {
   ruleTypes?: estypes.AggregationsStringTermsAggregate;
 }
 
-type RulePreviewMetadataResponse = estypes.SearchResponse<
-  RulePreviewAlertSource,
-  RulePreviewMetadataAggregations
->;
-
-interface RulePreviewAlertSource {
-  [ALERT_ORIGINAL_TIME]?: string;
-  [ALERT_SEVERITY]?: string;
-  [ALERT_RISK_SCORE]?: number;
-  [ALERT_REASON]?: string;
-}
-
-interface PreviewAlertRow {
-  id: string;
-  originalTime: string;
-  severity: string;
-  riskScore: string;
-  reason: string;
-}
+type RulePreviewMetadataResponse = estypes.SearchResponse<unknown, RulePreviewMetadataAggregations>;
 
 const RULE_PREVIEW_TYPES: readonly Type[] = [
   'query',
@@ -120,7 +92,8 @@ export const buildRulePreviewMetadataSearchRequest = ({
 }): IEsSearchRequest => ({
   params: {
     index: `${DEFAULT_PREVIEW_INDEX}-${spaceId}`,
-    size: ALERTS_TABLE_SIZE,
+    size: 0,
+    track_total_hits: true,
     query: {
       bool: {
         filter: [
@@ -150,14 +123,6 @@ export const buildRulePreviewMetadataSearchRequest = ({
         },
       },
     },
-    sort: [
-      {
-        [ALERT_ORIGINAL_TIME]: {
-          order: 'desc',
-          unmapped_type: 'date',
-        },
-      },
-    ],
   },
 });
 
@@ -183,16 +148,6 @@ export const getRulePreviewMetadata = (
     ruleType,
     timeframeStart: moment(minTimestamp).subtract(1, 'second'),
     timeframeEnd: moment(maxTimestamp).add(1, 'second'),
-    alerts: response.hits.hits.map((hit, index) => {
-      const source = hit._source;
-      return {
-        id: hit._id ?? `${index}`,
-        originalTime: source?.[ALERT_ORIGINAL_TIME] ?? '',
-        severity: source?.[ALERT_SEVERITY] ?? '',
-        riskScore: source?.[ALERT_RISK_SCORE] !== undefined ? String(source[ALERT_RISK_SCORE]) : '',
-        reason: source?.[ALERT_REASON] ?? '',
-      };
-    }),
   };
 };
 

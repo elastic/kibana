@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERT_REASON,
-  ALERT_RISK_SCORE,
-  ALERT_RULE_TYPE,
-  ALERT_RULE_UUID,
-  ALERT_SEVERITY,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { DEFAULT_PREVIEW_INDEX, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
@@ -23,7 +17,6 @@ import {
 } from './rule_preview_attachment';
 
 describe('rule preview attachment', () => {
-  const alertOriginalTime = 'kibana.alert.original_time';
   const mockAddAttachmentType = jest.fn();
   const mockAttachments: AttachmentServiceStartContract = {
     addAttachmentType: mockAddAttachmentType,
@@ -72,7 +65,8 @@ describe('rule preview attachment', () => {
     ).toEqual({
       params: {
         index: `${DEFAULT_PREVIEW_INDEX}-default`,
-        size: 5,
+        size: 0,
+        track_total_hits: true,
         query: {
           bool: {
             filter: [
@@ -89,14 +83,6 @@ describe('rule preview attachment', () => {
           maxTimestamp: { max: { field: '@timestamp' } },
           ruleTypes: { terms: { field: ALERT_RULE_TYPE, size: 1 } },
         },
-        sort: [
-          {
-            [alertOriginalTime]: {
-              order: 'desc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
       },
     });
   });
@@ -105,17 +91,7 @@ describe('rule preview attachment', () => {
     const metadata = getRulePreviewMetadata({
       hits: {
         total: { value: 1, relation: 'eq' },
-        hits: [
-          {
-            _id: 'alert-1',
-            _source: {
-              [alertOriginalTime]: '2026-05-27T13:02:00.000Z',
-              [ALERT_SEVERITY]: 'low',
-              [ALERT_RISK_SCORE]: 21,
-              [ALERT_REASON]: 'event created low alert',
-            },
-          },
-        ],
+        hits: [],
       },
       aggregations: {
         minTimestamp: { value: 1716800000000 },
@@ -130,15 +106,6 @@ describe('rule preview attachment', () => {
     expect(metadata?.total).toBe(1);
     expect(metadata?.timeframeStart.valueOf()).toBe(1716799999000);
     expect(metadata?.timeframeEnd.valueOf()).toBe(1716800601000);
-    expect(metadata?.alerts).toEqual([
-      {
-        id: 'alert-1',
-        originalTime: '2026-05-27T13:02:00.000Z',
-        severity: 'low',
-        riskScore: '21',
-        reason: 'event created low alert',
-      },
-    ]);
   });
 
   it('returns undefined when no preview alerts are found', () => {

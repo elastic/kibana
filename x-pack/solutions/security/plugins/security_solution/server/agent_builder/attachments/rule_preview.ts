@@ -111,6 +111,7 @@ const getRulePreviewAlertsTool = (): BuiltinAttachmentBoundedTool<
     const searchResult = await context.esClient.asCurrentUser.search<RulePreviewAlertSource>({
       index: `${DEFAULT_PREVIEW_INDEX}-${context.spaceId}`,
       size,
+      track_total_hits: true,
       query: {
         bool: {
           filter: [

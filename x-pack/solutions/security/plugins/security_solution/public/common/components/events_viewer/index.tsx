@@ -113,7 +113,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const reduxTableId = dataTableId ?? tableId;
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
-  const tableContext = useMemo(() => ({ tableId }), [tableId]);
+  const tableContext = useMemo(() => ({ tableId: reduxTableId }), [reduxTableId]);
   const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
   const selectGlobalQuerySelector = useMemo(() => globalQuerySelector(), []);
   const filters = useSelector(selectGlobalFiltersQuerySelector);

@@ -221,7 +221,7 @@ export const runRulePreview = async (
     let loggedRequests = [];
 
     const abortController = new AbortController();
-    setTimeout(() => {
+    const abortTimeout = setTimeout(() => {
       abortController.abort();
       isAborted = true;
     }, PREVIEW_TIMEOUT_SECONDS * 1000);
@@ -357,6 +357,7 @@ export const runRulePreview = async (
       startedAt.add(parseInterval(internalRule.schedule.interval));
       invocationCount--;
     }
+    clearTimeout(abortTimeout);
   };
 
   switch (previewRuleParams.type) {
