@@ -62,6 +62,7 @@ export function setBreadcrumbs({
   const embeddable = services.embeddableEditor;
   const isEmbeddedEditor = embeddable.isEmbeddedEditor();
   const byValueTitle = embeddable.getByValueTab()?.label;
+  const isEmbeddableEdition = Boolean(embeddable.getEmbeddableId());
 
   const breadcrumbTitle = byValueTitle || titleBreadcrumbText;
 
@@ -75,7 +76,7 @@ export function setBreadcrumbs({
     services.chrome.setBreadcrumbs([
       ...rootBreadcrumbs,
       {
-        text: isEmbeddedEditor
+        text: isEmbeddableEdition
           ? i18n.translate('discover.dashboardsEditorBreadcrumbEditingTitle', {
               defaultMessage: 'Editing {title}',
               values: { title: breadcrumbTitle },
