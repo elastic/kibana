@@ -100,6 +100,7 @@ const renderComposeDiscoverDetailsStep = (defaultValues: ComposeFormValues = BAS
       services={{ ...createMockServices(), uiActions: mockUiActions }}
       onRecoveryTypeChange={jest.fn()}
       onKindChange={jest.fn()}
+      isEditing={false}
     />,
     { wrapper: createComposeFormWrapper(defaultValues) }
   );
