@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -86,24 +86,26 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
   const { data: selectedTemplateData } = useGetTemplate(selectedTemplateId || undefined);
   const { mutate: changeTemplate } = useChangeAppliedTemplate();
 
-  const onTemplateChange = useCallback(
-    (selected: Array<EuiComboBoxOptionOption<string>>) => {
-      const newId = selected[0]?.value ?? '';
-      setSelectedTemplateId(newId);
+  useEffect(() => {
+    if (
+      selectedTemplateId &&
+      selectedTemplateData &&
+      selectedTemplateData.templateId === selectedTemplateId
+    ) {
+      changeTemplate({
+        caseData,
+        newTemplate: {
+          id: selectedTemplateData.templateId,
+          version: selectedTemplateData.templateVersion,
+          fields: selectedTemplateData.definition.fields,
+        },
+      });
+    }
+  }, [selectedTemplateId, selectedTemplateData, caseData, changeTemplate]);
 
-      if (newId && selectedTemplateData) {
-        changeTemplate({
-          caseData,
-          newTemplate: {
-            id: selectedTemplateData.templateId,
-            version: selectedTemplateData.templateVersion,
-            fields: selectedTemplateData.definition.fields,
-          },
-        });
-      }
-    },
-    [caseData, changeTemplate, selectedTemplateData]
-  );
+  const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
+    setSelectedTemplateId(selected[0]?.value ?? '');
+  }, []);
 
   const openRenameModal = useCallback(() => {
     setNewCaseName(caseData.title);

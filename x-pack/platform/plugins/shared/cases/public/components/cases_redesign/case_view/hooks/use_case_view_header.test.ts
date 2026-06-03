@@ -9,31 +9,32 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
 import { useCaseViewHeader } from './use_case_view_header';
+import { useCloseCaseFlow } from './use_close_case_flow';
 import { basicCase } from '../../../../containers/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
-import { useStatusAction } from '../../../actions/status/use_status_action';
 import type { CaseUI } from '../../../../../common';
 
+jest.mock('./use_close_case_flow');
 jest.mock('../../../../containers/use_get_case_connectors');
 jest.mock('../../../../containers/use_delete_cases');
 jest.mock('../../../actions/status/use_should_disable_status');
-jest.mock('../../../actions/status/use_status_action');
 jest.mock('../../../../common/navigation/hooks');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../case_view/use_on_refresh_case_view_page');
 
 const mockDeleteCases = jest.fn();
-const mockHandleUpdateCaseStatus = jest.fn();
+const mockOnStatusChanged = jest.fn();
 
+(useCloseCaseFlow as jest.Mock).mockReturnValue({
+  onStatusChanged: mockOnStatusChanged,
+  closeCaseModal: null,
+});
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
 (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
-(useStatusAction as jest.Mock).mockReturnValue({
-  handleUpdateCaseStatus: mockHandleUpdateCaseStatus,
-});
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -43,12 +44,13 @@ describe('useCaseViewHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useCloseCaseFlow as jest.Mock).mockReturnValue({
+      onStatusChanged: mockOnStatusChanged,
+      closeCaseModal: null,
+    });
     (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
     (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
-    (useStatusAction as jest.Mock).mockReturnValue({
-      handleUpdateCaseStatus: mockHandleUpdateCaseStatus,
-    });
   });
 
   it('returns a formatted title with incremental ID', () => {
@@ -90,7 +92,7 @@ describe('useCaseViewHeader', () => {
     );
 
     expect(severityBadge).toBeDefined();
-    expect(severityBadge?.label).toBe(basicCase.severity);
+    expect(severityBadge?.label).toBe('Low');
     expect(statusBadge).toBeDefined();
   });
 
@@ -220,5 +222,35 @@ describe('useCaseViewHeader', () => {
 
     expect(result.current.isSettingsOpen).toBe(true);
     expect(result.current.settingsAnchor).toBe(mockElement);
+  });
+
+  it('returns closeCaseModal from useCloseCaseFlow', () => {
+    const mockModal = 'mock-close-case-modal';
+    (useCloseCaseFlow as jest.Mock).mockReturnValue({
+      onStatusChanged: mockOnStatusChanged,
+      closeCaseModal: mockModal,
+    });
+
+    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+      wrapper,
+    });
+
+    expect(result.current.closeCaseModal).toBe(mockModal);
+  });
+
+  it('calls onStatusChanged from useCloseCaseFlow when status badge is clicked', () => {
+    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+      wrapper,
+    });
+
+    const statusBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-status-badge'
+    );
+
+    act(() => {
+      statusBadge?.items?.[2]?.onClick?.();
+    });
+
+    expect(mockOnStatusChanged).toHaveBeenCalledWith('closed');
   });
 });

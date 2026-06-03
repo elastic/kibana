@@ -158,7 +158,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
           <Suspense fallback={<EuiLoadingSpinner />}>
             {casesRedesign.details ? (
               <CaseViewRedesignLazy
-                actionsNavigation={actionsNavigation}
                 refreshRef={refreshRef}
                 timelineIntegration={timelineIntegration}
               />

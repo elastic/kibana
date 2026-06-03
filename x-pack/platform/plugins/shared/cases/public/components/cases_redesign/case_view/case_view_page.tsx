@@ -6,14 +6,14 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesTitleBreadcrumbs } from '../../use_breadcrumbs';
 import { CaseViewMetrics } from '../../case_view/metrics';
 import type { CaseViewPageProps } from '../../case_view/types';
-import { useRefreshCaseViewPage } from '../../case_view/use_on_refresh_case_view_page';
+
 import { useOnUpdateField } from '../../case_view/use_on_update_field';
 import { filterCaseAttachmentsBySearchTerm } from '../../case_view/components/helpers';
 import { PAGE_TITLE } from '../../../common/translations';
@@ -21,12 +21,14 @@ import { useCasesFeatures } from '../../../common/use_cases_features';
 import { ConfirmDeleteCaseModal } from '../../confirm_delete_case';
 import { CaseSettingsPopover } from './components/case_settings_popover';
 import { CaseViewTabContent } from './components/case_view_tab_content';
+import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
 import { useCaseViewHeader } from './hooks/use_case_view_header';
 
-export const CaseViewPageRedesign = React.memo<CaseViewPageProps>(
-  ({ caseData, refreshRef, actionsNavigation }) => {
+type CaseViewPageRedesignProps = Omit<CaseViewPageProps, 'fetchCase'>;
+
+export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
+  ({ caseData, refreshRef }) => {
     const { permissions } = useCasesContext();
-    const refreshCaseViewPage = useRefreshCaseViewPage();
     const { metricsFeatures } = useCasesFeatures();
 
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -47,24 +49,7 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageProps>(
     useCasesTitleBreadcrumbs(caseData.title);
 
     const { onUpdateField, isLoading } = useOnUpdateField({ caseData });
-
-    useEffect(() => {
-      let isStale = false;
-      if (refreshRef) {
-        refreshRef.current = {
-          refreshCase: async () => {
-            if (isStale || isLoading) {
-              return;
-            }
-            refreshCaseViewPage();
-          },
-        };
-        return () => {
-          isStale = true;
-          refreshRef.current = null;
-        };
-      }
-    }, [isLoading, refreshRef, refreshCaseViewPage]);
+    useCaseRefreshRef({ refreshRef, isLoading });
 
     const {
       headerTitle,
@@ -74,6 +59,7 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageProps>(
       isDeleteModalVisible,
       setIsDeleteModalVisible,
       onConfirmDeletion,
+      closeCaseModal,
       isSettingsOpen,
       setIsSettingsOpen,
       settingsAnchor,
@@ -112,8 +98,8 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageProps>(
           searchTerm={searchTerm}
           onSearch={onSearch}
           onUpdateField={onUpdateField}
-          actionsNavigation={actionsNavigation}
         />
+        {closeCaseModal}
         {isDeleteModalVisible && (
           <ConfirmDeleteCaseModal
             totalCasesToBeDeleted={1}

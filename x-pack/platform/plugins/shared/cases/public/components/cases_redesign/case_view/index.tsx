@@ -27,59 +27,52 @@ const CaseViewLoading = () => (
   </EuiFlexGroup>
 );
 
-export const CaseViewRedesign = React.memo(
-  ({ actionsNavigation, timelineIntegration, refreshRef }: CaseViewProps) => {
-    const { spaces: spacesApi } = useKibana().services;
-    const { detailName: caseId } = useCaseViewParams();
-    const { basePath } = useCasesContext();
-    useCasePageViewEbt();
+export const CaseViewRedesign = React.memo(({ timelineIntegration, refreshRef }: CaseViewProps) => {
+  const { spaces: spacesApi } = useKibana().services;
+  const { detailName: caseId } = useCaseViewParams();
+  const { basePath } = useCasesContext();
+  useCasePageViewEbt();
 
-    const { data, isLoading, isError, refetch } = useGetCase(caseId);
+  const { data, isLoading, isError } = useGetCase(caseId);
 
-    useEffect(() => {
-      if (spacesApi && data?.outcome === 'aliasMatch' && data.aliasTargetId != null) {
-        const newPath = `${basePath}${generateCaseViewPath({ detailName: data.aliasTargetId })}`;
-        spacesApi.ui.redirectLegacyUrl({
-          path: `${newPath}${window.location.search}${window.location.hash}`,
-          aliasPurpose: data.aliasPurpose,
-          objectNoun: i18n.CASE,
-        });
-      }
-    }, [basePath, data, spacesApi]);
+  useEffect(() => {
+    if (spacesApi && data?.outcome === 'aliasMatch' && data.aliasTargetId != null) {
+      const newPath = `${basePath}${generateCaseViewPath({ detailName: data.aliasTargetId })}`;
+      spacesApi.ui.redirectLegacyUrl({
+        path: `${newPath}${window.location.search}${window.location.hash}`,
+        aliasPurpose: data.aliasPurpose,
+        objectNoun: i18n.CASE,
+      });
+    }
+  }, [basePath, data, spacesApi]);
 
-    const getLegacyUrlConflictCallout = useCallback(() => {
-      if (data && spacesApi && data.outcome === 'conflict' && data.aliasTargetId != null) {
-        const otherObjectPath = `${basePath}${generateCaseViewPath({
-          detailName: data.aliasTargetId,
-        })}${window.location.search}${window.location.hash}`;
+  const getLegacyUrlConflictCallout = useCallback(() => {
+    if (data && spacesApi && data.outcome === 'conflict' && data.aliasTargetId != null) {
+      const otherObjectPath = `${basePath}${generateCaseViewPath({
+        detailName: data.aliasTargetId,
+      })}${window.location.search}${window.location.hash}`;
 
-        return spacesApi.ui.components.getLegacyUrlConflict({
-          objectNoun: i18n.CASE,
-          currentObjectId: data.case.id,
-          otherObjectId: data.aliasTargetId,
-          otherObjectPath,
-        });
-      }
-      return null;
-    }, [basePath, data, spacesApi]);
+      return spacesApi.ui.components.getLegacyUrlConflict({
+        objectNoun: i18n.CASE,
+        currentObjectId: data.case.id,
+        otherObjectId: data.aliasTargetId,
+        otherObjectPath,
+      });
+    }
+    return null;
+  }, [basePath, data, spacesApi]);
 
-    return isError ? (
-      <DoesNotExist caseId={caseId} />
-    ) : isLoading ? (
-      <CaseViewLoading />
-    ) : data ? (
-      <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-        {getLegacyUrlConflictCallout()}
-        <CaseViewPageRedesign
-          caseData={data.case}
-          fetchCase={refetch}
-          actionsNavigation={actionsNavigation}
-          refreshRef={refreshRef}
-        />
-      </CasesTimelineIntegrationProvider>
-    ) : null;
-  }
-);
+  return isError ? (
+    <DoesNotExist caseId={caseId} />
+  ) : isLoading ? (
+    <CaseViewLoading />
+  ) : data ? (
+    <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+      {getLegacyUrlConflictCallout()}
+      <CaseViewPageRedesign caseData={data.case} refreshRef={refreshRef} />
+    </CasesTimelineIntegrationProvider>
+  ) : null;
+});
 
 CaseViewLoading.displayName = 'CaseViewLoading';
 CaseViewRedesign.displayName = 'CaseViewRedesign';

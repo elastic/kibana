@@ -21,15 +21,10 @@ jest.mock('../../../case_view/components/case_view_activity', () => ({
   CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
 }));
 jest.mock('../../../case_view/components/case_view_attachments', () => ({
-  CaseViewAttachments: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="case-view-attachments">{children}</div>
-  ),
+  CaseViewAttachments: () => <div data-test-subj="case-view-attachments" />,
 }));
 jest.mock('../../../case_view/components/case_view_similar_cases', () => ({
   CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
-}));
-jest.mock('../../../case_view/components/case_view_observables', () => ({
-  CaseViewObservables: () => <div data-test-subj="case-view-observables" />,
 }));
 
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -69,32 +64,41 @@ describe('CaseViewTabContent', () => {
     expect(screen.getByTestId('case-view-similar-cases')).toBeInTheDocument();
   });
 
-  it('renders the attachments wrapper for alerts tab', async () => {
+  it('renders the attachments tab', async () => {
     useUrlParamsMock.mockReturnValue({
-      urlParams: { tabId: CASE_VIEW_PAGE_TABS.ALERTS },
-    });
-
-    renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />, {
-      wrapperProps: { features: { alerts: { enabled: true } } },
-    });
-
-    expect(
-      await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.ALERTS}`)
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-attachments')).toBeInTheDocument();
-  });
-
-  it('renders the observables tab within attachments', async () => {
-    useUrlParamsMock.mockReturnValue({
-      urlParams: { tabId: CASE_VIEW_PAGE_TABS.OBSERVABLES },
+      urlParams: { tabId: CASE_VIEW_PAGE_TABS.ATTACHMENTS },
     });
 
     renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />);
 
     expect(
-      await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.OBSERVABLES}`)
+      await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.ATTACHMENTS}`)
     ).toBeInTheDocument();
     expect(screen.getByTestId('case-view-attachments')).toBeInTheDocument();
-    expect(screen.getByTestId('case-view-observables')).toBeInTheDocument();
+  });
+
+  it('does not render activity or similar cases when on attachments tab', async () => {
+    useUrlParamsMock.mockReturnValue({
+      urlParams: { tabId: CASE_VIEW_PAGE_TABS.ATTACHMENTS },
+    });
+
+    renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />);
+
+    await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.ATTACHMENTS}`);
+    expect(screen.queryByTestId('case-view-activity')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-similar-cases')).not.toBeInTheDocument();
+  });
+
+  it('falls back to activity tab for unknown tabId values', async () => {
+    useUrlParamsMock.mockReturnValue({
+      urlParams: { tabId: 'alerts' },
+    });
+
+    renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />);
+
+    expect(
+      await screen.findByTestId(`case-view-tab-content-${CASE_VIEW_PAGE_TABS.ACTIVITY}`)
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-activity')).toBeInTheDocument();
   });
 });

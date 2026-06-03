@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBadge, EuiIcon } from '@elastic/eui';
 import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import type { AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
-import type { CaseStatuses } from '../../../../../common/types/domain';
+import { CaseStatuses } from '../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../common';
 import { useAllCasesNavigation } from '../../../../common/navigation';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
@@ -17,11 +18,12 @@ import { useRefreshCaseViewPage } from '../../../case_view/use_on_refresh_case_v
 import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
-import { useStatusAction } from '../../../actions/status/use_status_action';
 import { statuses } from '../../../status/config';
+import { severities } from '../../../severity/config';
 import type { OnUpdateFields } from '../../../case_view/types';
 import * as i18n from '../../../case_view/translations';
 import * as commonI18n from '../../../../common/translations';
+import { useCloseCaseFlow } from './use_close_case_flow';
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
@@ -31,7 +33,7 @@ interface UseCaseViewHeaderArgs {
 export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
-  const { showSuccessToast } = useCasesToast();
+  const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
   const { mutate: deleteCases } = useDeleteCases();
@@ -41,28 +43,11 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
   const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
 
   // Status
-  const statusAction = useStatusAction({
-    isDisabled: false,
-    onAction: () => {},
-    onActionSuccess: refreshCaseViewPage,
-    selectedStatus: caseData.status,
-  });
-
+  const { onStatusChanged, closeCaseModal } = useCloseCaseFlow({ caseData, onUpdateField });
   const shouldDisableStatusFn = useShouldDisableStatus();
   const isStatusMenuDisabled = useMemo(() => {
     return shouldDisableStatusFn([caseData]);
   }, [caseData, shouldDisableStatusFn]);
-
-  const onStatusChanged = useCallback(
-    (status: CaseStatuses, closeReason?: string) => {
-      if (status !== 'closed') {
-        onUpdateField({ key: 'status', value: status });
-      } else {
-        statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
-      }
-    },
-    [caseData, onUpdateField, statusAction]
-  );
 
   // Title
   const headerTitle = useMemo(() => {
@@ -84,7 +69,7 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
       critical: 'danger',
     };
     result.push({
-      label: caseData.severity,
+      label: severities[caseData.severity]?.label ?? caseData.severity,
       color: severityColorMap[caseData.severity] ?? 'default',
       'data-test-subj': 'case-view-severity-badge',
     });
@@ -100,17 +85,17 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
       statusBadge.items = [
         {
           name: statuses.open.label,
-          onClick: () => onStatusChanged('open' as CaseStatuses),
+          onClick: () => onStatusChanged(CaseStatuses.open),
           'data-test-subj': 'case-view-status-dropdown-open',
         },
         {
           name: statuses['in-progress'].label,
-          onClick: () => onStatusChanged('in-progress' as CaseStatuses),
+          onClick: () => onStatusChanged(CaseStatuses['in-progress']),
           'data-test-subj': 'case-view-status-dropdown-in-progress',
         },
         {
           name: statuses.closed.label,
-          onClick: () => onStatusChanged('closed' as CaseStatuses),
+          onClick: () => onStatusChanged(CaseStatuses.closed),
           'data-test-subj': 'case-view-status-dropdown-closed',
         },
       ];
@@ -122,6 +107,11 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
         label: String(caseData.totalAlerts),
         color: 'danger',
         'data-test-subj': 'case-view-alerts-count-badge',
+        renderCustomBadge: ({ badgeText }) => (
+          <EuiBadge color="danger" data-test-subj="case-view-alerts-count-badge">
+            <EuiIcon type="warning" size="s" aria-hidden={true} /> {badgeText}
+          </EuiBadge>
+        ),
       });
     }
 
@@ -167,11 +157,15 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
         : []),
       {
         id: 'copyId',
-        label: i18n.COPY_ID_ACTION_LABEL,
+        label: commonI18n.COPY_ID_ACTION_LABEL,
         iconType: 'copy' as const,
-        run: () => {
-          navigator.clipboard.writeText(caseData.id);
-          showSuccessToast(i18n.COPY_ID_ACTION_SUCCESS);
+        run: async () => {
+          try {
+            await navigator.clipboard.writeText(caseData.id);
+            showSuccessToast(commonI18n.COPY_ID_ACTION_SUCCESS);
+          } catch (error) {
+            showErrorToast(error as Error);
+          }
         },
         testId: 'case-action-copy-id',
         order: 300,
@@ -207,19 +201,20 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
 
     return { items };
   }, [
-    refreshCaseViewPage,
     permissions.update,
     permissions.delete,
+    currentExternalIncident,
+    refreshCaseViewPage,
     caseData.id,
     showSuccessToast,
-    currentExternalIncident,
+    showErrorToast,
   ]);
 
   // Delete
   const onConfirmDeletion = useCallback(() => {
     setIsDeleteModalVisible(false);
     deleteCases(
-      { caseIds: [caseData.id], successToasterTitle: i18n.DELETED_CASES(1) },
+      { caseIds: [caseData.id], successToasterTitle: commonI18n.DELETED_CASES(1) },
       { onSuccess: navigateToAllCases }
     );
   }, [caseData.id, deleteCases, navigateToAllCases]);
@@ -232,6 +227,7 @@ export const useCaseViewHeader = ({ caseData, onUpdateField }: UseCaseViewHeader
     isDeleteModalVisible,
     setIsDeleteModalVisible,
     onConfirmDeletion,
+    closeCaseModal,
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
