@@ -32,6 +32,8 @@ jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
 const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    // Default: no existing manual entries for any origin_id.
+    count: jest.fn().mockResolvedValue({ count: 0 }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
@@ -101,7 +103,11 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { term: { origin_id: 'att-1' } },
+        query: {
+          bool: {
+            filter: [{ term: { origin_id: 'att-1' } }, { term: { ingestion_method: 'crawled' } }],
+          },
+        },
         refresh: false,
       });
       expect(getSmlData).not.toHaveBeenCalled();
@@ -144,7 +150,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { term: { origin_id: 'att-2' } },
+        query: { bool: { filter: [{ term: { origin_id: 'att-2' } }] } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -162,6 +168,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
         permissions: ['perm1'],
+        ingestion_method: 'crawled',
       });
     });
 
@@ -315,7 +322,9 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to delete chunks'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to delete crawled chunks')
+      );
     });
 
     it('bulk index errors are logged', async () => {
@@ -404,6 +413,279 @@ describe('createSmlIndexer', () => {
 
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.operations[0].index.document.permissions).toEqual([]);
+    });
+
+    describe('manual-entry protection (origin mode)', () => {
+      it('skips getSmlData and write when a manual entry already exists', async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        // hasManualEntry returns true
+        (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-protected',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
+        expect(esClient.count).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.arrayContaining([
+                  { term: { origin_id: 'att-protected' } },
+                  { term: { ingestion_method: 'manual' } },
+                ]),
+              }),
+            }),
+          })
+        );
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          expect.stringContaining("skipping origin-mode index for 'att-protected'")
+        );
+      });
+
+      it('force=true overrides existing manual entry and writes as crawled', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'Forced', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'att-forced',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+          }),
+          force: true,
+        });
+
+        // hasManualEntry is bypassed entirely when force=true
+        expect(esClient.count).not.toHaveBeenCalled();
+        expect(getSmlData).toHaveBeenCalledTimes(1);
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        expect(bulkMock.mock.calls[0][0].operations[0].index.document.ingestion_method).toBe(
+          'crawled'
+        );
+      });
+
+      it('delete action proceeds regardless of manual entries', async () => {
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-delete-protected',
+            attachmentType: 'lens',
+            action: 'delete',
+            esClient,
+          })
+        );
+
+        expect(esClient.count).not.toHaveBeenCalled();
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('hasManualEntry treats lookup errors as no manual entry', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        (esClient.count as jest.Mock).mockRejectedValue(
+          Object.assign(new Error('boom'), { statusCode: 500 })
+        );
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-flaky',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('hasManualEntry check failed')
+        );
+        // Should proceed (fail-open) and call getSmlData + bulk
+        expect(getSmlData).toHaveBeenCalledTimes(1);
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('content mode (manual)', () => {
+      it('writes provided chunks with deterministic ids and ingestion_method=manual', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'att-manual',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['default'],
+            esClient,
+          }),
+          content: [
+            { type: 'lens', title: 'First', content: 'one', permissions: ['p1'] },
+            { type: 'lens', title: 'Second', content: 'two' },
+          ],
+        });
+
+        // getSmlData must NOT be called in content mode
+        expect(getSmlData).not.toHaveBeenCalled();
+        // Manual-protection check is also skipped in content mode
+        expect(esClient.count).not.toHaveBeenCalled();
+        // Existing chunks for this origin_id are still removed before write
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops).toHaveLength(2);
+        expect(ops[0].index._id).toBe('lens:att-manual:manual:0');
+        expect(ops[1].index._id).toBe('lens:att-manual:manual:1');
+        expect(ops[0].index.document).toEqual(
+          expect.objectContaining({
+            id: 'lens:att-manual:manual:0',
+            title: 'First',
+            origin_id: 'att-manual',
+            content: 'one',
+            permissions: ['p1'],
+            ingestion_method: 'manual',
+          })
+        );
+        expect(ops[1].index.document.ingestion_method).toBe('manual');
+        expect(ops[1].index.document.permissions).toEqual([]);
+      });
+
+      it('content mode does not require a registered type definition', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(undefined);
+        registry.list.mockReturnValue([]);
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'att-no-type',
+            attachmentType: 'unregistered',
+            action: 'create',
+            esClient,
+            logger,
+          }),
+          content: [{ type: 'unregistered', title: 'T', content: 'c' }],
+        });
+
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+      });
+
+      it('content mode with empty chunks deletes existing and writes nothing', async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'att-empty-manual',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+          }),
+          content: [],
+        });
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('delete action removes chunks even with content provided', async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'att-manual-del',
+            attachmentType: 'lens',
+            action: 'delete',
+            esClient,
+          }),
+          content: [{ type: 'lens', title: 'unused', content: 'x' }],
+        });
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
     });
   });
 });
