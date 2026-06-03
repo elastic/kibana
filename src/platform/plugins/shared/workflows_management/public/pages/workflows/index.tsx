@@ -42,18 +42,50 @@ import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/work
 
 const MANAGED_FILTER_OPTIONS = [
   {
-    label: i18n.translate('workflows.management.managedFilter.trueOptionLabel', {
-      defaultMessage: 'True',
-    }),
-    key: 'managed',
-  },
-  {
-    label: i18n.translate('workflows.management.managedFilter.falseOptionLabel', {
-      defaultMessage: 'False',
+    label: i18n.translate('workflows.management.managedFilter.customOptionLabel', {
+      defaultMessage: 'Custom',
     }),
     key: 'unmanaged',
   },
+  {
+    label: i18n.translate('workflows.management.managedFilter.managedOptionLabel', {
+      defaultMessage: 'Managed',
+    }),
+    key: 'managed',
+  },
 ];
+
+const getSelectedManagedFilterValues = (
+  managed: WorkflowsSearchParams['managed']
+): Array<'unmanaged' | 'managed'> => {
+  if (managed === 'all') {
+    return ['unmanaged', 'managed'];
+  }
+
+  if (managed === 'managed') {
+    return ['managed'];
+  }
+
+  return ['unmanaged'];
+};
+
+const getManagedFilterValue = (
+  selectedValues: Array<'unmanaged' | 'managed'>
+): WorkflowsSearchParams['managed'] => {
+  const selectedValuesSet = new Set(selectedValues);
+  const isCustomSelected = selectedValuesSet.has('unmanaged');
+  const isManagedSelected = selectedValuesSet.has('managed');
+
+  if (isCustomSelected && isManagedSelected) {
+    return 'all';
+  }
+
+  if (isManagedSelected) {
+    return 'managed';
+  }
+
+  return undefined;
+};
 
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
@@ -250,17 +282,14 @@ export function WorkflowsPage() {
                     <WorkflowsFilterPopover
                       filter="managed"
                       title={i18n.translate('workflows.management.managedFilter.title', {
-                        defaultMessage: 'Managed',
+                        defaultMessage: 'View',
                       })}
                       values={MANAGED_FILTER_OPTIONS}
-                      selectedValues={
-                        search.managed === 'managed' || search.managed === 'unmanaged'
-                          ? [search.managed]
-                          : []
-                      }
-                      singleSelection
+                      selectedValues={getSelectedManagedFilterValues(search.managed)}
                       onSelectedValuesChanged={(newValues) => {
-                        const [managed] = newValues as WorkflowsSearchParams['managed'][];
+                        const managed = getManagedFilterValue(
+                          newValues as Array<'unmanaged' | 'managed'>
+                        );
                         setSearch({ ...search, managed });
                       }}
                     />

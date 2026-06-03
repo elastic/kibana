@@ -57,6 +57,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:uiamOAuthClientManagement': boolean;
   'workflows:ui:enabled': boolean;
+  'workflows:ui:showManagedWorkflows': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;

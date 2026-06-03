@@ -160,7 +160,23 @@ describe('WorkflowsPage authorization', () => {
     expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
   });
 
-  it('uses the managed filter when the setting is enabled', async () => {
+  it('shows the workflow type filter when the managed workflow setting is enabled', () => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage();
+
+    expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
+    expect(mockUseWorkflows).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ managed: expect.anything() })
+    );
+  });
+
+  it('requests all workflows when custom and managed workflow types are selected', async () => {
     mockCapabilities(true, true);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
     mockUseWorkflows.mockReturnValue({
@@ -171,11 +187,11 @@ describe('WorkflowsPage authorization', () => {
     renderPage();
 
     fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
-    fireEvent.click(screen.getByText('True'));
+    fireEvent.click(screen.getByText('Managed'));
 
     await waitFor(() => {
       expect(mockUseWorkflows).toHaveBeenLastCalledWith(
-        expect.objectContaining({ managed: 'managed' })
+        expect.objectContaining({ managed: 'all' })
       );
     });
   });
