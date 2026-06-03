@@ -8,6 +8,7 @@
 import {
   UserActionType,
   createFieldChangedUserActionEvents,
+  createAttachmentAddedUserActionEvent,
   serializeAuditValue,
 } from './user_action_events';
 import { TimelineEventType } from './conversation';
@@ -62,5 +63,30 @@ describe('createFieldChangedUserActionEvents', () => {
       JSON.stringify([{ uid: 'u1', username: 'analyst_a' }])
     );
     expect(serializeAuditValue('plain')).toBe('plain');
+  });
+});
+
+describe('createAttachmentAddedUserActionEvent', () => {
+  it('creates an attachment_added audit event', () => {
+    const event = createAttachmentAddedUserActionEvent({
+      attachmentId: 'alert-89a4f2',
+      attachmentType: 'alert',
+      description: 'Suspicious login',
+      user: testUser,
+      timestamp: '2024-01-02T00:00:00.000Z',
+    });
+
+    expect(event).toMatchObject({
+      type: TimelineEventType.user_action,
+      action: UserActionType.attachment_added,
+      user: testUser,
+      timestamp: '2024-01-02T00:00:00.000Z',
+      payload: {
+        attachment_id: 'alert-89a4f2',
+        attachment_type: 'alert',
+        description: 'Suspicious login',
+      },
+    });
+    expect(event.id).toBeDefined();
   });
 });

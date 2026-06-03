@@ -33,6 +33,7 @@ import {
   createRequestToEs,
   updateConversation,
   normalizeEventsFromEs,
+  mergeTimelineEventsById,
   type Document,
 } from './converters';
 import { createUserMessageEvent } from './append_message';
@@ -215,7 +216,9 @@ class ConversationClientImpl implements ConversationClient {
     });
     const persistedFromSource = normalizeEventsFromEs(document._source.events);
     const existingEvents =
-      persistedFromSource.length > 0 ? persistedFromSource : resolveConversationEvents(conversation);
+      persistedFromSource.length > 0 || (conversation.events?.length ?? 0) > 0
+        ? mergeTimelineEventsById(persistedFromSource, conversation.events ?? [])
+        : resolveConversationEvents(conversation);
     const events = [...existingEvents, userEvent];
 
     const updatedConversation = await this.update({

@@ -67,7 +67,7 @@ export interface ConversationProperties {
   /** Denormalized from template_snapshot.chat_mode for list queries. */
   chat_mode?: ConversationChatMode;
   custom_fields?: Record<string, unknown>;
-  events?: TimelineEvent[];
+  events?: TimelineEvent[] | Record<string, TimelineEvent>;
   conversation_mode?: ConversationMode;
   status?: ConversationRoundStatus;
   read?: boolean;

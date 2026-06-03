@@ -13,6 +13,7 @@ import { TimelineEventType } from './conversation';
 /** POC audit actions on `events[]` until B3 federates Cases UserActions. */
 export enum UserActionType {
   field_changed = 'field_changed',
+  attachment_added = 'attachment_added',
 }
 
 export interface FieldChangedUserActionPayload {
@@ -21,10 +22,16 @@ export interface FieldChangedUserActionPayload {
   new_value: unknown;
 }
 
+export interface AttachmentAddedUserActionPayload {
+  attachment_id: string;
+  attachment_type: string;
+  description?: string;
+}
+
 export interface UserActionEvent extends BaseTimelineEvent<'user_action'> {
   user: UserIdAndName;
   action: UserActionType;
-  payload: FieldChangedUserActionPayload;
+  payload: FieldChangedUserActionPayload | AttachmentAddedUserActionPayload;
 }
 
 const valuesEqual = (left: unknown, right: unknown): boolean =>
@@ -103,3 +110,28 @@ export const createFieldChangedUserActionEvents = ({
 
   return events;
 };
+
+export const createAttachmentAddedUserActionEvent = ({
+  attachmentId,
+  attachmentType,
+  description,
+  user,
+  timestamp = new Date().toISOString(),
+}: {
+  attachmentId: string;
+  attachmentType: string;
+  description?: string;
+  user: UserIdAndName;
+  timestamp?: string;
+}): UserActionEvent => ({
+  id: uuidv4(),
+  timestamp,
+  type: TimelineEventType.user_action,
+  user,
+  action: UserActionType.attachment_added,
+  payload: {
+    attachment_id: attachmentId,
+    attachment_type: attachmentType,
+    ...(description !== undefined ? { description } : {}),
+  },
+});

@@ -132,10 +132,12 @@ export {
   isTimelineConversation,
   UserActionType,
   createFieldChangedUserActionEvents,
+  createAttachmentAddedUserActionEvent,
   serializeAuditValue,
   deserializeAuditValue,
   type UserActionEvent,
   type FieldChangedUserActionPayload,
+  type AttachmentAddedUserActionPayload,
 } from './conversation';
 export { shouldInvokeAgentForCollaborativeMessage } from './collaborative_triggers';
 export {
@@ -149,7 +151,9 @@ export {
 export { canDeleteConversation, isCollaborativeConversation, isConversationOwner } from './conversation_access';
 export {
   mergeLegacyRoundsWithPersistedEvents,
+  mergeTimelineEventsById,
   roundsToTimelineEvents,
+  sortTimelineEventsChronologically,
   timelineEventsToRounds,
   timelineEventsToRoundEntries,
   timelineEventsToActivityEntries,

@@ -744,7 +744,7 @@ describe('conversation model converters', () => {
       };
 
       const serialized = toEs(conversation, 'space');
-      const agentEvent = serialized.events?.[0];
+      const agentEvent = serialized.events?.['round-1'];
       expect(agentEvent && 'steps' in agentEvent).toBe(true);
       if (agentEvent && 'steps' in agentEvent) {
         const toolStep = agentEvent.steps.find(
@@ -892,9 +892,87 @@ describe('conversation model converters', () => {
         _id: 'conv-1',
         _source: {
           ...serialized,
+          events: serialized.events,
+        },
+      } as ConversationDocument);
+
+      expect(restored.events).toHaveLength(2);
+      expect(restored.events?.[0]?.message).toBe('first note');
+      expect(restored.events?.[1]?.message).toBe('second note');
+    });
+
+    it('serializes events keyed by event id for ES object mapping', () => {
+      const conversation: Conversation = {
+        id: 'conv-1',
+        agent_id: 'agent_id',
+        user: { id: 'user_id', username: 'user_name' },
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: updateDate,
+        conversation_mode: 'group',
+        events: [
+          {
+            id: 'msg-1',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { username: 'analyst_a' },
+            message: 'first note',
+          },
+          {
+            id: 'msg-2',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { username: 'analyst_a' },
+            message: 'second note',
+          },
+        ],
+        rounds: [],
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.events).toEqual({
+        'msg-1': conversation.events![0],
+        'msg-2': conversation.events![1],
+      });
+    });
+
+    it('restores multiple human notes from index-keyed ES object maps on read', () => {
+      const conversation: Conversation = {
+        id: 'conv-1',
+        agent_id: 'agent_id',
+        user: { id: 'user_id', username: 'user_name' },
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: updateDate,
+        conversation_mode: 'group',
+        events: [
+          {
+            id: 'msg-1',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { username: 'analyst_a' },
+            message: 'first note',
+          },
+          {
+            id: 'msg-2',
+            timestamp: creationDate,
+            type: TimelineEventType.user_message,
+            user: { username: 'analyst_a' },
+            message: 'second note',
+          },
+        ],
+        rounds: [],
+      };
+      const serialized = toEs(conversation, 'space');
+
+      const restored = fromEs({
+        _id: 'conv-1',
+        _source: {
+          ...serialized,
           events: {
-            '0': serialized.events![0],
-            '1': serialized.events![1],
+            '0': conversation.events![0],
+            '1': conversation.events![1],
           },
         },
       } as ConversationDocument);

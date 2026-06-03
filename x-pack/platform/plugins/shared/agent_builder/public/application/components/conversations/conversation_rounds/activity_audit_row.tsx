@@ -14,6 +14,7 @@ import {
   deserializeAuditValue,
   type UserActionEvent,
   type FieldChangedUserActionPayload,
+  type AttachmentAddedUserActionPayload,
 } from '@kbn/agent-builder-common';
 import { parseTemplateAssignees } from '../detail/template_assignees_utils';
 
@@ -76,6 +77,25 @@ const fieldChangedMessage = ({
   });
 };
 
+const attachmentAddedMessage = ({
+  username,
+  attachment_id,
+  attachment_type,
+  description,
+}: {
+  username: string;
+  attachment_id: string;
+  attachment_type: string;
+  description?: string;
+}) => {
+  const label = description?.trim() || `${attachment_type} (${attachment_id})`;
+
+  return i18n.translate('xpack.agentBuilder.activityAudit.attachmentAdded', {
+    defaultMessage: '{username} added attachment: {label}',
+    values: { username, label },
+  });
+};
+
 const describeUserAction = (event: UserActionEvent): string => {
   if (event.action === UserActionType.field_changed) {
     const payload = event.payload as FieldChangedUserActionPayload;
@@ -84,6 +104,16 @@ const describeUserAction = (event: UserActionEvent): string => {
       field: payload.field,
       previous_value: payload.previous_value,
       new_value: payload.new_value,
+    });
+  }
+
+  if (event.action === UserActionType.attachment_added) {
+    const payload = event.payload as AttachmentAddedUserActionPayload;
+    return attachmentAddedMessage({
+      username: event.user.username,
+      attachment_id: payload.attachment_id,
+      attachment_type: payload.attachment_type,
+      description: payload.description,
     });
   }
 

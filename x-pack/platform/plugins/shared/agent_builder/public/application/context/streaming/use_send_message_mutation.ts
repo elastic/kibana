@@ -23,6 +23,7 @@ import {
   ConversationRoundStatus,
   isCollaborativeConversation,
   shouldInvokeAgentForCollaborativeMessage,
+  sortTimelineEventsChronologically,
   timelineEventsToRounds,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
@@ -104,12 +105,16 @@ const applyHumanNoteCacheUpdate = ({
 const buildConversationFromEvents = (
   previous: Conversation,
   events: NonNullable<Conversation['events']>
-): Conversation => ({
-  ...previous,
-  events,
-  rounds: timelineEventsToRounds(events),
-  updated_at: events.at(-1)?.timestamp ?? previous.updated_at,
-});
+): Conversation => {
+  const sortedEvents = sortTimelineEventsChronologically(events);
+
+  return {
+    ...previous,
+    events: sortedEvents,
+    rounds: timelineEventsToRounds(sortedEvents),
+    updated_at: sortedEvents.at(-1)?.timestamp ?? previous.updated_at,
+  };
+};
 
 const buildConversationWithMergedEvents = (
   previous: Conversation,

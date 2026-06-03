@@ -44,8 +44,11 @@ describe('mergeAppendMessageResponseIntoConversation', () => {
     });
 
     expect(merged?.events).toHaveLength(2);
+    expect(merged?.events?.[0]?.message).toBe('Initial note');
     expect(merged?.events?.[1]?.message).toBe('Follow-up note');
-    expect(merged?.rounds).toHaveLength(1);
+    expect(merged?.rounds).toHaveLength(2);
+    expect(merged?.rounds?.[0]?.input.message).toBe('Initial note');
+    expect(merged?.rounds?.[1]?.input.message).toBe('Follow-up note');
     expect(merged?.updated_at).toBe('2026-06-02T01:00:00.000Z');
   });
 

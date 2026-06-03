@@ -488,10 +488,15 @@ export interface AgentExecutionEvent extends BaseTimelineEvent<'agent_execution'
   agent_id: string;
 }
 
-export type { UserActionEvent, FieldChangedUserActionPayload } from './user_action_events';
+export type {
+  UserActionEvent,
+  FieldChangedUserActionPayload,
+  AttachmentAddedUserActionPayload,
+} from './user_action_events';
 export {
   UserActionType,
   createFieldChangedUserActionEvents,
+  createAttachmentAddedUserActionEvent,
   serializeAuditValue,
   deserializeAuditValue,
 } from './user_action_events';

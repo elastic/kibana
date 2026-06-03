@@ -121,10 +121,19 @@ describe('timeline_converters', () => {
       expect(timelineEventsToActivityEntries(merged)).toHaveLength(1);
     });
 
-    it('prepends legacy-only rounds before persisted events', () => {
-      const legacyRound = createTestRound({ id: 'legacy-round' });
+    it('merges legacy-only rounds with persisted events in chronological order', () => {
+      const legacyRound = createTestRound({
+        id: 'legacy-round',
+        started_at: '2024-01-01T00:00:00.000Z',
+      });
       const persistedEvents = roundsToTimelineEvents(
-        [createTestRound({ id: 'persisted-round', input: { message: 'new' } })],
+        [
+          createTestRound({
+            id: 'persisted-round',
+            input: { message: 'new' },
+            started_at: '2024-01-01T01:00:00.000Z',
+          }),
+        ],
         testUser,
         testAgentId
       );
@@ -139,6 +148,42 @@ describe('timeline_converters', () => {
       expect(merged).toHaveLength(4);
       expect((merged[1] as AgentExecutionEvent).id).toBe('legacy-round');
       expect((merged[3] as AgentExecutionEvent).id).toBe('persisted-round');
+    });
+
+    it('keeps human notes in chronological order when legacy rounds only include the latest note', () => {
+      const analystA = { id: 'user-a', username: 'analyst_a' };
+      const agentRound = createTestRound({
+        id: 'agent-round',
+        started_at: '2024-01-01T00:00:00.000Z',
+      });
+      const note1: UserMessageEvent = {
+        id: 'note-1',
+        timestamp: '2024-01-01T01:00:00.000Z',
+        type: TimelineEventType.user_message,
+        user: analystA,
+        message: 'first note',
+      };
+      const note2: UserMessageEvent = {
+        id: 'note-2',
+        timestamp: '2024-01-01T02:00:00.000Z',
+        type: TimelineEventType.user_message,
+        user: analystA,
+        message: 'second note',
+      };
+      const persistedEvents = [...roundsToTimelineEvents([agentRound], testUser, testAgentId), note1, note2];
+      const legacyRounds = timelineEventsToRounds(persistedEvents);
+
+      const merged = mergeLegacyRoundsWithPersistedEvents({
+        legacyRounds,
+        persistedEvents,
+        user: testUser,
+        agentId: testAgentId,
+      });
+      const humanNotes = timelineEventsToActivityEntries(merged).flatMap((entry) =>
+        entry.type === 'round' && isHumanNoteRound(entry.round) ? [entry.round.input.message] : []
+      );
+
+      expect(humanNotes).toEqual(['first note', 'second note']);
     });
   });
 
@@ -219,6 +264,33 @@ describe('timeline_converters', () => {
       expect(entries).toHaveLength(1);
       expect(entries[0].author).toEqual(analystB);
       expect(isHumanNoteRound(entries[0].round)).toBe(false);
+    });
+
+    it('preserves multiple consecutive human notes as separate entries', () => {
+      const analystA = { id: 'user-a', username: 'analyst_a' };
+      const events = [
+        {
+          id: 'msg-1',
+          timestamp: '2024-01-01T00:00:00.000Z',
+          type: TimelineEventType.user_message,
+          user: analystA,
+          message: 'first note',
+        },
+        {
+          id: 'msg-2',
+          timestamp: '2024-01-01T00:01:00.000Z',
+          type: TimelineEventType.user_message,
+          user: analystA,
+          message: 'second note',
+        },
+      ] as const;
+
+      const entries = timelineEventsToRoundEntries([...events]);
+
+      expect(entries).toHaveLength(2);
+      expect(entries[0].round.input.message).toBe('first note');
+      expect(entries[1].round.input.message).toBe('second note');
+      expect(timelineEventsToActivityEntries([...events])).toHaveLength(2);
     });
   });
 

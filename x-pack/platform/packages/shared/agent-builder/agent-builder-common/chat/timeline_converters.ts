@@ -134,6 +134,43 @@ const buildHumanNoteRound = (userMessage: UserMessageEvent): ConversationRound =
   },
 });
 
+const timelineEventSortRank = (event: TimelineEvent): number => {
+  if (isUserMessageEvent(event)) {
+    return 0;
+  }
+  if (isAgentExecutionEvent(event)) {
+    return 1;
+  }
+  if (isUserActionEvent(event)) {
+    return 2;
+  }
+  return 3;
+};
+
+export const sortTimelineEventsChronologically = (events: TimelineEvent[]): TimelineEvent[] =>
+  [...events].sort((left, right) => {
+    const byTime = left.timestamp.localeCompare(right.timestamp);
+    if (byTime !== 0) {
+      return byTime;
+    }
+    const byType = timelineEventSortRank(left) - timelineEventSortRank(right);
+    if (byType !== 0) {
+      return byType;
+    }
+    return left.id.localeCompare(right.id);
+  });
+
+/** Merge event lists by id, then order chronologically (timestamp, then id). */
+export const mergeTimelineEventsById = (...eventLists: TimelineEvent[][]): TimelineEvent[] => {
+  const byId = new Map<string, TimelineEvent>();
+  for (const events of eventLists) {
+    for (const event of events) {
+      byId.set(event.id, event);
+    }
+  }
+  return sortTimelineEventsChronologically([...byId.values()]);
+};
+
 /** Human-only note persisted without an agent execution event. */
 export const isHumanNoteRound = (round: ConversationRound): boolean =>
   round.status === ConversationRoundStatus.completed &&
@@ -173,6 +210,14 @@ export const timelineEventsToActivityEntries = (
     }
 
     if (isUserMessageEvent(event)) {
+      // Each human note is a trailing user_message without a following agent_execution.
+      // Flush the previous pending note before accepting the next one.
+      if (pendingUserMessage) {
+        const humanNote = pendingHumanNoteEntry(pendingUserMessage);
+        if (humanNote) {
+          entries.push(humanNote);
+        }
+      }
       pendingUserMessage = event;
       continue;
     }
@@ -222,16 +267,41 @@ export const mergeLegacyRoundsWithPersistedEvents = ({
     return legacyRounds.length ? roundsToTimelineEvents(legacyRounds, user, agentId) : [];
   }
   if (!legacyRounds.length) {
-    return persistedEvents;
+    return sortTimelineEventsChronologically(persistedEvents);
   }
 
   // Collaborative conversations persist agent runs in `events` while legacy
   // `conversation_rounds` may still contain the same rounds — skip duplicates.
   const legacyEvents = roundsToTimelineEvents(legacyRounds, user, agentId);
   const persistedEventIds = new Set(persistedEvents.map((event) => event.id));
-  const uniqueLegacyEvents = legacyEvents.filter((event) => !persistedEventIds.has(event.id));
+  const persistedUserMessageIds = new Set(
+    persistedEvents.filter(isUserMessageEvent).map((event) => event.id)
+  );
+  const uniqueLegacyEvents = legacyEvents.filter((event) => {
+    if (persistedEventIds.has(event.id)) {
+      return false;
+    }
 
-  return [...uniqueLegacyEvents, ...persistedEvents];
+    // Legacy round conversion uses `msg-{id}` for user messages; persisted human notes use `{id}`.
+    if (isUserMessageEvent(event) && event.id.startsWith('msg-')) {
+      return !persistedUserMessageIds.has(event.id.slice(4));
+    }
+
+    // Human-note rounds also emit a synthetic agent_execution; persisted notes are user_message-only.
+    if (isAgentExecutionEvent(event) && persistedUserMessageIds.has(event.id)) {
+      const hasPersistedAgentExecution = persistedEvents.some(
+        (persisted, index) =>
+          isAgentExecutionEvent(persisted) &&
+          isUserMessageEvent(persistedEvents[index - 1]) &&
+          persistedEvents[index - 1]?.id === event.id
+      );
+      return hasPersistedAgentExecution;
+    }
+
+    return true;
+  });
+
+  return mergeTimelineEventsById(uniqueLegacyEvents, persistedEvents);
 };
 
 const asTimelineEvents = (events: TimelineEvent[] | undefined): TimelineEvent[] =>

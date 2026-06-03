@@ -22,15 +22,15 @@ import {
   TimelineEventType,
   ToolOrigin,
   ToolResultType,
-  mergeLegacyRoundsWithPersistedEvents,
-  timelineEventsToRounds,
-} from '@kbn/agent-builder-common';
-import type { TimelineEvent } from '@kbn/agent-builder-common';
-import {
   isAgentExecutionEvent,
   isUserActionEvent,
   isUserMessageEvent,
+  mergeLegacyRoundsWithPersistedEvents,
+  mergeTimelineEventsById,
+  sortTimelineEventsChronologically,
+  timelineEventsToRounds,
 } from '@kbn/agent-builder-common';
+import type { TimelineEvent } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
@@ -103,15 +103,15 @@ export const normalizeEventsFromEs = (events: unknown): TimelineEvent[] => {
   }
 
   if (Array.isArray(events)) {
-    return events.filter(isTimelineEvent);
+    return sortTimelineEventsChronologically(events.filter(isTimelineEvent));
   }
 
   if (typeof events === 'object') {
     if (isTimelineEvent(events)) {
-      return [events];
+      return [events as TimelineEvent];
     }
 
-    return Object.entries(events as Record<string, unknown>)
+    const normalized = Object.entries(events as Record<string, unknown>)
       .filter(([, value]) => isTimelineEvent(value))
       .sort(([leftKey], [rightKey]) => {
         const leftIndex = Number(leftKey);
@@ -122,10 +122,21 @@ export const normalizeEventsFromEs = (events: unknown): TimelineEvent[] => {
         return leftKey.localeCompare(rightKey);
       })
       .map(([, value]) => value as TimelineEvent);
+
+    return sortTimelineEventsChronologically(normalized);
   }
 
   return [];
 };
+
+/** Store events keyed by id so ES object mapping does not collapse array elements. */
+export const timelineEventsToEsRecord = (
+  events: TimelineEvent[]
+): Record<string, TimelineEvent> => {
+  return Object.fromEntries(events.map((event) => [event.id, event]));
+};
+
+export { mergeTimelineEventsById };
 
 const convertCollaborationFromEs = (source: ConversationProperties) => {
   const events = normalizeEventsFromEs(source.events);
@@ -143,7 +154,7 @@ const convertCollaborationToEs = (conversation: Conversation): Partial<Conversat
     }),
     ...(conversation.events !== undefined &&
       conversation.events.length > 0 && {
-        events: normalizeTimelineEventsForEs(conversation.events),
+        events: timelineEventsToEsRecord(normalizeTimelineEventsForEs(conversation.events)),
       }),
   };
 };
