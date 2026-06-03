@@ -7,133 +7,64 @@ and UI independently.
 
 ## Plugin structure
 
-```
-client_apps/
-├── kibana.jsonc                                  Plugin manifest
-├── tsconfig.json                                 TypeScript configuration
-├── jest.config.js                                Jest test configuration
-├── common/                                       Shared constants and types
-│   ├── index.ts                                  Plugin ID and API paths
-│   └── types.ts                                  Shared interfaces (e.g. SymbolicationResponse)
-├── public/                                       Client-side (browser)
-│   ├── index.ts                                  Entry point — exports plugin class
-│   ├── plugin.ts                                 Registers the Kibana app
-│   ├── app.tsx                                   Router — dispatches to platform views
-│   └── platforms/
-│       ├── android/
-│       │   └── retrace_view.tsx                  Android R8 deobfuscation UI
-│       └── javascript/
-│           └── sourcemap_view.tsx                JS source map resolution UI (placeholder)
-└── server/                                       Server-side (Node.js)
-    ├── index.ts                                  Config schema + plugin export
-    ├── plugin.ts                                 Wires together all platform routes
-    ├── lib/
-    │   └── handle_route_error.ts                 Shared error handler for routes
-    └── platforms/
-        ├── android/
-        │   ├── routes.ts                         POST /internal/client_apps/android/retrace
-        │   └── retrace.ts                        Core retrace algorithm (stub)
-        └── javascript/
-            └── routes.ts                         JS source map routes (placeholder)
-```
+The plugin is organized into three top-level areas:
+
+- **`common/`** — Types and API path constants shared between client and server.
+- **`public/`** — Client-side code: the Kibana app registration, a router, and one view
+  component per platform action.
+- **`server/`** — Server-side code: route registration, the symbolication libraries in
+  `lib/`, and shared utilities.
+
+Each platform (Android, JavaScript, …) owns a dedicated subdirectory under both
+`server/platforms/` and `public/platforms/`. Platform code does not import across platforms.
 
 ### Design principles
 
-- **Platform isolation** — Each platform (Android, JavaScript, iOS) owns its own directory
-  under both `server/platforms/` and `public/platforms/`. Platform code does not import from
-  other platforms.
-- **Shared shell** — The top-level plugin (`plugin.ts` on both sides) is a thin shell that
-  registers routes and UI from each platform. Shared utilities live in `server/lib/` and
-  `common/`.
-- **Common response contract** — All symbolication APIs return a `SymbolicationResponse`
-  (`{ original, resolved }`) defined in `common/types.ts`, so the UI can treat platforms
-  uniformly when needed.
+- **Platform isolation** — Each platform owns its directory under `server/platforms/` and
+  `public/platforms/`. Platform code does not import from other platforms.
+- **Shared shell** — The top-level `plugin.ts` on both sides is a thin shell that wires up
+  each platform. Shared utilities live in `server/lib/` and `common/`.
+- **Common response contract** — All symbolication APIs return `{ original, resolved }`
+  (defined in `common/types.ts`), so the UI can treat all platforms uniformly.
+- **Storage-agnostic symbolication** — Retracer libraries in `server/lib/` are decoupled
+  from Elasticsearch via a `SourceMapFetcher` interface. Route handlers inject an ES-backed
+  fetcher; tests inject in-memory documents, keeping the core algorithm independently
+  testable without a running cluster.
 
-## How to add a new platform
+## Adding a new platform
 
-Adding support for a new client platform (e.g. iOS) requires touching four places:
+Each platform needs four things:
 
-### 1. Server-side routes
+1. **Server routes** — Create `server/platforms/<platform>/routes.ts` and register it in
+   `server/plugin.ts`.
+2. **API path constant** — Add the route path to `common/index.ts`.
+3. **Client view** — Create a React component under `public/platforms/<platform>/`.
+4. **Router entry** — Add a `<Route>` for the new path in `public/app.tsx`.
 
-Create `server/platforms/ios/routes.ts`:
-
-```typescript
-import type { IRouter, Logger } from '@kbn/core/server';
-
-export function registerIosRoutes({ router, logger }: { router: IRouter; logger: Logger }) {
-  // Register POST /internal/client_apps/ios/symbolicate (or similar)
-}
-```
-
-Wire it into `server/plugin.ts`:
-
-```typescript
-import { registerIosRoutes } from './platforms/ios/routes';
-
-// Inside setup():
-registerIosRoutes(params);
-```
-
-### 2. API path constant
-
-Add the new route path to `common/index.ts`:
-
-```typescript
-export const IOS_SYMBOLICATE_API_PATH = '/internal/client_apps/ios/symbolicate';
-```
-
-### 3. Client-side view
-
-Create `public/platforms/ios/symbolicate_view.tsx` with a React component.
-
-### 4. Router entry
-
-Add a `<Route>` in `public/app.tsx`:
-
-```tsx
-import { SymbolicateView } from './platforms/ios/symbolicate_view';
-
-// Inside the <Router>:
-<Route path="/ios/symbolicate" render={() => <SymbolicateView core={core} />} />
-```
-
-That's it — the new platform is reachable at `/app/clientApps/ios/symbolicate` via URL
+The new platform will be reachable at `/app/clientApps/<platform>/<action>` via URL
 drilldown from any Kibana dashboard.
 
-## How to add backend services to an existing platform
+## Adding backend services to a platform
 
-Each platform directory under `server/platforms/<platform>/` can contain as many modules as
-needed. For example, to add a new service to the Android platform:
+Each `server/platforms/<platform>/` directory can contain as many modules as needed. Add
+new modules there and wire them into the platform's route handler, or add a new route file
+if the service needs its own endpoint. Add any new API path constants to `common/index.ts`.
 
-1. Create the module in `server/platforms/android/my_service.ts`.
-2. Import and use it from `server/platforms/android/routes.ts` (for route handlers) or
-   from a new route file if the service needs its own endpoint.
-3. If the new service needs a new API path, add the constant to `common/index.ts`.
+## Adding shared utilities
 
-The same pattern applies for adding new UI pages: create a new view component under
-`public/platforms/<platform>/` and add a corresponding `<Route>` in `public/app.tsx`.
+Utilities needed by more than one platform belong in:
 
-## How to add shared utilities
-
-Utilities needed by multiple platforms belong in:
-
-- `server/lib/` for server-side helpers (e.g. error handling, ES client wrappers)
+- `server/lib/` for server-side helpers (error handling, symbolication libraries, ES client
+  wrappers)
 - `common/` for types and constants shared between server and client
 
 ## URL drilldown integration
 
 The plugin registers with `visibleIn: []` — it does not appear in Kibana's navigation menu.
-Users reach platform views via URL drilldowns configured on dashboard panels. The URL
-pattern is:
+Users reach platform views via URL drilldowns configured on dashboard panels:
 
 ```
 {{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event.value}}
-```
-
-For example, an Android crash dashboard drills down to:
-
-```
-{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event.value}}
 ```
 
 ## Running tests
