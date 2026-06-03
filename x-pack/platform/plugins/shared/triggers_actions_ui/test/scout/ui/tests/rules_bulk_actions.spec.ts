@@ -101,7 +101,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     // Verify both rules show the snoozed badge
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
+      await page.keyboard.press('Enter');
+      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
       await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeVisible();
     }
   });
@@ -130,7 +131,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
+      await page.keyboard.press('Enter');
+      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
       await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeHidden();
     }
   });
@@ -158,7 +160,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
+      await page.keyboard.press('Enter');
+      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
       await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeVisible();
     }
   });
@@ -190,7 +193,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     for (const name of [r1.data.name, r2.data.name]) {
       await page.testSubj.locator('ruleSearchField').fill(name as string);
-      await expect(page.testSubj.locator('rulesList')).toContainText(name as string);
+      await page.keyboard.press('Enter');
+      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
       await expect(page.testSubj.locator('rulesListNotifyBadge-scheduled')).toBeHidden();
     }
   });
@@ -263,7 +267,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       { name: r3.data.name as string, expectedStatus: 'Disabled' },
     ]) {
       await page.testSubj.locator('ruleSearchField').fill(name);
-      await expect(page.testSubj.locator('rulesList')).toContainText(name);
+      await page.keyboard.press('Enter');
+      await expect(page.testSubj.locator('rulesList').locator(`[title="${name}"]`)).toBeVisible();
       await expect(page.testSubj.locator('statusDropdown')).toContainText(expectedStatus);
     }
 
