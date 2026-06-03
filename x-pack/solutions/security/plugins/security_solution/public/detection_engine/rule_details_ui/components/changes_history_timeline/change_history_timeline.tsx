@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { ChangeHistoryItem } from './change_history_item';
@@ -41,6 +42,7 @@ export function RuleChangesHistoryTimeline({
   onSelectItem,
   onLoadMore,
 }: ChangeHistoryTimelineProps): JSX.Element {
+  const { euiTheme } = useEuiTheme();
   const autoSelectedIdRef = useRef<string | undefined>(undefined);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -90,7 +92,16 @@ export function RuleChangesHistoryTimeline({
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
       <div
-        style={{ flex: '1 1 0', overflowY: 'auto', minHeight: 0 }}
+        style={{
+          flex: '1 1 0',
+          overflowY: 'auto',
+          minHeight: 0,
+          // Extra inset space so item hover shadows/borders aren't clipped by the
+          // overflow container. Setting overflowY forces overflowX to hidden too.
+          paddingTop: euiTheme.size.s,
+          paddingLeft: euiTheme.size.m,
+          paddingRight: euiTheme.size.m,
+        }}
         aria-label={i18n.TIMELINE_ARIA_LABEL}
         data-test-subj="ruleChangeHistoryList"
       >

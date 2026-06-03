@@ -71,7 +71,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Elemen
       `,
       rightPanelContentCss: css`
         overflow: hidden;
-        padding: ${euiTheme.size.m};
+        padding: ${euiTheme.size.s} 0;
       `,
     }),
     [euiTheme]
