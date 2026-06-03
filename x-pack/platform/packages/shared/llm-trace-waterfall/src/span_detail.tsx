@@ -20,6 +20,7 @@ import {
   EuiStat,
   EuiTabbedContent,
   type EuiTabbedContentTab,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { SpanNode } from './types';
 import { SPAN_COLORS, getSpanCategory } from './waterfall_item';
