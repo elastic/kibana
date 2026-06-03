@@ -1,0 +1,187 @@
+{
+  "sha1": "f33a76451025fdb85c586fdf3a37b0e0c2f88543",
+  "tests": [
+    {
+      "id": "edad46751593082-f1df5a4d8ec8b23",
+      "title": "Custom Threshold rule data view create a threshold rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 153,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-6f3dc658bc970b8",
+      "title": "Custom Threshold rule data view should have correct data view reference before and after edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 164,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-d7cfe0f3be09dbb",
+      "title": "Custom Threshold rule data view should create rule with noDataBehavior: recover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 196,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-76381e43384ef1a",
+      "title": "Custom Threshold rule data view should create rule with noDataBehavior: alertOnNoData",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 210,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-cbc2d3e7f437631",
+      "title": "Custom Threshold rule data view should create rule with noDataBehavior: remainActive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 224,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-6413d655d1215e7",
+      "title": "Custom Threshold rule data view should update existing rule to add noDataBehavior parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 238,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-2601ab533468352",
+      "title": "Metric threshold rule rule should be active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 207,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-8bd05469abfee33",
+      "title": "Metric threshold rule should set correct information in the alert document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 220,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-df47c0a865f6ca5",
+      "title": "Metric threshold rule should set correct action parameter: ruleType",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 269,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-a5c035bfdf9d2c2",
+      "title": "Metric threshold rule should create rule with noDataBehavior: recover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 297,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-020e88e8c6993ac",
+      "title": "Metric threshold rule should create rule with noDataBehavior: alertOnNoData",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 311,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-aff0e7200841edd",
+      "title": "Metric threshold rule should create rule with noDataBehavior: remainActive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 325,
+        "column": 10
+      }
+    },
+    {
+      "id": "a78c90a55d9044b-0a4902db6ac40fb",
+      "title": "Metric threshold rule should update existing rule to add noDataBehavior parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/metric_threshold_rule.spec.ts",
+        "line": 339,
+        "column": 10
+      }
+    }
+  ]
+}
