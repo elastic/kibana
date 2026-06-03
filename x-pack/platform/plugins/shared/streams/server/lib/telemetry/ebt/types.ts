@@ -102,6 +102,12 @@ interface StreamsAgentToolEventStatusUpdateProps {
   error_message?: string;
 }
 
+interface StreamsSignificantEventsDiscoveryTriggeredProps {
+  triggered_by: 'manual' | 'scheduled';
+  execution_id: string;
+  space_id: string;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -114,4 +120,5 @@ export {
   type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
+  type StreamsSignificantEventsDiscoveryTriggeredProps,
 };

@@ -11,17 +11,17 @@ import { SignificantEventsDiscoveryClient } from './significant_events_discovery
 
 export interface WorkflowClients {
   streamsKIsOnboardingClient: StreamsKIsOnboardingClient | undefined;
-  SignificantEventsDiscoveryClient: SignificantEventsDiscoveryClient | undefined;
+  significantEventsDiscoveryClient: SignificantEventsDiscoveryClient | undefined;
 }
 export const createWorkflowClients = (
   managementApi: WorkflowsServerPluginSetup['management'] | undefined
 ): WorkflowClients => {
   if (!managementApi) {
-    return { streamsKIsOnboardingClient: undefined, SignificantEventsDiscoveryClient: undefined };
+    return { streamsKIsOnboardingClient: undefined, significantEventsDiscoveryClient: undefined };
   }
 
   return {
     streamsKIsOnboardingClient: new StreamsKIsOnboardingClient({ managementApi }),
-    SignificantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
+    significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
   };
 };

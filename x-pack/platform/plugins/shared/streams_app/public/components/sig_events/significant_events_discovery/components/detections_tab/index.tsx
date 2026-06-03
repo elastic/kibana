@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -17,11 +18,18 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
+import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../../../hooks/sig_events/constants';
 import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { DetectionFlyout } from './detection_flyout';
+import { SignificantEventsDiscoveryEmptyPrompt } from '../shared/significant_events_discovery_empty_prompt';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { CHANGE_TYPE_LABELS, DETECTION_KIND_LABELS } from '../shared/translations';
+import {
+  CHANGE_TYPE_LABELS,
+  DETECTION_KIND_LABELS,
+  DETECTIONS_EMPTY_PROMPT_TITLE,
+} from '../shared/translations';
 import { DETECTION_KIND_COLORS } from '../shared/constants';
 
 const DISCOVERY_STATUS_LABELS = {
@@ -110,10 +118,16 @@ export const DetectionsTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DETECTIONS_RANGE);
 
+  const { isRunning, handleRun } = useSignificantEventsDiscovery({
+    onComplete: refreshAbsoluteRange,
+  });
+
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
     from: absoluteRange.from,
     to: absoluteRange.to,
   });
+  useInterval(refetch, isRunning ? STREAMS_RUNNING_POLL_INTERVAL : null);
+
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -149,27 +163,38 @@ export const DetectionsTab = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
-            defaultMessage: 'Detections',
-          })}
-          items={data?.hits ?? []}
-          columns={columns}
-          pagination={euiPagination}
-          onChange={onTableChange}
-          loading={isLoading}
-          noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
-            defaultMessage: 'No detections found.',
-          })}
-          rowProps={(item) => ({
-            onClick: () => setSelectedDetection(item),
-            css: css`
-              cursor: pointer;
-            `,
-          })}
-        />
-      </EuiFlexItem>
+      {!isLoading && data?.total === 0 ? (
+        <EuiFlexItem>
+          <SignificantEventsDiscoveryEmptyPrompt
+            title={DETECTIONS_EMPTY_PROMPT_TITLE}
+            onRun={handleRun}
+            isRunning={isRunning}
+            runTestSubj="detections_run_discovery_empty_button"
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
+              defaultMessage: 'Detections',
+            })}
+            items={data?.hits ?? []}
+            columns={columns}
+            pagination={euiPagination}
+            onChange={onTableChange}
+            loading={isLoading}
+            noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
+              defaultMessage: 'No detections found.',
+            })}
+            rowProps={(item) => ({
+              onClick: () => setSelectedDetection(item),
+              css: css`
+                cursor: pointer;
+              `,
+            })}
+          />
+        </EuiFlexItem>
+      )}
       {selectedDetection && (
         <DetectionFlyout
           detection={selectedDetection}

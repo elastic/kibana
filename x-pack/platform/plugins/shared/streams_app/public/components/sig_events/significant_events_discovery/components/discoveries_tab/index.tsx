@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -17,14 +18,17 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
+import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../../../hooks/sig_events/constants';
 import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { DiscoveryFlyout } from './discovery_flyout';
+import { SignificantEventsDiscoveryEmptyPrompt } from '../shared/significant_events_discovery_empty_prompt';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { DISCOVERIES_EMPTY_PROMPT_TITLE, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
@@ -107,10 +111,16 @@ export const DiscoveriesTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
 
+  const { isRunning, handleRun } = useSignificantEventsDiscovery({
+    onComplete: refreshAbsoluteRange,
+  });
+
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
     from: absoluteRange.from,
     to: absoluteRange.to,
   });
+  useInterval(refetch, isRunning ? STREAMS_RUNNING_POLL_INTERVAL : null);
+
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDiscoveryHistory(
@@ -150,27 +160,38 @@ export const DiscoveriesTab = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
-            defaultMessage: 'Discoveries',
-          })}
-          items={data?.hits ?? []}
-          columns={columns}
-          pagination={euiPagination}
-          onChange={onTableChange}
-          loading={isLoading}
-          noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
-            defaultMessage: 'No discoveries found.',
-          })}
-          rowProps={(item) => ({
-            onClick: () => setSelectedDiscovery(item),
-            css: css`
-              cursor: pointer;
-            `,
-          })}
-        />
-      </EuiFlexItem>
+      {!isLoading && data?.total === 0 ? (
+        <EuiFlexItem>
+          <SignificantEventsDiscoveryEmptyPrompt
+            title={DISCOVERIES_EMPTY_PROMPT_TITLE}
+            onRun={handleRun}
+            isRunning={isRunning}
+            runTestSubj="discoveries_run_discovery_empty_button"
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
+              defaultMessage: 'Discoveries',
+            })}
+            items={data?.hits ?? []}
+            columns={columns}
+            pagination={euiPagination}
+            onChange={onTableChange}
+            loading={isLoading}
+            noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
+              defaultMessage: 'No discoveries found.',
+            })}
+            rowProps={(item) => ({
+              onClick: () => setSelectedDiscovery(item),
+              css: css`
+                cursor: pointer;
+              `,
+            })}
+          />
+        </EuiFlexItem>
+      )}
       {selectedDiscovery && (
         <DiscoveryFlyout
           discovery={selectedDiscovery}

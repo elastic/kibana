@@ -477,6 +477,21 @@ const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventS
     },
   };
 
+const streamsSignificantEventsDiscoveryTriggeredSchema = {
+  triggered_by: {
+    type: 'keyword' as const,
+    _meta: { description: 'How the discovery pipeline was triggered' },
+  },
+  execution_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The workflow execution ID returned by the orchestrator' },
+  },
+  space_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The Kibana space in which the pipeline was triggered' },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -489,4 +504,5 @@ export {
   streamsAgentToolKiIdentificationStartedSchema,
   streamsAgentToolEventCreateSchema,
   streamsAgentToolEventStatusUpdateSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
 };

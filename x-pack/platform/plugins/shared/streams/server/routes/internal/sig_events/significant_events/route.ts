@@ -259,22 +259,22 @@ const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
     server,
     telemetry,
   }): Promise<{ executionId: string | null }> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    const { SignificantEventsDiscoveryClient } = workflowClients;
-
-    if (!SignificantEventsDiscoveryClient) {
+    const { significantEventsDiscoveryClient } = workflowClients;
+    if (!significantEventsDiscoveryClient) {
       throw new FeatureNotEnabledError(
         'Significant events discovery requires the workflows feature to be enabled'
       );
     }
 
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
     const spaceId = await getSpaceId(request);
     const { body } = params;
 
     if (body.action === 'trigger') {
-      const { executionId } = await SignificantEventsDiscoveryClient.run({
+      const { executionId } = await significantEventsDiscoveryClient.run({
         request,
         spaceId,
         triggeredBy: 'manual',
@@ -287,7 +287,7 @@ const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
       return { executionId };
     }
 
-    const executionId = await SignificantEventsDiscoveryClient.cancel({ request, spaceId });
+    const executionId = await significantEventsDiscoveryClient.cancel({ request, spaceId });
     return { executionId };
   },
 });
@@ -313,18 +313,16 @@ const SignificantEventsDiscoveryStatusRoute = createServerRoute({
     getSpaceId,
     server,
   }): Promise<SignificantEventsDiscoveryStatusResult> => {
+    const { significantEventsDiscoveryClient } = workflowClients;
+    if (!significantEventsDiscoveryClient) {
+      throw new FeatureNotEnabledError('Significant events discovery is not available');
+    }
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    if (!workflowClients) {
-      throw new FeatureNotEnabledError(
-        'Significant events discovery requires the workflows feature to be enabled'
-      );
-    }
-
     const spaceId = await getSpaceId(request);
-    return workflowClients.SignificantEventsDiscoveryClient.getStatus({ spaceId });
+    return significantEventsDiscoveryClient.getStatus({ spaceId });
   },
 });
 

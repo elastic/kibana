@@ -68,7 +68,7 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-  workflowClients?: WorkflowClients;
+  workflowClients: WorkflowClients;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
 }
 

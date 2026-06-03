@@ -29,6 +29,7 @@ interface ContextMenuSplitButtonProps {
   primaryIconType?: string;
   onPrimaryClick: () => void;
   isPrimaryDisabled?: boolean;
+  isPrimaryLoading?: boolean;
   primaryDataTestSubj?: string;
 
   secondaryAriaLabel: string;
@@ -42,6 +43,7 @@ interface ContextMenuSplitButtonProps {
 
   color?: ComponentProps<typeof EuiSplitButton>['color'];
   isLoading?: boolean;
+  hideModelSettings?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -50,6 +52,7 @@ export const ContextMenuSplitButton = ({
   primaryIconType,
   onPrimaryClick,
   isPrimaryDisabled,
+  isPrimaryLoading,
   primaryDataTestSubj,
   secondaryAriaLabel,
   isSecondaryDisabled,
@@ -59,6 +62,7 @@ export const ContextMenuSplitButton = ({
   errorTitle,
   color,
   isLoading,
+  hideModelSettings,
   'data-test-subj': dataTestSubj,
 }: ContextMenuSplitButtonProps) => {
   const { euiTheme } = useEuiTheme();
@@ -77,18 +81,19 @@ export const ContextMenuSplitButton = ({
   const panels = useMemo(() => {
     const builtPanels = buildPanels({ resetMenu, closeMenu });
 
-    const settingsItems = managementUrl
-      ? [
-          { isSeparator: true as const },
-          {
-            name: MODEL_SETTINGS_LABEL,
-            icon: 'gear' as const,
-            href: managementUrl,
-            target: '_blank',
-            onClick: closeMenu,
-          },
-        ]
-      : [];
+    const settingsItems =
+      !hideModelSettings && managementUrl
+        ? [
+            { isSeparator: true as const },
+            {
+              name: MODEL_SETTINGS_LABEL,
+              icon: 'gear' as const,
+              href: managementUrl,
+              target: '_blank',
+              onClick: closeMenu,
+            },
+          ]
+        : [];
 
     return builtPanels.map((panel, index) => ({
       ...panel,
@@ -97,7 +102,7 @@ export const ContextMenuSplitButton = ({
         ? { items: [...panel.items, ...settingsItems] }
         : {}),
     }));
-  }, [buildPanels, resetMenu, closeMenu, managementUrl]);
+  }, [buildPanels, resetMenu, closeMenu, managementUrl, hideModelSettings]);
 
   const popoverContent = error ? (
     <EuiCallOut
@@ -116,6 +121,7 @@ export const ContextMenuSplitButton = ({
       <EuiSplitButton.ActionPrimary
         onClick={onPrimaryClick}
         isDisabled={isPrimaryDisabled}
+        isLoading={isPrimaryLoading}
         iconType={primaryIconType}
         data-test-subj={primaryDataTestSubj}
       >

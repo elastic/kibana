@@ -24,12 +24,16 @@ import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
 import type { SigEvent } from '@kbn/streams-schema';
+import useInterval from 'react-use/lib/useInterval';
+import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../../../hooks/sig_events/constants';
 import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
 import { SigEventFlyout } from './sig_event_flyout';
+import { SignificantEventsDiscoveryEmptyPrompt } from '../shared/significant_events_discovery_empty_prompt';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getStatusColor } from './filter_constants';
@@ -159,7 +163,6 @@ export const SigEventsTab = () => {
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
   const { filteredStreams } = useKiGeneration();
-
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,6 +173,8 @@ export const SigEventsTab = () => {
     [filteredStreams]
   );
 
+  const { isRunning, handleRun } = useSignificantEventsDiscovery();
+
   const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchSigEvents({
     from: timeState.start,
     to: timeState.end,
@@ -177,6 +182,8 @@ export const SigEventsTab = () => {
     stream: streamFilter.length > 0 ? streamFilter : undefined,
     search: debouncedSearch || undefined,
   });
+  useInterval(refetch, isRunning ? STREAMS_RUNNING_POLL_INTERVAL : null);
+
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
   const onStatusChange = useCallback(
@@ -282,26 +289,40 @@ export const SigEventsTab = () => {
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiBasicTable<SigEvent>
-          tableCaption={TABLE_CAPTION}
-          items={data?.hits ?? []}
-          columns={columns}
-          pagination={{
-            pageIndex: pagination.page - 1,
-            pageSize: pagination.perPage,
-            totalItemCount: data?.total ?? 0,
-            pageSizeOptions: [10, 25, 50],
-          }}
-          onChange={onTableChange}
-          loading={isLoading}
-          rowProps={(item) => ({
-            onClick: () => setSelectedEvent(item),
-            css: clickableRowCss,
-          })}
-          noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
-        />
-      </EuiFlexItem>
+      {!isLoading &&
+      data?.total === 0 &&
+      !statusFilter.length &&
+      !streamFilter.length &&
+      !debouncedSearch ? (
+        <EuiFlexItem>
+          <SignificantEventsDiscoveryEmptyPrompt
+            onRun={handleRun}
+            isRunning={isRunning}
+            runTestSubj="sig_events_run_discovery_empty_button"
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiBasicTable<SigEvent>
+            tableCaption={TABLE_CAPTION}
+            items={data?.hits ?? []}
+            columns={columns}
+            pagination={{
+              pageIndex: pagination.page - 1,
+              pageSize: pagination.perPage,
+              totalItemCount: data?.total ?? 0,
+              pageSizeOptions: [10, 25, 50],
+            }}
+            onChange={onTableChange}
+            loading={isLoading}
+            rowProps={(item) => ({
+              onClick: () => setSelectedEvent(item),
+              css: clickableRowCss,
+            })}
+            noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
+          />
+        </EuiFlexItem>
+      )}
       {selectedEvent && (
         <SigEventFlyout event={selectedEvent} onClose={() => setSelectedEvent(undefined)} />
       )}

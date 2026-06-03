@@ -8,7 +8,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../../../../asset_image';
 import {
   DEFAULT_EMPTY_PROMPT_BODY,
@@ -16,11 +15,7 @@ import {
   FIND_SIGNIFICANT_EVENTS_LABEL,
 } from './translations';
 
-const RUN_LOADING_LABEL = i18n.translate('xpack.streams.runDiscoveryEmptyPrompt.runLoadingLabel', {
-  defaultMessage: 'Running discovery...',
-});
-
-interface RunDiscoveryEmptyPromptProps {
+interface SignificantEventsDiscoveryEmptyPromptProps {
   title?: ReactNode;
   body?: ReactNode;
   onRun: () => void;
@@ -28,13 +23,13 @@ interface RunDiscoveryEmptyPromptProps {
   runTestSubj?: string;
 }
 
-export const RunDiscoveryEmptyPrompt = ({
+export const SignificantEventsDiscoveryEmptyPrompt = ({
   title = DEFAULT_EMPTY_PROMPT_TITLE,
   body = DEFAULT_EMPTY_PROMPT_BODY,
   onRun,
   isRunning,
   runTestSubj,
-}: RunDiscoveryEmptyPromptProps) => (
+}: SignificantEventsDiscoveryEmptyPromptProps) => (
   <EuiEmptyPrompt
     aria-live="polite"
     titleSize="xs"
@@ -50,7 +45,7 @@ export const RunDiscoveryEmptyPrompt = ({
         isLoading={isRunning}
         data-test-subj={runTestSubj}
       >
-        {isRunning ? RUN_LOADING_LABEL : FIND_SIGNIFICANT_EVENTS_LABEL}
+        {FIND_SIGNIFICANT_EVENTS_LABEL}
       </EuiButton>
     }
   />

@@ -15,6 +15,13 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   }
 );
 
+export const CANCEL_DISCOVERY_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.cancelDiscoveryLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const DEFAULT_EMPTY_PROMPT_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.defaultEmptyPromptTitle',
   {

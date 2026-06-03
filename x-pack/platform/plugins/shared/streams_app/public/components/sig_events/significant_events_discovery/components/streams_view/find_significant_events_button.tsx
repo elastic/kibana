@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FIND_SIGNIFICANT_EVENTS_LABEL } from '../shared/translations';
+import { CANCEL_DISCOVERY_LABEL, FIND_SIGNIFICANT_EVENTS_LABEL } from '../shared/translations';
+import { ContextMenuSplitButton } from '../shared/context_menu_split_button';
+import type { MenuHelpers } from '../shared/context_menu_split_button';
+
+const SECONDARY_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.findSignificantEventsSecondaryAriaLabel',
+  { defaultMessage: 'Discovery options' }
+);
 
 interface FindSignificantEventsButtonProps {
   onRun: () => void;
@@ -23,30 +29,40 @@ export const FindSignificantEventsButton = ({
   isRunning,
   isDisabled,
 }: FindSignificantEventsButtonProps) => {
-  if (isRunning) {
-    return (
-      <EuiButton
-        iconType="stop"
-        onClick={onCancel}
-        color="warning"
-        data-test-subj="significant_events_cancel_discovery_button"
-      >
-        {i18n.translate('xpack.streams.significantEventsDiscovery.cancelLabel', {
-          defaultMessage: 'Cancel discovery',
-        })}
-      </EuiButton>
-    );
-  }
+  const buildPanels = useCallback(
+    ({ closeMenu }: MenuHelpers) => [
+      {
+        items: [
+          {
+            name: CANCEL_DISCOVERY_LABEL,
+            icon: 'cross' as const,
+            disabled: !isRunning,
+            onClick: () => {
+              onCancel();
+              closeMenu();
+            },
+            'data-test-subj': 'significant_events_cancel_discovery_menu_item',
+          },
+        ],
+      },
+    ],
+    [isRunning, onCancel]
+  );
 
   return (
-    <EuiButton
-      iconType="sparkles"
-      onClick={onRun}
-      isDisabled={isDisabled}
+    <ContextMenuSplitButton
+      primaryLabel={FIND_SIGNIFICANT_EVENTS_LABEL}
+      primaryIconType="sparkles"
+      onPrimaryClick={onRun}
+      isPrimaryDisabled={isDisabled || isRunning}
+      isPrimaryLoading={isRunning}
+      primaryDataTestSubj="significant_events_discover_insights_button"
+      secondaryAriaLabel={SECONDARY_ARIA_LABEL}
+      secondaryDataTestSubj="significant_events_discovery_options_trigger"
+      buildPanels={buildPanels}
       color="text"
-      data-test-subj="significant_events_discover_insights_button"
-    >
-      {FIND_SIGNIFICANT_EVENTS_LABEL}
-    </EuiButton>
+      hideModelSettings
+      data-test-subj="significant_events_find_split_button"
+    />
   );
 };
