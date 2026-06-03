@@ -15,6 +15,7 @@
       "dashboardMarkdown",
       "data",
       "agentContextLayer",
+      "embeddable",
       "share",
       "unifiedSearch"
     ]

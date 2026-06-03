@@ -6,11 +6,16 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  VEGA_VISUALIZATION_ATTACHMENT_TYPE,
+} from '@kbn/agent-builder-dashboards-common';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import { dashboardManagementSkill } from './skills/dashboard_management_skill';
+import { vegaVisualizationSkill } from './skills/vega_visualization_skill';
 
 describe('AgentBuilderDashboardsPlugin', () => {
-  it('registers the dashboard attachment type, skill, and SML type', () => {
+  it('registers the dashboard and vega attachment types, both skills, and the SML type', () => {
     const registerAttachmentType = jest.fn();
     const registerSkill = jest.fn();
     const registerSmlType = jest.fn();
@@ -30,8 +35,15 @@ describe('AgentBuilderDashboardsPlugin', () => {
       } as never
     );
 
-    expect(registerAttachmentType).toHaveBeenCalledTimes(1);
+    expect(registerAttachmentType).toHaveBeenCalledTimes(2);
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: DASHBOARD_ATTACHMENT_TYPE })
+    );
+    expect(registerAttachmentType).toHaveBeenCalledWith(
+      expect.objectContaining({ id: VEGA_VISUALIZATION_ATTACHMENT_TYPE })
+    );
     expect(registerSkill).toHaveBeenCalledWith(dashboardManagementSkill);
+    expect(registerSkill).toHaveBeenCalledWith(vegaVisualizationSkill);
     expect(registerSmlType).toHaveBeenCalledTimes(1);
     expect(registerSmlType).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard' }));
   });

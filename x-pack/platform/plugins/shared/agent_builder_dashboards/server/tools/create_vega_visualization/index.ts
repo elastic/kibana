@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { manageDashboardTool } from './manage_dashboard';
 export { createVegaVisualizationTool } from './create_vega_visualization';

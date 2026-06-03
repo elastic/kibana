@@ -6,3 +6,4 @@
  */
 
 export { createDashboardAttachmentType } from './dashboard';
+export { createVegaVisualizationAttachmentType } from './vega_visualization';

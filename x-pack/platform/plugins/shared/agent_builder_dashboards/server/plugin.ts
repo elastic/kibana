@@ -19,7 +19,10 @@ import type {
   AgentBuilderDashboardsPluginStart,
 } from './types';
 import { registerSkills } from './skills';
-import { createDashboardAttachmentType } from './attachment_types';
+import {
+  createDashboardAttachmentType,
+  createVegaVisualizationAttachmentType,
+} from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
 
 export class AgentBuilderDashboardsPlugin
@@ -54,6 +57,11 @@ export class AgentBuilderDashboardsPlugin
         logger: this.logger,
         getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
+    );
+    setupDeps.agentBuilder.attachments.registerType(
+      createVegaVisualizationAttachmentType() as Parameters<
+        typeof setupDeps.agentBuilder.attachments.registerType
+      >[0]
     );
     setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
     registerSkills(setupDeps.agentBuilder);

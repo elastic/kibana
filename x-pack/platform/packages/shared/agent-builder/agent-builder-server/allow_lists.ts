@@ -118,6 +118,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Dashboard
   'dashboard-management',
+  'vega-visualization',
 
   // Platform – Discover
   'discover-data-analysis',

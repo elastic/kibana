@@ -9,3 +9,8 @@
  * Attachment type identifier for dashboard state
  */
 export const DASHBOARD_ATTACHMENT_TYPE = 'platform.dashboard.dashboard_state';
+
+/**
+ * Attachment type identifier for Vega/Vega-Lite visualizations.
+ */
+export const VEGA_VISUALIZATION_ATTACHMENT_TYPE = 'platform.dashboard.vega_visualization';
