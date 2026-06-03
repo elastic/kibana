@@ -2,49 +2,50 @@
 name: Accessibility Issue
 about: Report an issue to improve keyboard navigation, screen reader support, and overall accessibility.
 labels: Project:Accessibility
-title: (Accessibility)
+title: "[Accessibility] <affected area>: <user impact>"
 ---
-
 <!--
+Glossary:
+- `affected area`: The Kibana feature, page, view, panel, control, or EUI component where the issue occurs.
+- `user impact`: What a user cannot do, cannot perceive, or experiences incorrectly because of the issue.
+
+Reporting guidelines:
 - This template is for accessibility issues only.
-- Please do not report multiple issues in a single ticket.
-- Please provide a concise and specific description of the problem.
-- Please remove any sections that are not applicable before submitting.
+- Do not report multiple issues in a single ticket.
+- Provide a concise and specific description of the problem.
+- Remove any sections that are not applicable before submitting.
 -->
 
-**What is broken**
-<!-- Provide a one-sentence summary of the accessibility problem, focusing on the incorrect behavior. -->
+**What is broken?**
+<!-- Provide a short, action-oriented summary of the accessibility problem: describe the incorrect behavior and its impact on the user. -->
 
 **Context**
-- **Breadcrumbs (if applicable):** <!-- breadcrumb to the broken element; use the exact nav/component names in code -->
-- **Affected component (optional, but preferred):** <!-- If possible, identify the affected Kibana or EUI component. -->
-- **Component selector (optional, but preferred):** <!-- Provide a `data-test-subj` or other unique selector if available. -->
+- **Breadcrumbs (if applicable):** <!-- Breadcrumbs of the page where the issue is detected. -->
+- **Affected area selector (optional, but preferred):** <!-- `data-test-subj` or another unique selector. -->
 
 **Steps to reproduce**
 1. Go to `[URL or route]`.
-2. Use `[keyboard, mouse, or screen reader]` to perform a `[specific action]`.
-3. Observe the `[specific result]`.
+2. Use `[keyboard / mouse / screen reader / axe-core / manual inspection]` to perform `[specific action]`.
+3. Observe `[specific accessibility failure]`.
 
 **Screenshot / recording**
-<!-- Provide a screenshot, recording, or transcript to demonstrate the issue. For screen reader problems, a recording or transcript is preferred. -->
+<!-- Attach a screenshot, recording, DOM snippet, axe output, or screen reader transcript that demonstrates the issue. Clear axe results or a screen reader transcript are especially useful. -->
 
-**Actual vs expected**
-
+**Actual vs. expected**
 | Behavior     | Details |
 |--------------|---------|
 | **Actual**   |         |
 | **Expected** |         |
 
-**Proposed fix or related issues (optional)**
-<!-- If you have a suggestion for a fix, or know of any related issues (open or closed), please provide details here. -->
 
 **WCAG criterion**
-<!-- Link to the specific WCAG criterion. Kibana's baseline is WCAG 2.2. -->
-
+<!-- Link to the applicable WCAG success criterion. Kibana's accessibility baseline is WCAG 2.2. -->
 - [Understanding SC #.#.# Criterion Name](https://www.w3.org/WAI/WCAG22/Understanding/<criterion-slug>.html)
 
-**Environment**
+**Potential solution / additional context (optional)**
+<!-- Share ideas for resolving the issue or provide additional context: related issues, previous fixes, design discussions, EUI documentation, or implementation references. -->
 
+**Environment**
 | Setting                           | Value |
 |-----------------------------------|-------|
 | **Kibana version**                | -     |
