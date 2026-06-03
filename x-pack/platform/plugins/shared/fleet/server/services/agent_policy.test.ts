@@ -3568,4 +3568,51 @@ describe('Agent policy', () => {
       expect(vars.cloud_connector_name).toBeUndefined();
     });
   });
+
+  describe('getLatestFleetPolicyRevisions', () => {
+    it('returns an empty map without querying when no policy ids are provided', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+
+      const result = await agentPolicyService.getLatestFleetPolicyRevisions(esClient, []);
+
+      expect(result).toEqual(new Map());
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('maps each policy id to its latest deployed revision, omitting policies with none', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          policies: {
+            buckets: [
+              { key: 'policy1', latest_revision: { value: 3 } },
+              { key: 'policy2', latest_revision: { value: 1 } },
+              // A bucket without a deployed revision is ignored
+              { key: 'policy3', latest_revision: { value: null } },
+            ],
+          },
+        },
+      } as any);
+
+      const result = await agentPolicyService.getLatestFleetPolicyRevisions(esClient, [
+        'policy1',
+        'policy2',
+        'policy3',
+      ]);
+
+      expect(result).toEqual(
+        new Map([
+          ['policy1', 3],
+          ['policy2', 1],
+        ])
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          size: 0,
+          query: { terms: { policy_id: ['policy1', 'policy2', 'policy3'] } },
+        })
+      );
+    });
+  });
 });

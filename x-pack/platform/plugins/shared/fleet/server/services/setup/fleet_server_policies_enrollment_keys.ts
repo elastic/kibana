@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 import pMap from 'p-map';
 
 import { agentPolicyService } from '../agent_policy';
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
+import { generateEnrollmentAPIKey, getPolicyIdsWithEnrollmentAPIKeys } from '../api_keys';
 import { SO_SEARCH_LIMIT, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 import { appContextService } from '../app_context';
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
@@ -37,31 +37,56 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const outdatedAgentPolicyIds: Array<{ id: string; spaceId?: string }> = [];
+  if (agentPolicies.length === 0) {
+    await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
+    return;
+  }
+
+  const agentPolicyIds = agentPolicies.map((agentPolicy) => agentPolicy.id);
+
+  // Resolve the latest deployed revision and which policies already have an enrollment API key
+  // with two bulk aggregations instead of one ES query per policy. The previous per-policy fan-out
+  // saturated the event loop during setup on installs with thousands of agent policies, blocking
+  // every other request (including the Fleet/Integrations UI bootstrap) for several seconds.
+  const [latestRevisionByPolicyId, policyIdsWithEnrollmentKeys] = await Promise.all([
+    agentPolicyService.getLatestFleetPolicyRevisions(esClient, agentPolicyIds),
+    getPolicyIdsWithEnrollmentAPIKeys(esClient, agentPolicyIds),
+  ]);
+
+  // Generate a default enrollment API key only for policies that are missing one, rather than
+  // probing every policy. `forceRecreate` matches the previous behaviour during setup.
+  const policiesMissingEnrollmentKey = agentPolicies.filter(
+    (agentPolicy) => !policyIdsWithEnrollmentKeys.has(agentPolicy.id)
+  );
   await pMap(
-    agentPolicies,
-    async (agentPolicy) => {
-      const [latestFleetPolicy] = await Promise.all([
-        agentPolicyService.getLatestFleetPolicyRevision(esClient, agentPolicy.id),
-        ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
-      ]);
-
-      if (latestFleetPolicy && latestFleetPolicy.revision_idx !== agentPolicy.revision) {
-        logger.warn(
-          `Policy [${agentPolicy.id}] has mismatched revisions: ` +
-            `.kibana_ingest revision [${agentPolicy.revision}], ` +
-            `.fleet-policies revision_idx [${latestFleetPolicy.revision_idx}]`
-        );
-      }
-
-      if ((latestFleetPolicy?.revision_idx ?? -1) < agentPolicy.revision) {
-        outdatedAgentPolicyIds.push({ id: agentPolicy.id, spaceId: agentPolicy.space_ids?.[0] });
-      }
-    },
+    policiesMissingEnrollmentKey,
+    (agentPolicy) =>
+      generateEnrollmentAPIKey(soClient, esClient, {
+        name: `Default`,
+        agentPolicyId: agentPolicy.id,
+        forceRecreate: true,
+      }),
     {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
     }
   );
+
+  const outdatedAgentPolicyIds: Array<{ id: string; spaceId?: string }> = [];
+  for (const agentPolicy of agentPolicies) {
+    const latestRevisionIdx = latestRevisionByPolicyId.get(agentPolicy.id);
+
+    if (latestRevisionIdx !== undefined && latestRevisionIdx !== agentPolicy.revision) {
+      logger.warn(
+        `Policy [${agentPolicy.id}] has mismatched revisions: ` +
+          `.kibana_ingest revision [${agentPolicy.revision}], ` +
+          `.fleet-policies revision_idx [${latestRevisionIdx}]`
+      );
+    }
+
+    if ((latestRevisionIdx ?? -1) < agentPolicy.revision) {
+      outdatedAgentPolicyIds.push({ id: agentPolicy.id, spaceId: agentPolicy.space_ids?.[0] });
+    }
+  }
 
   await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 

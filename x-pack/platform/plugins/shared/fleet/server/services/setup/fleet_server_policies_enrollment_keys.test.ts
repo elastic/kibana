@@ -10,7 +10,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
+import { generateEnrollmentAPIKey, getPolicyIdsWithEnrollmentAPIKeys } from '../api_keys';
 
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
 
@@ -22,9 +22,8 @@ jest.mock('../api_keys');
 jest.mock('../agent_policies/bump_agent_policies_task');
 jest.mock('../agent_policies/deploy_agent_policies_task');
 
-const mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy = jest.mocked(
-  ensureDefaultEnrollmentAPIKeyForAgentPolicy
-);
+const mockedGenerateEnrollmentAPIKey = jest.mocked(generateEnrollmentAPIKey);
+const mockedGetPolicyIdsWithEnrollmentAPIKeys = jest.mocked(getPolicyIdsWithEnrollmentAPIKeys);
 
 const mockedAgentPolicyService = jest.mocked(agentPolicyService);
 const mockedAppContextService = jest.mocked(appContextService);
@@ -38,8 +37,12 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       savedObjectsClientMock.create()
     );
 
-    mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy.mockReset();
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockReset();
+    mockedGenerateEnrollmentAPIKey.mockReset();
+    mockedGetPolicyIdsWithEnrollmentAPIKeys.mockReset();
+    // By default no policy has an enrollment key yet, so a key is generated for each one.
+    mockedGetPolicyIdsWithEnrollmentAPIKeys.mockResolvedValue(new Set());
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockReset();
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(new Map());
     mockedAgentPolicyService.deployPolicies.mockReset();
     mockedAgentPolicyService.deployPolicies.mockImplementation(async () => {});
     jest.mocked(scheduleDeployAgentPoliciesTask).mockReset();
@@ -61,22 +64,11 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
-      async (_, agentPolicyId) => {
-        if (agentPolicyId === 'policy1') {
-          return {
-            revision_idx: 1,
-          } as any;
-        }
-
-        if (agentPolicyId === 'policy2') {
-          return {
-            revision_idx: 2,
-          } as any;
-        }
-
-        return null;
-      }
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([
+        ['policy1', 1],
+        ['policy2', 2],
+      ])
     );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
@@ -85,10 +77,36 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(2);
     expect(mockedAgentPolicyService.deployPolicies).not.toBeCalled();
     expect(logger.warn).not.toHaveBeenCalledWith(
       expect.stringContaining('has mismatched revisions')
+    );
+  });
+
+  it('should only generate enrollment keys for policies that are missing one', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+    mockedGetPolicyIdsWithEnrollmentAPIKeys.mockResolvedValue(new Set(['policy1']));
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([
+        ['policy1', 1],
+        ['policy2', 2],
+      ])
+    );
+
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({
+      logger,
+      esClient,
+      soClient,
+    });
+
+    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(1);
+    expect(mockedGenerateEnrollmentAPIKey).toBeCalledWith(
+      soClient,
+      esClient,
+      expect.objectContaining({ agentPolicyId: 'policy2', name: 'Default', forceRecreate: true })
     );
   });
 
@@ -96,22 +114,11 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
-      async (_, agentPolicyId) => {
-        if (agentPolicyId === 'policy1') {
-          return {
-            revision_idx: 1,
-          } as any;
-        }
-
-        if (agentPolicyId === 'policy2') {
-          return {
-            revision_idx: 1,
-          } as any;
-        }
-
-        return null;
-      }
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([
+        ['policy1', 1],
+        ['policy2', 1],
+      ])
     );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
@@ -120,7 +127,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(2);
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
@@ -133,16 +140,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     const logger = loggingSystemMock.createLogger();
     const esClient = elasticsearchServiceMock.createInternalClient();
     const soClient = savedObjectsClientMock.create();
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
-      async (_, agentPolicyId) => {
-        if (agentPolicyId === 'policy1') {
-          return {
-            revision_idx: 1,
-          } as any;
-        }
-
-        return null;
-      }
+    // policy2 has no deployed revision so it is omitted from the map
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([['policy1', 1]])
     );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
@@ -151,7 +151,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedGenerateEnrollmentAPIKey).toBeCalledTimes(2);
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
@@ -175,16 +175,11 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     } as any);
 
     // fleet-server-policy is out of sync; policy1 is up to date
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockImplementation(
-      async (_, agentPolicyId) => {
-        if (agentPolicyId === 'fleet-server-policy') {
-          return { revision_idx: 1 } as any;
-        }
-        if (agentPolicyId === 'policy1') {
-          return { revision_idx: 1 } as any;
-        }
-        return null;
-      }
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([
+        ['fleet-server-policy', 1],
+        ['policy1', 1],
+      ])
     );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
@@ -220,9 +215,12 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     } as any);
 
     // Both are out of sync
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
-      revision_idx: 1,
-    } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([
+        ['fleet-server-policy', 1],
+        ['policy1', 1],
+      ])
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -257,9 +255,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       ],
     } as any);
 
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
-      revision_idx: 1,
-    } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([['fleet-server-policy', 1]])
+    );
     mockedAgentPolicyService.deployPolicies.mockRejectedValue(
       new Error('ES bulk operation failed')
     );
@@ -280,9 +278,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       ],
     } as any);
 
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
-      revision_idx: 1,
-    } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([['custom-fs-policy', 1]])
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,
@@ -315,9 +313,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       ],
     } as any);
 
-    mockedAgentPolicyService.getLatestFleetPolicyRevision.mockResolvedValue({
-      revision_idx: 1,
-    } as any);
+    mockedAgentPolicyService.getLatestFleetPolicyRevisions.mockResolvedValue(
+      new Map([['user-fs-policy', 1]])
+    );
 
     await ensureAgentPoliciesFleetServerKeysAndPolicies({
       logger,

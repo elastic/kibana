@@ -2082,6 +2082,49 @@ class AgentPolicyService {
     return res.hits.hits[0]._source ?? null;
   }
 
+  /**
+   * Resolve the latest deployed revision (`revision_idx` in `.fleet-policies`) for many agent
+   * policies in a single aggregation, rather than issuing one search per policy. Returns a map
+   * keyed by policy id; policies without a deployed revision are omitted from the map.
+   */
+  public async getLatestFleetPolicyRevisions(
+    esClient: ElasticsearchClient,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, number>> {
+    const latestRevisionByPolicyId = new Map<string, number>();
+    if (agentPolicyIds.length === 0) {
+      return latestRevisionByPolicyId;
+    }
+
+    const res = await esClient.search<
+      unknown,
+      {
+        policies: {
+          buckets: Array<{ key: string; latest_revision: { value: number | null } }>;
+        };
+      }
+    >({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      query: { terms: { policy_id: agentPolicyIds } },
+      aggs: {
+        policies: {
+          terms: { field: 'policy_id', size: agentPolicyIds.length },
+          aggs: { latest_revision: { max: { field: 'revision_idx' } } },
+        },
+      },
+    });
+
+    for (const bucket of res.aggregations?.policies?.buckets ?? []) {
+      if (bucket.latest_revision.value !== null) {
+        latestRevisionByPolicyId.set(bucket.key, bucket.latest_revision.value);
+      }
+    }
+
+    return latestRevisionByPolicyId;
+  }
+
   public async getFleetServerPolicy(
     esClient: ElasticsearchClient,
     agentPolicyId: string,

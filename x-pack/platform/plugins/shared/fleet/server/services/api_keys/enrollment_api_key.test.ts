@@ -21,6 +21,7 @@ import {
   deleteEnrollmentApiKeys,
   generateEnrollmentAPIKey,
   getEnrollmentAPIKey,
+  getPolicyIdsWithEnrollmentAPIKeys,
 } from './enrollment_api_key';
 
 jest.mock('../audit_logging');
@@ -148,6 +149,43 @@ describe('enrollment api keys', () => {
           body: expect.objectContaining({
             namespaces: ['test123', 'test456'],
           }),
+        })
+      );
+    });
+  });
+
+  describe('getPolicyIdsWithEnrollmentAPIKeys', () => {
+    it('returns an empty set without querying when no policy ids are provided', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await getPolicyIdsWithEnrollmentAPIKeys(esClient, []);
+
+      expect(result).toEqual(new Set());
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns the set of policy ids that have at least one enrollment key', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValue({
+        aggregations: {
+          policies: {
+            buckets: [{ key: 'policy1' }, { key: 'policy3' }],
+          },
+        },
+      } as any);
+
+      const result = await getPolicyIdsWithEnrollmentAPIKeys(esClient, [
+        'policy1',
+        'policy2',
+        'policy3',
+      ]);
+
+      expect(result).toEqual(new Set(['policy1', 'policy3']));
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ENROLLMENT_API_KEYS_INDEX,
+          size: 0,
+          query: { terms: { policy_id: ['policy1', 'policy2', 'policy3'] } },
         })
       );
     });
