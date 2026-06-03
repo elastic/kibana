@@ -65,13 +65,18 @@ function buildRelationshipMetadata(
   return doc;
 }
 
+export interface WriteRelationshipMetadatasResult {
+  docsAttempted: number;
+  docsApplied: number;
+}
+
 export const writeRelationshipMetadatas = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
   records: EntityRelationshipRecord[],
   context: WriteRelationshipMetadataContext
-): Promise<void> => {
-  if (records.length === 0) return;
+): Promise<WriteRelationshipMetadatasResult> => {
+  if (records.length === 0) return { docsAttempted: 0, docsApplied: 0 };
 
   const validRecords = records.filter(
     (r): r is EntityRelationshipRecord & { entityId: string } => r.entityId !== null
@@ -85,9 +90,10 @@ export const writeRelationshipMetadatas = async (
     }
   }
 
-  if (docs.length === 0) return;
+  if (docs.length === 0) return { docsAttempted: 0, docsApplied: 0 };
 
   const failures = await crudClient.bulkAppendRelationshipMetadata(docs);
+  const docsApplied = docs.length - failures.length;
 
   if (failures.length > 0) {
     logger.error(
@@ -95,7 +101,9 @@ export const writeRelationshipMetadatas = async (
         docs.length
       } relationship metadata: ${JSON.stringify(failures)}`
     );
-    return;
+  } else {
+    logger.info(`Appended ${docs.length} relationship metadata to metadata datastream`);
   }
-  logger.info(`Appended ${docs.length} relationship metadata to metadata datastream`);
+
+  return { docsAttempted: docs.length, docsApplied };
 };

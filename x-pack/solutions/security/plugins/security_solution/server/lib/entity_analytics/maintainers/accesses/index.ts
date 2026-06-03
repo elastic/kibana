@@ -16,7 +16,15 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
   interval: '1d',
   initialState: {},
-  run: async ({ esClient, cpsEsClient, logger, status, crudClient, abortController }) => {
+  run: async ({
+    esClient,
+    cpsEsClient,
+    logger,
+    status,
+    crudClient,
+    abortController,
+    telemetry,
+  }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting accesses maintainer run');
     const result = await runRelationshipMaintainer({
@@ -29,8 +37,18 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       abortController,
     });
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written`
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
+    telemetry.report({
+      funnel: {
+        scanned: result.totalBuckets,
+        qualified: result.totalRecords,
+        applied: result.totalWritten,
+        droppedNotInStore: result.totalNotFound,
+        failed: result.totalWriteErrors,
+        metadataDocsApplied: result.totalMetadataDocsApplied,
+      },
+    });
     return result;
   },
 };

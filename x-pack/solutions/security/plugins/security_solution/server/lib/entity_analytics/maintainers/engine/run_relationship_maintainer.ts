@@ -23,7 +23,7 @@ import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_di
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
-import { writeRelationshipMetadatas } from './write_relationship_metadatas';
+import { writeRelationshipMetadatas, type WriteRelationshipMetadatasResult } from './write_relationship_metadatas';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 
@@ -163,7 +163,7 @@ async function runIntegration(
   crudClient: EntityUpdateClient,
   abortController: AbortController | undefined,
   metadataContext: { scanId: string; observedAt: string }
-): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult }> {
+): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult; metadata: WriteRelationshipMetadatasResult }> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
   let totalBuckets = 0;
@@ -224,13 +224,13 @@ async function runIntegration(
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
   const write = await writeEntityIds(crudClient, logger, records);
-  await writeRelationshipMetadatas(crudClient, logger, records, {
+  const metadata = await writeRelationshipMetadatas(crudClient, logger, records, {
     scanId: metadataContext.scanId,
     lookbackWindow: LOOKBACK_WINDOW,
     entitySource: config.id,
     observedAt: metadataContext.observedAt,
   });
-  return { buckets: totalBuckets, recordsCount: records.length, write };
+  return { buckets: totalBuckets, recordsCount: records.length, write, metadata };
 }
 
 /**
@@ -278,6 +278,8 @@ export const runRelationshipMaintainer = async ({
   totalNotFound: number;
   /** Count of non-404 errors returned by `bulkUpdateEntity` (5xx, etc.). */
   totalWriteErrors: number;
+  /** Count of relationship metadata docs successfully appended to the metadata datastream. */
+  totalMetadataDocsApplied: number;
   lastRunTimestamp: string;
 }> => {
   // Defense-in-depth: namespace flows raw into eight `indexPattern(namespace)`
@@ -300,6 +302,7 @@ export const runRelationshipMaintainer = async ({
   let totalWritten = 0;
   let totalNotFound = 0;
   let totalWriteErrors = 0;
+  let totalMetadataDocsApplied = 0;
 
   for (const config of integrations) {
     if (abortController?.signal.aborted) {
@@ -307,7 +310,7 @@ export const runRelationshipMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
-    const { buckets, recordsCount, write } = await runIntegration(
+    const { buckets, recordsCount, write, metadata } = await runIntegration(
       config,
       readClient,
       logger,
@@ -321,6 +324,7 @@ export const runRelationshipMaintainer = async ({
     totalWritten += write.updated;
     totalNotFound += write.notFound;
     totalWriteErrors += write.errors;
+    totalMetadataDocsApplied += metadata.docsApplied;
   }
 
   return {
@@ -329,6 +333,7 @@ export const runRelationshipMaintainer = async ({
     totalWritten,
     totalNotFound,
     totalWriteErrors,
+    totalMetadataDocsApplied,
     lastRunTimestamp: new Date().toISOString(),
   };
 };
