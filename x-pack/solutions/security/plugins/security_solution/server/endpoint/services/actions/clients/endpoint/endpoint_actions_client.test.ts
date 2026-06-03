@@ -452,7 +452,10 @@ describe('EndpointActionsClient', () => {
 
     runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
 
-    cancel: responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions()),
+    cancel: responseActionsClientMock.createCancelActionOptions({
+      ...getCommonResponseActionOptions(),
+      parameters: { id: 'test-action-id-123', force: true },
+    }),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
@@ -503,6 +506,13 @@ describe('EndpointActionsClient', () => {
             timeout: 60000,
           };
           expectedComment = `(Script name: script one / File name: my_script.sh) ${expectedComment}`;
+          break;
+
+        case 'cancel':
+          expectedParams = {
+            id: 'test-action-id-123',
+            force: true,
+          };
           break;
       }
 

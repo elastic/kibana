@@ -147,6 +147,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
+  `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-authoring',
 ] as const;
 
