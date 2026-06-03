@@ -18,6 +18,8 @@ spaceTest.describe(
   'Discover context - filters (basic)',
   { tag: testData.CONTEXT_DEPLOYMENT_AGNOSTIC_TAGS },
   () => {
+    spaceTest.use({ viewport: { width: 1600, height: 1200 } });
+
     let dataViewId: string;
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {

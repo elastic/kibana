@@ -143,7 +143,7 @@ spaceTest.describe(
 
         await expect(page.testSubj.locator('doc-hit')).toBeVisible({ timeout: 30_000 });
 
-        await page.testSubj.click('~breadcrumb & ~first');
+        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
       }

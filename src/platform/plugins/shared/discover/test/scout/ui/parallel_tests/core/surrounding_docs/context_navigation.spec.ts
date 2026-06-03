@@ -103,7 +103,7 @@ spaceTest.describe(
         await pageObjects.contextPage.clickRowAction(1);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await page.testSubj.click('~breadcrumb & ~first');
+        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
@@ -131,7 +131,7 @@ spaceTest.describe(
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await page.testSubj.click('~breadcrumb & ~first');
+        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
@@ -156,7 +156,7 @@ spaceTest.describe(
         await pageObjects.contextPage.clickRowAction(1);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await page.testSubj.click('~breadcrumb & ~first');
+        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
