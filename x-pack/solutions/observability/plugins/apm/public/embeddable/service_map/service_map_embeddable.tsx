@@ -165,11 +165,14 @@ export function ServiceMapEmbeddable({
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
   const esQuery = useMemo(() => {
-    const hasParentSearchState =
-      (parentFilters && parentFilters.length > 0) ||
-      (parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
-        ? parentQuery.query.trim().length > 0
-        : Boolean(parentQuery));
+    const hasParentFilters = Boolean(parentFilters && parentFilters.length > 0);
+    const parentQueryText =
+      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
+        ? parentQuery.query.trim()
+        : undefined;
+    const hasParentQuery =
+      parentQueryText !== undefined ? parentQueryText.length > 0 : Boolean(parentQuery);
+    const hasParentSearchState = hasParentFilters || hasParentQuery;
     if (!dataView || !hasParentSearchState) {
       return undefined;
     }

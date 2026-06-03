@@ -299,7 +299,7 @@ export function AddToDashboardButton({
     defaultMessage: 'Service map',
   });
 
-  const buttonLabel = i18n.translate('xpack.apm.serviceMap.copyToDashboardMenuItem', {
+  const buttonLabel = i18n.translate('xpack.apm.serviceMap.copyToDashboardButton', {
     defaultMessage: 'Copy to dashboard',
   });
 
