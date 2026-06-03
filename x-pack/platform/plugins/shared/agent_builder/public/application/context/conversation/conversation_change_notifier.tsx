@@ -7,8 +7,10 @@
 
 import { useEffect } from 'react';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
-import { useConversation } from '../../hooks/use_conversation';
+import { useConversation, useAgentId } from '../../hooks/use_conversation';
 import { useConversationId } from './use_conversation_id';
+import { useStreamingContext } from '../streaming/streaming_context';
+import { useConversationListMutations } from '../../hooks/use_conversation_list_mutations';
 
 /**
  * Publishes the active conversation to the shared `EventsService` whenever the
@@ -20,6 +22,15 @@ export const ConversationChangeNotifier = (): null => {
   const { eventsService } = useAgentBuilderServices();
   const conversationId = useConversationId();
   const { conversation, isError, isFetched } = useConversation();
+  const { activeStreams } = useStreamingContext();
+  const agentId = useAgentId();
+
+  const { markAsRead } = useConversationListMutations({
+    routeConversationId: conversationId,
+    agentId: agentId ?? '',
+  });
+
+  const isStreaming = Boolean(conversationId && activeStreams.has(conversationId));
 
   useEffect(() => {
     if (!conversationId) {
@@ -42,6 +53,11 @@ export const ConversationChangeNotifier = (): null => {
       eventsService.clearActiveConversation();
     };
   }, [eventsService]);
+
+  useEffect(() => {
+    if (!isFetched || !conversation || conversation.read !== false || isStreaming) return;
+    markAsRead(conversation.id);
+  }, [isFetched, conversation, isStreaming, markAsRead]);
 
   return null;
 };

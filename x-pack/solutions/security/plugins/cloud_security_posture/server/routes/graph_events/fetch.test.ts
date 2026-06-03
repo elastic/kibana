@@ -30,9 +30,10 @@ describe('fetchEvents', () => {
       toArrowReader: jest.fn(),
     });
 
-    (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    // Default: index does not exist (no enrichment)
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
       .fn()
-      .mockRejectedValue({ statusCode: 404 });
+      .mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -67,20 +68,13 @@ describe('fetchEvents', () => {
     });
   });
 
-  it('uses lookup join enrichment when the entities index is in lookup mode', async () => {
+  it('uses lookup join enrichment when the entities index exists', async () => {
     const indexName = getEntitiesLatestIndexName('default');
 
-    (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
+    // Mock index exists → enrichment via LOOKUP JOIN is enabled
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
       .fn()
-      .mockResolvedValueOnce({
-        [indexName]: {
-          settings: {
-            index: {
-              mode: 'lookup',
-            },
-          },
-        },
-      });
+      .mockResolvedValueOnce(true);
 
     await fetchEvents({
       esClient,

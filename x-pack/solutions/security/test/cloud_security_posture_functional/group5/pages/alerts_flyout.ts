@@ -140,7 +140,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(1)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -153,7 +153,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-      await expandedFlyoutGraph.showEntityDetails('ba5009af439e17933876ad557ecefa32');
+      await expandedFlyoutGraph.showEntityDetails(
+        '788e996886e5d4eea273c24f7d591159076bca81e76bde03cf2936802da9c701'
+      );
       // check the preview panel grouped items rendered correctly
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(4);
       await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleTextNumber(4);
@@ -161,7 +163,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.closePreviewSection();
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(1)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -231,7 +233,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(1)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -270,7 +272,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole2)ln(528a070f7bdd4fdac70ee28fbe835f04)oe(0)oa(0)'
+        'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(0)oa(0)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -334,7 +336,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
 
-          await expandedFlyoutGraph.showEntityDetails('d45b28b33930cc202a6c9d8d8eab3ae6');
+          await expandedFlyoutGraph.showEntityDetails(
+            'aee6fb9ccf55bf0e3e974083019a0a1ba7786ef99ed3fe59a1504f22ac94ee31'
+          );
           // check the preview panel grouped items rendered correctly
           await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
           await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
@@ -404,10 +408,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           );
 
           // Verify second entity node - Host target
-          // get Node by md5 hash of host:host-instance-1 and host:host-instance-2
-          await expandedFlyoutGraph.assertNodeEntityTag('9da97a47da11862817d60dcc1cfbaaef', 'Host');
+          // get Node by sha256 hash of host:host-instance-1 and host:host-instance-2
+          await expandedFlyoutGraph.assertNodeEntityTag(
+            '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
+            'Host'
+          );
           await expandedFlyoutGraph.assertNodeEntityDetails(
-            '9da97a47da11862817d60dcc1cfbaaef',
+            '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339',
             'GCP Compute Instance'
           );
         });
