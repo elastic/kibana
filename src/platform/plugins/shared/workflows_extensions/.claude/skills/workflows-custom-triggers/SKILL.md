@@ -7,13 +7,31 @@ description: Register and implement custom workflow triggers from an external Ki
 
 > Custom triggers let workflows subscribe to domain events from your plugin. A misconfigured trigger can break workflows on every restart, emit invalid payloads that fail at runtime, cause infinite event chains, or silently fail the approval gate. The defaults are not always right — verify each field below explicitly.
 
+## Canonical guide — read this for implementation steps
+
+**Do not duplicate the contributing guide here.** Follow the end-to-end steps, code templates, emit patterns, guardrails, and approval workflow in:
+
+**[dev_docs/TRIGGERS.md](../../dev_docs/TRIGGERS.md)**
+
+Sections to use while implementing:
+
+| Task | TRIGGERS.md section |
+|---|---|
+| Define common trigger (`id`, `eventSchema`, docs, snippets) | [Step 1](../../dev_docs/TRIGGERS.md#step-1-define-common-trigger-id-eventschema-title-description-optional-documentation-and-snippets) |
+| Server registration | [Step 2](../../dev_docs/TRIGGERS.md#step-2-register-on-server) |
+| Public registration (icon, async loader) | [Step 3](../../dev_docs/TRIGGERS.md#step-3-register-on-public) |
+| Emit via request context or direct client | [Step 4](../../dev_docs/TRIGGERS.md#step-4-emit-events--two-ways) |
+| Approval gate | [Trigger Definition Approval Process](../../dev_docs/TRIGGERS.md#trigger-definition-approval-process) |
+| Event-chain depth and loop prevention | [Event-driven guardrails](../../dev_docs/TRIGGERS.md#event-driven-guardrails) |
+| Loop demo workflow | [Event-chain depth (loop) demo](../../dev_docs/TRIGGERS.md#event-chain-depth-loop-demo) |
+
 ## Overview
 
 A custom workflow trigger is owned and registered by a **plugin other than `workflows_extensions`**. The workflows-team plugin only hosts internal triggers; everything external must live in the owning plugin.
 
 A trigger lives in three layers:
 
-- **Common** — `id`, `eventSchema`, `title`, `description`, optional `documentation` / `snippets`. Imported by both server and public to keep them in sync. All the fields inside eventSchema should have description. This description is later on used for documentation purposes.
+- **Common** — `id`, `eventSchema`, `title`, `description`, optional `documentation` / `snippets`. Imported by both server and public to keep them in sync.
 - **Server** — registers the **same** common definition via `registerTriggerDefinition`; emits events with `emitEvent`.
 - **Public** — spreads the common definition and adds **icon** only (browser-only UI).
 
@@ -22,17 +40,14 @@ Both sides register through the `workflowsExtensions` setup contract:
 - Server: `registerTriggerDefinition(commonDefinition)`
 - Public: `registerTriggerDefinition(definition | () => Promise<definition>)`
 
-**Source of truth:**
+**Additional references:**
 
-- Contributing guide: `src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md`
 - Worked example: `examples/workflows_extensions_example/`
 - Common base type: `src/platform/plugins/shared/workflows_extensions/common/trigger_registry/types.ts` (`CommonTriggerDefinition`, `TriggerDocumentation`, `TriggerSnippets`)
 - Public trigger types: `src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts` (`PublicTriggerDefinition`)
 - Emit API: `src/platform/packages/shared/kbn-workflows/server/types.ts` (`WorkflowsClient`, `WorkflowsApiRequestHandlerContext`, `emitEvent`)
 - Event-chain guardrails: `src/platform/plugins/shared/workflows_extensions/server/event_chain_context.ts`
 - Approval fixture: `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_trigger_definitions.ts`
-
-For longer code templates (full scaffold, nested schemas, loop demo), see [reference.md](reference.md).
 
 ## 0. Locate the owning plugin (do this first)
 
@@ -67,6 +82,10 @@ Also check for existing registration hooks:
 
 Wire new triggers into those existing index/setup files when present; only create new index files when the plugin has no trigger layout yet.
 
+### Derive the trigger namespace
+
+Trigger ids use `<namespace>.<event>` (kebab-case namespace, camelCase event). Prefer the namespace already used by that plugin's triggers. If none exist, derive kebab-case from `plugin.id` (e.g. `workflowsExtensionsExample` → `workflows-extensions-example`) and confirm with the user if ambiguous.
+
 ## File layout
 
 Mirror the layout used by `examples/workflows_extensions_example/` so reviewers and the workflows team can find things:
@@ -81,242 +100,21 @@ your-plugin/
 
 Keep `id`, `eventSchema`, `title`, `description`, `documentation`, and `snippets` in the **common** file only. Re-importing them on the public side is how server/public stay locked together.
 
-## 1. `id` and naming — namespaced and stable
+## Agent-specific rules (beyond TRIGGERS.md)
 
-**Rule:** Trigger IDs MUST follow `<namespace>.<event>` with **kebab-case** namespace and **camelCase** event. Once shipped, the ID is part of users' YAML; renaming it breaks every existing workflow.
-
-```ts
-export const MyTriggerId = 'agent-builder.agentCompleted';   // ✓
-export const MyTriggerId = 'cases.caseCreated';              // ✓
-```
-
-```ts
-export const MyTriggerId = 'my_trigger';                     // ✗ no namespace
-export const MyTriggerId = 'custom_trigger';                 // ✗ event not camelCase
-export const MyTriggerId = 'my_plugin.my_event';             // ✗ snake_case event
-```
-
-Namespace conventions:
-
-| Area | Namespace | Notes |
-|---|---|---|
-| `cases.*` | owned by Cases plugin | Do not add new `cases.*` triggers outside the Cases plugin |
-| Your plugin | a fresh kebab-case namespace | Use one prefix per domain (e.g. `agent-builder.*`, `alerting-v2.*`, `workflows-extensions-example.*`) |
-
-Avoid generic names (`trigger`, `event`, `fired`) without a namespace.
-
-## 2. Common definition — what *both* sides need
-
-**Rule:** `title` and `description` are **required** on the common definition. Put them — together with `id`, `eventSchema`, and optional i18n'd `documentation` / `snippets` — in `common/triggers/<trigger>.ts` (or the plugin's existing triggers subdirectory). Do not duplicate them on the public side.
-
-```ts
-import { z } from '@kbn/zod/v4';
-import { i18n } from '@kbn/i18n';
-import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-
-export const MyTriggerId = 'my-namespace.myTrigger' as const;
-
-export const myTriggerEventSchema = z.object({
-  message: z.string().describe('The message text for the event.'),
-  source: z.string().optional().describe('The source that emitted the event.'),
-  category: z.string().optional().describe('Category for filtering in workflow conditions.'),
-});
-
-export type MyTriggerEvent = z.infer<typeof myTriggerEventSchema>;
-
-export const myTriggerCommonDefinition: CommonTriggerDefinition = {
-  id: MyTriggerId,
-  eventSchema: myTriggerEventSchema,
-  title: i18n.translate('myPlugin.myTrigger.title', { defaultMessage: 'My trigger' }),
-  description: i18n.translate('myPlugin.myTrigger.description', {
-    defaultMessage: 'Emitted when something happens.',
-  }),
-  documentation: {
-    details: i18n.translate('myPlugin.myTrigger.documentation.details', {
-      defaultMessage:
-        'Filter when this workflow runs using KQL on event properties (e.g. event.category, event.message).',
-    }),
-    examples: [
-      i18n.translate('myPlugin.myTrigger.documentation.exampleCategory', {
-        defaultMessage: `## Match by category
-\`\`\`yaml
-triggers:
-  - type: {triggerId}
-    on:
-      condition: 'event.category: "alerts"'
-\`\`\``,
-        values: { triggerId: MyTriggerId },
-      }),
-    ],
-  },
-  snippets: { condition: 'event.category: "alerts"' },
-};
-```
-
-## 3. `eventSchema`, documentation, and snippets
-
-**Rule:** Decide the payload shape before writing emit sites. `eventSchema` is validated at **emit time**; invalid payloads throw. Workflow conditions reference emitted fields as `event.*` in KQL.
+These are easy to miss during implementation or review — they are not always spelled out in the contributing doc:
 
 | Concern | Rule |
 |---|---|
-| `eventSchema` | Must be a Zod **object** schema; use `.describe()` on every field |
-| Unknown fields | Object schemas reject unknown keys by default — do not loosen unless intentional |
-| `documentation.examples[]` | Each example must only reference fields on `eventSchema` (agents pattern-match YAML) |
-| `snippets.condition` | Must be valid KQL using only `event.*` fields from `eventSchema`; validated at registration |
-| Template syntax in i18n | Values containing `{{ ... }}` or backticks with trigger ids MUST use i18n `values:` |
+| `id` namespace | `cases.*` is owned by the Cases plugin — do not add new `cases.*` triggers outside that plugin |
+| Server registration | Setup phase only — never call `registerTriggerDefinition` from `start()` |
+| Public icon | **Must be a React component** via `React.lazy` from `@elastic/eui/es/components/icon/assets/*`. EUI icon name strings (`'star'`) are not supported — the build will not fail, the icon will simply be missing |
+| Public async loader | Prefer async import to keep zod out of the main bundle. Loaders that reject are caught and logged; one broken loader does NOT prevent other triggers from registering — verify the log when a trigger is silently missing |
+| Public loader skip | Unlike step loaders, trigger loaders do **not** support returning `undefined` to skip registration. Guard optional triggers by not calling `registerTriggerDefinition` |
+| `emitEvent` request | Always pass the **same request** used for attribution/space so event-chain depth tracking works. Emitting without a real request when guardrails matter is an anti-pattern |
+| Loop demo | Use `kibana.request` (not a generic HTTP connector) so event-chain headers propagate |
 
-Payload is available in workflow YAML as `context.event` (and as `event` in trigger `on.condition` KQL).
-
-```yaml
-triggers:
-  - type: my-namespace.myTrigger
-    on:
-      condition: 'event.category: "alerts"'
-steps:
-  - name: handle_event
-    type: console.log
-    with:
-      message: "Event: {{ context.event.message }}"
-```
-
-`documentation.details` and `documentation.examples[]` show up in the editor side panel and agent tooling. `snippets.condition` pre-fills the trigger's `on.condition` when users add the trigger from the UI.
-
-## 4. Server registration
-
-**Rule:** Register the **common definition unchanged** on the server during plugin `setup()`. There is no server wrapper helper — the common object *is* the server definition.
-
-```ts
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { myTriggerCommonDefinition } from '../../common/triggers/my_trigger';
-
-export const registerTriggerDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
-) => {
-  workflowsExtensions.registerTriggerDefinition(myTriggerCommonDefinition);
-};
-
-// In server plugin setup():
-registerTriggerDefinitions(plugins.workflowsExtensions);
-```
-
-- Do **not** call `registerTriggerDefinition` from `start()` — registration is a setup-phase operation.
-- Server registration does **not** support async loaders (unlike public steps/triggers on the public side).
-- Pair every server registration with a public registration for the same `id`.
-
-## 5. Public definition — icon only
-
-**Rule:** Spread the common definition and add **icon** only. The public file should not restate `title`, `description`, or schemas.
-
-```ts
-import React from 'react';
-import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
-import { myTriggerCommonDefinition } from '../../common/triggers/my_trigger';
-
-export const myTriggerPublicDefinition: PublicTriggerDefinition = {
-  ...myTriggerCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
-  ),
-};
-```
-
-- **Icon MUST be a React component** (preferably lazy-loaded from `@elastic/eui/es/components/icon/assets/*`). EUI icon name strings (`'star'`) are **not** supported by the workflows editor today — the build will not fail, the icon will simply be missing.
-
-## 6. Emit events — request context vs direct client
-
-**Rule:** Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`. Emit only after the trigger is registered on the server. Payload must satisfy `eventSchema`.
-
-### Option A — Request context (recommended for routes)
-
-Type route handler context to include `workflows: WorkflowsApiRequestHandlerContext` from `@kbn/workflows/server`.
-
-```ts
-const workflows = await context.workflows;
-await workflows.emitEvent(MyTriggerId, {
-  message: request.body.message,
-  source: 'my-api',
-  category: 'alerts',
-});
-```
-
-- Space and user attribution come from the current request automatically.
-- **Always pass the same request** you use for attribution/space so event-chain depth tracking works (see §8).
-
-Reference: `examples/workflows_extensions_example/server/routes/emit_event.ts`
-
-### Option B — Direct client (background jobs with KibanaRequest)
-
-When you have a `KibanaRequest` but not route context:
-
-```ts
-const workflowsClient = await plugins.workflowsExtensions.getClient(request);
-await workflowsClient.emitEvent(MyTriggerId, {
-  message: 'Event from job',
-  source: 'background',
-  category: 'audit',
-});
-```
-
-```ts
-// Anti-pattern: emit without a real request when depth/cycle guardrails matter
-await someGlobalClient.emitEvent(MyTriggerId, payload); // no chain context
-```
-
-- Invalid payloads throw at emit time.
-- A trigger event handler (registered by `workflows_management`) must be running for workflows to execute.
-
-## 7. Registration — sync vs async loader (public only)
-
-**Rule:** Prefer the **async loader form** on the public side so the trigger module (and its zod deps) are not pulled into the plugin's main bundle. Server registration stays synchronous.
-
-```ts
-// public/triggers/index.ts — async loader keeps trigger module out of main bundle
-export const registerTriggerDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
-) => {
-  workflowsExtensions.registerTriggerDefinition(() =>
-    import('./my_trigger').then((m) => m.myTriggerPublicDefinition)
-  );
-};
-```
-
-- The workflow editor and trigger registry `await workflowsExtensions.isReady()` before reading definitions, so async loaders are settled before the UI renders.
-- Loaders that reject are caught and logged; one broken loader does NOT prevent other triggers from registering. Verify the log when a trigger is silently missing.
-- Public trigger loaders do **not** support returning `undefined` to skip registration (unlike step loaders). Feature-flag optional triggers by guarding the `registerTriggerDefinition` call itself.
-
-## 8. Event-chain guardrails
-
-**Rule:** When your trigger can fire from workflows that re-emit events, design for loop prevention from the start.
-
-- **Depth limit:** `workflowsExecutionEngine.eventDriven.maxChainDepth` in `kibana.yml` (default `10`, min `1`). Exceeding it stops scheduling further runs and logs a server warning.
-- **Same request:** Always pass the **same request** used for attribution/space to `emitEvent` so depth tracking works.
-- **`on.workflowEvents` (YAML):** Registered triggers support `ignore`, `avoid-loop` (default), or `allow-all` on workflow-attributed emits.
-
-For a loop demo, use `kibana.request` (not a generic HTTP connector) so event-chain headers propagate. See `examples/workflows_extensions_example` (`example.loopTrigger`) and [TRIGGERS.md § Event-chain depth demo](../../dev_docs/TRIGGERS.md#event-chain-depth-loop-demo).
-
-## 9. The approval gate — `APPROVED_TRIGGER_DEFINITIONS`
-
-**Rule:** Every new trigger (and every change to `eventSchema`) MUST appear in `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_trigger_definitions.ts` before the Scout API approval test will pass. The list stores `{ id, schemaHash }` pairs; the test compares registered triggers against this list.
-
-Workflow:
-
-1. Implement the trigger end-to-end (common + server + public + registration + emit path).
-2. Run the approval test locally (or start the server and GET `internal/workflows_extensions/trigger_definitions`):
-   ```bash
-   node scripts/scout.js run-tests --arch stateful --domain classic \
-     --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
-   ```
-3. Copy the printed entry (or `schemaHash` from the GET response) into `APPROVED_TRIGGER_DEFINITIONS` (sorted alphabetically by `id`).
-4. Request approval from `@elastic/workflows-eng` in the PR.
-5. If you change `eventSchema` later, the hash changes — repeat steps 2–4.
-
-```ts
-// approved_trigger_definitions.ts
-export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
-  // ... existing entries, sorted ...
-  { id: 'my-namespace.myTrigger', schemaHash: '<schemaHash from test output>' },
-];
-```
+For naming conventions, schema rules, registration templates, emit patterns, and approval steps, follow [TRIGGERS.md](../../dev_docs/TRIGGERS.md).
 
 ## Quick rule reference
 
@@ -341,7 +139,7 @@ When adding a new trigger:
    - [ ] User's `plugin.id` confirmed; plugin root resolved from `kibana.jsonc`
    - [ ] File paths follow the plugin's existing trigger/workflow layout
 
-2. **Common file** (`common/triggers/<trigger>.ts` or plugin convention)
+2. **Common file** (`common/triggers/<trigger>.ts` or plugin convention) — see [TRIGGERS.md Step 1](../../dev_docs/TRIGGERS.md#step-1-define-common-trigger-id-eventschema-title-description-optional-documentation-and-snippets)
    - [ ] `id` is namespaced (`<kebab>.<camel>`) and exported as a `const` string
    - [ ] `title`, `description`, and any text in `documentation` use `i18n.translate`
    - [ ] Template syntax / trigger ids inside i18n strings go through `values:`
@@ -349,14 +147,14 @@ When adding a new trigger:
    - [ ] `documentation.examples[]` reference only `eventSchema` fields
    - [ ] `snippets.condition` (if present) is valid KQL on `event.*` fields only
 
-3. **Server** (`server/triggers/index.ts` or existing registration hook)
-   - [ ] Registers `myTriggerCommonDefinition` unchanged via `registerTriggerDefinition`
+3. **Server** — see [TRIGGERS.md Step 2](../../dev_docs/TRIGGERS.md#step-2-register-on-server)
+   - [ ] Registers common definition unchanged via `registerTriggerDefinition`
    - [ ] Registration happens in `setup()`, never `start()`
    - [ ] Emit sites call `emitEvent` with payloads matching `eventSchema`
    - [ ] Emit uses request context or `getClient(request)` with the attribution request
 
-4. **Public** (`public/triggers/<trigger>.ts`)
-   - [ ] Spreads `myTriggerCommonDefinition` — no duplicated `title`/schemas
+4. **Public** — see [TRIGGERS.md Step 3](../../dev_docs/TRIGGERS.md#step-3-register-on-public)
+   - [ ] Spreads common definition — no duplicated `title`/schemas
    - [ ] Icon is a `React.lazy` import from `@elastic/eui/es/components/icon/assets/<name>`
    - [ ] Public registration uses async loader unless the module is trivially small
 
@@ -364,7 +162,7 @@ When adding a new trigger:
    - [ ] `workflowsExtensions` in `requiredPlugins` in `kibana.jsonc`
    - [ ] Server and public both register the same trigger `id`
 
-6. **Approval gate**
+6. **Approval gate** — see [TRIGGERS.md approval process](../../dev_docs/TRIGGERS.md#trigger-definition-approval-process)
    - [ ] Scout API test run or GET `internal/workflows_extensions/trigger_definitions` for `schemaHash`
    - [ ] Entry added to `APPROVED_TRIGGER_DEFINITIONS` (alphabetically sorted)
    - [ ] PR description requests review from `@elastic/workflows-eng`
@@ -395,6 +193,5 @@ When reviewing a PR that adds or modifies a custom trigger:
 
 ## Additional resources
 
-- Extended templates and loop-demo workflow: [reference.md](reference.md)
-- Internal vs external trigger boundary: `src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md`
+- Contributing guide (canonical): [dev_docs/TRIGGERS.md](../../dev_docs/TRIGGERS.md)
 - Public Slack channel for questions: `#one-workflow`
