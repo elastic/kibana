@@ -19,10 +19,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { take } from 'rxjs';
-import { AlertsSearchBar, useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
+import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
@@ -62,7 +62,8 @@ export const WorkflowExecuteAlertForm = ({
 }: WorkflowExecuteAlertFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
-  const { http, notifications, data: dataService, unifiedSearch } = services;
+  const { http, data: dataService, unifiedSearch } = services;
+  const { SearchBar } = unifiedSearch.ui;
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: 'now-15m',
@@ -70,8 +71,8 @@ export const WorkflowExecuteAlertForm = ({
   });
 
   const [alertsLoading, setAlertsLoading] = useState(false);
-  const [query, setQuery] = useState<string>('');
-  const [submittedQuery, setSubmittedQuery] = useState<string>('');
+  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [filters, setFilters] = useState<Filter[]>([]);
   const [dataView, setDataView] = useState<DataView | null>(null);
   const dataViewCreatingRef = useRef(false);
@@ -139,11 +140,8 @@ export const WorkflowExecuteAlertForm = ({
       searchSource.setField('index', dataView);
 
       // Set query
-      if (submittedQuery) {
-        searchSource.setField('query', {
-          query: submittedQuery,
-          language: 'kuery',
-        });
+      if (submittedQuery && submittedQuery.query) {
+        searchSource.setField('query', submittedQuery);
       }
 
       // Set time range filter with proper format (matching Discovery)
@@ -243,38 +241,33 @@ export const WorkflowExecuteAlertForm = ({
   };
 
   const handleQueryChange = useCallback(
-    ({
-      query: newQuery,
-      dateRange,
-    }: {
-      query?: string;
-      dateRange: { from: string; to: string };
-    }) => {
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
       if (newQuery !== undefined) {
         setQuery(newQuery);
       }
-      setTimeRange(dateRange);
+      setTimeRange({ from: dateRange.from, to: dateRange.to });
     },
     []
   );
 
   const handleQuerySubmit = useCallback(
-    ({
-      query: newQuery,
-      dateRange,
-    }: {
-      query?: string;
-      dateRange: { from: string; to: string };
-    }) => {
+    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
       // Update both draft and submitted query on submit
       if (newQuery !== undefined) {
         setQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
-      setTimeRange(dateRange);
+      setTimeRange({ from: dateRange.from, to: dateRange.to });
       // fetchAlerts will be triggered by useEffect when submittedQuery changes
     },
     []
+  );
+
+  const handleRefresh = useCallback(
+    ({ dateRange }: { dateRange: TimeRange }) => {
+      handleQuerySubmit({ query, dateRange });
+    },
+    [handleQuerySubmit, query]
   );
 
   const handleFiltersUpdated = useCallback((newFilters: Filter[]) => {
@@ -318,30 +311,28 @@ export const WorkflowExecuteAlertForm = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <AlertsSearchBar
+        <SearchBar
           appName="workflow_management"
-          showDatePicker
+          useDefaultBehaviors={true}
+          disableSubscribingToGlobalDataServices={true}
           onQueryChange={handleQueryChange}
           onQuerySubmit={handleQuerySubmit}
+          onRefresh={handleRefresh}
           onFiltersUpdated={handleFiltersUpdated}
           query={query}
           filters={filters}
-          rangeFrom={timeRange.from}
-          rangeTo={timeRange.to}
+          indexPatterns={dataView ? [dataView] : []}
+          showDatePicker={true}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
           showFilterBar={false}
           showSubmitButton={true}
+          showQueryInput={true}
           placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
             defaultMessage:
               'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
           })}
-          ruleTypeIds={[]}
-          http={http}
-          toasts={notifications.toasts}
-          unifiedSearchBar={unifiedSearch.ui.SearchBar}
-          dataService={dataService}
-          fetchUnifiedAlertsFields={Boolean(
-            racQueriesEnabled && alertIndexNames && alertIndexNames.length > 0
-          )}
+          displayStyle="inPage"
         />
       </EuiFlexItem>
 
