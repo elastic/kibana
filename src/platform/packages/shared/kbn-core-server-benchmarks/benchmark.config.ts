@@ -17,6 +17,7 @@ const config: InitialBenchConfig = {
       name: 'warm_start',
       module: require.resolve('./benchmarks/warm_start.bench.ts'),
       compare: {
+        exists: 'lhs',
         missing: 'lhs',
       },
     },
@@ -25,12 +26,13 @@ const config: InitialBenchConfig = {
       name: 'cold_start',
       module: require.resolve('./benchmarks/cold_start.bench.ts'),
       compare: {
+        exists: 'lhs',
         missing: 'lhs',
       },
     },
   ],
   runs: 1,
-  timeout: 10 * 60_000,
+  timeout: 20 * 60_000,
 };
 
 // eslint-disable-next-line import/no-default-export

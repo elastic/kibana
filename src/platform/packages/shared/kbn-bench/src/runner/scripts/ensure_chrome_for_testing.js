@@ -22,7 +22,7 @@ const KNOWN_GOOD_VERSIONS_URL =
   'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json';
 
 function log(message) {
-  process.stderr.write(`[ftr-benchmarks] ${message}\n`);
+  process.stderr.write(`[kbn-bench] ${message}\n`);
 }
 
 function getChromeForTestingPlatform() {
@@ -32,10 +32,6 @@ function getChromeForTestingPlatform() {
 
   if (process.platform === 'linux' && process.arch === 'x64') {
     return 'linux64';
-  }
-
-  if (process.platform === 'win32') {
-    return process.arch === 'x64' ? 'win64' : 'win32';
   }
 
   throw new Error(`Unsupported Chrome for Testing platform: ${process.platform}-${process.arch}`);
@@ -167,7 +163,7 @@ async function main() {
   const installDir = path.resolve(
     process.cwd(),
     'data',
-    'kbn-ftr-benchmarks',
+    'kbn-bench',
     'chrome-for-testing',
     chromeDownload.version,
     platform

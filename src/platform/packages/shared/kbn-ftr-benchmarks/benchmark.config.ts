@@ -10,23 +10,16 @@
 import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 
-const CHROME_FOR_TESTING_SCRIPT = `${__dirname}/scripts/ensure_chrome_for_testing.js`;
-
-function getBuildPlatform() {
-  if (process.platform === 'win32') {
-    return `windows-${process.arch === 'arm64' ? 'arm64' : 'x86_64'}`;
-  }
-
-  return `${process.platform}-${process.arch === 'arm64' ? 'aarch64' : 'x86_64'}`;
-}
-
-const KIBANA_BUILD_PLATFORM = getBuildPlatform();
-
 function createBenchmark(name: string, config: string) {
+  let runEnv = '';
+  if (!process.env.CI) {
+    runEnv = 'CI=true NODE_OPTIONS=--no-deprecation '; // just for local runs
+  }
   return {
     kind: 'script' as const,
     name,
-    run: `CI=true NODE_OPTIONS=--no-deprecation TEST_BROWSER_BINARY_PATH="\${TEST_BROWSER_BINARY_PATH:-$(node "${CHROME_FOR_TESTING_SCRIPT}")}" node scripts/functional_tests --config ${config} --kibana-install-dir "$(pwd)/build/default/kibana-$(node -p "require('./package.json').version")-SNAPSHOT-${KIBANA_BUILD_PLATFORM}"`,
+    run: ({ kibanaBuildDir }) =>
+      `${runEnv} node scripts/functional_tests --config ${config} --kibana-install-dir "${kibanaBuildDir}"`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
@@ -34,6 +27,7 @@ function createBenchmark(name: string, config: string) {
     ensure: {
       // We want each workspace to use it's own build rather than the dist from the build itself (like normal FTR does)
       build: true,
+      browser: true,
     },
   } satisfies ScriptBenchmark;
 }

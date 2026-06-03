@@ -8,7 +8,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { InitialBenchConfig, ModuleBenchmark, Script, ScriptBenchmark } from './types';
+import type {
+  InitialBenchConfig,
+  ModuleBenchmark,
+  Script,
+  ScriptCommand,
+  ScriptFactory,
+  ScriptBenchmark,
+} from './types';
 
 const benchmarkSchemaBase = z.object({
   // Restrict benchmark name to filename-safe characters we allow for generated artifacts
@@ -27,17 +34,32 @@ const moduleBenchmarkSchema = benchmarkSchemaBase.extend({
   module: z.string(),
 }) satisfies z.Schema<ModuleBenchmark>;
 
+const scriptCommandSchema = z.object({
+  cmd: z.string(),
+  args: z.array(z.string()).optional(),
+  cwd: z.string().optional(),
+}) satisfies z.Schema<ScriptCommand>;
+
+const scriptFactorySchema = z.custom<ScriptFactory>(
+  (value): value is ScriptFactory => typeof value === 'function',
+  'script factory must be a function'
+);
+
 const scriptSchema = z.union([
   z.string(),
-  z.object({
-    cmd: z.string(),
-    args: z.array(z.string()).optional(),
-    cwd: z.string().optional(),
-  }),
+  scriptCommandSchema,
+  scriptFactorySchema,
 ]) satisfies z.Schema<Script>;
 
 const scriptBenchmarkSchema = benchmarkSchemaBase.extend({
   kind: z.literal('script'),
+  ensure: z
+    .object({
+      bootstrap: z.boolean().optional(),
+      build: z.boolean().optional(),
+      browser: z.boolean().optional(),
+    })
+    .optional(),
   beforeAll: scriptSchema.optional(),
   afterAll: scriptSchema.optional(),
   before: scriptSchema.optional(),

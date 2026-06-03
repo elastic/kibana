@@ -13,6 +13,8 @@ import execa, { type ExecaChildProcess } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getBuildDir } from './get_build_dir';
 
+const execaEnv = { UNSAFE_DISABLE_NODE_VERSION_VALIDATION: '1' }; // mirror @kbn/workspaces
+
 async function waitForStdout({
   log,
   proc,
@@ -23,8 +25,19 @@ async function waitForStdout({
   search: string | RegExp;
 }): Promise<string> {
   return await new Promise<string>((resolve, reject) => {
-    function handleData(data: any) {
+    const output: string[] = [];
+
+    function recordOutput(data: any) {
       const line: string = data.toString();
+      output.push(line);
+      if (output.length > 20) {
+        output.shift();
+      }
+      return line;
+    }
+
+    function handleData(data: any) {
+      const line = recordOutput(data);
       log.verbose(line);
       const isMatch = typeof search === 'string' ? line.includes(search) : search.test(line);
 
@@ -34,11 +47,25 @@ async function waitForStdout({
       }
     }
 
-    proc.stdout?.on('data', handleData);
+    function handleErrorData(data: any) {
+      log.verbose(recordOutput(data));
+    }
 
-    proc.on('exit', (code) =>
-      reject(new Error(`Process "${proc.spawnargs.join(' ')}" exited early with code ${code}`))
-    );
+    proc.stdout?.on('data', handleData);
+    proc.stderr?.on('data', handleErrorData);
+
+    proc.on('exit', (code) => {
+      reject(
+        new Error(
+          [
+            `Process "${proc.spawnargs.join(' ')}" exited early with code ${code}`,
+            output.length ? `Recent output:\n${output.join('')}` : undefined,
+          ]
+            .filter(Boolean)
+            .join('\n')
+        )
+      );
+    });
 
     proc.on('error', reject);
   });
@@ -60,7 +87,7 @@ async function startEs({
   const [file, ...cmdArgs] = ['node', 'scripts/es.js', 'snapshot', ...args];
   log.debug(`Spawning "${file} ${cmdArgs.join(' ')}"`);
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd });
+  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd, env: execaEnv });
 
   const regex = /AbstractHttpServerTransport.*publish_address .*:(\d+)/;
 
@@ -140,7 +167,7 @@ async function startKibana({
     }, pid=${process.pid}`
   );
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd });
+  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd: distDir, env: execaEnv });
 
   await waitForStdout({
     proc,

@@ -29,13 +29,26 @@ export interface ModuleBenchmark extends BenchmarkBase {
   module: string;
 }
 
-export type Script = string | { cwd?: string; cmd: string; args?: string[] };
+export interface ScriptCommand {
+  cwd?: string;
+  cmd: string;
+  args?: string[];
+}
+
+export interface ScriptFactoryArgs {
+  kibanaBuildDir: string;
+}
+
+export type ScriptFactory = (args: ScriptFactoryArgs) => string | ScriptCommand;
+
+export type Script = string | ScriptCommand | ScriptFactory;
 
 export interface ScriptBenchmark extends BenchmarkBase {
   kind: 'script';
   ensure?: {
     bootstrap?: boolean;
     build?: boolean;
+    browser?: boolean;
   };
   beforeAll?: Script;
   afterAll?: Script;
