@@ -150,6 +150,7 @@ src/core/packages/chrome/feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
+src/core/packages/chrome/navigation-customization @elastic/appex-sharedux
 src/core/packages/chrome/navigation-utils @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar-components @elastic/appex-sharedux

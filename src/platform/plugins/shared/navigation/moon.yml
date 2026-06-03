@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/security-plugin'
   - '@kbn/navigation-customization-components'
+  - '@kbn/core-chrome-navigation-customization'
   - '@kbn/zod'
   - '@kbn/core-chrome-browser-navigation-utils'
 tags:
