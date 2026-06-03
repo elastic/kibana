@@ -699,6 +699,7 @@ describe('SmlCrawlerImpl', () => {
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
+      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
 
