@@ -27,8 +27,11 @@ export const getTypeLabel = (type: FormulaArgType): string => {
       return i18n.translate('lensFormulaDocs.string', { defaultMessage: 'string' });
     case 'boolean':
       return i18n.translate('lensFormulaDocs.boolean', { defaultMessage: 'boolean' });
+    default: {
+      const _exhaustiveCheck: never = type;
+      return _exhaustiveCheck;
+    }
   }
-  return type;
 };
 
 export const tinymathFunctions: Record<
