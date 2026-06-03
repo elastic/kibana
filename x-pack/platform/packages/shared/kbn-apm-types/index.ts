@@ -54,5 +54,4 @@ export type * from './src/time_range_metadata';
 export type * from './src/timeseries';
 export type * from './src/traces';
 export * from './src/privilege_type';
-export * from './src/string_from_buffer_rt';
 export type * from './src/metrics_types';
