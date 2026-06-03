@@ -15,12 +15,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import { RuleDetailTabs } from '../rule_details/use_rule_details_tabs';
-import {
-  CreatedBy,
-  RuleRevision,
-  RuleVersion,
-  UpdatedBy,
-} from '../../../../detections/components/rules/rule_info';
+import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import { RuleStatus, ruleStatusI18n } from '../../../common/components/rule_execution_status';
 import { RuleChangesHistory } from '../../components/changes_history';
 
@@ -43,8 +38,6 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
             ) : (
               ''
             ),
-            rule.rule_source.type === 'external' ? <RuleVersion version={rule.version} /> : '',
-            <RuleRevision revision={rule.revision} />,
           ].filter(Boolean)
         : [],
     [rule]
@@ -83,9 +76,9 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
           backOptions={{
             pageId: SecurityPageName.rules,
             path: getRuleDetailsTabUrl(ruleId, RuleDetailTabs.overview),
-            text: rule?.name ?? '',
             dataTestSubj: 'ruleChangesHistoryBack',
           }}
+          backInlined
         />
         <RuleChangesHistory />
       </SecuritySolutionPageWrapper>
