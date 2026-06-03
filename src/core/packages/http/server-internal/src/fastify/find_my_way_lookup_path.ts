@@ -137,18 +137,16 @@ export function findMyWayRouteMatch(
     if (trailingSlashMatch) {
       return trailingSlashMatch;
     }
-    const slashlessMatch = fmw.find(method as any, lookupPath);
-    if (
-      slashlessMatch &&
-      isCatchAllFindMyWayMatch(slashlessMatch) &&
-      isValidFindMyWayMatch(slashlessMatch)
-    ) {
-      return slashlessMatch;
+    const httpMethod = method.toUpperCase();
+    // Core `/{path*}` only registers GET (httpResources). Using it for POST/PUT would
+    // run the redirect handler and yield 302 on API URLs such as `/internal/search/indexFields/`.
+    if (httpMethod === 'GET' || httpMethod === 'HEAD') {
+      if (globalCatchAll) {
+        return buildGlobalCatchAllMatch(lookupPath, globalCatchAll);
+      }
+      return undefined;
     }
-    if (globalCatchAll) {
-      return buildGlobalCatchAllMatch(lookupPath, globalCatchAll);
-    }
-    return undefined;
+    return findIfValid(fmw, method, lookupPath);
   }
 
   return findIfValid(fmw, method, lookupPath);

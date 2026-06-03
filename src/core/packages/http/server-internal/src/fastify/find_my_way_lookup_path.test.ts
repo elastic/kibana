@@ -53,6 +53,21 @@ describe('find_my_way_lookup_path', () => {
     expect(routeMatchHasEmptyNamedPathParam({ path: '' }, 'path')).toBe(false);
   });
 
+  it('uses slashless lookup for POST with trailing slash (not GET catch-all redirect)', () => {
+    const fmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
+    fmw.on('POST', '/internal/search/indexFields', () => 'indexFields', {});
+    fmw.on('GET', '/*', () => 'wildcard', { wildcardName: 'path' });
+
+    const req = makeReq('/internal/search/indexFields/');
+    (req as { method: string }).method = 'POST';
+    const match = findMyWayRouteMatch(fmw, 'POST', req, {
+      handler: (() => 'wildcard') as GlobalCatchAllRoute['handler'],
+      wildcardName: 'path',
+    });
+
+    expect((match?.handler as () => string)()).toBe('indexFields');
+  });
+
   it('rejects empty named capture on trailing-slash URL then matches catch-all via slashless path', () => {
     const fmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
     fmw.on('GET', '/api/cases/:case_id', () => 'case', {});

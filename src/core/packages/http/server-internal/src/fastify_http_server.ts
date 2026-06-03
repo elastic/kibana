@@ -1170,13 +1170,15 @@ export class FastifyHttpServer {
     const hToolkit = { continue: HCONTINUE };
 
     const wrapHapiOnRequest = (handler: (request: any, h: any) => unknown | Promise<unknown>) => {
-      return async (req: FastifyRequest, _reply: FastifyReply) => {
+      return async (req: FastifyRequest, reply: FastifyReply) => {
         // Build a minimal Hapi-shaped request: `events` lets the metrics collector
         // observe socket disconnects; the rest is read-only metadata it never touches.
         const events = new EventEmitter();
-        // Hapi fires 'disconnect' on raw socket close; mirror that on Fastify's raw req.
+        // Hapi fires 'disconnect' when the connection closes before the response completes.
         req.raw.on('close', () => {
-          if (!req.raw.complete) events.emit('disconnect');
+          if (!reply.sent && !reply.raw.writableEnded) {
+            events.emit('disconnect');
+          }
         });
         const compatReq = { events, raw: req.raw, info: { received: Date.now() } };
         const result = await handler(compatReq, hToolkit);
@@ -1404,8 +1406,8 @@ export class FastifyHttpServer {
         const stat = await fs.promises.stat(requested);
         if (!stat.isFile()) {
           return reply
-            .code(404)
-            .send({ statusCode: 404, error: 'Not Found', message: 'Not Found' });
+            .code(403)
+            .send({ statusCode: 403, error: 'Forbidden', message: 'Forbidden' });
         }
         const resolved = await resolvePrecompressedStaticPath(
           requested,

@@ -352,6 +352,8 @@ export class FastifyResponseAdapter {
     if (!headers) return;
     for (const [name, value] of Object.entries(headers)) {
       if (value === undefined) continue;
+      // Hapi omits an empty Content-Length (e.g. reporting sets `Content-Length: ''` when size is unknown).
+      if (name.toLowerCase() === 'content-length' && value === '') continue;
       if (name.toLowerCase() === 'etag' && typeof value === 'string') {
         reply.header(name, this.formatHapiEtagHeader(value));
         continue;
