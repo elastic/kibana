@@ -9,4 +9,6 @@
 
 export const SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS = {
   HEADER: 'serviceFlyoutTransactionsHeader',
+  ROW_NAME: 'serviceFlyoutTransactionsRowName',
+  ROW_ALERTS_BADGE: 'serviceFlyoutTransactionsRowAlertsBadge',
 } as const;

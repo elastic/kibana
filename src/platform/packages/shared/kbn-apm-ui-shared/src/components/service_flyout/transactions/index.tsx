@@ -145,7 +145,15 @@ export function ServiceFlyoutTransactionsSection({
       }
       showMaxTransactionGroupsExceededWarning
       remainingTransactionsCellTooltipContent={MAX_GROUPS_TOOLTIP}
-      columnInteractions={{ name: { href: getTransactionDetailHref } }}
+      columnInteractions={{
+        name: {
+          href: getTransactionDetailHref,
+          ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_NAME },
+        },
+        alerts: {
+          ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_ALERTS_BADGE },
+        },
+      }}
       onSearchQueryChange={setSearchQuery}
     />
   );
