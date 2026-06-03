@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import type { ServiceMapResponse } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
+import { jsonRt } from '@kbn/io-ts-utils';
 import { defineRoute } from '../types';
 import { rangeRt, kueryRt } from '../../default_api_types';
 
@@ -20,6 +21,9 @@ export const serviceMapRoute = defineRoute<ServiceMapRouteResponse>()({
         serviceName: t.string,
         serviceGroup: t.string,
         kuery: kueryRt.props.kuery,
+        // JSON-serialised ES query produced by buildEsQuery() on the client.
+        // Carries filter-bar pills + Controls API selections already merged.
+        esQuery: jsonRt,
       }),
       environmentRt,
       rangeRt,
