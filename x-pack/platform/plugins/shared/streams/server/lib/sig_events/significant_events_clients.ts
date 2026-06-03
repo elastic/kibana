@@ -14,28 +14,27 @@ import { DiscoveryService, discoveriesDataStream } from './discoveries';
 import type { DiscoveryClient } from './discoveries';
 import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
-import { VerdictService, verdictsDataStream } from './verdicts';
-import type { VerdictClient } from './verdicts';
+import { memoriesDataStream } from '../memory';
+import { memoryHistoryDataStream } from '../memory/history_data_stream';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
   discovery: DiscoveryService;
   event: EventService;
-  verdict: VerdictService;
 }
 
 export interface SignificantEventsClients {
   getDetectionClient: () => DetectionClient;
   getDiscoveryClient: () => DiscoveryClient;
   getEventClient: () => EventClient;
-  getVerdictClient: () => VerdictClient;
 }
 
 const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
   detectionsDataStream,
   discoveriesDataStream,
   eventsDataStream,
-  verdictsDataStream,
+  memoriesDataStream,
+  memoryHistoryDataStream,
 ];
 
 export function createSignificantEventsServices(): SignificantEventsServices {
@@ -43,7 +42,6 @@ export function createSignificantEventsServices(): SignificantEventsServices {
     detection: new DetectionService(),
     discovery: new DiscoveryService(),
     event: new EventService(),
-    verdict: new VerdictService(),
   };
 }
 
@@ -60,7 +58,6 @@ export function createSignificantEventsClients({
     getDetectionClient: () => services.detection.getClient({ esClient, space }),
     getDiscoveryClient: () => services.discovery.getClient({ esClient, space }),
     getEventClient: () => services.event.getClient({ esClient, space }),
-    getVerdictClient: () => services.verdict.getClient({ esClient, space }),
   };
 }
 

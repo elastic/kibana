@@ -56,7 +56,7 @@ import { MonitorDetailsPanel } from '../../../common/components/monitor_details_
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -172,7 +172,7 @@ function DetailFlyoutDurationChart({
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
   const dataTypesIndexPatterns = useMemo(
-    () => (remoteName ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : undefined),
+    () => (remoteName ? { synthetics: getSyntheticsCcsIndex(remoteName) } : undefined),
     [remoteName]
   );
 
@@ -275,6 +275,7 @@ export function MonitorDetailFlyout(props: Props) {
     configId,
     locationId,
     spaces,
+    remoteName: monitor?.remote?.remoteName,
   });
 
   const editLink = useEditMonitorLocator({ configId, spaces });
@@ -286,6 +287,18 @@ export function MonitorDetailFlyout(props: Props) {
   // space and don't 404. Reuses the helper that powers the locator-based links.
   const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
 
+  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
+
+  // The overview-status metadata only carries `remote.kibanaUrl` when the
+  // remote heartbeat docs expose it via the `top_metrics` aggregation, which
+  // silently drops `text`-mapped fields. The latest ping reads `kibanaUrl`
+  // straight from `_source`, so fall back to it for the "View on remote
+  // cluster" deep link when the overview metadata didn't capture it.
+  const remoteKibanaUrl =
+    monitor?.remote?.kibanaUrl ??
+    monitorDetail.data?.remote?.kibanaUrl ??
+    monitorDetail.data?.kibanaUrl;
+
   const remoteMonitorUrl = useMemo(
     () =>
       monitor
@@ -293,9 +306,10 @@ export function MonitorDetailFlyout(props: Props) {
             monitor,
             locationId,
             spaceId: space?.id,
+            kibanaUrl: remoteKibanaUrl,
           })
         : undefined,
-    [monitor, locationId, space?.id]
+    [monitor, locationId, space?.id, remoteKibanaUrl]
   );
 
   const dispatch = useDispatch();
@@ -334,8 +348,6 @@ export function MonitorDetailFlyout(props: Props) {
   }, [configId, crossSpaceId, dispatch, isRemote, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-
-  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
 
   const getColor = useMonitorHealthColor();
 
@@ -541,19 +553,36 @@ export function MonitorDetailFlyout(props: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {isRemote ? (
-                <EuiToolTip content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
-                    isDisabled={!remoteMonitorUrl}
-                    href={remoteMonitorUrl}
-                    target="_blank"
-                    iconType="popout"
-                    iconSide="right"
-                    fill
-                  >
-                    {VIEW_ON_REMOTE_CLUSTER_TEXT}
-                  </EuiButton>
-                </EuiToolTip>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}
+                    >
+                      <EuiButton
+                        data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
+                        isDisabled={!remoteMonitorUrl}
+                        href={remoteMonitorUrl}
+                        target="_blank"
+                        iconType="popout"
+                        iconSide="right"
+                      >
+                        {VIEW_ON_REMOTE_CLUSTER_TEXT}
+                      </EuiButton>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                      isDisabled={!detailLink}
+                      href={detailLink}
+                      iconType="sortRight"
+                      iconSide="right"
+                      fill
+                    >
+                      {GO_TO_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
