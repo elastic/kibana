@@ -128,6 +128,7 @@ describe('createSignificantEventSmlType', () => {
           updated_at: '2026-01-01T00:00:00.000Z',
           spaces: ['default'],
           permissions: ['api:read_stream'],
+          ingestion_method: 'manual',
         },
         {
           request: {} as KibanaRequest,
