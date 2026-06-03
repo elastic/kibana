@@ -83,6 +83,40 @@ describe('PollPolicyStepHandler', () => {
       expect(durable.pollState?.attempt).toBe(1);
     });
 
+    it('start + poll resumed invocation: calls poll after start hand-off', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ state: { ready: true } });
+      const startedAt = new Date(Date.now() - 5_000).toISOString();
+      const initialState = {
+        [DURABLE_STEP_STATE_KEY]: {
+          startedAt,
+          initialStartState: { isStart: true },
+          pollState: {
+            attempt: 1,
+            nextPollAt: startedAt,
+            lastPollAt: startedAt,
+          },
+          customState: { ready: false },
+        },
+      };
+      const mocks = createHandlerTestMocks(initialState);
+      const stepDefinition = {
+        start: jest.fn(),
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
+        ceilings: { maxAttempts: 100, maxWaitMs: 60 * 60_000 },
+      };
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      const result = await handler.run({}, {}, pollNode.configuration);
+
+      expect(result.suspended).toBe(true);
+      expect(stepDefinition.start).not.toHaveBeenCalled();
+      expect(pollHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ attempt: 1, state: { ready: false } })
+      );
+      expect(getDurableState(mocks.persistedState.value).customState).toEqual({ ready: true });
+    });
+
     it('resumed invocation: hydrates author state, calls poll, schedules next on { state }', async () => {
       const pollHandler = jest.fn().mockResolvedValue({ state: { progress: 2 } });
       const startedAt = new Date(Date.now() - 5_000).toISOString();

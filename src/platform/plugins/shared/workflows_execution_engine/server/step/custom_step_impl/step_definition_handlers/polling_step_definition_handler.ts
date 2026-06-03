@@ -10,7 +10,7 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
-  isPollOnlyStepDefinition,
+  isPollStepDefinition,
   isStartPlusPollStepDefinition,
 } from '@kbn/workflows-extensions/server';
 import type {
@@ -79,7 +79,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
       !this.getDurableStepState().initialStartState?.isStart
     ) {
       res = await this.handleStart(input, rawInput, config);
-    } else if (isPollOnlyStepDefinition(this.stepDefinition)) {
+    } else if (isPollStepDefinition(this.stepDefinition)) {
       res = await this.handlePoll(input, rawInput, config);
     } else {
       throw new Error(`Step "${this.node.stepType}" has no "start" or "poll" phase.`);
