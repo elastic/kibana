@@ -40,7 +40,8 @@ export class HostsPage {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
     this.tableLoading = this.page.getByTestId('hostsView-table-loading');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');
-    this.tableNoData = this.page.getByTestId('hostsViewTableNoData');
+    // EuiBasicTable renders noItemsMessage in both caption (a11y) and body cell; scope to cell.
+    this.tableNoData = this.page.getByRole('cell').getByTestId('hostsViewTableNoData');
     this.searchBar = this.page.getByTestId('queryInput');
     this.querySubmitButton = this.page.getByTestId('querySubmitButton');
     this.errorCallout = this.page.getByTestId('hostsViewErrorCallout');
