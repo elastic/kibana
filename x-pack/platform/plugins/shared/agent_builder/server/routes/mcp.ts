@@ -16,6 +16,7 @@ import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -66,6 +67,9 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
       options: {
         tags: ['mcp', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         xsrfRequired: false,
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         availability: {
           since: '9.2.0',
         },

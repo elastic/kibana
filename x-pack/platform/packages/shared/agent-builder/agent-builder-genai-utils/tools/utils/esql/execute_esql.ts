@@ -45,6 +45,9 @@ export const executeEsql = async ({
         query: effectiveQuery,
         drop_null_columns: true,
         allow_partial_results: true,
+        filter: {
+          bool: { must_not: { term: { _tier: 'data_frozen' } } },
+        },
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
       },
       { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }

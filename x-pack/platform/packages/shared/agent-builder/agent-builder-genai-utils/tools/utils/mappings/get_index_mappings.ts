@@ -34,6 +34,7 @@ export const getIndexMappings = async ({
     batches.map(async (batch) => {
       const response = await esClient.indices.getMapping({
         index: batch,
+        querystring: { ignore_throttled: true },
       });
 
       return Object.entries(response).reduce((res, [indexName, mappingRes]) => {
