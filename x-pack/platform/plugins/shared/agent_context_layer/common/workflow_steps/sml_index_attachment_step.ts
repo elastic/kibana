@@ -41,11 +41,7 @@ const ChunkSchema = z.object({
     .min(1)
     .max(MAX_SML_IDENTIFIER_LENGTH)
     .describe('Chunk type (e.g., "visualization", "dashboard").'),
-  title: z
-    .string()
-    .min(1)
-    .max(MAX_SML_TITLE_LENGTH)
-    .describe('Display title for the chunk.'),
+  title: z.string().min(1).max(MAX_SML_TITLE_LENGTH).describe('Display title for the chunk.'),
   content: z
     .string()
     .min(1)
