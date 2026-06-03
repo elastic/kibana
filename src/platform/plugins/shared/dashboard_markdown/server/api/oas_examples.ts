@@ -416,4 +416,16 @@ export const updateMarkdownOASOperationObject = {
 export const deleteMarkdownOASOperationObject = {
   description: markdownDeleteDescription,
   'x-codeSamples': markdownDeleteCodeSamples,
+  responses: {
+    204: {
+      description: 'No content, the markdown library item was successfully deleted.',
+    },
+    403: {
+      description:
+        'Forbidden, the user does not have permission to delete the markdown library item.',
+    },
+    404: {
+      description: 'Not found, the markdown library item does not exist.',
+    },
+  },
 };
