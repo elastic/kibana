@@ -174,11 +174,11 @@ export function getEsqlInspectorStats(resp?: estypes.EsqlAsyncQueryResponse): Re
 
   if (resp && 'documents_found' in resp) {
     stats.documentsProcessed = {
-      label: i18n.translate('data.search.esql.documentsProcessedLabel', {
+      label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
         defaultMessage: 'Documents processed',
       }),
       value: `${resp.documents_found}`,
-      description: i18n.translate('data.search.esql.documentsProcessedDescription', {
+      description: i18n.translate('data.search.es_search.documentsProcessedDescription', {
         defaultMessage: 'The number of documents processed by the query.',
       }),
     };
