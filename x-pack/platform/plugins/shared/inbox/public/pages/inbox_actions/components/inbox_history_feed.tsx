@@ -200,22 +200,37 @@ const buildComment = (action: InboxAction): EuiCommentProps => {
             <EuiBadge color="hollow">{action.source_app}</EuiBadge>
           </EuiFlexItem>
           {/*
-            Status badge: green for the v1 "approved" placeholder, red
-            when `to_inbox_action.deriveHistoryStatus` mapped a rejection
-            payload. Bumps the audit feed from "everything looks the
-            same" to a quick visual scan of approve-vs-reject outcomes.
+            Approve/reject status badge — only rendered once the outcome is
+            actually known. `deriveHistoryStatus` (server-side) defaults to
+            `'approved'` whenever it can't read a rejection from the response
+            payload, which includes two states where the outcome is NOT a
+            settled approval:
+              - processing (responded, but the engine hasn't written
+                `response_input` yet — the value is still unknown and could
+                resolve to a rejection), and
+              - timed-out / abnormally-settled rows (no human approval at all).
+            Showing a green "Approved" in those states is misleading (a
+            contradictory "Approved + Timed out" pairing, or a green→red flip
+            mid-processing), so we defer to the Processing…/Timed out badges
+            below and only surface approve-vs-reject for genuinely settled rows.
           */}
-          <EuiFlexItem grow={false}>
-            {isRejected ? (
-              <EuiBadge color="danger" iconType="cross" data-test-subj="inboxHistoryRejectedBadge">
-                {i18n.STATUS_REJECTED}
-              </EuiBadge>
-            ) : (
-              <EuiBadge color="success" iconType="check">
-                {i18n.STATUS_APPROVED}
-              </EuiBadge>
-            )}
-          </EuiFlexItem>
+          {!processing && !isTimedOut ? (
+            <EuiFlexItem grow={false}>
+              {isRejected ? (
+                <EuiBadge
+                  color="danger"
+                  iconType="cross"
+                  data-test-subj="inboxHistoryRejectedBadge"
+                >
+                  {i18n.STATUS_REJECTED}
+                </EuiBadge>
+              ) : (
+                <EuiBadge color="success" iconType="check">
+                  {i18n.STATUS_APPROVED}
+                </EuiBadge>
+              )}
+            </EuiFlexItem>
+          ) : null}
           {channelBadge ? <EuiFlexItem grow={false}>{channelBadge}</EuiFlexItem> : null}
           {isTimedOut ? (
             <EuiFlexItem grow={false}>

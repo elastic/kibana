@@ -232,6 +232,12 @@ describe('InboxHistoryFeed', () => {
     render(<InboxHistoryFeed />, { wrapper: createWrapper() });
 
     expect(await screen.findByText('Processing…')).toBeInTheDocument();
+    // The approve/reject outcome is still unknown during the
+    // responded-but-not-resumed window (the server can't classify it until
+    // `response_input` lands), so we must NOT assert a green "Approved"
+    // placeholder that could later flip to "Rejected".
+    expect(screen.queryByText('Approved')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('inboxHistoryRejectedBadge')).not.toBeInTheDocument();
   });
 
   it('drops the Processing badge once the server fills in response_input', async () => {
@@ -276,5 +282,9 @@ describe('InboxHistoryFeed', () => {
     render(<InboxHistoryFeed />, { wrapper: createWrapper() });
 
     expect(await screen.findByText('Timed out')).toBeInTheDocument();
+    // A timed-out / abnormally-settled row was never approved by a human, so
+    // the green "Approved" placeholder must not render alongside the warning
+    // "Timed out" badge (the two together are contradictory).
+    expect(screen.queryByText('Approved')).not.toBeInTheDocument();
   });
 });
