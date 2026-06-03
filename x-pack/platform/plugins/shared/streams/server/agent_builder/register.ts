@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -25,10 +25,10 @@ export const createMemoryToolsOptions = ({
   server: StreamsServer;
   logger: Logger;
 }): MemoryToolsOptions => {
-  const getMemoryService = () =>
+  const getMemoryService = (esClient: ElasticsearchClient) =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
-      esClient: server.core.elasticsearch.client.asInternalUser,
+      esClient,
     });
 
   return {

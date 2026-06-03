@@ -73,12 +73,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
-  `${internalNamespaces.workflows}.workflow_insert_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step_property`,
-  `${internalNamespaces.workflows}.workflow_modify_property`,
-  `${internalNamespaces.workflows}.workflow_delete_step`,
-  `${internalNamespaces.workflows}.workflow_set_yaml`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
 ] as const;
 
@@ -152,6 +146,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
+  `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-authoring',
 ] as const;
 

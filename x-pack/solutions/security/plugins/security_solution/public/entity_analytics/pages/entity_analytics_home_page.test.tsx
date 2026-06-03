@@ -10,14 +10,13 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { TestProviders } from '../../common/mock';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
+import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -39,14 +38,6 @@ jest.mock('../../common/components/link_to', () => ({
       `/app/security/${deepLinkId}${path}`,
 }));
 
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(() => ({
-    indicesExist: true,
-    loading: false,
-    sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-  })),
-}));
-
 jest.mock('../components/home/dynamic_risk_level_panel', () => ({
   DynamicRiskLevelPanel: () => (
     <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
@@ -54,10 +45,7 @@ jest.mock('../components/home/dynamic_risk_level_panel', () => ({
 }));
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
-    if (flag === 'newDataViewPickerEnabled') return false;
-    return false;
-  }),
+  useIsExperimentalFeatureEnabled: jest.fn(() => false),
 }));
 
 jest.mock('../../common/hooks/use_license');
@@ -191,9 +179,8 @@ jest.mock('@kbn/expandable-flyout', () => ({
   })),
 }));
 
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+const mockUseEntityStoreDataView = useEntityStoreDataView as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseDataView = useDataView as jest.Mock;
 const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 const mockUseMissingRiskEnginePrivileges = useMissingRiskEnginePrivileges as jest.Mock;
 const mockUseEntityEnginePrivileges = useEntityEnginePrivileges as jest.Mock;
@@ -204,20 +191,10 @@ describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-    });
-
-    mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
-      if (flag === 'newDataViewPickerEnabled') return false;
-      return false;
-    });
-
-    mockUseDataView.mockReturnValue({
-      dataView: { id: 'test', matchedIndices: ['index-1'] },
-      status: 'ready',
+    mockUseEntityStoreDataView.mockReturnValue({
+      dataView: { id: 'test-entity-store', fields: [], matchedIndices: ['index-1'] },
+      isLoading: false,
+      error: undefined,
     });
 
     mockUseEntityStoreStatus.mockReturnValue({
@@ -314,23 +291,6 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
   });
 
-  it('renders loading spinner when sourcerer is loading', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      loading: true,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-    });
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsHomePage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    expect(screen.getByTestId('entityAnalyticsHomePageLoader')).toBeInTheDocument();
-  });
-
   it('renders the watchlists settings button', () => {
     render(
       <MemoryRouter>
@@ -343,13 +303,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('renders empty prompt when indices do not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
-    });
-
-    mockUseDataView.mockReturnValue({
+    mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: [] },
       status: 'ready',
     });
@@ -591,13 +545,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('indicesExist=false still wins over entity store disabled state', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
-    });
-
-    mockUseDataView.mockReturnValue({
+    mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: [] },
       status: 'ready',
     });

@@ -31,7 +31,6 @@ import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
 import { StreamsWriteQueue } from '../utils/write_queue';
-
 export {
   STREAMS_READ_TOOL_IDS,
   STREAMS_WRITE_TOOL_IDS,
