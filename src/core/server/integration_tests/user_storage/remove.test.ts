@@ -54,6 +54,7 @@ describe('UserStorage remove() / null-merge behavior', () => {
     userStorage = new UserStorageClient({
       savedObjectsClient,
       profileUid: PROFILE_UID,
+      namespace: undefined,
       definitions,
       logger: kbn.root.logger.get('user-storage-test'),
     });

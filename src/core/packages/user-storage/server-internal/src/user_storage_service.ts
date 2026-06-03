@@ -18,6 +18,7 @@ import type { InternalSecurityServiceStart } from '@kbn/core-security-server-int
 import type {
   UserStorageDefinition,
   UserStorageRegistrations,
+  IUserStorageClient,
 } from '@kbn/core-user-storage-common';
 import type {
   UserStorageServiceSetup,
@@ -46,6 +47,14 @@ export interface UserStorageStartDeps {
 export class UserStorageService {
   private readonly definitions = new Map<string, UserStorageDefinition>();
   private readonly logger: Logger;
+  /**
+   * Populated in `start()`; routes call this to get a scoped client. Using a
+   * mutable reference avoids a hard dependency between the route setup (which
+   * runs during `setup()`) and the start-time dependencies (savedObjects,
+   * security) that are only available once `start()` fires.
+   */
+  private scopedClientFactory: ((request: KibanaRequest) => IUserStorageClient | null) | null =
+    null;
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('user-storage');
@@ -58,7 +67,18 @@ export class UserStorageService {
     savedObjects.registerType(userStorageGlobalType);
 
     const router = http.createRouter<RequestHandlerContext>('');
-    registerRoutes({ router, definitions: this.definitions, logger: this.logger });
+    registerRoutes({
+      router,
+      getClient: (request) => {
+        if (!this.scopedClientFactory) {
+          this.logger.error(
+            'userStorage.getClient called before start() completed; returning null.'
+          );
+          return null;
+        }
+        return this.scopedClientFactory(request);
+      },
+    });
 
     return {
       register: (registrations: UserStorageRegistrations) => {
@@ -96,26 +116,42 @@ export class UserStorageService {
   public start({ savedObjects, security }: UserStorageStartDeps): UserStorageServiceStart {
     this.logger.debug('Starting user storage service');
 
-    return {
-      asScoped: (request: KibanaRequest) => {
-        const profileUid = security.authc.getCurrentUser(request)?.profile_uid;
-        if (!profileUid) return null;
+    const asScoped = (request: KibanaRequest): IUserStorageClient | null => {
+      const profileUid = security.authc.getCurrentUser(request)?.profile_uid;
+      if (!profileUid) return null;
 
-        const savedObjectsClient = savedObjects.getScopedClient(request, {
-          includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
-        });
+      const savedObjectsClient = savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
+      });
 
-        return new UserStorageClient({
-          savedObjectsClient,
-          profileUid,
-          definitions: this.definitions,
-          logger: this.logger,
-        });
-      },
+      // Resolve the active space namespace so that space-scoped document ids are
+      // namespaced (e.g. `<space>:<profile_uid>`), preventing cross-space id
+      // collisions on the `multiple-isolated` SO type.
+      //
+      // This must be read from the scoped client (not a bare
+      // `createScopedRepository`): `getScopedClient` applies the spaces extension
+      // via the client provider, so `getCurrentNamespace()` reflects the request's
+      // space. A repository built directly from `createScopedRepository` without
+      // extensions has no spaces extension and always returns `undefined`.
+      const namespace = savedObjectsClient.getCurrentNamespace();
+
+      return new UserStorageClient({
+        savedObjectsClient,
+        profileUid,
+        namespace,
+        definitions: this.definitions,
+        logger: this.logger,
+      });
     };
+
+    // Make the factory available to the routes registered during setup().
+    this.scopedClientFactory = asScoped;
+
+    return { asScoped };
   }
 
   public stop() {
     this.logger.debug('Stopping user storage service');
+    this.scopedClientFactory = null;
   }
 }
