@@ -198,14 +198,17 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     [activeAlerts]
   );
 
-  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
-    setSelectedSlo(null);
-    setSelectedSloTabId(undefined);
+  const isSloExpanded = useCallback(
+    (sloItem: SLOWithSummaryResponse) =>
+      !!selectedSlo &&
+      selectedSlo.id === sloItem.id &&
+      selectedSlo.instanceId === sloItem.instanceId,
+    [selectedSlo]
+  );
 
-    requestAnimationFrame(() => {
-      setSelectedSlo(sloItem);
-      setSelectedSloTabId(ALERTS_TAB_ID);
-    });
+  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSlo(sloItem);
+    setSelectedSloTabId(ALERTS_TAB_ID);
   }, []);
 
   const statusCounts = useMemo(() => {
@@ -273,24 +276,15 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setSearchQuery(e.target.value);
   }, []);
 
-  const isSloExpanded = useCallback(
-    (sloItem: SLOWithSummaryResponse) =>
-      !!selectedSlo &&
-      selectedSlo.id === sloItem.id &&
-      selectedSlo.instanceId === sloItem.instanceId,
-    [selectedSlo]
-  );
-
   const handleSloToggle = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
-      setSelectedSlo(null);
-      setSelectedSloTabId(undefined);
       if (isSloExpanded(sloItem)) {
+        setSelectedSlo(null);
+        setSelectedSloTabId(undefined);
         return;
       }
-      requestAnimationFrame(() => {
-        setSelectedSlo(sloItem);
-      });
+      setSelectedSlo(sloItem);
+      setSelectedSloTabId(undefined);
     },
     [isSloExpanded]
   );
@@ -413,7 +407,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               <EuiBadge
                 iconType="warning"
                 color="danger"
-                onClick={() => handleActiveAlertsClick(sloItem)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleActiveAlertsClick(sloItem);
+                }}
                 onClickAriaLabel={i18n.translate(
                   'xpack.apm.sloOverviewFlyout.activeAlertsBadge.ariaLabel',
                   { defaultMessage: 'active alerts badge' }
@@ -737,6 +734,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       </EuiFlyoutBody>
       {selectedSlo && sloPlugin?.getSLODetailsFlyout && (
         <sloPlugin.getSLODetailsFlyout
+          key={`${selectedSlo.id}-${selectedSlo.instanceId ?? ''}`}
           sloId={selectedSlo.id}
           sloInstanceId={selectedSlo.instanceId}
           onClose={handleCloseSloDetails}

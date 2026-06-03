@@ -13,6 +13,13 @@ import React from 'react';
 import { SingleStepWorkflowForm } from './single_step_workflow_form';
 import type { SingleStepWorkflowFormValue } from './types';
 
+jest.mock('@kbn/react-query', () => ({
+  ...jest.requireActual('@kbn/react-query'),
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
+
+const mockGetAddConnectorFlyout = jest.fn().mockReturnValue(null);
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
@@ -27,9 +34,16 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { get: jest.fn().mockResolvedValue([]) };
     }
+    if (token === 'plugin.start.triggersActionsUi') {
+      return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => `plugin.start.${key}`,
 }));
 
 jest.mock('@kbn/code-editor', () => ({
@@ -69,6 +83,7 @@ jest.mock('../../hooks/use_fetch_workflows', () => ({
 }));
 
 jest.mock('./hooks/use_fetch_connectors_by_type', () => ({
+  ALL_CONNECTORS_KEY: ['alertingV2', 'singleStepWorkflow', 'connectors'],
   useFetchConnectorsByType: ({ connectorTypeId }: { connectorTypeId: string | null }) => ({
     data:
       connectorTypeId === '.email'

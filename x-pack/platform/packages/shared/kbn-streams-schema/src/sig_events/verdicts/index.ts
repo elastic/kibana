@@ -12,20 +12,23 @@ import {
   causeKiSchema,
   evidenceSchema,
 } from '../common_schemas';
+import { MAX_STREAM_NAME_LENGTH } from '../../helpers/stream_name_validation';
+
+const MAX_RULE_NAME_LENGTH = 256;
 
 export const verdictSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  verdict: z.string(),
+  verdict: z.enum(['promoted', 'demoted', 'acknowledged']),
   verdict_id: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
-  rule_names: z.array(z.string()),
-  stream_names: z.array(z.string()),
+  rule_names: z.array(z.string().max(MAX_RULE_NAME_LENGTH)).optional(),
+  stream_names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).optional(),
   title: z.string(),
   summary: z.string(),
   root_cause: z.string(),
   criticality: z.number(),
-  confidence: z.number(),
+  confidence: z.number().optional(),
   impact: z.string().optional(),
   recommended_action: z.string().optional(),
   recommendations: z.array(z.string()).optional(),

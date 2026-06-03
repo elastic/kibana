@@ -10,6 +10,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -309,20 +310,30 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   ];
 
   const button = (
-    <EuiButtonIcon
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
         {
           defaultMessage: 'Step context menu',
         }
       )}
-      data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
-      data-stream-type={streamType}
-      disabled={!!stepUnderEdit}
-      size="xs"
-      iconType="boxesVertical"
-      onClick={togglePopover}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
+          {
+            defaultMessage: 'Step context menu',
+          }
+        )}
+        data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
+        data-stream-type={streamType}
+        disabled={!!stepUnderEdit}
+        size="xs"
+        iconType="boxesVertical"
+        onClick={togglePopover}
+      />
+    </EuiToolTip>
   );
 
   return (

@@ -64,6 +64,13 @@ export const ExecutionTypeValues = Object.values(ExecutionType);
 export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
 export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
 export type WorkflowExecutionSortOrder = 'asc' | 'desc';
+export const WorkflowExecutionCollapseFields = [
+  'concurrencyGroupKey',
+  'status',
+  'executedBy',
+  'triggeredBy',
+] as const;
+export type WorkflowExecutionCollapseField = (typeof WorkflowExecutionCollapseFields)[number];
 
 /**
  * An interface representing the state of a step scope during workflow execution.
@@ -771,6 +778,7 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  managed?: 'all' | 'managed' | 'unmanaged';
 }
 
 export interface RequestOptions {

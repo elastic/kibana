@@ -60,6 +60,13 @@ describe('createInitialState', () => {
     });
     expect(withSignal.recoveryType).toBe('default');
   });
+
+  it('sets childOpen false in create mode when isBuilderMode is true', () => {
+    const state = createInitialState({ mode: 'create', isBuilderMode: true });
+
+    expect(state.childOpen).toBe(false);
+    expect(state.queryCommitted).toBe(false);
+  });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────
@@ -85,12 +92,12 @@ describe('reducer', () => {
   });
 
   describe('COMMIT_QUERY', () => {
-    it('marks queryCommitted and closes child (non-yaml mode)', () => {
+    it('marks queryCommitted and preserves childOpen', () => {
       const state = createState({ queryCommitted: false, childOpen: true, yamlMode: false });
       const next = reducer(state, { type: 'COMMIT_QUERY' });
 
       expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(false);
+      expect(next.childOpen).toBe(true);
     });
 
     it('keeps childOpen when in yaml mode', () => {
@@ -110,6 +117,18 @@ describe('reducer', () => {
       expect(next.recoveryType).toBe('custom');
       expect(next.childOpen).toBe(true);
       expect(next.activeTab).toBe('recovery');
+    });
+
+    it('does not open child when switching to custom in builder mode', () => {
+      const state = createState({ recoveryType: 'default', childOpen: false });
+      const next = reducer(state, {
+        type: 'SET_RECOVERY_TYPE',
+        recoveryType: 'custom',
+        isBuilderMode: true,
+      });
+
+      expect(next.recoveryType).toBe('custom');
+      expect(next.childOpen).toBe(false);
     });
 
     it('does not open child when switching to default', () => {

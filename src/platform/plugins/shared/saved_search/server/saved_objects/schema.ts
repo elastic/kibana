@@ -14,6 +14,8 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_DISCOVER_SESSION_COLUMNS,
+  MAX_DISCOVER_SESSION_TABS,
   VIEW_MODE,
 } from '../../common';
 import { extractTabsTransformFnV13 } from '../../common/service/extract_tabs';
@@ -46,10 +48,15 @@ const SCHEMA_TAB_ATTRIBUTES_V13 = schema.object({
   hideTable: schema.boolean({ defaultValue: false }),
 
   // Data grid
-  columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  columns: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+    maxSize: MAX_DISCOVER_SESSION_COLUMNS,
+  }),
   sort: schema.oneOf(
     [
-      schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),
+      schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 }), {
+        maxSize: MAX_DISCOVER_SESSION_COLUMNS,
+      }),
       schema.arrayOf(schema.string(), { maxSize: 2 }),
     ],
     { defaultValue: [] }
@@ -150,7 +157,7 @@ const SCHEMA_TAB_V13 = schema.object({
 export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
   title: schema.string(),
   description: schema.string({ defaultValue: '' }),
-  tabs: schema.arrayOf(SCHEMA_TAB_V13, { minSize: 1, maxSize: 25 }),
+  tabs: schema.arrayOf(SCHEMA_TAB_V13, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
 // Add new model versions here, which automatically registers them

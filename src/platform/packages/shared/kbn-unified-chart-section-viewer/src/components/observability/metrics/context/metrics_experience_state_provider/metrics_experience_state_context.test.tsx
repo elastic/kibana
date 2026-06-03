@@ -128,7 +128,16 @@ describe('MetricsExperienceStateProvider', () => {
   });
 
   describe('onDimensionsChange', () => {
-    it('resets currentPage to 0 when dimensions change', () => {
+    it('updates selectedDimensions', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onDimensionsChange([{ name: 'host.name' }]);
+      });
+      expect(result.current.selectedDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
+    it('does not reset currentPage (internal sync should not disrupt pagination)', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
 
       act(() => {
@@ -139,7 +148,10 @@ describe('MetricsExperienceStateProvider', () => {
       act(() => {
         result.current.onDimensionsChange([{ name: 'host.name' }]);
       });
-      expect(result.current.currentPage).toBe(0);
+      // currentPage must be preserved — this is the duplicate-tab scenario:
+      // useDiscoverFieldForBreakdown fires an internal sync after restore,
+      // which must not reset the page the user was on.
+      expect(result.current.currentPage).toBe(4);
     });
   });
 

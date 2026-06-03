@@ -323,8 +323,14 @@ export function Detail() {
   const hasArchiveAlertingAssets = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
     (ALERTING_ASSET_TYPES as string[]).includes(type)
   );
+  const pkgInstallationInfo =
+    packageInfo && 'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const hasInstalledAlertingAssets = (pkgInstallationInfo?.installed_kibana ?? []).some((asset) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(asset.type)
+  );
   const showAlertingTab =
     hasArchiveAlertingAssets ||
+    hasInstalledAlertingAssets ||
     (isInstalled && packageInfo?.type === 'integration' && enableIntegrationInactivityAlerting);
 
   // Track install status state

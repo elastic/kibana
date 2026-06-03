@@ -145,7 +145,6 @@ dependsOn:
   - '@kbn/core-saved-objects-import-export-server-internal'
   - '@kbn/core-chrome-browser'
   - '@kbn/licensing-types'
-  - '@kbn/product-intercept-plugin'
   - '@kbn/reindex-service-plugin'
   - '@kbn/field-formats-common'
   - '@kbn/reporting-test-routes'
@@ -165,6 +164,7 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/inbox-common'
+  - '@kbn/core-user-profile-common'
 tags:
   - test-helper
   - package

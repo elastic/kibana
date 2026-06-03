@@ -6,7 +6,11 @@
  */
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
-import { LEGACY_FILE_ATTACHMENT_TYPE, INDICATOR_ATTACHMENT_TYPE } from '../../../common/constants';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const baseLegacyAttributes = {
@@ -338,6 +342,45 @@ describe('externalReferenceAttachmentTransformer', () => {
           },
         })
       );
+    });
+  });
+
+  describe('osquery', () => {
+    // Pre-existing on-disk shape from before the unified migration.
+    const legacyOsqueryAttributes = {
+      ...baseLegacyAttributes,
+      type: AttachmentType.externalReference as const,
+      externalReferenceId: 'action-osq-1',
+      externalReferenceStorage: {
+        type: ExternalReferenceStorageType.elasticSearchDoc as const,
+      },
+      externalReferenceAttachmentTypeId: 'osquery',
+      externalReferenceMetadata: {
+        actionId: 'action-osq-1',
+        agentIds: ['agent-1'],
+        queryId: 'query-1',
+      },
+      owner: 'securitySolution',
+    };
+
+    it('converts a legacy osquery externalReference SO to the unified osquery shape', () => {
+      const result =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyOsqueryAttributes);
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: OSQUERY_ATTACHMENT_TYPE,
+          attachmentId: 'action-osq-1',
+          metadata: legacyOsqueryAttributes.externalReferenceMetadata,
+          owner: 'securitySolution',
+        })
+      );
+    });
+
+    it('round-trips legacy osquery -> unified -> legacy without losing metadata.actionId', () => {
+      const unified =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyOsqueryAttributes);
+      const round = externalReferenceAttachmentTransformer.toLegacySchema(unified);
+      expect(round).toEqual(legacyOsqueryAttributes);
     });
   });
 

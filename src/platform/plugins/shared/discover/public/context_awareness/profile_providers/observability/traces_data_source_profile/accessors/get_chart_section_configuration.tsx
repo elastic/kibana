@@ -14,16 +14,16 @@ import { OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID } from '../profile';
 
 export const getChartSectionConfiguration =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
-  (prev) =>
-  (params) => {
+  (prev, { toolkit }) =>
+  () => {
     return {
-      ...prev(params),
+      ...prev(),
       renderChartSection: (props) => {
         return (
           <TraceMetricsGrid
             profileId={OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID}
             {...props}
-            actions={params.actions}
+            actions={toolkit.actions}
           />
         );
       },

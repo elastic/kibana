@@ -41,9 +41,12 @@ jest.mock('@kbn/core-di-browser', () => ({
       return { basePath: { prepend: (p: string) => p } };
     }
     if (token === 'notifications') {
+      return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
+    }
+    if (token === 'data' || token === 'dataViews' || token === 'lens' || token === 'uiActions') {
       return {};
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+    if (typeof token === 'function') {
       return {};
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
@@ -732,7 +735,9 @@ describe('RulesListPage', () => {
       isError: false,
       error: null,
     });
-    mockCreateRuleMutate.mockImplementationOnce((_payload, options) => options?.onSuccess?.());
+    mockCreateRuleMutate.mockImplementationOnce((_payload, options) =>
+      options?.onSuccess?.({ id: 'rule-1', metadata: { name: 'Test Rule' } })
+    );
 
     renderPage();
 

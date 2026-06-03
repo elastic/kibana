@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -39,7 +40,6 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { RuleCustomizationsContextProvider } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
@@ -236,13 +236,11 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const { application, cps, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
     } = application;
-
-    useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
@@ -319,6 +317,7 @@ export const RuleDetailsPage = connector(
 
     const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, canReadAlerts });
 
+    const confirmModalTitleId = useGeneratedHtmlId();
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
 
@@ -463,14 +462,16 @@ export const RuleDetailsPage = connector(
             </EuiFlexItem>
           ) : (
             <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-              <EuiButtonIcon
-                data-test-subj="ruleLastExecutionStatusRefreshButton"
-                color="primary"
-                onClick={refreshRule}
-                iconType="refresh"
-                aria-label={ruleI18n.REFRESH}
-                isDisabled={!isExistingRule}
-              />
+              <EuiToolTip content={ruleI18n.REFRESH} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="ruleLastExecutionStatusRefreshButton"
+                  color="primary"
+                  onClick={refreshRule}
+                  iconType="refresh"
+                  aria-label={ruleI18n.REFRESH}
+                  isDisabled={!isExistingRule}
+                />
+              </EuiToolTip>
             </RuleStatus>
           )}
           <EuiFlexItem grow={false}>
@@ -668,6 +669,8 @@ export const RuleDetailsPage = connector(
             buttonColor="danger"
             defaultFocusedButton="confirm"
             data-test-subj="deleteRulesConfirmationModal"
+            aria-labelledby={confirmModalTitleId}
+            titleProps={{ id: confirmModalTitleId }}
           >
             {i18n.DELETE_CONFIRMATION_BODY}
           </EuiConfirmModal>

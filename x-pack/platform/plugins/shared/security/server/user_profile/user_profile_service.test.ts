@@ -641,7 +641,9 @@ describe('UserProfileService', () => {
     it('should update application data scoped to Kibana', async () => {
       const startContract = userProfileService.start(mockStartParams);
       await startContract.update('UID', {
-        avatar: 'boring.png',
+        avatar: {
+          imageUrl: 'boring.png',
+        },
       });
       expect(
         mockStartParams.clusterClient.asInternalUser.security.updateUserProfileData
@@ -649,7 +651,9 @@ describe('UserProfileService', () => {
         uid: 'UID',
         data: {
           kibana: {
-            avatar: 'boring.png',
+            avatar: {
+              imageUrl: 'boring.png',
+            },
           },
         },
       });
@@ -662,7 +666,9 @@ describe('UserProfileService', () => {
       const startContract = userProfileService.start(mockStartParams);
       await expect(
         startContract.update('UID', {
-          avatar: 'boring.png',
+          avatar: {
+            imageUrl: 'boring.png',
+          },
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
       expect(logger.error).toHaveBeenCalled();

@@ -173,6 +173,20 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     [application, notifications, runWorkflow]
   );
 
+  const handleCloseExecuteModal = useCallback(() => {
+    setExecuteWorkflow(null);
+  }, []);
+
+  const handleExecuteModalSubmit = useCallback(
+    (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => {
+      if (!executeWorkflow) {
+        return;
+      }
+      handleRunWorkflow(executeWorkflow.id, data, triggerTab);
+    },
+    [executeWorkflow, handleRunWorkflow]
+  );
+
   const handleDeleteWorkflow = useCallback(
     (item: WorkflowListItemDto) => setWorkflowToDelete(item),
     []
@@ -353,8 +367,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           isTestRun={false}
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
-          onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
+          onClose={handleCloseExecuteModal}
+          onSubmit={handleExecuteModalSubmit}
         />
       )}
       {singleExportModal && (

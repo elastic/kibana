@@ -8,7 +8,8 @@
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { expect } from 'expect';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
+
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: testUserName, password: testUserPassword },
         })
         .expect(200);
-      return parseCookie(response.headers['set-cookie'][0])!;
+      return findSessionCookie(response.headers['set-cookie']);
     }
 
     before(async () => {
