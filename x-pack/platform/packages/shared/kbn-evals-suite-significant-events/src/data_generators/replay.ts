@@ -12,6 +12,8 @@ export { listAvailableSnapshots } from './list_snapshots';
 
 export { ensureLogsIndexTemplate, deleteLogsIndexTemplate } from './logs_index_template';
 
+export { ensureStreamsEnabled, SIGEVENTS_WIRED_ROOTS } from './ensure_streams_enabled';
+
 export {
   replaySignificantEventsSnapshot,
   cleanSignificantEventsDataStreams,

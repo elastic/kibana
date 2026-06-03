@@ -428,6 +428,11 @@ export async function replayIntoManagedStream(
     await repository.register({ esClient, log, repoName: artifacts.repoName });
 
     log.info('Step 2/4: Restoring logs snapshot indices into temporary indices...');
+    // A previously killed run may have left temp indices behind (the cleanup
+    // `finally` never ran), which would collide with `restore` ("an open index
+    // with same name already exists"). Delete any stale temp indices first.
+    await deleteTemporaryReplayIndices(esClient, log);
+
     const logsIndices = await getLogsIndicesFromSnapshot({
       esClient,
       repoName: artifacts.repoName,
