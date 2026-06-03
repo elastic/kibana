@@ -74,6 +74,7 @@
     "@kbn/visualizations-common",
     "@kbn/unified-data-table",
     "@kbn/session-notifications-plugin",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/deeplinks-analytics"
   ]
 }

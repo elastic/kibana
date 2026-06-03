@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/deeplinks-analytics'
 tags:
   - test-helper
   - package

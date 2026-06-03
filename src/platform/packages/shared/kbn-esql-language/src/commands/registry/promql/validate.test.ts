@@ -39,6 +39,15 @@ describe('PROMQL Validation', () => {
         ['[PROMQL] Parameters "step" and "buckets" are mutually exclusive']
       );
     });
+
+    test('time cannot be used with range query params', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_index time="2026-01-13T11:30:00.000Z" step=5m (rate(counterIntegerField[5m]))',
+        [
+          '[PROMQL] Specify either [time] for instant query or any of [step], [buckets], [start], [end]',
+        ]
+      );
+    });
   });
 
   describe('param values', () => {
@@ -81,6 +90,19 @@ describe('PROMQL Validation', () => {
         'PROMQL scrape_interval=abc start=?_tstart end=?_tend (rate(counterIntegerField))',
         ['[PROMQL] Invalid scrape_interval value']
       );
+    });
+
+    test('valid time value', () => {
+      promqlExpectErrors(
+        'PROMQL time="2026-01-13T11:30:00.000Z" (rate(counterIntegerField[5m]))',
+        []
+      );
+    });
+
+    test('invalid time format', () => {
+      promqlExpectErrors('PROMQL time=invalid (rate(counterIntegerField[5m]))', [
+        '[PROMQL] Invalid time value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
+      ]);
     });
   });
 

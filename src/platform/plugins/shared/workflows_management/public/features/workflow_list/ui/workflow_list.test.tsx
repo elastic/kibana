@@ -8,6 +8,7 @@
  */
 
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -337,6 +338,34 @@ describe('WorkflowList', () => {
       renderComponent();
       const toggle = screen.getByTestId('workflowToggleSwitch-wf-1');
       expect(toggle).toBeInTheDocument();
+    });
+
+    it('passes workflow definition when toggling enabled from the list', async () => {
+      const workflow = createMockWorkflow({
+        id: 'wf-toggle',
+        enabled: true,
+      });
+
+      mockUseWorkflows.mockReturnValue({
+        data: createMockWorkflowListDto([workflow]),
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      await userEvent.click(screen.getByTestId('workflowToggleSwitch-wf-toggle'));
+
+      expect(mockUpdateWorkflow.mutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'wf-toggle',
+          workflow: { enabled: false },
+          workflowDefinition: workflow.definition,
+          skipRefetch: true,
+        }),
+        expect.any(Object)
+      );
     });
 
     it('renders multiple workflows', () => {
