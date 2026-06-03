@@ -109,7 +109,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('rulePageFooterCancelButton');
 
-    await page.waitForURL(RULES_LIST_URL_RE);
+    await expect(page).toHaveURL(RULES_LIST_URL_RE);
     expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
     await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
   });
@@ -176,7 +176,10 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('rulePageFooterCancelButton');
 
-    await page.waitForURL(RULES_DETAILS_URL_RE);
+    // Cancel uses SPA history.push — no full page reload, so waitForURL (which
+    // requires a load event) would time out. Use toHaveURL instead, which polls
+    // without requiring a load event.
+    await expect(page).toHaveURL(RULES_DETAILS_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
   });
