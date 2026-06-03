@@ -89,6 +89,6 @@ export const documentationMap: Record<string, OperationDocumentationType> = [
   return memo;
 }, {});
 
-export { tinymathFunctions, getTypeLabel, getTypeI18n } from './src/math';
+export { tinymathFunctions, getTypeLabel, isFormulaArgType } from './src/math';
 export type { FormulaArgType } from './src/math';
 export { sections } from './src/sections';

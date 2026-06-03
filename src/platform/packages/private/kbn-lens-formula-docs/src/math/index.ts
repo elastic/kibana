@@ -10,6 +10,9 @@
 import { i18n } from '@kbn/i18n';
 
 export type FormulaArgType = 'number' | 'boolean' | 'string';
+export const isFormulaArgType = (value: string): value is FormulaArgType => {
+  return value === 'number' || value === 'boolean' || value === 'string';
+};
 
 /**
  * Returns a locale-aware display label for an internal type constant.
@@ -17,19 +20,16 @@ export type FormulaArgType = 'number' | 'boolean' | 'string';
  * Never use the return value for identity comparisons.
  */
 export const getTypeLabel = (type: FormulaArgType): string => {
-  if (type === 'number') {
-    return i18n.translate('lensFormulaDocs.number', { defaultMessage: 'number' });
+  switch (type) {
+    case 'number':
+      return i18n.translate('lensFormulaDocs.number', { defaultMessage: 'number' });
+    case 'string':
+      return i18n.translate('lensFormulaDocs.string', { defaultMessage: 'string' });
+    case 'boolean':
+      return i18n.translate('lensFormulaDocs.boolean', { defaultMessage: 'boolean' });
   }
-  if (type === 'string') {
-    return i18n.translate('lensFormulaDocs.string', { defaultMessage: 'string' });
-  }
-  return i18n.translate('lensFormulaDocs.boolean', { defaultMessage: 'boolean' });
+  return type;
 };
-
-/**
- * @deprecated Use `getTypeLabel` instead.
- */
-export const getTypeI18n = getTypeLabel;
 
 export const tinymathFunctions: Record<
   string,

@@ -16,7 +16,7 @@ import type {
   TinymathVariable,
 } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
-import { tinymathFunctions, getTypeLabel } from '@kbn/lens-formula-docs';
+import { tinymathFunctions, getTypeLabel, isFormulaArgType } from '@kbn/lens-formula-docs';
 import type { FormulaArgType } from '@kbn/lens-formula-docs';
 import type { Query } from '@kbn/es-query';
 import {
@@ -282,8 +282,10 @@ function getMessageFromId(
           values: {
             operation: meta.operation,
             name: meta.name,
-            type: getTypeLabel(meta.type as FormulaArgType) || meta.type,
-            expectedType: getTypeLabel(meta.expectedType as FormulaArgType) || meta.expectedType,
+            type: isFormulaArgType(meta.type) ? getTypeLabel(meta.type) : meta.type,
+            expectedType: isFormulaArgType(meta.expectedType)
+              ? getTypeLabel(meta.expectedType)
+              : meta.expectedType,
           },
         }),
       };
