@@ -337,13 +337,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
       });
-      registerRulePreviewAttachment({
-        attachments: plugins.agentBuilder.attachments,
-        data: plugins.data,
-        getServices: () => this.getDiscoverFlyoutServices(coreSetup),
-        getStore: () => this.getDiscoverFlyoutStore(coreSetup),
-        spaces: plugins.spaces,
-      });
+      if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
+        registerRulePreviewAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          data: plugins.data,
+          getServices: () => this.getDiscoverFlyoutServices(coreSetup),
+          getStore: () => this.getDiscoverFlyoutStore(coreSetup),
+          spaces: plugins.spaces,
+        });
+      }
     }
 
     // Enable CPS picker in READ_ONLY mode for all Security Solution pages

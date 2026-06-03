@@ -24,8 +24,9 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
  *
- * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
- * the feature can ship dark and be enabled per environment.
+ * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` and the
+ * `run_rule_preview` tool behind `experimentalFeatures.rulePreviewAttachmentEnabled` so the
+ * features can ship dark and be enabled per environment.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -39,10 +40,13 @@ export const registerTools = async (
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+
+  if (experimentalFeatures.rulePreviewAttachmentEnabled) {
+    agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
+  }
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
