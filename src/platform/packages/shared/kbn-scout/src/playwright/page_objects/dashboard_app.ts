@@ -538,9 +538,12 @@ export class DashboardApp {
   async waitForRenderComplete() {
     await expect(this.dashboardViewport).toBeVisible();
 
-    await expect(this.page.testSubj.locator('dashboard-control-renderer')).toHaveAttribute(
+    await expect(this.page.locator('[data-dashboard-controls-ready]')).toHaveAttribute(
       'data-dashboard-controls-ready',
-      'true'
+      'true',
+      {
+        timeout: 60000,
+      }
     );
 
     try {

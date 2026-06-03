@@ -79,10 +79,7 @@ export const DashboardControlsRenderer = () => {
   }, [dashboardApi]);
 
   return (
-    <span
-      data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}
-      data-test-subj="dashboard-control-renderer"
-    >
+    <span data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}>
       <ControlsRenderer
         parentApi={dashboardApi}
         controls={controls} // only controls can currently be pinned
