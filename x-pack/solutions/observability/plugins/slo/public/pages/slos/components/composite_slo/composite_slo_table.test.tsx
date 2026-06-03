@@ -7,28 +7,34 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type { FindCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
+import type { CompositeSLODefinitionResponse, CompositeSLOSummaryResponse } from '@kbn/slo-schema';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { ActiveAlerts } from '../../../hooks/active_alerts';
-import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
-import { useKibana } from '../../../hooks/use_kibana';
-import { usePermissions } from '../../../hooks/use_permissions';
-import { render } from '../../../utils/test_helper';
+import { ActiveAlerts } from '../../../../hooks/active_alerts';
+import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
+import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
+import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePermissions } from '../../../../hooks/use_permissions';
+import { render } from '../../../../utils/test_helper';
 import { CompositeSloTable } from './composite_slo_table';
 
-jest.mock('../../../hooks/use_kibana');
-jest.mock('../../../hooks/use_permissions');
-jest.mock('../../../hooks/use_fetch_active_alerts');
-jest.mock('./slo_sparkline', () => ({
+jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../hooks/use_permissions');
+jest.mock('../../../../hooks/use_fetch_active_alerts');
+jest.mock('../../../../hooks/use_fetch_composite_slo_details');
+jest.mock('../../../../hooks/use_fetch_composite_historical_summary');
+jest.mock('../slo_sparkline', () => ({
   SloSparkline: () => <div data-test-subj="sloSparkline" />,
 }));
 
 const useKibanaMock = useKibana as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
+const useFetchCompositeSloDetailsMock = useFetchCompositeSloDetails as jest.Mock;
+const useFetchCompositeHistoricalSummaryMock = useFetchCompositeHistoricalSummary as jest.Mock;
 
-type CompositeSLOItem = FindCompositeSLOResponse['results'][number];
+type CompositeSLOItem = CompositeSLODefinitionResponse;
 
 const buildCompositeSloItem = (overrides: Partial<CompositeSLOItem> = {}): CompositeSLOItem => ({
   id: 'composite-slo-1',
@@ -50,8 +56,8 @@ const buildCompositeSloItem = (overrides: Partial<CompositeSLOItem> = {}): Compo
 });
 
 const buildCompositeSloDetails = (
-  overrides: Partial<GetCompositeSLOResponse> = {}
-): GetCompositeSLOResponse => ({
+  overrides: Partial<CompositeSLOSummaryResponse> = {}
+): CompositeSLOSummaryResponse => ({
   id: 'composite-slo-1',
   name: 'My Composite SLO',
   description: 'A test composite SLO',
@@ -93,19 +99,15 @@ const buildCompositeSloDetails = (
 
 const defaultTableProps = {
   results: [],
-  total: 0,
-  page: 0,
-  perPage: 25,
-  sortBy: 'createdAt' as const,
-  sortDirection: 'desc' as const,
-  isDetailsLoading: false,
-  isHistoricalLoading: false,
-  detailsById: new Map<string, GetCompositeSLOResponse>(),
-  historicalSummaryById: new Map(),
+  pagination: { pageIndex: 0, pageSize: 25, totalItemCount: 0 },
+  sort: { field: 'createdAt' as const, direction: 'desc' as const },
   onPageChange: jest.fn(),
-  onPerPageChange: jest.fn(),
   onSortChange: jest.fn(),
   onDelete: jest.fn(),
+};
+
+const mockCompositeSloDetails = (detailsById: Map<string, CompositeSLOSummaryResponse>) => {
+  useFetchCompositeSloDetailsMock.mockReturnValue({ detailsById, isLoading: false });
 };
 
 describe('CompositeSloTable', () => {
@@ -131,6 +133,15 @@ describe('CompositeSloTable', () => {
 
     usePermissionsMock.mockReturnValue({ data: { hasAllWriteRequested: true } });
     useFetchActiveAlertsMock.mockReturnValue({ data: new ActiveAlerts() });
+    useFetchCompositeSloDetailsMock.mockReturnValue({
+      detailsById: new Map<string, CompositeSLOSummaryResponse>(),
+      isLoading: false,
+    });
+    useFetchCompositeHistoricalSummaryMock.mockReturnValue({
+      historicalSummaryById: new Map(),
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it('shows "No composite SLOs found" when there are no items', () => {
@@ -143,7 +154,7 @@ describe('CompositeSloTable', () => {
       buildCompositeSloItem({ id: 'composite-1', name: 'First Composite' }),
       buildCompositeSloItem({ id: 'composite-2', name: 'Second Composite' }),
     ];
-    render(<CompositeSloTable {...defaultTableProps} results={items} total={2} />);
+    render(<CompositeSloTable {...defaultTableProps} results={items} />);
 
     expect(screen.getByText('First Composite')).toBeInTheDocument();
     expect(screen.getByText('Second Composite')).toBeInTheDocument();
@@ -152,48 +163,27 @@ describe('CompositeSloTable', () => {
   describe('burn rate column', () => {
     it('shows "Burn rate (5m)" in the column header by default', () => {
       const item = buildCompositeSloItem();
-      const details = buildCompositeSloDetails();
+      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
-      render(
-        <CompositeSloTable
-          {...defaultTableProps}
-          results={[item]}
-          total={1}
-          detailsById={new Map([['composite-slo-1', details]])}
-        />
-      );
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
       expect(screen.getByText('Burn rate (5m)')).toBeInTheDocument();
     });
 
     it('displays the 5m burn rate value by default', () => {
       const item = buildCompositeSloItem();
-      const details = buildCompositeSloDetails();
+      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
-      render(
-        <CompositeSloTable
-          {...defaultTableProps}
-          results={[item]}
-          total={1}
-          detailsById={new Map([['composite-slo-1', details]])}
-        />
-      );
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
       expect(screen.getByText('1.2x')).toBeInTheDocument();
     });
 
     it('switches to 1h burn rate when selected from the popover', async () => {
       const item = buildCompositeSloItem();
-      const details = buildCompositeSloDetails();
+      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
-      render(
-        <CompositeSloTable
-          {...defaultTableProps}
-          results={[item]}
-          total={1}
-          detailsById={new Map([['composite-slo-1', details]])}
-        />
-      );
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
       fireEvent.click(screen.getByText('Burn rate (5m)'));
       await waitForEuiPopoverOpen();
@@ -205,16 +195,9 @@ describe('CompositeSloTable', () => {
 
     it('switches to 1d burn rate when selected from the popover', async () => {
       const item = buildCompositeSloItem();
-      const details = buildCompositeSloDetails();
+      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
-      render(
-        <CompositeSloTable
-          {...defaultTableProps}
-          results={[item]}
-          total={1}
-          detailsById={new Map([['composite-slo-1', details]])}
-        />
-      );
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
       fireEvent.click(screen.getByText('Burn rate (5m)'));
       await waitForEuiPopoverOpen();
@@ -236,15 +219,9 @@ describe('CompositeSloTable', () => {
           oneDayBurnRate: 0,
         },
       });
+      mockCompositeSloDetails(new Map([['composite-slo-1', details]]));
 
-      render(
-        <CompositeSloTable
-          {...defaultTableProps}
-          results={[item]}
-          total={1}
-          detailsById={new Map([['composite-slo-1', details]])}
-        />
-      );
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
       expect(screen.getAllByText('N/A').length).toBeGreaterThan(0);
     });
@@ -255,7 +232,7 @@ describe('CompositeSloTable', () => {
 
     it('does not show an alert badge when there are no active alerts', () => {
       const item = buildCompositeSloItem();
-      render(<CompositeSloTable {...defaultTableProps} results={[item]} total={1} />);
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
       expect(
         screen.queryByRole('button', { name: activeAlertsButtonName })
       ).not.toBeInTheDocument();
@@ -276,7 +253,7 @@ describe('CompositeSloTable', () => {
         ]),
       });
 
-      render(<CompositeSloTable {...defaultTableProps} results={[item]} total={1} />);
+      render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
       expect(screen.getByRole('button', { name: activeAlertsButtonName })).toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();

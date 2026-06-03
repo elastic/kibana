@@ -9,10 +9,10 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { render } from '../../../utils/test_helper';
+import { render } from '../../../../utils/test_helper';
 import { CompositeSloMembersTable } from './composite_slo_members_table';
 
-jest.mock('../../slo_details/shared_flyout/slo_details_flyout', () => ({
+jest.mock('../../../slo_details/shared_flyout/slo_details_flyout', () => ({
   __esModule: true,
   default: () => <div data-test-subj="sloDetailsFlyout" />,
 }));
