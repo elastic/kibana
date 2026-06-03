@@ -15,6 +15,8 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai4dsoc:navigation
         label: "Cypress MKI - AI4DSOC - Navigation"
@@ -29,10 +31,28 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        soft_fail:
+          - exit_status: 101
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai4dsoc:privileges
         label: "Cypress MKI - AI4DSOC - Privileges"
         key: test_ai4dsoc_privileges
+        env:
+          BK_TEST_SUITE_KEY: "serverless-cypress-ai4dsoc"
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+        timeout_in_minutes: 300
+        parallelism: 1
+        soft_fail:
+          - exit_status: 101
+
+      - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai4dsoc:promotion_rules
+        label: "Cypress MKI - AI4DSOC - Promotion Rules"
+        key: test_ai4dsoc_promotion_rules
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-ai4dsoc"
         agents:
@@ -52,6 +72,22 @@ steps:
       - label: 'API MKI - ai4dsoc_cases:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_cases:qa:serverless
         key: ai4dsoc_cases:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - ai4dsoc_ease_rules:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_ease_rules:qa:serverless
+        key: ai4dsoc_ease_rules:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

@@ -74,6 +74,10 @@
     "ai4dsoc_cases:runner:serverless": "npm run run-tests:ai4dsoc cases serverless serverlessEnv",
     "ai4dsoc_cases:qa:serverless": "npm run run-tests:ai4dsoc cases serverless qaPeriodicEnv",
 
+    "ai4dsoc_ease_rules:server:serverless": "npm run initialize-server:ai4dsoc ease_rules serverless",
+    "ai4dsoc_ease_rules:runner:serverless": "npm run run-tests:ai4dsoc ease_rules serverless serverlessEnv",
+    "ai4dsoc_ease_rules:qa:serverless": "npm run run-tests:ai4dsoc ease_rules serverless qaPeriodicEnv",
+
     "ai4dsoc_nlp_cleanup_task:server:serverless": "npm run initialize-server:ai4dsoc nlp_cleanup_task serverless",
     "ai4dsoc_nlp_cleanup_task:runner:serverless": "npm run run-tests:ai4dsoc nlp_cleanup_task serverless serverlessEnv",
     "ai4dsoc_nlp_cleanup_task:qa:serverless": "npm run run-tests:ai4dsoc nlp_cleanup_task serverless qaPeriodicEnv",
