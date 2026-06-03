@@ -329,7 +329,7 @@ describe('test fetchAll', () => {
         {
           fetchStatus: FetchStatus.COMPLETE,
           result: [...initialRecords, ...moreRecords],
-          interceptedWarnings: undefined,
+          interceptedWarnings: [],
           pagination: nextPagination,
         },
       ]);
