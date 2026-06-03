@@ -62,7 +62,7 @@ const testProps: EventsViewerProps = {
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
-  sourcererScope: PageScope.default,
+  pageScope: PageScope.default,
   start: from,
   tableId: TableId.test,
 };

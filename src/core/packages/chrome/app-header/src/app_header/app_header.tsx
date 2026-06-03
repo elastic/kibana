@@ -11,7 +11,13 @@ import type { ReactNode } from 'react';
 import React, { useLayoutEffect } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type { AppHeaderBack, AppHeaderBadge, AppHeaderPadding, AppHeaderTab } from '../types';
+import type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderMetadataItems,
+  AppHeaderPadding,
+  AppHeaderTab,
+} from '../types';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { AppHeaderShell } from './app_header_shell';
 import { AppBadges } from './app_badges';
@@ -19,6 +25,7 @@ import { AppTabs } from './app_tabs';
 import { TitleArea } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
+import { AppHeaderMetadata } from './app_header_metadata';
 import { useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
@@ -28,6 +35,7 @@ export interface AppHeaderViewProps {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: ReactNode;
+  metadata?: AppHeaderMetadataItems;
   sticky?: boolean;
   padding?: AppHeaderPadding;
   docLink?: string;
@@ -42,6 +50,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     badges,
     menu,
     favorite,
+    metadata,
     sticky,
     padding,
     docLink,
@@ -58,6 +67,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       !!menu?.items?.length ||
       !!shareAction ||
       !!favorite ||
+      !!metadata?.length ||
       !!docLink ||
       !!showAddIntegrations ||
       hasLegacyActionMenu;
@@ -74,6 +84,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
+        metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
         padding={padding}
