@@ -10,14 +10,23 @@ import type {
   PromptManager,
   ToolPromptManager,
   ConfirmationInfo,
+  AuthorizationInfo,
 } from '@kbn/agent-builder-server/runner';
 import type {
+  AuthorizationPrompt,
+  AuthorizationPromptDefinition,
   ConfirmationPrompt,
   ConfirmPromptDefinition,
   PromptResponseState,
   PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
-import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
+import {
+  AgentPromptType,
+  AuthorizationStatus,
+  ConfirmationStatus,
+  isAuthorizationPromptResponse,
+  isConfirmationPromptResponse,
+} from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
 import type { ToolPolicyConfirmationDefinition } from '@kbn/agent-builder-server/tools/builtin';
@@ -54,10 +63,32 @@ export const createPromptManager = ({
     throw new Error('Trying to check confirmation status of non-confirmation prompt.');
   };
 
+  const checkAuthorizationStatus = (promptId: string): AuthorizationInfo => {
+    const prompt = promptMap.get(promptId);
+    if (!prompt) {
+      return { status: AuthorizationStatus.unprompted };
+    }
+    if (prompt.type === AgentPromptType.authorization) {
+      return {
+        status: prompt.response.authorized
+          ? AuthorizationStatus.authorized
+          : AuthorizationStatus.declined,
+      };
+    }
+    throw new Error('Trying to check authorization status of non-authorization prompt.');
+  };
+
   const getConfirmationPrompt = (confirm: ConfirmPromptDefinition): ConfirmationPrompt => {
     return {
       type: AgentPromptType.confirmation,
       ...confirm,
+    };
+  };
+
+  const getAuthorizationPrompt = (auth: AuthorizationPromptDefinition): AuthorizationPrompt => {
+    return {
+      type: AgentPromptType.authorization,
+      ...auth,
     };
   };
 
@@ -71,6 +102,9 @@ export const createPromptManager = ({
     getConfirmationStatus: (promptId) => {
       return checkConfirmationStatus(promptId);
     },
+    getAuthorizationStatus: (promptId) => {
+      return checkAuthorizationStatus(promptId);
+    },
     clear: () => {
       promptMap.clear();
     },
@@ -78,8 +112,12 @@ export const createPromptManager = ({
     forTool: ({ toolId, toolCallId, toolParams }): ToolPromptManager => {
       return {
         checkConfirmationStatus,
+        checkAuthorizationStatus,
         askForConfirmation: (confirm) => {
           return { prompt: getConfirmationPrompt(confirm) };
+        },
+        askForAuthorization: (auth) => {
+          return { prompt: getAuthorizationPrompt(auth) };
         },
       };
     },
@@ -100,10 +138,17 @@ export const getAgentPromptStorageState = ({
 
   if (input.prompts) {
     Object.entries(input.prompts).forEach(([promptId, response]) => {
-      state.responses[promptId] = {
-        type: AgentPromptType.confirmation,
-        response,
-      };
+      if (isConfirmationPromptResponse(response)) {
+        state.responses[promptId] = {
+          type: AgentPromptType.confirmation,
+          response,
+        };
+      } else if (isAuthorizationPromptResponse(response)) {
+        state.responses[promptId] = {
+          type: AgentPromptType.authorization,
+          response,
+        };
+      }
     });
   }
 
