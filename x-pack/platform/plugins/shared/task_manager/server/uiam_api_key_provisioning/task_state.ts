@@ -27,13 +27,18 @@ export const stateSchemaByVersion = {
   2: {
     up: (state: Record<string, unknown>) => ({
       runs: (state.runs as number) ?? 0,
-      // One-time repair of `task` docs whose `uiamApiKey` was persisted unencrypted by the
-      // pre-fix provisioning run (see `repairBrokenUiamProvisionedTasks`). Defaults to `false`
-      // on upgrade so the repair runs once and then latches to `true`.
+      // One-time flush of stale `task` UIAM provisioning status docs. The pre-fix run left broken
+      // tasks with a COMPLETED status that would otherwise exclude them from re-provisioning, so we
+      // flush once (latches to `true`) to make them eligible again. See the provisioning task.
+      staleProvisioningStatusFlushed: (state.staleProvisioningStatusFlushed as boolean) ?? false,
+      // Repair campaign complete: the flush has happened AND the post-flush backlog has drained.
+      // While `false`, classification force-reconverts tasks that already carry a `uiamApiKey` (the
+      // pre-fix run may have stored it in plaintext). Latches to `true` once the backlog is drained.
       plaintextUiamKeysRepaired: (state.plaintextUiamKeysRepaired as boolean) ?? false,
     }),
     schema: schema.object({
       runs: schema.number(),
+      staleProvisioningStatusFlushed: schema.boolean(),
       plaintextUiamKeysRepaired: schema.boolean(),
     }),
   },
@@ -44,5 +49,6 @@ export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
   runs: 0,
+  staleProvisioningStatusFlushed: false,
   plaintextUiamKeysRepaired: false,
 };
