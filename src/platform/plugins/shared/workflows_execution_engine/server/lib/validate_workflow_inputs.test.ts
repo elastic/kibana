@@ -268,6 +268,31 @@ describe('validateWorkflowInputs', () => {
     expect(result).toBe(true);
   });
 
+  it('should render provided input values before validation', async () => {
+    setInputsSchema({
+      properties: {
+        severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+      },
+      required: ['severity'],
+    });
+
+    const result = await callValidate(
+      createWorkflowExecution(
+        { inputs: { severity: '{{ consts.default_severity }}' } },
+        {
+          workflowDefinition: {
+            ...stubWorkflowExecution.workflowDefinition,
+            consts: {
+              default_severity: 'high',
+            },
+          },
+        }
+      )
+    );
+
+    expect(result).toBe(true);
+  });
+
   it('should return false and mark execution as FAILED when a default input template is invalid', async () => {
     setInputsSchema({
       properties: {

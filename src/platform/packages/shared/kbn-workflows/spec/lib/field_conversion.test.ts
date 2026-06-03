@@ -361,10 +361,10 @@ describe('applyInputDefaults', () => {
     });
   });
 
-  it('should render provided values that still match their raw schema default', () => {
+  it('should render provided values when a renderer is provided', () => {
     const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
-        name: { type: 'string', default: '{{ user }}' },
+        name: { type: 'string', default: 'Default Name' },
         message: { type: 'string', default: '{{ greeting }}' },
       },
     });
@@ -381,18 +381,20 @@ describe('applyInputDefaults', () => {
     });
   });
 
-  it('should render provided object values that still match their raw schema default', () => {
+  it('should render provided nested object values when a renderer is provided', () => {
     const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         settings: {
           type: 'object',
-          default: { name: '{{ user }}' },
+          properties: {
+            name: { type: 'string' },
+          },
         },
       },
     });
 
     const result = applyInputDefaults({ settings: { name: '{{ user }}' } }, inputsSchema, (value) =>
-      JSON.stringify(value) === '{"name":"{{ user }}"}' ? { name: 'Alice' } : value
+      value === '{{ user }}' ? 'Alice' : value
     );
 
     expect(result).toEqual({

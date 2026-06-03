@@ -23,23 +23,10 @@ export type NormalizableFieldSchema =
   | JsonModelSchemaType
   | Array<LegacyWorkflowInput | WorkflowOutput>;
 
-export type RenderDefaultValue = (value: unknown) => unknown;
+export type RenderInputValue = (value: unknown) => unknown;
 
-function matchesDefaultValue(value: unknown, defaultValue: unknown): boolean {
-  if (Object.is(value, defaultValue)) {
-    return true;
-  }
-
-  if (
-    value === null ||
-    defaultValue === null ||
-    typeof value !== 'object' ||
-    typeof defaultValue !== 'object'
-  ) {
-    return false;
-  }
-
-  return JSON.stringify(value) === JSON.stringify(defaultValue);
+function renderValue(value: unknown, renderInputValue?: RenderInputValue): unknown {
+  return renderInputValue ? renderInputValue(value) : value;
 }
 
 /**
@@ -229,24 +216,16 @@ function applyDefaultToObjectProperty(
   prop: JSONSchema7,
   currentValue: unknown,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
-  renderDefaultValue?: RenderDefaultValue
+  renderInputValue?: RenderInputValue
 ): unknown {
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
-      return renderDefaultValue ? renderDefaultValue(prop.default) : prop.default;
+      return renderValue(prop.default, renderInputValue);
     }
     if (prop.type === 'object' && prop.properties) {
-      return applyDefaultFromSchema(prop, undefined, inputsSchema, renderDefaultValue);
+      return applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
     }
     return undefined;
-  }
-
-  if (
-    renderDefaultValue &&
-    prop.default !== undefined &&
-    matchesDefaultValue(currentValue, prop.default)
-  ) {
-    return renderDefaultValue(prop.default);
   }
 
   if (
@@ -255,10 +234,10 @@ function applyDefaultToObjectProperty(
     typeof currentValue === 'object' &&
     !Array.isArray(currentValue)
   ) {
-    return applyDefaultFromSchema(prop, currentValue, inputsSchema, renderDefaultValue);
+    return applyDefaultFromSchema(prop, currentValue, inputsSchema, renderInputValue);
   }
 
-  return currentValue;
+  return renderValue(currentValue, renderInputValue);
 }
 
 /**
@@ -271,7 +250,7 @@ function applyDefaultsToObjectProperties(
   schema: JSONSchema7,
   value: Record<string, unknown>,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
-  renderDefaultValue?: RenderDefaultValue
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { ...value };
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
@@ -281,7 +260,7 @@ function applyDefaultsToObjectProperties(
       prop,
       currentValue,
       inputsSchema,
-      renderDefaultValue
+      renderInputValue
     );
     if (defaultValue !== undefined) {
       result[key] = defaultValue;
@@ -332,7 +311,7 @@ export function hasDefaultsRecursive(
 function createObjectWithDefaults(
   schema: JSONSchema7,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
-  renderDefaultValue?: RenderDefaultValue
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> | undefined {
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
@@ -343,12 +322,7 @@ function createObjectWithDefaults(
     // 1. It's required, OR
     // 2. It has defaults (direct or nested)
     if (isRequired || hasDefaultsRecursive(prop, inputsSchema)) {
-      const defaultValue = applyDefaultFromSchema(
-        prop,
-        undefined,
-        inputsSchema,
-        renderDefaultValue
-      );
+      const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
       if (defaultValue !== undefined) {
         result[key] = defaultValue;
       }
@@ -398,26 +372,18 @@ function applyDefaultFromSchema(
   schema: JSONSchema7,
   value: unknown,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
-  renderDefaultValue?: RenderDefaultValue
+  renderInputValue?: RenderInputValue
 ): unknown {
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
     if (resolvedSchema) {
       // Use resolved schema for applying defaults
-      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema, renderDefaultValue);
+      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema, renderInputValue);
     }
   }
   // If value is already provided, use it (unless it's undefined/null for objects)
   if (value !== undefined && value !== null) {
-    if (
-      renderDefaultValue &&
-      schema.default !== undefined &&
-      matchesDefaultValue(value, schema.default)
-    ) {
-      return renderDefaultValue(schema.default);
-    }
-
     // For objects, recursively apply defaults to nested properties
     if (
       schema.type === 'object' &&
@@ -429,20 +395,20 @@ function applyDefaultFromSchema(
         schema,
         value as Record<string, unknown>,
         inputsSchema,
-        renderDefaultValue
+        renderInputValue
       );
     }
-    return value;
+    return renderValue(value, renderInputValue);
   }
 
   // If value is not provided, use default if available
   if (schema.default !== undefined) {
-    return renderDefaultValue ? renderDefaultValue(schema.default) : schema.default;
+    return renderValue(schema.default, renderInputValue);
   }
 
   // For objects, create object with defaults for required properties or properties with defaults
   if (schema.type === 'object' && schema.properties) {
-    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema, renderDefaultValue);
+    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema, renderInputValue);
     // If we created an object with defaults, return it; otherwise return undefined
     // This ensures nested objects with defaults are created even if not required
     return objectWithDefaults;
@@ -465,7 +431,7 @@ function applyDefaultFromSchema(
 export function applyInputDefaults(
   inputs: Record<string, unknown> | undefined,
   inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>,
-  renderDefaultValue?: RenderDefaultValue
+  renderInputValue?: RenderInputValue
 ): Record<string, unknown> | undefined {
   if (!inputsSchema?.properties) {
     return inputs;
@@ -484,7 +450,7 @@ export function applyInputDefaults(
         jsonSchema,
         undefined,
         inputsSchema,
-        renderDefaultValue
+        renderInputValue
       );
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;
@@ -495,7 +461,7 @@ export function applyInputDefaults(
         jsonSchema,
         currentValue,
         inputsSchema,
-        renderDefaultValue
+        renderInputValue
       );
       if (updatedValue !== undefined && !Object.is(updatedValue, currentValue)) {
         result[propertyName] = updatedValue;

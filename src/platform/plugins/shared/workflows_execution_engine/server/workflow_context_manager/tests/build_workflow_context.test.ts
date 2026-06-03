@@ -181,10 +181,10 @@ describe('buildWorkflowContext', () => {
       });
     });
 
-    it('should render prefilled input values that match their raw schema defaults', () => {
+    it('should render provided input values', () => {
       setInputsSchema({
         properties: {
-          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
         },
       });
 
