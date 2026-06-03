@@ -23,6 +23,7 @@ import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { collectTechPreviewSuggestAriaPrefixes } from '../lib/autocomplete/suggestions/collect_tech_preview_suggest_aria_prefixes';
+import { setStabilityBadgeThemeContext } from '../lib/get_stability_note';
 import {
   CUSTOM_TRIGGER_INLINE_CLASS,
   triggerTypeToCssClass,
@@ -250,6 +251,7 @@ export function useDynamicTypeIcons(
 
     const runInjection = async () => {
       const myRunId = ++injectionRunIdRef.current;
+      setStabilityBadgeThemeContext(euiThemeContext);
       // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
       const editorContainer = editorContainerRef?.current ?? undefined;
       await injectDynamicConnectorIcons(allTypes, editorContainer);

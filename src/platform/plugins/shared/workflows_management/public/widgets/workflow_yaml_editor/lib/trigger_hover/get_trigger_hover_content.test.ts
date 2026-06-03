@@ -9,8 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { getTriggerHoverContent, getTriggerTypeAtPath } from './get_trigger_hover_content';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 describe('getTriggerHoverContent', () => {
+  beforeEach(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
+
   it('returns null for built-in trigger: manual', () => {
     const result = getTriggerHoverContent('manual');
     expect(result).toBeNull();

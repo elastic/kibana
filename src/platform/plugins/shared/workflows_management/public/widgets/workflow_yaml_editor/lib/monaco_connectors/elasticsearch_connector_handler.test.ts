@@ -14,6 +14,7 @@ import {
   makeStepYaml,
   parseStepNodeFromListYaml,
 } from './test_utils/mock_factories';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 jest.mock('../../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
@@ -36,6 +37,7 @@ describe('ElasticsearchMonacoConnectorHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockStabilityBadgeThemeForTests();
     handler = new ElasticsearchMonacoConnectorHandler();
 
     getAllConnectors.mockReturnValue([
@@ -161,7 +163,9 @@ describe('ElasticsearchMonacoConnectorHandler', () => {
 
       expect(result).not.toBeNull();
       expect(result?.value).toContain('Beta');
-      expect(result?.value.indexOf('Beta')).toBeLessThan(result!.value.indexOf('**Endpoint**'));
+      expect(result?.value.indexOf('<img src="data:image/svg+xml,')).toBeLessThan(
+        result!.value.indexOf('**Endpoint**')
+      );
     });
 
     it('should include request body in console format when present', async () => {

@@ -9,11 +9,11 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
+import { STABILITY_BADGE_HEIGHT_PX } from '../lib/get_stability_note';
 
 const SUGGEST_ROW_PREFIX = '.monaco-editor .suggest-widget .monaco-list .monaco-list-row';
 
-/** Matches EuiBetaBadge size="s" icon-only footprint in the actions menu. */
-const BADGE_SIZE_PX = 18;
+const BADGE_SIZE_PX = STABILITY_BADGE_HEIGHT_PX;
 const FLASK_SIZE_PX = 10;
 
 function escapeCssAttributeValue(value: string): string {

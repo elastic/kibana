@@ -8,8 +8,10 @@
  */
 
 import { builtInStepDefinitions, getBuiltInStepStability } from '@kbn/workflows';
+import { stepSchemas } from '../../../../../../common/step_schemas';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 import { getCachedAllConnectors } from '../../connectors_cache';
+import { getExtensionStepStability } from '../../get_stability_note';
 
 function addAriaPrefix(prefixes: Set<string>, value: string | undefined): void {
   if (value !== undefined && value.length > 0) {
@@ -53,6 +55,12 @@ export function collectTechPreviewSuggestAriaPrefixes(): string[] {
 
   for (const stepDefinition of builtInStepDefinitions) {
     if (getBuiltInStepStability(stepDefinition.id) === 'tech_preview') {
+      addAriaPrefix(prefixes, stepDefinition.id);
+    }
+  }
+
+  for (const stepDefinition of stepSchemas.getAllRegisteredStepDefinitions()) {
+    if (getExtensionStepStability(stepDefinition) === 'tech_preview') {
       addAriaPrefix(prefixes, stepDefinition.id);
     }
   }

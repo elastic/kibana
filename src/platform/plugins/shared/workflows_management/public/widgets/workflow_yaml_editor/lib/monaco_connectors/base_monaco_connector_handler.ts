@@ -9,7 +9,8 @@
 
 import type { monaco } from '@kbn/monaco';
 import type { StepStabilityLevel } from '@kbn/workflows';
-import { getStabilityNote as getStabilityNoteFromShared } from '../get_stability_note';
+import { getCachedAllConnectors } from '../connectors_cache';
+import { getStabilityBadgeHtml } from '../get_stability_note';
 import type {
   ConnectorExamples,
   HoverContext,
@@ -142,24 +143,30 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
   }
 
   /**
-   * Returns HTML for a compact stability badge for non-GA steps.
-   */
-  protected getStabilityNote(stability: StepStabilityLevel | undefined): string {
-    return getStabilityNoteFromShared(stability);
-  }
-
-  /**
    * Prepends the stability badge to hover body lines (top-left, same as trigger hovers).
    */
   protected prependStabilityBadgeToContent(
     stability: StepStabilityLevel | undefined,
     bodyLines: string[]
   ): string {
-    const badge = getStabilityNoteFromShared(stability);
+    const badge = getStabilityBadgeHtml(stability);
     if (!badge) {
       return bodyLines.join('\n');
     }
     return [badge, '', ...bodyLines].join('\n');
+  }
+
+  protected getConnectorStabilityFromCache(connectorType: string): StepStabilityLevel | undefined {
+    const connectors = getCachedAllConnectors();
+    if (!connectors?.length) {
+      return undefined;
+    }
+    const connector = connectors.find((c) => c.type === connectorType);
+    const stability = connector?.stability;
+    if (stability === 'tech_preview' || stability === 'beta') {
+      return stability;
+    }
+    return undefined;
   }
 
   /**

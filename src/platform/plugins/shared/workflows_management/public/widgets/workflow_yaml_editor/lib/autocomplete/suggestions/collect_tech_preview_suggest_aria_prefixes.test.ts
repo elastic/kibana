@@ -33,6 +33,16 @@ jest.mock('@kbn/workflows', () => ({
   }),
 }));
 
+jest.mock('../../get_stability_note', () => ({
+  getExtensionStepStability: jest.fn(() => 'tech_preview'),
+}));
+
+jest.mock('../../../../../../common/step_schemas', () => ({
+  stepSchemas: {
+    getAllRegisteredStepDefinitions: jest.fn(() => []),
+  },
+}));
+
 import { triggerSchemas } from '../../../../../trigger_schemas';
 import { getCachedAllConnectors } from '../../connectors_cache';
 
@@ -67,5 +77,20 @@ describe('collectTechPreviewSuggestAriaPrefixes', () => {
       ])
     );
     expect(prefixes).not.toContain('elasticsearch.search');
+  });
+
+  it('includes dynamic connector display name prefixes', () => {
+    (getCachedAllConnectors as jest.Mock).mockReturnValue([
+      {
+        type: 'my.custom.connector',
+        summary: 'My Custom connector',
+        stability: 'tech_preview',
+      },
+    ]);
+
+    const prefixes = collectTechPreviewSuggestAriaPrefixes();
+
+    expect(prefixes).toContain('my.custom.connector');
+    expect(prefixes).toContain('My Custom');
   });
 });
