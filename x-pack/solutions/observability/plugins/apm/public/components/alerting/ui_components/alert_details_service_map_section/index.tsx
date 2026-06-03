@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -86,14 +87,17 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
       ? transactionTypeField[0]
       : transactionTypeField;
 
-    const initialTransactionType =
-      rawTransactionType != null ? String(rawTransactionType) : undefined;
+    const paddedRange = alertStart
+      ? getPaddedAlertTimeRange(String(alertStart), alertEnd != null ? String(alertEnd) : undefined)
+      : undefined;
 
     return {
       kuery: '',
-      initialTransactionType,
+      initialTransactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
+      rangeFrom: paddedRange?.from,
+      rangeTo: paddedRange?.to,
     };
-  }, [alert]);
+  }, [alert, alertStart, alertEnd]);
 
   const [hasNoServices, setHasNoServices] = useState(false);
 
