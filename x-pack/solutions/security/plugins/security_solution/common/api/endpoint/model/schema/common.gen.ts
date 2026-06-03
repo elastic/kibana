@@ -143,7 +143,7 @@ export type Timeout = z.infer<typeof Timeout>;
 /**
  * The status of a response action.
  */
-export const Status = lazySchema(() => z.enum(['failed', 'pending', 'successful']));
+export const Status = lazySchema(() => z.enum(['failed', 'pending', 'successful', 'canceled']));
 export type Status = z.infer<typeof Status>;
 export type StatusEnum = typeof Status.enum;
 export const StatusEnum = Status.enum;
