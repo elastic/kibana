@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiImage,
+  EuiPageTemplate,
+  EuiPanel,
   EuiSpacer,
-  EuiSplitPanel,
   EuiText,
   EuiTitle,
-  useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
@@ -28,150 +33,323 @@ interface RuleCreateOptionsPanelProps {
   onCreateThresholdAlert?: () => void;
 }
 
-export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
+/** Fits the two primary option descriptions on one line; threshold description may wrap. */
+const LIST_EMPTY_STATE_MAX_INLINE_SIZE = '44em';
+
+const listEmptyStateStyles = {
+  parent: css({
+    display: 'flex',
+    flexGrow: 1,
+    height: '100%',
+  }),
+  template: css({
+    backgroundColor: 'inherit',
+    paddingBlockStart: '0 !important',
+    marginInline: 'auto',
+    maxInlineSize: LIST_EMPTY_STATE_MAX_INLINE_SIZE,
+    width: '100%',
+  }),
+  widgetContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xl,
+      paddingTop: '0 !important',
+      borderRadius: euiTheme.border.radius.medium,
+      '.euiEmptyPrompt__icon': {
+        marginBottom: euiTheme.size.l,
+        paddingRight: euiTheme.size.s,
+      },
+      '.euiEmptyPrompt__content': {
+        maxInlineSize: LIST_EMPTY_STATE_MAX_INLINE_SIZE,
+        width: '100%',
+      },
+    }),
+  actionsWrapper: css({
+    width: '100%',
+    maxInlineSize: LIST_EMPTY_STATE_MAX_INLINE_SIZE,
+    marginInline: 'auto',
+  }),
+  actionPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      cursor: 'pointer',
+      minWidth: 0,
+    }),
+};
+
+interface RuleCreateOptionItem {
+  id: string;
+  iconType: string;
+  title: string;
+  description: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
+}
+
+const RuleCreateOptionActionPanel: React.FC<{
+  item: RuleCreateOptionItem;
+  actionPanelStyle: React.ComponentProps<typeof EuiPanel>['css'];
+}> = ({ item, actionPanelStyle }) => (
+  <EuiPanel
+    hasBorder
+    paddingSize="none"
+    onClick={item.onClick}
+    css={actionPanelStyle}
+    data-test-subj={item['data-test-subj']}
+  >
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={item.iconType} size="m" color="text" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem css={css({ minWidth: 0 })}>
+        <EuiText size="s">
+          <strong>{item.title}</strong>
+        </EuiText>
+        <EuiText size="xs" color="subdued">
+          {item.description}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+);
+
+const RuleBuilderSectionDivider: React.FC = () => (
+  <>
+    <EuiSpacer size="s" />
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.alertingV2.ruleCreateOptionsPanel.listEmptyStateBuilderDivider"
+            defaultMessage="Or start from a builder"
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="l" />
+  </>
+);
+
+/** Rules list empty state — matches dashboard create empty prompt layout. */
+const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
-  layout = 'horizontal',
   onCreateWithAgent,
   onCreateThresholdAlert,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const isVerticalLayout = layout === 'vertical';
+  const styles = useMemoCss(listEmptyStateStyles);
+
+  const primaryCreateOptions = useMemo<RuleCreateOptionItem[]>(
+    () => [
+      {
+        id: 'create-esql-rule',
+        iconType: 'productDiscover',
+        title: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle', {
+          defaultMessage: 'Create ES|QL rule',
+        }),
+        description: i18n.translate(
+          'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
+          {
+            defaultMessage:
+              'Create as an ES|QL query with live preview. YAML editor available.',
+          }
+        ),
+        onClick: onCreateEsqlRule,
+        'data-test-subj': 'createEsqlRuleCard',
+      },
+      {
+        id: 'create-with-agent',
+        iconType: 'productAgent',
+        title: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle', {
+          defaultMessage: 'Create with AI Agent',
+        }),
+        description: i18n.translate(
+          'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
+          { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
+        ),
+        onClick: onCreateWithAgent,
+        'data-test-subj': 'createWithAgentCard',
+      },
+    ],
+    [onCreateEsqlRule, onCreateWithAgent]
+  );
+
+  const thresholdCreateOption = useMemo<RuleCreateOptionItem>(
+    () => ({
+      id: 'create-threshold-alert',
+      iconType: 'chartThreshold',
+      title: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
+        defaultMessage: 'Threshold Alert',
+      }),
+      description: i18n.translate(
+        'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
+        {
+          defaultMessage:
+            'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
+        }
+      ),
+      onClick: onCreateThresholdAlert ?? (() => undefined),
+      'data-test-subj': 'createThresholdAlertCard',
+    }),
+    [onCreateThresholdAlert]
+  );
 
   return (
-    <EuiSplitPanel.Outer
-      hasBorder={!isVerticalLayout}
-      hasShadow={false}
-      grow={false}
-      css={{
-        maxWidth: isVerticalLayout ? 'none' : euiTheme.breakpoint.l,
-        margin: isVerticalLayout ? 0 : '0 auto',
-        textAlign: isVerticalLayout ? 'left' : 'center',
-      }}
-    >
-      <EuiSplitPanel.Inner css={{ padding: isVerticalLayout ? 0 : euiTheme.size.xxxl }}>
-        {!isVerticalLayout ? (
-          <>
-            <EuiTitle size="m">
-              <h2>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeTitle"
-                  defaultMessage="Welcome to the new Alerting experience"
+    <div css={listEmptyStateStyles.parent} data-test-subj="ruleCreateOptionsPanel">
+      <EuiPageTemplate grow={false} css={styles.template}>
+        <EuiPageTemplate.EmptyPrompt
+          icon={
+            <EuiImage
+              size="fullWidth"
+              src={rulesListEmptyIllustration}
+              alt=""
+              data-test-subj="rulesListEmptyIllustration"
+            />
+          }
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
+                defaultMessage="No rules yet. Let's get started!"
+              />
+            </h2>
+          }
+          actions={
+            <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
+              {primaryCreateOptions.map((item) => (
+                <EuiFlexItem key={item.id} grow={false}>
+                  <RuleCreateOptionActionPanel item={item} actionPanelStyle={styles.actionPanel} />
+                </EuiFlexItem>
+              ))}
+              <EuiFlexItem grow={false}>
+                <RuleBuilderSectionDivider />
+                <RuleCreateOptionActionPanel
+                  item={thresholdCreateOption}
+                  actionPanelStyle={styles.actionPanel}
                 />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued" textAlign="center">
-              <FormattedMessage
-                id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeDescription"
-                defaultMessage="Powerful ES|QL-driven rules and support for external alerts, it delivers consistent, high-quality alert data into a unified experience."
-              />
-            </EuiText>
-            <EuiSpacer size="l" />
-          </>
-        ) : null}
-        <EuiFlexGroup
-          direction={isVerticalLayout ? 'column' : 'row'}
-          gutterSize={isVerticalLayout ? 'l' : 'm'}
-        >
-          <EuiFlexItem>
-            <EuiCard
-              layout="horizontal"
-              display="plain"
-              titleElement="h3"
-              titleSize="xs"
-              hasBorder={true}
-              title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle', {
-                defaultMessage: 'Create ES|QL rule',
-              })}
-              description={i18n.translate(
-                'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-                {
-                  defaultMessage:
-                    'Create as an ES|QL query with live preview. YAML editor available.',
-                }
-              )}
-              onClick={onCreateEsqlRule}
-              icon={<EuiIcon type="productDiscover" color="text" size="l" aria-hidden={true} />}
-              data-test-subj="createEsqlRuleCard"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCard
-              layout="horizontal"
-              display="plain"
-              titleElement="h3"
-              titleSize="xs"
-              hasBorder={true}
-              title={i18n.translate(
-                'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
-                {
-                  defaultMessage: 'Create with AI Agent',
-                }
-              )}
-              description={i18n.translate(
-                'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
-                { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
-              )}
-              onClick={onCreateWithAgent}
-              icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.alertingV2.ruleCreateOptionsPanel.orDividerLabel"
-                defaultMessage="or"
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="none" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.ruleCreateOptionsPanel.ruleBuilderSectionTitle"
-              defaultMessage="Start from a rule builder"
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem css={{ width: '100%' }}>
-            <EuiCard
-              layout="horizontal"
-              display="plain"
-              titleElement="h3"
-              titleSize="xs"
-              hasBorder={true}
-              title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
-                defaultMessage: 'Threshold Alert',
-              })}
-              description={i18n.translate(
-                'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
-                {
-                  defaultMessage:
-                    'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
-                }
-              )}
-              onClick={onCreateThresholdAlert}
-              icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
-              css={{
-                width: isVerticalLayout ? '100%' : '50%',
-                margin: isVerticalLayout ? 0 : '0 auto',
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          titleSize="xs"
+          color="transparent"
+          css={styles.widgetContainer}
+        />
+      </EuiPageTemplate>
+    </div>
   );
+};
+
+/** Create-rule flyout — original card layout (unchanged). */
+const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
+  onCreateEsqlRule,
+  onCreateWithAgent,
+  onCreateThresholdAlert,
+}) => {
+  return (
+    <>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            display="plain"
+            titleElement="h3"
+            titleSize="xs"
+            hasBorder={true}
+            title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle', {
+              defaultMessage: 'Create ES|QL rule',
+            })}
+            description={i18n.translate(
+              'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
+              {
+                defaultMessage:
+                  'Create as an ES|QL query with live preview. YAML editor available.',
+              }
+            )}
+            onClick={onCreateEsqlRule}
+            icon={<EuiIcon type="productDiscover" color="text" size="l" aria-hidden={true} />}
+            data-test-subj="createEsqlRuleCard"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            display="plain"
+            titleElement="h3"
+            titleSize="xs"
+            hasBorder={true}
+            title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle', {
+              defaultMessage: 'Create with AI Agent',
+            })}
+            description={i18n.translate(
+              'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
+              { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
+            )}
+            onClick={onCreateWithAgent}
+            icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.alertingV2.ruleCreateOptionsPanel.orDividerLabel"
+              defaultMessage="or"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleCreateOptionsPanel.ruleBuilderSectionTitle"
+            defaultMessage="Start from a rule builder"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiCard
+        layout="horizontal"
+        display="plain"
+        titleElement="h3"
+        titleSize="xs"
+        hasBorder={true}
+        title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
+          defaultMessage: 'Threshold Alert',
+        })}
+        description={i18n.translate(
+          'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
+          {
+            defaultMessage:
+              'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
+          }
+        )}
+        onClick={onCreateThresholdAlert}
+        icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
+      />
+    </>
+  );
+};
+
+export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = (props) => {
+  const { layout = 'horizontal' } = props;
+  const isVerticalLayout = layout === 'vertical';
+
+  if (!isVerticalLayout) {
+    return <RuleCreateOptionsListEmptyState {...props} />;
+  }
+
+  return <RuleCreateOptionsFlyoutPanel {...props} />;
 };
