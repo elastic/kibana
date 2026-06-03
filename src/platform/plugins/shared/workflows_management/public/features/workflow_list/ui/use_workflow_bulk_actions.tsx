@@ -136,6 +136,7 @@ export const useWorkflowBulkActions = ({
           {
             id: workflow.id,
             workflow: updateData,
+            workflowDefinition: workflow.definition ?? undefined,
             isBulkAction: true,
             bulkActionCount: totalCount,
             skipRefetch: true,
