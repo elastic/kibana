@@ -20,8 +20,14 @@ import {
 } from '../../../../common/services/cloud_connectors/test_subjects';
 
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+import { ExperimentalFeaturesService } from '../../../services';
 
 import { CloudConnectorSelector } from './cloud_connector_selector';
+
+// The selector renders CloudConnectorPoliciesFlyout, which reads `enableOTelVerifier`
+// via this service. Tests don't bootstrap the full Fleet plugin, so init with the
+// production default (flag off).
+ExperimentalFeaturesService.init({} as any);
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
