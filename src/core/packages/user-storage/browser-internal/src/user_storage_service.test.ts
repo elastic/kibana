@@ -15,7 +15,7 @@ import { UserStorageService } from './user_storage_service';
 const buildDeps = (initialValues: Record<string, unknown> = {}) => {
   const http = httpServiceMock.createSetupContract();
   const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-  injectedMetadata.getUserStorage.mockReturnValue({ values: initialValues, available: true });
+  injectedMetadata.getUserStorage.mockReturnValue({ values: initialValues });
   return { http, injectedMetadata };
 };
 

@@ -16,12 +16,8 @@ import { test } from '../fixtures';
  *
  * The "Customize navigation" link only appears in spaces whose solution view is set to
  * 'es', 'oblt', or 'security' (project navigation mode). In the default space, which uses
- * classic navigation, the nav plugin never registers the link regardless of userStorage
- * availability — so it must be absent from the user menu.
- *
- * Note: testing the userStorage.available = false path (e.g. users authenticated via
- * SAML/OIDC with no role mappings) is covered by the X-Pack Security API integration
- * tests in CI, where that auth topology can be set up.
+ * classic navigation, the nav plugin never registers the link — so it must be absent from
+ * the user menu.
  */
 
 test.describe(

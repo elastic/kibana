@@ -17,7 +17,6 @@ import type { UserStorageApi } from './user_storage_api';
 export interface UserStorageClientParams {
   api: UserStorageApi;
   initialValues: Record<string, unknown>;
-  available: boolean;
   done$: Observable<unknown>;
 }
 
@@ -41,7 +40,6 @@ export interface UserStorageClientParams {
 export class UserStorageClient implements IUserStorageClient {
   private cache: Record<string, unknown>;
   private readonly api: UserStorageApi;
-  private readonly available_: boolean;
   private readonly update$ = new Subject<UserStorageUpdate>();
   private readonly httpErrors$ = new Subject<Error>();
   /** Emits whenever the cache is hydrated by a lazy fetch. */
@@ -49,9 +47,8 @@ export class UserStorageClient implements IUserStorageClient {
   /** Set of keys for which a lazy fetch has already been initiated. */
   private readonly fetchInitiated = new Set<string>();
 
-  constructor({ api, initialValues, available, done$ }: UserStorageClientParams) {
+  constructor({ api, initialValues, done$ }: UserStorageClientParams) {
     this.api = api;
-    this.available_ = available;
     this.cache = cloneDeep(initialValues);
 
     done$.subscribe({
@@ -152,10 +149,6 @@ export class UserStorageClient implements IUserStorageClient {
 
   public getHttpError$(): Observable<Error> {
     return this.httpErrors$.asObservable();
-  }
-
-  public isAvailable(): boolean {
-    return this.available_;
   }
 
   /**

@@ -107,12 +107,7 @@ export class NavigationPublicPlugin
       // confirms a project-nav solution. The handler may have already been
       // registered synchronously below; enableUi's per-capability idempotency
       // guards prevent double-registration.
-      if (
-        security &&
-        !isServerless &&
-        getIsProjectNav(activeSpace?.solution) &&
-        core.userStorage.isAvailable()
-      ) {
+      if (security && !isServerless && getIsProjectNav(activeSpace?.solution)) {
         this.customizationService.enableUi({ core, chrome, security });
       }
     };
@@ -127,7 +122,7 @@ export class NavigationPublicPlugin
     // Register the chrome customize-navigation handler synchronously so it is
     // available before the active-space observable resolves. The menu link is
     // added separately (above) once the space is confirmed as project-nav.
-    if (this.isSolutionNavEnabled && core.userStorage.isAvailable()) {
+    if (this.isSolutionNavEnabled) {
       this.customizationService.enableUi({ core, chrome });
     }
 
@@ -135,7 +130,7 @@ export class NavigationPublicPlugin
     // (preload: true on the server), keeping startup ordering safe.
     this.customizationService.start({ core, chrome, isUnauthenticated });
 
-    if (isServerless && !isUnauthenticated && core.userStorage.isAvailable()) {
+    if (isServerless && !isUnauthenticated) {
       // In serverless, the serverless plugin initializes project navigation directly,
       // bypassing this plugin's addSolutionNavigation flow. Listen for the navigation
       // to become available, then enable customization support.

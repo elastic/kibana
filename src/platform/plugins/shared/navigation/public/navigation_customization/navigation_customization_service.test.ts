@@ -37,7 +37,6 @@ const makeDeps = (overrides?: {
       get: jest.fn(),
       set: jest.fn(),
       remove: jest.fn(),
-      isAvailable: jest.fn().mockReturnValue(true),
     },
   } as unknown as Parameters<NavigationCustomizationService['start']>[0]['core'];
 

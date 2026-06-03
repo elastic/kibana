@@ -25,8 +25,8 @@ const INTERNAL_HEADERS = {
 /**
  * Scenario A — User with full Kibana access to a custom es-solution space.
  *
- * userStorage.isAvailable() === true → "Customize navigation" link is visible in the user menu
- * and the modal opens when clicked.
+ * In a project-nav (es-solution) space the "Customize navigation" link is visible in the
+ * user menu and the modal opens when clicked.
  */
 
 const SPACE_A = {
@@ -37,8 +37,7 @@ const SPACE_A = {
 
 // Minimal (read-only) privileges in SPACE_A:
 // - discover/dashboard `read` so those nav items are visible and SAML login
-//   activates a user profile (so userStorage.isAvailable() is true and the
-//   "Customize navigation" link renders).
+//   activates a user profile, so the "Customize navigation" link renders.
 // - `applyAutomaticReadPrivilegeGrants` grants every read privilege write access
 //   to the `user-storage` / `user-storage-global` saved object types, so even
 //   this read-only user can persist navigation customizations.

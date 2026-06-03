@@ -830,7 +830,6 @@ describe('RenderingService', () => {
       expect(getForInjection).toHaveBeenCalledTimes(1);
       expect(await renderAndReadUserStorage(content)).toEqual({
         values: { 'navigation:layout': { hidden: ['discover'] } },
-        available: true,
       });
     });
 
@@ -843,7 +842,7 @@ describe('RenderingService', () => {
       const content = await render(createKibanaRequest(), buildUiSettings());
 
       expect(asScoped).toHaveBeenCalledTimes(1);
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {}, available: false });
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
     it('injects empty values for anonymous pages without consulting userStorage', async () => {
@@ -857,7 +856,7 @@ describe('RenderingService', () => {
       });
 
       expect(asScoped).not.toHaveBeenCalled();
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {}, available: false });
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
     it('renders with empty user storage when getForInjection() rejects', async () => {
@@ -868,7 +867,7 @@ describe('RenderingService', () => {
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       const content = await render(createKibanaRequest(), buildUiSettings());
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {}, available: false });
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
   });
 

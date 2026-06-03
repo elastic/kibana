@@ -18,10 +18,10 @@ const apiMock = (): jest.Mocked<UserStorageApi> =>
     remove: jest.fn(),
   } as unknown as jest.Mocked<UserStorageApi>);
 
-const buildClient = (initialValues: Record<string, unknown> = {}, available = true) => {
+const buildClient = (initialValues: Record<string, unknown> = {}) => {
   const api = apiMock();
   const done$ = new Subject<void>();
-  const client = new UserStorageClient({ api, initialValues, available, done$ });
+  const client = new UserStorageClient({ api, initialValues, done$ });
   return { api, done$, client };
 };
 

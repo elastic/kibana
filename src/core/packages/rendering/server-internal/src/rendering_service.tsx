@@ -206,7 +206,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
-      userStorageResult = { values: {}, available: false },
+      userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -226,7 +226,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
             Promise<string> | undefined,
-            Promise<{ values: Record<string, unknown>; available: boolean }>
+            Promise<Record<string, unknown>>
           ])
     );
 
@@ -404,7 +404,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
-        userStorage: userStorageResult,
+        userStorage: { values: userStorageValues },
       },
     };
 
@@ -420,17 +420,15 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorage(
-    request: KibanaRequest
-  ): Promise<{ values: Record<string, unknown>; available: boolean }> {
+  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return { values: {}, available: false };
+    if (!userStorage) return {};
 
     const client = userStorage.asScoped(request);
-    if (!client) return { values: {}, available: false };
+    if (!client) return {};
 
     try {
-      return { values: await client.getForInjection(), available: true };
+      return await client.getForInjection();
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
@@ -440,11 +438,11 @@ export class RenderingService {
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)
       ) {
         this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
-        return { values: {}, available: false };
+        return {};
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);
-      return { values: {}, available: false };
+      return {};
     }
   }
 }

@@ -93,12 +93,4 @@ export interface IUserStorageClient {
    * Suitable for centralised toast / telemetry handling.
    */
   getHttpError$(): Observable<Error>;
-
-  /**
-   * Whether user storage is available for the current user. Returns `false`
-   * when the server-side preload failed (e.g. the user's auth realm does not
-   * grant access to saved objects). Consumers should use this to hide features
-   * that depend on persisting user preferences.
-   */
-  isAvailable(): boolean;
 }
