@@ -13,18 +13,19 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { commonRouteConfig } from '../constants';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 import { create } from './create';
-import { LINKS_API_PATH, LINKS_API_VERSION } from '../../../common/constants';
+import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
     path: LINKS_API_PATH,
     summary: 'Create a links library item',
     ...commonRouteConfig,
+    description: 'Creates a new links library item and returns its ID, full state, and metadata.',
   });
 
   createRoute.addVersion(
     {
-      version: LINKS_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           body: createRequestBodySchema,

@@ -8,14 +8,15 @@
  */
 
 export const commonRouteConfig = {
-  access: 'internal',
+  access: 'public',
   enableQueryVersion: true,
   description:
     'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   options: {
-    tags: ['oas-tag:markdown'],
+    tags: ['oas-tag:Links'],
     availability: {
       stability: 'experimental',
+      since: '9.5.0',
     },
   },
   security: {

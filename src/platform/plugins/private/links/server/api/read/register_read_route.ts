@@ -13,24 +13,26 @@ import { schema } from '@kbn/config-schema';
 import { commonRouteConfig } from '../constants';
 import { readResponseBodySchema } from './schemas';
 import { read } from './read';
-import { LINKS_API_PATH, LINKS_API_VERSION } from '../../../common/constants';
+import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Get a links library item by ID`,
     ...commonRouteConfig,
+    description: 'Returns the complete state of a links library item by ID.',
   });
 
   readRoute.addVersion(
     {
-      version: LINKS_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the links library item.',
+                description:
+                  'The links library item ID, as returned by the create or search endpoints.',
               },
             }),
           }),

@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
-import { LINKS_API_PATH, LINKS_API_VERSION } from '../../../common/constants';
+import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig } from '../constants';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
@@ -19,11 +19,12 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     path: LINKS_API_PATH,
     summary: `List links library items`,
     ...commonRouteConfig,
+    description: `Returns a paginated list of links library items. Each result includes title, description, and metadata, but not the content. Use \`GET ${LINKS_API_PATH}/{id}\` to retrieve the complete state.`,
   });
 
   searchRoute.addVersion(
     {
-      version: LINKS_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           query: searchRequestQuerySchema,

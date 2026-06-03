@@ -26,12 +26,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
+
 import type { LinksState } from '../../server';
-import {
-  DASHBOARD_LINK_TYPE,
-  LINKS_HORIZONTAL_LAYOUT,
-  LINKS_VERTICAL_LAYOUT,
-} from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
@@ -44,6 +40,11 @@ import { isParentApiCompatible } from '../actions/add_links_panel_action';
 import { coreServices } from '../services/kibana_services';
 import { loadFromLibrary } from '../links_client/load_from_library';
 import { getPlacementHints } from './get_placement_hints';
+import {
+  DASHBOARD_LINK_TYPE,
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+} from '../../common/types';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 

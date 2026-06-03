@@ -8,9 +8,6 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import type { CONTENT_ID } from './constants';
-
-export type LinksContentType = typeof CONTENT_ID;
 
 export interface SharingSavedObjectProps {
   outcome: SavedObjectsResolveResponse['outcome'];
@@ -18,3 +15,17 @@ export interface SharingSavedObjectProps {
   aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
+
+/**
+ * Link types
+ */
+export const DASHBOARD_LINK_TYPE = 'dashboardLink';
+export const EXTERNAL_LINK_TYPE = 'externalLink';
+export type LinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
+
+/**
+ * Layout options
+ */
+export const LINKS_HORIZONTAL_LAYOUT = 'horizontal';
+export const LINKS_VERTICAL_LAYOUT = 'vertical';
+export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERTICAL_LAYOUT;

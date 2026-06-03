@@ -14,7 +14,7 @@ import {
   showSaveModal,
   SavedObjectSaveModalWithSaveResult,
 } from '@kbn/saved-objects-plugin/public';
-import { LINKS_EMBEDDABLE_TYPE, CONTENT_ID } from '../../common';
+import { LINKS_EMBEDDABLE_TYPE, LINKS_SAVED_OBJECT_TYPE } from '../../common';
 import { hasLibraryItemWithTitle } from './has_library_item_with_title';
 import { linksClient } from './links_client';
 import { serializeResolvedLinks } from '../lib/resolve_links';
@@ -63,7 +63,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
         description={newState.description}
         showDescription
         showCopyOnSave={false}
-        objectType={CONTENT_ID}
+        objectType={LINKS_SAVED_OBJECT_TYPE}
       />
     );
     showSaveModal(saveModal);

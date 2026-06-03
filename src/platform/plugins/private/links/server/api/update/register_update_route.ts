@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
-import { LINKS_API_PATH, LINKS_API_VERSION } from '../../../common/constants';
+import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
@@ -22,11 +22,15 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Upsert links library item`,
     ...commonRouteConfig,
+    description: `Replaces the full state of a links library item. Partial updates are not supported.
+To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+If no item exists with the specified ID, a new one is created.`,
   });
 
   updateRoute.addVersion(
     {
-      version: LINKS_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           params: schema.object({

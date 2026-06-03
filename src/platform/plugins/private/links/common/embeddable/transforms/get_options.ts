@@ -8,8 +8,7 @@
  */
 
 import type { DashboardLink, ExternalLink, LinkOptions } from '../../../server';
-import type { LinkType } from '../../content_management';
-import { DASHBOARD_LINK_TYPE } from '../../content_management';
+import { DASHBOARD_LINK_TYPE, type LinkType } from '../../types';
 
 export function getOptions(type: LinkType, options: LinkOptions) {
   if (!options) return undefined;

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../content_management';
 import { extractReferences, injectReferences } from './references';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../constants';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../types';
 
 jest.mock('uuid', () => ({
   v4: jest

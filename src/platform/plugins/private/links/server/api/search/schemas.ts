@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { asCodeMetaSchema, asCodePaginationResponseMetaSchema } from '@kbn/as-code-shared-schemas';
 
 const MAX_PER_PAGE = 10000;
 
@@ -43,16 +43,22 @@ export const searchResponseBodySchema = schema.object({
     schema.object({
       id: schema.string(),
       data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
+        description: schema.maybe(
+          schema.string({
+            meta: { description: 'A short description of the links library item.' },
+          })
+        ),
+        title: schema.string({ meta: { description: 'The markdown library item title.' } }),
       }),
       meta: asCodeMetaSchema,
     }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
+    {
+      minSize: 0,
+      maxSize: MAX_PER_PAGE,
+      meta: {
+        description: 'List of links library items matching the query.',
+      },
+    }
   ),
-  meta: schema.object({
-    total: schema.number(),
-    per_page: schema.number(),
-    page: schema.number(),
-  }),
+  meta: asCodePaginationResponseMetaSchema,
 });

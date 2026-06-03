@@ -14,7 +14,12 @@ import { linksSchema } from '../schemas';
 export const updateRequestBodySchema = linksSchema;
 
 export const updateResponseBodySchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: {
+      description:
+        'The unique ID of the links library item, as returned by the create or search endpoints.',
+    },
+  }),
   data: linksSchema,
   meta: asCodeMetaSchema,
 });

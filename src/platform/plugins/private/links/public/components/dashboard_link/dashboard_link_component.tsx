@@ -21,12 +21,15 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
-import type { LinksLayoutType } from '../../../common/content_management';
-import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import type { DashboardLink } from '../../../server';
+import {
+  DASHBOARD_LINK_TYPE,
+  LINKS_VERTICAL_LAYOUT,
+  type LinksLayoutType,
+} from '../../../common/types';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;

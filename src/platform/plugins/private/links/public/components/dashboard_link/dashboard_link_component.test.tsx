@@ -12,7 +12,6 @@ import React from 'react';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import type { DashboardLinkProps } from './dashboard_link_component';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
@@ -22,6 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { LINKS_VERTICAL_LAYOUT } from '../../../common/types';
 
 function createMockLinksParent({
   initialQuery,

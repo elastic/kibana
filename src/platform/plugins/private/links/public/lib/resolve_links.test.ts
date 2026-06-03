@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+
 import { resolveLinkInfo, resolveLinks, serializeResolvedLinks } from './resolve_links';
-import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
 import type { ResolvedLink } from '../types';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { DASHBOARD_LINK_TYPE } from '../../common/types';
 
 jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
   fetchDashboard: async (id: string) => {
@@ -47,9 +48,10 @@ describe('resolveLinkInfo', () => {
   });
 
   it('resolves a dashboard link with a label', async () => {
+    const newLocal = '001';
     const link: Link = {
       type: DASHBOARD_LINK_TYPE,
-      destination: '001',
+      destination: newLocal,
       label: 'My Dashboard',
       options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     };

@@ -7,32 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { SOWithMetadata } from '@kbn/content-management-utils';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { PresentationUtilPluginSetup } from '@kbn/presentation-util-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { LinksEmbeddableState } from '../common';
-import {
-  APP_ICON,
-  APP_NAME,
-  CONTENT_ID,
-  LATEST_VERSION,
-  LINKS_EMBEDDABLE_TYPE,
-  LINKS_SAVED_OBJECT_TYPE,
-} from '../common';
-import type { LinksCrudTypes } from '../common/content_management';
-import { setKibanaServices } from './services/kibana_services';
+import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LINKS_SAVED_OBJECT_TYPE } from '../common';
+import type { LinksState } from '../server';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
+import { setKibanaServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -55,14 +49,6 @@ export class LinksPlugin
   constructor() {}
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
-    plugins.contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
-      },
-      name: APP_NAME,
-    });
-
     plugins.embeddable.registerAddFromLibraryType({
       onAdd: async (container, savedObject) => {
         container.addNewPanel<LinksEmbeddableState>(
@@ -95,7 +81,7 @@ export class LinksPlugin
     import('./links_client/links_client').then(({ getLinksClient }) =>
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
-        name: CONTENT_ID,
+        name: LINKS_SAVED_OBJECT_TYPE,
         title: APP_NAME,
         icon: APP_ICON,
         description: i18n.translate('links.description', {
@@ -104,11 +90,11 @@ export class LinksPlugin
         stage: 'production',
         appExtensions: {
           visualizations: {
-            docTypes: [CONTENT_ID],
+            docTypes: [LINKS_SAVED_OBJECT_TYPE],
             searchFields: ['title^3'],
             client: getLinksClient,
             toListItem(
-              linkItem: Omit<LinksCrudTypes['Item'], 'attributes'> & {
+              linkItem: Omit<SOWithMetadata<LinksState>, 'attributes'> & {
                 attributes: { title: string; description?: string };
               }
             ) {

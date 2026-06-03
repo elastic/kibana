@@ -8,16 +8,18 @@
  */
 
 import React from 'react';
-import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+
 import { EuiThemeProvider } from '@elastic/eui';
-import type { LinksEditorProps } from './links_editor';
-import LinksEditor from './links_editor';
-import { LinksStrings } from '../links_strings';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import type { ResolvedLink } from '../../types';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
+import { LINKS_VERTICAL_LAYOUT } from '../../../common/types';
+import type { ResolvedLink } from '../../types';
+import { LinksStrings } from '../links_strings';
+import type { LinksEditorProps } from './links_editor';
+import LinksEditor from './links_editor';
 
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [

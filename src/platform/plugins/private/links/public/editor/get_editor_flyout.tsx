@@ -11,11 +11,12 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import type { LinksLayoutType } from '../../common/content_management';
-import { linksClient, runSaveToLibrary } from '../links_client';
-import type { ResolvedLink } from '../types';
+
+import type { LinksLayoutType } from '../../common/types';
 import LinksEditor from '../components/editor/links_editor';
 import { serializeResolvedLinks } from '../lib/resolve_links';
+import { linksClient, runSaveToLibrary } from '../links_client';
+import type { ResolvedLink } from '../types';
 
 export interface EditorState {
   description?: string;

@@ -10,13 +10,13 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { DASHBOARD_LINK_TYPE } from '../../content_management';
 import type {
   ExternalLink,
   LinksState,
   StoredDashboardLink,
   StoredLinksState,
 } from '../../../server';
+import { DASHBOARD_LINK_TYPE } from '../../types';
 
 export function extractReferences(links: LinksState['links']) {
   const extractedReferences: Reference[] = [];

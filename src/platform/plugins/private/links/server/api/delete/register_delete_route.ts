@@ -12,24 +12,26 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { commonRouteConfig } from '../constants';
 import { deleteLinks } from './delete';
-import { LINKS_API_PATH, LINKS_API_VERSION } from '../../../common/constants';
+import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Delete a links library item.`,
     ...commonRouteConfig,
+    description: 'Permanently deletes a links library item by ID.',
   });
 
   deleteRoute.addVersion(
     {
-      version: LINKS_API_VERSION,
+      version: PUBLIC_API_VERSION,
       validate: {
         request: {
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the markdown library item.',
+                description:
+                  'The links library item ID, as returned by the create or search endpoints.',
               },
             }),
           }),
