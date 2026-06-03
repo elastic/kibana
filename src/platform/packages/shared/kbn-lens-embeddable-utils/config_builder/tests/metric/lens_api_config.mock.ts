@@ -177,3 +177,21 @@ export const metricAPIWithTermsRankedBySecondary = {
     },
   },
 } as MetricConfig;
+
+export const esqlMetricWithTrendAPIAttributes = {
+  type: 'metric',
+  title: 'Metric - ESQL with trendline',
+  description: 'ESQL Metric with trend background chart',
+  data_source: {
+    type: 'esql',
+    query:
+      'FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS avg_bytes = AVG(bytes)',
+  },
+  metrics: [
+    {
+      type: 'primary',
+      column: 'avg_bytes',
+      background_chart: { type: 'trend' },
+    },
+  ],
+} as MetricConfig;

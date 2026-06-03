@@ -27,6 +27,7 @@ import {
   breakdownMetricAPIAttributes,
   complexMetricAPIAttributes,
   complexESQLMetricAPIAttributes,
+  esqlMetricWithTrendAPIAttributes,
   metricAPIWithTermsRankedBySecondary,
 } from './lens_api_config.mock';
 
@@ -76,6 +77,10 @@ describe('Metric', () => {
 
     it('should convert a complex ESQL metric chart', () => {
       validator.metric.fromApi(complexESQLMetricAPIAttributes);
+    });
+
+    it('should convert an ESQL metric with trend background chart', () => {
+      validator.metric.fromApi(esqlMetricWithTrendAPIAttributes);
     });
 
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
