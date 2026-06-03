@@ -43,8 +43,9 @@ describe('getTriggerHoverContent', () => {
 
     const result = getTriggerHoverContent('cases.updated', getTriggerDefinition('cases.updated'));
     expect(result).not.toBeNull();
-    expect(result!.value).toContain('Tech Preview');
-    expect(result!.value).toContain(
+    expect(result!.value).toContain('Tech preview');
+    expect(result!.value).toContain('<img src="data:image/svg+xml,');
+    expect(result!.value).not.toContain(
       'This functionality is experimental and not supported. It may change or be removed at any time.'
     );
     expect(result!.value).toContain('Case updated');

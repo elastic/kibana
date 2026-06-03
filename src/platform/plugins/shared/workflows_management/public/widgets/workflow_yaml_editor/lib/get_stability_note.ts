@@ -9,33 +9,56 @@
 
 import { i18n } from '@kbn/i18n';
 import type { StepStabilityLevel } from '@kbn/workflows';
-import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
+
+const BADGE_HEIGHT_PX = 18;
+
+function escapeSvgText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function escapeHtmlAttribute(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;');
+}
 
 /**
- * Returns a markdown blockquote stability note.
+ * Monaco hover sanitizes span class/style attributes; render the badge as SVG instead.
+ */
+function buildStabilityBadgeHtml(label: string): string {
+  const escapedLabel = escapeSvgText(label);
+  const width = Math.max(48, Math.ceil(label.length * 6.5) + 20);
+  const svg = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${BADGE_HEIGHT_PX}" viewBox="0 0 ${width} ${BADGE_HEIGHT_PX}">`,
+    `<rect x="0.5" y="0.5" width="${width - 1}" height="${BADGE_HEIGHT_PX - 1}" rx="8.5" fill="#fff" stroke="#69707D" stroke-opacity="0.2"/>`,
+    `<text x="${width / 2}" y="13" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#343741">${escapedLabel}</text>`,
+    '</svg>',
+  ].join('');
+  const dataUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
+  return `<img src="${dataUrl}" alt="${escapeHtmlAttribute(label)}" width="${width}" height="${BADGE_HEIGHT_PX}" />`;
+}
+
+/**
+ * Returns HTML for a compact stability badge (matches actions menu EuiBetaBadge).
  */
 export function getStabilityNote(stability: StepStabilityLevel | undefined): string {
   if (stability === 'tech_preview') {
-    const flaskImg = `<img src="${HardcodedIcons.flask}" width="11" height="11" alt="" style="vertical-align: middle;" />`;
-    const label = i18n.translate('workflows.techPreviewStabilityNote.label', {
-      defaultMessage: 'Tech Preview',
+    const label = i18n.translate('workflows.actionsMenu.techPreviewBadge', {
+      defaultMessage: 'Tech preview',
     });
-    const description = i18n.translate('workflows.techPreviewStabilityNote.description', {
-      defaultMessage:
-        'This functionality is experimental and not supported. It may change or be removed at any time.',
-    });
-    return `> ${flaskImg} **${label}**: ${description}`;
+    return buildStabilityBadgeHtml(label);
   }
   if (stability === 'beta') {
-    const betaImg = `<img src="${HardcodedIcons.beta}" width="11" height="11" alt="" style="vertical-align: middle;" />`;
-    const label = i18n.translate('workflows.betaStabilityNote.label', {
+    const label = i18n.translate('workflows.actionsMenu.betaBadge', {
       defaultMessage: 'Beta',
     });
-    const message = i18n.translate('workflows.betaStabilityNote.description', {
-      defaultMessage:
-        'This functionality is still under development and not ready for production usage.',
-    });
-    return `> ${betaImg} **${label}** — ${message}`;
+    return buildStabilityBadgeHtml(label);
   }
   return '';
 }

@@ -161,6 +161,7 @@ describe('ElasticsearchMonacoConnectorHandler', () => {
 
       expect(result).not.toBeNull();
       expect(result?.value).toContain('Beta');
+      expect(result?.value.indexOf('Beta')).toBeLessThan(result!.value.indexOf('**Endpoint**'));
     });
 
     it('should include request body in console format when present', async () => {

@@ -142,11 +142,24 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
   }
 
   /**
-   * Returns a markdown blockquote stability note for non-GA steps.
+   * Returns HTML for a compact stability badge for non-GA steps.
    */
   protected getStabilityNote(stability: StepStabilityLevel | undefined): string {
-    const note = getStabilityNoteFromShared(stability);
-    return note ? `\n\n${note}` : '';
+    return getStabilityNoteFromShared(stability);
+  }
+
+  /**
+   * Prepends the stability badge to hover body lines (top-left, same as trigger hovers).
+   */
+  protected prependStabilityBadgeToContent(
+    stability: StepStabilityLevel | undefined,
+    bodyLines: string[]
+  ): string {
+    const badge = getStabilityNoteFromShared(stability);
+    if (!badge) {
+      return bodyLines.join('\n');
+    }
+    return [badge, '', ...bodyLines].join('\n');
   }
 
   /**

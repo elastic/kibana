@@ -266,7 +266,8 @@ describe('BaseMonacoConnectorHandler', () => {
   describe('getStabilityNote', () => {
     it('should return tech preview note for tech_preview stability', () => {
       const result = handler.exposedGetStabilityNote('tech_preview');
-      expect(result).toContain('Tech Preview');
+      expect(result).toContain('Tech preview');
+      expect(result).toContain('<img src="data:image/svg+xml,');
     });
 
     it('should return beta note for beta stability', () => {

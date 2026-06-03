@@ -108,7 +108,8 @@ describe('WorkflowExecuteMonacoConnectorHandler', () => {
       const result = await handler.generateHoverContent(context);
 
       expect(result).not.toBeNull();
-      expect(result?.value).toContain('Tech Preview');
+      expect(result?.value).toContain('Tech preview');
+      expect(result?.value.indexOf('Tech preview')).toBeLessThan(result!.value.indexOf('**Step**'));
     });
 
     it('should not include stability note when stability is GA or undefined', async () => {
