@@ -63,7 +63,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator(`checkboxSelectRow-${testRuleId}`).hover();
     await page.testSubj.click('editActionHoverButton');
 
-    await page.waitForURL(RULES_EDIT_URL_RE);
+    await expect(page).toHaveURL(RULES_EDIT_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/edit/${testRuleId}`);
 
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     // Edit saves directly — the create-confirmation modal only appears for new rules.
     await page.testSubj.click('rulePageFooterSaveButton');
 
-    await page.waitForURL(RULES_LIST_URL_RE);
+    await expect(page).toHaveURL(RULES_LIST_URL_RE);
     expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
     await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
 
@@ -126,7 +126,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('ruleActionsButton');
     await page.testSubj.click('openEditRuleFlyoutButton');
 
-    await page.waitForURL(RULES_EDIT_URL_RE);
+    await expect(page).toHaveURL(RULES_EDIT_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/edit/${testRuleId}`);
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
   });
@@ -151,7 +151,7 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     // Edit saves directly — the create-confirmation modal only appears for new rules.
     await page.testSubj.click('rulePageFooterSaveButton');
 
-    await page.waitForURL(RULES_DETAILS_URL_RE);
+    await expect(page).toHaveURL(RULES_DETAILS_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
