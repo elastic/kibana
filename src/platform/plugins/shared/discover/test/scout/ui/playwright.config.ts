@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ShareHelper } from '../../common/share_helper';
-export { createShareHelper } from '../../common/share_helper';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+  workers: 1,
+  runGlobalSetup: true,
+});

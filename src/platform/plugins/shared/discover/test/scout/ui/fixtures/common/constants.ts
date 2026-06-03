@@ -16,6 +16,16 @@ import { tags } from '@kbn/scout';
 export const DISCOVER_CORE_TAGS = tags.deploymentAgnostic;
 
 /**
+ * Tags for Discover specs that only make sense on stateful deployments
+ * (self-managed + Elastic Cloud hosted, classic + ESS). Use this for specs
+ * migrated from FTR `src/platform/test/functional/apps/discover/**`, which
+ * extend `config.base.js` and rely on the `logstash_functional` / `hamlet`
+ * ES archives, the `discover` kbn archive, and `security.testUser` custom
+ * roles — none of which are available on serverless / MKI projects.
+ */
+export const DISCOVER_STATEFUL_TAGS = tags.stateful.all;
+
+/**
  * Standard `kbn_archiver/discover` archive. Loads the `logstash-*` data view
  * and the other saved objects most Discover specs rely on.
  */
