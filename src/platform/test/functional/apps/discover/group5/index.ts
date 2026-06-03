@@ -32,7 +32,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_field_data_with_fields_api'));
     loadTestFile(require.resolve('./_shared_links'));
     loadTestFile(require.resolve('./_source_filters'));
-    loadTestFile(require.resolve('./_large_string'));
     loadTestFile(require.resolve('./_url_state'));
   });
 }
