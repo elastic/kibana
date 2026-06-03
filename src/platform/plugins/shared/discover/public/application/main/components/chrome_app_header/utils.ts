@@ -8,7 +8,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableEditorService } from '../plugin_imports/embeddable_editor_service';
+import type { AppHeaderBack } from '@kbn/app-header';
+import {
+  TransferAction,
+  type EmbeddableEditorService,
+} from '../../../../plugin_imports/embeddable_editor_service';
+
+/**
+ * Returns true if the session is being edited from an embeddable.
+ * (Do not confuse with Discover displayMode: 'embedded')
+ */
+export const isEmbeddableEdition = (embeddableEditor: EmbeddableEditorService): boolean =>
+  embeddableEditor.isEmbeddedEditor() && Boolean(embeddableEditor.getEmbeddableId());
+
+/**
+ * Back navigation when editing a Discover session from an embeddable (Today it's only from a dashboard).
+ */
+export const getChromeHeaderBack = (
+  embeddableEditor: EmbeddableEditorService
+): AppHeaderBack | undefined => {
+  if (!isEmbeddableEdition(embeddableEditor)) {
+    return undefined;
+  }
+
+  const originatingPath = embeddableEditor.getOriginatingPath() ?? '#/';
+
+  return {
+    href: originatingPath,
+    onClick: () => embeddableEditor.transferBackToEditor(TransferAction.Cancel),
+    label: i18n.translate('discover.titleDashboardEditionBackLabel', {
+      defaultMessage: 'Dashboard',
+    }),
+  };
+};
 
 /**
  * Returns the title to display in the Chrome App Header.
@@ -20,16 +52,13 @@ export const getChromeHeaderTitle = ({
   embeddableEditor: EmbeddableEditorService;
   sessionTitle?: string;
 }): string => {
-  const isEmbeddableEdition =
-    embeddableEditor.isEmbeddedEditor() && Boolean(embeddableEditor.getEmbeddableId());
-
-  // When editting a session from a dashboard.
-  if (isEmbeddableEdition) {
+  // When editting a session from an ambeddable.
+  if (isEmbeddableEdition(embeddableEditor)) {
     const title =
       embeddableEditor.getByValueTab()?.label || // Session persisted by value inside a dashboard.
       sessionTitle || // Session eddited by reference: it exists outise a particular dashboard.
       i18n.translate('discover.DiscoverSessionTitle', {
-        // Default, I.E: editting a by-value session that has no name.
+        // I.E: editting a by-value session that has no name.
         defaultMessage: 'Discover session',
       });
 

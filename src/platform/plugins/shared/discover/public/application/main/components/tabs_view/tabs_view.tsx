@@ -12,8 +12,8 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
-import { AppHeader } from '@kbn/app-header';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -26,7 +26,6 @@ import {
   useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getChromeHeaderTitle } from '../../../../utils/title';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 
@@ -41,13 +40,7 @@ export const TabsView = (props: SingleTabViewProps) => {
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
-  const isChromeNextProjectHeader = useMemo(
-    () => services.chrome.next.isEnabled && services.chrome.getChromeStyle() === 'project',
-    [services.chrome]
-  );
+  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
 
   const {
     shouldCollapseAppMenu,
@@ -88,25 +81,9 @@ export const TabsView = (props: SingleTabViewProps) => {
     if (!isChromeNextProjectHeader) {
       return undefined;
     }
-    const title = getChromeHeaderTitle({
-      embeddableEditor: services.embeddableEditor,
-      sessionTitle: persistedDiscoverSession?.title,
-    });
-    return (tabsBar) => (
-      <AppHeader
-        title={title}
-        menu={topNavMenuItems}
-        sticky={false}
-        padding="m"
-        titleAppend={tabsBar}
-      />
-    );
-  }, [
-    isChromeNextProjectHeader,
-    services.embeddableEditor,
-    persistedDiscoverSession?.title,
-    topNavMenuItems,
-  ]);
+
+    return (tabsBar) => <ChromeAppHeader menu={topNavMenuItems} titleAppend={tabsBar} />;
+  }, [isChromeNextProjectHeader, topNavMenuItems]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {

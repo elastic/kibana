@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { createDiscoverServicesMock } from '../__mocks__/services';
-import { getChromeHeaderTitle } from './title';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getChromeHeaderBack, getChromeHeaderTitle } from './utils';
+import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
 describe('getChromeHeaderTitle', () => {
   const discoverServiceMock = createDiscoverServicesMock();
@@ -76,5 +78,40 @@ describe('getChromeHeaderTitle', () => {
     it('should return New session', () => {
       expect(getChromeHeaderTitle({ embeddableEditor })).toBe('New session');
     });
+  });
+});
+
+describe('getChromeHeaderBack', () => {
+  const discoverServiceMock = createDiscoverServicesMock();
+  const { embeddableEditor } = discoverServiceMock;
+
+  beforeEach(() => {
+    jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(false);
+    jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue(undefined);
+    jest.spyOn(embeddableEditor, 'getOriginatingPath').mockReturnValue(undefined);
+  });
+
+  it('should return undefined if not called from an embeddable', () => {
+    expect(getChromeHeaderBack(embeddableEditor)).toBeUndefined();
+  });
+
+  it('should return back navigation when editing from a dashboard', () => {
+    jest.spyOn(embeddableEditor, 'isEmbeddedEditor').mockReturnValue(true);
+    jest.spyOn(embeddableEditor, 'getEmbeddableId').mockReturnValue('panel-id');
+    jest.spyOn(embeddableEditor, 'getOriginatingPath').mockReturnValue('/app/dashboards#/view/abc');
+
+    const back = getChromeHeaderBack(embeddableEditor);
+
+    expect(back).toEqual({
+      href: '/app/dashboards#/view/abc',
+      onClick: expect.any(Function),
+      label: 'Dashboard',
+    });
+
+    if (back && typeof back !== 'string' && back.onClick) {
+      back.onClick({} as unknown as React.MouseEvent);
+    }
+
+    expect(embeddableEditor.transferBackToEditor).toHaveBeenCalledWith(TransferAction.Cancel);
   });
 });
