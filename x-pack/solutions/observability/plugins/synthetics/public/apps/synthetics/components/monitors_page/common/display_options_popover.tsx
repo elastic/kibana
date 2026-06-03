@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
 import { useOverviewDisplayOptions } from './use_overview_display_options';
@@ -66,14 +67,16 @@ export const DisplayOptionsPopover: React.FC = () => {
   );
 
   const button = (
-    <EuiButtonIcon
-      data-test-subj="syntheticsOverviewDisplayOptionsButton"
-      iconType="controlsHorizontal"
-      aria-label={ARIA_LABEL}
-      onClick={() => setIsOpen((prev) => !prev)}
-      display={isOpen ? 'fill' : 'base'}
-      color="text"
-    />
+    <EuiToolTip content={ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="syntheticsOverviewDisplayOptionsButton"
+        iconType="controlsHorizontal"
+        aria-label={ARIA_LABEL}
+        onClick={() => setIsOpen((prev) => !prev)}
+        display={isOpen ? 'fill' : 'base'}
+        color="text"
+      />
+    </EuiToolTip>
   );
 
   return (
