@@ -222,7 +222,7 @@ export const buildEpisodesQuery = (
  */
 export const buildEpisodesKpisQuery = (
   spaceId: string,
-  currentUserUid: string,
+  currentUserUid?: string,
   filterState?: EpisodesFilterState
 ): string => {
   const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
@@ -231,11 +231,17 @@ export const buildEpisodesKpisQuery = (
     applyFilterState(query, filterState);
   }
 
-  // Indicator columns — null for distinct count, 1/0 for sum-based counts
+  // Indicator columns — null for distinct count, 1/0 for sum-based counts.
+  // When there's no current user (anonymous/proxy-authenticated), nothing can be
+  // "assigned to me", so the indicator is always 0.
   // prettier-ignore
   query
     .pipe`EVAL _active_rule_id = CASE(effective_status == "active", \`rule.id\`, null)`
-    .pipe(`EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`)
+    .pipe(
+      currentUserUid
+        ? `EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`
+        : `EVAL _assigned_to_me = 0`
+    )
     .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
     .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
     .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)`

@@ -160,4 +160,31 @@ describe('useEpisodesKpisQuery', () => {
     const queryArg = mockExecuteEsqlQuery.mock.calls[0][0].query;
     expect(queryArg).toContain('specific-user-uid');
   });
+
+  it('still fetches KPIs when the user has no profile', async () => {
+    mockGetCurrent.mockResolvedValue(null);
+    mockExecuteEsqlQuery.mockResolvedValue([mockKpisRow]);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      { wrapper: wrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual({
+      alertsCount: 5,
+      firingRules: 2,
+      assignedToMe: 1,
+      unassigned: 3,
+      acknowledged: 4,
+      snoozed: 0,
+    });
+  });
 });

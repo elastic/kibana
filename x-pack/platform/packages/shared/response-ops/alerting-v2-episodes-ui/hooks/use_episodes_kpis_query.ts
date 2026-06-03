@@ -11,6 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useSpaceId } from './use_space_id';
+import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery, type EpisodesFilterState } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
@@ -56,10 +57,11 @@ export const useEpisodesKpisQuery = ({
 }: UseEpisodesKpisQueryOptions): UseEpisodesKpisQueryResult => {
   const spaceId = useSpaceId(services.spaces);
 
-  const { data: currentUser, isLoading: isCurrentUserLoading } = useQuery({
-    queryKey: queryKeys.kpisCurrentUser(),
-    queryFn: () => services.userProfile.getCurrent(),
-    staleTime: Infinity,
+  // The current user profile is only needed to compute the "assigned to me"
+  // count. Users without a profile (anonymous or proxy-authenticated) still get
+  // KPIs; their "assigned to me" count is simply always 0.
+  const { data: currentUser, isLoading: isCurrentUserLoading } = useCurrentUserProfile({
+    userProfile: services.userProfile,
   });
 
   const currentUserUid = currentUser?.uid;
@@ -68,12 +70,11 @@ export const useEpisodesKpisQuery = ({
     data,
     isLoading: isKpisLoading,
     error,
-  } = useQuery<EpisodesKpisData | undefined, Error>({
+  } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
     queryKey: queryKeys.kpis(spaceId, filterState, timeRange, currentUserUid),
-    queryFn: async ({ signal }) => {
-      if (!currentUserUid) return undefined; // enabled: !!currentUserUid guards this
+    queryFn: ({ signal }) => {
       const query = buildEpisodesKpisQuery(spaceId, currentUserUid, filterState);
-      const rows = await executeEsqlQuery<EpisodesKpisRow>({
+      return executeEsqlQuery<EpisodesKpisRow>({
         expressions: services.expressions,
         query,
         input: {
@@ -83,6 +84,8 @@ export const useEpisodesKpisQuery = ({
         },
         abortSignal: signal,
       });
+    },
+    select: (rows) => {
       const row = rows[0];
       if (!row) return undefined;
       return {
@@ -94,7 +97,10 @@ export const useEpisodesKpisQuery = ({
         snoozed: row.snoozed ?? 0,
       };
     },
-    enabled: !!currentUserUid,
+    // Wait until the profile query settles (resolved or `null`) so the KPIs
+    // query fires once with a stable `currentUserUid`, instead of firing with
+    // `undefined` and immediately refetching once the profile loads.
+    enabled: !isCurrentUserLoading,
   });
 
   return {

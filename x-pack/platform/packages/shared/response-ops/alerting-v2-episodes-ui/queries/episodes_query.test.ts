@@ -339,6 +339,13 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toMatch(/SUM\(_assigned_to_me\)/);
   });
 
+  it('sets assigned_to_me to a constant 0 when no currentUserUid is provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, undefined);
+    expect(output).toContain('EVAL _assigned_to_me = 0');
+    expect(output).not.toContain('last_assignee_uid ==');
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
   it('uses IS NULL check for unassigned', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
     expect(output).toContain('last_assignee_uid IS NULL');
@@ -381,7 +388,6 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toContain('WHERE rule.id == "rule-xyz"');
   });
 });
-
 
 describe('buildEpisodesHistogramQuery', () => {
   it('includes first_timestamp, last_timestamp, and episode.status in KEEP', () => {
@@ -432,7 +438,6 @@ describe('buildEpisodesHistogramQuery', () => {
     expect(output).toContain('user-xyz');
   });
 });
-
 
 describe('buildEpisodesBaseQuery — action state stats', () => {
   it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {

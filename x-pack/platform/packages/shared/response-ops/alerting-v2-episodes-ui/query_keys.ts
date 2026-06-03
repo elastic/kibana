@@ -79,7 +79,7 @@ export const queryKeys = {
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined
   ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
-  kpisCurrentUser: () => [...queryKeys.all, 'kpis-current-user'] as const,
+  currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
   kpis: (
     spaceId: string,
