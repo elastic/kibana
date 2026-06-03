@@ -37,7 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { GRAPH_PRESETS } from './presets';
-import type { GraphPreset } from './presets';
+import { TopologyGraph } from './topology_graph';
 
 // ---------------------------------------------------------------------------
 // Types mirroring the server route responses
@@ -59,80 +59,6 @@ interface RouteTestResult {
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
-
-const TopologySummary = ({ preset }: { preset: GraphPreset }) => {
-  const { topology } = preset;
-
-  const edgeRows = topology.routing.map((edge, idx) => ({
-    id: idx,
-    from: edge.from,
-    to: edge.to,
-    condition: edge.where ? JSON.stringify(edge.where) : '(always)',
-  }));
-
-  return (
-    <>
-      <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.streams.graphDemo.sourcesLabel', {
-                defaultMessage: 'Sources',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          {Object.keys(topology.sources ?? {}).map((id) => (
-            <EuiBadge key={id} color="primary">
-              {id}
-            </EuiBadge>
-          ))}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.streams.graphDemo.pipelinesLabel', {
-                defaultMessage: 'Pipelines',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          {Object.keys(topology.pipelines ?? {}).map((id) => (
-            <EuiBadge key={id} color="accent">
-              {id}
-            </EuiBadge>
-          ))}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.streams.graphDemo.destinationsLabel', {
-                defaultMessage: 'Destinations',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          {Object.keys(topology.destinations ?? {}).map((id) => (
-            <EuiBadge key={id} color="success">
-              {id}
-            </EuiBadge>
-          ))}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption="Routing edges"
-        items={edgeRows}
-        columns={[
-          { field: 'from', name: 'From', width: '25%' },
-          { field: 'to', name: 'To', width: '25%' },
-          { field: 'condition', name: 'Condition', truncateText: true },
-        ]}
-        rowHeader="from"
-      />
-    </>
-  );
-};
 
 const LoadResultPanel = ({ result }: { result: LoadResult }) => {
   const hasErrors = result.results.some((r) => r.status === 'error');
@@ -382,7 +308,7 @@ export const GraphStreamsDemoPage = () => {
             <p>{selectedPreset.description}</p>
           </EuiText>
           <EuiSpacer size="m" />
-          <TopologySummary preset={selectedPreset} />
+          <TopologyGraph preset={selectedPreset} />
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
