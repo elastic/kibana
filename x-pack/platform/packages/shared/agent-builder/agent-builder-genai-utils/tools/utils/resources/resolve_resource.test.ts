@@ -146,7 +146,10 @@ describe('resolveResource', () => {
       });
 
       // Should use _mapping, not _field_caps
-      expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: ['my-local-index'] });
+      expect(esClient.indices.getMapping).toHaveBeenCalledWith({
+        index: ['my-local-index'],
+        querystring: { ignore_throttled: true },
+      });
       expect(esClient.fieldCaps).not.toHaveBeenCalled();
 
       expect(result).toEqual({
@@ -190,6 +193,7 @@ describe('resolveResource', () => {
       });
       expect(esClient.indices.getMapping).toHaveBeenCalledWith({
         index: ['logs-1'],
+        querystring: { ignore_throttled: true },
       });
       expect(result).toEqual({
         name: 'logs-1',

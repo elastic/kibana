@@ -38,6 +38,7 @@ describe('getIndexMappings', () => {
     expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
     expect(esClient.indices.getMapping).toHaveBeenCalledWith({
       index: ['index-a', 'index-b'],
+      querystring: { ignore_throttled: true },
     });
   });
 
