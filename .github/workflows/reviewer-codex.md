@@ -110,6 +110,7 @@ steps:
       path: /tmp/gh-aw/agent
 safe-outputs:
   footer: true
+  report-failure-as-issue: false
   noop:
     report-as-issue: false
   create-pull-request-review-comment:
