@@ -26,16 +26,20 @@ export const useSignificantEventsDiscoveryApi = () => {
         streamsRepositoryClient.fetch(
           'POST /internal/streams/significant_events/discovery/_execute',
           {
+            // No abort signal: aborting a fire-and-track mutation would silently
+            // start the server workflow with no client-side tracking.
             params: { body: { action: 'trigger' as const } },
-            signal,
+            signal: null,
           }
         ),
       cancelSignificantEventsDiscovery: () =>
         streamsRepositoryClient.fetch(
           'POST /internal/streams/significant_events/discovery/_execute',
           {
+            // No abort signal: cancel is fire-and-forget — aborting mid-flight
+            // would leave the server/client state diverged.
             params: { body: { action: 'cancel' as const } },
-            signal,
+            signal: null,
           }
         ),
       getSignificantEventsDiscoveryStatus: () =>

@@ -49,7 +49,7 @@ export const useSignificantEventsDiscovery = ({
 
   // Local status state — set optimistically on trigger AND updated from server polling.
   // Mirrors the onboardingState pattern in useKnowledgeIndicatorsOnboarding.
-  const [SignificantEventsDiscoveryStatus, setSignificantEventsDiscoveryStatus] =
+  const [significantEventsDiscoveryStatus, setSignificantEventsDiscoveryStatus] =
     useState<WorkflowStatus | null>(null);
 
   // Tracks the previous server-confirmed status for toast transition detection.
@@ -86,9 +86,9 @@ export const useSignificantEventsDiscovery = ({
   // It includes the optimistic InProgress state set by handleRun so polling
   // continues even before the server confirms the new execution.
   const isRunning =
-    SignificantEventsDiscoveryStatus !== null &&
-    !isTerminalStatus(SignificantEventsDiscoveryStatus) &&
-    SignificantEventsDiscoveryStatus !== WorkflowStatus.NotStarted;
+    significantEventsDiscoveryStatus !== null &&
+    !isTerminalStatus(significantEventsDiscoveryStatus) &&
+    significantEventsDiscoveryStatus !== WorkflowStatus.NotStarted;
 
   const { data } = useQuery({
     queryKey: ['significant_events_discovery_status'],
