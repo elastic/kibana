@@ -165,6 +165,11 @@ export const allowedExperimentalValues = Object.freeze({
   trustedDevices: true,
 
   /**
+   * Enables custom YARA signature management in Elastic Defend.
+   */
+  customYaraSignaturesEnabled: false,
+
+  /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: true,
