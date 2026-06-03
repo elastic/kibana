@@ -18,13 +18,14 @@ plugins:
     - dashboard_markdown
     - data
     - data_view_editor
-    - data_views
     - data_view_management
+    - data_views
     - dev_tools
     - discover
     - discover_enhanced
     - entity_store
     - error_boundary_example
+    - event_annotation_listing
     - exploratory_view
     - fleet
     - flyoutSystemExamples
@@ -40,6 +41,7 @@ plugins:
     - ingest_pipelines
     - intercepts
     - kibana_overview
+    - kql
     - lens
     - logstash
     - management
@@ -83,6 +85,7 @@ packages:
   enabled:
     - core
     - kbn-scout
+    - kbn-security-hardening
     - kbn-streamlang-tests
     - user-storage
   disabled:

@@ -77,7 +77,7 @@ export interface RulesSavedObjectServiceContract {
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
     total: number;
   }>;
-  findTags(): Promise<string[]>;
+  findTags(params?: { filter?: string }): Promise<string[]>;
 }
 
 @injectable()
@@ -268,10 +268,11 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
-  public async findTags(): Promise<string[]> {
+  public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
+      ...(filter ? { filter } : {}),
       aggs: {
         tags: {
           terms: {
