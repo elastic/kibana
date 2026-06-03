@@ -319,7 +319,7 @@ export const sendEndpointActionResponse = async (
               output: {
                 type: 'json',
                 content: {
-                  code: `ra_${canceledActionCommandName}_canceled`,
+                  code: `ra_${canceledActionCommandName}_error_canceled`,
                   canceled_by: 'action',
                   canceled_id: action.id,
                 },
