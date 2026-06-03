@@ -32,6 +32,7 @@ const createMw = async (
     title: string;
     startDate?: Date;
     notRecurring?: boolean;
+    overwrite?: Record<string, unknown>;
   }
 ): Promise<MwResponse> => {
   const dtstart = (opts.startDate ?? new Date()).toISOString();
@@ -47,6 +48,7 @@ const createMw = async (
         tzid: 'UTC',
         ...(opts.notRecurring ? { freq: 1, count: 1 } : { freq: 2 }),
       },
+      ...opts.overwrite,
     },
   });
   return res.data;
@@ -63,23 +65,31 @@ const deleteMw = async (kbnClient: KbnClient, id: string) => {
 
 // ── Page helpers ─────────────────────────────────────────────────────────────
 
+// Use the stable data-test-subj on the EuiFieldSearch input (set in the component).
 const searchMws = async (page: ScoutPage, text: string) => {
-  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
+  const searchBox = page.testSubj.locator('maintenance-window-search');
   await searchBox.fill(text);
   await searchBox.press('Enter');
   await page.locator(TABLE_LOADED_CSS).waitFor();
 };
 
+// Read status text from the <td data-test-subj="maintenance-windows-column-status"> cell
+// directly — no EUI internal CSS classes needed.
 const getMwRowStatuses = async (page: ScoutPage): Promise<string[]> => {
   const rows = await page.testSubj.locator('list-item').all();
   const statuses: string[] = [];
   for (const row of rows) {
-    const cell = row.locator(
-      '[data-test-subj="maintenance-windows-column-status"] .euiTableCellContent'
-    );
+    const cell = row.locator('[data-test-subj="maintenance-windows-column-status"]');
     statuses.push(((await cell.textContent()) ?? '').trim());
   }
   return statuses;
+};
+
+// Dismiss all visible toasts to prevent accumulation across actions in a single test.
+const dismissToasts = async (page: ScoutPage) => {
+  for (const btn of await page.testSubj.locator('toastCloseButton').all()) {
+    await btn.click({ force: true });
+  }
 };
 
 // Opens the actions popover for the first visible row if the action button is
@@ -128,6 +138,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Cancelled running maintenance window '${title}'`
     );
+    await dismissToasts(page);
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
@@ -155,6 +166,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Archived maintenance window '${title}'`
     );
+    await dismissToasts(page);
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
@@ -182,6 +194,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Cancelled and archived running maintenance window '${title}'`
     );
+    await dismissToasts(page);
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
@@ -206,6 +219,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Archived maintenance window '${title}'`
     );
+    await dismissToasts(page);
 
     await searchMws(page, title);
     let statuses = await getMwRowStatuses(page);
@@ -217,6 +231,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Unarchived maintenance window '${title}'`
     );
+    await dismissToasts(page);
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
@@ -290,6 +305,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Cancelled and archived running maintenance window '${runningTitle}'`
     );
+    await dismissToasts(page);
 
     // Filter to show only archived
     await page.testSubj.click('status-filter-button');
@@ -338,6 +354,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText('Deleted maintenance window');
+    await dismissToasts(page);
 
     await searchMws(page, title);
     await expect(page.testSubj.locator('list-item')).toHaveCount(0);
