@@ -14,7 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
+import { isConditionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -28,13 +28,7 @@ import {
 import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
 import { collectDescendantStepIds } from '../../state_management/utils';
 import type { StepConfigurationProps } from '../steps_list';
-import { EditStepDescriptionModal } from './action/edit_step_description_modal';
 import { deleteProcessorPromptOptions } from './action/prompt_options';
-import {
-  ADD_DESCRIPTION_MENU_LABEL,
-  EDIT_DESCRIPTION_MENU_LABEL,
-  REMOVE_DESCRIPTION_MENU_LABEL,
-} from './action/translations';
 import { deleteConditionPromptOptions } from './where/prompt_options';
 
 const moveUpItemText = i18n.translate(
@@ -79,6 +73,13 @@ const deleteItemText = i18n.translate(
   }
 );
 
+const tooltipContent = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
+  {
+    defaultMessage: 'Step context menu',
+  }
+);
+
 type StepContextMenuProps = Pick<
   StepConfigurationProps,
   'stepRef' | 'stepUnderEdit' | 'isFirstStepInLevel' | 'isLastStepInLevel'
@@ -119,13 +120,8 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const isWhere = isConditionBlock(step);
-  const hasCustomDescription =
-    isActionBlock(step) &&
-    typeof step.description === 'string' &&
-    step.description.trim().length > 0;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
-  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
 
   const menuPopoverId = useGeneratedHtmlId({
     prefix: 'stepContextMenuPopover',
@@ -205,49 +201,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {moveDownItemText}
     </EuiContextMenuItem>,
-    ...(!isWhere
-      ? hasCustomDescription
-        ? [
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuEditDescriptionItem"
-              key="editDescription"
-              icon="comment"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                toggleEditDescriptionModal(true);
-              }}
-            >
-              {EDIT_DESCRIPTION_MENU_LABEL}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuRemoveDescriptionItem"
-              key="removeDescription"
-              icon="minusCircle"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                stepRef.send({ type: 'step.changeDescription', description: '' });
-              }}
-            >
-              {REMOVE_DESCRIPTION_MENU_LABEL}
-            </EuiContextMenuItem>,
-          ]
-        : [
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuEditDescriptionItem"
-              key="editDescription"
-              icon="comment"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                toggleEditDescriptionModal(true);
-              }}
-            >
-              {ADD_DESCRIPTION_MENU_LABEL}
-            </EuiContextMenuItem>,
-          ]
-      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
       data-stream-type={streamType}
@@ -310,22 +263,9 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   ];
 
   const button = (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
-        {
-          defaultMessage: 'Step context menu',
-        }
-      )}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <EuiButtonIcon
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
-          {
-            defaultMessage: 'Step context menu',
-          }
-        )}
+        aria-label={tooltipContent}
         data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
         data-stream-type={streamType}
         disabled={!!stepUnderEdit}
@@ -337,27 +277,15 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   );
 
   return (
-    <>
-      <EuiPopover
-        id={menuPopoverId}
-        data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuPopover"
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={() => togglePopover(false)}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel items={items} />
-      </EuiPopover>
-      {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
-        <EditStepDescriptionModal
-          step={step}
-          onCancel={() => toggleEditDescriptionModal(false)}
-          onSave={(description) => {
-            toggleEditDescriptionModal(false);
-            stepRef.send({ type: 'step.changeDescription', description });
-          }}
-        />
-      )}
-    </>
+    <EuiPopover
+      id={menuPopoverId}
+      data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuPopover"
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => togglePopover(false)}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
   );
 };
