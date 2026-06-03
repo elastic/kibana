@@ -17,7 +17,6 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/private/cross_cluster_replication
 dependsOn:
-  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/licensing-plugin'
   - '@kbn/management-plugin'
@@ -51,7 +50,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
