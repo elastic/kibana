@@ -144,16 +144,16 @@ function addFinding(filePath, category, item) {
   ownerData.get(owner)[category].push(item);
 }
 
-// Complexity
-for (const f of data.health?.findings ?? []) {
+// Complexity (fallow health --format json — top-level, no 'health' wrapper)
+for (const f of data.findings ?? []) {
   addFinding(f.path, 'complexityFindings', f);
 }
 
-for (const f of data.health?.file_scores ?? []) {
+for (const f of data.file_scores ?? []) {
   addFinding(f.path, 'fileScores', f);
 }
 
-for (const f of data.health?.hotspots ?? []) {
+for (const f of data.hotspots ?? []) {
   addFinding(f.path, 'hotspots', f);
 }
 

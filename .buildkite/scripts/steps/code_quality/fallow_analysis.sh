@@ -23,16 +23,16 @@ if [ "${BUILDKITE_PIPELINE_SLUG:-}" = "kibana-code-quality-fallow" ]; then
 fi
 
 echo "--- Run fallow analysis"
-echo "Checks: dead code (unused exports/types/files) · duplication · complexity hotspots"
+echo "Checks: complexity hotspots · per-file health scores"
 echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, excludes tests/stories/mocks)"
+echo "Note: dead code detection skipped (unreliable in Kibana — @kbn/* path aliases not resolved by fallow)"
 echo ""
 echo "Run locally (same as CI):"
-echo "  npx fallow --score --format json --quiet > fallow.json"
+echo "  npx fallow health --format json --quiet > fallow.json"
 echo "  node ${REPORT_SCRIPT} fallow.json --owners ${FALLOW_OWNERS}"
 set +e
 # shellcheck disable=SC2086
-.buildkite/node_modules/.bin/fallow \
-  --score \
+.buildkite/node_modules/.bin/fallow health \
   --format json \
   --quiet \
   $SAVE_SNAPSHOT_FLAG \
