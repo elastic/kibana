@@ -31,11 +31,6 @@ describe('createIndexes', () => {
   });
 
   it('creates both workflow indices via createOrUpdateIndex', async () => {
-    // Regression: previously the step execution index used the
-    // one-shot `createIndexWithMappings`, which short-circuits when the
-    // index already exists. New fields (e.g. the HITL audit envelope
-    // `hitl.respondedBy`/`respondedAt`/`channel` for inbox multi-client
-    // safety) therefore couldn't be added without a manual reindex.
     await createIndexes({ esClient, logger });
 
     // The bootstrap path uses `createOrUpdateIndex` for both indices
