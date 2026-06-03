@@ -8,8 +8,8 @@
  */
 
 import { render } from '@testing-library/react';
-import { EuiIcon } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { EuiIcon } from '@elastic/eui';
 import { getUiSessionMock } from '../../../__mocks__';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { createExtendActionDescriptor } from './extend_button';
