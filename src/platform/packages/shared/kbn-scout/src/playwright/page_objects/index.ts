@@ -25,7 +25,6 @@ import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { VisualizeApp } from './visualize_app';
-import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export { CopySavedObjectsToSpaceFlyout, SavedObjectsManagementPage };
 
