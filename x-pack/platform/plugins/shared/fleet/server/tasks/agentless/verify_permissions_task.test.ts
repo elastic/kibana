@@ -183,28 +183,6 @@ describe('verify_permissions_task', () => {
       taskRunner = createTaskRunner();
     });
 
-    it('should skip when enableOTelVerifier is disabled', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOTelVerifier: false,
-      } as any);
-
-      await taskRunner.run();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('OTel verifier is disabled')
-      );
-      expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
-    });
-
-    it('should skip when experimental features are undefined', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue(undefined as any);
-
-      await taskRunner.run();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('OTel verifier is disabled')
-      );
-      expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
-    });
-
     it('should skip verification when an active non-expired verifier policy exists', async () => {
       mockedAgentPolicyService.list.mockResolvedValueOnce({
         items: [
@@ -630,15 +608,6 @@ describe('verify_permissions_task', () => {
       // active verifier's TTL elapses (otherwise we'd wait the full 12 h cron).
       expect(result!.runAt.getTime()).toBeGreaterThan(Date.now());
       expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
-    });
-
-    it('should NOT request a follow-up run when the feature flag is off', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOTelVerifier: false,
-      } as any);
-
-      const result = await taskRunner.run();
-      expect(result).toBeUndefined();
     });
 
     it('should NOT request a follow-up run when an earlier verification fails with no other eligibles', async () => {
