@@ -96,8 +96,13 @@ export type CellDecorationFillMode = 'single' | 'solid' | 'gradient';
  * - `custom`: use an explicit `[min, max]` domain (supports a negative `min`).
  *
  * For `single` fills this range is the source of truth. For `solid`/`gradient`
- * fills the range is kept in sync with the palette color bounds
+ * fills the active custom range is kept in sync with the palette color bounds
  * (`palette.params.rangeMin`/`rangeMax`).
+ *
+ * `min`/`max` may also be present while `mode` is `auto`: they hold the last
+ * committed custom bounds so toggling `auto`<->`custom` restores them rather
+ * than resetting to the data bounds. They are inert while `mode` is `auto`
+ * (the domain falls back to the data bounds).
  */
 export interface CellDecorationValueRange {
   mode: 'auto' | 'custom';

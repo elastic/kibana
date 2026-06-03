@@ -27,6 +27,7 @@ import type {
   ColumnState,
   CellDecorationFillMode,
   CellDecorationFillConfig,
+  CellDecorationValueRange,
 } from '@kbn/lens-common';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
@@ -178,17 +179,25 @@ export function ProgressBarControls({
       const nextFillStyle: CellDecorationFillConfig = { ...fillStyle, fillMode: nextFillMode };
       const update: Partial<ColumnState> = {};
 
+      // Carry the committed custom bounds across the fill-mode switch (and the
+      // single<->palette range-store handoff) so a Custom range survives even
+      // when the active mode is Auto. The bounds are inert until Custom is
+      // active for the new fill mode.
+      const rememberedMin = fillStyle.valueRange?.min ?? effectiveRange.min;
+      const rememberedMax = fillStyle.valueRange?.max ?? effectiveRange.max;
+      const nextValueRange: CellDecorationValueRange = {
+        mode: effectiveRange.mode,
+        min: rememberedMin,
+        max: rememberedMax,
+      };
+
       if (nextFillMode === 'single') {
-        // Moving to single: seed the single color and capture any palette-driven
-        // custom range into the dedicated single-mode field so the bar domain is stable.
         nextFillStyle.color = fillStyle.color ?? DEFAULT_PROGRESS_BAR_COLOR;
-        nextFillStyle.valueRange = isCustomRange
-          ? { mode: 'custom', min: effectiveRange.min, max: effectiveRange.max }
-          : { mode: 'auto' };
+        nextFillStyle.valueRange = nextValueRange;
       } else {
-        // Moving to solid/gradient: ensure a palette exists; sync any single-mode
-        // custom range onto the palette params so colors and bar share one domain.
-        nextFillStyle.valueRange = { mode: effectiveRange.mode };
+        // Moving to solid/gradient: ensure a palette exists; sync the custom
+        // range onto the palette params so colors and bar share one domain.
+        nextFillStyle.valueRange = nextValueRange;
         const nextPalette: PaletteOutput<CustomPaletteParams> = {
           ...palette,
           params: {
@@ -218,8 +227,14 @@ export function ProgressBarControls({
     (mode: 'auto' | 'custom') => {
       if (mode === effectiveRange.mode) return;
 
-      const min = effectiveRange.min ?? dataBounds.min;
-      const max = effectiveRange.max ?? dataBounds.max;
+      // Seed Custom from the previously committed custom bounds when known,
+      // otherwise from the current (Auto) data bounds.
+      const min = fillStyle.valueRange?.min ?? effectiveRange.min ?? dataBounds.min;
+      const max = fillStyle.valueRange?.max ?? effectiveRange.max ?? dataBounds.max;
+
+      // The committed bounds are retained on `fillStyle.valueRange` across the
+      // Auto round-trip so the last custom range survives the toggle.
+      const nextValueRange: CellDecorationValueRange = { mode, min, max };
 
       if (usesPalette) {
         const nextPalette: PaletteOutput<CustomPaletteParams> = {
@@ -233,14 +248,11 @@ export function ProgressBarControls({
         };
         onUpdate({
           palette: nextPalette,
-          fillStyle: { ...fillStyle, valueRange: { mode } },
+          fillStyle: { ...fillStyle, valueRange: nextValueRange },
         });
       } else {
         onUpdate({
-          fillStyle: {
-            ...fillStyle,
-            valueRange: mode === 'custom' ? { mode, min, max } : { mode },
-          },
+          fillStyle: { ...fillStyle, valueRange: nextValueRange },
         });
       }
     },
@@ -249,6 +261,11 @@ export function ProgressBarControls({
 
   const setCustomRange = useCallback(
     ([min, max]: [number, number]) => {
+      // Persist the bounds on `fillStyle.valueRange` for every fill mode so they
+      // are remembered when toggling Auto/Custom; palette fills additionally
+      // mirror them onto the palette range that drives solid/gradient colors.
+      const nextValueRange: CellDecorationValueRange = { mode: 'custom', min, max };
+
       if (usesPalette) {
         const nextPalette: PaletteOutput<CustomPaletteParams> = {
           ...palette,
@@ -256,11 +273,11 @@ export function ProgressBarControls({
         };
         onUpdate({
           palette: nextPalette,
-          fillStyle: { ...fillStyle, valueRange: { mode: 'custom' } },
+          fillStyle: { ...fillStyle, valueRange: nextValueRange },
         });
       } else {
         onUpdate({
-          fillStyle: { ...fillStyle, valueRange: { mode: 'custom', min, max } },
+          fillStyle: { ...fillStyle, valueRange: nextValueRange },
         });
       }
     },

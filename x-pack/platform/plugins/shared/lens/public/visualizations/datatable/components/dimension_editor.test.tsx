@@ -567,6 +567,78 @@ describe('data table dimension editor', () => {
       });
     });
 
+    it('retains the last custom range when toggling Custom -> Auto (single fill)', async () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'custom', min: -5, max: 25 },
+      };
+      renderTableDimensionEditor();
+
+      // Toggle the value range to Auto.
+      await act(async () => screen.getByTestId('lnsDatatable_progressBar_valueRange_auto').click());
+      await act(async () => jest.advanceTimersByTime(256));
+
+      // The committed bounds survive on `fillStyle.valueRange` (inert under Auto)
+      // so they can be restored on the next switch to Custom.
+      expect(props.setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [
+            expect.objectContaining({
+              fillStyle: expect.objectContaining({
+                valueRange: { mode: 'auto', min: -5, max: 25 },
+              }),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('restores the remembered custom bounds when switching Auto -> Custom (single fill)', async () => {
+      mockFirstColumn({ dataType: 'number' });
+      // Auto mode but with previously committed bounds remembered on valueRange.
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'auto', min: -5, max: 25 },
+      };
+      renderTableDimensionEditor();
+
+      await act(async () =>
+        screen.getByTestId('lnsDatatable_progressBar_valueRange_custom').click()
+      );
+      await act(async () => jest.advanceTimersByTime(256));
+
+      // The committed Custom range is seeded from the remembered bounds (-5, 25),
+      // not reset to the data bounds.
+      expect(props.setState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [
+            expect.objectContaining({
+              fillStyle: expect.objectContaining({
+                valueRange: { mode: 'custom', min: -5, max: 25 },
+              }),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('renders the remembered bounds on the slider for a custom range', () => {
+      mockFirstColumn({ dataType: 'number' });
+      state.columns[0].colorMode = 'progress';
+      state.columns[0].fillStyle = {
+        fillMode: 'single',
+        valueRange: { mode: 'custom', min: -5, max: 25 },
+      };
+      renderTableDimensionEditor();
+
+      const [minInput, maxInput] = screen.getAllByRole('spinbutton');
+      expect(minInput).toHaveValue(-5);
+      expect(maxInput).toHaveValue(25);
+    });
+
     it('drops progress config when switching away from progress mode', async () => {
       mockFirstColumn({ dataType: 'number' });
       state.columns[0].colorMode = 'progress';
