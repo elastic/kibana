@@ -589,6 +589,17 @@ export class StreamsPlugin
       );
     });
 
+    // Emits once when the memory feature flag transitions to enabled at runtime.
+    // The initial flag state is handled by the startup install/registration below,
+    // hence `skip(1)`.
+    const memoryEnabled$ = core.featureFlags
+      .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+      .pipe(
+        distinctUntilChanged(),
+        skip(1),
+        filter((enabled) => enabled)
+      );
+
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
 
@@ -602,24 +613,17 @@ export class StreamsPlugin
         }
       );
 
-      core.featureFlags
-        .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
-        .pipe(
-          distinctUntilChanged(),
-          skip(1),
-          filter((enabled) => enabled)
-        )
-        .subscribe(() => {
-          void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
-            (error: unknown) => {
-              this.logger.error(
-                `streams: Failed to install memory managed workflows after feature flag change: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            }
-          );
-        });
+      memoryEnabled$.subscribe(() => {
+        void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
+          (error: unknown) => {
+            this.logger.error(
+              `streams: Failed to install memory managed workflows after feature flag change: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          }
+        );
+      });
     }
 
     if (plugins.agentBuilder && this.server && this.streamsGetScopedClients) {
@@ -638,16 +642,9 @@ export class StreamsPlugin
         isMemoryEnabled,
       })
         .then(({ onMemoryEnabled }) => {
-          core.featureFlags
-            .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
-            .pipe(
-              distinctUntilChanged(),
-              skip(1),
-              filter((enabled) => enabled)
-            )
-            .subscribe(() => {
-              void onMemoryEnabled();
-            });
+          memoryEnabled$.subscribe(() => {
+            void onMemoryEnabled();
+          });
         })
         .catch((err) => {
           this.logger.error(`Failed to register streams memory skills: ${err.message}`);
@@ -688,10 +685,9 @@ export class StreamsPlugin
         client,
         isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
       });
+      this.logger.info('Streams managed workflows installed');
 
       await client.ready();
-
-      this.logger.info('Streams managed workflows installed');
     } catch (error) {
       this.logger.warn(
         `Failed to install streams managed workflows: ${
