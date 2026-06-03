@@ -10,11 +10,13 @@
 const childProcess = require('child_process');
 const fs = require('fs');
 const https = require('https');
+const { createRequire } = require('module');
 const os = require('os');
 const path = require('path');
 const { pipeline } = require('stream/promises');
 const extract = require('extract-zip');
-const chromeDriver = require('chromedriver');
+const requireFromWorkspace = createRequire(path.resolve(process.cwd(), 'package.json'));
+const chromeDriver = requireFromWorkspace('chromedriver');
 
 const KNOWN_GOOD_VERSIONS_URL =
   'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json';
@@ -50,11 +52,7 @@ function getChromeBinaryRelativePath(platform) {
     );
   }
 
-  if (platform === 'linux64') {
-    return path.join('chrome-linux64', 'chrome');
-  }
-
-  return path.join(`chrome-${platform}`, 'chrome.exe');
+  return path.join('chrome-linux64', 'chrome');
 }
 
 function getChromeDriverVersion() {
