@@ -28,10 +28,10 @@ import {
  * Validates CPS `projectRouting` propagation from the Kibana space into the Graph
  * Investigation API request body.
  *
- * The unit-test side asserts that the server splits its events fetcher (logs query
- * carries `project_routing`, alerts query stays origin-only) and that the schema
- * accepts the documented routing modes. This UI test validates the piece the unit
- * tests can't reach: that the Graph React component actually subscribes to
+ * The unit-test side asserts that the server forwards `project_routing` to a
+ * single events ES|QL query covering both logs and alerts, and that the schema
+ * accepts the documented routing modes. This UI test validates the piece the
+ * unit tests can't reach: that the Graph React component actually subscribes to
  * `cps.cpsManager.getProjectRouting$()` and forwards the current value into
  * `/internal/cloud_security_posture/graph`.
  *

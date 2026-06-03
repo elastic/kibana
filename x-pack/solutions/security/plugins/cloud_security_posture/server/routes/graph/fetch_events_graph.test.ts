@@ -417,7 +417,7 @@ describe('fetchEvents', () => {
   describe('CPS projectRouting', () => {
     const ALERTS_PATTERN = '.alerts-security.alerts-default';
 
-    it('issues a single logs-only query and omits project_routing when only logs patterns are supplied', async () => {
+    it('issues a single query and omits project_routing when only logs patterns are supplied without routing', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -436,7 +436,7 @@ describe('fetchEvents', () => {
       expect(args).not.toHaveProperty('project_routing');
     });
 
-    it('issues an alerts-only query and omits project_routing when only the alerts pattern is supplied', async () => {
+    it('issues a single alerts query and forwards project_routing when only the alerts pattern is supplied', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -453,11 +453,11 @@ describe('fetchEvents', () => {
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       expect(args.query).toContain(`FROM ${ALERTS_PATTERN}`);
-      // Alerts are origin-only: caller's projectRouting must not propagate.
-      expect(args).not.toHaveProperty('project_routing');
+      // Alerts now fan out across linked projects like the rest of the alert flyout.
+      expect(args.project_routing).toBe('_alias:*');
     });
 
-    it('splits into two queries when both patterns are supplied — project_routing applied only to the logs query', async () => {
+    it('issues a single query against both patterns and forwards project_routing to it', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -471,20 +471,13 @@ describe('fetchEvents', () => {
         projectRouting: '_alias:*',
       });
 
-      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(2);
-      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
-
-      const logsCall = calls.find((c) => c[0].query.includes('FROM logs-*'));
-      const alertsCall = calls.find((c) => c[0].query.includes(`FROM ${ALERTS_PATTERN}`));
-
-      expect(logsCall).toBeDefined();
-      expect(alertsCall).toBeDefined();
-
-      expect(logsCall![0].project_routing).toBe('_alias:*');
-      expect(alertsCall![0]).not.toHaveProperty('project_routing');
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      expect(args.query).toContain(`FROM ${ALERTS_PATTERN},logs-*`);
+      expect(args.project_routing).toBe('_alias:*');
     });
 
-    it('passes _alias:_origin through to the logs query when supplied', async () => {
+    it('passes _alias:_origin through unchanged when supplied', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -502,7 +495,7 @@ describe('fetchEvents', () => {
       expect(args.project_routing).toBe('_alias:_origin');
     });
 
-    it('skips project_routing on the logs query when no projectRouting is supplied', async () => {
+    it('omits project_routing on the events query when no projectRouting is supplied', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -516,40 +509,9 @@ describe('fetchEvents', () => {
         // projectRouting intentionally omitted — stateful / non-CPS regression.
       });
 
-      const calls = esClient.asCurrentUser.helpers.esql.mock.calls;
-      for (const [args] of calls) {
-        expect(args).not.toHaveProperty('project_routing');
-      }
-    });
-
-    it('concatenates records from both split queries into a single EsqlToRecords result', async () => {
-      const logsRecord = { id: 'log-1' };
-      const alertsRecord = { id: 'alert-1' };
-      const toRecordsMock = jest
-        .fn()
-        .mockResolvedValueOnce({ columns: [], records: [logsRecord] })
-        .mockResolvedValueOnce({ columns: [], records: [alertsRecord] });
-      esClient.asCurrentUser.helpers.esql.mockReturnValue({
-        toRecords: toRecordsMock,
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
-      });
-
-      const result = await fetchEvents({
-        esClient,
-        logger,
-        start: 0,
-        end: 1000,
-        originEventIds: [] as OriginEventId[],
-        showUnknownTarget: false,
-        indexPatterns: [ALERTS_PATTERN, 'logs-*'],
-        spaceId: 'default',
-        esQuery: undefined as EsQuery | undefined,
-        projectRouting: '_alias:*',
-      });
-
-      expect(result.records).toEqual(expect.arrayContaining([logsRecord, alertsRecord]));
-      expect(result.records).toHaveLength(2);
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      expect(args).not.toHaveProperty('project_routing');
     });
   });
 });
