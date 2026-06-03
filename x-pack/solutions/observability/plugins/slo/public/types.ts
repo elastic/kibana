@@ -56,7 +56,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
+import type { SLORouteRepository } from '../server/routes/utils/get_slo_server_route_repository';
 import type { SLOPlugin } from './plugin';
 
 export type SLORepositoryClient = RouteRepositoryClient<SLORouteRepository, DefaultClientOptions>;
