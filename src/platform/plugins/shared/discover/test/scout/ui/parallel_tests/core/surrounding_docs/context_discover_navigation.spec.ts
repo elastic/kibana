@@ -149,7 +149,37 @@ spaceTest.describe(
       }
     );
 
-    // TODO: "should navigate to doc view from embeddable" requires dashboard integration
-    // which needs updated selectors and is tracked separately.
+    spaceTest(
+      'should navigate to doc view from embeddable',
+      async ({ browserAuth, page, pageObjects }) => {
+        await browserAuth.loginAsPrivilegedUser();
+        await pageObjects.discover.goto({ queryMode: 'classic' });
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.discover.waitForDocTableRendered();
+        await pageObjects.discover.saveSearch('my search');
+
+        await pageObjects.dashboard.openNewDashboard();
+        await pageObjects.dashboard.addSavedSearch('my-search');
+        await pageObjects.dashboard.waitForRenderComplete();
+
+        const rowToggle = page.locator(
+          '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
+        );
+        await rowToggle.click();
+
+        const flyout = page.testSubj.locator('docViewerFlyout');
+        await expect(flyout).toBeVisible({ timeout: 10_000 });
+        const viewDocAction = flyout.locator('[data-test-subj="docTableRowAction"] >> nth=0');
+        await viewDocAction.click();
+
+        const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
+        if (await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+          await confirmBtn.click();
+        }
+
+        await expect(page).toHaveURL(/#\/doc/, { timeout: 30_000 });
+        await expect(page.testSubj.locator('doc-hit')).toBeVisible({ timeout: 30_000 });
+      }
+    );
   }
 );
