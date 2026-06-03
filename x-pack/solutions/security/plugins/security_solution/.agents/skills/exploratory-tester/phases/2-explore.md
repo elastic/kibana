@@ -168,6 +168,18 @@ After the mini-probe, if a **Level 1** finding still has unresolved scope — fo
 
 **When NOT to open an investigation flow:** if the mini-probe already answered the scope question (e.g. confirmed the bug is page-specific), or if the finding is Level 2 — Level 2 findings get mini-probes, not investigation flows. Reserve investigation flows for confirmed bugs where scope determines whether the issue is a blocker.
 
+**When you cannot open an investigation flow** (session cap fired, or the flow would clearly exceed the remaining budget): record it as a deferred flow instead. Append to `config.json → deferred_flows`:
+```json
+{
+  "name": "<short description of what needs investigating>",
+  "triggered_by": "<Level 1 finding title>",
+  "entry": "<entry path>",
+  "reason_not_run": "<session cap reached | would exceed budget | agent flow cap reached>",
+  "priority": "<blocker | high | medium>"
+}
+```
+Deferred flows appear in the report's **Recommended Follow-up** section so the user knows exactly what still needs attention and why it wasn't covered.
+
 ### When uncertain about expected behavior
 
 Consult in order — stop when you have enough to proceed:

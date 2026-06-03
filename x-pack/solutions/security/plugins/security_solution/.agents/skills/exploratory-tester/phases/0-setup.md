@@ -199,6 +199,7 @@ Write `.exploratory-session/config.json`:
     "password": "<admin password>"
   },
   "created_flow_spaces": [],
+  "deferred_flows": [],
   "skipped_setup": [],
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],

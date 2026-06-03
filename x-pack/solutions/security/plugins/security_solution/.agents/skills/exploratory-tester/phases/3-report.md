@@ -30,6 +30,8 @@ For each Level 2 and Level 3 finding, check in order:
 
 Level 1 findings are never suppressed — a confirmed bug is always reported.
 
+Populate the **Recommended Follow-up** section from `config.json → deferred_flows`. If the list is empty, write: "_No deferred flows — session covered everything identified._"
+
 ---
 
 ## Step 3c — Present report

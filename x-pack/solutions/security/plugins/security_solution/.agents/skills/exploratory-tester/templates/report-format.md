@@ -61,6 +61,15 @@ Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <IS
 |---|---|---|
 | <flow name> | <step> | time budget exhausted / session lost |
 
+## Recommended Follow-up
+Flows identified as needed but not executed this session. Address these before treating the area as fully covered.
+
+| Flow | Triggered by | Priority | Why not run |
+|---|---|---|---|
+| <flow description> | <Level 1 finding title> | blocker / high / medium | session cap reached / would exceed budget / agent flow cap reached |
+
+_If empty: no deferred flows — session covered everything identified._
+
 ## Known / Suppressed
 | Finding | Reason suppressed |
 |---|---|
