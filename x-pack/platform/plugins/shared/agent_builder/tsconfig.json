@@ -139,6 +139,5 @@
     "@kbn/react-kibana-mount",
     "@kbn/user-profile-components",
     "@kbn/telemetry",
-    "@kbn/lens-common"
   ]
 }
