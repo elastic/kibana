@@ -12,14 +12,15 @@ import { encode } from '@kbn/rison';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
 import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiButtonIcon,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -123,13 +124,15 @@ const CategoryExampleMessageRow: React.FC<CategoryExampleMessageRowProps> = ({
       <EuiTableRowCell width="32px">
         <EuiPopover
           button={
-            <EuiButtonIcon
-              data-test-subj="infraCategoryExampleMessageRowButton"
-              aria-label={MENU_LABEL}
-              iconType="boxesVertical"
-              size="s"
-              onClick={toggleMenu}
-            />
+            <EuiToolTip content={MENU_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="infraCategoryExampleMessageRowButton"
+                aria-label={MENU_LABEL}
+                iconType="boxesVertical"
+                size="s"
+                onClick={toggleMenu}
+              />
+            </EuiToolTip>
           }
           isOpen={isMenuOpen}
           closePopover={closeMenu}
