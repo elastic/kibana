@@ -25,7 +25,9 @@ import { test, makeEsQueryRule } from '../fixtures';
 // "Edit from rule details page: …").
 
 const SM_BASE = 'management/insightsAndAlerting/triggersActions';
-const RULES_LIST_URL_RE = new RegExp(`/app/${SM_BASE}(/|$|\\?|#)`);
+// Matches the rules list root (.../triggersActions or .../triggersActions/) but
+// NOT sub-routes like /edit/ or /rule/ — those share the same prefix.
+const RULES_LIST_URL_RE = new RegExp(`/app/${SM_BASE}/?(?:\\?|#|$)`);
 const RULES_EDIT_URL_RE = new RegExp(`/app/${SM_BASE}/edit/`);
 const RULES_DETAILS_URL_RE = new RegExp(`/app/${SM_BASE}/rule/`);
 
