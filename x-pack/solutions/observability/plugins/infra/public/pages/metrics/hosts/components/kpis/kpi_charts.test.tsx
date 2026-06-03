@@ -126,7 +126,7 @@ describe('KpiCharts', () => {
       'data-formatted',
       '1.2'
     );
-    // Null is forwarded as-is so the tile renders "–" rather than `0%`.
+    // Null is forwarded as-is so the tile renders "N/A" rather than `0%`.
     expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-value', 'null');
   });
 
@@ -164,11 +164,8 @@ describe('KpiCharts', () => {
         'Average (of 100 hosts)'
       );
     });
-    // semconv disk ratio (no max/avg) discloses the cap without a prefix.
-    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute(
-      'data-subtitle',
-      'of 100 hosts'
-    );
+    // semconv disk ratio (no max/avg) stays blank even when truncated.
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-subtitle', '');
   });
 
   it('subtitles the ECS disk tile "Max (of N hosts)" when truncated (mirrors its `max(...)` formula)', async () => {

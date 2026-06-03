@@ -18,7 +18,8 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
   loading: boolean;
-  // `null` surfaces "no data" (rendered as "–") without faking a value.
+  // `null` is "no data": Elastic Charts renders it as the Metric theme's
+  // `nonFiniteText` ("N/A") rather than a fabricated value.
   value: number | null;
   toolTip: React.ReactNode;
   style?: CSSProperties;
@@ -26,7 +27,6 @@ export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 
 }
 
 const DEFAULT_FORMATTER = (d: number) => d.toString();
-const NO_DATA_PLACEHOLDER = '–';
 
 export const MetricChartWrapper = React.memo(
   ({
@@ -57,10 +57,8 @@ export const MetricChartWrapper = React.memo(
       }
     }, [loading]);
 
-    // `Metric` only renders numbers: swap `null` → `NaN`, keeping the chart
-    // shape intact. Elastic Charts bypasses `valueFormatter` for non-finite
-    // values and renders `theme.metric.nonFiniteText` instead, so the "–"
-    // placeholder is wired through the theme below (not the formatter).
+    // `Metric` only renders numbers: swap `null` → `NaN` so an empty tile shows
+    // the theme's `nonFiniteText` ("N/A") instead of a fabricated value.
     const numericValue = value ?? Number.NaN;
     const format = valueFormatter ?? DEFAULT_FORMATTER;
 
@@ -98,10 +96,7 @@ export const MetricChartWrapper = React.memo(
               `}
             >
               {loading && <ChartLoadingProgress hasTopMargin={false} />}
-              <Settings
-                baseTheme={baseTheme}
-                theme={{ metric: { nonFiniteText: NO_DATA_PLACEHOLDER } }}
-              />
+              <Settings baseTheme={baseTheme} />
               <Metric id={id} data={[[metricsData]]} />
             </Chart>
           </EuiToolTip>

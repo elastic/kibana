@@ -27,7 +27,7 @@ import { useHostsPageReady } from './use_hosts_page_ready';
 // dependency, mirroring `logs_overview_fetchers.ts`.
 const SEARCH_EXCLUDED_DATA_TIERS_SETTING = 'observability:searchExcludedDataTiers';
 
-// `null` is the "no data" outcome, kept distinct from `0` so tiles render "–".
+// `null` is the "no data" outcome, kept distinct from `0` so tiles render "N/A".
 export interface HostsKpis {
   cpuUsage: number | null;
   normalizedLoad1m: number | null;
