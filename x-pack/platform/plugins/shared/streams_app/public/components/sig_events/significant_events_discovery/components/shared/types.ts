@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { OnboardingStep } from '@kbn/streams-schema';
+import type { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
 
 export interface OnboardingConfig {
-  steps: OnboardingStep[];
+  steps: StreamsKIsOnboardingStep[];
   connectors: {
     features?: string;
     queries?: string;

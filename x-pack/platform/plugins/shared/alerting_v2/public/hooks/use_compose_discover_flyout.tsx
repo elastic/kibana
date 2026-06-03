@@ -28,10 +28,14 @@ import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
-const tryParseBuilderState = (type: string, query: string): BuilderState | null => {
+const tryParseBuilderState = (
+  type: string,
+  query: string,
+  recoveryQuery?: string
+): BuilderState | null => {
   const definition = RULE_BUILDER_REGISTRY[type];
   if (definition?.parseState) {
-    return definition.parseState(query);
+    return definition.parseState(query, recoveryQuery);
   }
   return null;
 };
@@ -136,7 +140,11 @@ export const useComposeDiscoverFlyout = ({
 
       if (rule.metadata.builder_type) {
         const query = rule.evaluation?.query?.base;
-        const state = query ? tryParseBuilderState(rule.metadata.builder_type, query) : null;
+        const recoveryQuery =
+          rule.recovery_policy?.type === 'query' ? rule.recovery_policy.query?.base : undefined;
+        const state = query
+          ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
+          : null;
         if (state && typeof state === 'object') {
           const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };
           setBuilderType(rule.metadata.builder_type);

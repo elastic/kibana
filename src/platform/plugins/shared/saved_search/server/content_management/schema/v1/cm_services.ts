@@ -35,8 +35,8 @@ const savedSearchUpdateOptionsSchema = schema.maybe(
 );
 const savedSearchSearchOptionsSchema = schema.maybe(
   schema.object({
-    searchFields: schema.maybe(schema.arrayOf(schema.string())),
-    fields: schema.maybe(schema.arrayOf(schema.string())),
+    searchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   })
 );
 

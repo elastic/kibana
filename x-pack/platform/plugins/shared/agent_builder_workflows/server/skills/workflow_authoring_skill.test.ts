@@ -6,6 +6,7 @@
  */
 
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { workflowAuthoringSkill } from './workflow_authoring_skill';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
@@ -20,9 +21,19 @@ describe('workflowAuthoringSkill', () => {
   });
 
   describe('getRegistryTools', () => {
-    it('includes all workflow tools', () => {
+    it('includes all surviving workflow tools and generate_workflow', () => {
       const tools = workflowAuthoringSkill.getRegistryTools!();
-      expect(tools).toEqual(Object.values(workflowTools));
+      expect(tools).toEqual([...Object.values(workflowTools), platformCoreTools.generateWorkflow]);
+    });
+
+    it('does not include the deleted low-level edit tools', () => {
+      const tools = workflowAuthoringSkill.getRegistryTools!();
+      expect(tools).not.toContain('workflows.workflow_insert_step');
+      expect(tools).not.toContain('workflows.workflow_modify_step');
+      expect(tools).not.toContain('workflows.workflow_modify_step_property');
+      expect(tools).not.toContain('workflows.workflow_modify_property');
+      expect(tools).not.toContain('workflows.workflow_delete_step');
+      expect(tools).not.toContain('workflows.workflow_set_yaml');
     });
   });
 
@@ -41,13 +52,14 @@ describe('workflowAuthoringSkill', () => {
       expect(workflowAuthoringSkill.content).toContain(WORKFLOW_YAML_ATTACHMENT_TYPE);
     });
 
-    it('documents all edit tools', () => {
-      expect(workflowAuthoringSkill.content).toContain(workflowTools.setYaml);
-      expect(workflowAuthoringSkill.content).toContain(workflowTools.insertStep);
-      expect(workflowAuthoringSkill.content).toContain(workflowTools.modifyStep);
-      expect(workflowAuthoringSkill.content).toContain(workflowTools.modifyStepProperty);
-      expect(workflowAuthoringSkill.content).toContain(workflowTools.modifyProperty);
-      expect(workflowAuthoringSkill.content).toContain(workflowTools.deleteStep);
+    it('delegates creation and editing to generate_workflow', () => {
+      expect(workflowAuthoringSkill.content).toContain(platformCoreTools.generateWorkflow);
+    });
+
+    it('does not document the deleted low-level edit tools', () => {
+      expect(workflowAuthoringSkill.content).not.toContain('workflow_insert_step');
+      expect(workflowAuthoringSkill.content).not.toContain('workflow_modify_step');
+      expect(workflowAuthoringSkill.content).not.toContain('workflow_set_yaml');
     });
   });
 });

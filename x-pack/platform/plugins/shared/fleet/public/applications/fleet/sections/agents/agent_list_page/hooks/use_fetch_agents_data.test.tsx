@@ -177,7 +177,7 @@ describe('useFetchAgentsData', () => {
       },
     });
     expect(result?.current.kuery).toEqual(
-      '(status:online or (status:error or status:degraded) or status:orphaned or (status:updating or status:unenrolling or status:enrolling) or status:offline) and NOT type:OPAMP'
+      'status:online or (status:error or status:degraded) or status:orphaned or (status:updating or status:unenrolling or status:enrolling) or status:offline'
     );
 
     expect(result?.current.page).toEqual({ index: 0, size: 20 });

@@ -36,6 +36,11 @@ describe('PROMQL summary', () => {
       expectedNewColumns: ['step', 'col0'],
     });
   });
+  it('does not return the step column when time param is used', () => {
+    assertSummary('PROMQL index=metrics time="2026-01-13T11:30:00.000Z" col0=(sum(bytes))', {
+      expectedNewColumns: ['col0'],
+    });
+  });
   it.todo('returns query text as column name when no label is provided');
   it.todo('collects columns derivated from grouping inside the query');
 });
