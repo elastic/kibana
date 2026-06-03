@@ -8,72 +8,20 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { episodeActionEnvelopeShape } from './episode_action_envelope';
 
 export const EPISODE_ASSIGNED_TRIGGER_ID = 'alerting.episodeAssigned' as const;
 
 export const episodeAssignedPayloadSchema = z
   .object({
-    occurredAt: z.iso.datetime().describe(
-      i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.occurredAt', {
-        defaultMessage: 'ISO timestamp of when the assignment occurred.',
-      })
-    ),
-    groupHash: z
-      .string()
-      .min(1)
-      .max(128)
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.groupHash', {
-          defaultMessage: 'Stable hash of the alert grouping the episode belongs to.',
-        })
-      ),
-    episodeId: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.episodeId', {
-          defaultMessage: 'Identifier of the alerting episode whose assignee changed.',
-        })
-      ),
-    ruleId: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.ruleId', {
-          defaultMessage: 'Identifier of the alerting rule the episode belongs to.',
-        })
-      ),
-    spaceId: z
-      .string()
-      .min(1)
-      .max(256)
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.spaceId', {
-          defaultMessage: 'Kibana space the episode lives in.',
-        })
-      ),
-    actorUid: z
-      .string()
-      .min(1)
-      .max(256)
-      .nullable()
-      .describe(
-        i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.actorUid', {
-          defaultMessage:
-            'User-profile uid of the actor who changed the assignee, or null when performed by an internal/system context.',
-        })
-      ),
+    ...episodeActionEnvelopeShape,
     assigneeUid: z
       .string()
       .min(1)
       .max(256)
-      .nullable()
       .describe(
         i18n.translate('xpack.alertingVTwo.triggers.episodeAssigned.schema.assigneeUid', {
-          defaultMessage:
-            'User-profile uid of the new assignee, or null when the episode was unassigned.',
+          defaultMessage: 'User-profile uid of the new assignee.',
         })
       ),
   })
