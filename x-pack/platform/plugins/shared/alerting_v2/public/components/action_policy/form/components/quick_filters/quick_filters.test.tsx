@@ -113,8 +113,8 @@ describe('RuleFilter', () => {
 
     await user.click(screen.getByTestId('quickFilterRule'));
 
-    expect(screen.getByText('Alerting')).toBeInTheDocument();
-    expect(screen.getByText('Detect only')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByText('Signal')).toBeInTheDocument();
   });
 
   it('calls onChange with rule.id clause when selecting a rule', async () => {
