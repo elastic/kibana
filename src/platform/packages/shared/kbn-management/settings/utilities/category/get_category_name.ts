@@ -99,7 +99,7 @@ const names: Record<string, string> = {
     defaultMessage: 'Developer Tools',
   }),
   [ALERTING_V2_CATEGORY]: i18n.translate('management.settings.categoryNames.alertingV2Label', {
-    defaultMessage: 'Alerting v2',
+    defaultMessage: 'Alerting V2',
   }),
 };
 
