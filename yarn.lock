@@ -2305,10 +2305,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.13.0.tgz#b9c079532257b7d4c46e3004ecb7b1f78f00a6b9"
   integrity sha512-Itl7zn88GEYRAqfmuRzViNy03nVHkIVLAvtjIC0b3lhjBnJgUbEG8ImfdYUExMiGraFE+2/k6v/Z8LbWXxO+JA==
 
-"@elastic/esql@4.2.0":
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.2.0.tgz#06a61135709eb4126ddbd71464008b05d4f68a21"
-  integrity sha512-fcJm30NiVaySNg+Cte33lERz9JI0EL12kolhWPkwBzgk9QKzkNItzY0U8E5gKiReDOoIwm0+dOIkaWzLdBv2yA==
+"@elastic/esql@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.3.0.tgz#a0e334df971512c480925c153a5940f2c534e867"
+  integrity sha512-8y0OnR23IxZk43LiR3TTXNonUkPlj/4MMM7y3En6deNt8tj4Bhm2gpG5idg3MCgnmEwXVGbWiizesDLpLq6kdQ==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -2396,10 +2396,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.3.1.tgz#e837f423f44412216937257b66ede326d02cef6e"
-  integrity sha512-b0AORTpYi0Q+corhIndMnUffBumLBsJP3tkD+J+59af8qHiumVjolZZdEgHJZbCGs39awQCtAUec0PXGE2MsuQ==
+"@elastic/monaco-esql@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.4.0.tgz#8dd058f333ab92847c91101f90b114e0c2e691c9"
+  integrity sha512-jJaGDdOVru4aVG4NydXdHaNOyU73eeCBaaSm34CQJO7Ae2GeXJuQTu2DcKFAEWRCprn6eLPOS+UcUqGzunC/gg==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -4911,6 +4911,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-point-chart-viewer@link:src/platform/packages/shared/kbn-change-point-chart-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
@@ -6247,6 +6251,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-settings-types@link:src/core/packages/user-settings/types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-storage-browser-internal@link:src/core/packages/user-storage/browser-internal":
   version "0.0.0"
   uid ""
@@ -6428,6 +6436,10 @@
   uid ""
 
 "@kbn/data-view-validation@link:src/platform/packages/shared/kbn-data-view-validation":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-views-as-code-plugin@link:src/platform/plugins/shared/data_views_as_code":
   version "0.0.0"
   uid ""
 
@@ -6851,10 +6863,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eui-provider-dev-warning@link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning":
-  version "0.0.0"
-  uid ""
-
 "@kbn/eval-kql@link:src/platform/packages/shared/kbn-eval-kql":
   version "0.0.0"
   uid ""
@@ -6872,6 +6880,10 @@
   uid ""
 
 "@kbn/evals-plugin@link:x-pack/platform/plugins/shared/evals":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-agent-builder-dashboards@link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards":
   version "0.0.0"
   uid ""
 
@@ -6916,6 +6928,10 @@
   uid ""
 
 "@kbn/evals-suite-security-ai-rules@link:x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-security-alert-triage@link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage":
   version "0.0.0"
   uid ""
 
@@ -7396,6 +7412,10 @@
   uid ""
 
 "@kbn/inference-tracing@link:x-pack/platform/packages/shared/kbn-inference-tracing":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inference-workflows-plugin@link:x-pack/platform/plugins/shared/inference_workflows":
   version "0.0.0"
   uid ""
 
@@ -9652,6 +9672,14 @@
   uid ""
 
 "@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout-constants@link:src/platform/kbn-ui/chrome-layout-constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout-utils@link:src/platform/kbn-ui/chrome-layout-utils":
   version "0.0.0"
   uid ""
 
@@ -16713,6 +16741,11 @@ adm-zip@0.5.16:
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.16.tgz#0b5e4c779f07dedea5805cdccb1147071d94a909"
   integrity sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==
 
+adm-zip@^0.5.17:
+  version "0.5.17"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.17.tgz#5c0b65f37aeec5c2a94995c024f931f62e4bbc5a"
+  integrity sha512-+Ut8d9LLqwEvHHJl1+PIHqoyDxFgVN847JTVM3Izi3xHDWPE4UtzzXysMZQs64DMcrJfBeS/uoEP4AD3HQHnQQ==
+
 after-all-results@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/after-all-results/-/after-all-results-2.0.0.tgz#6ac2fc202b500f88da8f4f5530cfa100f4c6a2d0"
@@ -17394,12 +17427,12 @@ axe-core@~4.11.0:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
   integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
 
-axios@1.15.2:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.15.2.tgz#eb8fb6d30349abace6ade5b4cb4d9e8a0dc23e5b"
-  integrity sha512-wLrXxPtcrPTsNlJmKjkPnNPK2Ihe0hn0wGSaTEiHRPxwjvJwT3hKmXF4dpqxmPO9SoNb2FsYXj/xEo0gHN+D5A==
+axios@1.16.0:
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.16.0.tgz#f8e5dd931cef2a5f8c32216d5784eda2f8750eb7"
+  integrity sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==
   dependencies:
-    follow-redirects "^1.15.11"
+    follow-redirects "^1.16.0"
     form-data "^4.0.5"
     proxy-from-env "^2.1.0"
 
@@ -18625,15 +18658,15 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@148.0.2:
-  version "148.0.2"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-148.0.2.tgz#0d0236b96e32e58a276db4109449631d7d93a3b2"
-  integrity sha512-9N9J6XxkB7dub7dcYzJomNfTbaEQA5qILpdha5cxUxgDC2hwE3u8yV/7tkJacSSfPGCHKHp05NYmAitQ4Y7tSw==
+chromedriver@148.0.3:
+  version "148.0.3"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-148.0.3.tgz#817a6fb2aff7123036ff46b72bcb3b36abc36815"
+  integrity sha512-efk4NIkjjRr3Zy0C8Trj8jpMGgDY+ZA6kVpYFerH3M4tM4fguKCi81PguWwmHVx8FZdMmhFYczb1PaPvJqUkZQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
+    adm-zip "^0.5.17"
     axios "^1.16.0"
     compare-versions "^6.1.0"
-    extract-zip "^2.0.1"
     proxy-agent "^8.0.1"
     proxy-from-env "^2.0.0"
     tcp-port-used "^1.0.2"
@@ -22774,7 +22807,7 @@ focus-lock@^0.11.6:
   dependencies:
     tslib "^2.0.3"
 
-follow-redirects@^1.0.0, follow-redirects@^1.15.11, follow-redirects@^1.16.0:
+follow-redirects@^1.0.0, follow-redirects@^1.16.0:
   version "1.16.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.16.0.tgz#28474a159d3b9d11ef62050a14ed60e4df6d61bc"
   integrity sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==

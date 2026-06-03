@@ -32,7 +32,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
       locationLabel: schema.string(),
       from: schema.string({ defaultValue: 'now-30d' }),
       to: schema.string({ defaultValue: 'now' }),
-      remoteName: schema.maybe(schema.string()),
+      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async ({ syntheticsEsClient, request }): Promise<MonitorSummaryStats> => {
