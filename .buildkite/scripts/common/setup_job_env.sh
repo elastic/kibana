@@ -130,7 +130,7 @@ EOF
 # Set up Kibana Evals secrets
 {
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
-    echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
+    echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
     KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
     # Validate config shape (safe; does not print secrets)
@@ -144,10 +144,6 @@ EOF
     # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
     export KBN_EVALS_CONFIG_B64
     KBN_EVALS_CONFIG_B64="$(printf '%s' "$KBN_EVALS_CONFIG_JSON" | base64)"
-
-    # Elasticsearch cluster for evaluation results export
-    export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    export EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
 
     # Optional: separate cluster for trace-based evaluators
     export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"

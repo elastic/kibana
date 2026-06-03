@@ -66,6 +66,7 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
+  item_count?: number;
 }
 
 export type AgentBuilderUiClickElementKind =
@@ -80,7 +81,6 @@ export interface ReportUiClickParams {
   ebt_action?: string;
   ebt_detail?: string;
   element_kind: AgentBuilderUiClickElementKind;
-  location_pathname: string;
 }
 
 export interface ReportRoundCompleteParams {
@@ -446,13 +446,6 @@ const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    location_pathname: {
-      type: 'keyword',
-      _meta: {
-        description: 'Agent Builder app pathname when the click occurred',
-        optional: false,
-      },
-    },
   },
 };
 
@@ -477,6 +470,13 @@ const ADD_TO_CHAT_CLICKED_EVENT: AgentBuilderTelemetryEvent = {
       },
       _meta: {
         description: 'Types of attachments',
+        optional: true,
+      },
+    },
+    item_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of items added via bulk add-to-chat. Absent for single-item pathways.',
         optional: true,
       },
     },

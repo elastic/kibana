@@ -49,8 +49,11 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
+import { initializeTriggerEventsClient } from './trigger_events/event_logs';
+import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
@@ -225,12 +228,13 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const workflowExecutionRepository = new WorkflowExecutionRepository(
-                coreStart.elasticsearch.client.asInternalUser
-              );
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
+                stepExecutionRepository,
                 workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
@@ -257,6 +261,7 @@ export class WorkflowsExecutionEnginePlugin
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
@@ -334,12 +339,13 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const workflowExecutionRepository = new WorkflowExecutionRepository(
-                coreStart.elasticsearch.client.asInternalUser
-              );
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
+                stepExecutionRepository,
                 workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
@@ -366,6 +372,7 @@ export class WorkflowsExecutionEnginePlugin
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
@@ -454,13 +461,20 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                 includeGlobal: true,
               });
               if (!workflow) {
-                logger.error(`Workflow ${workflowId} not found`);
-                return;
+                // Keep this as error for a while to ensure that such message appears only once per workflow
+                logger.error(
+                  `Workflow ${workflowId} not found in space ${spaceId}; removing orphaned scheduled task`
+                );
+                return {
+                  state: taskInstance.state,
+                  shouldDeleteTask: true,
+                };
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
@@ -471,6 +485,7 @@ export class WorkflowsExecutionEnginePlugin
                   workflow,
                   spaceId,
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   taskInstance,
                   logger
                 );
@@ -1303,6 +1318,8 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
+
     const triggerEventHandler = new TriggerEventHandler({
       coreStart,
       workflowRepository,
@@ -1311,6 +1328,7 @@ export class WorkflowsExecutionEnginePlugin
       scheduleWorkflow,
       logger: this.logger,
       config: this.config.eventDriven,
+      triggerEventsClientPromise,
     });
 
     const triggerEvents: TriggerEventsContract = {
@@ -1318,6 +1336,10 @@ export class WorkflowsExecutionEnginePlugin
       isEnabled: this.config.eventDriven.enabled,
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+      searchTriggerEventLog: async (params) => {
+        const triggerEventsClient = await triggerEventsClientPromise;
+        return querySearchTriggerEventLog(triggerEventsClient, params);
+      },
     };
 
     return {

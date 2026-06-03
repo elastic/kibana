@@ -13,6 +13,13 @@ export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episode
   defaultMessage: 'Alert episodes',
 });
 
+export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.manageRulesButton',
+  {
+    defaultMessage: 'Manage rules',
+  }
+);
+
 export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.tableAriaLabel',
   {
@@ -116,3 +123,20 @@ export const getBulkPartialSuccessToast = (processed: number, total: number) =>
       '{processed} of {total} {total, plural, one {episode} other {episodes}} updated',
     values: { processed, total },
   });
+
+export const EPISODES_HISTOGRAM_CAP_WARNING = i18n.translate(
+  'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.capWarning',
+  {
+    defaultMessage: 'Results may be incomplete — too many episodes in this time range.',
+  }
+);
+
+export const EPISODES_HISTOGRAM_QUERY_ERROR = i18n.translate(
+  'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.queryError',
+  { defaultMessage: 'Failed to load histogram data.' }
+);
+
+export const EPISODES_HISTOGRAM_RETRY = i18n.translate(
+  'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.retry',
+  { defaultMessage: 'Retry' }
+);

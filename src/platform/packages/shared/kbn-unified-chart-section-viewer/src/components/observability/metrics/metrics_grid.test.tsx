@@ -50,7 +50,7 @@ jest.mock('../../../common/utils', () => ({
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
+    return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
   }),
 }));
 
@@ -78,7 +78,7 @@ describe('MetricsGrid', () => {
   const metricItems: MetricsGridProps['metricItems'] = [
     {
       metricName: 'system.cpu.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -86,7 +86,7 @@ describe('MetricsGrid', () => {
     },
     {
       metricName: 'system.memory.utilization',
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -285,7 +285,7 @@ describe('MetricsGrid', () => {
     const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'fieldsense.energy.battery.voltage',
-        dataStream: 'fieldsense-station-metrics',
+        indexName: 'fieldsense-station-metrics',
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -293,7 +293,7 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'system.cpu.utilization',
-        dataStream: 'metrics-hostmetricsreceiver.otel-default',
+        indexName: 'metrics-hostmetricsreceiver.otel-default',
         units: [null],
         metricTypes: ['gauge'],
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -339,7 +339,7 @@ describe('MetricsGrid', () => {
       relativeTimeRange: { from: 'now-1h', to: 'now' },
     });
 
-    const dataStreamFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+    const sourceFetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
       filters: [],
       query: { esql: 'TS edge-case-gauge-to-counter' },
       esqlVariables: [],
@@ -362,14 +362,14 @@ describe('MetricsGrid', () => {
     });
 
     it('forwards the user-typed data stream as originalSource', () => {
-      renderMetricsGrid({ fetchParams: dataStreamFetchParams });
+      renderMetricsGrid({ fetchParams: sourceFetchParams });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
         expect.objectContaining({ originalSource: 'edge-case-gauge-to-counter' })
       );
     });
 
-    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to dataStream)', () => {
+    it('forwards the raw glob pattern as originalSource (createESQLQuery falls back to indexName)', () => {
       renderMetricsGrid({ fetchParams: globFetchParams });
 
       expect(createESQLQuery).toHaveBeenCalledWith(
@@ -460,7 +460,7 @@ describe('MetricsGrid', () => {
         ...metricItems,
         {
           metricName: 'system.disk.utilization',
-          dataStream: 'metrics-*',
+          indexName: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -468,7 +468,7 @@ describe('MetricsGrid', () => {
         },
         {
           metricName: 'system.network.utilization',
-          dataStream: 'metrics-*',
+          indexName: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -618,7 +618,7 @@ describe('MetricsGrid', () => {
     it('renders the flyout when initial restorable flyoutState references an existing metric', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState({
         gridPosition: 1,
-        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       });
@@ -641,7 +641,7 @@ describe('MetricsGrid', () => {
       const onInitialStateChange = jest.fn();
       const initialFlyoutState: FlyoutState = {
         gridPosition: 0,
-        metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+        metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       };
@@ -698,7 +698,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 0,
-              metricUniqueKey: `${metricItems[0].dataStream}::${metricItems[0].metricName}`,
+              metricUniqueKey: `${metricItems[0].indexName}::${metricItems[0].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.cpu.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -727,7 +727,7 @@ describe('MetricsGrid', () => {
       const { queryByTestId } = renderMetricsGridWithInitialFlyoutState(
         {
           gridPosition: 1,
-          metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+          metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
           esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
           selectedTabId: 'overview',
         },
@@ -740,7 +740,7 @@ describe('MetricsGrid', () => {
     it('renders the restored flyout once the owning tab becomes active', () => {
       const initialFlyoutState: FlyoutState = {
         gridPosition: 1,
-        metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+        metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
         esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
         selectedTabId: 'overview',
       };
@@ -786,7 +786,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 1,
-              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -825,7 +825,7 @@ describe('MetricsGrid', () => {
           initialState={{
             flyoutState: {
               gridPosition: 0,
-              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              metricUniqueKey: `${metricItems[1].indexName}::${metricItems[1].metricName}`,
               esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
               selectedTabId: 'overview',
             },
@@ -855,7 +855,7 @@ describe('MetricsGrid', () => {
     const nonOverlappingMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'system.cpu.utilization',
-        dataStream: 'metrics-system',
+        indexName: 'metrics-system',
         units: ['ms'],
         metricTypes: ['counter'],
         fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -863,7 +863,7 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'k8s.container.cpu',
-        dataStream: 'metrics-k8s',
+        indexName: 'metrics-k8s',
         units: ['ms'],
         metricTypes: ['counter'],
         fieldTypes: [ES_FIELD_TYPES.LONG],

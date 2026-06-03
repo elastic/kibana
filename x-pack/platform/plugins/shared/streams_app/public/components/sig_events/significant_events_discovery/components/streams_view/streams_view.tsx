@@ -10,7 +10,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@el
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID, TaskStatus } from '@kbn/streams-schema';
+import {
+  STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
+  TaskStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+} from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
@@ -33,8 +37,6 @@ import {
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
-
-const IN_PROGRESS_STATUSES = new Set<TaskStatus>([TaskStatus.InProgress, TaskStatus.BeingCanceled]);
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -64,8 +66,8 @@ export function StreamsView() {
     queriesConnectors,
     generatingStreamNames,
     streamStatusMap,
-    cancelOnboardingTask,
-    bulkScheduleOnboardingTask,
+    cancelOnboarding,
+    bulkScheduleOnboarding,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,
@@ -90,7 +92,7 @@ export function StreamsView() {
     (streamName: string) => {
       if (generatingStreamNames.includes(streamName)) return false;
       const result = streamStatusMap[streamName];
-      return !!result && !IN_PROGRESS_STATUSES.has(result.status);
+      return !!result && !STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(result.status);
     },
     [generatingStreamNames, streamStatusMap]
   );
@@ -159,7 +161,7 @@ export function StreamsView() {
                   onClick={() => {
                     toasts.remove(toast);
                     router.push('/_discovery/{tab}', {
-                      path: { tab: 'significant_events' },
+                      path: { tab: 'insights' },
                       query: {},
                     });
                   }}
@@ -206,11 +208,11 @@ export function StreamsView() {
   }, [getActionableStreamNames, bulkOnboardQueriesOnly]);
 
   const onOnboardStreamActionClick = async (streamName: string) => {
-    await bulkScheduleOnboardingTask([streamName]);
+    await bulkScheduleOnboarding([streamName]);
   };
 
   const onStopOnboardingActionClick = (streamName: string) => {
-    cancelOnboardingTask(streamName);
+    cancelOnboarding(streamName);
   };
 
   return (
