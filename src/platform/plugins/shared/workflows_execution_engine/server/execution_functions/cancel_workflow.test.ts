@@ -56,7 +56,9 @@ const buildCancelParams = ({
   workflowExecutionRepository:
     workflowExecutionRepository as unknown as WorkflowExecutionRepository,
   workflowTaskManager: workflowTaskManager as unknown as WorkflowTaskManager,
-  taskManager: { schedule: jest.fn().mockResolvedValue(undefined) } as unknown as TaskManagerStartContract,
+  taskManager: {
+    schedule: jest.fn().mockResolvedValue(undefined),
+  } as unknown as TaskManagerStartContract,
   logger: loggingSystemMock.create().get() as Logger,
 });
 
@@ -211,6 +213,8 @@ describe('cancelWorkflow', () => {
 
     await cancelWorkflow(buildCancelParams({ workflowExecutionRepository, workflowTaskManager }));
 
-    expect(workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses).toHaveBeenCalled();
+    expect(
+      workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
+    ).toHaveBeenCalled();
   });
 });
