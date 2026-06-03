@@ -3488,6 +3488,54 @@ export default function (providerContext: FtrProviderContext) {
                 expect(edge.type).equal('solid');
               });
             });
+
+            it('should produce one relationship node when two actors of the same type share the same relationship', async () => {
+              await retry.tryForTime(enrichmentRetryTimeout, async () => {
+                const response = await postGraph(
+                  supertest,
+                  {
+                    query: {
+                      originEventIds: [],
+                      start: '2024-09-01T00:00:00Z',
+                      end: '2024-09-02T00:00:00Z',
+                      entityIds: [
+                        { id: 'host:over-split-actor-1', isOrigin: false },
+                        { id: 'host:over-split-actor-2', isOrigin: false },
+                      ],
+                    },
+                  },
+                  undefined,
+                  entitiesSpaceId
+                ).expect(result(200, logger));
+
+                // Both actors are "Host / Linux Host" with communicates_with → host:over-split-target.
+                // Before the fix: 2 relationship nodes. After the fix: 1 merged relationship node.
+                const relationshipNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) => node.shape === 'relationship'
+                );
+                expect(relationshipNodes.length).to.equal(1);
+                expect(relationshipNodes[0].label).to.equal('Communicates with');
+
+                // The merged actor node has count=2 (both actors collapsed)
+                const entityNodes = response.body.nodes.filter(
+                  (node: NodeDataModel) =>
+                    node.shape === 'ellipse' ||
+                    node.shape === 'rectangle' ||
+                    node.shape === 'hexagon'
+                );
+                const actorNode = entityNodes.find(
+                  (node: EntityNodeDataModel) => node.count === 2
+                ) as EntityNodeDataModel;
+                expect(actorNode).not.to.be(undefined);
+                expect(actorNode.tag).to.equal('Host');
+
+                // Target node is a single entity (no merge needed)
+                const targetNode = entityNodes.find(
+                  (node: NodeDataModel) => node.id === 'host:over-split-target'
+                ) as EntityNodeDataModel;
+                expect(targetNode).not.to.be(undefined);
+              });
+            });
           });
         });
       });
