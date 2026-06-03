@@ -67,6 +67,7 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
+  GetWorkflowAggsOptions,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
 } from './workflows_management_api';
@@ -316,9 +317,15 @@ export class WorkflowsService {
     return this.searchService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  public async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     await this.ensureInitialized();
-    return this.searchService.getWorkflowAggs(fields, spaceId);
+    return options
+      ? this.searchService.getWorkflowAggs(fields, spaceId, options)
+      : this.searchService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getWorkflowExecution(

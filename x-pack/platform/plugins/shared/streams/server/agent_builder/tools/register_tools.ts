@@ -27,6 +27,12 @@ import {
   createSearchKnowledgeIndicatorsTool,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 } from './search_knowledge_indicators/tool';
+import { createSearchEventsTool, STREAMS_SEARCH_EVENTS_TOOL_ID } from './event_search/tool';
+import { createEventTool, STREAMS_CREATE_EVENT_TOOL_ID } from './event_create/tool';
+import {
+  createEventStatusUpdateTool,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
+} from './event_status_update/tool';
 import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
@@ -48,6 +54,9 @@ export {
   STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID,
   STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID,
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
+  STREAMS_SEARCH_EVENTS_TOOL_ID,
+  STREAMS_CREATE_EVENT_TOOL_ID,
+  STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
 };
 
 export function registerAgentBuilderTools({
@@ -102,6 +111,23 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('ki_query_create_tool'),
+      telemetry,
+    }),
+    createSearchEventsTool({
+      getScopedClients,
+      server,
+      logger: logger.get('event_search_tool'),
+    }),
+    createEventTool({
+      getScopedClients,
+      server,
+      logger: logger.get('event_create_tool'),
+      telemetry,
+    }),
+    createEventStatusUpdateTool({
+      getScopedClients,
+      server,
+      logger: logger.get('event_status_update_tool'),
       telemetry,
     }),
   ];

@@ -16,6 +16,7 @@ import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
 export const createMemoryToolsOptions = ({
   server,
@@ -61,6 +62,7 @@ export const registerStreamsAgentBuilder = async ({
     telemetry,
   });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerSignificantEventsDiscoveryAgents(agentBuilder);
 
   const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
 
