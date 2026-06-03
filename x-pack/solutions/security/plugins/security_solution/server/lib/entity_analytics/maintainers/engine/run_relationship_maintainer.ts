@@ -23,7 +23,10 @@ import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_di
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
-import { writeRelationshipMetadatas, type WriteRelationshipMetadatasResult } from './write_relationship_metadatas';
+import {
+  writeRelationshipMetadatas,
+  type WriteRelationshipMetadatasResult,
+} from './write_relationship_metadatas';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 
@@ -163,7 +166,12 @@ async function runIntegration(
   crudClient: EntityUpdateClient,
   abortController: AbortController | undefined,
   metadataContext: { scanId: string; observedAt: string }
-): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult; metadata: WriteRelationshipMetadatasResult }> {
+): Promise<{
+  buckets: number;
+  recordsCount: number;
+  write: WriteEntityIdsResult;
+  metadata: WriteRelationshipMetadatasResult;
+}> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
   let totalBuckets = 0;
@@ -289,7 +297,7 @@ export const runRelationshipMaintainer = async ({
 
   const readClient = cpsEsClient ?? esClient;
 
-  // One scan_id + observedAt for the whole maintainer pass. Every observation
+  // One scan_id + observedAt for the whole maintainer pass. Every metadata doc
   // doc emitted across all integrations in this run carries the same values
   // so a reader can group records by maintainer-run.
   const metadataContext = {

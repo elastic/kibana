@@ -30,7 +30,7 @@ export const getMetadataEntityIndexTemplateConfig = (
   _meta: {
     description:
       'Index template for the entity metadata data stream. ' +
-      'Stores observation documents emitted by entity maintainers (relationships, behaviors).',
+      'Stores metadata documents emitted by entity maintainers (relationships, behaviors).',
     ecs_version: '9.2.0',
     managed: true,
     managed_by: 'security_context_core_analysis',

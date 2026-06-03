@@ -994,7 +994,7 @@ describe('runRelationshipMaintainer', () => {
       expect(sourcesPerCall).toEqual([['elastic_defend'], ['okta']]);
     });
 
-    it('fans one record with multiple targets into one observation doc per target', async () => {
+    it('fans one record with multiple targets into one metadata doc per target', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkAppend } = makeCrudClient();
       search.mockResolvedValueOnce(

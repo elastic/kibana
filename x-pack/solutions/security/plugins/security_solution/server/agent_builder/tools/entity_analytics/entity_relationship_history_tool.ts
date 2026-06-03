@@ -44,16 +44,13 @@ const entityRelationshipHistorySchema = z.object({
   from: z
     .string()
     .optional()
-    .describe('ISO 8601 start of the observation time window, e.g. "2026-05-01T00:00:00Z"'),
-  to: z
-    .string()
-    .optional()
-    .describe('ISO 8601 end of the observation time window, e.g. "2026-05-29T23:59:59Z"'),
+    .describe('ISO 8601 start of the time range, e.g. "2026-05-01T00:00:00Z"'),
+  to: z.string().optional().describe('ISO 8601 end of the time range, e.g. "2026-05-29T23:59:59Z"'),
   sort_order: z
     .enum(['asc', 'desc'])
     .optional()
     .describe(
-      '"asc" returns the oldest observation first — use with per_page 1 to find first-seen. ' +
+      '"asc" returns the oldest record first — use with per_page 1 to find first-seen. ' +
         '"desc" returns the newest first — use with per_page 1 to find last-seen. Defaults to "desc".'
     ),
   per_page: z
@@ -79,7 +76,7 @@ export const entityRelationshipHistoryTool = (
     id: SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
     type: ToolType.builtin,
     description:
-      "Returns the observation history of an entity's relationships — when they were first seen, " +
+      'Returns the relationship history of an entity — when relationships were first seen, ' +
       'last seen, and what hosts or users they communicated with over a time window. ' +
       'Use this to answer questions like "when did this user first access host:laptopA?", ' +
       '"what hosts did this compromised user touch after the alert fired?", or ' +

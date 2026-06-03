@@ -425,10 +425,10 @@ export class CRUDClient {
     });
 
     if (!resp.errors) {
-      this.logger.debug(`Successfully appended ${docs.length} relationship observations`);
+      this.logger.debug(`Successfully appended ${docs.length} relationship metadata docs`);
       return [];
     }
-    this.logger.debug(`Appended ${docs.length} relationship observations with errors`);
+    this.logger.debug(`Appended ${docs.length} relationship metadata docs with errors`);
     return resp.items
       .map((item) => Object.entries(item)[0][1])
       .filter((value) => value.error !== undefined || value.status >= 400)
@@ -551,7 +551,7 @@ export class CRUDClient {
     };
   }
 
-  // Reads relationship observations from the metadata datastream alias. The
+  // Reads relationship records from the metadata datastream alias. The
   // method owns query construction — routes forward parsed params untouched.
   public async listRelationshipMetadata(
     params: ListRelationshipMetadataParams

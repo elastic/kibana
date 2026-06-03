@@ -56,7 +56,7 @@ apiTest.describe('GET /entities/{entityId}/relationships', { tag: ENTITY_STORE_T
     });
     expect(install.statusCode).toBe(201);
 
-    // Seed three observations for alice: two against host:laptopA at
+    // Seed three records for alice: two against host:laptopA at
     // different timestamps, one communicates_with at a third timestamp.
     const docs = [
       makeMetadataDoc({
@@ -93,7 +93,7 @@ apiTest.describe('GET /entities/{entityId}/relationships', { tag: ENTITY_STORE_T
   });
 
   apiTest(
-    'returns the oldest observation when sorted asc with per_page=1 (first-seen)',
+    'returns the oldest record when sorted asc with per_page=1 (first-seen)',
     async ({ apiClient }) => {
       const resp = await apiClient.get(
         `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?target=host:laptopA&sort_order=asc&per_page=1`,
@@ -107,7 +107,7 @@ apiTest.describe('GET /entities/{entityId}/relationships', { tag: ENTITY_STORE_T
   );
 
   apiTest(
-    'returns the newest observation when sorted desc with per_page=1 (last-seen)',
+    'returns the newest record when sorted desc with per_page=1 (last-seen)',
     async ({ apiClient }) => {
       const resp = await apiClient.get(
         `${LIST_RELATIONSHIPS_ROUTE(ALICE)}?target=host:laptopA&sort_order=desc&per_page=1`,
@@ -137,7 +137,7 @@ apiTest.describe('GET /entities/{entityId}/relationships', { tag: ENTITY_STORE_T
   );
 
   apiTest(
-    'returns an empty records array (not an error) for an entity with no observations',
+    'returns an empty records array (not an error) for an entity with no records',
     async ({ apiClient }) => {
       const resp = await apiClient.get(LIST_RELATIONSHIPS_ROUTE('user:nobody@local'), {
         headers: defaultHeaders,

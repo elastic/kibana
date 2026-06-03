@@ -25,7 +25,7 @@ export const paramsSchema = z.object({
   entityId: z
     .string()
     .min(1)
-    .describe('The EUID of the entity to list relationship observations for.'),
+    .describe('The EUID of the entity to list relationships for.'),
 });
 
 export type { RelationshipRecord };
@@ -42,9 +42,9 @@ export function registerListRelationships(router: EntityStorePluginRouter) {
     .get({
       path: ENTITY_STORE_ROUTES.public.LIST_ENTITY_RELATIONSHIPS,
       access: 'public',
-      summary: 'List entity relationship observations',
+      summary: 'List entity relationships',
       description:
-        'List paginated relationship observations for a given entity. Reads from the metadata datastream with an implicit event.action=relationship_observed filter.',
+        'List paginated relationship records for a given entity. Reads from the metadata datastream with an implicit event.action=relationship_observed filter.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -64,7 +64,7 @@ export function registerListRelationships(router: EntityStorePluginRouter) {
         async (ctx, req, res): Promise<IKibanaResponse<ListRelationshipMetadataResponseBody>> => {
           const { logger, crudClient } = await ctx.entityStore;
 
-          logger.debug('List entity relationship observations api called');
+          logger.debug('List entity relationships api called');
 
           const result = await crudClient.listRelationshipMetadata({
             entityId: req.params.entityId,

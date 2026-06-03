@@ -171,7 +171,7 @@ describe('RelationshipMetadataDoc', () => {
 });
 
 // Every flat keyword/date path the Phase 1 template declares for the
-// relationship observation doc.
+// relationship metadata doc.
 const FLAT_TEMPLATE_PATHS = [
   '@timestamp',
   'event.kind',
@@ -191,7 +191,7 @@ const MAINTAINER_SUB_KEYS = ['kind', 'scan_id', 'lookback_window'] as const sati
 // clause asserts the array is a subset of `keyof`; the type-level equality
 // assertion below pins it to the full set, so adding a new field to the
 // type without listing it here fails compilation.
-const RELATIONSHIP_OBSERVATION_FIELD_PATHS = [
+const RELATIONSHIP_METADATA_FIELD_PATHS = [
   '@timestamp',
   'event.kind',
   'event.action',
@@ -212,14 +212,14 @@ const RELATIONSHIP_OBSERVATION_FIELD_PATHS = [
 
 // True iff A and B are mutually assignable. Used to enforce exhaustiveness
 // at the type level: any field added to `RelationshipMetadataDoc`
-// without a matching entry in `RELATIONSHIP_OBSERVATION_FIELD_PATHS` makes
+// without a matching entry in `RELATIONSHIP_METADATA_FIELD_PATHS` makes
 // this resolve to `false`, so the assertion at the bottom of this describe
 // fails compilation.
 type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
   ? true
   : false;
 
-type EnumeratedKeys = (typeof RELATIONSHIP_OBSERVATION_FIELD_PATHS)[number];
+type EnumeratedKeys = (typeof RELATIONSHIP_METADATA_FIELD_PATHS)[number];
 
 describe('drift guard: RelationshipMetadataDoc stays in sync with component template mapping', () => {
   const template = getMetadataComponentTemplate('default');
@@ -229,7 +229,7 @@ describe('drift guard: RelationshipMetadataDoc stays in sync with component temp
     Record<string, { path_match?: string; mapping?: { type?: string } }>
   >;
 
-  it('RELATIONSHIP_OBSERVATION_FIELD_PATHS exhaustively covers keyof RelationshipMetadataDoc', () => {
+  it('RELATIONSHIP_METADATA_FIELD_PATHS exhaustively covers keyof RelationshipMetadataDoc', () => {
     const exhaustive: Equals<EnumeratedKeys, keyof RelationshipMetadataDoc> = true;
     expect(exhaustive).toBe(true);
   });
@@ -262,7 +262,7 @@ describe('drift guard: RelationshipMetadataDoc stays in sync with component temp
     expect(targetTemplate).toBeDefined();
   });
 
-  it.each(RELATIONSHIP_OBSERVATION_FIELD_PATHS)(
+  it.each(RELATIONSHIP_METADATA_FIELD_PATHS)(
     'maps every keyof RelationshipMetadataDoc — %s — to the Phase 1 template',
     (path) => {
       if (path === 'Maintainer') {

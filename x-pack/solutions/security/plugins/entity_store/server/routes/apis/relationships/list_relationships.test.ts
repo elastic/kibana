@@ -173,7 +173,7 @@ describe('registerListRelationships route', () => {
     expect(body.per_page).toBe(10);
   });
 
-  it('returns an empty records array when no observations match', async () => {
+  it('returns an empty records array when no records match', async () => {
     registerListRelationships(router);
     const route = (router.versioned.get as jest.Mock).mock.results[0].value;
     const [, handler] = (route.addVersion as jest.Mock).mock.calls[0];
