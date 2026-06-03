@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 29547
+  esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6117
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   logstash: 15882
   maintenanceWindows: 8775
   management: 14304
-  maps: 45917
+  maps: 36281
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
@@ -206,7 +206,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
   visTypeTimeseries: 20000
-  visTypeVega: 38538
+  visTypeVega: 11562
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148
