@@ -10,6 +10,7 @@ import pMap from 'p-map';
 import type {
   CoreStart,
   ISavedObjectsImporter,
+  ISavedObjectsRepository,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -118,44 +119,21 @@ export async function syncAgentBuilderOverviewDashboard(
   const client = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
   const importer = coreStart.savedObjects.createImporter(client);
 
-  // `space` is a hidden SO type and must be explicitly allowlisted.
+  // `space` is a hidden SO type, so it must be explicitly allowlisted on the repository.
   const spaceRepo = coreStart.savedObjects.createInternalRepository(['space']);
-  const perPage = 100;
-  const allSpaceObjects: Array<{ id: string }> = [];
-  let page = 1;
+  const spaceIds = await getAllSpaceIds(spaceRepo);
 
-  while (true) {
-    const { saved_objects: batch, total } = await spaceRepo.find({
-      type: 'space',
-      perPage,
-      page,
-    });
-
-    allSpaceObjects.push(...batch);
-
-    if (allSpaceObjects.length >= total || batch.length < perPage) {
-      break;
-    }
-    page++;
-  }
-
-  logger.debug(`Agent Builder dashboard sync: found ${allSpaceObjects.length} space(s)`);
-
-  const spaceIds = [
-    'default',
-    ...allSpaceObjects.map((s) => s.id).filter((id) => id !== 'default'),
-  ];
+  logger.debug(`Agent Builder dashboard sync: found ${spaceIds.length} space(s)`);
 
   await pMap(
     spaceIds,
     async (spaceId) => {
       const namespace = spaceId === 'default' ? undefined : spaceId;
       try {
-        if (!sendToSelf) {
-          await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
-          return;
-        } else {
+        if (sendToSelf) {
           await installAgentBuilderOverviewDashboard(importer, logger, spaceId, namespace);
+        } else {
+          await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
         }
       } catch (err) {
         logger.error(`Agent Builder dashboard sync failed for space "${spaceId}": ${err}`);
@@ -163,4 +141,28 @@ export async function syncAgentBuilderOverviewDashboard(
     },
     { concurrency: SYNC_CONCURRENCY }
   );
+}
+
+/**
+ * fetch the ids of every space, paging through the (hidden) `space` saved objects.
+ */
+async function getAllSpaceIds(spaceRepo: ISavedObjectsRepository): Promise<string[]> {
+  const perPage = 100;
+  const spaceIds = new Set<string>(['default']);
+
+  for (let page = 1; ; page++) {
+    const { saved_objects: batch } = await spaceRepo.find<unknown>({
+      type: 'space',
+      perPage,
+      page,
+    });
+
+    batch.forEach((space) => spaceIds.add(space.id));
+
+    if (batch.length < perPage) {
+      break;
+    }
+  }
+
+  return [...spaceIds];
 }
