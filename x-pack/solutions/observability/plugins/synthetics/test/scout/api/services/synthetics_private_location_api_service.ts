@@ -146,6 +146,31 @@ export function createSyntheticsPrivateLocationApi(
     label?: string;
     isInvalid?: boolean;
   }
+  // Single probe of the public `GET private_locations/{id}` route, which combines
+  // the same private-location SO + agent-policy reads that the monitor-save
+  // validation performs. A location is "ready" only when it is found and
+  // `isInvalid:false`.
+  const probePrivateLocation = async (
+    locationId: string,
+    urlSpaceId: string
+  ): Promise<{ ready: boolean; detail: string }> => {
+    try {
+      const { data, status } = await kbnClient.request<PrivateLocationContract>({
+        method: 'GET',
+        path: `/s/${urlSpaceId}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
+        headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+        ignoreErrors: [404],
+        retries: 1,
+      });
+      if (status === 200 && data?.id === locationId && data?.isInvalid === false) {
+        return { ready: true, detail: 'ready' };
+      }
+      return { ready: false, detail: `status=${status} body=${JSON.stringify(data)}` };
+    } catch (error) {
+      return { ready: false, detail: error instanceof Error ? error.message : String(error) };
+    }
+  };
+
   const waitForPrivateLocationsReady = async (
     locationIds: string[],
     urlSpaceId: string
@@ -157,21 +182,11 @@ export function createSyntheticsPrivateLocationApi(
 
     while (pending.size > 0 && Date.now() < deadline) {
       for (const locationId of [...pending]) {
-        try {
-          const { data, status } = await kbnClient.request<PrivateLocationContract>({
-            method: 'GET',
-            path: `/s/${urlSpaceId}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
-            headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-            ignoreErrors: [404],
-            retries: 1,
-          });
-          if (status === 200 && data?.id === locationId && data?.isInvalid === false) {
-            pending.delete(locationId);
-          } else {
-            lastSeen = `status=${status} body=${JSON.stringify(data)}`;
-          }
-        } catch (error) {
-          lastSeen = error instanceof Error ? error.message : String(error);
+        const { ready, detail } = await probePrivateLocation(locationId, urlSpaceId);
+        if (ready) {
+          pending.delete(locationId);
+        } else {
+          lastSeen = detail;
         }
       }
       if (pending.size > 0) {
@@ -242,7 +257,18 @@ export function createSyntheticsPrivateLocationApi(
 
   const getSharedPrivateLocation = async (): Promise<ScoutPrivateLocation> => {
     if (cachedSharedLocation) {
-      return cachedSharedLocation;
+      // The shared location is cached per worker, but its saved object (and Fleet
+      // agent policy) live in the shared, default space and are globally removed
+      // by sibling specs that clean `synthetics-private-location` /
+      // `ingest-agent-policies` directly (bypassing `resetSharedPrivateLocation`).
+      // Reusing a stale location id makes the first monitor save of the consuming
+      // spec throw `InvalidLocationError` -> 400. Re-validate before reuse and
+      // recreate the location when it is no longer present/valid.
+      const { ready } = await probePrivateLocation(cachedSharedLocation.id, 'default');
+      if (ready) {
+        return cachedSharedLocation;
+      }
+      cachedSharedLocation = null;
     }
     cachedSharedLocation = await addTestPrivateLocation();
     return cachedSharedLocation;
