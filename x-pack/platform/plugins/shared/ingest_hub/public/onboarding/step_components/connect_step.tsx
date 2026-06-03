@@ -12,6 +12,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
+import {
+  CLOUDFORMATION_TEMPLATE_FILENAME,
+  renderAgentlessCft,
+} from '../cloud_formation/render_agentless_cft';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 
@@ -32,6 +36,11 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
     );
   }, [selectedServiceIds]);
 
+  const staticKeysCloudFormationTemplate = useMemo(
+    () => renderAgentlessCft(selectedServiceIds),
+    [selectedServiceIds]
+  );
+
   return (
     <div data-test-subj="onboardingStep-connect">
       <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
@@ -41,6 +50,8 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
           initialStaticKeys={connectStep.staticKeys}
           initialTemporaryKeys={connectStep.temporaryKeys}
           showIdentityFederation={showIdentityFederation}
+          staticKeysCloudFormationTemplate={staticKeysCloudFormationTemplate || undefined}
+          staticKeysCloudFormationTemplateFileName={CLOUDFORMATION_TEMPLATE_FILENAME}
           onNext={onNext}
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}

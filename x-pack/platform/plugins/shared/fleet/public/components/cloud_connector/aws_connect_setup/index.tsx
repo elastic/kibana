@@ -19,6 +19,7 @@ import type { AwsStaticKeyCredentials } from './aws_static_keys_form';
 import { AwsTemporaryKeysForm } from './aws_temporary_keys_form';
 import type { AwsTemporaryKeyCredentials } from './aws_temporary_keys_form';
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
+import { AwsStaticKeysCloudFormationGuide } from './aws_static_keys_cloud_formation_guide';
 
 export type { AwsAuthType, AwsStaticKeyCredentials, AwsTemporaryKeyCredentials };
 
@@ -31,6 +32,8 @@ export interface AwsConnectSetupProps {
   initialStaticKeys?: Partial<AwsStaticKeyCredentials>;
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
   showIdentityFederation?: boolean;
+  staticKeysCloudFormationTemplate?: string;
+  staticKeysCloudFormationTemplateFileName?: string;
   onNext?: () => void;
   onConnectorIdChange?: (connectorId: string | undefined) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
@@ -46,6 +49,8 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialStaticKeys,
   initialTemporaryKeys,
   showIdentityFederation = true,
+  staticKeysCloudFormationTemplate,
+  staticKeysCloudFormationTemplateFileName,
   onNext,
   onConnectorIdChange,
   onStaticKeysChange,
@@ -92,7 +97,6 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         onChange={handleAuthTypeChange}
       />
       <EuiSpacer size="l" />
-      {/* TODO: for IDF and static keys, generate a CFN template to download and show instructions to run it (AWS CLI) */}
       {authType === 'identity_federation' && (
         <AwsIdentityFederationSetup
           cloud={cloud}
@@ -105,12 +109,20 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         />
       )}
       {authType === 'static_keys' && (
-        <AwsStaticKeysForm
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          initialValues={initialStaticKeys}
-          onReadyChange={setIsFormReady}
-          onFieldsChange={onStaticKeysChange}
-        />
+        <>
+          {staticKeysCloudFormationTemplate ? (
+            <AwsStaticKeysCloudFormationGuide
+              cloudFormationTemplate={staticKeysCloudFormationTemplate}
+              cloudFormationTemplateFileName={staticKeysCloudFormationTemplateFileName}
+            />
+          ) : null}
+          <AwsStaticKeysForm
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            initialValues={initialStaticKeys}
+            onReadyChange={setIsFormReady}
+            onFieldsChange={onStaticKeysChange}
+          />
+        </>
       )}
       {authType === 'temporary_keys' && (
         <AwsTemporaryKeysForm

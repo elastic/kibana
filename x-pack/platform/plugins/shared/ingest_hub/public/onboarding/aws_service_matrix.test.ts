@@ -90,5 +90,11 @@ describe('AWS_SERVICES_MATRIX', () => {
     it('has a boolean showInUI', () => {
       expect(typeof entry.showInUI).toBe('boolean');
     });
+
+    if (entry.deliveryMethods.some(({ method }) => method === 'agentless')) {
+      it('has non-empty providerPermissions.actions for agentless delivery', () => {
+        expect(entry.providerPermissions?.actions?.length).toBeGreaterThan(0);
+      });
+    }
   });
 });
