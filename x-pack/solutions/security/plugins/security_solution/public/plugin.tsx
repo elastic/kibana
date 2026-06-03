@@ -332,13 +332,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    // Enable CPS picker only for individual dashboard views (not the listing page).
-    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
-    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
-      /security\/dashboards\/[^?]+/.test(location)
-        ? ProjectRoutingAccess.EDITABLE
-        : ProjectRoutingAccess.DISABLED
-    );
+    // Enable CPS picker in READ_ONLY mode for all Security Solution pages
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, () => ProjectRoutingAccess.READONLY);
 
     return this.contract.getStartContract(core);
   }

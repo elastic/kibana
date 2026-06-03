@@ -170,8 +170,8 @@ node scripts/evals run --suite streams --dry-run
 | `--export-profile <name>`        |           | Load export settings from `config.<name>.json`                |
 | `--trace-es-url <url>`           |           | Elasticsearch URL for trace queries                           |
 | `--trace-es-api-key <key>`       |           | API key for trace ES                                          |
-| `--evaluations-es-url <url>`     |           | Elasticsearch URL for storing eval results                    |
-| `--evaluations-es-api-key <key>` |           | API key for evaluations ES                                    |
+| `--evaluations-kbn-url <url>`     |           | Kibana URL for score ingestion and dataset operations          |
+| `--evaluations-kbn-api-key <key>` |           | API key for the target Kibana                                  |
 | `--phoenix-base-url <url>`       |           | Phoenix API URL (when using `--executor phoenix`)             |
 | `--phoenix-api-key <key>`        |           | Phoenix API key                                               |
 | `--dry-run`                      |           | Print the Playwright command and exit                         |

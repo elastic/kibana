@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { IconType, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -27,41 +26,18 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices, uiActionsService } from '../../../services/kibana_services';
+import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
+import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 
-interface EmptyStateAction {
-  actionId: string;
-  title: string;
-  description: string;
-  icon: IconType;
-  dataTestSubj: string;
-}
-
-const EMPTY_STATE_ACTIONS: readonly EmptyStateAction[] = [
-  {
-    actionId: 'addLensPanelAction',
-    title: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
-      defaultMessage: 'Create visualization',
-    }),
-    description: i18n.translate('dashboard.emptyScreen.createVisualizationDescription', {
-      defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
-    }),
-    icon: 'visBarVertical',
-    dataTestSubj: 'emptyDashboardCreateVisualization',
-  },
-  {
-    actionId: 'ACTION_CREATE_ESQL_CHART',
-    title: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
-      defaultMessage: 'Create visualization (query)',
-    }),
-    description: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationDescription', {
-      defaultMessage: 'Build charts, metrics, and tables with ES|QL.',
-    }),
-    icon: 'editorCodeBlock',
-    dataTestSubj: 'emptyDashboardCreateEsqlVisualization',
-  },
-] as const;
+const customTitles: Record<string, string> = {
+  addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
+    defaultMessage: 'Create visualization',
+  }),
+  ACTION_CREATE_ESQL_CHART: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
+    defaultMessage: 'Create visualization (query)',
+  }),
+};
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -69,30 +45,10 @@ export function DashboardEmptyScreen() {
   }, []);
 
   const dashboardApi = useDashboardApi();
+  const { featuredItems } = useFeaturedItems({ dashboardApi });
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
-
-  const executeAction = useCallback(
-    async (actionId: string) => {
-      try {
-        const action = await uiActionsService.getAction(actionId);
-        const { triggers } = await import('@kbn/ui-actions-plugin/public');
-        const { ADD_PANEL_TRIGGER } = await import('@kbn/ui-actions-plugin/common/trigger_ids');
-        action.execute({
-          embeddable: dashboardApi,
-          trigger: triggers[ADD_PANEL_TRIGGER],
-        } as ActionExecutionContext);
-      } catch (error) {
-        coreServices.notifications.toasts.addWarning(
-          i18n.translate('dashboard.addNewPanelError', {
-            defaultMessage: 'Unable to add new panel',
-          })
-        );
-      }
-    },
-    [dashboardApi]
-  );
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -144,25 +100,25 @@ export function DashboardEmptyScreen() {
     if (showEditPrompt) {
       return (
         <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-          {EMPTY_STATE_ACTIONS.map((action) => (
-            <EuiFlexItem key={action.actionId} grow={false}>
+          {featuredItems.map((item) => (
+            <EuiFlexItem key={item.id} grow={false}>
               <EuiPanel
                 hasBorder
                 paddingSize="none"
-                onClick={() => executeAction(action.actionId)}
+                onClick={item.onClick}
                 css={styles.actionPanel}
-                data-test-subj={action.dataTestSubj}
+                data-test-subj={item['data-test-subj']}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={action.icon} size="m" aria-hidden={true} />
+                    <EuiIcon type={item.icon} size="m" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      <strong>{action.title}</strong>
+                      <strong>{customTitles[item.id] ?? item.name}</strong>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
-                      {action.description}
+                      {item.description}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

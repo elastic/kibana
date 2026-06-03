@@ -414,7 +414,10 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+    });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =

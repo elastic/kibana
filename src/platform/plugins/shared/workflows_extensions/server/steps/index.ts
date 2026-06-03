@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/server';
-import { aiClassifyStepDefinition } from './ai/ai_classify_step/step';
-import { aiPromptStepDefinition } from './ai/ai_prompt_step/step';
-import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
 import {
   dataAggregateStepDefinition,
   dataConcatStepDefinition,
@@ -24,12 +20,8 @@ import {
   dataStringifyJsonStepDefinition,
 } from './data';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../types';
 
-export const registerInternalStepDefinitions = (
-  core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
-  serverStepRegistry: ServerStepRegistry
-) => {
+export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
   serverStepRegistry.register(dataFilterStepDefinition);
@@ -40,7 +32,4 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(dataConcatStepDefinition);
   serverStepRegistry.register(dataParseJsonStepDefinition);
   serverStepRegistry.register(dataStringifyJsonStepDefinition);
-  serverStepRegistry.register(aiClassifyStepDefinition(core));
-  serverStepRegistry.register(aiPromptStepDefinition(core));
-  serverStepRegistry.register(aiSummarizeStepDefinition(core));
 };

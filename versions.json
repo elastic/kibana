@@ -12,12 +12,12 @@
       "branchType": "release"
     },
     {
-      "version": "9.3.5",
+      "version": "9.3.6",
       "branch": "9.3",
       "branchType": "release"
     },
     {
-      "version": "8.19.16",
+      "version": "8.19.17",
       "branch": "8.19",
       "branchType": "release"
     }

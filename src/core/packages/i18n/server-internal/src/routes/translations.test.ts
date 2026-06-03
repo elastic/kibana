@@ -9,6 +9,8 @@
 
 import { Readable } from 'stream';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { registerTranslationsRoute } from './translations';
 
 jest.mock('fs/promises', () => ({
@@ -118,6 +120,32 @@ describe('registerTranslationsRoute', () => {
         }),
       }),
       expect.any(Function)
+    );
+  });
+
+  test('returns 404 for a stale hash even when the locale uses non-canonical casing', async () => {
+    const router = mockRouter.create();
+    registerTranslationsRoute({
+      router,
+      locale: 'en',
+      isDist: true,
+      translationHashes: { en: 'GOODHASH' },
+      localeFileMap: {},
+    });
+
+    // Both registered route paths share the same handler logic; either is
+    // fine to drive. Use the hashed-path handler since it's the one that
+    // exercises the stale-hash check.
+    const [, hashedPathHandler] = router.get.mock.calls[1];
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { locale: 'EN', translationHash: 'BADHASH' },
+    });
+    const response = await hashedPathHandler({} as any, request, kibanaResponseFactory);
+
+    expect(response.status).toBe(404);
+    expect((response.payload as any) ?? response.payload).toEqual(
+      expect.stringContaining('Stale translation hash')
     );
   });
 

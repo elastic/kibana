@@ -87,6 +87,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
+    "@kbn/unified-histogram",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",
@@ -110,6 +111,7 @@
     "@kbn/code-editor",
     "@kbn/workflows-yaml",
     "@kbn/workflows-ui",
+    "@kbn/datemath",
     "@kbn/triggers-actions-ui-plugin"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
