@@ -23,28 +23,22 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule } = useRuleWithFallback(ruleId);
   const { euiTheme } = useEuiTheme();
+  const header = useMemo(() => {
+    const subTitle = rule
+      ? [
+          <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
+          rule.updated_by != null ? (
+            <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
+          ) : (
+            ''
+          ),
+        ].filter(Boolean)
+      : [];
 
-  const lastExecution = rule?.execution_summary?.last_execution;
-  const lastExecutionStatus = lastExecution?.status;
-  const lastExecutionDate = lastExecution?.date ?? '';
-
-  const subTitle = useMemo(
-    () =>
-      rule
-        ? [
-            <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
-            rule.updated_by != null ? (
-              <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
-            ) : (
-              ''
-            ),
-          ].filter(Boolean)
-        : [],
-    [rule]
-  );
-
-  const statusInfo = useMemo(
-    () => (
+    const lastExecution = rule?.execution_summary?.last_execution;
+    const lastExecutionStatus = lastExecution?.status;
+    const lastExecutionDate = lastExecution?.date ?? '';
+    const statusInfo = (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
           {ruleStatusI18n.STATUS}
@@ -54,9 +48,22 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
           {null}
         </RuleStatus>
       </EuiFlexGroup>
-    ),
-    [lastExecutionStatus, lastExecutionDate]
-  );
+    );
+
+    return (
+      <HeaderPage
+        title={rule?.name ?? ''}
+        subtitle={subTitle}
+        subtitle2={statusInfo}
+        backOptions={{
+          pageId: SecurityPageName.rules,
+          path: getRuleDetailsTabUrl(ruleId, RuleDetailTabs.overview),
+          dataTestSubj: 'ruleChangesHistoryBack',
+        }}
+        backInlined
+      />
+    );
+  }, [ruleId, rule]);
 
   return (
     <>
@@ -68,19 +75,7 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
           overflow: 'hidden',
         }}
       >
-        <HeaderPage
-          border
-          title={rule?.name ?? ''}
-          subtitle={subTitle}
-          subtitle2={statusInfo}
-          backOptions={{
-            pageId: SecurityPageName.rules,
-            path: getRuleDetailsTabUrl(ruleId, RuleDetailTabs.overview),
-            dataTestSubj: 'ruleChangesHistoryBack',
-          }}
-          backInlined
-        />
-        <RuleChangesHistory />
+        <RuleChangesHistory header={header} />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>

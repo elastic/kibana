@@ -28,7 +28,13 @@ import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { RuleChangesDiff } from '../changes_diff/changes_diff';
 import * as i18n from './translations';
 
-export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Element {
+interface RuleChangesHistoryProps {
+  header?: React.ReactNode;
+}
+
+export const RuleChangesHistory = memo(function RuleChangesHistory({
+  header,
+}: RuleChangesHistoryProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
@@ -65,9 +71,16 @@ export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Elemen
         padding: ${euiTheme.size.m};
         border-bottom: ${euiTheme.border.thin};
       `,
+      leftPanelCss: css`
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      `,
       leftPanelContentCss: css`
+        flex: 1;
+        min-height: 0;
         overflow-y: auto;
-        padding: ${euiTheme.size.m};
+        padding-right: ${euiTheme.size.m};
       `,
       rightPanelContentCss: css`
         overflow: hidden;
@@ -85,9 +98,13 @@ export const RuleChangesHistory = memo(function RuleChangesHistory(): JSX.Elemen
             id="rule-changes-history-left"
             initialSize={65}
             minSize="200px"
-            css={styles.leftPanelContentCss}
+            paddingSize="none"
+            css={styles.leftPanelCss}
           >
-            <RuleChangesDiff item={selectedItem} isLoading={isLoading} />
+            {header}
+            <div css={styles.leftPanelContentCss}>
+              <RuleChangesDiff item={selectedItem} isLoading={isLoading} />
+            </div>
           </EuiResizablePanel>
           <EuiResizableButton />
           <EuiResizablePanel
