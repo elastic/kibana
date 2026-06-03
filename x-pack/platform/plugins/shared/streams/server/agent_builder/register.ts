@@ -15,6 +15,7 @@ import { MemoryServiceImpl } from '../lib/memory';
 import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -57,4 +58,5 @@ export const registerStreamsAgentBuilder = async ({
 }): Promise<void> => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
+  registerSignificantEventsDiscoveryAgents(agentBuilder);
 };

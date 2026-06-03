@@ -23,17 +23,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import {
-  STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
+import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -689,21 +684,10 @@ export class StreamsPlugin
         STREAMS_MANAGED_WORKFLOW_OWNER
       );
 
-      await Promise.all([
-        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-      ]);
-
-      if (await isSignificantEventsMemoryEnabled(featureFlags)) {
-        await installMemoryWorkflows({ client });
-      }
+      await installWorkflows({
+        client,
+        isSignificantEventsMemoryEnabled: await isSignificantEventsMemoryEnabled(featureFlags),
+      });
 
       await client.ready();
 
