@@ -105,37 +105,6 @@ export async function hasEnrollementAPIKeysForPolicy(
   return res.total !== 0;
 }
 
-/**
- * Return the set of agent policy ids that already have at least one enrollment API key, resolved
- * with a single aggregation rather than one search per policy. Used during Fleet setup to avoid
- * a per-policy `hasEnrollementAPIKeysForPolicy` query for every agent policy.
- */
-export async function getPolicyIdsWithEnrollmentAPIKeys(
-  esClient: ElasticsearchClient,
-  agentPolicyIds: string[]
-): Promise<Set<string>> {
-  const policyIdsWithKeys = new Set<string>();
-  if (agentPolicyIds.length === 0) {
-    return policyIdsWithKeys;
-  }
-
-  const res = await esClient.search<unknown, { policies: { buckets: Array<{ key: string }> } }>({
-    index: ENROLLMENT_API_KEYS_INDEX,
-    ignore_unavailable: true,
-    size: 0,
-    query: { terms: { policy_id: agentPolicyIds } },
-    aggs: {
-      policies: { terms: { field: 'policy_id', size: agentPolicyIds.length } },
-    },
-  });
-
-  for (const bucket of res.aggregations?.policies?.buckets ?? []) {
-    policyIdsWithKeys.add(bucket.key);
-  }
-
-  return policyIdsWithKeys;
-}
-
 export async function getEnrollmentAPIKey(
   esClient: ElasticsearchClient,
   id: string,

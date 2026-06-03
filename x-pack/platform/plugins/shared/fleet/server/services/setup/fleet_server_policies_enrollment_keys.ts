@@ -8,12 +8,82 @@
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { AGENT_POLICY_INDEX, ENROLLMENT_API_KEYS_INDEX } from '../../../common/constants';
+
 import { agentPolicyService } from '../agent_policy';
-import { generateEnrollmentAPIKey, getPolicyIdsWithEnrollmentAPIKeys } from '../api_keys';
+import { generateEnrollmentAPIKey } from '../api_keys';
 import { SO_SEARCH_LIMIT, MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 import { appContextService } from '../app_context';
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
 import { scheduleBumpAgentPoliciesTask } from '../agent_policies/bump_agent_policies_task';
+
+/**
+ * Resolve the latest deployed revision (`revision_idx` in `.fleet-policies`) for many agent
+ * policies in a single aggregation, Returns a map keyed by policy id; policies without a
+ * deployed revision are omitted from the map.
+ */
+async function getLatestFleetPolicyRevisions(
+  esClient: ElasticsearchClient,
+  agentPolicyIds: string[]
+): Promise<Map<string, number>> {
+  const latestRevisionByPolicyId = new Map<string, number>();
+  if (agentPolicyIds.length === 0) {
+    return latestRevisionByPolicyId;
+  }
+
+  const res = await esClient.search<
+    unknown,
+    { policies: { buckets: Array<{ key: string; latest_revision: { value: number | null } }> } }
+  >({
+    index: AGENT_POLICY_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    query: { terms: { policy_id: agentPolicyIds } },
+    aggs: {
+      policies: {
+        terms: { field: 'policy_id', size: agentPolicyIds.length },
+        aggs: { latest_revision: { max: { field: 'revision_idx' } } },
+      },
+    },
+  });
+
+  for (const bucket of res.aggregations?.policies?.buckets ?? []) {
+    if (bucket.latest_revision.value !== null) {
+      latestRevisionByPolicyId.set(bucket.key, bucket.latest_revision.value);
+    }
+  }
+
+  return latestRevisionByPolicyId;
+}
+
+/**
+ * Return the set of agent policy ids that already have at least one enrollment API key.
+ */
+async function getPolicyIdsWithEnrollmentAPIKeys(
+  esClient: ElasticsearchClient,
+  agentPolicyIds: string[]
+): Promise<Set<string>> {
+  const policyIdsWithKeys = new Set<string>();
+  if (agentPolicyIds.length === 0) {
+    return policyIdsWithKeys;
+  }
+
+  const res = await esClient.search<unknown, { policies: { buckets: Array<{ key: string }> } }>({
+    index: ENROLLMENT_API_KEYS_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    query: { terms: { policy_id: agentPolicyIds } },
+    aggs: {
+      policies: { terms: { field: 'policy_id', size: agentPolicyIds.length } },
+    },
+  });
+
+  for (const bucket of res.aggregations?.policies?.buckets ?? []) {
+    policyIdsWithKeys.add(bucket.key);
+  }
+
+  return policyIdsWithKeys;
+}
 
 export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   logger,
@@ -37,6 +107,7 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
 
+  // TODO: this will be pulled out by https://github.com/elastic/kibana/pull/272428
   if (agentPolicies.length === 0) {
     await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
     return;
@@ -45,16 +116,12 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   const agentPolicyIds = agentPolicies.map((agentPolicy) => agentPolicy.id);
 
   // Resolve the latest deployed revision and which policies already have an enrollment API key
-  // with two bulk aggregations instead of one ES query per policy. The previous per-policy fan-out
-  // saturated the event loop during setup on installs with thousands of agent policies, blocking
-  // every other request (including the Fleet/Integrations UI bootstrap) for several seconds.
   const [latestRevisionByPolicyId, policyIdsWithEnrollmentKeys] = await Promise.all([
-    agentPolicyService.getLatestFleetPolicyRevisions(esClient, agentPolicyIds),
+    getLatestFleetPolicyRevisions(esClient, agentPolicyIds),
     getPolicyIdsWithEnrollmentAPIKeys(esClient, agentPolicyIds),
   ]);
 
-  // Generate a default enrollment API key only for policies that are missing one, rather than
-  // probing every policy. `forceRecreate` matches the previous behaviour during setup.
+  // Generate a default enrollment API key only for policies that are missing one
   const policiesMissingEnrollmentKey = agentPolicies.filter(
     (agentPolicy) => !policyIdsWithEnrollmentKeys.has(agentPolicy.id)
   );
@@ -88,6 +155,7 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     }
   }
 
+  // TODO: this will be pulled out by https://github.com/elastic/kibana/pull/272428
   await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   if (!outdatedAgentPolicyIds.length) {
