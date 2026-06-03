@@ -201,6 +201,8 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     setIsDisableModalOpen(false);
   }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
 
+  const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
+
   return (
     <>
       <EuiFlexGroup
@@ -464,8 +466,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
-                  const showAddModelPopover = canManage && (!hasOverflow || isExpanded) &&
-                  canAddMore; ...
                   {showAddModelPopover && (
                     <EuiFlexItem grow={false}>
                       <AddModelPopover
