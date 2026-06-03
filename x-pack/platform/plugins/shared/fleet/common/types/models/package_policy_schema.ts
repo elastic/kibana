@@ -329,18 +329,6 @@ export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
   { unknowns: 'ignore', meta: { id: 'package_policy_v23' } }
 );
 
-/**
- * Snapshot of the package policy SO schema as of model version 10.24.0.
- * Re-introduces the `condition` field at the integration level — V22/V23 excluded it
- * to preserve their hashes when `condition` was added to PackagePolicyBaseSchema.
- */
-export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
-  {
-    condition: NewPackagePolicySchema.getPropSchemas().condition,
-  },
-  { unknowns: 'ignore', meta: { id: 'package_policy_v24' } }
-);
-
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),
