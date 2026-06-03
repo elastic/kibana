@@ -284,9 +284,9 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Deleted 1 rule');
-    // Remove r2 from cleanup list since it was deleted
-    const r2Idx = createdRuleIds.indexOf(r2.data.id);
-    if (r2Idx !== -1) createdRuleIds.splice(r2Idx, 1);
+    // r2 was deleted by the test; reset cleanup list to only the surviving rules.
+    createdRuleIds.length = 0;
+    createdRuleIds.push(r1.data.id, r3.data.id);
 
     await page.testSubj.click('rules-list-clear-filter');
     await refreshRulesList(page);
