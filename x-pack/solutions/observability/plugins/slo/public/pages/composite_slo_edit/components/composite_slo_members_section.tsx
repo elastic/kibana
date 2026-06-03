@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH, MIN_COMPOSITE_MEMBERS } from '../constants';
@@ -206,8 +207,15 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     }
   }, [isGrouped, instanceId, index, setValue]);
 
+  const [instanceSearch, setInstanceSearch] = useState<string>();
+  const [debouncedInstanceSearch, setDebouncedInstanceSearch] = useState<string | undefined>(
+    undefined
+  );
+  useDebounce(() => setDebouncedInstanceSearch(instanceSearch), 300, [instanceSearch]);
+
   const { data: instances, isLoading: isLoadingInstances } = useFetchSloInstances({
     sloId,
+    search: debouncedInstanceSearch?.trim() || undefined,
     size: 100,
     enabled: isGrouped,
   });
@@ -219,12 +227,30 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     value: ALL_VALUE,
   };
 
-  const instanceOptions: EuiComboBoxOptionOption[] = [
-    allInstancesOption,
-    ...(instances?.results ?? []).map((inst) => ({
+  const fetchedInstanceOptions: EuiComboBoxOptionOption[] = (instances?.results ?? []).map(
+    (inst) => ({
       label: inst.instanceId,
       value: inst.instanceId,
-    })),
+    })
+  );
+
+  // Preserve the currently selected instance in the options even when it falls outside
+  // the fetched batch (e.g. user picked an instance via search, then the search reset
+  // and the next page does not contain it). Without this, `selectedOptions` resolves
+  // to an empty array and the combo box renders no pill, making the selection look
+  // like it disappeared.
+  const hasSelectionInFetched =
+    instanceId === ALL_VALUE ||
+    fetchedInstanceOptions.some((opt) => opt.value === instanceId);
+  const pinnedSelectionOption: EuiComboBoxOptionOption | undefined =
+    !hasSelectionInFetched && typeof instanceId === 'string'
+      ? { label: instanceId, value: instanceId }
+      : undefined;
+
+  const instanceOptions: EuiComboBoxOptionOption[] = [
+    allInstancesOption,
+    ...(pinnedSelectionOption ? [pinnedSelectionOption] : []),
+    ...fetchedInstanceOptions,
   ];
 
   return (
@@ -245,11 +271,13 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
               return (
                 <EuiComboBox
                   fullWidth
+                  async
                   singleSelection={{ asPlainText: false }}
                   isLoading={isLoadingInstances}
                   options={instanceOptions}
                   selectedOptions={selected}
                   onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
+                  onSearchChange={setInstanceSearch}
                   isClearable={false}
                   compressed
                   data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
