@@ -355,7 +355,7 @@ export class RetracerAndroid extends Retracer<AndroidClassMap> {
       const versions = Array.from(unrecognizedVersions)
         .sort((a, b) => compareMapVersion(a, b))
         .join(', ');
-      this._logger.warn(
+      this._logger?.warn(
         `[stack-reframe] R8 map_version mismatch: ${unrecognizedDocCount} document(s) ` +
           `declare versions [${versions}] which exceed MAX_KNOWN_MAP_VERSION ` +
           `(${MAX_KNOWN_MAP_VERSION}). Retracing best-effort; results may be ` +

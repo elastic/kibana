@@ -5,16 +5,12 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+
+export type { Logger };
+
 export interface SourceMapFetcher<SourceMapType> {
   fetch: (sources: string[]) => Promise<SourceMapType[]>;
-}
-
-/**
- * Minimal logger interface the retracer uses to surface diagnostic
- * warnings.
- */
-export interface Logger {
-  warn: (message: string) => void;
 }
 
 export interface RetracerOptions {
@@ -24,7 +20,7 @@ export interface RetracerOptions {
 export abstract class Retracer<SourceMapType> {
   protected _stackTrace: string;
   protected _fetcher: SourceMapFetcher<SourceMapType>;
-  protected _logger: Logger;
+  protected _logger: Logger | undefined;
 
   constructor(
     stackTrace: string,
@@ -33,9 +29,7 @@ export abstract class Retracer<SourceMapType> {
   ) {
     this._stackTrace = stackTrace;
     this._fetcher = sourceMapFetcher;
-    this._logger = options.logger ?? {
-      warn: (message) => console.warn(message), // eslint-disable-line no-console
-    };
+    this._logger = options.logger;
   }
 
   abstract retrace(): Promise<string | undefined>;

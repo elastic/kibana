@@ -6,16 +6,12 @@
  */
 
 import crypto from 'crypto';
-import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AndroidClassMap } from '../../lib/retracer_android';
-import { retrace } from './retrace';
+import { MappingNotFoundError, retrace } from './retrace';
 
 function sha256(input: string) {
   return crypto.createHash('sha256').update(input).digest('hex');
-}
-
-function makeLogger(): jest.Mocked<Pick<Logger, 'warn'>> {
-  return { warn: jest.fn() };
 }
 
 function makeMget(docs: Array<{ found: boolean; _source?: AndroidClassMap }>) {
@@ -43,13 +39,12 @@ const simpleClassMap: AndroidClassMap = {
 describe('retrace (Android ES fetcher)', () => {
   it('queries android-r8-mappings-<buildId> with SHA-256 hashed class names', async () => {
     const mget = makeMget([{ found: true, _source: simpleClassMap }]);
-    const esClient = makeEsClient(mget);
 
     await retrace({
-      esClient,
+      esClient: makeEsClient(mget),
       stacktrace: '\tat f8.b(SourceFile:3)',
       buildId: BUILD_ID,
-      logger: makeLogger() as unknown as Logger,
+      logger: loggingSystemMock.createLogger(),
     });
 
     expect(mget).toHaveBeenCalledWith(
@@ -67,7 +62,7 @@ describe('retrace (Android ES fetcher)', () => {
       esClient: makeEsClient(mget),
       stacktrace: '\tat f8.b(SourceFile:3)',
       buildId: BUILD_ID,
-      logger: makeLogger() as unknown as Logger,
+      logger: loggingSystemMock.createLogger(),
     });
 
     expect(result).toBe('\tat com.example.Crasher.deepCrash(Crasher.kt:28)');
@@ -81,24 +76,60 @@ describe('retrace (Android ES fetcher)', () => {
       esClient: makeEsClient(mget),
       stacktrace,
       buildId: BUILD_ID,
-      logger: makeLogger() as unknown as Logger,
+      logger: loggingSystemMock.createLogger(),
     });
 
     expect(result).toBe(stacktrace);
   });
 
-  it('returns the original stacktrace when mget throws', async () => {
+  it('throws MappingNotFoundError when the mapping index does not exist', async () => {
+    const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
+      meta: { body: { error: { type: 'index_not_found_exception' } } },
+    });
+    const mget = jest.fn().mockRejectedValue(indexNotFoundError);
+
+    await expect(
+      retrace({
+        esClient: makeEsClient(mget),
+        stacktrace: '\tat f8.b(SourceFile:3)',
+        buildId: BUILD_ID,
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).rejects.toThrow(MappingNotFoundError);
+  });
+
+  it('MappingNotFoundError message includes the build ID', async () => {
+    const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
+      meta: { body: { error: { type: 'index_not_found_exception' } } },
+    });
+    const mget = jest.fn().mockRejectedValue(indexNotFoundError);
+
+    await expect(
+      retrace({
+        esClient: makeEsClient(mget),
+        stacktrace: '\tat f8.b(SourceFile:3)',
+        buildId: BUILD_ID,
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).rejects.toThrow(BUILD_ID);
+  });
+
+  it('logs a warning and returns the original stacktrace when mget throws a generic ES error', async () => {
     const mget = jest.fn().mockRejectedValue(new Error('ES unavailable'));
     const stacktrace = '\tat f8.b(SourceFile:3)';
+    const logger = loggingSystemMock.createLogger();
 
     const result = await retrace({
       esClient: makeEsClient(mget),
       stacktrace,
       buildId: BUILD_ID,
-      logger: makeLogger() as unknown as Logger,
+      logger,
     });
 
     expect(result).toBe(stacktrace);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to fetch R8 mappings')
+    );
   });
 
   it('batches all unique classes from the stacktrace into a single mget', async () => {
@@ -113,7 +144,7 @@ describe('retrace (Android ES fetcher)', () => {
         '\tat i8.run(SourceFile:20)',
       ].join('\n'),
       buildId: BUILD_ID,
-      logger: makeLogger() as unknown as Logger,
+      logger: loggingSystemMock.createLogger(),
     });
 
     const { ids } = mget.mock.calls[0][0];
@@ -130,7 +161,7 @@ describe('retrace (Android ES fetcher)', () => {
       esClient: makeEsClient(mget),
       stacktrace: '\tat f8.b(SourceFile:3)',
       buildId: BUILD_ID,
-      logger: makeLogger() as unknown as Logger,
+      logger: loggingSystemMock.createLogger(),
     });
 
     expect(result).toBe('\tat com.example.Crasher.deepCrash(Crasher.kt:28)');
