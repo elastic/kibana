@@ -1,8 +1,8 @@
 {
   "type": "shared-common",
-  "id": "@kbn/spaces-utils",
+  "id": "@kbn/core-spaces-common",
   "owner": [
-    "@elastic/kibana-security"
+    "@elastic/kibana-core"
   ],
   "group": "platform",
   "visibility": "shared"
