@@ -17,14 +17,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { take } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { SortDirection } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESSearchResponse, SearchHit } from '@kbn/es-types';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -38,7 +38,6 @@ import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyou
 import {
   buildWorkflowExecutionsSearchFilters,
   getWorkflowExecutionsFetchErrorMessage,
-  isWorkflowExecutionsIndexNotFoundError,
 } from './workflow_executions_search_query';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -77,6 +76,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const {
       data: dataService,
       fieldFormats,
+      http,
       notifications: { toasts },
       storage,
       theme,
@@ -96,8 +96,6 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
     const [retryToken, setRetryToken] = useState(0);
-    const timeFrom = timeRange.from;
-    const timeTo = timeRange.to;
 
     useEffect(() => {
       let cancelled = false;
@@ -107,64 +105,48 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
         setError(null);
 
         try {
-          const searchSource = await dataService.search.searchSource.create();
           const timeField = dataView.timeFieldName ?? 'startedAt';
           const searchFilters = buildWorkflowExecutionsSearchFilters({
             spaceId,
-            timeRange: { from: timeFrom, to: timeTo },
+            timeRange,
             timeField,
             userFilters: filters,
           });
-
-          searchSource.setField('index', dataView);
-
-          if (query?.query) {
-            searchSource.setField('query', query);
-          }
-
-          searchSource.setField('filter', searchFilters);
-          searchSource.setField('from', pageIndex * pageSize);
-          searchSource.setField('size', pageSize);
-          searchSource.setField(
-            'sort',
-            sort.map(([field, direction]) => ({
-              [field]: {
-                order: direction === 'asc' ? SortDirection.asc : SortDirection.desc,
-              },
-            }))
+          const rawResponse = await http.post<ESSearchResponse<EsWorkflowExecution>>(
+            '/internal/workflows/executions/_search',
+            {
+              version: '1',
+              body: JSON.stringify({
+                query: buildEsQuery(
+                  dataView,
+                  query?.query ? [query] : [],
+                  searchFilters,
+                  getEsQueryConfig(uiSettings)
+                ),
+                from: pageIndex * pageSize,
+                size: pageSize,
+                sort: sort.map(([field, direction]) => ({ [field]: { order: direction } })),
+                trackTotalHits: true,
+              }),
+            }
           );
-          searchSource.setField('trackTotalHits', true);
-
-          const response = await searchSource.fetch$().pipe(take(1)).toPromise();
 
           if (cancelled) {
             return;
           }
 
-          const rawResponse = response?.rawResponse as
-            | ESSearchResponse<EsWorkflowExecution>
-            | undefined;
-          const responseHits = (rawResponse?.hits?.hits ?? []).filter(
-            (hit: SearchHit<EsWorkflowExecution>): hit is SearchHit<EsWorkflowExecution> =>
-              hit._source != null
+          const responseHits = (rawResponse.hits?.hits ?? []).filter(
+            (hit) => hit._source != null
           ) as unknown as EsHitRecord[];
-          const totalHits = rawResponse?.hits?.total;
+          const totalHits = rawResponse.hits?.total;
           const totalCount =
             typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
 
           setHits(responseHits);
           setTotal(totalCount);
           setLoadingState(DataLoadingState.loaded);
-        } catch (err) {
+        } catch {
           if (cancelled) {
-            return;
-          }
-
-          if (isWorkflowExecutionsIndexNotFoundError(err)) {
-            setHits([]);
-            setTotal(0);
-            setError(null);
-            setLoadingState(DataLoadingState.loaded);
             return;
           }
 
@@ -181,23 +163,23 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
         cancelled = true;
       };
     }, [
-      dataService.search.searchSource,
       dataView,
       filters,
+      http,
       pageIndex,
       pageSize,
       query,
       retryToken,
       sort,
       spaceId,
-      timeFrom,
-      timeTo,
+      timeRange,
+      uiSettings,
     ]);
 
     useEffect(() => {
       setPageIndex(0);
       setExpandedDoc(undefined);
-    }, [query, filters, spaceId, timeFrom, timeTo]);
+    }, [query, filters, spaceId, timeRange]);
 
     const handleRetry = useCallback(() => {
       setRetryToken((n) => n + 1);

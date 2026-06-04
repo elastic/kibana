@@ -1,0 +1,97 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { schema } from '@kbn/config-schema';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
+import type { RouteDependencies } from '../types';
+import { INTERNAL_API_VERSION } from '../utils/route_constants';
+import { handleRouteError } from '../utils/route_error_handlers';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
+
+const parseFields = (value: string | string[] | undefined): string[] => {
+  if (!value) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value;
+  }
+  return [value];
+};
+
+export function registerExecutionFieldsRoute({ router }: RouteDependencies) {
+  router.versioned
+    .get({
+      path: '/internal/workflows/executions/fields',
+      access: 'internal',
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
+    })
+    .addVersion(
+      {
+        version: INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            query: schema.object(
+              {
+                meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+                  defaultValue: [],
+                }),
+                allow_no_index: schema.maybe(schema.boolean()),
+                include_unmapped: schema.maybe(schema.boolean()),
+                fields: schema.maybe(
+                  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                ),
+                field_types: schema.maybe(
+                  schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+                    defaultValue: [],
+                  })
+                ),
+                allow_hidden: schema.maybe(schema.boolean()),
+              },
+              { unknowns: 'allow' }
+            ),
+          },
+        },
+      },
+      withAvailabilityCheck(async (context, request, response) => {
+        try {
+          const core = await context.core;
+          const esClient = core.elasticsearch.client.asInternalUser;
+          const indexPatternsFetcher = new IndexPatternsFetcher(esClient, {
+            uiSettingsClient: core.uiSettings.client,
+            rollupsEnabled: false,
+          });
+
+          const { fields, indices } = await indexPatternsFetcher.getFieldsForWildcard({
+            pattern: WORKFLOWS_EXECUTIONS_INDEX,
+            metaFields: parseFields(request.query.meta_fields),
+            fieldCapsOptions: {
+              allow_no_indices: request.query.allow_no_index || false,
+              includeUnmapped: request.query.include_unmapped,
+            },
+            fieldTypes: parseFields(request.query.field_types),
+            allowHidden: request.query.allow_hidden,
+            ...(parseFields(request.query.fields).length > 0
+              ? { fields: parseFields(request.query.fields) }
+              : {}),
+          });
+
+          return response.ok({
+            body: {
+              fields,
+              indices,
+            },
+          });
+        } catch (error) {
+          return handleRouteError(response, error);
+        }
+      })
+    );
+}

@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { of, throwError } from 'rxjs';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { createStartServicesMock } from '../../mocks';
@@ -35,21 +32,17 @@ describe('WorkflowExecutionsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(searchSourceInstanceMock.fetch$).mockReturnValue(
-      of({
-        rawResponse: {
-          hits: {
-            hits: [],
-            total: { value: 0, relation: 'eq' },
-          },
-        },
-      }) as unknown as ReturnType<typeof searchSourceInstanceMock.fetch$>
-    );
   });
 
-  it('queries with space scoping and step-run exclusion filters', async () => {
+  it('calls internal executions search API', async () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
+    jest.mocked(services.http.post).mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { value: 0, relation: 'eq' },
+      },
+    });
 
     render(
       <WorkflowExecutionsTable
@@ -66,47 +59,32 @@ describe('WorkflowExecutionsTable', () => {
       expect(screen.getByTestId('workflowExecutionsTableEmpty')).toBeInTheDocument();
     });
 
-    const filterCalls = jest
-      .mocked(searchSourceInstanceMock.setField)
-      .mock.calls.filter(([field]) => field === 'filter');
-    expect(filterCalls.length).toBeGreaterThan(0);
-
-    const searchFilters = filterCalls[filterCalls.length - 1][1] as Array<{ query: unknown }>;
-    expect(searchFilters).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          query: {
-            bool: {
-              should: [
-                { term: { spaceId: 'my-space' } },
-                { bool: { must_not: { exists: { field: 'spaceId' } } } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        }),
-        expect.objectContaining({
-          query: {
-            bool: {
-              must_not: { exists: { field: 'stepId' } },
-            },
-          },
-        }),
-      ])
+    expect(services.http.post).toHaveBeenCalledWith(
+      '/internal/workflows/executions/_search',
+      expect.objectContaining({
+        version: '1',
+        body: expect.any(String),
+      })
     );
+
+    const { body } = jest.mocked(services.http.post).mock.calls[0][1] as unknown as {
+      body: string;
+    };
+    const requestBody = JSON.parse(body);
+    expect(requestBody.from).toBe(0);
+    expect(requestBody.size).toBe(25);
+    expect(requestBody.trackTotalHits).toBe(true);
   });
 
-  it('shows empty state when the executions index does not exist', async () => {
+  it('shows empty state when search returns no executions', async () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
-    const indexNotFoundError = new errors.ResponseError({
-      statusCode: 404,
-      body: { error: { type: 'index_not_found_exception', reason: 'missing' } },
-    } as ConstructorParameters<typeof errors.ResponseError>[0]);
-
-    jest
-      .mocked(searchSourceInstanceMock.fetch$)
-      .mockReturnValue(throwError(() => indexNotFoundError));
+    jest.mocked(services.http.post).mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { value: 0, relation: 'eq' },
+      },
+    });
 
     render(
       <WorkflowExecutionsTable
@@ -129,9 +107,7 @@ describe('WorkflowExecutionsTable', () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
 
-    jest
-      .mocked(searchSourceInstanceMock.fetch$)
-      .mockReturnValue(throwError(() => new Error('cluster unavailable')));
+    jest.mocked(services.http.post).mockRejectedValue(new Error('cluster unavailable'));
 
     render(
       <WorkflowExecutionsTable

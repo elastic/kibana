@@ -9,8 +9,6 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { WorkflowExecutionsPage } from './executions_page';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
@@ -38,17 +36,9 @@ describe('WorkflowExecutionsPage', () => {
     services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
-
-    jest.mocked(searchSourceInstanceMock.fetch$).mockReturnValue(
-      of({
-        rawResponse: {
-          hits: {
-            hits: [],
-            total: { value: 0, relation: 'eq' },
-          },
-        },
-      }) as unknown as ReturnType<typeof searchSourceInstanceMock.fetch$>
-    );
+    jest.mocked(services.http.post).mockResolvedValue({
+      hits: { hits: [], total: { value: 0, relation: 'eq' } },
+    });
 
     render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
 

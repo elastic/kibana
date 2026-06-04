@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
+import { useWorkflowExecutionsHttpInterceptor } from './workflow_executions_http_interceptor';
 import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { useKibana } from '../../hooks/use_kibana';
@@ -32,6 +33,7 @@ const EMPTY_FILTERS: Filter[] = [];
 export const WorkflowExecutionsPageContent = React.memo(() => {
   const { fieldFormats } = useKibana().services;
   const spaceId = useSpaceId();
+  useWorkflowExecutionsHttpInterceptor();
   const dataView = useMemo(() => createWorkflowExecutionsDataView(fieldFormats), [fieldFormats]);
 
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);

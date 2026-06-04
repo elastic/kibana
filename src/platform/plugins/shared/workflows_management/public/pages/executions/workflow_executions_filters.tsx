@@ -14,10 +14,7 @@ import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import {
-  WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-  WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-} from './workflow_executions_data_view';
+import { WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC } from './workflow_executions_data_view';
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTION_FILTERS_STORAGE_KEY,
@@ -64,14 +61,26 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
       [urlStorage]
     );
 
+    const scopedDataViews = useMemo(
+      () => ({
+        ...dataViews,
+        create: (
+          spec: Parameters<typeof dataViews.create>[0],
+          _skipFetchFields?: boolean,
+          displayErrors?: boolean
+        ) => dataViews.create(spec, true, displayErrors),
+      }),
+      [dataViews]
+    );
+
     const services = useMemo(
       () => ({
         http,
         notifications,
-        dataViews,
+        dataViews: scopedDataViews,
         storage: Storage,
       }),
-      [http, notifications, dataViews]
+      [http, notifications, scopedDataViews]
     );
 
     if (!spaceId) {
@@ -82,10 +91,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
       <div data-test-subj="workflowExecutionsFilters" key={location.search}>
         <AlertFilterControls
           controlsUrlState={controlsUrlState}
-          dataViewSpec={{
-            ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-            id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-          }}
+          dataViewSpec={WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC}
           defaultControls={DEFAULT_EXECUTION_PAGE_FILTERS}
           filters={filters}
           maxControls={4}
