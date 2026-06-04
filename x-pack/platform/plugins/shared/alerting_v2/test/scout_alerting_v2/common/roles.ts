@@ -38,6 +38,7 @@ export const ALL_ROLE: KibanaRole = {
         alerting_v2_rules: ['all'],
         alerting_v2_alerts: ['all'],
         alerting_v2_action_policies: ['all'],
+        alerting_v2_execution_history: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -58,6 +59,7 @@ export const READ_ROLE: KibanaRole = {
         alerting_v2_rules: ['read'],
         alerting_v2_alerts: ['read'],
         alerting_v2_action_policies: ['read'],
+        alerting_v2_execution_history: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -189,6 +191,34 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
         alerting_v2_action_policies: ['all'],
         alerting_v2_rules: ['read'],
         discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_execution_history: ['all'],
+        discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const ALERTING_V2_EXECUTION_HISTORY_READ_ROLE: KibanaRole = {
+  elasticsearch: READER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_execution_history: ['read'],
+        discover: ['read'],
       },
       spaces: ['*'],
     },

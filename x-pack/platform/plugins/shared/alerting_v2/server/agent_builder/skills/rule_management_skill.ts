@@ -341,11 +341,11 @@ steps:
     with:
       to:
         - <user-provided-email>
-      subject: "Alert: <rule-name> — {{ inputs.episodes | size }} episode(s)"
+      subject: "Alert: <rule-name> — {{ inputs.payload.episodes | size }} episode(s)"
       message: >
-        Rule "<rule-name>" triggered {{ inputs.episodes | size }} alert episode(s).
+        Rule "<rule-name>" triggered {{ inputs.payload.episodes | size }} alert episode(s).
 
-        {% for ep in inputs.episodes %}
+        {% for ep in inputs.payload.episodes %}
         - Host: {{ ep.data.host.name | default: "unknown" }}
           Errors: {{ ep.data.error_count | default: "n/a" }}
           Status: {{ ep.episode_status }}
@@ -372,14 +372,14 @@ steps:
 
 | Variable | Description |
 |---|---|
-| \`inputs.episodes\` | Array of alert episodes |
-| \`inputs.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
-| \`inputs.episodes[].rule_id\` | The rule's saved object ID |
-| \`inputs.episodes[].episode_id\` | The episode UUID |
-| \`inputs.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
-| \`inputs.policyId\` | The action policy ID |
-| \`inputs.id\` | The action group ID |
-| \`inputs.groupKey\` | The grouping key object |
+| \`inputs.payload.episodes\` | Array of alert episodes |
+| \`inputs.payload.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
+| \`inputs.payload.episodes[].rule_id\` | The rule's saved object ID |
+| \`inputs.payload.episodes[].episode_id\` | The episode UUID |
+| \`inputs.payload.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
+| \`inputs.payload.policyId\` | The action policy ID |
+| \`inputs.payload.id\` | The action group ID |
+| \`inputs.payload.groupKey\` | The grouping key object |
 | \`triggeredBy\` | Always \`"action_policy"\` |
 | \`spaceId\` | The Kibana space |
 | \`execution.url\` | Direct link to the workflow execution in Kibana |

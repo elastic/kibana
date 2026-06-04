@@ -109,7 +109,9 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-user-profile-browser",
     "@kbn/workflows-ui",
+    "@kbn/core-spaces-common",
     "@kbn/datemath",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

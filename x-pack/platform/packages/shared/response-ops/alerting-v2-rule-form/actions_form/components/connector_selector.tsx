@@ -16,7 +16,7 @@ import type {
   ActionConnector,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   ALL_CONNECTORS_KEY,
   type SingleStepConnector,
@@ -34,23 +34,26 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   const triggersActionsUi = useService(
     PluginStart('triggersActionsUi')
   ) as TriggersAndActionsUIPublicPluginStart;
-  const queryClient = useQueryClient();
-  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
-
-  // The triggers-actions-ui connector flyout reads core services from the
-  // `@kbn/kibana-react-plugin` context (e.g. `application.capabilities`), which
-  // the rule form does not otherwise provide. Bridge the DI-provided core
-  // services into that context so the flyout can render standalone.
   const application = useService(CoreStart('application'));
   const http = useService(CoreStart('http'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const settings = useService(CoreStart('settings'));
   const notifications = useService(CoreStart('notifications'));
   const docLinks = useService(CoreStart('docLinks'));
-  const kibanaServices = useMemo(
-    () => ({ application, http, uiSettings, settings, notifications, docLinks }),
-    [application, http, uiSettings, settings, notifications, docLinks]
-  );
+  const queryClient = useQueryClient();
+  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
+
+  // The connector flyout from triggers_actions_ui resolves core services via the kibana-react
+  // context (useKibana().services), which the alerting_v2 app does not provide because it mounts
+  // through core-di. Bridge the required services here so the flyout can render.
+  const connectorFlyoutServices = {
+    application,
+    http,
+    uiSettings,
+    settings,
+    notifications,
+    docLinks,
+  };
 
   const handleConnectorCreated = (connector: ActionConnector) => {
     queryClient.setQueryData<SingleStepConnector[]>(ALL_CONNECTORS_KEY, (old = []) => [
@@ -113,7 +116,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
         />
       </EuiFormRow>
       {isCreateFlyoutOpen && (
-        <KibanaContextProvider services={kibanaServices}>
+        <KibanaContextProvider services={connectorFlyoutServices}>
           {triggersActionsUi.getAddConnectorFlyout({
             initialConnector: { actionTypeId: connectorTypeId },
             onClose: () => setIsCreateFlyoutOpen(false),
