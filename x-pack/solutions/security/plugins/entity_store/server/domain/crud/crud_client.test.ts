@@ -9,15 +9,6 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { CRUDClient } from './crud_client';
 import { EntityStoreNotInstalledError } from '../errors';
-import { runWithSpan } from '../../telemetry/traces';
-
-jest.mock('../../telemetry/traces', () => {
-  const actual = jest.requireActual('../../telemetry/traces');
-  return {
-    ...actual,
-    runWithSpan: jest.fn(actual.runWithSpan),
-  };
-});
 
 describe('CRUDClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -28,7 +19,6 @@ describe('CRUDClient', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggerMock.create();
     client = new CRUDClient({ esClient, logger, namespace: 'default' });
-    (runWithSpan as jest.Mock).mockClear();
   });
 
   describe('assertInstalled', () => {
