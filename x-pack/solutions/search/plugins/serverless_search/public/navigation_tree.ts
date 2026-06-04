@@ -58,8 +58,7 @@ const PROJECT_PERFORMANCE_TITLE = i18n.translate(
   }
 );
 
-export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
-  'xpack.serverlessSearch.nav.dashboards.extensions.recent';
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
 export function createNavigationTree({
   isAppRegistered,
@@ -97,8 +96,9 @@ export function createNavigationTree({
             title: i18n.translate('xpack.serverlessObservability.nav.dashboards.recentlyViewed', {
               defaultMessage: 'Recently viewed',
             }),
-            renderAs: 'extensionPoint',
-            extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+            renderAs: 'extension',
+            slotId: RECENT_DASHBOARDS_SLOT_ID,
+            extensionId: 'recentlyAccessedDashboards',
             popoverOnly: true,
           },
         ],

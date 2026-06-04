@@ -10,8 +10,7 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
-  'xpack.security.nav.dashboards.extensions.recent';
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
 export const createDashboardsNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.dashboards,
@@ -24,8 +23,9 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
       title: i18n.translate('securitySolutionPackages.navLinks.dashboards.recentlyViewed', {
         defaultMessage: 'Recently viewed',
       }),
-      renderAs: 'extensionPoint',
-      extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+      renderAs: 'extension',
+      slotId: RECENT_DASHBOARDS_SLOT_ID,
+      extensionId: 'recentlyAccessedDashboards',
       popoverOnly: true,
     },
     {

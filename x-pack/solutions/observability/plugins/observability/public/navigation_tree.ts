@@ -7,11 +7,8 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  defineExtensionPointRenderers,
-  type AddSolutionNavigationArg,
-  recentDashboardsNavExtension,
-} from '@kbn/navigation-plugin/public';
+import { createRecentItemsData$ } from '@kbn/dashboard-plugin/public';
+import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
@@ -19,8 +16,7 @@ import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
-export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
-  'xpack.observability.obltNav.dashboards.extensions.recent';
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -89,8 +85,9 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.dashboards.recentlyViewed', {
               defaultMessage: 'Recently viewed',
             }),
-            renderAs: 'extensionPoint',
-            extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+            renderAs: 'extension',
+            slotId: RECENT_DASHBOARDS_SLOT_ID,
+            extensionId: 'recentlyAccessedDashboards',
             popoverOnly: true,
           },
         ],
@@ -761,7 +758,10 @@ export const createDefinition = (
       })
     )
   ),
-  extensionPointRenderers: defineExtensionPointRenderers({
-    [RECENT_DASHBOARDS_EXTENSION_POINT_ID]: recentDashboardsNavExtension,
-  }),
+  slotDataSources: {
+    [RECENT_DASHBOARDS_SLOT_ID]: createRecentItemsData$(
+      coreStart.chrome.recentlyAccessed,
+      coreStart.http.basePath
+    ),
+  },
 });

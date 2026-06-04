@@ -13,7 +13,13 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "serverless", "workplaceAI"],
-    "requiredPlugins": ["serverless", "agentBuilder", "workflowsManagement", "navigation"],
+    "requiredPlugins": [
+      "serverless",
+      "agentBuilder",
+      "workflowsManagement",
+      "navigation",
+      "dashboard"
+    ],
     "optionalPlugins": [],
     "requiredBundles": []
   }

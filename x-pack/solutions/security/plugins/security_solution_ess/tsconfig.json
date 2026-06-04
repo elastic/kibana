@@ -25,7 +25,6 @@
     "@kbn/navigation-plugin",
     "@kbn/management-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/use-observable",
     "@kbn/cloud-plugin",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
@@ -33,5 +32,6 @@
     "@kbn/ai-assistant-common",
     "@kbn/ai-assistant-icon",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/dashboard-plugin",
   ]
 }

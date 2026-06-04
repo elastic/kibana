@@ -14,8 +14,7 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
-export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
-  'xpack.serverlessObservability.nav.dashboards.extensions.recent';
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
 export function filterForFeatureAvailability<
   T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
@@ -77,8 +76,9 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.dashboards.recentlyViewed', {
               defaultMessage: 'Recently viewed',
             }),
-            renderAs: 'extensionPoint',
-            extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+            renderAs: 'extension',
+            slotId: RECENT_DASHBOARDS_SLOT_ID,
+            extensionId: 'recentlyAccessedDashboards',
             popoverOnly: true,
           },
         ],

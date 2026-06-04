@@ -16,7 +16,7 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import {
   defaultNavigationTree,
-  RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+  RECENT_DASHBOARDS_SLOT_ID,
 } from '@kbn/security-solution-navigation/navigation_tree';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 
@@ -28,7 +28,7 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Security' }
 );
 
-export { RECENT_DASHBOARDS_EXTENSION_POINT_ID };
+export { RECENT_DASHBOARDS_SLOT_ID };
 
 export const createNavigationTree = async (
   services: Services,

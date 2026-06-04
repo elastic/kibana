@@ -10,8 +10,8 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   SolutionId,
+  SlotDataSources,
 } from '@kbn/core-chrome-browser';
-import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
@@ -27,7 +27,7 @@ export interface ServerlessPluginStart {
   initNavigation(
     id: SolutionId,
     navigationTree$: Observable<NavigationTreeDefinition>,
-    extensionPointRenderers?: ExtensionPointRenderersMap
+    slotDataSources?: SlotDataSources
   ): void;
   getNavigationCards$(
     roleManagementEnabled?: boolean,

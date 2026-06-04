@@ -9166,7 +9166,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-navigation-extension-templates@link:src/platform/packages/shared/shared-ux/navigation_extension_templates":
+"@kbn/shared-ux-navigation-extension-templates@link:src/platform/packages/shared/shared-ux/navigation-extension-templates":
   version "0.0.0"
   uid ""
 

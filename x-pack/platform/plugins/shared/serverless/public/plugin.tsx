@@ -64,8 +64,8 @@ export class ServerlessPlugin
     });
 
     return {
-      initNavigation: (id, navigationTree$, extensionPointRenderers) => {
-        project.initNavigation(id, navigationTree$, extensionPointRenderers);
+      initNavigation: (id, navigationTree$, slotDataSources) => {
+        project.initNavigation(id, navigationTree$, slotDataSources);
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       getNavigationCards$: (roleManagementEnabled, extendCardNavDefinitions) => {

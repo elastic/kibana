@@ -6,11 +6,10 @@
  */
 
 import { map, combineLatest } from 'rxjs';
-import { lazy } from 'react';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
-import { defineExtensionPointRenderers } from '@kbn/navigation-plugin/public';
-import { RECENT_DASHBOARDS_EXTENSION_POINT_ID } from '@kbn/security-solution-navigation/navigation_tree';
+import { createRecentItemsData$ } from '@kbn/dashboard-plugin/public';
+import { RECENT_DASHBOARDS_SLOT_ID } from '@kbn/security-solution-navigation/navigation_tree';
 
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
@@ -40,12 +39,11 @@ export const registerSolutionNavigation = async (services: Services) => {
     title: SOLUTION_NAME,
     icon: 'logoSecurity',
     navigationTree$,
-    extensionPointRenderers: defineExtensionPointRenderers({
-      [RECENT_DASHBOARDS_EXTENSION_POINT_ID]: lazy(() =>
-        import('./recent_dashboards_section').then(({ RecentDashboardsSection }) => ({
-          default: RecentDashboardsSection,
-        }))
+    slotDataSources: {
+      [RECENT_DASHBOARDS_SLOT_ID]: createRecentItemsData$(
+        services.chrome.recentlyAccessed,
+        services.http.basePath
       ),
-    }),
+    },
   });
 };

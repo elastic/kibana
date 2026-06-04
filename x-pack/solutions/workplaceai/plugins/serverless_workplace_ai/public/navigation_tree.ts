@@ -8,8 +8,7 @@
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
-export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
-  'xpack.workplaceai.nav.dashboards.extensions.recent';
+export const RECENT_DASHBOARDS_SLOT_ID = 'recentDashboards';
 
 export const createNavigationTree = (): NavigationTreeDefinition => {
   return {
@@ -40,8 +39,9 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             title: i18n.translate('xpack.serverlessWorkplaceAI.nav.dashboards.recentlyViewed', {
               defaultMessage: 'Recently viewed',
             }),
-            renderAs: 'extensionPoint',
-            extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+            renderAs: 'extension',
+            slotId: RECENT_DASHBOARDS_SLOT_ID,
+            extensionId: 'recentlyAccessedDashboards',
             popoverOnly: true,
           },
         ],
