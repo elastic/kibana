@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useHasLatelyUsedAttackDiscovery } from './use_has_lately_used_attack_discovery';
+import { useHasEverUsedAttackDiscovery } from './use_has_ever_used_attack_discovery';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
@@ -33,23 +33,24 @@ describe('useHasEverUsedAttackDiscovery', () => {
     jest.restoreAllMocks();
   });
 
-  it('queries with a wide window covering "ever" and includes all statuses', () => {
+  it('queries with no date range (all-time) and includes all statuses', () => {
     mockedUseFindAttackDiscoveries.mockReturnValue({
       data: { total: 0 },
       isLoading: false,
     } as ReturnType<typeof useFindAttackDiscoveries>);
 
-    renderHook(() => useHasLatelyUsedAttackDiscovery());
+    renderHook(() => useHasEverUsedAttackDiscovery());
 
     expect(mockedUseFindAttackDiscoveries).toHaveBeenCalledWith(
       expect.objectContaining({
-        start: 'now-2y',
-        end: 'now',
         isAssistantEnabled: true,
         perPage: 1,
         status: ['open', 'acknowledged', 'closed'],
       })
     );
+    const [callArgs] = mockedUseFindAttackDiscoveries.mock.calls[0];
+    expect(callArgs).not.toHaveProperty('start');
+    expect(callArgs).not.toHaveProperty('end');
   });
 
   it('disables the query when enabled is false', () => {
@@ -58,14 +59,14 @@ describe('useHasEverUsedAttackDiscovery', () => {
       isLoading: true,
     } as ReturnType<typeof useFindAttackDiscoveries>);
 
-    const { result } = renderHook(() => useHasLatelyUsedAttackDiscovery({ enabled: false }));
+    const { result } = renderHook(() => useHasEverUsedAttackDiscovery({ enabled: false }));
 
     expect(mockedUseFindAttackDiscoveries).toHaveBeenCalledWith(
       expect.objectContaining({
         isAssistantEnabled: false,
       })
     );
-    expect(result.current.hasLatelyUsedAttackDiscovery).toBe(false);
+    expect(result.current.hasEverUsedAttackDiscovery).toBe(false);
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -75,9 +76,9 @@ describe('useHasEverUsedAttackDiscovery', () => {
       isLoading: false,
     } as ReturnType<typeof useFindAttackDiscoveries>);
 
-    const { result } = renderHook(() => useHasLatelyUsedAttackDiscovery());
+    const { result } = renderHook(() => useHasEverUsedAttackDiscovery());
 
-    expect(result.current.hasLatelyUsedAttackDiscovery).toBe(false);
+    expect(result.current.hasEverUsedAttackDiscovery).toBe(false);
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -87,9 +88,9 @@ describe('useHasEverUsedAttackDiscovery', () => {
       isLoading: false,
     } as ReturnType<typeof useFindAttackDiscoveries>);
 
-    const { result } = renderHook(() => useHasLatelyUsedAttackDiscovery());
+    const { result } = renderHook(() => useHasEverUsedAttackDiscovery());
 
-    expect(result.current.hasLatelyUsedAttackDiscovery).toBe(true);
+    expect(result.current.hasEverUsedAttackDiscovery).toBe(true);
   });
 
   it('propagates the loading state', () => {
@@ -98,9 +99,9 @@ describe('useHasEverUsedAttackDiscovery', () => {
       isLoading: true,
     } as ReturnType<typeof useFindAttackDiscoveries>);
 
-    const { result } = renderHook(() => useHasLatelyUsedAttackDiscovery());
+    const { result } = renderHook(() => useHasEverUsedAttackDiscovery());
 
     expect(result.current.isLoading).toBe(true);
-    expect(result.current.hasLatelyUsedAttackDiscovery).toBe(false);
+    expect(result.current.hasEverUsedAttackDiscovery).toBe(false);
   });
 });

@@ -12,7 +12,7 @@ import {
   SAMPLE_VALUE_METRICS_COMPARE,
 } from '../components/ai_value/sample_data';
 import { useValueMetrics } from '../components/ai_value/hooks/use_value_metrics';
-import { useHasLatelyUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_lately_used_attack_discovery';
+import { useHasEverUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_ever_used_attack_discovery';
 
 interface Props {
   from: string;
@@ -59,9 +59,9 @@ export const useValueReportData = ({
   } = useValueMetrics({ from, to, minutesPerAlert, analystHourlyRate });
 
   const {
-    hasLatelyUsedAttackDiscovery: hasHistoricalAttackDiscoveries,
+    hasEverUsedAttackDiscovery: hasHistoricalAttackDiscoveries,
     isLoading: isLoadingHistory,
-  } = useHasLatelyUsedAttackDiscovery({ enabled: shouldCheckHistory });
+  } = useHasEverUsedAttackDiscovery({ enabled: shouldCheckHistory });
 
   const isLoading = isLoadingMetrics || (shouldCheckHistory && isLoadingHistory);
 

@@ -15,15 +15,13 @@ import {
   OPEN,
 } from '../../../../attack_discovery/pages/results/history/search_and_filter/translations';
 
-// Query a window wide enough to mean "ever" so the report can distinguish
-// "no discoveries in the selected range" from "the feature has never been used".
-const EVER_START = 'now-2y';
-const EVER_END = 'now';
-
+// No start/end: queries all time, matching the same scope the rest of the value
+// report uses. Only fires when the selected range is empty (enabled gate), so
+// this runs at most once before the report decides to show sample data.
 const ALL_STATUSES = [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase());
 
-interface UseHasLatelyUsedAttackDiscovery {
-  hasLatelyUsedAttackDiscovery: boolean;
+interface UseHasEverUsedAttackDiscovery {
+  hasEverUsedAttackDiscovery: boolean;
   isLoading: boolean;
 }
 
@@ -31,25 +29,23 @@ interface Options {
   enabled?: boolean;
 }
 
-export const useHasLatelyUsedAttackDiscovery = ({
+export const useHasEverUsedAttackDiscovery = ({
   enabled = true,
-}: Options = {}): UseHasLatelyUsedAttackDiscovery => {
+}: Options = {}): UseHasEverUsedAttackDiscovery => {
   const { http } = useKibana().services;
   const { assistantAvailability } = useAssistantContext();
   const shouldQueryHistory = assistantAvailability.isAssistantEnabled && enabled;
 
   const { data, isLoading } = useFindAttackDiscoveries({
-    end: EVER_END,
     http,
     isAssistantEnabled: shouldQueryHistory,
     perPage: 1,
-    start: EVER_START,
     status: ALL_STATUSES,
   });
 
   return useMemo(
     () => ({
-      hasLatelyUsedAttackDiscovery: shouldQueryHistory ? (data?.total ?? 0) > 0 : false,
+      hasEverUsedAttackDiscovery: shouldQueryHistory ? (data?.total ?? 0) > 0 : false,
       isLoading: shouldQueryHistory && isLoading,
     }),
     [data?.total, isLoading, shouldQueryHistory]
