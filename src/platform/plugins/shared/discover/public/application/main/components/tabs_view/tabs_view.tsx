@@ -82,8 +82,14 @@ export const TabsView = (props: SingleTabViewProps) => {
       return undefined;
     }
 
-    return (tabsBar) => <ChromeAppHeader menu={topNavMenuItems} titleAppend={tabsBar} />;
-  }, [isChromeNextProjectHeader, topNavMenuItems]);
+    return (tabsBar) => (
+      <ChromeAppHeader
+        menu={topNavMenuItems}
+        titleAppend={tabsBar}
+        isCollapsed={shouldCollapseAppMenu}
+      />
+    );
+  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {
