@@ -291,7 +291,6 @@ export class CommonPageObject extends FtrService {
       search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
-      retryOnFatalError = true,
       skipUrlValidation = false,
     } = {}
   ) {
@@ -370,12 +369,6 @@ export class CommonPageObject extends FtrService {
 
         if (!navSuccessful) {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
-
-        if (retryOnFatalError && (await this.isFatalErrorScreen())) {
-          const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
           this.log.debug(msg);
           throw new Error(msg);
         }
@@ -497,10 +490,6 @@ export class CommonPageObject extends FtrService {
 
   async isChromeHidden() {
     return await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
-  }
-
-  async isFatalErrorScreen() {
-    return await this.testSubjects.exists('fatalErrorScreen');
   }
 
   async waitForTopNavToBeVisible() {
