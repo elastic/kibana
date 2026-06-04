@@ -19,6 +19,12 @@ const wrapperCss = css`
   .codicon.codicon-light-bulb.lightbulb-glyph {
     display: none;
   }
+  /* In inline diff mode both editor.original and editor.modified render delete
+     indicators at the same position, causing them to stack visually.
+     Hides the duplicate indicator. */
+  .editor.original .cldr.delete-sign.codicon.codicon-diff-remove::before {
+    display: none;
+  }
 `;
 
 // Applied in canvas view so the diff editor grows to fill the remaining flex space,
@@ -81,7 +87,7 @@ const useDiffEditor = ({ containerRef, beforeContent, afterContent }: UseDiffEdi
       lightbulb: { enabled: false },
       contextmenu: false,
       domReadOnly: true,
-      renderIndicators: false,
+      renderIndicators: true,
       renderMarginRevertIcon: false,
     });
 
