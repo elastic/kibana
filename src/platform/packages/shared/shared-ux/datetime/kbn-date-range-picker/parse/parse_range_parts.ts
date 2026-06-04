@@ -504,6 +504,23 @@ const parseSide = (
   );
 };
 
+/** Infers which side a compact one-sided display label edits. */
+const getCompactDisplayRangeIndex = (display: string): RangePart['rangeIndex'] => {
+  const trimmed = display.trim();
+  const longRelativeMatch = trimmed.match(LONG_RELATIVE_RE);
+  const naturalInstantMatch = trimmed.match(NATURAL_INSTANT_RE);
+
+  if (
+    longRelativeMatch?.[1].toLowerCase() === 'next' ||
+    naturalInstantMatch?.[3].toLowerCase() === 'from now' ||
+    INSTANT_FROM_NOW_RE.test(trimmed)
+  ) {
+    return 1;
+  }
+
+  return 0;
+};
+
 /**
  * Splits edit-input text into semantic range parts.
  */
@@ -533,5 +550,5 @@ export function parseDisplayParts(display: string): RangePart[] {
     ];
   }
 
-  return parseSide(display, 0, null);
+  return parseSide(display, 0, getCompactDisplayRangeIndex(display));
 }

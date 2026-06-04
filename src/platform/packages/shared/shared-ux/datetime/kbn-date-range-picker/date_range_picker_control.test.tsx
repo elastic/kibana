@@ -78,6 +78,33 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it.each([
+      ['Next', '+'],
+      ['days', 'd'],
+    ])(
+      'selects the clicked future relative "%s" display part in the input',
+      async (text, selected) => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue="+4d" onChange={() => {}} />
+        );
+
+        const displayPart = screen.getByText(text);
+        fireEvent.mouseDown(displayPart);
+        fireEvent.click(displayPart);
+
+        const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
+        await waitFor(() => {
+          expect(input).toHaveFocus();
+          expect(input.value.slice(input.selectionStart ?? 0, input.selectionEnd ?? 0)).toBe(
+            selected
+          );
+        });
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        await waitForPopoverClose();
+      }
+    );
+
     it('selects clicked no-year absolute display parts in the input', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-06-04T12:00:00.000Z'));
 

@@ -154,25 +154,48 @@ describe('parse range parts', () => {
   });
 
   describe('parseDisplayParts', () => {
-    it('splits compact display text with no range side', () => {
+    it('places compact past display parts on the start side', () => {
       expect(parseDisplayParts('Last 24 hours')).toEqual([
         expect.objectContaining({
           text: 'Last',
           kind: 'relative-direction',
           navigable: true,
-          rangeIndex: null,
+          rangeIndex: 0,
         }),
         expect.objectContaining({
           text: '24',
           kind: 'relative-value',
           navigable: true,
-          rangeIndex: null,
+          rangeIndex: 0,
         }),
         expect.objectContaining({
           text: 'hours',
           kind: 'relative-unit',
           navigable: true,
-          rangeIndex: null,
+          rangeIndex: 0,
+        }),
+      ]);
+    });
+
+    it('places compact future display parts on the end side', () => {
+      expect(parseDisplayParts('Next 24 hours')).toEqual([
+        expect.objectContaining({
+          text: 'Next',
+          kind: 'relative-direction',
+          navigable: true,
+          rangeIndex: 1,
+        }),
+        expect.objectContaining({
+          text: '24',
+          kind: 'relative-value',
+          navigable: true,
+          rangeIndex: 1,
+        }),
+        expect.objectContaining({
+          text: 'hours',
+          kind: 'relative-unit',
+          navigable: true,
+          rangeIndex: 1,
         }),
       ]);
     });
@@ -184,19 +207,19 @@ describe('parse range parts', () => {
           text: 'Past',
           kind: 'relative-direction',
           navigable: true,
-          rangeIndex: null,
+          rangeIndex: 0,
         }),
         expect.objectContaining({
           text: '7',
           kind: 'relative-value',
           navigable: true,
-          rangeIndex: null,
+          rangeIndex: 0,
         }),
         expect.objectContaining({
           text: 'days',
           kind: 'relative-unit',
           navigable: true,
-          rangeIndex: null,
+          rangeIndex: 0,
         }),
       ]);
     });
