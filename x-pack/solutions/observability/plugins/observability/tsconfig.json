@@ -21,6 +21,7 @@
     "@kbn/observability-get-padded-alert-time-range-util",
     "@kbn/share-plugin",
     "@kbn/data-plugin",
+    "@kbn/data-forge",
     "@kbn/alerting-comparators",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
@@ -155,6 +156,7 @@
     "@kbn/cps",
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/zod",
     "@kbn/nightshift"
   ],

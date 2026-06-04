@@ -9,7 +9,7 @@ import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   CoreSetup,
   CoreStart,
@@ -727,6 +727,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.unenrollInactiveAgents?.taskInterval,
+        gracePeriodMs: config.unenrollInactiveAgents?.gracePeriodMs,
       },
     });
     this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
