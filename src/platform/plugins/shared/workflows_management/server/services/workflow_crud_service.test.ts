@@ -74,6 +74,13 @@ const makeDeps = (
   return { deps, client };
 };
 
+const makeTaskScheduler = () => ({
+  scheduleWorkflowTasks: jest.fn().mockResolvedValue([]),
+  scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
+  unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+  updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
+});
+
 const lightweightWorkflowYaml = [
   'name: My Workflow',
   'enabled: true',
@@ -775,13 +782,6 @@ describe('WorkflowCrudService', () => {
       expect(result.failed[0].id).toBe('same');
     });
 
-    const makeTaskScheduler = () => ({
-      scheduleWorkflowTasks: jest.fn().mockResolvedValue([]),
-      scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
-      unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-      updateWorkflowTasks: jest.fn().mockResolvedValue(undefined),
-    });
-
     it('overwrite=true unschedules orphaned tasks when the new workflow has no scheduled triggers', async () => {
       const taskScheduler = makeTaskScheduler();
       const { deps, client } = makeDeps();
@@ -1128,6 +1128,60 @@ describe('WorkflowCrudService', () => {
       await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
 
       expect(client.index.mock.calls[0][0].document.lastUpdatedBy).toBe('alice');
+    });
+
+    it('refreshes scheduled task credentials when editing an enabled scheduled workflow', async () => {
+      const taskScheduler = makeTaskScheduler();
+      const { deps, client } = makeDeps();
+      (deps as any).getTaskScheduler = () => taskScheduler;
+      const scheduledDefinition = {
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+        steps: [],
+      } as any;
+      const existingSource = makeSource({
+        enabled: true,
+        valid: true,
+        triggerTypes: ['scheduled'],
+        definition: scheduledDefinition,
+      });
+
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: existingSource,
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: {
+                  ...existingSource,
+                  tags: ['new'],
+                  lastUpdatedBy: 'alice',
+                },
+              },
+            ],
+          },
+        });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
+
+      expect(taskScheduler.updateWorkflowTasks).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'wf-1', tags: ['new'] }),
+        'default',
+        request
+      );
+      expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
   });
 });

@@ -45,6 +45,7 @@ import {
   removeConflictingIds,
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
+import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
@@ -606,7 +607,12 @@ export class WorkflowCrudService {
       await this.indexWorkflowDocument(id, finalData);
 
       const taskScheduler = this.deps.getTaskScheduler();
-      if (shouldUpdateScheduler && taskScheduler) {
+      const shouldRefreshScheduledTaskCredentials =
+        Boolean(finalData.definition) &&
+        finalData.valid &&
+        finalData.enabled &&
+        hasScheduledTriggers(finalData.definition?.triggers ?? []);
+      if ((shouldUpdateScheduler || shouldRefreshScheduledTaskCredentials) && taskScheduler) {
         await syncSchedulerAfterSave({
           workflowId: id,
           spaceId,

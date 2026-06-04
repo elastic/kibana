@@ -227,7 +227,7 @@ describe('WorkflowTaskScheduler', () => {
       expect(mockTm.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['workflow:test-workflow:scheduled'],
         expect.objectContaining({ interval: '30s' }),
-        { request: mockRequest }
+        { request: mockRequest, regenerateApiKey: true }
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Updated existing scheduled task')

@@ -264,12 +264,20 @@ export class TaskScheduling {
     schedule: IntervalSchedule | RruleSchedule,
     options?: ApiKeyOptions
   ): Promise<BulkUpdateTaskResult> {
+    const shouldRegenerateApiKey = options?.regenerateApiKey === true;
+
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
+      filter: (task) =>
+        task.status === TaskStatus.Idle &&
+        (shouldRegenerateApiKey || !isEqual(task.schedule, schedule)),
       map: (task) => {
+        if (isEqual(task.schedule, schedule)) {
+          return task;
+        }
+
         const newRunAtInMs = calculateNextRunAtFromSchedule({
           schedule,
           startDate: task.scheduledAt,

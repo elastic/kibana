@@ -113,7 +113,10 @@ export class WorkflowTaskScheduler {
       if ((err as { statusCode?: number }).statusCode === VERSION_CONFLICT_STATUS) {
         // Task already exists — update its schedule in place rather than failing.
         // This handles both interval and RRule schedule types.
-        const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule, { request });
+        const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule, {
+          request,
+          regenerateApiKey: true,
+        });
         if (result.errors.length > 0) {
           const firstError = result.errors[0].error;
           // 409 (concurrent update) and 404 (task was just removed) are non-fatal
