@@ -10,19 +10,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiOverlayMask,
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { HttpSetup } from '@kbn/core/public';
@@ -36,6 +31,7 @@ import { dataSourceFromListItem } from './create_data_source_flyout/data_source_
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
+import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
@@ -58,9 +54,6 @@ export interface MainProps {
 export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) => {
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
-  const confirmDeleteDataSourceTitleId = useGeneratedHtmlId({
-    prefix: 'confirmDeleteDataSourceTitle',
-  });
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
@@ -521,42 +514,13 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
         />
       </EuiPageSection>
       {pendingDeleteDataSource ? (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={mainTranslations.confirmDeleteDataSource.title}
-            titleProps={{ id: confirmDeleteDataSourceTitleId }}
-            aria-labelledby={confirmDeleteDataSourceTitleId}
-            buttonColor="danger"
-            confirmButtonText={mainTranslations.confirmDeleteDataSource.confirmButton}
-            cancelButtonText={mainTranslations.confirmDeleteDataSource.cancelButton}
-            defaultFocusedButton="cancel"
-            onConfirm={confirmDeleteDataSource}
-            onCancel={cancelDeleteDataSource}
-            confirmButtonDisabled={isDeletingDataSource}
-          >
-            <EuiText size="s">
-              <p>{mainTranslations.confirmDeleteDataSource.prompt}</p>
-              <p>
-                <strong>{pendingDeleteDataSource.name}</strong>
-              </p>
-              <p>{mainTranslations.confirmDeleteDataSource.warning}</p>
-            </EuiText>
-            {deleteDataSourceError ? (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut
-                  title={mainTranslations.confirmDeleteDataSource.errorTitle}
-                  color="danger"
-                  iconType="warning"
-                  size="s"
-                  announceOnMount
-                >
-                  <p>{deleteDataSourceError}</p>
-                </EuiCallOut>
-              </>
-            ) : null}
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <ConfirmDeleteDataSourceModal
+          dataSourceName={pendingDeleteDataSource.name}
+          isDeleting={isDeletingDataSource}
+          error={deleteDataSourceError}
+          onConfirm={() => void confirmDeleteDataSource()}
+          onCancel={cancelDeleteDataSource}
+        />
       ) : null}
       {dataSourceFlyout.kind !== 'closed' ? (
         <CreateDataSourceFlyout
