@@ -6,7 +6,7 @@
  */
 
 import { of, toArray, lastValueFrom } from 'rxjs';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import { convertGraphEvents } from './convert_graph_events';
 import { steps } from './constants';
 
@@ -28,6 +28,7 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       params: data.params,
       tool_call_group_id: data.toolCallGroupId,
       tool_origin: data.toolOrigin,
+      tool_type: data.toolType,
     },
   })),
   createToolResultEvent: jest.fn(),
@@ -83,6 +84,7 @@ describe('convertGraphEvents', () => {
         toolManager: {
           getToolIdMapping: jest.fn().mockReturnValue(new Map()),
           getToolOrigin: jest.fn().mockReturnValue(ToolOrigin.inline),
+          getToolType: jest.fn().mockReturnValue(ToolType.builtin),
         } as any,
         pendingRound: undefined,
         logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -106,6 +108,7 @@ describe('convertGraphEvents', () => {
           tool_call_id: 'call-1',
           tool_id: 'inline.dynamic',
           tool_origin: ToolOrigin.inline,
+          tool_type: ToolType.builtin,
         }),
       }),
     ]);
@@ -140,6 +143,7 @@ describe('convertGraphEvents', () => {
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
             getToolOrigin: jest.fn(),
+            getToolType: jest.fn(),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -190,6 +194,7 @@ describe('convertGraphEvents', () => {
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
             getToolOrigin: jest.fn(),
+            getToolType: jest.fn(),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -257,6 +262,7 @@ describe('convertGraphEvents', () => {
             toolManager: {
               getToolIdMapping: jest.fn().mockReturnValue(new Map()),
               getToolOrigin: jest.fn(),
+              getToolType: jest.fn(),
             } as any,
             pendingRound: undefined,
             logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -322,6 +328,7 @@ describe('convertGraphEvents', () => {
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
             getToolOrigin: jest.fn(),
+            getToolType: jest.fn(),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
@@ -374,6 +381,7 @@ describe('convertGraphEvents', () => {
           toolManager: {
             getToolIdMapping: jest.fn().mockReturnValue(new Map()),
             getToolOrigin: jest.fn(),
+            getToolType: jest.fn(),
           } as any,
           pendingRound: undefined,
           logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,

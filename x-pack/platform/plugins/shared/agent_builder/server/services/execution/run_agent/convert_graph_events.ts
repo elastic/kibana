@@ -160,6 +160,7 @@ export const convertGraphEvents = ({
                       params: toolCallArgs,
                       toolCallGroupId,
                       toolOrigin: toolManager.getToolOrigin(toolId),
+                      toolType: toolManager.getToolType(toolId),
                     })
                   );
                 }
