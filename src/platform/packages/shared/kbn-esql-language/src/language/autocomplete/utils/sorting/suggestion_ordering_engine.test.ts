@@ -38,6 +38,18 @@ describe('SuggestionOrderingEngine', () => {
     expect(result[3].label).toBe('operator');
   });
 
+  it('should rank NEW_LINE ahead of CUSTOM_ACTION', () => {
+    const suggestions = [
+      createSuggestion('action', SuggestionCategory.CUSTOM_ACTION),
+      createSuggestion('New line', SuggestionCategory.NEW_LINE),
+    ];
+
+    const result = engine.sort(suggestions, { command: 'EVAL' });
+
+    expect(result[0].label).toBe('New line');
+    expect(result[1].label).toBe('action');
+  });
+
   it('should apply context-specific boosts (STATS BY)', () => {
     const suggestions = [
       createSuggestion('myColumn', SuggestionCategory.USER_DEFINED_COLUMN),
