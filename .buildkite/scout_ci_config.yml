@@ -9,6 +9,8 @@ plugins:
     - data_view_management
     - discover_enhanced
     - exploratory_view
+    - graph
+    - home
     - index_management
     - infra
     - lens

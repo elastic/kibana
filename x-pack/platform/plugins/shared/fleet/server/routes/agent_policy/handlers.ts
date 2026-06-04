@@ -7,8 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import { escapeQuotes } from '@kbn/es-query';
-import pMap from 'p-map';
+import { escapeQuotes, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { dump } from 'js-yaml';
 
 import { isEmpty, uniq } from 'lodash';
@@ -25,11 +24,7 @@ import {
   licenseService,
 } from '../../services';
 import { type AgentClient } from '../../services/agents';
-import {
-  AGENTS_PREFIX,
-  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
-  UNPRIVILEGED_AGENT_KUERY,
-} from '../../constants';
+import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -81,45 +76,70 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
+interface AssignedAgentsCountAggregation {
+  buckets: Record<
+    string,
+    {
+      doc_count: number;
+      unprivileged?: { doc_count: number };
+      fips?: { doc_count: number };
+    }
+  >;
+}
+
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
 ) {
-  await pMap(
-    agentPolicies,
-    (agentPolicy: GetAgentPoliciesResponseItem) => {
-      const totalAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(agentPolicy.id)}"`,
-        })
-        .then(({ total }) => (agentPolicy.agents = total));
-      const unprivilegedAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
-            agentPolicy.id
-          )}" and ${UNPRIVILEGED_AGENT_KUERY}`,
-        })
-        .then(({ total }) => (agentPolicy.unprivileged_agents = total));
-      const fipsAgents = agentClient
-        .listAgents({
-          showInactive: true,
-          perPage: 0,
-          page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
-            agentPolicy.id
-          )}" and ${FIPS_AGENT_KUERY}`,
-        })
-        .then(({ total }) => (agentPolicy.fips_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
-    },
-    { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
+  if (agentPolicies.length === 0) {
+    return;
+  }
+
+  // Compute the per-policy agent counts with a single bucketed aggregation rather than issuing
+  // several agent searches per policy. A `filters` aggregation produces one bucket per policy
+  // (keyed by policy id), each with sub-aggregations for the unprivileged/FIPS counts. This keeps
+  // the work to one ES request regardless of page size.
+  const policyKueryById = new Map(
+    agentPolicies.map((agentPolicy) => [
+      agentPolicy.id,
+      `policy_id:"${escapeQuotes(agentPolicy.id)}"`,
+    ])
   );
+
+  const { aggregations } = await agentClient.listAgents({
+    showInactive: true,
+    perPage: 0,
+    page: 1,
+    kuery: [...policyKueryById.values()].join(' or '),
+    aggregations: {
+      policies: {
+        filters: {
+          filters: Object.fromEntries(
+            [...policyKueryById].map(([id, kuery]) => [
+              id,
+              toElasticsearchQuery(fromKueryExpression(kuery)),
+            ])
+          ),
+        },
+        aggs: {
+          unprivileged: {
+            filter: toElasticsearchQuery(fromKueryExpression(UNPRIVILEGED_AGENT_KUERY)),
+          },
+          fips: { filter: toElasticsearchQuery(fromKueryExpression(FIPS_AGENT_KUERY)) },
+        },
+      },
+    },
+  });
+
+  const buckets =
+    (aggregations?.policies as AssignedAgentsCountAggregation | undefined)?.buckets ?? {};
+
+  for (const agentPolicy of agentPolicies as GetAgentPoliciesResponseItem[]) {
+    const bucket = buckets[agentPolicy.id];
+    agentPolicy.agents = bucket?.doc_count ?? 0;
+    agentPolicy.unprivileged_agents = bucket?.unprivileged?.doc_count ?? 0;
+    agentPolicy.fips_agents = bucket?.fips?.doc_count ?? 0;
+  }
 }
 
 function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
