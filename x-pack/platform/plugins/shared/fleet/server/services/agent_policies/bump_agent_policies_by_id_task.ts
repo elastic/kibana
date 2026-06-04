@@ -12,7 +12,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { agentPolicyService, appContextService } from '..';
 import { runWithCache } from '../epm/packages/cache';
@@ -26,7 +25,7 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
       timeout: '5m',
       maxAttempts: 3,
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const agentPolicyIdsWithSpace: Array<{ id: string; spaceId?: string }> =
+        const agentPolicyIdsWithSpace: Array<{ id: string; spaceId: string }> =
           taskInstance.params.agentPolicyIdsWithSpace;
         const user: AuthenticatedUser | undefined = taskInstance.params.user;
         let cancelled = false;
@@ -39,7 +38,7 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
               .getLogger()
               .debug(`Bumping revision of ${agentPolicyIdsWithSpace.length} agent policies`);
             const agentPolicyIdsIndexedBySpace = agentPolicyIdsWithSpace.reduce(
-              (acc, { id, spaceId = DEFAULT_SPACE_ID }) => {
+              (acc, { id, spaceId }) => {
                 if (!acc[spaceId]) {
                   acc[spaceId] = [];
                 }
@@ -73,7 +72,7 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
 
 export async function scheduleBumpAgentPoliciesByIdTask(
   taskManagerStart: TaskManagerStartContract,
-  agentPolicyIdsWithSpace: Array<{ id: string; spaceId?: string }>,
+  agentPolicyIdsWithSpace: Array<{ id: string; spaceId: string }>,
   user?: AuthenticatedUser
 ) {
   if (!agentPolicyIdsWithSpace.length) {

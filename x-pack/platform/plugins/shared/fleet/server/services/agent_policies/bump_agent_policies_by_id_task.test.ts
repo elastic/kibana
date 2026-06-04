@@ -82,22 +82,6 @@ describe('bump_agent_policies_by_id_task', () => {
       );
     });
 
-    it('falls back to the default space when spaceId is missing', async () => {
-      const runner = getRegisteredTaskRunner(
-        buildTaskInstance({
-          agentPolicyIdsWithSpace: [{ id: 'policy-1' }],
-        })
-      );
-
-      await runner.run();
-
-      expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).toHaveBeenCalledWith(
-        ['policy-1'],
-        { user: undefined },
-        'default'
-      );
-    });
-
     it('does nothing when there are no policies to bump', async () => {
       const runner = getRegisteredTaskRunner(buildTaskInstance({ agentPolicyIdsWithSpace: [] }));
 
