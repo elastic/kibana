@@ -88,7 +88,6 @@ const ID = 'BhbXBmkBR346wHgn4PeZ';
 const ENRICHMENT_HOST_ID = '8cc95778cce5407c809480e8e32ad76b';
 const ENRICHMENT_HOST_NAME = 'suricata-zeek-sensor-toronto';
 const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
-const ENRICHMENT_USER_NAME = 'root';
 
 /**
  * Test coverage:
@@ -283,12 +282,14 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]?._source?.user?.risk).toEqual(undefined);
     });
 
-    describe('with host and user risk indices', () => {
+    describe('with host risk indices', () => {
       before(async () => {
         // Auditbeat host records carry host.id so the EUID is id-based (host:<host.id>).
-        // 'root' is in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES so the local-namespace gate never
-        // fires for this user — entity.namespace falls back to 'unknown' regardless of host.id.
-        // The user EUID is therefore user:<user.name>@unknown.
+        // Note: user.name for this auditbeat record is 'root', which is in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+        // This means entity.namespace falls back to 'unknown' for root, and the postAggFilter in
+        // getEuidFromObject() also fails (entity.id not in source, namespace ≠ 'local', not IDP).
+        // getEuidFromObject() therefore returns undefined for root — user enrichment is skipped
+        // by the detection engine for system accounts. Only host enrichment is tested here.
         await entityStoreV2.setup({
           hosts: [
             {
@@ -300,16 +301,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ],
-          users: [
-            {
-              user: { name: ENRICHMENT_USER_NAME },
-              entity: {
-                id: `user:${ENRICHMENT_USER_NAME}@unknown`,
-                type: 'user',
-                risk: { calculated_level: 'Low', calculated_score_norm: 11 },
-              },
-            },
-          ],
         });
       });
 
@@ -317,7 +308,7 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreV2.teardown();
       });
 
-      it('should have host and user risk score fields', async () => {
+      it('should have host risk score fields', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -327,11 +318,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('should have host and user risk score fields when suppression enabled on interval', async () => {
+      it('should have host risk score fields when suppression enabled on interval', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -348,11 +337,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
+      it('should have host risk score fields when suppression enabled on rule execution only', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -365,29 +352,19 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
     });
 
     describe('with asset criticality', () => {
       before(async () => {
+        // User enrichment is omitted — 'root' is in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, so
+        // getEuidFromObject() returns undefined for this alert and user enrichment is skipped.
         await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
               entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
               asset: { criticality: 'high_impact' },
-            },
-          ],
-          users: [
-            {
-              user: { name: ENRICHMENT_USER_NAME },
-              entity: {
-                id: `user:${ENRICHMENT_USER_NAME}@unknown`,
-                type: 'user',
-              },
-              asset: { criticality: 'extreme_impact' },
             },
           ],
         });
@@ -405,7 +382,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('high_impact');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
 
       it('should be enriched alert with criticality_level when suppression enabled', async () => {
@@ -423,7 +399,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('high_impact');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 
