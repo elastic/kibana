@@ -117,6 +117,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/datemath'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod

@@ -324,6 +324,7 @@ export class StreamsPlugin
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
+        agentContextLayer: plugins.agentContextLayer,
         getScopedClients,
         server: this.server,
         logger: this.logger,
