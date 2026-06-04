@@ -171,9 +171,9 @@ export interface SmlDocument {
   type: string;
   /** Display title */
   title: string;
-  /** Origin ID (e.g., saved object ID) of the underlying element. */
-  origin_id: string;
-  /** Self-describing URI for the origin, constructed as `${type}://${origin_id}` at index time. */
+  /** Raw origin id (e.g. saved object ID). Not stored in the index — derived at read time from `origin.uri`. */
+  origin_id?: string;
+  /** Self-describing URI for the origin, e.g. `${type}://${origin_id}`. */
   origin: { uri: string };
   /** Searchable content (`semantic_text` in the index) */
   content: string;
@@ -450,7 +450,7 @@ export interface SmlService {
     request: KibanaRequest;
     /**
      * Optional fields to include beyond the baseline (`id`, `type`, `title`,
-     * `origin_id`, `description`). Valid opt-in values: `'content'`, `'tags'`,
+     * `description`). Valid opt-in values: `'content'`, `'tags'`,
      * `'references'`, `'spaces'`, `'permissions'`.
      */
     fields?: string[];
@@ -536,7 +536,7 @@ export interface SmlService {
     page?: number;
     perPage?: number;
     type?: string;
-    originId?: string;
+    originUri?: string;
   }) => Promise<{ total: number; results: SmlDocument[] }>;
 
   /**

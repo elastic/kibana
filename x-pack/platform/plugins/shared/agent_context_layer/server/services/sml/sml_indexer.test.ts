@@ -136,7 +136,7 @@ describe('createSmlIndexer', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            filter: [{ term: { origin_id: 'att-1' } }, { term: { ingestion_method: 'crawled' } }],
+            filter: [{ term: { 'origin.uri': 'lens://att-1' } }, { term: { ingestion_method: 'crawled' } }],
           },
         },
         refresh: false,
@@ -181,7 +181,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { bool: { filter: [{ term: { origin_id: 'att-2' } }] } },
+        query: { bool: { filter: [{ term: { 'origin.uri': 'lens://att-2' } }] } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -196,7 +196,6 @@ describe('createSmlIndexer', () => {
         id: 'mock-uuid-1',
         type: 'lens',
         title: 'My Viz',
-        origin_id: 'att-2',
         origin: { uri: 'lens://att-2' },
         content: 'content',
         created_at: expect.any(String),
@@ -262,7 +261,6 @@ describe('createSmlIndexer', () => {
         id: 'dashboard:dash-100:mock-uuid',
         type: 'dashboard',
         title: 'Sales Q3',
-        origin_id: 'dash-100',
         origin: { uri: 'dashboard://dash-100' },
         content: 'sales dashboard for Q3 with revenue and conversion metrics',
         description: 'Quarterly sales overview, executive audience',

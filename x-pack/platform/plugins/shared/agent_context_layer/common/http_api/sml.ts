@@ -87,7 +87,6 @@ export interface SmlHttpItem {
   id: string;
   type: string;
   title: string;
-  origin_id: string;
   origin: { uri: string };
   content: string;
   created_at: string;

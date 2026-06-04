@@ -161,7 +161,7 @@ class SmlServiceImpl implements SmlServiceInstance {
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
       },
-      listDocuments: async ({ spaceId, esClient, page, perPage, type, originId }) => {
+      listDocuments: async ({ spaceId, esClient, page, perPage, type, originUri }) => {
         return listDocuments({
           spaceId,
           esClient,
@@ -169,7 +169,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           page,
           perPage,
           type,
-          originId,
+          originId: originUri,
         });
       },
       upsertDocument: async ({ id, spaceId, document, esClient }) => {
@@ -479,9 +479,9 @@ const buildSmlEsqlQuery = ({
         lines.push('| WHERE type != ?');
       } else {
         // Non-empty → allow matching docs of this type, pass through other types
-        const idPlaceholders = criteria.ids.map(() => '?').join(', ');
-        params.push(typeId, ...criteria.ids);
-        lines.push(`| WHERE type != ? OR origin_id IN (${idPlaceholders})`);
+        const uriPlaceholders = criteria.ids.map(() => '?').join(', ');
+        params.push(typeId, ...criteria.ids.map((id) => `${typeId}://${id}`));
+        lines.push(`| WHERE type != ? OR origin.uri IN (${uriPlaceholders})`);
       }
     }
   }
@@ -590,9 +590,7 @@ export const buildConstraintsFilter = (
         bool: {
           should: [
             {
-              bool: {
-                must: [{ term: { type: typeId } }, { terms: { origin_id: criteria.ids } }],
-              },
+              terms: { 'origin.uri': criteria.ids.map((id) => `${typeId}://${id}`) },
             },
             {
               bool: {
@@ -1034,12 +1032,13 @@ const getDocumentsByIds = async ({
     for (const hit of response.hits.hits) {
       if (!hit._source) continue;
       const source = hit._source;
+      const originUri = source.origin?.uri ?? '';
       const doc: SmlDocument = {
         id: source.id ?? '',
         type: source.type ?? '',
         title: source.title ?? '',
-        origin_id: source.origin_id ?? '',
-        origin: { uri: source.origin?.uri ?? '' },
+        origin_id: originUri.split('://')[1] ?? '',
+        origin: { uri: originUri },
         content: source.content ?? '',
         created_at: source.created_at ?? '',
         updated_at: source.updated_at ?? '',
@@ -1120,7 +1119,7 @@ const getDocumentById = async ({
       id: source.id ?? '',
       type: source.type ?? '',
       title: source.title ?? '',
-      origin_id: source.origin_id ?? '',
+      origin_id: (source.origin?.uri ?? '').split('://')[1] ?? '',
       origin: { uri: source.origin?.uri ?? '' },
       content: source.content ?? '',
       created_at: source.created_at ?? '',
@@ -1173,7 +1172,7 @@ const listDocuments = async ({
     filters.push({ term: { type } });
   }
   if (originId) {
-    filters.push({ term: { origin_id: originId } });
+    filters.push({ term: { 'origin.uri': originId } });
   }
 
   try {
@@ -1201,12 +1200,13 @@ const listDocuments = async ({
       .filter((hit) => hit._source != null)
       .map((hit) => {
         const source = hit._source!;
+        const uri = source.origin?.uri ?? '';
         return {
           id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
-          origin_id: source.origin_id ?? '',
-          origin: { uri: source.origin?.uri ?? '' },
+          origin_id: uri.split('://')[1] ?? '',
+          origin: { uri },
           content: source.content ?? '',
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
@@ -1295,7 +1295,6 @@ const upsertDocument = async ({
     id,
     type: document.type,
     title: document.title,
-    origin_id: document.origin_id,
     origin: { uri: `${document.type}://${document.origin_id}` },
     content: document.content,
     created_at: existing?.created_at ?? now,

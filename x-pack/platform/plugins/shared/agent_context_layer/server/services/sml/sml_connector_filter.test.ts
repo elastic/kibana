@@ -40,12 +40,7 @@ describe('buildConstraintsFilter', () => {
       bool: {
         should: [
           {
-            bool: {
-              must: [
-                { term: { type: 'connector' } },
-                { terms: { origin_id: ['conn-1', 'conn-2'] } },
-              ],
-            },
+            terms: { 'origin.uri': ['connector://conn-1', 'connector://conn-2'] },
           },
           {
             bool: {

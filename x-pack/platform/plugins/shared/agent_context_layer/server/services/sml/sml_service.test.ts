@@ -357,17 +357,17 @@ describe('SmlService', () => {
         params?: unknown[];
       };
 
-      // Constraints WHERE clause: exclude type OR allow specific origin_ids
-      expect(esql).toContain('| WHERE type != ? OR origin_id IN (?)');
+      // Constraints WHERE clause: exclude type OR allow specific origin URIs
+      expect(esql).toContain('| WHERE type != ? OR origin.uri IN (?)');
       // Agent type filter
       expect(esql).toContain('| WHERE type IN (?, ?)');
       // Agent tag filter with MV_CONTAINS
       expect(esql).toContain('| WHERE MV_CONTAINS(tags, ?)');
 
-      // Positional params: [spaceId, scopeTypeId, scopeId, filterType1, filterType2, filterTag, ...queryX6]
+      // Positional params: [spaceId, scopeTypeId, scopeUri, filterType1, filterType2, filterTag, ...queryX6]
       expect(params![0]).toBe('default'); // spaceId
       expect(params![1]).toBe('connector'); // constraints typeId
-      expect(params![2]).toBe('gh-1'); // constraints id
+      expect(params![2]).toBe('connector://gh-1'); // constraints origin URI
       expect(params![3]).toBe('connector'); // filter type 1
       expect(params![4]).toBe('dashboard'); // filter type 2
       expect(params![5]).toBe('production'); // filter tag
@@ -823,12 +823,7 @@ describe('SmlService', () => {
         bool: {
           should: [
             {
-              bool: {
-                must: [
-                  { term: { type: 'connector' } },
-                  { terms: { origin_id: ['gh-1', 'jira-1'] } },
-                ],
-              },
+              terms: { 'origin.uri': ['connector://gh-1', 'connector://jira-1'] },
             },
             { bool: { must_not: [{ term: { type: 'connector' } }] } },
           ],
@@ -1235,8 +1230,7 @@ describe('SmlService', () => {
                 id: 'doc-1',
                 type: 'lens',
                 title: 'Doc 1',
-                origin_id: 'ref-1',
-                origin: { uri: 'ref-1' },
+                origin: { uri: 'lens://ref-1' },
                 content: 'content 1',
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
@@ -1249,8 +1243,7 @@ describe('SmlService', () => {
                 id: 'doc-2',
                 type: 'dashboard',
                 title: 'Doc 2',
-                origin_id: 'ref-2',
-                origin: { uri: 'ref-2' },
+                origin: { uri: 'dashboard://ref-2' },
                 content: 'content 2',
                 description: 'dash desc',
                 user_id: 'u2',
@@ -1277,7 +1270,7 @@ describe('SmlService', () => {
         type: 'lens',
         title: 'Doc 1',
         origin_id: 'ref-1',
-        origin: { uri: 'ref-1' },
+        origin: { uri: 'lens://ref-1' },
         content: 'content 1',
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
@@ -1290,7 +1283,7 @@ describe('SmlService', () => {
         type: 'dashboard',
         title: 'Doc 2',
         origin_id: 'ref-2',
-        origin: { uri: 'ref-2' },
+        origin: { uri: 'dashboard://ref-2' },
         content: 'content 2',
         description: 'dash desc',
         user_id: 'u2',
@@ -1317,8 +1310,7 @@ describe('SmlService', () => {
                 id: 'doc-3',
                 type: 'dashboard',
                 title: 'Sales Q3',
-                origin_id: 'dash-100',
-                origin: { uri: 'dash-100' },
+                origin: { uri: 'dashboard://dash-100' },
                 content: 'sales content',
                 description: 'sales summary',
                 tags: ['sales', 'executive'],
@@ -1347,7 +1339,7 @@ describe('SmlService', () => {
         type: 'dashboard',
         title: 'Sales Q3',
         origin_id: 'dash-100',
-        origin: { uri: 'dash-100' },
+        origin: { uri: 'dashboard://dash-100' },
         content: 'sales content',
         description: 'sales summary',
         tags: ['sales', 'executive'],
@@ -1511,7 +1503,7 @@ describe('SmlService', () => {
       expect(call.size).toBe(20);
     });
 
-    it('adds optional type and origin_id filters when provided', async () => {
+    it('adds optional type and origin_uri filters when provided', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -1524,7 +1516,7 @@ describe('SmlService', () => {
         spaceId: 'default',
         esClient: scopedClient,
         type: 'dashboard',
-        originId: 'dash-1',
+        originUri: 'dashboard://dash-1',
       });
 
       const call = esClient.search.mock.calls[0]![0]! as {
@@ -1532,10 +1524,10 @@ describe('SmlService', () => {
       };
       const filters = call.query!.bool!.filter!;
       expect(filters).toContainEqual({ term: { type: 'dashboard' } });
-      expect(filters).toContainEqual({ term: { origin_id: 'dash-1' } });
+      expect(filters).toContainEqual({ term: { 'origin.uri': 'dashboard://dash-1' } });
     });
 
-    it('does not add type/origin_id filters when omitted', async () => {
+    it('does not add type/origin_uri filters when omitted', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -1897,7 +1889,7 @@ describe('SmlService', () => {
                 id: 'doc-1',
                 type: 'lens',
                 title: 'A',
-                origin_id: 'ref-1',
+                origin: { uri: 'lens://ref-1' },
                 content: '',
                 created_at: '',
                 updated_at: '',
@@ -1934,7 +1926,7 @@ describe('SmlService', () => {
                 id: 'doc-1',
                 type: 'lens',
                 title: 'A',
-                origin_id: 'ref-1',
+                origin: { uri: 'lens://ref-1' },
                 content: '',
                 created_at: '',
                 updated_at: '',
@@ -1970,7 +1962,7 @@ describe('SmlService', () => {
                 id: 'doc-1',
                 type: 'lens',
                 title: 'A',
-                origin_id: 'ref-1',
+                origin: { uri: 'lens://ref-1' },
                 content: '',
                 created_at: '',
                 updated_at: '',
@@ -2006,7 +1998,7 @@ describe('SmlService', () => {
                 id: 'doc-1',
                 type: 'lens',
                 title: 'A',
-                origin_id: 'ref-1',
+                origin: { uri: 'lens://ref-1' },
                 content: '',
                 created_at: '',
                 updated_at: '',

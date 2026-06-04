@@ -78,7 +78,7 @@ describe('registerGetRoute', () => {
       esClient: expect.any(Object),
     });
     expect(response.ok).toHaveBeenCalledWith({
-      body: { item: sampleDocument },
+      body: { item: expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin }) },
     });
   });
 

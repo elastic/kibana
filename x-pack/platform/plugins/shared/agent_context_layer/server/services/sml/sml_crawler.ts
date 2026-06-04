@@ -356,23 +356,23 @@ export class SmlCrawlerImpl implements SmlCrawler {
       // them entirely (and ACK their state) instead of letting the indexer's safety
       // net no-op every cycle. Skips apply only to create/update actions; delete is
       // always allowed because the upstream object is gone.
-      const candidateOriginIds = Array.from(
+      const candidateOriginUris = Array.from(
         new Set(
           validHits
             .filter((hit) => hit._source!.update_action !== 'delete')
-            .map((hit) => hit._source!.origin_id)
+            .map((hit) => `${attachmentType}://${hit._source!.origin_id}`)
         )
       );
-      const manualOriginIds = await this.findManualOriginIds({
+      const manualOriginUris = await this.findManualOriginUris({
         esClient,
-        originIds: candidateOriginIds,
+        originUris: candidateOriginUris,
       });
 
       const indexPromises = validHits.map((hit) => {
         const doc = hit._source!;
         const action = doc.update_action!;
 
-        if (action !== 'delete' && manualOriginIds.has(doc.origin_id)) {
+        if (action !== 'delete' && manualOriginUris.has(`${attachmentType}://${doc.origin_id}`)) {
           this.logger.debug(
             `SML crawler: skipping '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id}) — manual entry exists`
           );
@@ -477,38 +477,38 @@ export class SmlCrawlerImpl implements SmlCrawler {
    * fails — manual protection is best-effort here; the indexer's own guard is
    * the authoritative check.
    */
-  private async findManualOriginIds({
+  private async findManualOriginUris({
     esClient,
-    originIds,
+    originUris,
   }: {
     esClient: ElasticsearchClient;
-    originIds: string[];
+    originUris: string[];
   }): Promise<Set<string>> {
     const result = new Set<string>();
-    if (originIds.length === 0) return result;
+    if (originUris.length === 0) return result;
 
     try {
-      const response = await esClient.search<{ origin_id?: string }>({
+      const response = await esClient.search<{ origin?: { uri?: string } }>({
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        size: originIds.length,
+        size: originUris.length,
         track_total_hits: false,
-        _source: ['origin_id'],
+        _source: ['origin.uri'],
         query: {
           bool: {
-            filter: [{ terms: { origin_id: originIds } }, { term: { ingestion_method: 'manual' } }],
+            filter: [{ terms: { 'origin.uri': originUris } }, { term: { ingestion_method: 'manual' } }],
           },
         },
-        // Collapse so we get at most one hit per origin_id even if multiple
+        // Collapse so we get at most one hit per origin.uri even if multiple
         // manual chunks exist for the same origin.
-        collapse: { field: 'origin_id' },
+        collapse: { field: 'origin.uri' },
       });
 
       for (const hit of response.hits.hits) {
-        const originId = hit._source?.origin_id;
-        if (originId) {
-          result.add(originId);
+        const originUri = hit._source?.origin?.uri;
+        if (originUri) {
+          result.add(originUri);
         }
       }
     } catch (error) {

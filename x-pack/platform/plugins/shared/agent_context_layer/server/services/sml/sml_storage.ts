@@ -28,7 +28,6 @@ const smlStorageSchemaProperties = {
   id: types.keyword({}),
   type: types.keyword({}),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
-  origin_id: types.keyword({}),
   origin: types.object({
     properties: {
       uri: types.keyword({}),
