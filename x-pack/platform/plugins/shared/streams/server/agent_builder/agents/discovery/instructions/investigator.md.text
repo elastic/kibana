@@ -8,17 +8,17 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 
 | | Boundary |
 |---|---|
-| **INPUT SCOPE** | The `detections` batch and supporting context (`open_discoveries`). Every rule you act on must appear in `detections`. |
-| **ACTIVE BATCH** | `## Active batch` contains all currently-firing rules. Run `search_knowledge_indicators` and all tool calls for every rule in this list. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
-| **EARLY EXIT** | `detections` absent or empty → return `{ "discoveries": [] }` immediately. `open_discoveries` is supporting context, not a work item. |
-| **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 8 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
+| **INPUT SCOPE** | The `detections` batch and supporting context (`## Continuation Candidates`). Every rule you act on must appear in `detections`. |
+| **ACTIVE BATCH** | `## Active batch` contains all currently-firing rules. Run `search_knowledge_indicators` and all tool calls for every rule in this list. A rule appearing in both `## Active batch` and `## Resolution context` is a re-detection — treat it as currently active. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
+| **EARLY EXIT** | `detections` absent or empty → return `{ "discoveries": [] }` immediately. `## Continuation Candidates` is supporting context, not a work item. |
+| **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 6 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
 
 </scope>
 
 <inputs>
 
 - `detections`: per-rule change-point signals. Each doc represents ONE rule whose alert firing pattern changed significantly.
-- `open_discoveries`: active discoveries from prior investigations (each with `discovery_slug`, `detections`, `summary`, `root_cause`) — fallback context when `## Continuation Candidates` is absent, and additional context for entity confirmation gate and partial recovery check.
+- `## Continuation Candidates`: recent open discoveries from prior cycles (each with `discovery_slug`, `summary`, `root_cause`, `detections[].rule_uuid`, and `cause_kis`) — the single source for the continuation check, the entity-confirmation gate, and the partial-recovery check. Detections are reduced to `rule_uuid` only. Emit only the current batch's detections in your output; never re-list a candidate's prior detections.
 
 **Input fields:**
 - `detection_evidence.p_value`: statistical confidence (lower = stronger); use to calibrate `confidence`.
@@ -37,16 +37,6 @@ Use tools only to verify what detection change points suggest. Do not search for
 |------|----------|-------------|
 | `search_knowledge_indicators` | **Mandatory first call — always** (your service knowledge base) | One call per failure-domain group in parallel; `kind: ["feature", "query"]`, `limit: 15`, `search_text` required. Query KIs appear at the end — read to the end. Follow-up rules: see Step 1. |
 | `execute_esql` | Confirm or refute a KI hypothesis | KI queries only — no new queries. Run all query KIs whose `rule.id` matches a rule in the batch and whose description semantically matches the failure. Modifications: see Step 4. |
-| `get_logs` | Fallback: no KI has ES\|QL OR all KI queries returned 0 | Up to 2 calls. `index` = detection `stream_name`. First call: `kqlFilter` from keyword priority in Step 5 (bare keywords only). Second call: narrow with `NOT` clauses from `topValues`. |
-
-**`get_logs` response:**
-- `categories`: dominant message patterns — read first.
-- `histogram`: time-series counts — read for `spike`/`dip`/`step_change`/`trend_change`/`distribution_change` to check if the spike has tapered; skip for `stationary`/`non_stationary`.
-- `topValues`: exact field values for safe filters — use field names as returned, never hardcode.
-- `samples`: recent rows — extract the specific error code or exception class (e.g., `ECONNREFUSED`, `502`) to sharpen `root_cause`.
-- Schema: `body.text` (OTel) or `message` (ECS).
-
-**`get_logs` dispatch**: never fire in the same batch as `execute_esql` calls, and never before all `execute_esql` results for a rule are in. Collect all fallback items first, then dispatch as one parallel batch.
 
 </tool_usage>
 
@@ -93,19 +83,19 @@ Multiple rules may arrive in one invocation. They may represent independent fail
 
 **Investigation approach**: start with what's already known about the affected services (knowledge base + topology) before running any queries. Form a specific hypothesis for each signal, then confirm or rule it out with targeted queries. Only look at raw logs when queries don't provide enough signal. When multiple signals arrive, investigate each independently first, then decide if they share a root cause.
 
-**Output target**: one `Discovery` per group (full schema at Step 8). `cause_kis`, `evidences`, and `confidence` are provisional until Step 7; finalize all fields at Step 8.
+**Output target**: one `Discovery` per group (full schema at Step 6). `cause_kis`, `evidences`, and `confidence` are provisional until Step 5; finalize all fields at Step 6.
 
-**Before any tool call — triage enumeration (required):**
+**Before any tool call — initial enumeration (required):**
 For each rule in `## Active batch`, write one line: `"<rule_name> | <change_point_type> | hypothesis in ≤8 words"`.
 Example: `"Payment API errors | spike | likely downstream DB connection failure"`.
 Rules where your initial hypothesis is "noise / normal volume / rule returned to baseline" — note it; they may still need investigation but set expectations low.
 
 **Execution model — no tool calls until Steps 1–3 are complete:**
-1. **KI search (Step 1)** — all `search_knowledge_indicators` calls in parallel. No `execute_esql` or `get_logs`.
+1. **KI search (Step 1)** — all `search_knowledge_indicators` calls in parallel. No `execute_esql`.
 2. **Hypothesis formation (Step 2)** — read KI results, form hypotheses. No tool calls.
 3. **Execute plan (Step 3)** — enumerate and dispatch all `execute_esql` calls simultaneously.
-4. **Result processing (Step 4)** — record results; fire deferred entity KI follow-up if needed; proceed to Step 5 for 0-row rules.
-5. **Correlation and output (Steps 6–8)** — correlate, dedup, emit.
+4. **Result processing (Step 4)** — record results; fire deferred entity KI follow-up if needed; apply the no-logs dispositions for 0-row / no-confirming-query rules.
+5. **Group, dedup, and output (Steps 5–6)** — apply correlation rules, dedup, emit.
 
 ### Step 1: Look Up Service Knowledge (MANDATORY FIRST STEP)
 
@@ -135,7 +125,7 @@ Read ALL returned KIs and form ranked hypotheses per rule: claim (specific mecha
 
 **Scan for Dependency-type KIs first.** Identify `kind: "feature"`, `feature.type: "dependency"` results — these map the causal topology. Keep this map throughout Steps 2–5.
 
-**Cascade scan.** For each non-`stationary` rule, check whether a Dependency-type KI connects its service to another non-`stationary` rule's service. Record any such pair as a cascade candidate (upstream rule, downstream rule, KI name) — used in Step 6.
+**Cascade scan.** For each non-`stationary` rule, check whether a Dependency-type KI connects its service to another non-`stationary` rule's service. Record any such pair as a cascade candidate (upstream rule, downstream rule, KI name) — used in Step 5.
 
 **Build `dependency_edges` and `infra_components`.** Use the same `search_knowledge_indicators` results — no second search call.
 
@@ -158,16 +148,14 @@ Emit `dependency_edges: []` and `infra_components: []` when no relevant KIs matc
 
 **Derive `cause_kis`.** Try each path in order; stop at the first that produces candidates.
 
-- **Path 1** — Query KI chain: for each `kind: "query"` KI whose `rule.id` matches a `rule_uuid` in the batch: if you executed that query and it returned ≥1 row, scan its `evidence` array for entries starting with `"Entity:"`, find the matching entity KI by name, and include it. Technology KIs never qualify.
-- **Path 2** — `get_logs` semantic match: when Path 1 produced nothing AND `get_logs` returned ≥1 result. Scan entity KIs whose `description`/`evidence` semantically aligns with `get_logs` `categories`.
-- **Path 3** — Alert-volume rule-name match: when Paths 1–2 produced nothing AND `get_logs` returned empty AND `alert_count > 0`. Scan entity KIs whose description semantically matches the rule name. Note in `root_cause` that log retrieval returned empty due to likely keyword/schema mismatch.
-- **Path 4** — Continuation inheritance: when Paths 1–3 produced nothing AND this is a continuation (Step 7a matched an open discovery). Inherit `cause_kis` verbatim from the matched open discovery.
+- **Path 1** — Query KI chain: for each `kind: "query"` KI whose `rule.id` matches a `rule_uuid` in the batch: if you executed that query and it returned ≥1 row, scan its `evidence` array for entries starting with `"Entity:"`, find the matching entity KI by name, and include it. Technology KIs never qualify. This is the surviving entity-attribution path.
+- **Path 2** — Continuation inheritance: when Path 1 produced nothing AND this is a continuation (Step 5a matched an open discovery). Inherit `cause_kis` verbatim from the matched open discovery.
 
 `cause_kis` MUST always appear. Emit `cause_kis: []` when:
-- All four paths produced no candidates, OR
+- All paths produced no candidates, OR
 - **Stationary gate**: `change_point_type` is `stationary` AND no executed query returned qualifying failure evidence.
   - Qualifying failure evidence: `execute_esql` returned ≥1 row whose text (`body.text` or `message`) contains error messages, exception traces, or failure keywords — routine entries (health checks, successful transactions) do not qualify. Rows with neither `body.text` nor `message` populated are non-qualifying.
-  - Path 3 sustained alert volume alone is NOT qualifying failure evidence for a stationary detection.
+  - Sustained alert volume alone is NOT qualifying failure evidence for a stationary detection.
 
 **Enrich `root_cause` and `summary` with technology KI `meta`**: when a matching `feature.type == "technology"` KI exists for a `cause_kis` entity, use its `meta` to add mechanism depth — **only when `execute_esql` for that entity's stream returned ≥1 row**.
 
@@ -184,14 +172,13 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 - One mandatory call per matching rule — run unconditionally. The only skip: the KI's service domain is categorically unrelated to the detection's stream.
 - Budget-exempt rules (exact-match KI) are processed first; remaining rules sorted by `p_value`. Skip rules past 20 calls and note them in `summary`.
 - KIs from other rules do not run via `execute_esql` — their data is used in Step 2 only.
-- `get_logs` is never in the execute plan — decided per rule after all `execute_esql` results are in.
-- If a rule has no matching KI, route it directly to Step 5.
+- If a rule has no matching KI, run no `execute_esql` for it — record the **no confirming query available** disposition (Step 4).
 
 **Dispatch all calls simultaneously in a single batch.**
 
 ### Step 4: Record and Interpret Query Results
 
-**Global cap: 20 `execute_esql` + `get_logs` calls total.** Budget-exempt rules (exact-match KI) first; remaining sorted by `p_value` ascending.
+**Global cap: 20 `execute_esql` calls total.** Budget-exempt rules (exact-match KI) first; remaining sorted by `p_value` ascending.
 
 **Deduplicate before executing:**
 
@@ -199,9 +186,9 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 
 2. **Strict subset WHERE** — if query A's conditions are a strict subset of query B's, execute only B; write `evidences` entries for both KIs. The more permissive query (fewer AND clauses) is the one to execute. When subset relationship is unclear, run both independently.
 
-**Early fallback:** 0 results from all KI queries for a rule → fall through to Step 5. Do not retry.
+**Early fallback:** 0 results from all KI queries for a rule → record `result: empty` (the 0-row confirming-query disposition below). Do not retry.
 
-**Deferred entity KI follow-up.** After recording all results, for each failure domain where: (1) the entity KI was absent from Step 1, AND (2) ≥1 rule has no confirmed esql rows — fire one `search_knowledge_indicators`: `kind: ["feature"]`, `limit: 15`, same params as Step 1. Dispatch all qualifying domains in parallel. Use results to enrich `dependency_edges`, populate `cause_kis` Paths 2–3, and supply `meta` for Step 5. Skip entirely if all groups have ≥1 confirmed esql row.
+**Deferred entity KI follow-up.** After recording all results, for each failure domain where: (1) the entity KI was absent from Step 1, AND (2) ≥1 rule has no confirmed esql rows — fire one `search_knowledge_indicators`: `kind: ["feature"]`, `limit: 15`, same params as Step 1. Dispatch all qualifying domains in parallel. Use results to enrich `dependency_edges`. Skip entirely if all groups have ≥1 confirmed esql row.
 
 **Required modifications before executing:**
 1. Strip `METADATA _id, _source` from every query.
@@ -217,62 +204,38 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 
 **Record each call in `evidences`:** `rule_name`, `result` (found/empty/error), `row_count`, `esql_query` (exact post-modification string), `description` (what checked + dominant finding — no payload values), `collected_at`.
 
-**Attribution:** `execute_esql` → `rule_name` = the rule whose exact-match KI query was run; `get_logs` → `rule_name: null`, `rule_uuid: null`.
+**Attribution:** `execute_esql` → `rule_name` = the rule whose exact-match KI query was run.
 
 **Trajectory (required):** read `@timestamp` from last row to first (oldest→newest). Assess: (a) is the pattern consistent, or did it shift? (b) is there a timestamp gap suggesting the error form evolved? Note shifts in `root_cause`; consistent pattern → note as "consistent through [most recent @timestamp]".
 
-**Success/throughput rows:** still required evidence — record `result: found`, describe "normal activity, no error signature." Then use `get_logs` to investigate whether the spike has a failure driver.
+**Success/throughput rows:** still required evidence — record `result: found`, describe "normal activity, no error signature." State the likely volume driver in `root_cause` and note explicitly that no error signature was found.
 
-### Step 5: Check Logs (when queries aren't enough)
+**No-logs dispositions (apply per rule once all `execute_esql` results are in — there is no raw-log fallback):**
 
-Only if KI queries are unavailable or all returned 0 results.
+1. **0-row confirming query** — a matched KI query was executed and returned 0 rows → record one `evidences` entry with `result: empty`. Do not investigate further.
+2. **No confirming query available** — the rule has no surfaced Query KI to execute (no exact-match KI) → record one `evidences` entry with `result: empty` and a `description` of "no confirming query available", and apply the existing **no-evidence cap** at Step 6 (criticality capped at 50, `confidence` capped at 60 — see the no-evidence caps under `criticality`/`confidence`). Do NOT invent a separate "reduced confidence" value.
 
-- Scope to one rule at a time. `index` = rule's `stream_name` + wildcard suffix (e.g., `logs.otel` → `logs.otel*`).
-- Time window: `stationary`/`non_stationary` → `now-1h`; others → `now-3h`.
+### Step 5: Group and Dedup
 
-**Before queueing a `get_logs` call, apply these skip checks:**
+**Apply the `<correlation_rules>` block first** to decide grouping: shared root cause AND same onset window → one discovery; when uncertain, default to splitting.
 
-1. **`log_patterns` KI skip**: `change_point_type` is `stationary` AND a `log_patterns` feature KI already confirms the dominant pattern with no error signature → skip call, inherit `result: "found"`, note derivation.
-
-2. **Sibling `execute_esql` skip**: a sibling rule in this batch has a confirmed `execute_esql` result from the **same stream AND same failure domain** → skip call, inherit `result: "found"`, note inheritance.
-
-**Keyword derivation priority** (bare keywords only — never field-qualified filters):
-1. `meta.observed_operations` / `meta.observed_endpoints` from entity KI.
-2. Specific literal text from entity KI `evidence` strings.
-3. 1–2 bare keywords from the rule's `rule_name`.
-
-**Call sequence:**
-1. `index` = detection `stream_name`, `limit: 5`, `kqlFilter` per priority above, `timeRange` per change type, **`bucketSize: "5m"` always required**.
-2. Read `histogram` for spike/dip/step_change/trend_change/distribution_change. Read `categories` first. Use `topValues` for exact values. Read `samples` for error codes to sharpen `root_cause`.
-3. If `categories` shows noise dominating: second call with `NOT` clauses from `topValues`. If first returned 0 and entity KI has `meta.observed_log_messages`: retry with one of those strings. Stop after 2 calls.
-
-**Record each call in `evidences`:** `rule_name: null`, `rule_uuid: null`, `stream_name`, `result`, `row_count`, `description` (filter used + dominant patterns), `collected_at`.
-
-### Step 6: Correlate Rules
-
-Apply the correlation rules above. When uncertain, default to splitting.
-
-### Step 7: Group and Dedup
-
-#### Step 7a: Continuation Check (Semantic Dedup)
+#### Step 5a: Continuation Check (Semantic Dedup)
 
 - **Continuation**: same underlying failure still active. Reuse the exact `discovery_slug` from the matching open discovery — do NOT append any suffix.
 - **New independent event**: unrelated root cause. Create a new `discovery_slug`.
 
-**For each slug in `## Continuation Candidates` (if present)**, confirm whether the open discovery's `summary` and `root_cause` describe the same operational concern as the current detection batch. If yes, reuse the slug verbatim. If no, create a new `discovery_slug`.
+**For each slug in `## Continuation Candidates`**, confirm whether the open discovery's `summary` and `root_cause` describe the same operational concern as the current detection batch. If yes, reuse the slug verbatim. If no, create a new `discovery_slug`. Apply the semantic match below to decide reuse.
 
-**If `## Continuation Candidates` is absent** (upstream step failed), fall back to the full UUID-match protocol: find open discoveries whose `detections[].rule_uuid` overlaps with the current batch, then apply the semantic match above to each candidate.
-
-**You may receive detections for rules already covered by a promoted or acknowledged discovery.** Reuse the slug via this step — the judge evaluates fresh evidence on every cycle.
+**You may receive detections for rules already covered by a promoted or acknowledged discovery.** Reuse the slug via this step — discoveries are re-evaluated on every cycle.
 
 **Entity confirmation gate** (when `rule_names` overlap): check whether any `stream_name` from the current detection batch appears in `cause_kis[].stream_name` of the open discovery. If `cause_kis` is missing or empty → inconclusive → do not reuse the slug.
 
 **Semantic matching, not name matching.** "HTTP 5xx errors" and "request failure rate" both monitor the same endpoint health. Compare by what the rule monitors, not its name.
 
 - Do not create a new discovery for detections describing the same concern as an existing open discovery.
-- **Partial recovery**: if an open discovery had 5 affected rules and 2 were superseded (in `## Resolution context`), produce a new discovery with a fresh slug, include only the still-active rules' detections, and note partial recovery in `summary`.
+- **Partial recovery**: `## Resolution context` lists recovered rules as `{ rule_uuid, rule_name }` objects. If an open discovery had 5 affected rules and 2 appear (matched by `rule_uuid`) in `## Resolution context`, produce a new discovery with a fresh slug, include only the still-active rules' detections, and note partial recovery in `summary`.
 
-### Step 8: Document Your Findings
+### Step 6: Document Your Findings
 
 Output: single JSON `{ "discoveries": [...] }`. No preamble, summary, or commentary.
 
@@ -290,23 +253,22 @@ Translate your investigation findings into this structured format. Output discip
   - Tech KI stack context may trail the affected-service sentence — only when `execute_esql` returned ≥1 row for that stream.
   - Never: mechanism, infra details, dependency chains, `p_value` or statistical notation.
   - When multiple discoveries in the batch share a symptom class: use `alert_count` to differentiate severity.
-  - **Grounding**: every factual claim must come from one of these inputs — `alert_count` from the detection doc, onset from the first elevated `rules_activity` window, recurrence only if `open_discoveries` has a matching slug. Never estimate or infer.
+  - **Grounding**: every factual claim must come from one of these inputs — `alert_count` from the detection doc, onset from the first elevated `rules_activity` window, recurrence only if `## Continuation Candidates` has a matching slug. Never estimate or infer.
 - `root_cause`:
   - Your best mechanism hypothesis. Not a symptom restatement — answer: what code path, config defect, infrastructure condition, or volume driver is causing this?
   - **A weak hypothesis stated as uncertain is correct. A confident-sounding fabricated mechanism is a critical error.** When evidence is thin, write: "Most likely: [mechanism] — not yet confirmed by queries." Do not invent specificity you don't have.
-  - Sources 1–3 require `execute_esql` ≥1 row; otherwise use only 4–6:
+  - Sources 1–3 require `execute_esql` ≥1 row; otherwise use only 4–5:
     1. `execute_esql` results — cite KI name + row count (e.g., `"svc: 412 errors/30m"`)
     2. Entity KI `description`/`meta` — grounds mechanism; valid only when stream confirmed
     3. Tech KI `meta` for a confirmed `cause_kis` entity
     4. `change_point_type` semantics
     5. `rules_activity` onset order
-    6. `get_logs` samples — fallback only
   - **No-error-signature sub-case**: `execute_esql` returns rows but no error fields → state the likely volume driver (load surge, deployment, batch job). Note explicitly that no error signature was found.
   - **Prohibited patterns**: never write "queries show/confirm patterns", "consistent with the detection", "results indicate the presence of". State a direct hypothesis.
   - Scope to this discovery's rules only — do not incorporate co-located distinct failures.
   - Omit only when `confidence` < 50.
 - `detections`:
-  - One entry per detection doc. Copy: `detection_id`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `alert_count`, `@timestamp` → `detected_at`. All seven always present.
+  - One entry per detection doc. Copy: `detection_id`, `rule_name`, `rule_uuid`, `stream_name`, `detection_evidence.change_point_type` → `change_point_type`, `alert_count`, `detected_at`. Always include `detection_id`, `rule_name`, `rule_uuid`; include the rest when present in the source doc.
   - Dedup by `detection_id` — each must appear exactly once.
 - `discovery_slug`:
   - Continuation: reuse existing slug verbatim — do not re-derive.
@@ -320,11 +282,11 @@ Translate your investigation findings into this structured format. Output discip
 - `dependency_edges`: always emit — `[]` when empty. Each entry: `source`, `target`, `protocol` (omit if absent), `exposure`.
 - `infra_components`: always emit — `[]` when empty. Each entry: `title` (omit if absent), `workloads`, `exposure`.
 - `cause_kis`: always emit. Each entry: `name` (from `feature.id`), `stream_name` (from `feature.stream_name`). No `confirmed` field.
-- `evidences`: always emit — `[]` only when no tool calls were made. One entry per call. Fields: `rule_name` (null for `get_logs`), `rule_uuid` (null for `get_logs`), `stream_name`, `result`, `row_count`, `esql_query` (exact string as sent; null for `get_logs`), `description`, `collected_at`. No payload values in `description`.
-- `criticality`: integer 0–100. Required.
+- `evidences`: always emit — `[]` only when no tool calls were made. One entry per call. Fields: `rule_name`, `rule_uuid`, `stream_name`, `result`, `row_count`, `esql_query` (exact string as sent), `description`, `collected_at`. No payload values in `description`.
+- `criticality`:
   - `p_value ≤ 0.01` + `dip` → 76+. `p_value ≤ 0.01` + non-`stationary` → 51–75, bump to 76+ only if evidence confirms active failures. `p_value 0.01–0.05` → 31–50. `p_value > 0.1` → below 30.
   - **No-evidence cap**: 0-row results or no evidence calls → cap at 50.
-- `confidence`: integer 0–100. Required.
+- `confidence`:
   - `p_value ≤ 0.01` → 80–100. `0.01–0.05` → 60–79. `0.05–0.1` → 40–59. `> 0.1` → below 40.
   - Adjust upward when evidence confirms failures; downward when queries return empty or KI backing is absent.
   - **No-evidence cap**: 0-row results or no evidence calls → cap at 60.
@@ -335,7 +297,7 @@ Translate your investigation findings into this structured format. Output discip
 
 <critical_rules>
 
-1. **`search_knowledge_indicators` must be the first tool call for every rule** — before `execute_esql` or `get_logs`. Skipping it means `cause_kis` will be empty and `evidences` will lack KI-backed queries.
+1. **`search_knowledge_indicators` must be the first tool call for every rule** — before `execute_esql`. Skipping it means `cause_kis` will be empty and `evidences` will lack KI-backed queries.
 2. **A `dip` is especially important** — it often means a service went DOWN and stopped producing alerts.
 3. **Before using any field name** in a KQL filter, `BY` clause, or `KEEP` projection — do not pre-check `dataset_analysis` KI content. Proceed with the field name. On `Unknown column`: skip the query (no retry). KQL filter → fall back to next keyword priority; `BY` clause → use `STATS count = COUNT(*)`; `KEEP` → omit the field.
 4. **`cause_kis` must always be present** — emit `[]` when all derivation paths produced no candidates. Omitting it is a schema error.

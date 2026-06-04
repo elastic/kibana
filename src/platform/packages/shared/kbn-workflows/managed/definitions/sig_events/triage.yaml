@@ -40,9 +40,6 @@ consts:
   KIND_FINDING: 'finding'
   LOOKUP_BATCH_SIZE: 100
   REVIEWED_IDS_MAX: 1000
-  STATUS_ACKNOWLEDGED: 'acknowledged'
-  STATUS_DEMOTED: 'demoted'
-  STATUS_PROMOTED: 'promoted'
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_space_vars
@@ -99,6 +96,9 @@ steps:
                   unmapped_type: integer
               - '@timestamp':
                   order: desc
+            # Collapse by discovery_slug so the judge sees one finding per incident.
+            collapse:
+              field: discovery_slug
             _source:
               includes:
                 - discovery_id
@@ -145,6 +145,9 @@ steps:
                   unmapped_type: integer
               - '@timestamp':
                   order: desc
+            # Collapse by discovery_slug so the judge sees one finding per incident.
+            collapse:
+              field: discovery_slug
             _source:
               includes:
                 - discovery_id
@@ -358,6 +361,44 @@ steps:
                   type: string
                 root_cause:
                   type: string
+                cause_kis:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      stream_name:
+                        type: string
+                dependency_edges:
+                  type: array
+                  items:
+                    type: object
+                    required: [source, target]
+                    properties:
+                      source:
+                        type: string
+                      target:
+                        type: string
+                      protocol:
+                        type: string
+                      exposure:
+                        type: string
+                        enum: ['exposed', 'not_exposed']
+                infra_components:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      workloads:
+                        type: array
+                        items:
+                          type: string
+                      exposure:
+                        type: string
+                        enum: ['exposed', 'not_exposed']
                 evidences:
                   type: array
                   items:
@@ -366,13 +407,13 @@ steps:
                       rule_name:
                         anyOf:
                           - type: string
-                          - type: "null"
-                        description: "Name of the rule this evidence targets. Null for get_logs entries."
+                          - type: 'null'
+                        description: 'Name of the rule this evidence targets.'
                       rule_uuid:
                         anyOf:
                           - type: string
-                          - type: "null"
-                        description: "UUID of the rule this evidence targets. Null for get_logs entries."
+                          - type: 'null'
+                        description: 'UUID of the rule this evidence targets.'
                       result:
                         type: string
                         enum: [found, empty, error]
@@ -461,16 +502,11 @@ steps:
       - name: compute_write_gate
         type: data.set
         with:
-          no_doc: >-
-            ${{ steps.check_existing_event.output.hits.total.value == 0 }}
-          existing_status: '{% if steps.check_existing_event.output.hits.total.value > 0 %}{{ steps.check_existing_event.output.hits.hits[0]._source.status }}{% endif %}'
-          needs_new_event: >-
-            ${{ steps.compute_write_gate.output.no_doc and foreach.item.status != consts.STATUS_DEMOTED }}
-          needs_revision: >-
-            ${{ not steps.compute_write_gate.output.no_doc and steps.compute_write_gate.output.existing_status != foreach.item.status }}
           should_write: >-
-            ${{ steps.compute_write_gate.output.needs_new_event or steps.compute_write_gate.output.needs_revision }}
-          event_id: '{% if steps.compute_write_gate.output.needs_new_event %}{{ foreach.item.discovery_id }}-event{% else %}{{ execution.id }}-{{ foreach.item.discovery_id }}{% endif %}'
+            ${{ steps.check_existing_event.output.hits.total.value == 0
+            or steps.check_existing_event.output.hits.total.value > 0
+            and steps.check_existing_event.output.hits.hits[0]._source.status != foreach.item.status }}
+          event_id: '{% if steps.check_existing_event.output.hits.total.value == 0 %}{{ foreach.item.discovery_id }}-event{% else %}{{ execution.id }}-{{ foreach.item.discovery_id }}{% endif %}'
           created_at: "{% if steps.check_existing_event.output.hits.total.value > 0 %}{{ steps.check_existing_event.output.hits.hits[0]._source.created_at }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
           previous_event_id: '{% if steps.check_existing_event.output.hits.total.value > 0 %}{{ steps.check_existing_event.output.hits.hits[0]._source.event_id }}{% endif %}'
 

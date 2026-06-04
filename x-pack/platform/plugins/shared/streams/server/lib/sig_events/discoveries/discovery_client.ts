@@ -58,7 +58,7 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: FIELD_DISCOVERY_ID,
+      groupBy: FIELD_DISCOVERY_SLUG,
     });
   }
 
@@ -70,53 +70,53 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: FIELD_DISCOVERY_ID,
+      groupBy: FIELD_DISCOVERY_SLUG,
       where: esql.exp`${esql.col('kind')} == ${esql.str('finding')}`,
     });
 
     if (!result.hits.length) return result;
 
-    const clearedIds = await this.getClearedIds(
-      result.hits.map((h) => h.discovery_id).filter((id): id is string => Boolean(id))
-    );
+    const slugs = result.hits
+      .map((h) => h.discovery_slug)
+      .filter((slug): slug is string => Boolean(slug));
+
+    const clearedSlugs = await this.getClearedSlugs(slugs);
 
     return {
       ...result,
       hits: result.hits.map((h) => ({
         ...h,
-        kind: clearedIds.has(h.discovery_id ?? '') ? ('clearance' as const) : h.kind,
+        kind: clearedSlugs.has(h.discovery_slug ?? '') ? ('clearance' as const) : h.kind,
       })),
     };
   }
 
-  // Returns the set of finding IDs that have been cleared.
-  // Mirrors getProcessedIds in detection_client: a finding is cleared only when the latest
-  // clearance doc timestamp is on or after the latest finding doc timestamp, so re-opened
-  // findings (no newer clearance) are not reported as cleared.
+  // Returns the set of discovery slugs that have been cleared.
+  // Identity is slug-stable (A1): an incident is one `discovery_slug`, so clearance is
+  // derived per slug rather than per ephemeral `discovery_id`. Both finding and clearance
+  // docs carry `discovery_slug`, so we group both kinds by it directly.
+  // Mirrors getProcessedIds in detection_client: a slug is cleared only when the latest
+  // clearance doc timestamp is on or after the latest finding doc timestamp, so a slug that
+  // regrows after a clearance (newer finding, no newer clearance) is not reported as cleared.
   // Chunked at CLEARED_IDS_CHUNK_SIZE to match the getProcessedIds IN-clause guard.
-  private async getClearedIds(findingIds: string[]): Promise<Set<string>> {
-    if (!findingIds.length) return new Set();
+  private async getClearedSlugs(slugs: string[]): Promise<Set<string>> {
+    if (!slugs.length) return new Set();
 
     const cleared = new Set<string>();
-    for (let i = 0; i < findingIds.length; i += CLEARED_IDS_CHUNK_SIZE) {
-      const batch = findingIds.slice(i, i + CLEARED_IDS_CHUNK_SIZE);
-      const idLiterals = batch.map((id) => esql.str(id));
+    for (let i = 0; i < slugs.length; i += CLEARED_IDS_CHUNK_SIZE) {
+      const batch = slugs.slice(i, i + CLEARED_IDS_CHUNK_SIZE);
+      const slugLiterals = batch.map((slug) => esql.str(slug));
       const kindFinding = esql.str('finding');
       const kindClearance = esql.str('clearance');
-      // Use EVAL to normalize both doc types to the same "finding ID" for grouping:
-      // finding docs: unified_id = discovery_id
-      // clearance docs: unified_id = closes_discovery_id (references the original finding)
+      // Group both doc kinds by `discovery_slug` (the incident identity under A1):
+      // finding docs and clearance docs both carry the slug for the incident they belong to.
       const query = esql`FROM ${DISCOVERIES_DATA_STREAM}
         | WHERE ${esql.col('kibana.space_ids')} == ${esql.str(this.clients.space)} OR ${esql.col(
         'kibana.space_ids'
       )} IS NULL
         | WHERE ${esql.col('kind')} IN (${[kindFinding, kindClearance]})
-        | WHERE ${esql.col('discovery_id')} IN (${idLiterals}) OR ${esql.col(
-        'closes_discovery_id'
-      )} IN (${idLiterals})
-        | EVAL unified_id = CASE(${esql.col('kind')} == ${kindFinding}, ${esql.col(
-        'discovery_id'
-      )}, ${esql.col('closes_discovery_id')})
+        | WHERE ${esql.col('discovery_slug')} IN (${slugLiterals})
+        | EVAL unified_id = ${esql.col('discovery_slug')}
         | STATS max_finding_ts = MAX(CASE(${esql.col('kind')} == ${kindFinding}, @timestamp, null)),
                 max_clearance_ts = MAX(CASE(${esql.col(
                   'kind'

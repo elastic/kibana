@@ -45,7 +45,6 @@ export const sigEventSchema = z.object({
   infra_components: z.array(infraComponentSchema).optional(),
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
-  grouped_into: z.string().max(255).optional(),
   analysis_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
   assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
 });

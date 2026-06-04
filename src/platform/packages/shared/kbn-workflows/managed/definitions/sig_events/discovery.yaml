@@ -87,6 +87,10 @@ steps:
               order: desc
         collapse:
           field: rule_uuid
+        _source:
+          includes:
+            - rule_uuid
+            - rule_name
         query:
           bool:
             filter:
@@ -101,18 +105,18 @@ steps:
     on-failure:
       continue: true
 
-  - name: compute_resolved_quiet_uuids
+  - name: compute_resolved_quiet_rules
+    # Resolved (silenced) rules as { rule_uuid, rule_name } — the partial-recovery signal.
     type: data.set
     with:
-      resolved_rule_names: "${{ steps.get_resolved_quiet_rule_uuids.output.hits.hits | map: '_source.rule_name' | default: [] }}"
+      resolved_rules: "${{ steps.get_resolved_quiet_rule_uuids.output.hits.hits | map: '_source' | default: [] }}"
 
   # -----------------------------------------------------------------------
   # Step 2: Propagate resolutions.
   # -----------------------------------------------------------------------
   - name: get_all_open_discoveries
-    # Unconditional — not gated on resolved rules so incidents where alerts stopped
-    # without a resolution doc are also caught. Collapsed by discovery_id (not slug)
-    # so each finding is evaluated independently.
+    # Open findings for resolution propagation, one latest finding per incident.
+    # Unconditional so incidents whose alerts simply stopped (no resolution doc) are caught.
     type: elasticsearch.request
     with:
       method: POST
@@ -123,7 +127,18 @@ steps:
           - "@timestamp":
               order: desc
         collapse:
-          field: discovery_id
+          field: discovery_slug
+        _source:
+          includes:
+            - discovery_id
+            - discovery_slug
+            - detections
+            - summary
+            - root_cause
+            - title
+            - confidence
+            - criticality
+            - cause_kis
         query:
           bool:
             filter:
@@ -348,24 +363,26 @@ steps:
   # Step 3: Correlate detections into discoveries.
   # -----------------------------------------------------------------------
   - name: get_open_discoveries
-    # Read-only agent context — write correctness is governed by compute_create_gate.
+    # Bounded continuation context for the agent: latest open finding per incident,
+    # lightweight projection (detections reduced to rule_uuid).
     type: elasticsearch.request
     with:
       method: POST
       path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
       body:
-        size: "${{ consts.CONTEXT_FETCH_SIZE }}"
-        collapse:
-          field: discovery_slug
+        size: '${{ consts.CONTEXT_FETCH_SIZE }}'
         sort:
           - "@timestamp":
               order: desc
+        collapse:
+          field: discovery_slug
         _source:
           includes:
             - discovery_slug
-            - detections
             - summary
             - root_cause
+            - detections.rule_uuid
+            - cause_kis
         query:
           bool:
             filter:
@@ -378,14 +395,6 @@ steps:
                     gte: '{{ inputs.activeDiscoveryLookback }}'
     on-failure:
       continue: true
-
-  - name: compute_continuation_candidates
-    type: data.set
-    with:
-      candidates: >-
-        ${{ steps.get_open_discoveries.output.hits.hits
-        | map: '_source'
-        | default: [] }}
 
   - name: run_investigator_agent
     # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
@@ -402,21 +411,16 @@ steps:
     with:
       message: |
         ## Active batch
-        Currently-firing rules (kind: "detection", no subsequent kind: "handled"). A rule appearing in both this list and Resolution context is a re-detection — treat it as currently active.
         {{ steps.get_detected_window.output.hits.hits | json }}
 
-        ## Open discoveries
-        {{ steps.get_open_discoveries.output.hits.hits | map: '_source' | json }}
-
-        {% if steps.compute_continuation_candidates.output.candidates.size > 0 %}
+        {% if steps.get_open_discoveries.output.hits.hits.size > 0 %}
         ## Continuation Candidates
-        Pre-computed open discoveries with UUID overlap against the active detection batch. For each candidate, decide whether the open discovery describes the same operational concern — if yes, reuse the slug; if no, create a new one.
-        {{ steps.compute_continuation_candidates.output.candidates | json }}
+        {{ steps.get_open_discoveries.output.hits.hits | map: '_source' | json }}
         {% endif %}
 
-        {% if steps.compute_resolved_quiet_uuids.output.resolved_rule_names.size > 0 %}
+        {% if steps.compute_resolved_quiet_rules.output.resolved_rules.size > 0 %}
         ## Resolution context
-        {{ steps.compute_resolved_quiet_uuids.output.resolved_rule_names | json }}
+        {{ steps.compute_resolved_quiet_rules.output.resolved_rules | json }}
         {% endif %}
       schema:
         type: object
@@ -510,13 +514,13 @@ steps:
                       rule_name:
                         anyOf:
                           - type: string
-                          - type: "null"
-                        description: "Name of the rule this evidence targets. Null for get_logs entries."
+                          - type: 'null'
+                        description: 'Name of the rule this evidence targets.'
                       rule_uuid:
                         anyOf:
                           - type: string
-                          - type: "null"
-                        description: "UUID of the rule this evidence targets. Null for get_logs entries."
+                          - type: 'null'
+                        description: 'UUID of the rule this evidence targets.'
                       result:
                         type: string
                         enum: [found, empty, error]
@@ -531,8 +535,8 @@ steps:
                       esql_query:
                         anyOf:
                           - type: string
-                          - type: "null"
-                        description: "The post-modification ES|QL snapshot executed. Null for get_logs entries."
+                          - type: 'null'
+                        description: 'The post-modification ES|QL snapshot executed.'
                 discovery_slug:
                   type: string
                   pattern: "^[a-z0-9-]+__[a-z0-9-]+$"
@@ -564,9 +568,10 @@ steps:
     foreach: "${{ steps.snapshot_discoveries.output.discoveries }}"
     steps:
       - name: compute_discovery_id
+        # Per-write id; the slug is the stable incident identity.
         type: data.set
         with:
-          discovery_id: "{% if foreach.item.discovery_slug contains 'group-' %}{{ foreach.item.discovery_slug }}{% else %}{{ execution.id }}-{{ foreach.item.discovery_slug }}{% endif %}"
+          discovery_id: '{{ execution.id }}-{{ foreach.item.discovery_slug }}'
           discovery_slug: '{{ foreach.item.discovery_slug }}'
 
       - name: check_recent_finding
@@ -634,6 +639,7 @@ steps:
       - name: compute_write_gate
         type: data.set
         with:
+          # Write when there is no recent finding for the slug, or the recent one was cleared.
           needs_new_discovery: >-
             ${{ steps.compute_write_signals.output.has_recent_finding == false
             or steps.compute_write_signals.output.match_is_cleared }}
