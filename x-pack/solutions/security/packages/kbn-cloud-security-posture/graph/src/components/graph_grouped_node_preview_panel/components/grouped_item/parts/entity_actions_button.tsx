@@ -169,13 +169,15 @@ export const EntityActionsButton = ({
     <EuiPopover
       aria-label={actionsButtonAriaLabel}
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={actionsButtonAriaLabel}
-          color="text"
-          onClick={togglePopover}
-          data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
-        />
+        <EuiToolTip content={actionsButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={actionsButtonAriaLabel}
+            color="text"
+            onClick={togglePopover}
+            data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
