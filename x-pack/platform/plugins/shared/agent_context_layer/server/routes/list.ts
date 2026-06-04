@@ -42,7 +42,7 @@ export const registerListRoute = ({
             max: SML_HTTP_LIST_PER_PAGE_MAX,
           }),
           type: schema.maybe(schema.string({ minLength: 1 })),
-          origin_uri: schema.maybe(schema.string({ minLength: 1 })),
+          origin_uri: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
         }),
       },
       options: { access: 'internal' },
