@@ -235,34 +235,22 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         </EuiScreenReaderOnly>
       ),
       render: ({ serviceName }: { serviceName: string }) => {
+        const isExpanded = Boolean(itemIdToExpandedRowMap[serviceName]);
+        const toggleLabel = isExpanded
+          ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
+              defaultMessage: 'Collapse',
+            })
+          : i18n.translate('xpack.apm.storageExplorer.table.expand', {
+              defaultMessage: 'Expand',
+            });
+
         return (
-          <EuiToolTip
-            content={
-              itemIdToExpandedRowMap[serviceName]
-                ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
-                    defaultMessage: 'Collapse',
-                  })
-                : i18n.translate('xpack.apm.storageExplorer.table.expand', {
-                    defaultMessage: 'Expand',
-                  })
-            }
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj={`storageDetailsButton_${serviceName}`}
               onClick={() => toggleRowDetails(serviceName)}
-              aria-label={
-                itemIdToExpandedRowMap[serviceName]
-                  ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
-                      defaultMessage: 'Collapse',
-                    })
-                  : i18n.translate('xpack.apm.storageExplorer.table.expand', {
-                      defaultMessage: 'Expand',
-                    })
-              }
-              iconType={
-                itemIdToExpandedRowMap[serviceName] ? 'chevronSingleUp' : 'chevronSingleDown'
-              }
+              aria-label={toggleLabel}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             />
           </EuiToolTip>
         );

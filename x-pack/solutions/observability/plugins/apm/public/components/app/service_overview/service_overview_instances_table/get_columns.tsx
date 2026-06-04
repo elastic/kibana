@@ -314,22 +314,22 @@ export function getColumns({
       width: '40px',
       isExpander: true,
       render: (instanceItem: MainStatsServiceInstanceItem) => {
+        const isExpanded = Boolean(itemIdToExpandedRowMap[instanceItem.serviceNodeName]);
+        const toggleLabel = isExpanded
+          ? i18n.translate('xpack.apm.serviceOverview.instancesTable.collapse', {
+              defaultMessage: 'Collapse',
+            })
+          : i18n.translate('xpack.apm.serviceOverview.instancesTable.expand', {
+              defaultMessage: 'Expand',
+            });
+
         return (
-          <EuiToolTip
-            content={itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'}
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
               onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
-              aria-label={
-                itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
-              }
-              iconType={
-                itemIdToExpandedRowMap[instanceItem.serviceNodeName]
-                  ? 'chevronSingleUp'
-                  : 'chevronSingleDown'
-              }
+              aria-label={toggleLabel}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             />
           </EuiToolTip>
         );

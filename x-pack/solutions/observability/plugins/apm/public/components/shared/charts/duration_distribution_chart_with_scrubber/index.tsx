@@ -12,7 +12,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -133,7 +133,7 @@ export function DurationDistributionChartWithScrubber({
             ) : (
               <>
                 <EuiFlexItem grow={false}>
-                  <EuiIconTip type="info" content={emptySelectionText} size="s" />
+                  <EuiIcon type="info" size="s" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">{emptySelectionText}</EuiText>
