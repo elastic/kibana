@@ -41,7 +41,7 @@ Object {
     "title": "test",
     "version": "99.99.99",
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.1",
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
@@ -154,7 +154,7 @@ Object {
     "title": "test",
     "version": "99.99.99",
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.1",
   "paths": Object {
     "/bar": Object {
       "get": Object {
@@ -317,9 +317,7 @@ Object {
                     "type": "string",
                   },
                   "literalType": Object {
-                    "enum": Array [
-                      "literallythis",
-                    ],
+                    "const": "literallythis",
                     "type": "string",
                   },
                   "map": Object {
@@ -488,9 +486,7 @@ Object {
                     "type": "string",
                   },
                   "literalType": Object {
-                    "enum": Array [
-                      "literallythis",
-                    ],
+                    "const": "literallythis",
                     "type": "string",
                   },
                   "map": Object {
@@ -661,9 +657,7 @@ Object {
         "additionalProperties": false,
         "properties": Object {
           "type": Object {
-            "enum": Array [
-              "a",
-            ],
+            "const": "a",
             "type": "string",
           },
           "value": Object {
@@ -681,9 +675,7 @@ Object {
         "additionalProperties": false,
         "properties": Object {
           "type": Object {
-            "enum": Array [
-              "b",
-            ],
+            "const": "b",
             "type": "string",
           },
           "value": Object {
@@ -734,7 +726,7 @@ Object {
     "title": "test",
     "version": "99.99.99",
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.1",
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
@@ -823,7 +815,7 @@ Object {
     "title": "test",
     "version": "99.99.99",
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.1",
   "paths": Object {
     "/recursive": Object {
       "get": Object {
@@ -893,7 +885,7 @@ Object {
     "title": "test",
     "version": "99.99.99",
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.1",
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {

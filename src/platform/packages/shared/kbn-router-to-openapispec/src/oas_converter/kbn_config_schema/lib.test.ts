@@ -53,7 +53,7 @@ describe('convert', () => {
             type: 'string',
           },
           literalType: {
-            enum: ['literallythis'],
+            const: 'literallythis',
             type: 'string',
           },
           map: {

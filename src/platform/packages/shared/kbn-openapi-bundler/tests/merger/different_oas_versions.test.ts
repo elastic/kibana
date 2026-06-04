@@ -11,9 +11,9 @@ import { createOASDocument } from '../create_oas_document';
 import { mergeSpecs } from './merge_specs';
 
 describe('OpenAPI Merger - different OpenAPI versions', () => {
-  it('merges specs having OpenAPI 3.0.x versions', async () => {
+  it('merges specs having OpenAPI <3.1.x versions', async () => {
     const spec1 = createOASDocument({
-      openapi: '3.0.3',
+      openapi: '3.1.1',
       paths: {
         '/api/some/path': {},
       },
@@ -32,18 +32,18 @@ describe('OpenAPI Merger - different OpenAPI versions', () => {
       })
     );
 
-    expect(mergedSpec.openapi).toBe('3.0.3');
+    expect(mergedSpec.openapi).toBe('3.1.1');
   });
 
   it('throws an error when different minor OAS versions encountered', async () => {
     const spec1 = createOASDocument({
-      openapi: '3.0.3',
+      openapi: '3.1.1',
       paths: {
         '/api/some/path': {},
       },
     });
     const spec2 = createOASDocument({
-      openapi: '3.1.0',
+      openapi: '3.2.0',
       paths: {
         '/api/some/path': {},
       },
@@ -59,13 +59,13 @@ describe('OpenAPI Merger - different OpenAPI versions', () => {
 
   it('throws an error when different OAS 3.1.x patch versions encountered', async () => {
     const spec1 = createOASDocument({
-      openapi: '3.1.0',
+      openapi: '3.1.1',
       paths: {
         '/api/some/path': {},
       },
     });
     const spec2 = createOASDocument({
-      openapi: '3.1.1',
+      openapi: '3.1.2',
       paths: {
         '/api/some/path': {},
       },

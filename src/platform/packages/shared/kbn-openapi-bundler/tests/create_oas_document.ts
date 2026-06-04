@@ -8,6 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { TARGET_OPENAPI_VERSION } from '../src/utils/get_oas_version';
 
 export function createOASDocument(overrides: {
   openapi?: string;
@@ -19,7 +20,7 @@ export function createOASDocument(overrides: {
   tags?: OpenAPIV3.TagObject[];
 }): OpenAPIV3.Document {
   const document: OpenAPIV3.Document = {
-    openapi: overrides.openapi ?? '3.0.3',
+    openapi: overrides.openapi ?? TARGET_OPENAPI_VERSION,
     info: {
       title: 'Test endpoint',
       version: '2023-10-31',

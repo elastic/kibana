@@ -10,6 +10,18 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import { isReferenceObject } from '../../../common';
 
+/** Convert single-value enums (from schema.literal) to JSON Schema `const` for OAS 3.1. */
+export const convertSingleValueEnumToConst = (schema: OpenAPIV3.SchemaObject): void => {
+  const enumValues = schema.enum;
+  if (!enumValues || enumValues.length !== 1) {
+    return;
+  }
+
+  const [value] = enumValues;
+  delete schema.enum;
+  (schema as Record<string, unknown>).const = value;
+};
+
 /** Identify special case output of schema.nullable() */
 const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => {
   return (
@@ -79,4 +91,5 @@ export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   if (processNullableOutput(schema)) return;
   replaceNullableOutputWithNullable(schema);
   prettifyEnum(schema);
+  convertSingleValueEnumToConst(schema);
 };

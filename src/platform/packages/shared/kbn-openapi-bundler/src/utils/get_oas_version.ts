@@ -10,6 +10,9 @@
 import chalk from 'chalk';
 import type { ResolvedDocument } from '../bundler/ref_resolver/resolved_document';
 
+/** Target OpenAPI specification version for generated and bundled Kibana OAS documents. */
+export const TARGET_OPENAPI_VERSION = '3.1.1';
+
 export function getOasVersion(resolvedDocument: ResolvedDocument): string {
   if (typeof resolvedDocument.document.openapi !== 'string') {
     throw new Error(
@@ -21,5 +24,5 @@ export function getOasVersion(resolvedDocument: ResolvedDocument): string {
 
   // Automatically promote to the recent OAS 3.0 version which is 3.0.3
   // 3.0.3 is the version used in the specification https://swagger.io/specification/v3/
-  return version < '3.0.3' ? '3.0.3' : version;
+  return version < TARGET_OPENAPI_VERSION ? TARGET_OPENAPI_VERSION : version;
 }

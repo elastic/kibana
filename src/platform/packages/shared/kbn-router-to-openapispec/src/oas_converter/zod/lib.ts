@@ -669,94 +669,6 @@ function mergeInlineOasExtensions(node: unknown): unknown {
   return result;
 }
 
-/**
- * Recursively transform a JSON Schema object (OAS 3.1 / JSON Schema draft 2020-12)
- * into an OpenAPI 3.0-compatible Schema Object.
- *
- * Once we start offering an OAS 3.1 schema, this can be removed. Zod v4 exports OAS 3.1 by default.
- *
- * Transformations applied:
- * - `type: 'null'`  → removed, and `nullable: true` is set on the parent/sibling
- * - `const: value`  → `enum: [value]`
- * - `propertyNames`  → removed (not supported in OAS 3.0)
- * - `anyOf`/`oneOf` containing `{ type: 'null' }` → collapsed into `nullable: true`
- */
-function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, unknown> {
-  if (typeof node !== 'object' || node === null) return node;
-
-  let result: Record<string, unknown> = {};
-
-  const hasPropertyNames = 'propertyNames' in node;
-
-  for (const [key, value] of Object.entries(node)) {
-    // Strip `propertyNames` (not supported in OAS 3.0)
-    if (key === 'propertyNames') continue;
-    // Strip companion `required` emitted by z.toJSONSchema() for z.record(z.enum([...]), ...)
-    if (key === 'required' && hasPropertyNames) continue;
-
-    // `const: value` → `enum: [value]`
-    if (key === 'const') {
-      result.enum = [value];
-      continue;
-    }
-
-    // Recursively process arrays and objects
-    if (Array.isArray(value)) {
-      result[key] = value.map((item) =>
-        typeof item === 'object' && item !== null && !Array.isArray(item)
-          ? jsonSchemaToOpenApi30(item as Record<string, unknown>)
-          : item
-      );
-    } else if (typeof value === 'object' && value !== null) {
-      result[key] = jsonSchemaToOpenApi30(value as Record<string, unknown>);
-    } else {
-      result[key] = value;
-    }
-  }
-
-  // Handle `anyOf`/`oneOf` containing `{ type: 'null' }` branches:
-  // Pull out the null branch and set `nullable: true` on the remaining schema.
-  for (const combiner of ['anyOf', 'oneOf'] as const) {
-    const branches = result[combiner];
-    if (!Array.isArray(branches)) continue;
-
-    const nullIdx = branches.findIndex(
-      (b: unknown) =>
-        typeof b === 'object' &&
-        b !== null &&
-        (b as Record<string, unknown>).type === 'null' &&
-        Object.keys(b as Record<string, unknown>).length === 1
-    );
-
-    if (nullIdx === -1) continue;
-
-    // Remove the null branch
-    const remaining = branches.filter((_: unknown, i: number) => i !== nullIdx);
-
-    if (remaining.length === 1) {
-      // Single remaining branch: merge it into the current level with nullable
-      const [sole] = remaining;
-      if (typeof sole === 'object' && sole !== null) {
-        // Remove the combiner key, spread the sole schema, add nullable
-        delete result[combiner];
-        result = { ...result, ...(sole as Record<string, unknown>), nullable: true };
-      }
-    } else {
-      // Multiple remaining branches: keep the combiner, add nullable
-      result[combiner] = remaining;
-      result.nullable = true;
-    }
-  }
-
-  // Handle top-level `type: 'null'` (standalone null schema)
-  if (result.type === 'null') {
-    delete result.type;
-    result.nullable = true;
-  }
-
-  return result;
-}
-
 export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
   const unwrapped = unwrapZodType(schema, true);
 
@@ -799,18 +711,12 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
   let processedSchema: Record<string, unknown> = jsonSchema;
 
   // z.toJSONSchema() emits `$defs` for recursive schemas (e.g. FilterCondition
-  // with self-referencing and/or/not). OpenAPI 3.0 doesn't support inline `$defs`
-  // — refs must point to `#/components/schemas/...`. Extract them.
+  // with self-referencing and/or/not). Inline `$defs` must be extracted so refs
+  // point to `#/components/schemas/...`.
   if ($defs && typeof $defs === 'object' && Object.keys($defs).length > 0) {
     const extracted = extractDefsToShared($defs, jsonSchema);
     processedSchema = extracted.schema;
     shared = extracted.shared;
-  }
-
-  // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
-  processedSchema = jsonSchemaToOpenApi30(processedSchema);
-  for (const [key, value] of Object.entries(shared)) {
-    shared[key] = jsonSchemaToOpenApi30(value as Record<string, unknown>) as OpenAPIV3.SchemaObject;
   }
 
   // Ensure z.object() schemas carry `additionalProperties: false`.
@@ -822,9 +728,6 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
       value as Record<string, any>
     ) as OpenAPIV3.SchemaObject;
   }
-
-  // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
-  processedSchema = jsonSchemaToOpenApi30(processedSchema);
 
   // Extract any registered schemas that were inlined by z.toJSONSchema()
   // (single-use, non-recursive schemas don't appear in $defs — we hoist them

@@ -9,3 +9,4 @@
 
 export * from './src/openapi_bundler';
 export * from './src/openapi_merger';
+export { TARGET_OPENAPI_VERSION, getOasVersion } from './src/utils/get_oas_version';

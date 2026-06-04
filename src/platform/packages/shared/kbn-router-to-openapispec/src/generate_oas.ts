@@ -15,7 +15,7 @@ import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
 import { buildGlobalTags, createOpIdGenerator } from './util';
 
-export const openApiVersion = '3.0.0';
+export const openApiVersion = '3.1.1';
 
 export interface Env {
   serverless: boolean;
