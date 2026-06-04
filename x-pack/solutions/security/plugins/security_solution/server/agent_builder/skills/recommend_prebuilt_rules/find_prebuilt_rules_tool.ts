@@ -356,8 +356,11 @@ export const createFindPrebuiltRulesInlineTool = ({
     'Search the catalog of installable (not-yet-installed, non-deprecated) Elastic prebuilt ' +
     'detection rules using structured filters. Returns a compact triage shape per rule by ' +
     'default — rule_id, name, severity, risk_score, tags, MITRE tactics, and ' +
-    'related_integrations.package — plus the total match count. Use `related_integrations.package` ' +
-    'against the cached user inventory to reason about which rules can run on the deployment. ' +
+    'related_integrations.package — plus the total match count. Compare `related_integrations.package` ' +
+    'against the cached user inventory to reason about which rules likely have data to run on — an ' +
+    'installed integration is a signal, not a guarantee that data is flowing. ' +
+    'The response also includes `space_url_prefix`: prepend it to ' +
+    '`/app/security/rules/add_rules/<rule_id>` to build a deep link that opens a rule install flyout. ' +
     'Opt into deeper detail (description, query, full MITRE, etc.) via `fields`, and deep-fetch ' +
     'specific rules via `ruleIds`. ' +
     'Before any call that uses a `tags` filter, call `security.get_installable_catalog_overview` ' +
@@ -370,6 +373,13 @@ export const createFindPrebuiltRulesInlineTool = ({
       const [coreStart, startPlugins] = await getStartServices();
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
+      // Resolve the active Kibana space so the LLM can build install-flyout links that land
+      // users in the correct space. The default space (id "default") uses no URL prefix;
+      // custom spaces use /s/<id>. Empty string when the spaces plugin is unavailable.
+      const activeSpace = await startPlugins.spaces?.spacesService.getActiveSpace(request);
+      const spaceUrlPrefix =
+        activeSpace && activeSpace.id !== 'default' ? `/s/${activeSpace.id}` : '';
 
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
       const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
@@ -417,6 +427,7 @@ export const createFindPrebuiltRulesInlineTool = ({
             type: ToolResultType.other,
             data: {
               message: buildResponseMessage({ total, shown: rules.length, hasTagFilter }),
+              space_url_prefix: spaceUrlPrefix,
               total,
               rules,
             },
