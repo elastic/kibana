@@ -26,7 +26,6 @@ interface TestData {
 }
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   const originalTestData: TestData = {
@@ -176,8 +175,6 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });

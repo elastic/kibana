@@ -12,7 +12,6 @@ const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 import { farequoteDataViewTestData } from './index_test_data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const ml = getService('ml');
   const retry = getService('retry');
@@ -41,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('field statistics in Discover (trial license)', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();

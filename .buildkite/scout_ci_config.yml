@@ -15,6 +15,7 @@ plugins:
     - logstash
     - maps
     - ml
+    - monitoring
     - observability
     - observability_onboarding
     - painless_lab
