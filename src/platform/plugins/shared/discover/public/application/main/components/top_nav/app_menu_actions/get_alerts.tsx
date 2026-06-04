@@ -16,14 +16,15 @@ import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-
 import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
+import type { CreateAlertFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/public';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverInternalState, InternalStateDispatch } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux';
-import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -39,7 +40,7 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
 
 const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 
-const CreateAlertFlyout: React.FC<{
+const CreateV1AlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   tabId: string;
@@ -56,10 +57,6 @@ const CreateAlertFlyout: React.FC<{
   const currentTab = selectTab(getState(), tabId);
   const timeField = getTimeField(dataView);
   const { query, savedQuery: savedQueryId } = currentTab.appState;
-
-  /**
-   * Provides the default parameters used to initialize the new rule
-   */
 
   const getParams = useCallback(() => {
     if (isEsqlMode) {
@@ -125,7 +122,6 @@ export const getAlertsAppMenuItem = ({
   tabId,
   getState,
   dispatch,
-  subscribe,
   showCreateRuleV2,
 }: {
   discoverParams: AppMenuDiscoverParams;
@@ -133,40 +129,65 @@ export const getAlertsAppMenuItem = ({
   tabId: string;
   getState: () => DiscoverInternalState;
   dispatch: InternalStateDispatch;
-  subscribe: (listener: () => void) => () => void;
   showCreateRuleV2?: boolean;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
-  const items: DiscoverAppMenuPopoverItem[] = [];
-
   if (showCreateRuleV2) {
-    items.push({
-      id: 'create-esql-rule-v2',
-      order: 0,
-      label: i18n.translate('discover.alerts.createEsqlRuleV2', {
-        defaultMessage: 'Create ES|QL rule',
-      }),
-      labelBadgeText: i18n.translate('discover.alerts.newBadge', {
-        defaultMessage: 'New',
-      }),
-      iconType: 'bell',
-      testId: 'discoverCreateEsqlRuleV2Button',
-      run: ({ context: { onFinishAction } }) => {
-        return (
-          <CreateESQLRuleFlyout
+    const legacyRuleTypes: CreateAlertFlyoutLegacyItem[] = [];
+
+    if (
+      services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+      discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
+    ) {
+      legacyRuleTypes.push({
+        id: 'search-threshold-rule',
+        label: i18n.translate('discover.alerts.legacySearchThreshold', {
+          defaultMessage: 'Search threshold rule',
+        }),
+        'data-test-subj': 'discoverLegacySearchThresholdRule',
+        render: (onClose) => (
+          <CreateV1AlertFlyout
+            onFinishAction={onClose}
+            discoverParams={discoverParams}
             services={services}
             tabId={tabId}
             getState={getState}
-            subscribe={subscribe}
+            dispatch={dispatch}
+          />
+        ),
+      });
+    }
+
+    return {
+      id: AppMenuActionId.alerts,
+      label: i18n.translate('discover.localMenu.alertsTitle', {
+        defaultMessage: 'Create alert rule',
+      }),
+      testId: 'discoverAlertsButton',
+      order: 11,
+      iconType: 'warning',
+      run: ({ context: { onFinishAction } }) => {
+        const tab = selectTab(getState(), tabId);
+        const { query } = tab.appState;
+        const esqlQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
+        const esqlVariables = tab.esqlVariables;
+        const V2Flyout = services.alertingVTwo!.CreateAlertFlyout;
+        return (
+          <V2Flyout
             onClose={onFinishAction}
+            initialQuery={esqlQuery}
+            esqlVariables={esqlVariables}
+            legacyRuleTypes={legacyRuleTypes}
           />
         );
       },
-    });
+    };
   }
+
+  const items: DiscoverAppMenuPopoverItem[] = [];
 
   if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
     items.push({
@@ -197,7 +218,7 @@ export const getAlertsAppMenuItem = ({
             }),
         run: ({ context: { onFinishAction } }) => {
           return (
-            <CreateAlertFlyout
+            <CreateV1AlertFlyout
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}

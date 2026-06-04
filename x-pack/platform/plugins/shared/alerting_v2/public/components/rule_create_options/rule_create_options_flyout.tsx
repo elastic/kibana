@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleCreateOptionsPanel } from './rule_create_options_panel';
+import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
 
@@ -26,6 +26,7 @@ export interface RuleCreateOptionsFlyoutProps {
   onCreateEsqlRule: () => void;
   onCreateWithAgent: () => void;
   onCreateThresholdAlert?: () => void;
+  legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
 export const RuleCreateOptionsFlyout = ({
@@ -33,6 +34,7 @@ export const RuleCreateOptionsFlyout = ({
   onCreateEsqlRule,
   onCreateWithAgent,
   onCreateThresholdAlert,
+  legacyRuleTypes,
 }: RuleCreateOptionsFlyoutProps) => {
   return (
     <EuiFlyout
@@ -75,6 +77,7 @@ export const RuleCreateOptionsFlyout = ({
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
           onCreateThresholdAlert={onCreateThresholdAlert}
+          legacyRuleTypes={legacyRuleTypes}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

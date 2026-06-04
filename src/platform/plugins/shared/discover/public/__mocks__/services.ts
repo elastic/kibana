@@ -327,6 +327,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     alertingVTwo: {
       DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateAlertFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },

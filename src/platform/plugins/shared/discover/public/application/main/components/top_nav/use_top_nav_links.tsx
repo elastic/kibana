@@ -48,7 +48,6 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
   useInternalStateGetState,
-  useInternalStateSubscribe,
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -89,7 +88,7 @@ export const useTopNavLinks = ({
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const getState = useInternalStateGetState();
-  const subscribe = useInternalStateSubscribe();
+
   const runtimeStateManager = useRuntimeStateManager();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
@@ -144,8 +143,7 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
-  const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+  const showCreateRuleV2 = !!services.capabilities.alertingVTwo;
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
@@ -160,7 +158,6 @@ export const useTopNavLinks = ({
         tabId: currentTab.id,
         getState,
         dispatch,
-        subscribe,
         showCreateRuleV2,
       });
       items.push(alertsAppMenuItem);
@@ -283,7 +280,6 @@ export const useTopNavLinks = ({
     appId,
     dispatch,
     getState,
-    subscribe,
     isEsqlMode,
     currentDataView,
     currentTab,

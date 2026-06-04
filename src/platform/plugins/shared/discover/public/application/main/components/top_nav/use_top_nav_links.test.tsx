@@ -422,57 +422,36 @@ describe('useTopNavLinks', () => {
       ).result.current;
     };
 
-    it('should include the alerts menu when in ES|QL mode and alerting v2 is enabled', async () => {
+    it('should include the alerts menu as a direct action when alerting v2 is enabled', async () => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
       expect(alertsItem?.label).toBe('Create alert rule');
-
-      const createRuleTopLevel = appMenuConfig.items?.find(
-        (item) => item.id === AppMenuActionId.createRule
-      );
-      expect(createRuleTopLevel).toBeUndefined();
+      expect(alertsItem?.run).toBeDefined();
+      expect(alertsItem?.items).toBeUndefined();
     });
 
-    it('should prepend the v2 ES|QL rule row inside the alerts popover when v2 is enabled', async () => {
-      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
+    it('should show the v2 selector flyout in both ES|QL and classic modes', async () => {
+      const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
+      const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
-      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
-      expect(alertsItem?.items).toBeDefined();
+      const esqlAlerts = esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      const classicAlerts = classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
 
-      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
-      expect(v2Row).toBeDefined();
-      expect(v2Row?.order).toBe(0);
-      expect(v2Row?.labelBadgeText).toBe('New');
+      expect(esqlAlerts).toBeDefined();
+      expect(esqlAlerts?.items).toBeUndefined();
+      expect(classicAlerts).toBeDefined();
+      expect(classicAlerts?.items).toBeUndefined();
     });
 
-    it('should NOT include the v2 row when not in ES|QL mode', async () => {
-      const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
-
-      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
-      expect(alertsItem).toBeDefined();
-
-      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
-      expect(v2Row).toBeUndefined();
-    });
-
-    it('should NOT include the v2 row when alerting v2 is disabled', async () => {
+    it('should fall back to v1 popover items when alerting v2 is disabled', async () => {
       const appMenuConfig = await setupWithAlertingV2({ isEsqlMode: true }, false);
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
-
-      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
-      expect(v2Row).toBeUndefined();
-    });
-
-    it('should include alerts menu in both ES|QL and classic modes', async () => {
-      const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
-      const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
-
-      expect(esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
-      expect(classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
+      expect(alertsItem?.items).toBeDefined();
+      expect(alertsItem?.items!.length).toBeGreaterThan(0);
     });
   });
 
@@ -524,7 +503,7 @@ describe('useTopNavLinks', () => {
       });
     });
 
-    it('should include the alerts menu in ES|QL mode when only alerting v2 is granted', async () => {
+    it('should show the v2 selector flyout as a direct action when only alerting v2 is granted', async () => {
       const services = setupV2OnlyServices();
       const toolkit = getDiscoverInternalStateMock({ services });
       await toolkit.initializeTabs();
@@ -552,19 +531,8 @@ describe('useTopNavLinks', () => {
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
-
-      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
-      expect(v2Row).toBeDefined();
-
-      // v1 entries must remain hidden because the user has no v1 capabilities.
-      const manageRow = alertsItem?.items?.find(
-        (item) => item.testId === 'discoverManageAlertsButton'
-      );
-      const createSearchThresholdRow = alertsItem?.items?.find(
-        (item) => item.testId === 'discoverCreateAlertButton'
-      );
-      expect(manageRow).toBeUndefined();
-      expect(createSearchThresholdRow).toBeUndefined();
+      expect(alertsItem?.run).toBeDefined();
+      expect(alertsItem?.items).toBeUndefined();
     });
 
     it('should NOT include the alerts menu when neither v1 nor v2 access is granted', async () => {
