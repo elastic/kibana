@@ -19,7 +19,6 @@ import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
 import { runRulePreviewTool } from './run_rule_preview_tool';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
-import { recommendRulesToInstallTool } from './recommend_rules_to_install_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -44,7 +43,6 @@ export const registerTools = async (
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(recommendRulesToInstallTool(core, logger));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
