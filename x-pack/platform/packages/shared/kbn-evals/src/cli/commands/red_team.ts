@@ -123,11 +123,11 @@ export const redTeamCmd: Command<void> = {
       envOverrides.RED_TEAM_TEMPLATES_ONLY = 'true';
     }
 
-    const {
-      evaluationConnectorId,
-      projects,
-      profileEnvOverrides,
-    } = await resolveRunContext(repoRoot, log, flagsReader);
+    const { evaluationConnectorId, projects, profileEnvOverrides } = await resolveRunContext(
+      repoRoot,
+      log,
+      flagsReader
+    );
 
     envOverrides.EVALUATION_CONNECTOR_ID = evaluationConnectorId;
     Object.assign(envOverrides, profileEnvOverrides);
