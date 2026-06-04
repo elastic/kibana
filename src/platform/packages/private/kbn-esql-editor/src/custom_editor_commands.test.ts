@@ -286,5 +286,19 @@ describe('Custom Editor Commands', () => {
 
       expect(mockOnPrettifyQuery).toHaveBeenCalledTimes(1);
     });
+
+    it('inserts a newline when Shift+Enter is pressed', () => {
+      addEditorKeyBindings(mockEditor, jest.fn(), jest.fn(), jest.fn());
+
+      const shiftEnterCall = (mockEditor.addCommand as jest.Mock).mock.calls.find(
+        // eslint-disable-next-line no-bitwise
+        ([keyMod]) => keyMod === (monaco.KeyMod.Shift | monaco.KeyCode.Enter)
+      );
+      expect(shiftEnterCall).toBeDefined();
+
+      shiftEnterCall[1]();
+
+      expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'type', { text: '\n' });
+    });
   });
 });

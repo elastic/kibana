@@ -340,6 +340,13 @@ export const addEditorKeyBindings = (
     () => onQuerySubmit(QuerySource.MANUAL)
   );
 
+  // Shift+Enter always inserts a newline, even while the suggestion popover is open
+  editor.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.Shift | monaco.KeyCode.Enter,
+    () => insertNewLine(editor)
+  );
+
   editor.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
