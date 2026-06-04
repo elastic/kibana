@@ -50,7 +50,7 @@ export function getDataSetByIdApiPath(id: string): string {
 export type { Dataset, DataSetWithName, DatasetSettings } from './dataset_types';
 
 export const PLUGIN_NAME = i18n.translate('dataSets.pluginName', {
-  defaultMessage: 'External data sets',
+  defaultMessage: 'External Data Sets',
 });
 
 export const LIST_BREADCRUMB = [

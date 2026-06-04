@@ -95,7 +95,16 @@ export const mainTranslations = {
       defaultMessage: 'Delete',
     }),
     addButtonLabel: i18n.translate('dataSets.addButtonLabel', {
-      defaultMessage: 'Add data source',
+      defaultMessage: 'Connect data source',
+    }),
+  },
+
+  filters: {
+    dataSource: i18n.translate('dataSets.filters.dataSource', {
+      defaultMessage: 'Data source',
+    }),
+    allDataSources: i18n.translate('dataSets.filters.allDataSources', {
+      defaultMessage: 'All data sources',
     }),
   },
 } as const;

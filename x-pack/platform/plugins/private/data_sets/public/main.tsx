@@ -10,8 +10,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiPageSection,
+  EuiSelect,
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
@@ -53,6 +56,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
+  const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
   const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
     kind: 'closed',
@@ -98,6 +102,33 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
       type: sourceByName.get(ds.data_source)?.type,
     }));
   }, [dataSetsRaw, items]);
+
+  const dataSourceFilterOptions = useMemo(
+    () => [
+      { value: '', text: mainTranslations.filters.allDataSources },
+      ...[...new Set(items.map((ds) => ds.name))]
+        .sort()
+        .map((name) => ({ value: name, text: name })),
+    ],
+    [items]
+  );
+
+  useEffect(() => {
+    if (dataSourceFilter && !items.some((ds) => ds.name === dataSourceFilter)) {
+      setDataSourceFilter('');
+    }
+  }, [dataSourceFilter, items]);
+
+  useEffect(() => {
+    setSelectedDataSets([]);
+  }, [dataSourceFilter]);
+
+  const filteredDataSetItems = useMemo(() => {
+    if (!dataSourceFilter) {
+      return dataSetItems;
+    }
+    return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
+  }, [dataSetItems, dataSourceFilter]);
 
   const handleDataSourceSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
@@ -255,7 +286,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
           <>
             <EuiSpacer size="m" />
             <EuiInMemoryTable<DataSetListRow>
-              items={dataSetItems}
+              items={filteredDataSetItems}
               itemId="name"
               columns={dataSetColumns}
               search={{
@@ -291,14 +322,29 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                     </EuiButton>
                   ) : undefined,
                 toolsRight: (
-                  <EuiButton
-                    color="primary"
-                    data-test-subj="dataSetsSetsCreateButton"
-                    iconType="plusInCircle"
-                    onClick={() => setDataSetFlyout({ kind: 'create' })}
-                  >
-                    {mainTranslations.columns.dataSets.addButtonLabel}
-                  </EuiButton>
+                  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiSelect
+                        compressed
+                        data-test-subj="dataSetsSetsDataSourceFilter"
+                        aria-label={mainTranslations.filters.dataSource}
+                        prepend={mainTranslations.filters.dataSource}
+                        options={dataSourceFilterOptions}
+                        value={dataSourceFilter}
+                        onChange={(e) => setDataSourceFilter(e.target.value)}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="primary"
+                        data-test-subj="dataSetsSetsCreateButton"
+                        iconType="plusInCircle"
+                        onClick={() => setDataSetFlyout({ kind: 'create' })}
+                      >
+                        {mainTranslations.columns.dataSets.addButtonLabel}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 ),
               }}
               rowHeader="name"
@@ -397,8 +443,10 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
       columns,
       dataClient,
       dataSetColumns,
-      dataSetItems,
+      dataSourceFilter,
+      dataSourceFilterOptions,
       dataSetsClient,
+      filteredDataSetItems,
       items,
       selectedDataSets,
       selectedItems,
