@@ -38,7 +38,7 @@ export async function retrace({
   buildId,
   logger,
 }: RetraceParams): Promise<string> {
-  const index = `android-r8-mappings-${buildId}`;
+  const index = `.android-r8-mappings-${buildId}`;
   let fetchError: unknown;
 
   const retracer = new RetracerAndroid(
