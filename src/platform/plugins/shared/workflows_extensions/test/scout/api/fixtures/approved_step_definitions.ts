@@ -26,11 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'contextEngine.addEntry',
-    // Handler implementation changed (renamed step + added feature-flag and
-    // privilege gates) so the previous hash no longer applies. The Scout
-    // step-definitions-approval test will report the new hash on first run;
-    // copy it in here and request review from the workflows-eng team.
-    handlerHash: '8a9316425c5d8aa467ee6bb5a31508cd1bfcf04d82e6033fed7b89008046a2c7',
+    handlerHash: '27344216178a96568fc8bcaf53701928a274b598b297a9b39bfbae6eb8b5b8ff',
   },
   {
     id: 'ai.agent',
