@@ -606,6 +606,8 @@ export class StreamsPlugin
       this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+      this.server.workflowsExtensions = plugins.workflowsExtensions;
+      this.server.agentBuilder = plugins.agentBuilder;
 
       // Set up memory trigger registry with all built-in triggers
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
