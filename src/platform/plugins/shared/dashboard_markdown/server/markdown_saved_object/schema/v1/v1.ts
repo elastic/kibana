@@ -13,10 +13,14 @@ export const markdownAttributesSchema = schema.object(
   {
     title: schema.string({
       meta: { description: 'A human-readable title' },
+      maxLength: 256,
     }),
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
+    description: schema.maybe(
+      schema.string({ meta: { description: 'A short description.' }, maxLength: 1000 })
+    ),
     content: schema.string({
       meta: { description: 'Markdown enriched text content' },
+      maxLength: 5000,
     }),
     settings: schema.maybe(
       schema.object({
