@@ -9,7 +9,7 @@ This folder owns the **public-side (browser) registration** of `alerting_v2` wor
 - **Public setup contract** (`WorkflowsExtensionsPublicPluginSetup`) — UI metadata for the Workflows builder (title, description, icon, docs, snippets). This is what controls discoverability of a trigger in the Workflows UI.
 - **Server setup contract** (`WorkflowsExtensionsServerPluginSetup`) — runtime validation/execution of triggers and steps.
 
-This README covers the **public** side. For the server side (where runtime emission also lives), see [`server/lib/services/workflow_extensions_service/README.md`](../../../server/lib/services/workflow_extensions_service/README.md).
+This README covers the **public** side. For the server side (where runtime emission also lives), see [`server/lib/services/workflow_service/README.md`](../../../server/lib/services/workflow_service/README.md).
 
 ## Registering a new trigger
 
