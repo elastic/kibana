@@ -121,17 +121,15 @@ describe('RulesClient', () => {
         .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
     } as unknown as ActionPolicyClient;
 
-    return new RulesClient({
-      services: {
-        request,
-        rulesSavedObjectService,
-        taskManager,
-        userService,
-        actionPolicyClient,
-        ruleEventPublisher,
-      },
-      options: { spaceId: 'space-1' },
-    });
+    return new RulesClient(
+      request,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient,
+      'space-1',
+      ruleEventPublisher
+    );
   }
 
   describe('createRule', () => {

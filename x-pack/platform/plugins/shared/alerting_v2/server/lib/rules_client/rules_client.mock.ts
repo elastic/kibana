@@ -37,17 +37,15 @@ export function createRulesClient(): {
     emitAfterRuleUpdate: jest.fn(),
   } as unknown as jest.Mocked<RuleEventPublisher>;
 
-  const rulesClient = new RulesClient({
-    services: {
-      request,
-      rulesSavedObjectService,
-      taskManager,
-      userService,
-      actionPolicyClient,
-      ruleEventPublisher,
-    },
-    options: { spaceId: 'default' },
-  });
+  const rulesClient = new RulesClient(
+    request,
+    rulesSavedObjectService,
+    taskManager,
+    userService,
+    actionPolicyClient,
+    'default',
+    ruleEventPublisher
+  );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
 }

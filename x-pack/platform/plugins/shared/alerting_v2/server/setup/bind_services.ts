@@ -7,7 +7,6 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
@@ -25,7 +24,6 @@ import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
-import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
 import { RulesClient } from '../lib/rules_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
@@ -85,23 +83,7 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(RulesClient)
-    .toDynamicValue(({ get }) => {
-      return new RulesClient({
-        services: {
-          request: get(Request),
-          rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
-          taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
-          userService: get(UserService),
-          actionPolicyClient: get(ActionPolicyClient),
-          ruleEventPublisher: get(RuleEventPublisher),
-        },
-        options: {
-          spaceId: get(RequestSpaceIdToken),
-        },
-      });
-    })
-    .inRequestScope();
+  bind(RulesClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -117,19 +99,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return spaces.spacesService.spaceIdToNamespace(spaceId);
     })
     .inRequestScope();
-  bind(ActionPolicyClient)
-    .toDynamicValue(({ get }) => {
-      return new ActionPolicyClient(
-        get(ActionPolicySavedObjectServiceScopedToken),
-        get(RulesSavedObjectServiceScopedToken),
-        get(UserService),
-        get(ApiKeyService),
-        get(EncryptedSavedObjectsClientToken),
-        get(ActionPolicyNamespaceToken),
-        get(LoggerServiceToken)
-      );
-    })
-    .inRequestScope();
+  bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
