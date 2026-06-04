@@ -41,6 +41,7 @@ export interface AppHeaderViewProps {
   padding?: AppHeaderPadding;
   docLink?: string;
   showAddIntegrations?: boolean;
+  menuIsCollapsed?: boolean;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
@@ -57,6 +58,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     padding,
     docLink,
     showAddIntegrations,
+    menuIsCollapsed,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
@@ -86,7 +88,12 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         titleAppend={titleAppend}
         trailing={
-          <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
+          <AppMenu
+            menu={menu}
+            docLink={docLink}
+            showAddIntegrations={showAddIntegrations}
+            isCollapsed={menuIsCollapsed}
+          />
         }
         metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}

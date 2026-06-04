@@ -22,26 +22,29 @@ export interface AppMenuProps {
   menu?: AppMenuConfig;
   docLink?: string;
   showAddIntegrations?: boolean;
+  isCollapsed?: boolean;
 }
 
-export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegrations }) => {
-  const { config, staticItems } = useAppHeaderMenu(menu, docLink, showAddIntegrations);
-  const hasLegacyActionMenu = useHasLegacyActionMenu();
-  const hasStaticItems = hasNonGlobalStaticItems(staticItems);
+export const AppMenu = React.memo<AppMenuProps>(
+  ({ menu, docLink, showAddIntegrations, isCollapsed = false }) => {
+    const { config, staticItems } = useAppHeaderMenu(menu, docLink, showAddIntegrations);
+    const hasLegacyActionMenu = useHasLegacyActionMenu();
+    const hasStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if (config || hasStaticItems) {
-    return (
-      <Suspense>
-        <AppMenuComponent config={config} staticItems={staticItems} />
-      </Suspense>
-    );
+    if (config || hasStaticItems) {
+      return (
+        <Suspense>
+          <AppMenuComponent config={config} staticItems={staticItems} isCollapsed={isCollapsed} />
+        </Suspense>
+      );
+    }
+
+    if (hasLegacyActionMenu) {
+      return <LegacyHeaderActionMenu />;
+    }
+
+    return null;
   }
-
-  if (hasLegacyActionMenu) {
-    return <LegacyHeaderActionMenu />;
-  }
-
-  return null;
-});
+);
 
 AppMenu.displayName = 'AppMenu';
