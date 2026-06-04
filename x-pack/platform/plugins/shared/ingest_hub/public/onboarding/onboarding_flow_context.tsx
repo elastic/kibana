@@ -26,18 +26,15 @@ interface PersistedConnectStep {
 
 export interface ServicesStepState {
   selectedServiceIds: string[];
-  defaultRegion: string;
 }
 
 interface PersistedServicesStep {
   selectedServiceIds: string[];
-  defaultRegion: string;
 }
 
 const DEFAULT_SELECTED_IDS = AWS_SERVICES_MATRIX.filter((s) => s.showInUI && s.defaultEnabled).map(
   (s) => s.id
 );
-const DEFAULT_REGION = 'us-east-1';
 
 interface OnboardingFlowState {
   connectStep: ConnectStepState;
@@ -46,7 +43,6 @@ interface OnboardingFlowState {
   setTemporaryKeys: (keys: AwsTemporaryKeyCredentials | undefined) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
-  setDefaultRegion: (region: string) => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -59,7 +55,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const [persistedServices, setPersistedServices] = useSessionStorage<PersistedServicesStep>(
     'onboarding.aws.servicesStep',
-    { selectedServiceIds: DEFAULT_SELECTED_IDS, defaultRegion: DEFAULT_REGION }
+    { selectedServiceIds: DEFAULT_SELECTED_IDS }
   );
 
   // Sensitive fields (secret_access_key, session_token) live in memory only.
@@ -124,13 +120,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [persistedServices, setPersistedServices]
   );
 
-  const setDefaultRegion = useCallback(
-    (region: string) => {
-      setPersistedServices({ ...persistedServices, defaultRegion: region });
-    },
-    [persistedServices, setPersistedServices]
-  );
-
   const connectStep: ConnectStepState = {
     connectorId: persistedConnectStep?.connectorId,
     staticKeys,
@@ -139,7 +128,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const servicesStep: ServicesStepState = {
     selectedServiceIds: persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS,
-    defaultRegion: persistedServices?.defaultRegion ?? DEFAULT_REGION,
   };
 
   return (
@@ -151,7 +139,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setTemporaryKeys,
         servicesStep,
         setSelectedServiceIds,
-        setDefaultRegion,
       }}
     >
       {children}

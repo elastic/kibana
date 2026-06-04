@@ -11,12 +11,10 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiComboBox,
   EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHealth,
   EuiPanel,
   EuiSpacer,
@@ -54,17 +52,6 @@ const SIGNAL_FILTER_OPTIONS = [
   },
 ];
 
-const AWS_REGION_OPTIONS = [
-  'ap-southeast-1',
-  'ap-southeast-2',
-  'eu-west-1',
-  'eu-west-2',
-  'us-east-1',
-  'us-east-2',
-  'us-west-1',
-  'us-west-2',
-].map((r) => ({ label: r }));
-
 const CATEGORY_ORDER: ServiceCategory[] = [
   'Security, Identity and Compliance',
   'Compute',
@@ -86,8 +73,8 @@ function categoryColor(category: string): string {
 }
 
 export function ServicesStep({ onNext }: ServicesStepProps) {
-  const { servicesStep, setSelectedServiceIds, setDefaultRegion } = useOnboardingFlow();
-  const { selectedServiceIds, defaultRegion } = servicesStep;
+  const { servicesStep, setSelectedServiceIds } = useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
 
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -182,27 +169,6 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
           />
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={i18n.translate('xpack.ingestHub.servicesStep.defaultRegion.label', {
-          defaultMessage: 'Default AWS region',
-        })}
-        helpText={i18n.translate('xpack.ingestHub.servicesStep.defaultRegion.help', {
-          defaultMessage:
-            'Used for services that require a region. You can also type a region not in the list.',
-        })}
-      >
-        <EuiComboBox
-          singleSelection={{ asPlainText: true }}
-          options={AWS_REGION_OPTIONS}
-          selectedOptions={defaultRegion ? [{ label: defaultRegion }] : []}
-          onChange={(selected) => setDefaultRegion(selected[0]?.label ?? '')}
-          onCreateOption={(value) => setDefaultRegion(value.trim())}
-          compressed
-          style={{ maxWidth: 320 }}
-          data-test-subj="servicesStep-regionComboBox"
-        />
-      </EuiFormRow>
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>

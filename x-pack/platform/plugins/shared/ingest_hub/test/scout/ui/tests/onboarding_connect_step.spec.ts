@@ -57,7 +57,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     await page.evaluate(() => {
       sessionStorage.setItem(
         'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: [], defaultRegion: 'us-east-1' })
+        JSON.stringify({ selectedServiceIds: [] })
       );
     });
 
@@ -140,7 +140,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
       await page.evaluate(() => {
         sessionStorage.setItem(
           'onboarding.aws.servicesStep',
-          JSON.stringify({ selectedServiceIds: [], defaultRegion: 'us-east-1' })
+          JSON.stringify({ selectedServiceIds: [] })
         );
       });
 

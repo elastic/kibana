@@ -31,17 +31,12 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     });
   });
 
-  test('renders step header, region field, and default category view', async ({
-    browserAuth,
-    page,
-  }) => {
+  test('renders step header and default category view', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    // title and region field are present
     await expect(page.getByText('Which AWS services do you want to monitor?')).toBeVisible();
-    await expect(page.testSubj.locator('servicesStep-regionComboBox')).toBeVisible();
 
     // Security, Identity and Compliance is the default active category
     await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeVisible();
@@ -102,7 +97,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await page.evaluate(() => {
       sessionStorage.setItem(
         'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: [], defaultRegion: 'us-east-1' })
+        JSON.stringify({ selectedServiceIds: [] })
       );
     });
     await page.reload();
