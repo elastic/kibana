@@ -38,9 +38,9 @@ export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProp
         'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {episodes}.',
       values: {
         syntax: '{{ ... }}',
-        policyId: '{{ inputs.policyId }}',
-        groupKey: '{{ inputs.groupKey }}',
-        episodes: '{{ inputs.episodes }}',
+        policyId: '{{ inputs.payload.policyId }}',
+        groupKey: '{{ inputs.payload.groupKey }}',
+        episodes: '{{ inputs.payload.episodes }}',
       },
     })}
     fullWidth
