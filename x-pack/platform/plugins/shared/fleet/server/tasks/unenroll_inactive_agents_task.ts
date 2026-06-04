@@ -60,11 +60,22 @@ interface UnenrollInactiveAgentsTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
 
+function parseIntervalToMs(interval: string): number {
+  const match = interval.match(/^(\d+)(s|m|h)$/);
+  if (!match) return 10 * 60 * 1000; // fallback to 10m
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+  if (unit === 's') return value * 1000;
+  if (unit === 'm') return value * 60 * 1000;
+  return value * 60 * 60 * 1000; // h
+}
+
 export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private unenrollBatchSize: number;
   private taskInterval: string;
+  private taskIntervalMs: number;
   private gracePeriodMs: number;
   // Tracks action IDs already processed by the execute phase so stale action docs
   // in the append-only .fleet-actions index are not re-processed on every tick.
@@ -78,6 +89,7 @@ export class UnenrollInactiveAgentsTask {
     this.unenrollBatchSize =
       unenrollBatchSize !== undefined ? unenrollBatchSize : UNENROLLMENT_BATCHSIZE;
     this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.taskIntervalMs = parseIntervalToMs(this.taskInterval);
     this.gracePeriodMs = config.gracePeriodMs ?? UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS;
 
     taskManager.registerTaskDefinitions({
@@ -290,7 +302,7 @@ export class UnenrollInactiveAgentsTask {
     // scheduled unenrollments must have been created within the grace period window,
     // so anything older than grace_period + one task interval cannot match a due action.
     const cancelWindowStart = new Date(
-      Date.now() - this.gracePeriodMs - 10 * 60 * 1000
+      Date.now() - this.gracePeriodMs - this.taskIntervalMs
     ).toISOString();
     const cancelRes = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
