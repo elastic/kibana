@@ -198,8 +198,7 @@ describe('CRUDClient', () => {
       const calls = (runWithSpan as jest.Mock).mock.calls;
       const matching = calls.find(
         (c) =>
-          (c[0] as { name?: string }).name ===
-          'entityStore.crud.bulk_append_relationship_metadatas'
+          (c[0] as { name?: string }).name === 'entityStore.crud.bulk_append_relationship_metadatas'
       );
       expect(matching).toBeDefined();
       const attrs = (matching![0] as { attributes?: Record<string, unknown> }).attributes ?? {};
@@ -451,8 +450,7 @@ describe('CRUDClient', () => {
       await client.listRelationshipMetadata({ entityId: 'user:alice@corp' });
       const calls = (runWithSpan as jest.Mock).mock.calls;
       const matching = calls.find(
-        (c) =>
-          (c[0] as { name?: string }).name === 'entityStore.crud.list_relationship_metadata'
+        (c) => (c[0] as { name?: string }).name === 'entityStore.crud.list_relationship_metadata'
       );
       expect(matching).toBeDefined();
       const attrs = (matching![0] as { attributes?: Record<string, unknown> }).attributes ?? {};

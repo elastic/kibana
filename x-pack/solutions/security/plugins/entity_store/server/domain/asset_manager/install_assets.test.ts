@@ -13,10 +13,7 @@ import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
 
 jest.mock('../../infra/elasticsearch');
 
-const {
-  deleteIndex,
-  deleteDataStream,
-} = jest.requireMock('../../infra/elasticsearch') as {
+const { deleteIndex, deleteDataStream } = jest.requireMock('../../infra/elasticsearch') as {
   deleteIndex: jest.Mock;
   deleteDataStream: jest.Mock;
 };
@@ -37,7 +34,10 @@ describe('uninstallElasticsearchAssets', () => {
       namespace,
     });
 
-    expect(deleteIndex).toHaveBeenCalledWith(expect.anything(), getLatestEntitiesIndexName(namespace));
+    expect(deleteIndex).toHaveBeenCalledWith(
+      expect.anything(),
+      getLatestEntitiesIndexName(namespace)
+    );
   });
 
   it('deletes the updates data stream', async () => {

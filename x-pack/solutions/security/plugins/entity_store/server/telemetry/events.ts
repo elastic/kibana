@@ -258,8 +258,7 @@ export const ENTITY_STORE_METADATA_USAGE_EVENT = {
     docCount: {
       type: 'long',
       _meta: {
-        description:
-          'Total documents in the entity metadata datastream (.entities.v2.metadata.*)',
+        description: 'Total documents in the entity metadata datastream (.entities.v2.metadata.*)',
       },
     },
   },
