@@ -26,7 +26,7 @@ export const causeKiSchema = z.object({
 });
 
 export const evidenceSchema = z.object({
-  rule_name: z.string().optional(),
+  rule_name: z.string().nullish(),
   result: z.string().optional(),
   description: z.string().optional(),
   stream_name: z.string().optional(),

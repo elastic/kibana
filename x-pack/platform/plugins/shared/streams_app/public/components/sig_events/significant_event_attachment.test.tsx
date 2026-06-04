@@ -8,8 +8,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import type { SignificantEventAttachment } from '@kbn/streams-plugin/common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
+import { FocusedSignificantEventService } from '../../services/significant_events/focused_significant_event_service';
 import {
   registerSignificantEventAttachment,
   significantEventAttachmentDefinition,
@@ -38,12 +40,22 @@ const attachment: SignificantEventAttachment = {
 describe('significantEventAttachmentDefinition', () => {
   it('registers the attachment renderer', () => {
     const addAttachmentType = jest.fn();
-
-    registerSignificantEventAttachment({
+    const cleanup = registerSignificantEventAttachment({
       agentBuilder: {
+        addAttachment: jest.fn(),
         attachments: { addAttachmentType },
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null).asObservable() },
+          getChatEvents$: jest.fn(() => EMPTY),
+        },
       } as never,
+      chrome: {
+        sidebar: { getCurrentAppId$: () => new BehaviorSubject(null).asObservable() },
+      } as never,
+      focusedSignificantEventService: new FocusedSignificantEventService(),
     });
+
+    cleanup();
 
     expect(addAttachmentType).toHaveBeenCalledWith(
       SIGNIFICANT_EVENT_ATTACHMENT_TYPE,

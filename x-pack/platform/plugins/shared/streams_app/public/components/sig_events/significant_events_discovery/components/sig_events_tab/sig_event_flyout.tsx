@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -28,6 +28,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SigEvent } from '@kbn/streams-schema';
 import { useFetchEventLifecycle } from '../../../../../hooks/sig_events/use_fetch_sig_events';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getStatusColor } from './filter_constants';
 import { formatTimestamp } from '../../../../../util/formatters';
@@ -84,6 +85,9 @@ interface SigEventFlyoutProps {
 
 export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
   const {
+    services: { focusedSignificantEventService },
+  } = useKibana();
+  const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
@@ -91,6 +95,14 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sigEventFlyout' });
   const ruleNames = event.rule_names ?? [];
+
+  useEffect(() => {
+    focusedSignificantEventService.setFocusedEvent(event);
+
+    return () => {
+      focusedSignificantEventService.clearFocusedEvent(event.discovery_slug);
+    };
+  }, [event, focusedSignificantEventService]);
 
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
