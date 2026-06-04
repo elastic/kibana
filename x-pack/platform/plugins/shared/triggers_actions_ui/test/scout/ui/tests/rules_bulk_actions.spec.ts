@@ -10,12 +10,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule, makeIndexThresholdRule } from '../fixtures';
 
-// Migrated from: x-pack/platform/test/functional_with_es_ssl/apps/rules/rules_list/bulk_actions.ts
-// Rule type substitutions:
-//   test.noop          → .es-query  (built-in, always available in Scout)
-//   test.always-firing → .index-threshold (different type needed for filter tests)
-// Snooze / schedule helpers use kbnClient (internal alerting API) instead of supertest.
-
 // ── API helpers ──────────────────────────────────────────────────────────────
 
 const snoozeRule = async (kbnClient: KbnClient, ruleId: string) => {
@@ -209,7 +203,6 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await refreshRulesList(page);
 
-    // Ensure any prior search text is cleared so all rules are visible.
     await page.testSubj.locator('ruleSearchField').fill('');
     // Select r1, select-all (both selected), then deselect r2 → only r1 remains
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);

@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 
 /**
  * Fills the mandatory fields of the .index-threshold rule form so the rule can
- * be saved without validation errors.  Used in create-rule-flow tests.
+ * be saved without validation errors.
  *
  * Opens the index popover, picks the first index option after typing '.kibana',
  * waits for the time-field <select> to populate, and selects the first real

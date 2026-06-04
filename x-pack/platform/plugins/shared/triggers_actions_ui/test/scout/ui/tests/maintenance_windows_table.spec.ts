@@ -10,15 +10,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, MAINTENANCE_WINDOWS_APP_PATH } from '../fixtures';
 
-// Migrated from:
-// x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/maintenance_windows/maintenance_windows_table.ts
-// API helpers inline the FTR createMaintenanceWindow util (supertest → kbnClient).
-// FTR page objects (searchMaintenanceWindows, getMaintenanceWindowsList) are
-// replaced with direct page locators.
-
-// When MWs exist the table is shown; when none exist the page renders the empty
-// prompt instead and the table element is never added to the DOM. Wait for
-// whichever state the page lands in.
 const TABLE_LOADED_CSS =
   '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
 const PAGE_READY_SELECTOR = `${TABLE_LOADED_CSS}, [data-test-subj="mw-empty-prompt"]`;
@@ -353,7 +344,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
   test('should delete a maintenance window', async ({ page, kbnClient, kbnUrl }) => {
     const title = uniqueTitle('delete-mw');
-    // Do NOT push to createdIds — deletion is the test action itself
+
     await createMw(kbnClient, { title });
 
     await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));

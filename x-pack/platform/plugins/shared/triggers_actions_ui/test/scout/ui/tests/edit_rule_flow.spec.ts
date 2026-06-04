@@ -9,21 +9,6 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule } from '../fixtures';
 
-// Migrated from: x-pack/platform/test/functional_with_es_ssl/apps/rules/rules_page/edit_rule_flow.ts
-// Rule type substitution: test.noop → .es-query (test.noop not registered in
-// Scout's stateful/classic config). The edit form pre-populates all params
-// from the API-created rule; tests only change the name field and do not
-// interact with rule-type-specific controls.
-//
-// Note: each Playwright test has a fresh browser session so the FTR pattern
-// of chaining tests through shared browser state is not used here. Instead
-// each test navigates independently to set up the correct return-path context
-// before asserting the post-save/cancel destination.
-//
-// Inner test.describe blocks are flattened (max nesting depth = 1); context is
-// preserved in the test name prefixes ("Edit from rules list: …" and
-// "Edit from rule details page: …").
-
 const SM_BASE = 'management/insightsAndAlerting/triggersActions';
 // Matches the rules list root (.../triggersActions or .../triggersActions/) but
 // NOT sub-routes like /edit/ or /rule/ — those share the same prefix.
@@ -157,7 +142,6 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
-    // Verify the name was actually persisted (matches FTR's getRuleById assertion).
     const saved = await apiServices.alerting.rules.get(testRuleId);
     expect(saved.data.name).toBe(updatedName);
 
@@ -178,9 +162,6 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('rulePageFooterCancelButton');
 
-    // Cancel uses SPA history.push — no full page reload, so waitForURL (which
-    // requires a load event) would time out. Use toHaveURL instead, which polls
-    // without requiring a load event.
     await expect(page).toHaveURL(RULES_DETAILS_URL_RE);
     expect(page.url()).toContain(`/${SM_BASE}/rule/${testRuleId}`);
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
