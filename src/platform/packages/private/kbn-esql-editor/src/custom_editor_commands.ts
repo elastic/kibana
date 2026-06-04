@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
-import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND, ESQL_NEW_LINE_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
   QuerySource,
@@ -85,6 +85,12 @@ const applyTextReplacement = (
   editor.setPosition(model.getPositionAt(boundedStart + payload.replacementText.length));
 };
 
+/** Inserts a newline at the cursor, honoring auto-indent. Used by the "New line" suggestion and the Shift+Enter shortcut. */
+const insertNewLine = (editor: monaco.editor.IStandaloneCodeEditor) => {
+  editor.focus();
+  editor.trigger('keyboard', 'type', { text: '\n' });
+};
+
 const triggerControl = async (
   queryString: string,
   variableType: ESQLVariableType,
@@ -136,6 +142,16 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
       openTimePickerPopover();
+    })
+  );
+
+  // "New line" suggestion command: inserts a newline so users can break to a new line via Enter
+  commandDisposables.push(
+    monaco.editor.registerCommand(ESQL_NEW_LINE_COMMAND, () => {
+      const editor = editorRef.current;
+      if (editor) {
+        insertNewLine(editor);
+      }
     })
   );
 
