@@ -25,7 +25,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
