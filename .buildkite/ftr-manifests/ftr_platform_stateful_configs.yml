@@ -99,6 +99,7 @@ enabled:
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts
+  - src/platform/test/functional/apps/management/config.ts
   - src/platform/test/functional/apps/sharing/config.ts
   - src/platform/test/functional/apps/status_page/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
