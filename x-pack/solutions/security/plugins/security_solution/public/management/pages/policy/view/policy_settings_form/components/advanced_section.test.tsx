@@ -90,7 +90,6 @@ describe('Policy Advanced Settings section', () => {
     const fieldsWithDefaultValues = [
       'mac.advanced.capture_env_vars',
       'linux.advanced.capture_env_vars',
-      'mac.ransomware.mode',
     ];
 
     await render(true);

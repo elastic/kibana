@@ -54,6 +54,8 @@ describe('Policy Ransomware Protections Card', () => {
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.windowsModeSelect));
     expect(getByTestId(testSubj.windowsNotifyUserCheckbox));
+    expect(getByTestId(testSubj.macModeSelect));
+    expect(getByTestId(testSubj.macNotifyUserCheckbox));
   });
 
   it('should show supported OS values', () => {
@@ -151,5 +153,23 @@ describe('Policy Ransomware Protections Card', () => {
       expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
       expect(getByTestId('test-ransomware-windowsNotifyUser-checkbox')).not.toBeChecked();
     });
+
+    it('should display the macOS mode select and notify option', () => {
+      set(formProps.policy, 'mac.ransomware.mode', ProtectionModes.prevent);
+      const { getByTestId } = render();
+
+      expectIsViewOnly(getByTestId(testSubj.card));
+
+      expect(getByTestId(testSubj.macModeSelect));
+      expect(getByTestId('test-ransomware-macNotifyUser-checkbox')).toBeChecked();
+    });
+  });
+
+  it('should render the macOS mode select and notify option in edit mode', () => {
+    set(formProps.policy, 'mac.ransomware.mode', ProtectionModes.prevent);
+    const { getByTestId } = render();
+
+    expect(getByTestId(testSubj.macModeSelect));
+    expect(getByTestId(testSubj.macNotifyUserCheckbox));
   });
 });

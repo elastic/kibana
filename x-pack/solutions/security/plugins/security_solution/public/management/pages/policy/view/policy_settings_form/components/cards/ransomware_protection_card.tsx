@@ -28,7 +28,18 @@ import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_prote
 import { useProtectionMasterOffDisplaySnapshot } from '../../hooks/use_protection_master_off_display_snapshot';
 import { useProtectionSectionSelected } from '../../hooks/use_protection_section_selected';
 
-const RANSOMWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [PolicyOperatingSystem.windows];
+const RANSOMWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
+  PolicyOperatingSystem.windows,
+  PolicyOperatingSystem.mac,
+];
+
+const RANSOMWARE_OS_LIST: ReadonlyArray<{
+  os: RansomwareProtectionOSes;
+  operatingSystem: OperatingSystem;
+}> = [
+  { os: PolicyOperatingSystem.windows, operatingSystem: OperatingSystem.WINDOWS },
+  { os: PolicyOperatingSystem.mac, operatingSystem: OperatingSystem.MAC },
+];
 
 export const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.ransomware',
@@ -71,19 +82,12 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
       );
     }
 
-    const ransomwareDisplayModeForDetailedUi = selected
-      ? policy.windows[protection].mode
-      : masterOffDisplayModes?.windows ?? policy.windows[protection].mode;
-    const showRansomwareDetailedSettings =
-      ransomwareDisplayModeForDetailedUi === ProtectionModes.detect ||
-      ransomwareDisplayModeForDetailedUi === ProtectionModes.prevent;
-
     return (
       <SettingCard
         type={i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
           defaultMessage: 'Ransomware',
         })}
-        supportedOss={[OperatingSystem.WINDOWS]}
+        supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC]}
         sectionDescription={RANSOMWARE_POLICY_SECTION_DESCRIPTION}
         dataTestSubj={getTestId()}
         selected={selected}
@@ -102,38 +106,51 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
             onMasterSwitchTurnedOff={(_savedModes, policyBeforeToggle) =>
               setMasterOffDisplayModes({
                 windows: policyBeforeToggle.windows[protection].mode,
+                mac: policyBeforeToggle.mac[protection].mode,
               })
             }
           />
         }
       >
-        <OsProtectionRow
-          isLast
-          os={OperatingSystem.WINDOWS}
-          data-test-subj={getTestId('windowsRow')}
-        >
-          <OsProtectionModeSelect
-            os="windows"
-            protection={protection}
-            policy={policy}
-            onChange={onChange}
-            mode={mode}
-            displayModeWhenPolicyOff={masterOffDisplayModes?.windows}
-            sectionFeatureEnabled={selected}
-            data-test-subj={getTestId('windowsModeSelect')}
-          />
-          {showRansomwareDetailedSettings && (
-            <NotifyUserOption
-              policy={policy}
-              onChange={onChange}
-              mode={mode}
-              protection={protection}
-              os="windows"
-              sectionFeatureEnabled={selected}
-              data-test-subj={getTestId('windowsNotifyUser')}
-            />
-          )}
-        </OsProtectionRow>
+        {RANSOMWARE_OS_LIST.map(({ os, operatingSystem }, index) => {
+          const displayModeForDetailedUi = selected
+            ? policy[os][protection].mode
+            : masterOffDisplayModes?.[os] ?? policy[os][protection].mode;
+          const showOsDetailedSettings =
+            displayModeForDetailedUi === ProtectionModes.detect ||
+            displayModeForDetailedUi === ProtectionModes.prevent;
+
+          return (
+            <OsProtectionRow
+              key={os}
+              os={operatingSystem}
+              isLast={index === RANSOMWARE_OS_LIST.length - 1}
+              data-test-subj={getTestId(`${os}Row`)}
+            >
+              <OsProtectionModeSelect
+                os={os}
+                protection={protection}
+                policy={policy}
+                onChange={onChange}
+                mode={mode}
+                displayModeWhenPolicyOff={masterOffDisplayModes?.[os]}
+                sectionFeatureEnabled={selected}
+                data-test-subj={getTestId(`${os}ModeSelect`)}
+              />
+              {showOsDetailedSettings && (
+                <NotifyUserOption
+                  policy={policy}
+                  onChange={onChange}
+                  mode={mode}
+                  protection={protection}
+                  os={os}
+                  sectionFeatureEnabled={selected}
+                  data-test-subj={getTestId(`${os}NotifyUser`)}
+                />
+              )}
+            </OsProtectionRow>
+          );
+        })}
       </SettingCard>
     );
   }

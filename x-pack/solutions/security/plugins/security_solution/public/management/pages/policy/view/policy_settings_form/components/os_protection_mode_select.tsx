@@ -36,6 +36,12 @@ const DETECT_PREVENT_LABEL = i18n.translate(
   { defaultMessage: 'Detect & prevent' }
 );
 
+const optionLabelCss = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+`;
+
 export interface OsProtectionModeSelectProps extends PolicyFormComponentCommonProps {
   os: 'windows' | 'mac' | 'linux';
   protection: PolicyProtection;
@@ -76,12 +82,6 @@ export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
       []
     );
 
-    const optionLabelCss = css`
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    `;
-
     const modeOptions = useMemo<Array<EuiSuperSelectOption<ProtectionModes>>>(
       () => [
         {
@@ -112,7 +112,7 @@ export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
           ),
         },
       ],
-      [euiTheme, dotCss, optionLabelCss]
+      [euiTheme, dotCss]
     );
 
     const currentMode = useMemo(() => {
@@ -144,7 +144,7 @@ export const OsProtectionModeSelect = memo<OsProtectionModeSelectProps>(
           </span>
         )
       );
-    }, [displayMode, modeOptions, optionLabelCss, dotCss, euiTheme.colors.danger]);
+    }, [displayMode, modeOptions, dotCss, euiTheme.colors.danger]);
 
     const handleChange = useCallback(
       (newMode: ProtectionModes) => {
