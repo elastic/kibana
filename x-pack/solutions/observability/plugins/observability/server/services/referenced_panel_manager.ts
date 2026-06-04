@@ -8,7 +8,26 @@
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { Reference } from '@kbn/content-management-utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
+
+// Dashboard panels carry an embeddable `type` while the entries in
+// `dashboard.references` carry the underlying saved object content type. They
+// happened to be the same string before the Lens / Visualize embeddable rename
+// (https://github.com/elastic/kibana/pull/260040), but after that change the
+// embeddable type for Lens became `vis` while the saved object content type
+// stayed as `lens` (see `LENS_CONTENT_TYPE` in `@kbn/lens-common`). The same
+// pattern applies to the legacy visualization embeddable (`legacy_vis`
+// embeddable, `visualization` saved object). This map translates an embeddable
+// type into the saved object type used inside dashboard references so we can
+// look up the right entry in `dashboard.references` and call `bulkGet` with a
+// valid saved object type.
+const EMBEDDABLE_TYPE_TO_SAVED_OBJECT_TYPE: Readonly<Record<string, string>> = {
+  [LENS_EMBEDDABLE_TYPE]: 'lens',
+};
+
+const toReferenceSavedObjectType = (embeddableType: string): string =>
+  EMBEDDABLE_TYPE_TO_SAVED_OBJECT_TYPE[embeddableType] ?? embeddableType;
 
 export class ReferencedPanelManager {
   // The uid refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
@@ -59,11 +78,14 @@ export class ReferencedPanelManager {
     const { id: uid, type } = panel;
     if (!uid) return;
 
-    const panelReference = references.find((r) => r.name.includes(uid) && r.type === type);
+    const savedObjectType = toReferenceSavedObjectType(type);
+    const panelReference = references.find(
+      (r) => r.name.includes(uid) && r.type === savedObjectType
+    );
     // A reference of the panel was not found
     if (!panelReference) {
       this.logger.error(
-        `Reference for panel of type ${type} and uid ${uid} was not found in dashboard with id ${dashboardId}`
+        `Reference for panel of type ${type} (saved object type ${savedObjectType}) and uid ${uid} was not found in dashboard with id ${dashboardId}`
       );
       return;
     }
@@ -73,7 +95,7 @@ export class ReferencedPanelManager {
     this.panelUidToId.set(uid, panelId);
 
     if (!this.panelsTypeById.has(panelId)) {
-      this.panelsTypeById.set(panelId, panel.type);
+      this.panelsTypeById.set(panelId, savedObjectType);
     }
   }
 }
