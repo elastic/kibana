@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { compositeSloDefinitionSchema, compositeStatusSchema } from '../../../schema/composite_slo';
+import { compositeStatusSchema } from '../../../schema/composite_slo';
 
 const compositeSortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
 const compositeSortBySchema = z.union([
@@ -33,15 +33,7 @@ const findCompositeSLOParamsSchema = z.object({
   query: findCompositeSLOQuerySchema.optional(),
 });
 
-const findCompositeSLOResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(compositeSloDefinitionSchema),
-});
-
 type FindCompositeSLOParams = z.infer<typeof findCompositeSLOQuerySchema>;
-type FindCompositeSLOResponse = z.infer<typeof findCompositeSLOResponseSchema>;
 
-export { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema };
-export type { FindCompositeSLOParams, FindCompositeSLOResponse };
+export { findCompositeSLOParamsSchema };
+export type { FindCompositeSLOParams };
