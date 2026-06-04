@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
@@ -28,14 +28,15 @@ export const DataSearchProgress: React.FC<{
       </EuiFlexItem>
       {onCancel ? (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="logsSharedDataSearchProgressButton"
-            color="danger"
-            iconType="cross"
-            onClick={onCancel}
-            title={cancelButtonLabel}
-            aria-label={cancelButtonLabel}
-          />
+          <EuiToolTip content={cancelButtonLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="logsSharedDataSearchProgressButton"
+              color="danger"
+              iconType="cross"
+              onClick={onCancel}
+              aria-label={cancelButtonLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>

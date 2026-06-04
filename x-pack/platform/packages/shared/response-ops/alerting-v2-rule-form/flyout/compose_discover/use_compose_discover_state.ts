@@ -82,7 +82,7 @@ export function reducer(
       return {
         ...state,
         recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom'
+        ...(action.recoveryType === 'custom' && !action.isBuilderMode
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
