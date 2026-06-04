@@ -9,7 +9,14 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiComboBox,
+  EuiCopy,
+  EuiFormRow,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { DropDownLabel } from '@kbn/ml-field-stats-flyout';
 import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import type { LatestFunctionService } from './hooks/use_latest_function_config';
@@ -112,11 +119,13 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy: () => void) => (
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copy"
-                      aria-label={copyToClipboardDescription}
-                    />
+                    <EuiToolTip content={copyToClipboardDescription} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        onClick={copy}
+                        iconType="copy"
+                        aria-label={copyToClipboardDescription}
+                      />
+                    </EuiToolTip>
                   )}
                 </EuiCopy>
               </p>
