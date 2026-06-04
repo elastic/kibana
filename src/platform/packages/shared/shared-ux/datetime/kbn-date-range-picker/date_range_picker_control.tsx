@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type KeyboardEvent, type ChangeEvent, useRef, useEffect, useCallback } from 'react';
+import React, {
+  type KeyboardEvent,
+  type ChangeEvent,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
 
 import { css } from '@emotion/react';
 import {
@@ -110,7 +117,7 @@ export function DateRangePickerControl() {
   };
 
   /** Handle selecting specific parts when focusing the input */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEditing || !inputRef.current) return;
 
     const clickedPart = clickedDisplayPartRef.current;
