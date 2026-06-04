@@ -181,6 +181,13 @@ export const isDashboardViewPath = (pathname: string): boolean =>
     strict: false,
   }) != null;
 
+export const isRuleChangesHistoryPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: `${RULES_PATH}/id/:id/changes-history`,
+    exact: true,
+    strict: false,
+  });
+
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `${ALERTS_PATH}`,
