@@ -217,19 +217,30 @@ const MissingDashboardsCallout = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  data-test-subj="removeMissingDashboardButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
                     {
                       defaultMessage: 'Remove unavailable dashboard {dashboardId}',
                       values: { dashboardId: dashboard.id },
                     }
                   )}
-                  onClick={() => onRemove(dashboard.id)}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    data-test-subj="removeMissingDashboardButton"
+                    aria-label={i18n.translate(
+                      'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
+                      {
+                        defaultMessage: 'Remove unavailable dashboard {dashboardId}',
+                        values: { dashboardId: dashboard.id },
+                      }
+                    )}
+                    onClick={() => onRemove(dashboard.id)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
