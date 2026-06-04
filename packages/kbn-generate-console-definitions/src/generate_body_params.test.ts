@@ -158,6 +158,28 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('returns __scope_link to GLOBAL.query for QueryContainer', () => {
+    const queryContainer: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'QueryContainer', namespace: '_types.query_dsl' },
+      properties: [
+        getMockProperty({ propertyName: 'bool' }),
+        getMockProperty({ propertyName: 'term' }),
+      ],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [queryContainer] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'query',
+        type: { kind: 'instance_of', type: { name: 'QueryContainer', namespace: '_types.query_dsl' } },
+      }),
+    ]);
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      query: { __scope_link: 'GLOBAL.query' },
+    });
+  });
+
   it('returns {} for cyclic interface references instead of infinite recursion', () => {
     const selfRefInterface: SpecificationTypes.Interface = {
       kind: 'interface',

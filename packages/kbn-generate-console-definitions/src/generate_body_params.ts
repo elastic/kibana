@@ -85,6 +85,9 @@ const convertBodyValueOf = (
         visited
       );
     } else if (definedType.kind === 'interface') {
+      if (propertyName === 'QueryContainer') {
+        return {"__scope_link": "GLOBAL.query"};
+      }
       const typeKey = `${namespace}::${propertyName}`;
       if (visited.has(typeKey)) return {}; // cycle guard
       visited.add(typeKey);
