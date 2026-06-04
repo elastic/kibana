@@ -185,12 +185,8 @@ export const startCmd: Command<void> = {
       ? suite.absoluteConfigPath
       : Path.resolve(repoRoot, configPath as string);
 
-    const {
-      evaluationConnectorId,
-      projects,
-      profileEnvOverrides,
-      exportProfile,
-    } = await resolveRunContext(repoRoot, log, flagsReader, { baseProfile: profile });
+    const { evaluationConnectorId, projects, profileEnvOverrides, exportProfile } =
+      await resolveRunContext(repoRoot, log, flagsReader, { baseProfile: profile });
 
     const skipServer = flagsReader.boolean('skip-server');
     const requiresEisCcm =
@@ -234,7 +230,9 @@ export const startCmd: Command<void> = {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
     log.info(
-      `Profiles:  datasets=${(flagsReader.string('datasets-profile') ?? profile) ?? 'config'} export=${exportProfile ?? 'none'}`
+      `Profiles:  datasets=${
+        flagsReader.string('datasets-profile') ?? profile ?? 'config'
+      } export=${exportProfile ?? 'none'}`
     );
     log.info('');
 
