@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/notifications-center-plugin",
+  "owner": ["@elastic/search-kibana"],
+  "description": "Presentation and ingestion layer for in-product notifications (e.g. model status). Disabled behind feature flags by default.",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "notificationsCenter",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "notificationsCenter"],
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}
