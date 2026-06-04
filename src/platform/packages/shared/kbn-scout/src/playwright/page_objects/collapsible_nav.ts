@@ -35,4 +35,10 @@ export class CollapsibleNav {
       ? this.page.testSubj.click(`*nav-item-id-${itemName.toLocaleLowerCase()}`)
       : this.page.click(`[title="${itemName}"]`);
   }
+
+  async getNavLinks(): Promise<string[]> {
+    await this.expandNav();
+    const links = this.page.testSubj.locator('collapsibleNavAppLink');
+    return links.allInnerTexts();
+  }
 }

@@ -9,6 +9,7 @@
 
 import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
+import type { KibanaUrl } from '../../common/services/kibana_url';
 import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
@@ -32,6 +33,7 @@ export interface PageObjectsFixtures {
   page: ScoutPage;
   config: ScoutTestConfig;
   log: ScoutLogger;
+  kbnUrl: KibanaUrl;
 }
 
 export interface PageObjects {
