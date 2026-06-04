@@ -14,7 +14,12 @@ import type {
   BackgroundExecutionState,
   TodoItem,
 } from './conversation';
-import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
+import type {
+  PromptRequestSource,
+  PromptRequest,
+  AskUserQuestionItem,
+  AskUserQuestionAnswer,
+} from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 
 export enum ChatEventType {
@@ -35,6 +40,8 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  askUserQuestionPendingStep = 'ask_user_question_pending_step',
+  askUserQuestionAnsweredStep = 'ask_user_question_answered_step',
 }
 
 export type ChatEventBase<
@@ -144,6 +151,58 @@ export const isPromptRequestEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is PromptRequestEvent => {
   return event.type === ChatEventType.promptRequest;
+};
+
+// Ask-user-question step lifecycle
+
+export interface AskUserQuestionPendingStepEventData {
+  step_id: string;
+  questions: AskUserQuestionItem[];
+}
+
+export type AskUserQuestionPendingStepEvent = ChatEventBase<
+  ChatEventType.askUserQuestionPendingStep,
+  AskUserQuestionPendingStepEventData
+>;
+
+export const isAskUserQuestionPendingStepEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is AskUserQuestionPendingStepEvent => {
+  return event.type === ChatEventType.askUserQuestionPendingStep;
+};
+
+export const createAskUserQuestionPendingStepEvent = (
+  data: AskUserQuestionPendingStepEventData
+): AskUserQuestionPendingStepEvent => {
+  return {
+    type: ChatEventType.askUserQuestionPendingStep,
+    data,
+  };
+};
+
+export interface AskUserQuestionAnsweredStepEventData {
+  step_id: string;
+  answers: AskUserQuestionAnswer[];
+}
+
+export type AskUserQuestionAnsweredStepEvent = ChatEventBase<
+  ChatEventType.askUserQuestionAnsweredStep,
+  AskUserQuestionAnsweredStepEventData
+>;
+
+export const isAskUserQuestionAnsweredStepEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is AskUserQuestionAnsweredStepEvent => {
+  return event.type === ChatEventType.askUserQuestionAnsweredStep;
+};
+
+export const createAskUserQuestionAnsweredStepEvent = (
+  data: AskUserQuestionAnsweredStepEventData
+): AskUserQuestionAnsweredStepEvent => {
+  return {
+    type: ChatEventType.askUserQuestionAnsweredStep,
+    data,
+  };
 };
 
 // reasoning
@@ -383,7 +442,9 @@ export type ChatAgentEvent =
   | RoundCompleteEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
-  | BackgroundAgentCompleteEvent;
+  | BackgroundAgentCompleteEvent
+  | AskUserQuestionPendingStepEvent
+  | AskUserQuestionAnsweredStepEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

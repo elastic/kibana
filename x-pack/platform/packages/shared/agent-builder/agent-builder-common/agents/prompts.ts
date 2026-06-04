@@ -8,6 +8,7 @@
 export enum AgentPromptType {
   confirmation = 'confirmation',
   authorization = 'authorization',
+  ask_user_question = 'ask_user_question',
 }
 
 export enum AgentPromptRequestSourceType {
@@ -69,6 +70,33 @@ export interface AuthorizationPromptDefinition {
   auth_method: AuthorizationMethod;
 }
 
+// Ask user question
+
+export interface AskUserQuestionOption {
+  label: string;
+  description?: string;
+}
+
+export interface AskUserQuestionItem {
+  question: string;
+  options: AskUserQuestionOption[];
+  multi_select: boolean;
+}
+
+export interface AskUserQuestionPromptDefinition {
+  id: string;
+  questions: AskUserQuestionItem[];
+}
+
+export interface AskUserQuestionAnswer {
+  /** Selected option indices (in `questions[i].options`). For single-select questions: at most one entry. */
+  choice?: number[];
+  /** Free-text answer. Allowed alongside `choice`. */
+  custom?: string;
+  /** True when the user explicitly skipped this question. Mutually exclusive with `choice` / `custom`. */
+  skipped?: boolean;
+}
+
 export interface ConfirmationPromptResponse {
   allow: boolean;
 }
@@ -77,7 +105,14 @@ export interface AuthorizationPromptResponse {
   authorized: boolean;
 }
 
-export type PromptResponse = ConfirmationPromptResponse | AuthorizationPromptResponse;
+export interface AskUserQuestionPromptResponse {
+  answers: AskUserQuestionAnswer[];
+}
+
+export type PromptResponse =
+  | ConfirmationPromptResponse
+  | AuthorizationPromptResponse
+  | AskUserQuestionPromptResponse;
 
 export const isConfirmationPromptResponse = (
   response: PromptResponse
@@ -91,6 +126,12 @@ export const isAuthorizationPromptResponse = (
   return 'authorized' in response;
 };
 
+export const isAskUserQuestionPromptResponse = (
+  response: PromptResponse
+): response is AskUserQuestionPromptResponse => {
+  return 'answers' in response;
+};
+
 export interface ConfirmationPrompt extends ConfirmPromptDefinition {
   type: AgentPromptType.confirmation;
 }
@@ -99,7 +140,11 @@ export interface AuthorizationPrompt extends AuthorizationPromptDefinition {
   type: AgentPromptType.authorization;
 }
 
-export type PromptRequest = ConfirmationPrompt | AuthorizationPrompt;
+export interface AskUserQuestionPrompt extends AskUserQuestionPromptDefinition {
+  type: AgentPromptType.ask_user_question;
+}
+
+export type PromptRequest = ConfirmationPrompt | AuthorizationPrompt | AskUserQuestionPrompt;
 
 export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
   return prompt.type === AgentPromptType.confirmation;
@@ -107,6 +152,10 @@ export const isConfirmationPrompt = (prompt: PromptRequest): prompt is Confirmat
 
 export const isAuthorizationPrompt = (prompt: PromptRequest): prompt is AuthorizationPrompt => {
   return prompt.type === AgentPromptType.authorization;
+};
+
+export const isAskUserQuestionPrompt = (prompt: PromptRequest): prompt is AskUserQuestionPrompt => {
+  return prompt.type === AgentPromptType.ask_user_question;
 };
 
 export interface ConfirmationPromptResponseState {
@@ -119,9 +168,15 @@ export interface AuthorizationPromptResponseState {
   response: AuthorizationPromptResponse;
 }
 
+export interface AskUserQuestionPromptResponseState {
+  type: AgentPromptType.ask_user_question;
+  response: AskUserQuestionPromptResponse;
+}
+
 export type PromptResponseState =
   | ConfirmationPromptResponseState
-  | AuthorizationPromptResponseState;
+  | AuthorizationPromptResponseState
+  | AskUserQuestionPromptResponseState;
 
 /**
  * The internal representation of the prompt storage state for the conversation.

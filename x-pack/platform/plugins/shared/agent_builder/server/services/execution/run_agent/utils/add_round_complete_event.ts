@@ -24,6 +24,7 @@ import type {
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
   TodosStep,
+  AskUserQuestionPendingStepEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -46,6 +47,10 @@ import {
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isAskUserQuestionPendingStepEvent,
+  isAskUserQuestionAnsweredStepEvent,
+  isAskUserQuestionStep,
+  createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -64,10 +69,19 @@ import type { CompactedConversation } from './conversation_compactor';
 
 type SourceEvents = ConvertedEvents;
 
-type StepEvents = ReasoningEvent | ToolCallEvent | BackgroundAgentCompleteEvent;
+type StepEvents =
+  | ReasoningEvent
+  | ToolCallEvent
+  | BackgroundAgentCompleteEvent
+  | AskUserQuestionPendingStepEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
-  return isReasoningEvent(event) || isToolCallEvent(event) || isBackgroundAgentCompleteEvent(event);
+  return (
+    isReasoningEvent(event) ||
+    isToolCallEvent(event) ||
+    isBackgroundAgentCompleteEvent(event) ||
+    isAskUserQuestionPendingStepEvent(event)
+  );
 };
 
 export const addRoundCompleteEvent = ({
@@ -189,6 +203,20 @@ const resumeRound = ({
 
     step.results = toolResults.flatMap(({ data }) => data.results);
     step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
+  }
+
+  // Back-fill pending ask_user_question steps from answered events (matched by step_id)
+  const pendingAskUserQuestionSteps = pendingRound.steps
+    .filter(isAskUserQuestionStep)
+    .filter((step) => step.answers === undefined);
+
+  for (const step of pendingAskUserQuestionSteps) {
+    const answeredEvent = events
+      .filter(isAskUserQuestionAnsweredStepEvent)
+      .find((e) => e.data.step_id === step.step_id);
+    if (answeredEvent) {
+      step.answers = answeredEvent.data.answers;
+    }
   }
 
   const followUp = createRound({
@@ -332,6 +360,15 @@ const createRound = ({
     }
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
+    }
+    if (isAskUserQuestionPendingStepEvent(event)) {
+      return [
+        createAskUserQuestionStep({
+          step_id: event.data.step_id,
+          questions: event.data.questions,
+          // answers remain undefined; back-filled at resume by askUserQuestionAnsweredStepEvent
+        }),
+      ];
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };

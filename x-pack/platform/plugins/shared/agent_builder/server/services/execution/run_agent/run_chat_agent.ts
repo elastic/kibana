@@ -36,7 +36,7 @@ import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
-import { roundToActions } from './utils/round_to_actions';
+import { buildPendingRoundActions } from './utils/build_pending_round_actions';
 import { computeContextBudget } from './utils/context_budget';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
@@ -275,6 +275,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
+      promptManager,
+      eventEmitter: events.emit,
     }),
     {
       version: 'v2',
@@ -382,10 +384,14 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
+  promptManager,
+  eventEmitter,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
+  promptManager: PromptManager;
+  eventEmitter: AgentEventEmitterFn;
 }): Command => {
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
@@ -395,11 +401,17 @@ const createInitializerCommand = ({
     : undefined;
 
   if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    initialState.mainActions = roundToActions({
+    const { actions, consumedPromptIds } = buildPendingRoundActions({
       round: lastRound,
+      promptState: promptManager.dump(),
       toolIdMapping: agentBuilderToLangchainIdMap,
+      eventEmitter,
     });
-
+    initialState.mainActions = actions;
+    // G20 cleanup: question-list responses are consumed once per round.
+    for (const id of consumedPromptIds) {
+      promptManager.deleteResponse(id);
+    }
     startAt = steps.executeTool;
   }
 

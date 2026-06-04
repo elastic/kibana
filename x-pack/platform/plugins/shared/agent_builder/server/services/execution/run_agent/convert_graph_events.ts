@@ -34,6 +34,9 @@ import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import { createAskUserQuestionPendingStepEvent } from '@kbn/agent-builder-common/chat';
+import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
@@ -152,7 +155,10 @@ export const convertGraphEvents = ({
                       params: toolCallArgs,
                     })
                   );
-                } else {
+                } else if (toolId !== internalTools.askUserQuestion) {
+                  // ask_user_question intentionally does NOT produce a generic
+                  // toolCallEvent — it has its own dedicated step lifecycle event
+                  // (askUserQuestionPendingStepEvent) emitted at executeTool.on_chain_end.
                   events.push(
                     createToolCallEvent({
                       toolId,
@@ -224,6 +230,15 @@ export const convertGraphEvents = ({
                     },
                   })
                 );
+
+                if (isAskUserQuestionPrompt(prompt)) {
+                  resultEvents.push(
+                    createAskUserQuestionPendingStepEvent({
+                      step_id: prompt.id,
+                      questions: prompt.questions,
+                    })
+                  );
+                }
               }
             }
           }

@@ -24,6 +24,7 @@ import {
   AgentPromptType,
   AuthorizationStatus,
   ConfirmationStatus,
+  isAskUserQuestionPromptResponse,
   isAuthorizationPromptResponse,
   isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
@@ -99,6 +100,9 @@ export const createPromptManager = ({
     get: (promptId) => {
       return promptMap.get(promptId);
     },
+    deleteResponse: (promptId) => {
+      promptMap.delete(promptId);
+    },
     getConfirmationStatus: (promptId) => {
       return checkConfirmationStatus(promptId);
     },
@@ -146,6 +150,11 @@ export const getAgentPromptStorageState = ({
       } else if (isAuthorizationPromptResponse(response)) {
         state.responses[promptId] = {
           type: AgentPromptType.authorization,
+          response,
+        };
+      } else if (isAskUserQuestionPromptResponse(response)) {
+        state.responses[promptId] = {
+          type: AgentPromptType.ask_user_question,
           response,
         };
       }

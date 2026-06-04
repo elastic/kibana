@@ -14,11 +14,14 @@ import type {
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ConversationRoundStatus,
+  internalTools,
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
+  isAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -126,6 +129,29 @@ export const roundToLangchain = async (
           groupIndex++;
         }
         // Other tool calls in the same group are handled by createGroupedToolCallMessages
+      } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
+        // Render answered ask_user_question steps as a tool-call / tool-response pair.
+        // A fresh tool_call_id binds the two messages within this LangChain conversation;
+        // the original pause-time tool_call_id is not persisted (see spec G7).
+        const toolCallId = uuidv4();
+        messages.push(
+          new AIMessage({
+            content: '',
+            tool_calls: [
+              {
+                id: toolCallId,
+                name: internalTools.askUserQuestion,
+                args: { questions: step.questions },
+              },
+            ],
+          })
+        );
+        messages.push(
+          new ToolMessage({
+            tool_call_id: toolCallId,
+            content: JSON.stringify({ answers: step.answers }),
+          })
+        );
       }
       // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
     }

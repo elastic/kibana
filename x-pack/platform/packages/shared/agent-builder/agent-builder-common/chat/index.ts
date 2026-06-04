@@ -45,6 +45,10 @@ export {
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
+  type AskUserQuestionStep,
+  type AskUserQuestionStepData,
+  createAskUserQuestionStep,
+  isAskUserQuestionStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -105,6 +109,14 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  type AskUserQuestionPendingStepEvent,
+  type AskUserQuestionPendingStepEventData,
+  type AskUserQuestionAnsweredStepEvent,
+  type AskUserQuestionAnsweredStepEventData,
+  isAskUserQuestionPendingStepEvent,
+  isAskUserQuestionAnsweredStepEvent,
+  createAskUserQuestionPendingStepEvent,
+  createAskUserQuestionAnsweredStepEvent,
 } from './events';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
