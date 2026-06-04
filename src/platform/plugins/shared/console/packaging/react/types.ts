@@ -47,4 +47,19 @@ export interface OneConsoleProps {
   lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
   http?: Partial<HttpSetup>;
   notifications: NotificationCallbacks;
+  /**
+   * Literal localStorage key prefix for per-instance state (request history
+   * and the in-progress editor buffer). Pass a per-deployment value so each
+   * deployment keeps its own history and editor buffer isolated. Defaults to
+   * `'sense:'`. User settings, variables, and panel sizes are NOT scoped by
+   * this prefix — they remain shared across deployments.
+   */
+  storagePrefix?: string;
+  /**
+   * Text shown in the editor when no buffer is saved for this instance
+   * (first mount, or after the user clears everything and remounts). Defaults
+   * to Kibana's built-in welcome message. Consumers can pass a custom string
+   * to show product- or deployment-specific placeholder commands instead.
+   */
+  defaultEditorContent?: string;
 }

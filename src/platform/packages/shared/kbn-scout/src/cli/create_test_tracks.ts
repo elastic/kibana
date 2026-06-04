@@ -569,19 +569,31 @@ export const createTestTracks: Command<void> = {
             : [...new Set(loads.map((load) => load.config.server.configSet))];
 
         // Each server config set gets its own track
-        return configSets.map((configSet) => {
+        return configSets.flatMap((configSet): TestTrack[] => {
           log.info(
             `Building test track for test target '${target.tag}' with server config set '${configSet}'`
           );
+
+          const enabledLoads = loads.filter(
+            (load) => load.enabled && load.config.server.configSet === configSet
+          );
+
+          if (enabledLoads.length === 0) {
+            log.warning(
+              `No enabled test loads found for test target '${target.tag}' and server config set '${configSet}'`
+            );
+            return [];
+          }
+
           const track = buildTrack(
             Math.max(minimumRuntime, runtimeTarget),
             estimatedLaneSetupDuration,
             target,
-            loads.filter((load) => load.enabled && load.config.server.configSet === configSet),
+            enabledLoads,
             log
           );
           track.metadata.server = { configSet };
-          return track;
+          return [track];
         });
       })
       .toArray();

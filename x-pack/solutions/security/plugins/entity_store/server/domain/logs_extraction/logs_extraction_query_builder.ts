@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
@@ -33,6 +33,7 @@ import {
   ENTITY_NAME_FIELD,
   ENTITY_TYPE_FIELD,
   TIMESTAMP_FIELD,
+  MAX_COLLECTED_VALUES_PER_FIELD,
   aggregationStats,
   fieldsToKeep,
   extractPaginationParams,
@@ -231,7 +232,7 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
       switch (retention.operation) {
         case 'collect_values':
           return `${dest} = MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
-            retention.maxLength - 1
+            MAX_COLLECTED_VALUES_PER_FIELD - 1
           })`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;

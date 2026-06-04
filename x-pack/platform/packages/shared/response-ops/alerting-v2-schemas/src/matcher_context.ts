@@ -20,6 +20,7 @@ export interface MatcherContext {
   group_hash: string;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  severity?: 'info' | 'low' | 'medium' | 'high' | 'critical';
   rule: MatcherContextRule;
   data?: Record<string, unknown>;
 }
@@ -34,6 +35,7 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
   { path: 'episode_status', type: 'string' },
   { path: 'group_hash', type: 'string' },
   { path: 'last_event_timestamp', type: 'string' },
+  { path: 'severity', type: 'string' },
   { path: 'rule.id', type: 'string' },
   { path: 'rule.name', type: 'string' },
   { path: 'rule.description', type: 'string' },

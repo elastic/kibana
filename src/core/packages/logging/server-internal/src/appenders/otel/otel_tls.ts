@@ -9,7 +9,7 @@
 
 import { readFileSync } from 'fs';
 import type { AgentOptions as HttpsAgentOptions } from 'https';
-import type { PeerCertificate } from 'tls';
+import { rootCertificates, type PeerCertificate } from 'tls';
 import type { OtelAppenderTlsConfig } from '@kbn/core-logging-server';
 
 /** Compatible with `@grpc/grpc-js` `VerifyOptions` passed to `credentials.createSsl`. */
@@ -118,11 +118,16 @@ export const buildHttpsAgentTlsOptions = (resolved: ResolvedOtelTls): HttpsAgent
   return opts;
 };
 
-export const toGrpcRootCerts = (resolved: ResolvedOtelTls): Buffer | null => {
+export const toGrpcRootCerts = (resolved: ResolvedOtelTls): Buffer => {
+  const systemRoots = Buffer.from(rootCertificates.join('\n'));
+  // Use Node's built-in roots only if no custom CAs are configured
   if (resolved.ca === undefined) {
-    return null;
+    return systemRoots;
   }
-  return Array.isArray(resolved.ca) ? concatCaBuffers(resolved.ca) : resolved.ca;
+
+  const customCa = Array.isArray(resolved.ca) ? concatCaBuffers(resolved.ca) : resolved.ca;
+  // Append to Node's built-in roots so intermediate CAs can be verified
+  return Buffer.concat([customCa, Buffer.from('\n'), systemRoots]);
 };
 
 export const buildGrpcVerifyOptions = (resolved: ResolvedOtelTls): OtelGrpcVerifyOptions => {

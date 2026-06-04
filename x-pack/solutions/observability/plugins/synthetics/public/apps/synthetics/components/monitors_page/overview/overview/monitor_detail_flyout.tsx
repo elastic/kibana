@@ -37,7 +37,10 @@ import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_mo
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
+import {
+  getMonitorSpaceToAppend,
+  useEditMonitorLocator,
+} from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
 import {
   getMonitorAction,
@@ -278,6 +281,11 @@ export function MonitorDetailFlyout(props: Props) {
 
   const { space } = useKibanaSpace();
 
+  // If the monitor lives outside the active space, thread `spaceId` through
+  // sub-route URLs (and the saved-object fetch) so links land on the correct
+  // space and don't 404. Reuses the helper that powers the locator-based links.
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+
   const remoteMonitorUrl = useMemo(
     () =>
       monitor
@@ -309,13 +317,21 @@ export function MonitorDetailFlyout(props: Props) {
   // local SO and the request would 404.
   useEffect(() => {
     if (isRemote) return;
+    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
+    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
+    // that case, which means an early dispatch would fetch the SO from the
+    // active space and 404 for cross-space monitors. The follow-up dispatch
+    // (after `space` resolves) is silently dropped by the `takeLeading`
+    // saga while the first request is still in flight, leaving the 404 in
+    // Redux state forever. Wait for the active space before dispatching.
+    if (!space) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
+        ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, dispatch, isRemote, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, isRemote, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -356,7 +372,15 @@ export function MonitorDetailFlyout(props: Props) {
       paddingSize="none"
       resizable
     >
-      {error && !isLoading && !isRemote && <ErrorCallout {...error} />}
+      {/*
+        For cross-space monitors the saved-object fetch may legitimately 404
+        when the user can't read the SO from the active space, even though the
+        heartbeat-based `monitor` metadata renders the flyout fine. Don't
+        alarm the user with a "fetch failed" callout if we already have the
+        overview metadata to render — only surface real errors when there's
+        nothing else to show.
+      */}
+      {error && !isLoading && !isRemote && !monitor && <ErrorCallout {...error} />}
       <EuiFlyoutHeader hasBorder>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -457,6 +481,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               locationId={locationId}
               remoteName={monitor?.remote?.remoteName}
+              spaceId={crossSpaceId}
             />
             <FlyoutSummaryKPIs
               monitorId={id}

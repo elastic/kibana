@@ -11,12 +11,8 @@ export { takeSnapshot } from './take_snapshot';
 export { fetchSnapshot, gcsSnapshotUrl } from './fetch_snapshot';
 export { compareSnapshots } from './compare_snapshots';
 export { getNewTypes } from './get_new_types';
-export {
-  classifyUpdatedTypes,
-  getUpdatedTypes,
-  getTypesWithNewModelVersions,
-} from './get_updated_types';
-export type { ClassifiedUpdatedTypes } from './get_updated_types';
+export { classifyUpdatedTypes } from './classify_updated_types';
+export type { ClassifiedUpdatedTypes } from './classify_updated_types';
 export {
   validateChangesNewType,
   validateChangesExistingType,

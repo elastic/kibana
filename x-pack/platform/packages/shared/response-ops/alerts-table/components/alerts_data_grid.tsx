@@ -60,6 +60,7 @@ export const AlertsDataGrid = typedMemo(
       onResetColumns,
       onColumnResize,
       showInspectButton = false,
+      showCsvExportButton = false,
       leadingControlColumns: additionalLeadingControlColumns,
       trailingControlColumns,
       onSortChange,
@@ -151,6 +152,7 @@ export const AlertsDataGrid = typedMemo(
       fieldsBrowserOptions,
       alertsQuerySnapshot,
       showInspectButton,
+      showCsvExportButton,
       toolbarVisibilityProp,
       settings,
     });

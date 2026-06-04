@@ -12,6 +12,7 @@ import type {
   CreateProjectRequestBody,
   Credentials,
 } from './project_handler';
+import { ProjectInitTimeoutError } from './project_init_timeout_error';
 import { ProjectHandler } from './project_handler';
 
 const DEFAULT_REGION = 'aws-eu-west-1';
@@ -175,8 +176,12 @@ export class CloudHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
-    const fetchProjectStatusAttempt = async (attemptNum: number) => {
-      this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
+    let lastPhase: string | undefined;
+    let attempts = 0;
+
+    const fetchProjectStatusAttempt = async () => {
+      attempts += 1;
+      this.log.info(`Retry number ${attempts} to check if project is initialized.`);
       const response = await fetch(
         `${this.baseEnvUrl}/api/v1/serverless/projects/security/${projectId}/status`,
         {
@@ -190,6 +195,7 @@ export class CloudHandler extends ProjectHandler {
       }
 
       const data = (await response.json()) as { phase: string };
+      lastPhase = typeof data.phase === 'string' ? data.phase : undefined;
       if (data.phase !== 'initialized') {
         this.log.info(data);
         throw new Error('Project is not initialized. A retry will be triggered soon...');
@@ -197,6 +203,7 @@ export class CloudHandler extends ProjectHandler {
         this.log.info('Project is initialized');
       }
     };
+
     const retryOptions = {
       onFailedAttempt: (error: Error) => {
         if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
@@ -209,6 +216,14 @@ export class CloudHandler extends ProjectHandler {
       factor: 2,
       maxTimeout: 20000,
     };
-    return pRetry(fetchProjectStatusAttempt, retryOptions);
+
+    return pRetry(fetchProjectStatusAttempt, retryOptions).catch((final: unknown) => {
+      throw new ProjectInitTimeoutError({
+        projectId,
+        lastPhase,
+        attempts,
+        cause: final,
+      });
+    });
   }
 }

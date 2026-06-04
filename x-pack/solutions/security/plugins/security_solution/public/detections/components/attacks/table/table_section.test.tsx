@@ -589,6 +589,10 @@ describe('<TableSection />', () => {
         }),
         expect.anything()
       );
+
+      expect(mockUseGroupStats).toHaveBeenCalledWith({
+        getAttack: expect.any(Function),
+      });
     });
   });
 });

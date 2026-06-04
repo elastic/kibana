@@ -142,7 +142,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },
@@ -255,7 +255,7 @@ describe('FormBasedDimensionEditor', () => {
             title: 'Bytes',
           }),
           deserialize: jest.fn().mockReturnValue({
-            convert: () => 'formatted',
+            convertToText: () => 'formatted',
           }),
         },
         search: {
@@ -2363,7 +2363,7 @@ describe('FormBasedDimensionEditor', () => {
                 searchable: true,
               },
             ]),
-            getFormatterForField: () => ({ convert: (v: unknown) => v }),
+            getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
             isPersisted: true,
             spec: {},
           },

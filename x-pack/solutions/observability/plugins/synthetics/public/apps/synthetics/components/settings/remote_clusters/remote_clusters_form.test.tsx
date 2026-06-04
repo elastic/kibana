@@ -23,6 +23,7 @@ const mockSaveSettings = jest.fn();
 const mockCCSSettingsData = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [] as string[],
+  spaces: ['default'],
 };
 
 jest.mock('./hooks/use_get_ccs_settings', () => ({
@@ -51,6 +52,19 @@ jest.mock('../../../contexts/synthetics_settings_context', () => ({
   useSyntheticsSettingsContext: jest.fn(),
 }));
 
+const buildSpacesService = () => ({
+  ui: {
+    useSpaces: () => ({
+      spacesDataPromise: Promise.resolve({
+        spacesMap: new Map<string, { id: string; name: string }>([
+          ['default', { id: 'default', name: 'Default' }],
+          ['marketing', { id: 'marketing', name: 'Marketing' }],
+        ]),
+      }),
+    }),
+  },
+});
+
 describe('<RemoteClustersForm />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,14 +81,17 @@ describe('<RemoteClustersForm />', () => {
       loading: false,
       refetch: () => {},
     });
-    return render(<RemoteClustersForm />);
+    return render(<RemoteClustersForm />, {
+      core: { spaces: buildSpacesService() } as any,
+    });
   };
 
-  it('renders the form with toggle and cluster selector', () => {
+  it('renders the form with toggle, cluster selector, and spaces selector', () => {
     renderWithClusters();
 
     expect(screen.getByTestId('syntheticsUseAllRemoteClusters')).toBeInTheDocument();
     expect(screen.getByTestId('syntheticsSelectRemoteClusters')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsCCSSettingsSpacesSelect')).toBeInTheDocument();
   });
 
   it('shows a warning callout when no remote clusters are available', () => {
@@ -104,5 +121,19 @@ describe('<RemoteClustersForm />', () => {
     fireEvent.click(toggle);
 
     expect(applyButton).not.toBeDisabled();
+  });
+
+  it('forwards the saved spaces to saveSettings on apply', () => {
+    renderWithClusters();
+
+    // Toggle the switch to make the form dirty without interacting with the spaces combo box
+    // (its options load asynchronously via the spaces plugin promise).
+    fireEvent.click(screen.getByTestId('syntheticsUseAllRemoteClusters'));
+    fireEvent.click(screen.getByTestId('syntheticsCCSSettingsApplyButton'));
+
+    expect(mockSaveSettings).toHaveBeenCalledWith(
+      { useAllRemoteClusters: true, selectedRemoteClusters: [] },
+      ['default']
+    );
   });
 });

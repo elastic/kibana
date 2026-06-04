@@ -84,8 +84,8 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   return [
     collectValues({ source: 'event.module' }),
     collectValues({ source: 'event.dataset' }),
-    collectValues({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
-    collectValues({ source: ENTITY_SOURCE_FIELD, fieldHistoryLength: 50 }),
+    collectValues({ source: 'data_stream.dataset' }),
+    collectValues({ source: ENTITY_SOURCE_FIELD }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
@@ -166,14 +166,12 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',
       mapping: { type: 'keyword' },
-      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
     collectValues({
       source: `${prefix}.behaviors.anomaly_job_ids`,
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
-      fieldHistoryLength: 100,
       allowAPIUpdate: true,
     }),
 

@@ -25,6 +25,7 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
 @injectable()
@@ -177,7 +178,14 @@ export class AlertActionsClient {
 
     if (result.length === 0) {
       throw Boom.notFound(
-        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`
+        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`,
+        {
+          code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+          details: {
+            group_hash: groupHash,
+            ...(episodeId ? { episode_id: episodeId } : {}),
+          },
+        }
       );
     }
 

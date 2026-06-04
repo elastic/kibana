@@ -1,0 +1,317 @@
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+entries:
+- file:
+    name: 269560.yaml
+    checksum: 7cfda2f2baf491ce1613c10f81a8dae38c1213e8
+  type: feature
+  title: Add file attachment option to Cases
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/269560
+- file:
+    name: 268424.yaml
+    checksum: b18148c762d526566dc3e39e574da3b0177b1b6d
+  type: bug-fix
+  title: Fix filters and drilldowns when ES|QL renames a column field
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268424
+  issues:
+  - https://github.com/elastic/kibana/issues/260184
+- file:
+    name: 269687.yaml
+    checksum: 0ff808dd49d9faffab4a36ae80f96b9e198c6749
+  type: bug-fix
+  title: Fix Elasticsearch search sort validation in workflows
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Workflow `elasticsearch.search` steps now accept Elasticsearch body-style `sort` syntax, including object entries with `order`.
+  prs:
+  - https://github.com/elastic/kibana/pull/269687
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17429'
+- file:
+    name: 267549.yaml
+    checksum: c356989db84adcdbc61a43a632ade78dbc9d91fc
+  type: feature
+  title: Add bulk actions for Attack Discovery schedules
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  prs:
+  - https://github.com/elastic/kibana/pull/267549
+- file:
+    name: 269652.yaml
+    checksum: 38305ba46f4450d94908cd480cfeb685721a4266
+  type: bug-fix
+  title: Fix missing aria labels on modals and popovers
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Modals and popovers in Stack Management now expose accessible names for screen readers through `aria-label` or `aria-labelledby` attributes.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/269652
+- file:
+    name: 269936.yaml
+    checksum: 740f508e9f1be4ae6d7f052d6d628a158ed915a8
+  type: bug-fix
+  title: Fix APM Traces table horizontal scroll on narrow viewports
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  prs:
+  - https://github.com/elastic/kibana/pull/269936
+  issues:
+  - https://github.com/elastic/kibana/issues/269668
+- file:
+    name: 267247.yaml
+    checksum: e62edea19d0f61a39ac7b7b80d5683b12f4f2441
+  type: bug-fix
+  title: Fix AI rule creation when ES|QL is disabled in a space
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: When the `enableESQL` advanced setting is off, AI-assisted rule creation and ES|QL rule tools are unavailable instead of bypassing the setting.
+  prs:
+  - https://github.com/elastic/kibana/pull/267247
+  issues:
+  - https://github.com/elastic/kibana/issues/266378
+- file:
+    name: 267894.yaml
+    checksum: 613f544df0e9c401ae803e743221ce4a95895933
+  type: bug-fix
+  title: Fix empty pack details columns for scheduled Osquery queries
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Scheduled queries on the Osquery pack details page now show values in the "Last results", "# of docs", and "# of agents" columns.
+  prs:
+  - https://github.com/elastic/kibana/pull/267894
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17205'
+- file:
+    name: 268785.yaml
+    checksum: 78dc1b9f5fc71d658db90246c1dc79321f0f6e3a
+  type: enhancement
+  title: Add sparkline charts to the Discover table
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  areas:
+  - Discover and ES|QL
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/268785
+  issues:
+  - https://github.com/elastic/kibana/issues/262503
+- file:
+    name: 269454.yaml
+    checksum: 3afb645c038cfe35678ae8ffb2a1c1e408e26e65
+  type: enhancement
+  title: Merge Triggers and Steps into a single column in the workflow list
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  prs:
+  - https://github.com/elastic/kibana/pull/269454
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17163'
+- file:
+    name: 269455.yaml
+    checksum: 755c9f0cd40264ceff3aef8dae7bd203daef9643
+  type: enhancement
+  title: Add "Fix with AI" for ES|QL commands in Discover
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/269455
+- file:
+    name: 266718.yaml
+    checksum: d3ec42a49546d36156afb7102d70abce4bcd0bea
+  type: feature
+  title: Preserve metric details flyout state across Discover navigation
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: The metric details flyout in the Metrics experience stays open on the same metric and tab when you switch Discover tabs or duplicate a tab.
+  prs:
+  - https://github.com/elastic/kibana/pull/266718
+  issues:
+  - https://github.com/elastic/kibana/issues/235834
+- file:
+    name: 269438.yaml
+    checksum: 5c1c5cc9ad8b163ecb3bdbbe18e1db82fc3e9e22
+  type: enhancement
+  title: Restore SPARKLINE in the identify patterns recommended query
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/269438
+- file:
+    name: 266520.yaml
+    checksum: fd20300239a585e2d4decf668994eafea1f9de67
+  type: bug-fix
+  title: Fix metric chart queries when using a single backing index source
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Chart queries in the Metrics experience now keep the same index scope you type in the ES|QL source bar, preventing verification errors on metric cards.
+  prs:
+  - https://github.com/elastic/kibana/pull/266520
+  issues:
+  - https://github.com/elastic/kibana/issues/262360
+- file:
+    name: 266234.yaml
+    checksum: ffcd6627b9b735d0dc500c994835a76196b67af3
+  type: bug-fix
+  title: Fix ARM ELSER model selection during product doc installation
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Kibana no longer defaults to the Linux-based ELSER model when the inference ID contains `elser` on ARM deployments.
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/266234
+- file:
+    name: 268477.yaml
+    checksum: 8a2688f895d55b5ae3ab3be52aa26b9458391e66
+  type: enhancement
+  title: Add 'unnecessary escaping' warning to Endpoint artifacts
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: A warning callout and a confirmation modal added to Endpoint exceptions, Trusted applications and Event filters form to warn the users against escaping special characters.
+  prs:
+  - https://github.com/elastic/kibana/pull/268477
+- file:
+    name: 265592.yaml
+    checksum: 63d4871438d7690a0d41f560629d727fe2c025ab
+  type: enhancement
+  title: Add default repository setting
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Adds support in Snapshot and Restore to view and set the default repository via cluster setting.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/265592
+  issues:
+  - https://github.com/elastic/kibana/issues/263954
+  - https://github.com/elastic/kibana/issues/263955
+- file:
+    name: 269227.yaml
+    checksum: f8bd634bc6c9993f8e279976caa21b749365ddc4
+  type: enhancement
+  title: Add `ignoreGlobalDefault` flag to inference feature config
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: AI features can opt out of the global default inference connector by setting `ignoreGlobalDefault` on their inference feature configuration.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/269227
+- file:
+    name: 268620.yaml
+    checksum: c8e519e7314e46a96ecda7fa3bec04b904549bb9
+  type: bug-fix
+  title: Fix custom rank by count operation for terms bucket
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: 'Fixed an issue where the Lens Visualization API rejected `rank_by` with `operation: "count"` on terms buckets when no `field` was specified. `Count` can now rank by all documents without requiring a field.'
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268620
+  issues:
+  - https://github.com/elastic/kibana/issues/265786
+- file:
+    name: 269705.yaml
+    checksum: ee53e877190cabe3412d31441c7c7db57c20cf0d
+  type: enhancement
+  title: Move APM service map controls menu to the right of the toggle
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  prs:
+  - https://github.com/elastic/kibana/pull/269705
+  issues:
+  - https://github.com/elastic/kibana/issues/269685
+- file:
+    name: 269718.yaml
+    checksum: 032ffcdcb520a8ad31672710801e0ac14dc9621a
+  type: feature
+  title: Expand alert consumer list to include ml and stackAlerts
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: ML anomaly detection alerts and Stack alerts are now visible on the Observability Alerts page for users who have the corresponding feature privileges.
+  prs:
+  - https://github.com/elastic/kibana/pull/269718
+- file:
+    name: 258291.yaml
+    checksum: 17ea3caed7a6df91653ef9155a2b267b790fa165
+  type: enhancement
+  title: Add `secretQueryParams` support to HTTP connector
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: HTTP connectors can store encrypted query parameters in connector secrets and inject them into every request URL, similar to secret headers.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/258291
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16359'
+  - https://github.com/elastic/kibana/issues/256491
+- file:
+    name: 269484.yaml
+    checksum: 171cc3596f50b41c98579732e16d18f8bcfbcce2
+  type: enhancement
+  title: Improve Discover Metrics telemetry for rows with multiple units
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Adds a `units` counter to Discover Metrics telemetry so mixed-unit metric rows can be measured alongside existing data stream and field type counters.
+  prs:
+  - https://github.com/elastic/kibana/pull/269484
+- file:
+    name: 269467.yaml
+    checksum: 231f4b199eb9cd51d7f2bc7323cef50cc8997e00
+  type: bug-fix
+  title: Fix rule saves with oversized action message payloads
+  products:
+  - product: cloud-serverless
+    target: 2026-05-20
+  description: Rules with very large action message bodies no longer fail to save after upgrade because `actions.params` now uses `ignore_above` like other rule parameter fields.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/269467
+  issues:
+  - https://github.com/elastic/kibana/issues/268982

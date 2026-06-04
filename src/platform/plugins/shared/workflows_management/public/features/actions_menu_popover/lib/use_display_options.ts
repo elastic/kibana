@@ -91,37 +91,41 @@ export function buildDisplayOptions({
   }
 
   if (isStepsMode) {
+    if (options.length > 0) {
+      result.push({
+        label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
+          defaultMessage: 'Add step',
+        }),
+        isGroupLabel: true,
+      });
+      for (const opt of options) {
+        result.push({ label: opt.label, data: { menuItem: { kind: 'action', action: opt } } });
+      }
+    }
+    return result;
+  }
+
+  const visibleOptions = hasSearch ? options.slice(0, MAX_VISIBLE_STEPS) : options;
+  if (visibleOptions.length > 0) {
     result.push({
       label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
         defaultMessage: 'Add step',
       }),
       isGroupLabel: true,
     });
-    for (const opt of options) {
+    for (const opt of visibleOptions) {
       result.push({ label: opt.label, data: { menuItem: { kind: 'action', action: opt } } });
     }
-    return result;
-  }
 
-  result.push({
-    label: i18n.translate('workflows.actionsMenu.addStepGroupLabel', {
-      defaultMessage: 'Add step',
-    }),
-    isGroupLabel: true,
-  });
-  const visibleOptions = hasSearch ? options.slice(0, MAX_VISIBLE_STEPS) : options;
-  for (const opt of visibleOptions) {
-    result.push({ label: opt.label, data: { menuItem: { kind: 'action', action: opt } } });
-  }
-
-  if (hasSearch && options.length > MAX_VISIBLE_STEPS) {
-    result.push({
-      label: i18n.translate('workflows.actionsMenu.viewAllSteps', {
-        defaultMessage: 'View all steps to add',
-      }),
-      className: 'compactOption',
-      data: { menuItem: { kind: 'nav', target: 'viewAll' } },
-    });
+    if (hasSearch && options.length > MAX_VISIBLE_STEPS) {
+      result.push({
+        label: i18n.translate('workflows.actionsMenu.viewAllSteps', {
+          defaultMessage: 'View all steps to add',
+        }),
+        className: 'compactOption',
+        data: { menuItem: { kind: 'nav', target: 'viewAll' } },
+      });
+    }
   }
 
   const filteredCmds = (commands ?? []).filter(

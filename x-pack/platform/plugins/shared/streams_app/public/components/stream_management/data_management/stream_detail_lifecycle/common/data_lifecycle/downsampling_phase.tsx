@@ -8,7 +8,10 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
+  EuiButton,
   EuiButtonIcon,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -17,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { capitalize } from 'lodash';
@@ -48,6 +52,9 @@ export const DownsamplingPhase = ({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const intervalLabel = downsample.fixed_interval;
+  const popoverTitleId = useGeneratedHtmlId({
+    prefix: `streamsDownsamplingPopoverTitle-${stepNumber}`,
+  });
 
   const handleEditStep = () => {
     onEditStep?.(stepNumber, phaseName);
@@ -134,24 +141,36 @@ export const DownsamplingPhase = ({
           values: { stepNumber },
         }
       )}
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle data-test-subj={`downsamplingPopover-step${stepNumber}-title`}>
+      <EuiPopoverTitle
+        id={popoverTitleId}
+        data-test-subj={`downsamplingPopover-step${stepNumber}-title`}
+      >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.popoverTitle', {
-              defaultMessage: 'Downsample step {stepNumber}',
-              values: { stepNumber },
-            })}
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.popoverTitle', {
+                  defaultMessage: 'Downsample step {stepNumber}',
+                  values: { stepNumber },
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge data-test-subj={`downsamplingPopover-step${stepNumber}-ageBadge`}>
+                  {downsample.after}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {canManageLifecycle && (onEditStep || onRemoveStep) && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                 {onEditStep && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      display="base"
-                      iconType="pencil"
+                    <EuiButton
                       size="s"
+                      minWidth={false}
                       aria-label={i18n.translate(
                         'xpack.streams.streamDetailLifecycle.editDownsampleStep.ariaLabel',
                         {
@@ -161,7 +180,12 @@ export const DownsamplingPhase = ({
                       )}
                       data-test-subj={`downsamplingPopover-step${stepNumber}-editButton`}
                       onClick={handleEditStep}
-                    />
+                    >
+                      {i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.editDownsampleStepLabel',
+                        { defaultMessage: 'Edit' }
+                      )}
+                    </EuiButton>
                   </EuiFlexItem>
                 )}
 
@@ -194,94 +218,53 @@ export const DownsamplingPhase = ({
         data-test-subj={`downsamplingPopover-step${stepNumber}-content`}
       >
         <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGrid columns={2} gutterSize="s">
           {phaseName && (
             <>
               <EuiFlexItem data-test-subj={`downsamplingPopover-step${stepNumber}-definedIn`}>
-                <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>
-                        {i18n.translate(
-                          'xpack.streams.streamDetailLifecycle.downsample.definedIn',
-                          {
-                            defaultMessage: 'Defined in',
-                          }
-                        )}
-                      </strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText
-                      size="s"
-                      textAlign="right"
-                      data-test-subj={`downsamplingPopover-step${stepNumber}-phaseName`}
-                    >
-                      {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.phase', {
-                        defaultMessage: '{phase} phase',
-                        values: {
-                          phase: capitalize(phaseName),
-                        },
-                      })}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.definedIn', {
+                      defaultMessage: 'Defined in',
+                    })}
+                  </strong>
+                </EuiText>
               </EuiFlexItem>
-              <EuiSpacer size="s" />
+              <EuiFlexItem>
+                <EuiText
+                  size="s"
+                  data-test-subj={`downsamplingPopover-step${stepNumber}-phaseName`}
+                >
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.downsample.phase', {
+                    defaultMessage: '{phase} phase',
+                    values: { phase: capitalize(phaseName) },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
             </>
           )}
-          <EuiFlexItem data-test-subj={`downsamplingPopover-step${stepNumber}-afterDataStored`}>
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.downsample.afterDataStored',
-                      {
-                        defaultMessage: 'After data stored',
-                      }
-                    )}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="s"
-                  textAlign="right"
-                  data-test-subj={`downsamplingPopover-step${stepNumber}-afterValue`}
-                >
-                  {downsample.after}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiSpacer size="s" />
+
           <EuiFlexItem data-test-subj={`downsamplingPopover-step${stepNumber}-interval`}>
-            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.downsample.downsampleInterval',
-                      {
-                        defaultMessage: 'Downsample interval',
-                      }
-                    )}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="s"
-                  textAlign="right"
-                  data-test-subj={`downsamplingPopover-step${stepNumber}-intervalValue`}
-                >
-                  {downsample.fixed_interval}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiText size="s">
+              <strong>
+                {i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.downsample.downsampleInterval',
+                  {
+                    defaultMessage: 'Downsample interval',
+                  }
+                )}
+              </strong>
+            </EuiText>
           </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText
+              size="s"
+              data-test-subj={`downsamplingPopover-step${stepNumber}-intervalValue`}
+            >
+              {downsample.fixed_interval}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGrid>
       </div>
     </EuiPopover>
   );

@@ -61,6 +61,7 @@ import {
   ServiceMapOptionsPanelToggle,
   type ServiceMapOrientation,
 } from './service_map_options_panel';
+import { ServiceMapLegend } from './service_map_legend';
 import type { Environment } from '../../../../common/environment_rt';
 import {
   isServiceNode,
@@ -210,12 +211,24 @@ function GraphInner({
 
   useEffect(() => {
     setNodes(nodesWithContextHighlight);
-    setEdges(
-      applyEdgeHighlighting(edgesAfterFilters, {
-        selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
-        selectedEdgeId: selectedEdgeForPopoverRef.current,
-      })
-    );
+
+    const highlightedEdges = applyEdgeHighlighting(edgesAfterFilters, {
+      selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
+      selectedEdgeId: selectedEdgeForPopoverRef.current,
+    });
+
+    const edgesWithContextHighlight = highlightedServiceName
+      ? highlightedEdges.map((edge) => ({
+          ...edge,
+          data: {
+            ...edge.data,
+            sourceContextHighlight: edge.source === highlightedServiceName,
+            targetContextHighlight: edge.target === highlightedServiceName,
+          },
+        }))
+      : highlightedEdges;
+
+    setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
     if (nodesAfterFilters.length > 0) {
       const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
@@ -230,6 +243,7 @@ function GraphInner({
     applyEdgeHighlighting,
     getFitViewOptions,
     nodesAfterFilters.length,
+    highlightedServiceName,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
@@ -636,6 +650,15 @@ function GraphInner({
                       />
                     )}
                   </EuiFlexGroup>
+                </EuiPanel>
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  borderRadius="m"
+                  grow={false}
+                >
+                  <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
               {!isEmbedded && panelExpanded && (
