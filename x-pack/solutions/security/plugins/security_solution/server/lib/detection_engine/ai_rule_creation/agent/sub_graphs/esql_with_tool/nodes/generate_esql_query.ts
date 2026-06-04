@@ -9,7 +9,7 @@ import type { Logger, KibanaRequest, ElasticsearchClient } from '@kbn/core/serve
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
 import type { RejectionCode, RuleCreationState } from '../../../state';
 
 interface GenerateEsqlQueryParams {
@@ -79,15 +79,6 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         events: toolEvents,
       });
 
-      if (esqlResponse.rejectionReason) {
-        return {
-          rejectionReason: {
-            code: esqlResponse.rejectionReason.code as RejectionCode,
-            message: esqlResponse.rejectionReason.message,
-          },
-        };
-      }
-
       if (esqlResponse.error) {
         events?.reportProgress(`Failed to generate ES|QL query: ${esqlResponse.error}`);
         return {
@@ -115,6 +106,14 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         },
       };
     } catch (err) {
+      if (err instanceof GenerateEsqlNoDataError) {
+        return {
+          rejectionReason: {
+            code: err.code as RejectionCode,
+            message: err.message,
+          },
+        };
+      }
       logger.error(`Error generating ES|QL query: ${err.message}`, err);
       events?.reportProgress(`Failed to generate ES|QL query: ${err.message}`);
       return {
