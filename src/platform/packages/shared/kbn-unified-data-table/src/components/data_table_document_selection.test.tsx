@@ -105,13 +105,13 @@ describe('document selection', () => {
       expect(screen.getByRole('checkbox', { name: "Select document '1'" })).not.toBeChecked();
     });
 
-    it('is checked correctly', () => {
+    it('is checked when the document is selected', () => {
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
-      const { unmount } = renderWithTableContext(
+      renderWithTableContext(
         <SelectButton
           colIndex={0}
           columnId="test"
@@ -125,7 +125,13 @@ describe('document selection', () => {
       );
 
       expect(screen.getByRole('checkbox', { name: "Select document '1'" })).toBeChecked();
-      unmount();
+    });
+
+    it('is not checked when the document is not selected', () => {
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+      };
 
       renderWithTableContext(
         <SelectButton

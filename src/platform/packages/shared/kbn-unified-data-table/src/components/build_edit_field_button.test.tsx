@@ -28,10 +28,6 @@ const unknownField = dataViewMock.fields.create({
 });
 
 describe('buildEditFieldButton', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterEach(() => {
     jest.restoreAllMocks();
   });

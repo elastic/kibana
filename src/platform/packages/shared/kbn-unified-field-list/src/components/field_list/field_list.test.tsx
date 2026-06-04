@@ -14,13 +14,13 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
 describe('UnifiedFieldList <FieldList />', () => {
-  it('should render correctly when processing', () => {
-    const { unmount } = renderWithI18n(<FieldList isProcessing={true} />);
+  it('should render the loading indicator when processing', () => {
+    renderWithI18n(<FieldList isProcessing={true} />);
 
     expect(screen.getByTestId('fieldListLoading')).toBeVisible();
+  });
 
-    unmount();
-
+  it('should not render the loading indicator when not processing', () => {
     renderWithI18n(<FieldList isProcessing={false} />);
 
     expect(screen.queryByTestId('fieldListLoading')).not.toBeInTheDocument();
