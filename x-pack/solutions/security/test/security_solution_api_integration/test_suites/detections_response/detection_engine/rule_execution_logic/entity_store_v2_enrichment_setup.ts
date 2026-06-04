@@ -77,11 +77,19 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       );
     }
 
-    // Wait until the risk-score maintainer has completed its first run (taskStatus === 'stopped'
-    // and runs > 0). This ensures the maintainer has finished its initial setup pass and will not
-    // overwrite CRUD-seeded test entities before the detection rule executes.
-    // The entity store status API always returns 'running' once install is done, so we poll the
-    // entity maintainers API instead.
+    // Wait until the risk-score maintainer has completed at least one successful run. This
+    // ensures the maintainer has finished its initial setup pass and will not overwrite
+    // CRUD-seeded test entities before the detection rule executes.
+    //
+    // `taskStatus` is only ever set to 'stopped' by an explicit stopEntityMaintainer() API
+    // call — the task runner keeps taskStatus = 'started' between runs. The correct signal
+    // for "first run completed" is `runs > 0` (incremented in the finally block of every
+    // run regardless of success/failure) combined with `lastSuccessTimestamp !== null` to
+    // confirm the run actually succeeded and the risk-score index is ready.
+    //
+    // The entity maintainers route is an internal API (api-version '2'). There is no public
+    // equivalent for per-maintainer run counts. If the route version is bumped, update
+    // INTERNAL_API_HEADERS accordingly.
     await retry.waitForWithTimeout(
       'risk-score maintainer initial run to complete',
       300_000,
@@ -91,11 +99,10 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
         );
         const maintainer = res.body?.maintainers?.[0];
         if (!maintainer) return false;
-        // taskStatus stays 'started' between runs — it is only set to 'stopped' by an
-        // explicit stop API call, never by the task runner itself after a normal run.
-        // Waiting for runs > 0 is the correct condition: it means the maintainer has
-        // completed at least one full cycle and the risk-score index is ready.
-        return maintainer.runs > 0;
+        if (maintainer.lastErrorTimestamp && !maintainer.lastSuccessTimestamp) {
+          throw new Error(`risk-score maintainer first run failed: ${JSON.stringify(res.body)}`);
+        }
+        return maintainer.runs > 0 && maintainer.lastSuccessTimestamp !== null;
       }
     );
 

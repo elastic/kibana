@@ -286,8 +286,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with host and user risk indices', () => {
       before(async () => {
         // Auditbeat host records carry host.id so the EUID is id-based (host:<host.id>).
-        // Auditbeat user records carry host.id but no user.domain, so the EUID is local-namespace-based:
-        // user:<user.name>@<host.id>@local. entity.id must be supplied explicitly — the create API requires it.
+        // 'root' is in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES so the local-namespace gate never
+        // fires for this user — entity.namespace falls back to 'unknown' regardless of host.id.
+        // The user EUID is therefore user:<user.name>@unknown.
         await entityStoreV2.setup({
           hosts: [
             {
@@ -302,9 +303,8 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: ENRICHMENT_USER_NAME },
-              host: { id: [ENRICHMENT_HOST_ID] },
               entity: {
-                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
+                id: `user:${ENRICHMENT_USER_NAME}@unknown`,
                 type: 'user',
                 risk: { calculated_level: 'Low', calculated_score_norm: 11 },
               },
@@ -383,9 +383,8 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: ENRICHMENT_USER_NAME },
-              host: { id: [ENRICHMENT_HOST_ID] },
               entity: {
-                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
+                id: `user:${ENRICHMENT_USER_NAME}@unknown`,
                 type: 'user',
               },
               asset: { criticality: 'extreme_impact' },

@@ -63,7 +63,6 @@ import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_s
 const ENRICHMENT_HOST_ID = '2ce8b1e7d69e4a1d9c6bcddc473da9d9';
 const ENRICHMENT_HOST_NAME = 'zeek-sensor-amsterdam';
 const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
-const ENRICHMENT_USER_NAME = 'root';
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -2523,25 +2522,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
+        // Note: user.name in this auditbeat record is 'root'. Entity Store V2's LOCAL_NAMESPACE_EXCLUDED_USER_NAMES
+        // list includes 'root', so the local-namespace gate fails and getEuidFromObject() returns
+        // undefined for alerts where user.name === 'root'. User enrichment is therefore skipped by
+        // the detection engine for system accounts; only host enrichment is tested here.
         await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
               entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
               asset: { criticality: 'low_impact' },
-            },
-          ],
-          users: [
-            {
-              // Indicator match alerts come from auditbeat events that carry host.id,
-              // triggering the local-namespace user EUID: user:<name>@<host.id>@local.
-              user: { name: ENRICHMENT_USER_NAME },
-              host: { id: [ENRICHMENT_HOST_ID] },
-              entity: {
-                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
-                type: 'user',
-              },
-              asset: { criticality: 'extreme_impact' },
             },
           ],
         });
@@ -2582,7 +2572,6 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(fullAlert?.['host.asset.criticality']).toEqual('low_impact');
-        expect(fullAlert?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 

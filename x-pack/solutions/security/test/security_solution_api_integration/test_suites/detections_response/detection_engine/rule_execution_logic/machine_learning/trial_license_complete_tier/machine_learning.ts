@@ -347,13 +347,17 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
+        // ML anomaly records carry host.name ('mothra') but not host.id. The host EUID is
+        // therefore name-based: host:mothra. 'root' (user.name in the anomaly influencer) is in
+        // LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, which causes getEuidFromObject() to return undefined
+        // for the user entity — user enrichment is skipped for system accounts. Test host only.
         await entityStoreV2.setup({
-          users: [
+          hosts: [
             {
-              user: { name: 'root' },
+              host: { name: 'mothra' },
               entity: {
-                id: 'user:root@unknown',
-                type: 'user',
+                id: 'host:mothra',
+                type: 'host',
               },
               asset: { criticality: 'extreme_impact' },
             },
@@ -372,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts).toHaveLength(1);
         expect(previewAlerts[0]._source).toEqual(
           expect.objectContaining({
-            'user.asset.criticality': 'extreme_impact',
+            'host.asset.criticality': 'extreme_impact',
           })
         );
       });
