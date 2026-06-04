@@ -12,24 +12,6 @@ import { test, makeEsQueryRule, makeIndexThresholdRule } from '../fixtures';
 
 // ── API helpers ──────────────────────────────────────────────────────────────
 
-const snoozeRule = async (kbnClient: KbnClient, ruleId: string) => {
-  await kbnClient.request({
-    method: 'POST',
-    path: `/internal/alerting/rule/${ruleId}/_snooze`,
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      snooze_schedule: {
-        duration: 100_000_000,
-        rRule: {
-          count: 1,
-          dtstart: new Date().toISOString(),
-          tzid: 'UTC',
-        },
-      },
-    },
-  });
-};
-
 const scheduleRuleSnooze = async (kbnClient: KbnClient, ruleId: string) => {
   await kbnClient.request({
     method: 'POST',
@@ -102,13 +84,16 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('should allow rules to be unsnoozed', async ({ page, apiServices, kbnClient }) => {
+  test('should allow rules to be unsnoozed', async ({ page, apiServices }) => {
     const [r1, r2] = await Promise.all([
       apiServices.alerting.rules.create(makeEsQueryRule('unsnooze-a')),
       apiServices.alerting.rules.create(makeEsQueryRule('unsnooze-b')),
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
-    await Promise.all([snoozeRule(kbnClient, r1.data.id), snoozeRule(kbnClient, r2.data.id)]);
+    await Promise.all([
+      apiServices.alerting.rules.snooze(r1.data.id, 100_000_000),
+      apiServices.alerting.rules.snooze(r2.data.id, 100_000_000),
+    ]);
 
     await refreshRulesList(page);
 
