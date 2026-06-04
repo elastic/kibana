@@ -55,7 +55,7 @@ spaceTest.describe(
 
         expect(rows).toHaveLength(expectedTimestamps.length);
         for (let i = 0; i < expectedTimestamps.length; i++) {
-          expect(rows[i]).toContain(expectedTimestamps[i]);
+          expect.soft(rows[i]).toContain(expectedTimestamps[i]);
         }
       }
     );

@@ -11,6 +11,8 @@ import rison from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+const CONTEXT_LOAD_TIMEOUT = 30_000;
+
 const DEFAULT_INITIAL_STATE = {
   columns: ['@message'],
 };
@@ -43,10 +45,19 @@ export class ContextPage {
   }
 
   async waitUntilContextLoadingHasFinished() {
-    await expect(this.predecessorsLoadMoreButton).toBeVisible({ timeout: 30_000 });
-    await expect(this.predecessorsLoadMoreButton).toBeEnabled({ timeout: 30_000 });
-    await expect(this.successorsLoadMoreButton).toBeVisible({ timeout: 30_000 });
-    await expect(this.successorsLoadMoreButton).toBeEnabled({ timeout: 30_000 });
+    await this.predecessorsLoadMoreButton.waitFor({
+      state: 'visible',
+      timeout: CONTEXT_LOAD_TIMEOUT,
+    });
+    await this.successorsLoadMoreButton.waitFor({
+      state: 'visible',
+      timeout: CONTEXT_LOAD_TIMEOUT,
+    });
+    // no waitFor equivalent for "enabled"; expect is intentional sync, not assertion
+    await expect(this.predecessorsLoadMoreButton).toBeEnabled({
+      timeout: CONTEXT_LOAD_TIMEOUT,
+    });
+    await expect(this.successorsLoadMoreButton).toBeEnabled({ timeout: CONTEXT_LOAD_TIMEOUT });
   }
 
   async clickPredecessorLoadMoreButton() {

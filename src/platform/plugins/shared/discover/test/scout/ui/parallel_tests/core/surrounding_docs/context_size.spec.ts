@@ -45,7 +45,8 @@ spaceTest.describe(
       'should default to the context:defaultSize setting',
       async ({ page, pageObjects }) => {
         const expectedRowCount = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-        const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+        const rows = page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]');
+        // context data grid renders after anchor + surrounding doc queries
         await expect(rows).toHaveCount(expectedRowCount, { timeout: 30_000 });
 
         const predecessorValue = await pageObjects.contextPage.getPredecessorCountPickerValue();
@@ -57,12 +58,14 @@ spaceTest.describe(
       'should increase rows when clicking load newer button',
       async ({ page, pageObjects }) => {
         const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-        const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+        const rows = page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]');
+        // context data grid renders after anchor + surrounding doc queries
         await expect(rows).toHaveCount(initialExpected, { timeout: 30_000 });
 
         await pageObjects.contextPage.clickPredecessorLoadMoreButton();
 
         const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
+        // new rows fetched and appended after load-more query
         await expect(rows).toHaveCount(expectedAfterLoad, { timeout: 30_000 });
       }
     );
@@ -71,12 +74,14 @@ spaceTest.describe(
       'should increase rows when clicking load older button',
       async ({ page, pageObjects }) => {
         const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-        const rows = page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]');
+        const rows = page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]');
+        // context data grid renders after anchor + surrounding doc queries
         await expect(rows).toHaveCount(initialExpected, { timeout: 30_000 });
 
         await pageObjects.contextPage.clickSuccessorLoadMoreButton();
 
         const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
+        // new rows fetched and appended after load-more query
         await expect(rows).toHaveCount(expectedAfterLoad, { timeout: 30_000 });
       }
     );

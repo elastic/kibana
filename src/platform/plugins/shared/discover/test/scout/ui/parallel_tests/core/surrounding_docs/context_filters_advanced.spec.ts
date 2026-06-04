@@ -239,6 +239,7 @@ spaceTest.describe(
         await page.testSubj.click('editFilter');
 
         const filterForm0 = page.locator('[data-test-subj="filter-0"]');
+        // filter editor re-renders after clicking edit on an existing filter
         await filterForm0.waitFor({ state: 'visible', timeout: 10_000 });
         await filterForm0.locator('[data-test-subj="add-and-filter"]').click();
 

@@ -51,7 +51,7 @@ spaceTest.describe('Discover context - date_nanos', { tag: testData.CONTEXT_STAT
 
       expect(rows).toHaveLength(expectedTimestamps.length);
       for (let i = 0; i < expectedTimestamps.length; i++) {
-        expect(rows[i]).toContain(expectedTimestamps[i]);
+        expect.soft(rows[i]).toContain(expectedTimestamps[i]);
       }
     }
   );
@@ -78,7 +78,7 @@ spaceTest.describe('Discover context - date_nanos', { tag: testData.CONTEXT_STAT
 
       expect(rows).toHaveLength(expectedTimestamps.length);
       for (let i = 0; i < expectedTimestamps.length; i++) {
-        expect(rows[i]).toContain(expectedTimestamps[i]);
+        expect.soft(rows[i]).toContain(expectedTimestamps[i]);
       }
     }
   );

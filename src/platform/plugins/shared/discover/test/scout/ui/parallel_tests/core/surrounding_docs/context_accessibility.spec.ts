@@ -20,6 +20,10 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     });
 
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsViewer();
+    });
+
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
@@ -27,8 +31,7 @@ spaceTest.describe(
 
     spaceTest(
       'should give focus to the Load link when Tab is pressed',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
+      async ({ page, pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();

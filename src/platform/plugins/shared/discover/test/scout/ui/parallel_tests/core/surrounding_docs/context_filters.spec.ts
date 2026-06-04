@@ -54,6 +54,7 @@ spaceTest.describe(
         await anchorExpandBtn.click();
 
         const flyout = page.testSubj.locator('docViewerFlyout');
+        // flyout renders after row expansion + data fetch
         await expect(flyout).toBeVisible({ timeout: 10_000 });
 
         // In serverless, the flyout may default to "Log overview" tab; switch to "Table" if needed
@@ -65,6 +66,7 @@ spaceTest.describe(
         const valueCell = flyout.locator(
           `[data-test-subj="tableDocViewRow-${TEST_ANCHOR_FILTER_FIELD}-value"]`
         );
+        // field search + table re-render inside flyout
         await expect(valueCell).toBeVisible({ timeout: 10_000 });
         await valueCell.hover();
 
@@ -128,6 +130,7 @@ spaceTest.describe(
         await anchorExpandBtn.click();
 
         const flyout = page.testSubj.locator('docViewerFlyout');
+        // flyout renders after row expansion + data fetch
         await expect(flyout).toBeVisible({ timeout: 10_000 });
 
         // In serverless, the flyout may default to "Log overview" tab; switch to "Table" if needed
@@ -139,6 +142,7 @@ spaceTest.describe(
         const nameCell = flyout.locator(
           '[data-gridcell-column-id="name"][data-gridcell-visible-row-index="0"]'
         );
+        // field search + table re-render inside flyout
         await expect(nameCell).toBeVisible({ timeout: 10_000 });
         await nameCell.hover();
 

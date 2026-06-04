@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  addFilterWithoutStrictCheck,
-} from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, addFilters } from '../../../fixtures/surrounding_docs';
 
 const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
   [
@@ -22,12 +17,6 @@ const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
   ],
   ['extension', 'jpg'],
 ];
-
-async function addAllFilters(page: ScoutPage) {
-  for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-    await addFilterWithoutStrictCheck(page, field, value);
-  }
-}
 
 spaceTest.describe(
   'Discover context - back navigation',
@@ -39,6 +28,10 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     });
 
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsViewer();
+    });
+
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
@@ -46,13 +39,12 @@ spaceTest.describe(
 
     spaceTest(
       'should go back after loading more in context view',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
+      async ({ page, pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await addAllFilters(page);
+        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         const initialHitCount = await pageObjects.discover.getHitCountInt();
@@ -76,13 +68,12 @@ spaceTest.describe(
 
     spaceTest(
       'should go back via breadcrumbs with preserved state',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
+      async ({ page, pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await addAllFilters(page);
+        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
@@ -105,13 +96,12 @@ spaceTest.describe(
 
     spaceTest(
       'should go back via breadcrumbs with preserved state after page refresh',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
+      async ({ page, pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await addAllFilters(page);
+        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
@@ -133,13 +123,12 @@ spaceTest.describe(
 
     spaceTest(
       'should preserve state when navigating back after URL state changes',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
+      async ({ page, pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await addAllFilters(page);
+        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });

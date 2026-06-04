@@ -7,25 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  addFilterWithoutStrictCheck,
-} from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, addFilters } from '../../../fixtures/surrounding_docs';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
   ['extension.raw', 'jpg'],
   ['geo.src', 'IN'],
 ];
-
-async function addAllFilters(page: ScoutPage) {
-  for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-    await addFilterWithoutStrictCheck(page, field, value);
-  }
-}
 
 spaceTest.describe(
   'Discover context - navigation from Discover',
@@ -117,7 +106,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
 
-        await addAllFilters(page);
+        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
@@ -147,10 +136,12 @@ spaceTest.describe(
         await pageObjects.contextPage.openRowActions(0);
         await pageObjects.contextPage.clickRowAction(0);
 
+        // doc view load can be slow with large logstash dataset
         await expect(page.testSubj.locator('doc-hit')).toBeVisible({ timeout: 30_000 });
 
         await page.testSubj.click('~breadcrumb-deepLinkId-discover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
+        // full Discover re-render after breadcrumb navigation
         await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
       }
     );
@@ -175,15 +166,18 @@ spaceTest.describe(
         await rowToggle.click();
 
         const flyout = page.testSubj.locator('docViewerFlyout');
+        // flyout renders after row expansion + data fetch
         await expect(flyout).toBeVisible({ timeout: 10_000 });
         const viewDocAction = flyout.locator('[data-test-subj="docTableRowAction"] >> nth=0');
         await viewDocAction.click();
 
+        // dashboard may prompt "unsaved changes" confirmation on navigation
         const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
         if (await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
           await confirmBtn.click();
         }
 
+        // doc view load can be slow with large logstash dataset
         await expect(page).toHaveURL(/#\/doc/, { timeout: 30_000 });
         await expect(page.testSubj.locator('doc-hit')).toBeVisible({ timeout: 30_000 });
       }

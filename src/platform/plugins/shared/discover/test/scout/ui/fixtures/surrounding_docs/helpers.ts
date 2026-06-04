@@ -35,3 +35,12 @@ export async function addFilterWithoutStrictCheck(
   await page.testSubj.click('saveFilter');
   await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
 }
+
+/**
+ * Adds multiple "is" filters in sequence.
+ */
+export async function addFilters(page: ScoutPage, filters: Array<[string, string]>): Promise<void> {
+  for (const [field, value] of filters) {
+    await addFilterWithoutStrictCheck(page, field, value);
+  }
+}
