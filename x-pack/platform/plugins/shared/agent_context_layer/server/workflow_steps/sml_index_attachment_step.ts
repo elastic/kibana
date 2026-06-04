@@ -6,8 +6,10 @@
  */
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { smlIndexAttachmentStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
+import { apiPrivileges } from '../../common/features';
 import type { SmlChunk } from '../services/sml/types';
 import type { AgentContextLayerPluginStart } from '../types';
 
@@ -30,6 +32,15 @@ import type { AgentContextLayerPluginStart } from '../types';
  * `indexAttachment`'s delete, which keeps curated manuals around so
  * crawler / event-driven CRUD callers don't clobber pinned content.
  *
+ * Both branches are gated by an `agentContextLayer:write` Kibana privilege
+ * check against the workflow's fake request. The HTTP upsert/delete routes
+ * already enforce the same privilege via route security; the workflow step
+ * is a second entrypoint into the indexer and must mirror that gate or it
+ * becomes a privilege-escalation surface for any user who can author or
+ * trigger a workflow. When the security plugin is absent (e.g. dev/test
+ * with security disabled) we follow the standard "no security plugin →
+ * open access" convention used by the SML read path.
+ *
  * The `getTypeDefinition` guard intentionally only fires on the `upsert`
  * branch: writes against an unregistered type are nonsensical (no
  * `getSmlData` hook to fall back to, no `toAttachment` for downstream
@@ -44,9 +55,11 @@ import type { AgentContextLayerPluginStart } from '../types';
 export const createSmlIndexAttachmentStepDefinition = ({
   getStartContract,
   getSpaces,
+  getSecurity,
 }: {
   getStartContract: () => AgentContextLayerPluginStart;
   getSpaces: () => SpacesPluginStart | undefined;
+  getSecurity: () => SecurityPluginStart | undefined;
 }) =>
   createServerStepDefinition({
     ...smlIndexAttachmentStepCommonDefinition,
@@ -57,6 +70,30 @@ export const createSmlIndexAttachmentStepDefinition = ({
         const request = context.contextManager.getFakeRequest();
 
         const startContract = getStartContract();
+
+        const security = getSecurity();
+        if (security) {
+          const requiredPrivilege = security.authz.actions.api.get(
+            apiPrivileges.writeAgentContextLayer
+          );
+          const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
+          const { hasAllRequested } = await checkPrivileges({ kibana: [requiredPrivilege] });
+          if (!hasAllRequested) {
+            return {
+              error: new Error(
+                `Unauthorized: workflow caller is missing required privilege '${apiPrivileges.writeAgentContextLayer}' to ${action} SML attachment '${originId}'.`
+              ),
+            };
+          }
+        } else {
+          // Match the "no security plugin → open access" convention used by
+          // the read path (filterResultsByPermissions). Logged so operators
+          // running with the security plugin disabled can see writes
+          // happening through this step.
+          context.logger.debug(
+            'Skipping agentContextLayer:write privilege check — security plugin is not available.'
+          );
+        }
 
         if (action === 'delete') {
           // We do NOT gate on `getTypeDefinition` here: a workflow must be

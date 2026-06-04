@@ -7,6 +7,7 @@
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { AgentContextLayerPluginStart } from '../types';
 import { createSmlIndexAttachmentStepDefinition } from './sml_index_attachment_step';
 
@@ -14,12 +15,14 @@ export const registerAgentContextLayerWorkflowSteps = ({
   workflowsExtensions,
   getStartContract,
   getSpaces,
+  getSecurity,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getStartContract: () => AgentContextLayerPluginStart;
   getSpaces: () => SpacesPluginStart | undefined;
+  getSecurity: () => SecurityPluginStart | undefined;
 }) => {
   workflowsExtensions.registerStepDefinition(
-    createSmlIndexAttachmentStepDefinition({ getStartContract, getSpaces })
+    createSmlIndexAttachmentStepDefinition({ getStartContract, getSpaces, getSecurity })
   );
 };

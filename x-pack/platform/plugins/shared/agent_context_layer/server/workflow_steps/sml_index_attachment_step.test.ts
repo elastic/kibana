@@ -8,7 +8,9 @@
 import type { z } from '@kbn/zod/v4';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
+import { apiPrivileges } from '../../common/features';
 import type { AgentContextLayerPluginStart } from '../types';
 import { createSmlIndexAttachmentStepDefinition } from './sml_index_attachment_step';
 
@@ -21,6 +23,38 @@ const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   indexAttachment: jest.fn().mockResolvedValue(undefined),
   deleteAttachment: jest.fn().mockResolvedValue(undefined),
 });
+
+/**
+ * Builds a security mock whose privilege check returns `authorized` for
+ * every requested kibana privilege. The expanded `api:` form returned by
+ * `actions.api.get(...)` is what we'd see at runtime — we mirror that here
+ * so the assertions below can match on the same value.
+ */
+const buildSecurity = ({ authorized = true }: { authorized?: boolean } = {}): jest.Mocked<
+  Pick<SecurityPluginStart, 'authz'>
+> & {
+  authz: {
+    actions: { api: { get: jest.Mock } };
+    checkPrivilegesDynamicallyWithRequest: jest.Mock;
+  };
+} => {
+  const checkPrivileges = jest.fn().mockImplementation(async ({ kibana }: { kibana: string[] }) => ({
+    hasAllRequested: authorized,
+    privileges: {
+      kibana: kibana.map((privilege) => ({ privilege, authorized })),
+    },
+  }));
+  return {
+    authz: {
+      actions: {
+        api: {
+          get: jest.fn((privilege: string) => `api:${privilege}`),
+        },
+      },
+      checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+    },
+  } as any;
+};
 
 // Reuse the Zod schema as the source of truth for the test input shape so
 // the test fixtures cannot silently drift from the contract.
@@ -56,6 +90,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => buildStartContract(),
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
     expect(definition.id).toBe('agentContextLayer.smlIndexAttachment');
     expect(definition.inputSchema).toBeDefined();
@@ -71,6 +106,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => spaces as SpacesPluginStart,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -127,6 +163,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -147,6 +184,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -184,6 +222,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -223,6 +262,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     // Cleanup must remain functional after the plugin that registered the
@@ -254,6 +294,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -276,6 +317,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -301,6 +343,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
         throw new Error('start contract not ready');
       },
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -320,6 +363,7 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const definition = createSmlIndexAttachmentStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
+      getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
     });
 
     const context = buildHandlerContext({
@@ -331,5 +375,121 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
     const result = await definition.handler(context as any);
     expect(result.output?.spaceId).toBe('default');
+  });
+
+  describe('agentContextLayer:write privilege check', () => {
+    it('checks the privilege against the workflow fake request and dispatches the write when authorized', async () => {
+      const startContract = buildStartContract();
+      const security = buildSecurity({ authorized: true });
+      const definition = createSmlIndexAttachmentStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => security as unknown as SecurityPluginStart,
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      const context = buildHandlerContext(
+        {
+          originId: 'doc-1',
+          attachmentType: 'custom',
+          action: 'upsert',
+          chunks: [{ type: 'custom', title: 't', content: 'c' }],
+        },
+        request
+      );
+
+      const result = await definition.handler(context as any);
+
+      expect(security.authz.actions.api.get).toHaveBeenCalledWith(
+        apiPrivileges.writeAgentContextLayer
+      );
+      expect(security.authz.checkPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(request);
+      const checkPrivileges =
+        security.authz.checkPrivilegesDynamicallyWithRequest.mock.results[0].value;
+      // The security mock expands the api action via `actions.api.get`,
+      // so we expect the wrapped `api:` form here — same as what runtime
+      // `checkPrivilegesDynamicallyWithRequest` would receive.
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [`api:${apiPrivileges.writeAgentContextLayer}`],
+      });
+      expect(result.error).toBeUndefined();
+      expect(startContract.indexAttachment).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects upsert with an error and never calls indexAttachment when the caller lacks the privilege', async () => {
+      const startContract = buildStartContract();
+      const security = buildSecurity({ authorized: false });
+      const definition = createSmlIndexAttachmentStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => security as unknown as SecurityPluginStart,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'upsert',
+        chunks: [{ type: 'custom', title: 't', content: 'c' }],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.output).toBeUndefined();
+      expect(result.error).toBeInstanceOf(Error);
+      expect((result.error as Error).message).toContain(apiPrivileges.writeAgentContextLayer);
+      expect((result.error as Error).message).toContain('upsert');
+      expect(startContract.indexAttachment).not.toHaveBeenCalled();
+      // The type-definition lookup happens after the privilege gate, so it
+      // must not be consulted when the caller is unauthorized.
+      expect(startContract.getTypeDefinition).not.toHaveBeenCalled();
+    });
+
+    it('rejects delete with an error and never calls deleteAttachment when the caller lacks the privilege', async () => {
+      const startContract = buildStartContract();
+      const security = buildSecurity({ authorized: false });
+      const definition = createSmlIndexAttachmentStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => security as unknown as SecurityPluginStart,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'delete',
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.output).toBeUndefined();
+      expect(result.error).toBeInstanceOf(Error);
+      expect((result.error as Error).message).toContain(apiPrivileges.writeAgentContextLayer);
+      expect((result.error as Error).message).toContain('delete');
+      expect(startContract.deleteAttachment).not.toHaveBeenCalled();
+    });
+
+    it('skips the privilege check and proceeds when the security plugin is absent', async () => {
+      const startContract = buildStartContract();
+      const definition = createSmlIndexAttachmentStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => undefined,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'upsert',
+        chunks: [{ type: 'custom', title: 't', content: 'c' }],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.error).toBeUndefined();
+      expect(startContract.indexAttachment).toHaveBeenCalledTimes(1);
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('security plugin is not available')
+      );
+    });
   });
 });

@@ -42,6 +42,7 @@ export class AgentContextLayerPlugin
   private smlService?: SmlService;
   private startContract?: AgentContextLayerPluginStart;
   private spaces?: AgentContextLayerStartDependencies['spaces'];
+  private security?: AgentContextLayerStartDependencies['security'];
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -104,6 +105,7 @@ export class AgentContextLayerPlugin
           return this.startContract;
         },
         getSpaces: () => this.spaces,
+        getSecurity: () => this.security,
       });
     }
 
@@ -123,6 +125,7 @@ export class AgentContextLayerPlugin
       securityAuthz: security?.authz,
     });
     this.spaces = spaces;
+    this.security = security;
 
     const smlService = this.smlService;
 
