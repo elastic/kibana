@@ -6,16 +6,16 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import type { CompositeSLODefinition } from '../../domain/models';
 import { toRichRollingTimeWindow } from '../../domain/models';
 import { retryTransientEsErrors } from '../../utils/retry';
-import { buildCompositeSloSummaryDocId } from './composite_slo_summary_index';
-import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
+import { buildCompositeSloSummaryDocId } from './composite_slo_summary_index';
+import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 
 export interface CompositeSummaryDoc {
   spaceId: string;
@@ -85,7 +85,7 @@ export function buildCompositeSummaryDoc(
 interface PersistCompositeSummaryDocParams {
   esClient: ElasticsearchClient;
   summaryClient: SummaryClient;
-  sloDefinitionRepository: SLODefinitionRepository;
+  repository: SLODefinitionRepository;
   logger: Logger;
   spaceId: string;
   compositeSlo: CompositeSLODefinition;
@@ -99,13 +99,13 @@ interface PersistCompositeSummaryDocParams {
 export async function persistCompositeSummaryDoc({
   esClient,
   summaryClient,
-  sloDefinitionRepository,
+  repository,
   logger,
   spaceId,
   compositeSlo,
 }: PersistCompositeSummaryDocParams): Promise<void> {
   const memberSloIds = compositeSlo.members.map((m) => m.sloId);
-  const memberDefinitions = await sloDefinitionRepository.findAllByIds(memberSloIds);
+  const memberDefinitions = await repository.findAllByIds(memberSloIds);
   const memberDefinitionMap = new Map(memberDefinitions.map((slo) => [slo.id, slo]));
 
   const unresolvedMemberIds = compositeSlo.members

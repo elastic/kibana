@@ -18,20 +18,20 @@ export interface UpdateCompositeSloParams extends UpdateCompositeSLOInput {
   userId: string | undefined;
 }
 
-export interface UpdateCompositeSloDeps {
+interface Dependencies {
   esClient: ElasticsearchClient;
-  compositeSloRepository: CompositeSLORepository;
-  sloDefinitionRepository: SLODefinitionRepository;
+  compositeRepository: CompositeSLORepository;
+  repository: SLODefinitionRepository;
   summaryClient: SummaryClient;
   logger: Logger;
 }
 
 export const updateCompositeSlo = async (
   params: UpdateCompositeSloParams,
-  deps: UpdateCompositeSloDeps
+  { esClient, compositeRepository, repository, summaryClient, logger }: Dependencies
 ): Promise<CompositeSLODefinitionResponse> => {
   const { id, spaceId, userId, ...body } = params;
-  const existing = await deps.compositeSloRepository.findById(id);
+  const existing = await compositeRepository.findById(id);
 
   const updated = {
     ...existing,
@@ -40,13 +40,13 @@ export const updateCompositeSlo = async (
     updatedBy: userId ?? existing.updatedBy,
   };
 
-  const result = await deps.compositeSloRepository.update(updated);
+  const result = await compositeRepository.update(updated);
 
   await persistCompositeSummaryDoc({
-    esClient: deps.esClient,
-    summaryClient: deps.summaryClient,
-    sloDefinitionRepository: deps.sloDefinitionRepository,
-    logger: deps.logger,
+    esClient,
+    summaryClient,
+    repository,
+    logger,
     spaceId,
     compositeSlo: result,
   });

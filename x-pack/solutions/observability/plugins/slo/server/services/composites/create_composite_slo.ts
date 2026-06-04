@@ -6,30 +6,30 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CreateCompositeSLOInput, CompositeSLODefinitionResponse } from '@kbn/slo-schema';
+import type { CompositeSLODefinitionResponse, CreateCompositeSLOInput } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { CompositeSLORepository } from './composite_slo_repository';
-import { persistCompositeSummaryDoc } from './composite_summary_writer';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
+import type { CompositeSLORepository } from './composite_slo_repository';
+import { persistCompositeSummaryDoc } from './composite_summary_writer';
 
 export interface CreateCompositeSloParams extends CreateCompositeSLOInput {
   spaceId: string;
   userId: string;
 }
 
-export interface CreateCompositeSloDeps {
+interface Dependencies {
   esClient: ElasticsearchClient;
-  compositeSloRepository: CompositeSLORepository;
-  sloDefinitionRepository: SLODefinitionRepository;
+  compositeRepository: CompositeSLORepository;
+  repository: SLODefinitionRepository;
   summaryClient: SummaryClient;
   logger: Logger;
 }
 
-export const createCompositeSlo = async (
+export async function createCompositeSlo(
   params: CreateCompositeSloParams,
-  deps: CreateCompositeSloDeps
-): Promise<CompositeSLODefinitionResponse> => {
+  { esClient, compositeRepository, repository, summaryClient, logger }: Dependencies
+): Promise<CompositeSLODefinitionResponse> {
   const { spaceId, userId, ...body } = params;
   const now = new Date().toISOString();
   const compositeSlo = {
@@ -44,16 +44,16 @@ export const createCompositeSlo = async (
     updatedBy: userId,
   };
 
-  const created = await deps.compositeSloRepository.create(compositeSlo);
+  const created = await compositeRepository.create(compositeSlo);
 
   await persistCompositeSummaryDoc({
-    esClient: deps.esClient,
-    summaryClient: deps.summaryClient,
-    sloDefinitionRepository: deps.sloDefinitionRepository,
-    logger: deps.logger,
+    esClient,
+    summaryClient,
+    repository,
+    logger,
     spaceId,
     compositeSlo: created,
   });
 
   return created;
-};
+}
