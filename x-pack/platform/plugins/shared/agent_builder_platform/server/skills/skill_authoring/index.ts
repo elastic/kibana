@@ -6,4 +6,4 @@
  */
 
 export { skillAuthoringSkill } from './skill_authoring_skill';
-export { skillEditingSkill } from './skill_editing_skill';
+export { skillManagementSkill } from './skill_management_skill';

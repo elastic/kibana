@@ -152,7 +152,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.use-case-library`,
   `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-authoring',
-  'skill-editing',
+  'skill-management',
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

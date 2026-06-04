@@ -420,20 +420,20 @@ export const createSkillAttachmentDefinition = ({
 
       if (isCommitted(attachment)) {
         const isCreating = mode === 'create';
-        const label = isCreating
-          ? i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.create', {
-              defaultMessage: 'Created',
-            })
-          : i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.edit', {
-              defaultMessage: 'Saved',
-            });
-        const committedBadge: HeaderBadge = {
-          label,
-          color: 'success',
-          iconType: 'check',
-        };
-        badges.push(committedBadge);
-        // Created attachments only show created badge
+        // Only show the committed badge on the latest version.
+        // Show no badges for a freshly loaded skill since no user action has been taken yet.
+        const isFreshLoad = !isCreating && (attachment.versionData?.versionCount ?? 0) === 1;
+        if (isLatest(attachment) && !isFreshLoad) {
+          const label = isCreating
+            ? i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.create', {
+                defaultMessage: 'Created',
+              })
+            : i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.edit', {
+                defaultMessage: 'Saved',
+              });
+          const committedBadge: HeaderBadge = { label, color: 'success', iconType: 'check' };
+          badges.push(committedBadge);
+        }
         return { icon: 'sparkles', subtitle: skill.id, badges };
       }
 
@@ -539,47 +539,46 @@ export const createSkillAttachmentDefinition = ({
         actionButtons.push(previewButton);
       }
 
-      if (isLatest(attachment)) {
-        // Once the draft has been persisted, swap the create button for one that
-        // navigates the user to the skill management page for the skill.
-        if (isCommitted(attachment)) {
-          const skillId = attachment.origin;
-          const editInManagementButton: ActionButton = {
-            label: editInManagementLabel,
-            icon: 'pencil',
-            type: ActionButtonType.PRIMARY,
-            href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
-              path: `${SKILLS_MANAGE_PATH}/${skillId}`,
-            }),
-            openInNewTab: true,
-            handler: () => {
-              // Do nothing. navigation handled by href
-            },
-          };
-          actionButtons.push(editInManagementButton);
-        } else if (mode === 'edit') {
-          const saveChangesButton: ActionButton = {
-            label: saveChangesLabel,
-            icon: 'save',
-            type: ActionButtonType.PRIMARY,
-            disabled: !canCreate,
-            disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
-            handler: saveChanges,
-          };
-          actionButtons.push(saveChangesButton);
-        } else {
-          // Only show create button for the latest draft
-          const createButton: ActionButton = {
-            label: createSkillLabel,
-            icon: 'plus',
-            type: ActionButtonType.PRIMARY,
-            disabled: !canCreate,
-            disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
-            handler: createSkill,
-          };
+      if (!isLatest(attachment)) {
+        return actionButtons;
+      }
 
-          actionButtons.push(createButton);
-        }
+      if (isCommitted(attachment)) {
+        const skillId = attachment.origin;
+        const editInManagementButton: ActionButton = {
+          label: editInManagementLabel,
+          icon: 'pencil',
+          type: ActionButtonType.PRIMARY,
+          href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
+            path: `${SKILLS_MANAGE_PATH}/${skillId}`,
+          }),
+          openInNewTab: true,
+          handler: () => {
+            // Do nothing. navigation handled by href
+          },
+        };
+        actionButtons.push(editInManagementButton);
+      } else if (mode === 'edit') {
+        const saveChangesButton: ActionButton = {
+          label: saveChangesLabel,
+          icon: 'save',
+          type: ActionButtonType.PRIMARY,
+          disabled: !canCreate,
+          disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+          handler: saveChanges,
+        };
+        actionButtons.push(saveChangesButton);
+      } else {
+        // Only show create button for the latest draft
+        const createButton: ActionButton = {
+          label: createSkillLabel,
+          icon: 'plus',
+          type: ActionButtonType.PRIMARY,
+          disabled: !canCreate,
+          disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+          handler: createSkill,
+        };
+        actionButtons.push(createButton);
       }
 
       return actionButtons;
