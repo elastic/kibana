@@ -50,6 +50,13 @@ const isNewConversation = (conversation: ActiveConversation | null): boolean => 
   return conversation !== null && !conversation.id;
 };
 
+/*
+ * Keep one stable id while the attachment is still a draft so opening another
+ * SigEvent before send updates the existing input pill instead of adding duplicates.
+ * Once the draft is sent, that id belongs to a persisted conversation attachment,
+ * so rotate it to avoid later auto-attachments mutating the old attachment. Closing
+ * the sidebar also discards the input draft, so the next open should start fresh.
+ */
 export const createSignificantEventAttachmentIdRegenerationSubscription = ({
   agentBuilder,
   chrome,
@@ -92,6 +99,12 @@ export const createSignificantEventAttachmentIdRegenerationSubscription = ({
   return subscription;
 };
 
+/*
+ * Auto-stage the SigEvent currently shown in the details flyout when the AI Agent
+ * sidebar is opened. This intentionally only targets new conversations:
+ * existing chats may already have unrelated context, so we avoid injecting the
+ * viewed SigEvent unless the user is starting from a fresh draft.
+ */
 export const registerSignificantEventAutoAttach = ({
   agentBuilder,
   chrome,
@@ -133,6 +146,11 @@ export const registerSignificantEventAutoAttach = ({
         return;
       }
 
+      /*
+       * Defer until the active conversation change has fully propagated. The AI Agent
+       * sidebar registers its attachment callbacks during render, so calling
+       * addAttachment synchronously here can run before the sidebar is ready to accept it.
+       */
       pendingAddAttachmentTimeout = setTimeout(() => {
         pendingAddAttachmentTimeout = undefined;
         addAttachment(event);
