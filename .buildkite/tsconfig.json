@@ -14,7 +14,9 @@
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
     "pull_requests.json",
-    "pipeline-resource-definitions/**/*.ts"
+    "pipeline-resource-definitions/**/*.ts",
+    "../src/platform/packages/shared/kbn-core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build.ts",
+    "../src/platform/packages/shared/kbn-core-server-benchmarks/ci_warm_start_memory/memory_regression_report.ts"
   ],
   "exclude": [
     "target/**/*",
