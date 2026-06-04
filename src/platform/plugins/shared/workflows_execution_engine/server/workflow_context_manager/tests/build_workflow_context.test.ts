@@ -154,7 +154,7 @@ describe('buildWorkflowContext', () => {
       });
     });
 
-    it('should render default input values when inputs are not provided', () => {
+    it('should leave templated default input values raw when inputs are not provided', () => {
       setInputsSchema({
         properties: {
           inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
@@ -177,11 +177,11 @@ describe('buildWorkflowContext', () => {
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
-        inputWithDefault: 'renderedValue',
+        inputWithDefault: '{{ consts.default_input }}',
       });
     });
 
-    it('should render provided input values', () => {
+    it('should leave provided templated input values raw', () => {
       setInputsSchema({
         properties: {
           inputWithDefault: { type: 'string', default: 'defaultValue' },
@@ -206,7 +206,7 @@ describe('buildWorkflowContext', () => {
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.inputs).toEqual({
-        inputWithDefault: 'renderedValue',
+        inputWithDefault: '{{ consts.default_input }}',
       });
     });
 

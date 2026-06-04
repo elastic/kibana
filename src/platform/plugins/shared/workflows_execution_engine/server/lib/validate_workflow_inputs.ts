@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isDeepStrictEqual } from 'node:util';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -21,6 +22,11 @@ import {
   type WorkflowExecutionForInputRendering,
 } from '../workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from '../workflow_context_manager/types';
+
+const hasInputChanges = (
+  currentInputs: Record<string, unknown> | undefined,
+  nextInputs: Record<string, unknown> | undefined
+): boolean => !isDeepStrictEqual(currentInputs, nextInputs);
 
 /**
  * Validates workflow inputs against the workflow's input schema.
@@ -90,6 +96,18 @@ export const validateWorkflowInputs = async (
     }
 
     return false;
+  }
+
+  if (hasInputChanges(renderContext.inputs, inputsWithDefaults)) {
+    const context = {
+      ...(workflowExecution.context ?? {}),
+      ...(inputsWithDefaults !== undefined ? { inputs: inputsWithDefaults } : {}),
+    };
+    workflowExecution.context = context;
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowExecution.id,
+      context,
+    });
   }
 
   return true;

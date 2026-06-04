@@ -14,7 +14,6 @@ import {
   getInputsFromDefinition,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { ContextDependencies } from './types';
-import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
 export type WorkflowExecutionForInputRendering = Partial<EsWorkflowExecution> &
@@ -83,12 +82,7 @@ export function buildWorkflowContext(
 ): WorkflowContext {
   const normalizedInputsSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
-  const templateEngine = new WorkflowTemplatingEngine();
-  const inputsWithDefaults = applyInputDefaults(
-    renderContext.inputs,
-    normalizedInputsSchema,
-    (value) => templateEngine.render(value, renderContext)
-  );
+  const inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedInputsSchema);
 
   return {
     ...renderContext,

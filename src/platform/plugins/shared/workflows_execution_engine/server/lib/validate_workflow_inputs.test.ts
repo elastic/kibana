@@ -251,21 +251,48 @@ describe('validateWorkflowInputs', () => {
       required: ['name'],
     });
 
-    const result = await callValidate(
-      createWorkflowExecution(
-        { inputs: {} },
-        {
-          workflowDefinition: {
-            ...stubWorkflowExecution.workflowDefinition,
-            consts: {
-              default_name: 'rendered-name',
-            },
+    const workflowExecution = createWorkflowExecution(
+      { inputs: {} },
+      {
+        workflowDefinition: {
+          ...stubWorkflowExecution.workflowDefinition,
+          consts: {
+            default_name: 'rendered-name',
           },
-        }
-      )
+        },
+      }
     );
 
+    const result = await callValidate(workflowExecution);
+
     expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual({ name: 'rendered-name' });
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+      id: executionId,
+      context: { inputs: { name: 'rendered-name' } },
+    });
+  });
+
+  it('should persist dynamic default input values once before runtime', async () => {
+    setInputsSchema({
+      properties: {
+        time: { type: 'string', default: '{{ now }}' },
+      },
+      required: ['time'],
+    });
+
+    const workflowExecution = createWorkflowExecution({ inputs: {} });
+
+    const result = await callValidate(workflowExecution);
+
+    const renderedTime = workflowExecution.context.inputs?.time;
+    expect(result).toBe(true);
+    expect(renderedTime).toEqual(expect.any(String));
+    expect(renderedTime).not.toBe('{{ now }}');
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+      id: executionId,
+      context: { inputs: { time: renderedTime } },
+    });
   });
 
   it('should render provided input values before validation', async () => {
@@ -276,21 +303,26 @@ describe('validateWorkflowInputs', () => {
       required: ['severity'],
     });
 
-    const result = await callValidate(
-      createWorkflowExecution(
-        { inputs: { severity: '{{ consts.default_severity }}' } },
-        {
-          workflowDefinition: {
-            ...stubWorkflowExecution.workflowDefinition,
-            consts: {
-              default_severity: 'high',
-            },
+    const workflowExecution = createWorkflowExecution(
+      { inputs: { severity: '{{ consts.default_severity }}' } },
+      {
+        workflowDefinition: {
+          ...stubWorkflowExecution.workflowDefinition,
+          consts: {
+            default_severity: 'high',
           },
-        }
-      )
+        },
+      }
     );
 
+    const result = await callValidate(workflowExecution);
+
     expect(result).toBe(true);
+    expect(workflowExecution.context.inputs).toEqual({ severity: 'high' });
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+      id: executionId,
+      context: { inputs: { severity: 'high' } },
+    });
   });
 
   it('should return false and mark execution as FAILED when a default input template is invalid', async () => {
