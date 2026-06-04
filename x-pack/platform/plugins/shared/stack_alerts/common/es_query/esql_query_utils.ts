@@ -12,10 +12,7 @@ import type { ESQLCommandOption } from '@kbn/esql-ast';
 import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem, isFunctionItem } from '@kbn/esql-validation-autocomplete';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
-import type {
-  EsqlQueryResponse,
-  FieldValue
-} from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlQueryResponse, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
