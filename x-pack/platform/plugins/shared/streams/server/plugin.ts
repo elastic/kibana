@@ -15,25 +15,18 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
-  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import {
-  STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
+import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -338,9 +331,7 @@ export class StreamsPlugin
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
-            const soClient = coreStart.savedObjects.createInternalRepository();
-            const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+            return await isSignificantEventsMemoryEnabled(coreStart.featureFlags);
           } catch {
             return false;
           }
@@ -655,24 +646,13 @@ export class StreamsPlugin
         STREAMS_MANAGED_WORKFLOW_OWNER
       );
 
-      await Promise.all([
-        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-      ]);
+      await installWorkflows({ client });
+      this.logger.info('Streams managed workflows installed');
 
       await client.ready();
-
-      this.logger.info('Streams KI managed workflows installed');
     } catch (error) {
       this.logger.warn(
-        `Failed to install streams KI managed workflows: ${
+        `Failed to install streams managed workflows: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
