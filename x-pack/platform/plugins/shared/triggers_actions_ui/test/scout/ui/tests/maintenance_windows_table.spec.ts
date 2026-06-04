@@ -95,10 +95,15 @@ const dismissToasts = async (page: ScoutPage) => {
 // Opens the actions popover for the first visible row if the action button is
 // not already visible.
 const clickTableAction = async (page: ScoutPage, action: string) => {
-  if (!(await page.testSubj.locator(action).isVisible())) {
+  const actionLocator = page.testSubj.locator(action);
+  const directlyVisible = await actionLocator
+    .waitFor({ state: 'visible', timeout: 2_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!directlyVisible) {
     await page.testSubj.click('table-actions-popover');
   }
-  await page.testSubj.click(action);
+  await actionLocator.click();
 };
 
 // ── Tests ────────────────────────────────────────────────────────────────────
