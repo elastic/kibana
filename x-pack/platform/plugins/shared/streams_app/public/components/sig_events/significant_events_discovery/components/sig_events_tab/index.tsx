@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
 import type { SigEvent } from '@kbn/streams-schema';
 import useInterval from 'react-use/lib/useInterval';
-import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../../../hooks/sig_events/constants';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
@@ -182,7 +182,7 @@ export const SigEventsTab = () => {
     stream: streamFilter.length > 0 ? streamFilter : undefined,
     search: debouncedSearch || undefined,
   });
-  useInterval(refetch, isRunning ? STREAMS_RUNNING_POLL_INTERVAL : null);
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 

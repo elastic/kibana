@@ -9,11 +9,9 @@ import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { WorkflowStatus } from '@kbn/streams-schema';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
 import { useKibana } from '../use_kibana';
 import { useSignificantEventsDiscoveryApi } from './use_significant_events_discovery_api';
-
-const STATUS_POLL_INTERVAL_MS = 3 * 1000;
+import { RUNNING_POLL_INTERVAL_MS } from '../../components/sig_events/constants';
 
 const SIGNIFICANT_EVENT_DISCOVERY_NOTIFIED = ['significant_events_discovery_notified'];
 
@@ -37,9 +35,7 @@ export const useSignificantEventsDiscovery = ({
 
   const queryClient = useQueryClient();
 
-  // Keep the latest onComplete in a ref so it never needs to be a useEffect dep.
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
 
   const {
     triggerSignificantEventsDiscovery,
@@ -47,19 +43,22 @@ export const useSignificantEventsDiscovery = ({
     getSignificantEventsDiscoveryStatus,
   } = useSignificantEventsDiscoveryApi();
 
-  // Local status state — set optimistically on trigger AND updated from server polling.
-  // Mirrors the onboardingState pattern in useKnowledgeIndicatorsOnboarding.
   const [significantEventsDiscoveryStatus, setSignificantEventsDiscoveryStatus] =
     useState<WorkflowStatus | null>(null);
 
-  // Tracks the previous server-confirmed status for toast transition detection.
-  // null = no server status observed yet; used to suppress spurious toasts on mount.
   const previousStatusRef = useRef<WorkflowStatus | null>(null);
+
+  const triggeredExecutionIdRef = useRef<string | null>(null);
 
   const { mutate: triggerMutate } = useMutation({
     mutationFn: triggerSignificantEventsDiscovery,
+    onSuccess: ({ executionId }) => {
+      triggeredExecutionIdRef.current = executionId;
+    },
     onError: (error: Error) => {
       setSignificantEventsDiscoveryStatus(null);
+      previousStatusRef.current = null;
+      triggeredExecutionIdRef.current = null;
       toasts.addError(error, {
         title: i18n.translate(
           'xpack.streams.SignificantEventsDiscoveryWorkflow.triggerErrorTitle',
@@ -93,12 +92,24 @@ export const useSignificantEventsDiscovery = ({
   const { data } = useQuery({
     queryKey: ['significant_events_discovery_status'],
     queryFn: getSignificantEventsDiscoveryStatus,
-    refetchInterval: isRunning ? STATUS_POLL_INTERVAL_MS : false,
+    refetchInterval: isRunning ? RUNNING_POLL_INTERVAL_MS : false,
   });
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const status = data?.status;
     if (!status) return;
+
+    // While optimistic and the poll hasn't reported the new execution id yet,
+    // ignore status from the previous run (stale terminal, or pre-creation NotStarted).
+    const optimisticRunPending =
+      significantEventsDiscoveryStatus === WorkflowStatus.InProgress &&
+      (triggeredExecutionIdRef.current === null ||
+        data?.executionId !== triggeredExecutionIdRef.current);
+    if (optimisticRunPending) return;
 
     setSignificantEventsDiscoveryStatus(status);
 
@@ -146,6 +157,7 @@ export const useSignificantEventsDiscovery = ({
         title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.failedTitle', {
           defaultMessage: 'Significant events discovery failed',
         }),
+        text: data?.error,
       });
     } else {
       toasts.addDanger({
@@ -154,11 +166,19 @@ export const useSignificantEventsDiscovery = ({
         }),
       });
     }
-  }, [data?.status, toasts, queryClient]);
+  }, [
+    data?.status,
+    data?.executionId,
+    data?.error,
+    significantEventsDiscoveryStatus,
+    toasts,
+    queryClient,
+  ]);
 
   const handleRun = useCallback(() => {
     queryClient.removeQueries({ queryKey: SIGNIFICANT_EVENT_DISCOVERY_NOTIFIED });
 
+    // Reset until the trigger resolves with the new id (see optimisticRunPending).    triggeredExecutionIdRef.current = null;
     previousStatusRef.current = WorkflowStatus.InProgress;
     setSignificantEventsDiscoveryStatus(WorkflowStatus.InProgress);
     triggerMutate();

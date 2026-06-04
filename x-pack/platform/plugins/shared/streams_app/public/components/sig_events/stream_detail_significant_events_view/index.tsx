@@ -25,7 +25,7 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
-import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../hooks/sig_events/constants';
+import { RUNNING_POLL_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
@@ -140,7 +140,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   useInterval(
     refetch,
     knowledgeIndicatorsOnboardingState?.status === WorkflowStatus.InProgress
-      ? STREAMS_RUNNING_POLL_INTERVAL
+      ? RUNNING_POLL_INTERVAL_MS
       : null
   );
 

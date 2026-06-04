@@ -84,7 +84,6 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
-import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -317,11 +316,10 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    const streamsKIsOnboardingClient = plugins.workflowsManagement
-      ? new StreamsKIsOnboardingClient({ managementApi: plugins.workflowsManagement.management })
-      : undefined;
-
+    // Build workflow clients once and reuse the shared onboarding client instance
+    // everywhere, rather than constructing a second one from the same management API.
     const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
+    const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({

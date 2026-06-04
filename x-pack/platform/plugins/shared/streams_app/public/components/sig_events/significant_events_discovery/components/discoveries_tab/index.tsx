@@ -18,7 +18,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
-import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../../../hooks/sig_events/constants';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
@@ -119,7 +119,7 @@ export const DiscoveriesTab = () => {
     from: absoluteRange.from,
     to: absoluteRange.to,
   });
-  useInterval(refetch, isRunning ? STREAMS_RUNNING_POLL_INTERVAL : null);
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 

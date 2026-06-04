@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   WorkflowsManagementApi,
@@ -51,6 +52,16 @@ export class WorkflowExecutionService {
         const _exhaustiveCheck: never = status;
         return _exhaustiveCheck;
     }
+  }
+
+  static getFailureMessage(
+    execution: Pick<WorkflowExecutionListItemDto, 'status' | 'error'>,
+    timedOutMessage: string
+  ): string {
+    if (execution.status === ExecutionStatus.TIMED_OUT) {
+      return timedOutMessage;
+    }
+    return execution.error?.message ?? 'Unknown error';
   }
 
   async execute({

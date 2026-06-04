@@ -191,10 +191,10 @@ const mapExecutionToStatusResult = (
   const onboardingStatus = WorkflowExecutionService.classifyExecutionStatus(execution.status);
 
   if (onboardingStatus === WorkflowStatus.Failed) {
-    const errorMessage =
-      execution.status === ExecutionStatus.TIMED_OUT
-        ? 'Onboarding workflow timed out'
-        : execution.error?.message ?? 'Unknown error';
+    const errorMessage = WorkflowExecutionService.getFailureMessage(
+      execution,
+      'Onboarding workflow timed out'
+    );
     return { status: WorkflowStatus.Failed, error: errorMessage };
   }
 

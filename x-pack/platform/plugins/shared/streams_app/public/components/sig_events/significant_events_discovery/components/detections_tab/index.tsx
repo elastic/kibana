@@ -18,7 +18,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
-import { STREAMS_RUNNING_POLL_INTERVAL } from '../../../../../hooks/sig_events/constants';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
@@ -126,7 +126,7 @@ export const DetectionsTab = () => {
     from: absoluteRange.from,
     to: absoluteRange.to,
   });
-  useInterval(refetch, isRunning ? STREAMS_RUNNING_POLL_INTERVAL : null);
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedDetection, setSelectedDetection] = useState<Detection | undefined>();
 
