@@ -14,6 +14,7 @@ plugins:
     - dashboard_markdown
     - data
     - data_views
+    - data_view_management
     - discover
     - discover_enhanced
     - entity_store
@@ -28,6 +29,8 @@ plugins:
     - lens
     - logstash
     - maps
+    - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
