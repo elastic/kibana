@@ -257,7 +257,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
         isRelated: (sibling) => {
           return apiHasUseGlobalFiltersSetting(sibling)
             ? Boolean(sibling.useGlobalFilters$.getValue())
-            : true,
+            : true;
         },
         relatedSiblingObservables: ['useGlobalFilters$'],
       });
