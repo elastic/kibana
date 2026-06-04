@@ -204,18 +204,11 @@ Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>`
 
 ### 1.3 On-demand evals (Buildkite)
 
-Run a suite on any branch without a PR
+Run a suite on any branch without a PR:
 
-a. **CI Stats (recommended)**
-
-1.  Open the [on-demand evals trigger](https://ci-stats.kibana.dev/trigger_evals_runner)
-2.  In CI Stats: choose branch, suite, and model groups, then trigger.
-
-b. **Buildkite directly:**
-
-1.  Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
-2.  Click **New build**, select branch/commit
-3.  Add environment variables:
+1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
+2. Click **New build**, select branch/commit
+3. Add environment variables:
 
 | Variable                  | Required           | Description                                                                 |
 | ------------------------- | ------------------ | --------------------------------------------------------------------------- |
