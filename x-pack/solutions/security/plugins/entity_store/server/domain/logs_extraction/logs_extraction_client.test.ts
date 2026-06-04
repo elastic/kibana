@@ -240,6 +240,7 @@ describe('LogsExtractionClient', () => {
         targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         logger: expect.any(Object),
         abortController: undefined,
+        refresh: true,
       });
 
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(

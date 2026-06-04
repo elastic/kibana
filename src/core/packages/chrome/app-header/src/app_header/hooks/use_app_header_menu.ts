@@ -30,6 +30,17 @@ const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   href,
 });
 
+const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
+  label: i18n.translate('core.chrome.appHeader.feedbackMenuItemLabel', {
+    defaultMessage: 'Feedback',
+  }),
+  id: 'feedback',
+  iconType: 'comment',
+  order: 1,
+  run: feedbackHandler,
+  global: true,
+});
+
 const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.documentationMenuItemLabel', {
     defaultMessage: 'Documentation',
@@ -55,11 +66,19 @@ const useStaticItems = ({
 }) => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
   return useMemo(() => {
     const staticItems: AppMenuStaticItem[] = [];
 
+    if (feedbackHandler) {
+      staticItems.push(createFeedbackMenuItem(feedbackHandler));
+    }
+
+    /**
+     * Precedence: <AppHeader/> docLink prop -> chrome.getAppDocumentationLink$() -> chrome.getHelpExtension$()
+     */
     const docLink =
       explicitDocLink ??
       helpExtension?.links?.find((link) => link.linkType === 'documentation')?.href;
@@ -74,7 +93,7 @@ const useStaticItems = ({
     }
 
     return staticItems;
-  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations]);
+  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
 };
 
 const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu => {
@@ -113,7 +132,7 @@ export function useAppHeaderMenu(
 }
 
 export interface ShareAction {
-  onClick: () => void;
+  onClick: (triggerElement: HTMLElement) => void;
   tooltipContent?: string;
   tooltipTitle?: string;
   testId?: string;
@@ -133,7 +152,9 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
     });
 
     return {
-      onClick: () => run(),
+      onClick: (triggerElement: HTMLElement) => {
+        run({ triggerElement, returnFocus: () => triggerElement.focus() });
+      },
       tooltipContent: content,
       tooltipTitle: title,
       testId,
