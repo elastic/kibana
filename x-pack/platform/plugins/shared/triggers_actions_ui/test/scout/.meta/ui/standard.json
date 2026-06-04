@@ -2018,6 +2018,20 @@
       }
     },
     {
+      "id": "3727cd43770f0ac-e62c321150177d3",
+      "title": "Slack connector saves a rule with a Slack API connector as its action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
       "id": "3727cd43770f0ac-46ac0ad13057d55",
       "title": "Slack connector saves a rule with a webhook Slack connector as its action",
       "expectedStatus": "passed",

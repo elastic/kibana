@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertingRulesCache } from './use_alerting_rules_cache';
-import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import type { BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
@@ -31,10 +31,10 @@ describe('useAlertingRulesCache', () => {
     const fetchedRule = {
       id: ruleId,
       name: 'Fetched Rule',
-    } as unknown as FindRulesResponse['items'][number];
-    mockHttp.get.mockResolvedValue({
-      items: [fetchedRule],
-    } as FindRulesResponse);
+    } as unknown as BulkGetRulesResponse['rules'][number];
+    mockHttp.post.mockResolvedValue({
+      rules: [fetchedRule],
+    } as BulkGetRulesResponse);
 
     const { result, rerender } = renderHook(
       ({ ruleIds }: { ruleIds: string[] } = { ruleIds: [ruleId] }) =>
@@ -50,7 +50,7 @@ describe('useAlertingRulesCache', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.post).toHaveBeenCalledTimes(1);
   });
 
   it('should fetch rules for uncached rule IDs', async () => {
@@ -58,10 +58,10 @@ describe('useAlertingRulesCache', () => {
     const fetchedRule = {
       id: ruleId,
       name: 'Fetched Rule',
-    } as unknown as FindRulesResponse['items'][number];
-    mockHttp.get.mockResolvedValue({
-      items: [fetchedRule],
-    } as FindRulesResponse);
+    } as unknown as BulkGetRulesResponse['rules'][number];
+    mockHttp.post.mockResolvedValue({
+      rules: [fetchedRule],
+    } as BulkGetRulesResponse);
 
     const { result } = renderHook(() =>
       useAlertingRulesCache({
@@ -71,8 +71,8 @@ describe('useAlertingRulesCache', () => {
     );
 
     await waitFor(() =>
-      expect(mockHttp.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/_bulk`, {
-        query: { ids: [ruleId] },
+      expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/_bulk_get`, {
+        body: JSON.stringify({ ids: [ruleId] }),
       })
     );
     expect(result.current.rulesCache).toEqual({ [ruleId]: fetchedRule });
@@ -88,7 +88,7 @@ describe('useAlertingRulesCache', () => {
       })
     );
 
-    expect(mockHttp.get).not.toHaveBeenCalled();
+    expect(mockHttp.post).not.toHaveBeenCalled();
     expect(result.current.rulesCache).toEqual({});
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
