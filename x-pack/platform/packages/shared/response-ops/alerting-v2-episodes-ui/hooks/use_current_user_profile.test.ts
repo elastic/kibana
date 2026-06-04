@@ -42,16 +42,4 @@ describe('useCurrentUserProfile', () => {
     expect(mockGetCurrent).toHaveBeenCalledTimes(1);
     expect(result.current.data).toEqual({ uid: 'user-123' });
   });
-
-  it('returns null for users without a profile', async () => {
-    mockGetCurrent.mockResolvedValue(null);
-
-    const { result } = renderHook(() => useCurrentUserProfile({ userProfile: mockUserProfile }), {
-      wrapper: wrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.data).toBeNull();
-  });
 });

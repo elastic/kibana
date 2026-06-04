@@ -8,9 +8,10 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import { useEpisodesKpisQuery } from './use_episodes_kpis_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { useSpaceId } from './use_space_id';
@@ -22,12 +23,13 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
-const mockGetCurrent = jest.fn().mockResolvedValue({ uid: 'user-123' });
+const mockUserProfile = userProfileServiceMock.createStart();
+mockUserProfile.getCurrent.mockResolvedValue({ uid: 'user-123' } as GetUserProfileResponse);
 
 const mockServices = {
-  expressions: {} as ExpressionsStart,
-  spaces: {} as SpacesPluginStart,
-  userProfile: { getCurrent: mockGetCurrent } as unknown as CoreStart['userProfile'],
+  expressions: expressionsPluginMock.createStartContract(),
+  spaces: spacesPluginMock.createStartContract(),
+  userProfile: mockUserProfile,
 };
 
 const mockTimeRange = {
@@ -55,7 +57,6 @@ const wrapper = () => {
 afterEach(() => {
   jest.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default');
-  mockGetCurrent.mockResolvedValue({ uid: 'user-123' });
 });
 
 describe('useEpisodesKpisQuery', () => {
@@ -143,7 +144,9 @@ describe('useEpisodesKpisQuery', () => {
   });
 
   it('passes currentUserUid from getCurrent to the query', async () => {
-    mockGetCurrent.mockResolvedValue({ uid: 'specific-user-uid' });
+    mockUserProfile.getCurrent.mockResolvedValue({
+      uid: 'specific-user-uid',
+    } as GetUserProfileResponse);
     mockExecuteEsqlQuery.mockResolvedValue([mockKpisRow]);
 
     renderHook(
@@ -162,7 +165,9 @@ describe('useEpisodesKpisQuery', () => {
   });
 
   it('still fetches KPIs when the user has no profile', async () => {
-    mockGetCurrent.mockResolvedValue(null);
+    // `getCurrent` resolves `null` at runtime for anonymous or proxy-authenticated
+    // users, even though its return type is non-nullable.
+    mockUserProfile.getCurrent.mockResolvedValue(null as unknown as GetUserProfileResponse);
     mockExecuteEsqlQuery.mockResolvedValue([mockKpisRow]);
 
     const { result } = renderHook(
