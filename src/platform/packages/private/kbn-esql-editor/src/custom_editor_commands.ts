@@ -85,7 +85,6 @@ const applyTextReplacement = (
   editor.setPosition(model.getPositionAt(boundedStart + payload.replacementText.length));
 };
 
-/** Inserts a newline at the cursor, honoring auto-indent. Used by the "New line" suggestion and the Shift+Enter shortcut. */
 const insertNewLine = (editor: monaco.editor.IStandaloneCodeEditor) => {
   editor.focus();
   editor.trigger('keyboard', 'type', { text: '\n' });
@@ -145,7 +144,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     })
   );
 
-  // "New line" suggestion command: inserts a newline so users can break to a new line via Enter
+  // "New line" suggestion command
   commandDisposables.push(
     monaco.editor.registerCommand(ESQL_NEW_LINE_COMMAND, () => {
       const editor = editorRef.current;
@@ -340,7 +339,6 @@ export const addEditorKeyBindings = (
     () => onQuerySubmit(QuerySource.MANUAL)
   );
 
-  // Shift+Enter always inserts a newline, even while the suggestion popover is open
   editor.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.Shift | monaco.KeyCode.Enter,

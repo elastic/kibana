@@ -12,12 +12,12 @@ import { setup } from './helpers';
 
 describe('Suggestion Ordering', () => {
   describe('"New line" affordance', () => {
-    // `suggestRaw` keeps the "New line" item that the shared `suggest` helper strips out.
     it.each([
       ['root / source commands', 'FROM /'],
       ['after a pipe', 'FROM a | /'],
       ['within an expression', 'FROM a | EVAL x = /'],
     ])('is the first suggestion (%s)', async (_title, query) => {
+      // `suggestRaw` keeps the "New line" item that the shared `suggest` helper strips out.
       const { suggestRaw } = await setup();
       const suggestions = await suggestRaw(query);
 

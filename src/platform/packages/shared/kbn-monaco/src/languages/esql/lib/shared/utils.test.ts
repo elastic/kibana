@@ -14,21 +14,15 @@ describe('filterSuggestionsWithCustomCommands', () => {
   const suggestion = (command?: { id: string; title: string }): ISuggestionItem =>
     ({ label: 'x', text: 'x', kind: 'Keyword', command } as ISuggestionItem);
 
-  test('returns ids of suggestions carrying a custom command', () => {
+  test('returns ids of suggestions carrying a custom command, excluding trigger-suggest and "New line" commands', () => {
     const result = filterSuggestionsWithCustomCommands([
       suggestion(),
       suggestion({ id: 'esql.control.values.create', title: 'Create control' }),
-    ]);
-    expect(result).toEqual(['esql.control.values.create']);
-  });
-
-  test('excludes the trigger-suggest and "New line" commands', () => {
-    const result = filterSuggestionsWithCustomCommands([
       suggestion({ id: 'editor.action.triggerSuggest', title: 'Trigger' }),
       suggestion({ id: ESQL_NEW_LINE_COMMAND, title: 'New line' }),
       suggestion({ id: 'esql.timepicker.choose', title: 'Time picker' }),
     ]);
-    expect(result).toEqual(['esql.timepicker.choose']);
+    expect(result).toEqual(['esql.control.values.create', 'esql.timepicker.choose']);
   });
 });
 
