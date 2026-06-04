@@ -39,6 +39,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/core-di-browser",
     "@kbn/core-di",
-    "@kbn/announcement-banner"
+    "@kbn/announcement-banner",
+    "@kbn/kibana-react-plugin"
   ]
 }
