@@ -814,7 +814,6 @@ export const QueryBarTopRow = React.memo(
           data-test-subj="querySubmitButton"
           toolTipProps={{
             content: buttonAriaLabel,
-            delay: 'long',
             position: 'bottom',
           }}
         >
