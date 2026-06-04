@@ -76,18 +76,28 @@ if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
 Build: ${BUILD_URL}"
   fi
 
-  # Dynamically upload a pipeline notify step — no bot token needed,
-  # Buildkite handles Slack delivery via its built-in org-level integration.
+  # Upload a step with step-level notify — Buildkite delivers via org-level Slack integration.
+  # Step-level notify (not top-level) fires when the step itself completes.
   NOTIFY_YML="$(mktemp /tmp/fallow_notify_XXXXXX.yml)"
   {
-    echo "notify:"
-    echo "  - slack:"
-    echo "      channels:"
-    echo "        - \"${CHANNEL}\""
-    echo "      message: |"
+    echo "steps:"
+    echo "  - label: \":slack: Code Quality Notify\""
+    echo "    command: \"echo 'Code Quality report sent to Slack'\""
+    echo "    agents:"
+    echo "      image: family/kibana-ubuntu-2404"
+    echo "      imageProject: elastic-images-prod"
+    echo "      provider: gcp"
+    echo "      machineType: n2-standard-2"
+    echo "      preemptible: true"
+    echo "    notify:"
+    echo "      - slack:"
+    echo "          channels:"
+    echo "            - \"${CHANNEL}\""
+    echo "          message: |"
     while IFS= read -r line; do
-      echo "        ${line}"
+      echo "            ${line}"
     done <<< "$SLACK_TEXT"
+    echo "        if: step.outcome == \"passed\""
   } > "$NOTIFY_YML"
 
   buildkite-agent pipeline upload "$NOTIFY_YML"
