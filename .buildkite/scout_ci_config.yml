@@ -9,10 +9,12 @@ plugins:
     - banners
     - cloud_security_posture
     - console
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
+    - data_view_editor
     - data_views
     - data_view_management
     - discover
@@ -23,11 +25,13 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - index_lifecycle_management
     - index_management
     - infra
     - intercepts
     - lens
     - logstash
+    - management
     - maps
     - ml
     - monitoring

@@ -235,7 +235,6 @@ enabled:
   - x-pack/platform/test/functional_basic/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional_cors/config.ts
   - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/platform/test/functional_execution_context/config.ts
@@ -253,7 +252,6 @@ enabled:
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts
-  - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
@@ -263,7 +261,6 @@ enabled:
   - x-pack/platform/test/functional/apps/graph/config.ts
   - x-pack/platform/test/functional/apps/grok_debugger/config.ts
   - x-pack/platform/test/functional/apps/home/config.ts
-  - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
   - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
@@ -293,7 +290,6 @@ enabled:
   - x-pack/platform/test/functional/apps/license_management/config.ts
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
-  - x-pack/platform/test/functional/apps/management/config.ts
   - x-pack/platform/test/functional/apps/maps/group1/config.ts
   - x-pack/platform/test/functional/apps/maps/group2/config.ts
   - x-pack/platform/test/functional/apps/maps/group3/config.ts
@@ -340,7 +336,6 @@ enabled:
   - x-pack/platform/test/functional/apps/transform/actions/config.ts
   - x-pack/platform/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/platform/test/functional/apps/transform/permissions/config.ts
-  - x-pack/platform/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
