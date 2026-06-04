@@ -48,8 +48,10 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const { actionTypeRegistry } = useKibana().services.plugins.triggersActionsUi;
   const agentQuery = useAgentBuilderAgentById(agentId);
   const { openCreateFlyout } = useConnectorsActions();
-  const hasAllPrivileges = useHasConnectorsAllPrivileges();
+  const { canShow, canExecute, canSave } = useHasConnectorsAllPrivileges();
   const canEditAgent = useCanEditAgent({ agent: agentQuery.agent ?? null });
+  const canAddFromLibrary = canEditAgent && canShow && canExecute;
+  const canCreateNew = canEditAgent && canSave;
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -164,7 +166,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                       </a>
                     </EuiText>
                   </EuiFlexItem>
-                  {hasAllPrivileges && canEditAgent && (
+                  {(canAddFromLibrary || canCreateNew) && (
                     <EuiFlexItem grow={false}>
                       <EuiPopover
                         aria-label={labels.connectors.addConnectorPopoverLabel}
@@ -189,7 +191,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="from-library"
                               icon="importAction"
-                              disabled={isAddDisabled}
+                              disabled={isAddDisabled || !canAddFromLibrary}
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openLibrary();
@@ -200,6 +202,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             <EuiContextMenuItem
                               key="create-new"
                               icon="plusInCircle"
+                              disabled={!canCreateNew}
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openCreateFlyout();

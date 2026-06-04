@@ -124,7 +124,13 @@ describe('AgentConnectors', () => {
       unassign: jest.fn(),
     });
 
-    useHasConnectorsAllPrivileges.mockReturnValue(true);
+    useHasConnectorsAllPrivileges.mockReturnValue({
+      hasAllPrivileges: true,
+      canShow: true,
+      canExecute: true,
+      canSave: true,
+      canDelete: true,
+    });
 
     useConnectorsActions.mockReturnValue({ openCreateFlyout });
   });

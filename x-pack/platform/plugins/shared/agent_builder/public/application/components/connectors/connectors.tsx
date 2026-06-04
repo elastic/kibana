@@ -17,7 +17,7 @@ import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_al
 
 export const AgentBuilderConnectors = () => {
   const { openCreateFlyout } = useConnectorsActions();
-  const hasAllPrivileges = useHasConnectorsAllPrivileges();
+  const { hasAllPrivileges } = useHasConnectorsAllPrivileges();
 
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderConnectorsPage">

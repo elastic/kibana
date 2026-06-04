@@ -17,11 +17,16 @@ export const useHasConnectorsAllPrivileges = () => {
   const { services } = useKibana();
   const { application } = services;
 
-  const hasConnectorsAllPrivilege =
-    application.capabilities.actions?.show === true &&
-    application.capabilities.actions?.execute === true &&
-    application.capabilities.actions?.delete === true &&
-    application.capabilities.actions?.save === true;
+  const canShow = application.capabilities.actions?.show === true;
+  const canExecute = application.capabilities.actions?.execute === true;
+  const canSave = application.capabilities.actions?.save === true;
+  const canDelete = application.capabilities.actions?.delete === true;
 
-  return hasConnectorsAllPrivilege;
+  return {
+    hasAllPrivileges: canShow && canExecute && canDelete && canSave,
+    canShow,
+    canExecute,
+    canSave,
+    canDelete,
+  };
 };

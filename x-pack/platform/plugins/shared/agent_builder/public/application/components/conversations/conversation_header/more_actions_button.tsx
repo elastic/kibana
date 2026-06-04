@@ -91,7 +91,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const {
     services: { application, plugins },
   } = useKibana();
-  const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const { hasAllPrivileges: hasAccessToGenAiSettings } = useHasConnectorsAllPrivileges();
 
   const getAddToDatasetAction = plugins.evals?.getAddToDatasetAction;
 
