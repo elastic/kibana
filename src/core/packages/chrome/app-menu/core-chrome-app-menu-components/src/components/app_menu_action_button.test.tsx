@@ -149,7 +149,7 @@ describe('AppMenuActionButton', () => {
       />
     );
 
-    await user.click(screen.getByLabelText('More options'));
+    expect(screen.getByLabelText('More options')).toBeDisabled();
 
     expect(splitButtonProps.run).not.toHaveBeenCalled();
   });
