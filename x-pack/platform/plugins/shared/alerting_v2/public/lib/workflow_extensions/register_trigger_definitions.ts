@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import type {
-  PublicTriggerDefinition,
-  WorkflowsExtensionsPublicPluginSetup,
-} from '@kbn/workflows-extensions/public';
-import { episodeAssignedTriggerPublicDefinition } from './triggers/episode_assigned';
-import { episodeUnassignedTriggerPublicDefinition } from './triggers/episode_unassigned';
-import { episodeAckedTriggerPublicDefinition } from './triggers/episode_acked';
-import { episodeUnackedTriggerPublicDefinition } from './triggers/episode_unacked';
-import { episodeTaggedTriggerPublicDefinition } from './triggers/episode_tagged';
-import { episodeSnoozedTriggerPublicDefinition } from './triggers/episode_snoozed';
-import { episodeUnsnoozedTriggerPublicDefinition } from './triggers/episode_unsnoozed';
-import { episodeActivatedTriggerPublicDefinition } from './triggers/episode_activated';
-import { episodeDeactivatedTriggerPublicDefinition } from './triggers/episode_deactivated';
-
-const triggerDefinitions: PublicTriggerDefinition[] = [
-  episodeAssignedTriggerPublicDefinition,
-  episodeUnassignedTriggerPublicDefinition,
-  episodeAckedTriggerPublicDefinition,
-  episodeUnackedTriggerPublicDefinition,
-  episodeTaggedTriggerPublicDefinition,
-  episodeSnoozedTriggerPublicDefinition,
-  episodeUnsnoozedTriggerPublicDefinition,
-  episodeActivatedTriggerPublicDefinition,
-  episodeDeactivatedTriggerPublicDefinition,
-];
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 /**
  * Registers all alerting-v2 public workflow trigger definitions (UI metadata).
  * Call once during plugin setup with the `workflowsExtensions` setup contract.
+ *
+ * Each definition is registered as a loader so its module (and the EUI icon it
+ * lazily imports) stays out of the plugin's page-load bundle and is only fetched
+ * when the Workflows editor needs it.
  */
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
-  for (const definition of triggerDefinitions) {
-    workflowsExtensions.registerTriggerDefinition(definition);
-  }
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_assigned').then((m) => m.episodeAssignedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_unassigned').then((m) => m.episodeUnassignedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_acked').then((m) => m.episodeAckedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_unacked').then((m) => m.episodeUnackedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_tagged').then((m) => m.episodeTaggedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_snoozed').then((m) => m.episodeSnoozedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_unsnoozed').then((m) => m.episodeUnsnoozedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_activated').then((m) => m.episodeActivatedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_deactivated').then(
+      (m) => m.episodeDeactivatedTriggerPublicDefinition
+    )
+  );
 }
