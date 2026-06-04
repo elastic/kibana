@@ -9,38 +9,36 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { Global } from '@kbn/core-di-internal';
 import { Request } from '@kbn/core-di-server';
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { RulesClient } from '../lib/rules_client';
-import { buildScopedRulesClientFactory } from './scoped_rules_client_factory';
+import { resolveRequestScoped } from './resolve_request_scoped';
+
+const TOKEN = Symbol.for('test.token');
 
 const createMockScope = () => ({
   bind: jest.fn().mockReturnValue({ toConstantValue: jest.fn() }),
-  get: jest.fn().mockReturnValue({} as RulesClient),
+  get: jest.fn().mockReturnValue({}),
 });
 
-const createMockInjection = (scope = createMockScope()): CoreDiServiceStart => ({
-  fork: jest.fn().mockReturnValue(scope),
-  getContainer: jest.fn(),
-});
+const createMockInjection = (scope = createMockScope()): CoreDiServiceStart =>
+  ({
+    fork: jest.fn().mockReturnValue(scope),
+    getContainer: jest.fn(),
+  } as unknown as CoreDiServiceStart);
 
-describe('buildScopedRulesClientFactory', () => {
+describe('resolveRequestScoped', () => {
   it('forks the container on each call', () => {
     const scope = createMockScope();
     const injection = createMockInjection(scope);
-    const getInjection = jest.fn().mockReturnValue(injection);
 
-    const factory = buildScopedRulesClientFactory(getInjection);
-    factory(httpServerMock.createKibanaRequest());
+    resolveRequestScoped(injection, httpServerMock.createKibanaRequest(), TOKEN);
 
     expect(injection.fork).toHaveBeenCalledTimes(1);
   });
 
   it('binds the request to the Request token', () => {
     const scope = createMockScope();
-    const getInjection = jest.fn().mockReturnValue(createMockInjection(scope));
-
-    const factory = buildScopedRulesClientFactory(getInjection);
     const request = httpServerMock.createKibanaRequest();
-    factory(request);
+
+    resolveRequestScoped(createMockInjection(scope), request, TOKEN);
 
     expect(scope.bind).toHaveBeenCalledWith(Request);
     expect(scope.bind.mock.results[0].value.toConstantValue).toHaveBeenCalledWith(request);
@@ -48,26 +46,26 @@ describe('buildScopedRulesClientFactory', () => {
 
   it('binds Global to the Request token to activate request scope', () => {
     const scope = createMockScope();
-    const getInjection = jest.fn().mockReturnValue(createMockInjection(scope));
 
-    const factory = buildScopedRulesClientFactory(getInjection);
-    factory(httpServerMock.createKibanaRequest());
+    resolveRequestScoped(createMockInjection(scope), httpServerMock.createKibanaRequest(), TOKEN);
 
     expect(scope.bind).toHaveBeenCalledWith(Global);
     expect(scope.bind.mock.results[1].value.toConstantValue).toHaveBeenCalledWith(Request);
   });
 
-  it('resolves RulesClient from the forked scope', () => {
-    const mockRulesClient = {} as RulesClient;
+  it('resolves the requested token from the forked scope', () => {
+    const resolved = {};
     const scope = createMockScope();
-    scope.get.mockReturnValue(mockRulesClient);
-    const getInjection = jest.fn().mockReturnValue(createMockInjection(scope));
+    scope.get.mockReturnValue(resolved);
 
-    const factory = buildScopedRulesClientFactory(getInjection);
-    const result = factory(httpServerMock.createKibanaRequest());
+    const result = resolveRequestScoped(
+      createMockInjection(scope),
+      httpServerMock.createKibanaRequest(),
+      TOKEN
+    );
 
-    expect(scope.get).toHaveBeenCalledWith(RulesClient);
-    expect(result).toBe(mockRulesClient);
+    expect(scope.get).toHaveBeenCalledWith(TOKEN);
+    expect(result).toBe(resolved);
   });
 
   it('creates a fresh scope for each request', () => {
@@ -76,12 +74,10 @@ describe('buildScopedRulesClientFactory', () => {
     const injection = {
       fork: jest.fn().mockReturnValueOnce(scope1).mockReturnValueOnce(scope2),
       getContainer: jest.fn(),
-    } as CoreDiServiceStart;
-    const getInjection = jest.fn().mockReturnValue(injection);
+    } as unknown as CoreDiServiceStart;
 
-    const factory = buildScopedRulesClientFactory(getInjection);
-    factory(httpServerMock.createKibanaRequest());
-    factory(httpServerMock.createKibanaRequest());
+    resolveRequestScoped(injection, httpServerMock.createKibanaRequest(), TOKEN);
+    resolveRequestScoped(injection, httpServerMock.createKibanaRequest(), TOKEN);
 
     expect(injection.fork).toHaveBeenCalledTimes(2);
     expect(scope1.get).toHaveBeenCalledTimes(1);

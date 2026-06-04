@@ -175,7 +175,7 @@ export class DispatchStep implements DispatcherStep {
     const executionId = await this.workflowsManagement.scheduleWorkflow(
       model,
       group.spaceId,
-      payload,
+      { payload },
       request,
       ACTION_POLICY_TRIGGER
     );
