@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
     security: {
-      ...baseConfig.get('security'),
+      ...functionalConfig.get('security'),
       cookieLogin: false, // tests rely on localStorage column state between steps; loginByCookie clears it
     },
     junit: {
