@@ -1719,37 +1719,34 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@skipInServerless alert enrichment', () => {
-        before(async function () {
+      describe('alert enrichment', () => {
+        before(async () => {
           // Dynamic docs in this describe only have host.name / user.name (no host.id),
           // so the EUID is name-based.
-          if (
-            !(await entityStoreV2.setup({
-              hosts: [
-                {
-                  host: { name: 'suricata-zeek-sensor-toronto' },
-                  entity: {
-                    id: 'host:suricata-zeek-sensor-toronto',
-                    type: 'host',
-                    risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
-                  },
+          await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: 'suricata-zeek-sensor-toronto' },
+                entity: {
+                  id: 'host:suricata-zeek-sensor-toronto',
+                  type: 'host',
+                  risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
                 },
-                {
-                  host: { name: 'zeek-newyork-sha-aa8df15' },
-                  entity: { id: 'host:zeek-newyork-sha-aa8df15', type: 'host' },
-                  asset: { criticality: 'medium_impact' },
-                },
-              ],
-              users: [
-                {
-                  user: { name: 'root' },
-                  entity: { id: 'user:root@unknown', type: 'user' },
-                  asset: { criticality: 'extreme_impact' },
-                },
-              ],
-            }))
-          )
-            return this.skip();
+              },
+              {
+                host: { name: 'zeek-newyork-sha-aa8df15' },
+                entity: { id: 'host:zeek-newyork-sha-aa8df15', type: 'host' },
+                asset: { criticality: 'medium_impact' },
+              },
+            ],
+            users: [
+              {
+                user: { name: 'root' },
+                entity: { id: 'user:root@unknown', type: 'user' },
+                asset: { criticality: 'extreme_impact' },
+              },
+            ],
+          });
         });
 
         after(async () => {
@@ -1825,7 +1822,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless sequence queries with suppression "per rule execution"', () => {
+    describe('sequence queries with suppression "per rule execution"', () => {
       it('suppresses alerts in a given rule execution', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:50:00.000Z';
@@ -2907,7 +2904,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/241398
-    describe.skip('@skipInServerless sequence queries with suppression duration', () => {
+    describe.skip('sequence queries with suppression duration', () => {
       it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
         const id = uuidv4();
         const firstTimestamp = new Date(Date.now() - 1000).toISOString();

@@ -314,23 +314,20 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless alerts should be enriched', () => {
-      before(async function () {
-        if (
-          !(await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: 'mothra' },
-                entity: {
-                  id: 'host:mothra',
-                  type: 'host',
-                  risk: { calculated_level: 'Low', calculated_score_norm: 1 },
-                },
+    describe('alerts should be enriched', () => {
+      before(async () => {
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'mothra' },
+              entity: {
+                id: 'host:mothra',
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 1 },
               },
-            ],
-          }))
-        )
-          return this.skip();
+            },
+          ],
+        });
       });
 
       after(async () => {
@@ -348,23 +345,20 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless with asset criticality', () => {
-      before(async function () {
-        if (
-          !(await entityStoreV2.setup({
-            users: [
-              {
-                user: { name: 'root' },
-                entity: {
-                  id: 'user:root@unknown',
-                  type: 'user',
-                },
-                asset: { criticality: 'extreme_impact' },
+    describe('with asset criticality', () => {
+      before(async () => {
+        await entityStoreV2.setup({
+          users: [
+            {
+              user: { name: 'root' },
+              entity: {
+                id: 'user:root@unknown',
+                type: 'user',
               },
-            ],
-          }))
-        )
-          return this.skip();
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {

@@ -2255,43 +2255,40 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless enrichment', () => {
+    describe('enrichment', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
-      before(async function () {
+      before(async () => {
         await esArchiver.load(path);
         // Two entities are needed:
         //   1. Id-based EUID for auditbeat docs (risk test, host.id present in alert).
         //   2. Name-based EUID for dynamic ecs_compliant docs (criticality test, no host.id).
-        if (
-          !(await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-                entity: {
-                  id: ENRICHMENT_HOST_EUID,
-                  type: 'host',
-                  risk: { calculated_level: 'Low', calculated_score_norm: 23 },
-                },
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 23 },
               },
-              {
-                host: { name: ENRICHMENT_HOST_NAME },
-                entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
-                asset: { criticality: 'medium_impact' },
-              },
-            ],
-            users: [
-              {
-                user: { name: 'root' },
-                entity: { id: 'user:root@unknown', type: 'user' },
-                asset: { criticality: 'extreme_impact' },
-              },
-            ],
-          }))
-        )
-          return this.skip();
+            },
+            {
+              host: { name: ENRICHMENT_HOST_NAME },
+              entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
+              asset: { criticality: 'medium_impact' },
+            },
+          ],
+          users: [
+            {
+              user: { name: 'root' },
+              entity: { id: 'user:root@unknown', type: 'user' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {

@@ -1102,32 +1102,29 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('@skipInServerless with enrichments', () => {
-        before(async function () {
+      describe('with enrichments', () => {
+        before(async () => {
           // ML anomaly docs use host.name only (no host.id) → EUID is name-based.
-          if (
-            !(await entityStoreV2.setup({
-              hosts: [
-                {
-                  host: { name: 'zeek-newyork-sha-aa8df15' },
-                  entity: {
-                    id: 'host:zeek-newyork-sha-aa8df15',
-                    type: 'host',
-                    risk: { calculated_level: 'Low', calculated_score_norm: 23 },
-                  },
-                  asset: { criticality: 'medium_impact' },
+          await entityStoreV2.setup({
+            hosts: [
+              {
+                host: { name: 'zeek-newyork-sha-aa8df15' },
+                entity: {
+                  id: 'host:zeek-newyork-sha-aa8df15',
+                  type: 'host',
+                  risk: { calculated_level: 'Low', calculated_score_norm: 23 },
                 },
-              ],
-              users: [
-                {
-                  user: { name: 'root' },
-                  entity: { id: 'user:root@unknown', type: 'user' },
-                  asset: { criticality: 'extreme_impact' },
-                },
-              ],
-            }))
-          )
-            return this.skip();
+                asset: { criticality: 'medium_impact' },
+              },
+            ],
+            users: [
+              {
+                user: { name: 'root' },
+                entity: { id: 'user:root@unknown', type: 'user' },
+                asset: { criticality: 'extreme_impact' },
+              },
+            ],
+          });
         });
 
         after(async () => {

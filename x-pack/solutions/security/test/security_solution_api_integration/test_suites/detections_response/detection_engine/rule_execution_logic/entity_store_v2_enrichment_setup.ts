@@ -58,25 +58,12 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   const retry = getService('retry');
   const log = getService('log');
 
-  /**
-   * Installs Entity Store V2 engines and seeds entities.
-   *
-   * Throws if the install API returns a non-2xx status (e.g. missing `entity-analytics`
-   * privilege when the `security/complete` product tier is not configured). This is a hard
-   * failure — the environment is misconfigured and the caller should not suppress it.
-   *
-   * Returns `false` if the risk-score maintainer does not complete its first run within
-   * 5 minutes. This is a soft failure caused by CI timing variability, not a code bug.
-   * Callers should call `this.skip()` when `false` is returned. Enrichment describe blocks
-   * must be tagged `@skipInServerless` to prevent this function being called in environments
-   * where the install API returns 403 (missing product-tier privilege).
-   */
-  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<boolean> => {
+  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<void> => {
     const entityTypes: string[] = [];
     if (enrichmentConfig.hosts?.length) entityTypes.push('host');
     if (enrichmentConfig.users?.length) entityTypes.push('user');
 
-    if (entityTypes.length === 0) return true;
+    if (entityTypes.length === 0) return;
 
     const installRes = await withHeaders(supertest.post('/api/security/entity_store/install')).send(
       { entityTypes }
@@ -84,11 +71,9 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
 
     if (installRes.status !== 200 && installRes.status !== 201) {
       throw new Error(
-        `Entity Store V2 install returned ${installRes.status}: ${JSON.stringify(
+        `Entity Store V2 install failed (status ${installRes.status}): ${JSON.stringify(
           installRes.body
-        )}. ` +
-          `Ensure the test environment has the 'security/complete' product tier configured ` +
-          `(required for the 'entity-analytics' privilege).`
+        )}`
       );
     }
 
@@ -97,25 +82,21 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
     // overwrite CRUD-seeded test entities before the detection rule executes.
     // The entity store status API always returns 'running' once install is done, so we poll the
     // entity maintainers API instead.
-    const scanCompleted = await retry
-      .waitForWithTimeout('risk-score maintainer initial run to complete', 300_000, async () => {
+    await retry.waitForWithTimeout(
+      'risk-score maintainer initial run to complete',
+      300_000,
+      async () => {
         const res = await withInternalHeaders(
           supertest.get('/internal/security/entity_store/entity_maintainers?ids=risk-score')
         );
         const maintainer = res.body?.maintainers?.[0];
         if (!maintainer) return false;
+        if (maintainer.taskStatus === 'error') {
+          throw new Error(`risk-score maintainer errored: ${JSON.stringify(res.body)}`);
+        }
         return maintainer.taskStatus === 'stopped' && maintainer.runs > 0;
-      })
-      .then(() => true)
-      .catch((err: Error) => {
-        log.warning(
-          `risk-score maintainer did not complete its first run within the timeout — skipping enrichment tests. ` +
-            `This is a CI timing issue, not a code bug. Error: ${err.message}`
-        );
-        return false;
-      });
-
-    if (!scanCompleted) return false;
+      }
+    );
 
     for (const hostConfig of enrichmentConfig.hosts ?? []) {
       const createRes = await withHeaders(
@@ -142,8 +123,6 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
         );
       }
     }
-
-    return true;
   };
 
   const teardown = async (): Promise<void> => {

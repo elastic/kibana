@@ -1046,24 +1046,21 @@ export default ({ getService }: FtrProviderContext) => {
       expect(processPids[0]).toEqual([1]);
     });
 
-    describe('@skipInServerless alerts should be be enriched', () => {
-      before(async function () {
+    describe('alerts should be be enriched', () => {
+      before(async () => {
         // The first new term alert uses auditbeat data (host.id present), so EUID is id-based.
-        if (
-          !(await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
-                entity: {
-                  id: ENRICHMENT_HOST_EUID,
-                  type: 'host',
-                  risk: { calculated_level: 'Low', calculated_score_norm: 23 },
-                },
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 23 },
               },
-            ],
-          }))
-        )
-          return this.skip();
+            },
+          ],
+        });
       });
 
       after(async () => {
@@ -1086,31 +1083,28 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@skipInServerless with asset criticality', () => {
-      before(async function () {
+    describe('with asset criticality', () => {
+      before(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
         // Dynamic docs use host.name only (no host.id) → name-based EUID.
-        if (
-          !(await entityStoreV2.setup({
-            hosts: [
-              {
-                host: { name: ENRICHMENT_HOST_NAME },
-                entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
-                asset: { criticality: 'medium_impact' },
-              },
-            ],
-            users: [
-              {
-                user: { name: 'root' },
-                entity: { id: 'user:root@unknown', type: 'user' },
-                asset: { criticality: 'extreme_impact' },
-              },
-            ],
-          }))
-        )
-          return this.skip();
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME },
+              entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
+              asset: { criticality: 'medium_impact' },
+            },
+          ],
+          users: [
+            {
+              user: { name: 'root' },
+              entity: { id: 'user:root@unknown', type: 'user' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {

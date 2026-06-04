@@ -2499,33 +2499,30 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@skipInServerless alerts should be enriched', () => {
-          before(async function () {
-            if (
-              !(await entityStoreV2.setup({
-                hosts: [
-                  {
-                    host: { name: 'zeek-sensor-amsterdam' },
-                    entity: {
-                      id: 'host:zeek-sensor-amsterdam',
-                      type: 'host',
-                      risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
-                    },
+        describe('alerts should be enriched', () => {
+          before(async () => {
+            await entityStoreV2.setup({
+              hosts: [
+                {
+                  host: { name: 'zeek-sensor-amsterdam' },
+                  entity: {
+                    id: 'host:zeek-sensor-amsterdam',
+                    type: 'host',
+                    risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
                   },
-                ],
-                users: [
-                  {
-                    user: { name: 'root' },
-                    entity: {
-                      id: 'user:root@unknown',
-                      type: 'user',
-                      risk: { calculated_level: 'Low', calculated_score_norm: 11 },
-                    },
+                },
+              ],
+              users: [
+                {
+                  user: { name: 'root' },
+                  entity: {
+                    id: 'user:root@unknown',
+                    type: 'user',
+                    risk: { calculated_level: 'Low', calculated_score_norm: 11 },
                   },
-                ],
-              }))
-            )
-              return this.skip();
+                },
+              ],
+            });
           });
 
           after(async () => {
@@ -2592,27 +2589,24 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@skipInServerless with asset criticality', () => {
-          before(async function () {
-            if (
-              !(await entityStoreV2.setup({
-                hosts: [
-                  {
-                    host: { name: 'zeek-sensor-amsterdam' },
-                    entity: { id: 'host:zeek-sensor-amsterdam', type: 'host' },
-                    asset: { criticality: 'low_impact' },
-                  },
-                ],
-                users: [
-                  {
-                    user: { name: 'root' },
-                    entity: { id: 'user:root@unknown', type: 'user' },
-                    asset: { criticality: 'extreme_impact' },
-                  },
-                ],
-              }))
-            )
-              return this.skip();
+        describe('with asset criticality', () => {
+          before(async () => {
+            await entityStoreV2.setup({
+              hosts: [
+                {
+                  host: { name: 'zeek-sensor-amsterdam' },
+                  entity: { id: 'host:zeek-sensor-amsterdam', type: 'host' },
+                  asset: { criticality: 'low_impact' },
+                },
+              ],
+              users: [
+                {
+                  user: { name: 'root' },
+                  entity: { id: 'user:root@unknown', type: 'user' },
+                  asset: { criticality: 'extreme_impact' },
+                },
+              ],
+            });
           });
 
           after(async () => {
