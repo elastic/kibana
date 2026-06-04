@@ -80,6 +80,12 @@
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-workplace-ai",
     "@kbn/core-http-browser-mocks",
+    "@kbn/cloud",
+    "@kbn/deeplinks-observability",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-security",
+    "@kbn/deeplinks-shared",
+    "@kbn/deeplinks-workplace-ai",
     "@kbn/core-user-profile-server"
   ],
   "exclude": ["target/**/*"]

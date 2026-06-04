@@ -15,11 +15,13 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
-import { useFooterLinks } from './hooks';
-import { useActiveSpace } from './hooks/use_active_space';
-import { useEnvironmentContext } from './hooks/use_environment_context';
-import { useManagementActions } from './hooks/use_management_actions';
-import { useSpaceItems } from './hooks/use_space_items';
+import {
+  useActiveSpace,
+  useEnvironmentContext,
+  useFooterLinks,
+  useManagementActions,
+  useSpaceItems,
+} from './hooks';
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';

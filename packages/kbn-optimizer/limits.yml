@@ -17,7 +17,7 @@ pageLoadAssetSize:
   canvas: 14881
   cases: 213452
   charts: 40269
-  cloud: 11906
+  cloud: 11743
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 29547
+  esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6117
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   logstash: 15882
   maintenanceWindows: 8775
   management: 14304
-  maps: 45917
+  maps: 36281
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
@@ -181,7 +181,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 32595
-  streamsApp: 29825
+  streamsApp: 340704
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -206,7 +206,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
   visTypeTimeseries: 20000
-  visTypeVega: 38538
+  visTypeVega: 11562
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148

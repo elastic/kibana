@@ -86,6 +86,9 @@ const configSchema = schema.object({
   organization_url: schema.maybe(schema.string()),
   profile_url: schema.maybe(schema.string()),
   projects_url: offeringBasedSchema({ serverless: schema.string({ defaultValue: '/projects/' }) }),
+  create_project_url: offeringBasedSchema({
+    serverless: schema.string({ defaultValue: '/projects/create' }),
+  }),
   trial_end_date: schema.maybe(schema.string()),
   create_project_url: offeringBasedSchema({
     serverless: schema.string({ defaultValue: '/projects/create' }),

@@ -95,14 +95,18 @@ export const useEnvironmentContext = ({
 
     const isProject = environmentType === 'project';
     const createUrl = isProject ? cloud.createProjectUrl : cloud.createDeploymentUrl;
+    const createLabel = isProject
+      ? i18n.translate('xpack.spaces.contextSwitcher.createProjectLabel', {
+          defaultMessage: 'Create project',
+        })
+      : i18n.translate('xpack.spaces.contextSwitcher.createDeploymentLabel', {
+          defaultMessage: 'Create deployment',
+        });
 
     const submenuFooterAction: ActionConfig | undefined = createUrl
       ? {
           id: isProject ? 'createProject' : 'createDeployment',
-          label: i18n.translate('xpack.spaces.contextSwitcher.createUrlLabel', {
-            defaultMessage: 'Create {environmentType}',
-            values: { environmentType },
-          }),
+          label: createLabel,
           href: createUrl,
         }
       : undefined;

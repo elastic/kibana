@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -67,34 +68,27 @@ export const useFooterLinks = ({
     [application.capabilities.navLinks]
   );
 
+  const isMounted = useMountedState();
+
   useEffect(() => {
-    let isMounted = true;
-
-    if (!cloud || isServerless !== true) {
+    if (!cloud || !isServerless) {
       setUsersAndRolesUrl(undefined);
-      return () => {
-        isMounted = false;
-      };
+      return;
     }
-
     cloud
       .getPrivilegedUrls()
       .then((urls) => {
-        if (isMounted) setUsersAndRolesUrl(urls.usersAndRolesUrl);
+        if (isMounted()) setUsersAndRolesUrl(urls.usersAndRolesUrl);
       })
       .catch(() => {
-        if (isMounted) setUsersAndRolesUrl(undefined);
+        if (isMounted()) setUsersAndRolesUrl(undefined);
       });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [cloud, isServerless]);
+  }, [cloud, isServerless, isMounted]);
 
   return useMemo(() => {
     const items: LinksListItem[] = [];
 
-    const serverlessProjectType = isServerless === true ? cloud?.serverless.projectType : undefined;
+    const serverlessProjectType = isServerless ? cloud?.serverless.projectType : undefined;
 
     const preferredTarget = (serverlessProjectType && SERVERLESS_TARGETS[serverlessProjectType]) ??
       (activeSpaceSolution && SPACE_SOLUTION_TARGETS[activeSpaceSolution]) ?? {
@@ -108,6 +102,7 @@ export const useFooterLinks = ({
       ? application.getUrlForApp(preferredTarget.appId, { path: preferredTarget.path })
       : undefined;
 
+    // TODO: https://github.com/elastic/kibana/issues/271876
     // "Get started" link ("Add data" for Observability projects)
     if (getStartedHref) {
       items.push({
@@ -140,11 +135,9 @@ export const useFooterLinks = ({
       });
     }
 
-    const canInviteUsersViaCloud = isServerless === true && Boolean(usersAndRolesUrl);
+    const canInviteUsersViaCloud = Boolean(isServerless && usersAndRolesUrl);
     const canInviteUsersViaKibana =
-      isServerless !== true &&
-      canAccessApp('management') &&
-      application.capabilities.users?.save === true;
+      !isServerless && canAccessApp('management') && Boolean(application.capabilities.users?.save);
 
     const inviteUsersHref = canInviteUsersViaCloud
       ? usersAndRolesUrl
