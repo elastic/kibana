@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-    '../../../../../kbn-ui/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
+import { type CalloutProps } from './types';
+
+export type ErrorCalloutProps = CalloutProps;
+
+/**
+ * Error callout — Use for errors, destructive operations, or blocking
+ * issues that require immediate attention.
+ */
+export const ErrorCallout = (props: ErrorCalloutProps) => {
+  return <EuiCallOut color="danger" {...props} />;
 };

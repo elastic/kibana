@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-    '../../../../../kbn-ui/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
+import { type CalloutProps } from './types';
+
+export type SuccessCalloutProps = CalloutProps;
+
+/**
+ * Success callout — Use to confirm that an action completed successfully.
+ */
+export const SuccessCallout = (props: SuccessCalloutProps) => {
+  return <EuiCallOut color="success" {...props} />;
 };

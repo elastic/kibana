@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-    '../../../../../kbn-ui/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
+import { type CalloutProps } from './types';
+
+export type InfoCalloutProps = CalloutProps;
+
+/**
+ * Informational callout — Use for neutral guidance, tips, or notes
+ * that do not indicate a problem.
+ */
+export const InfoCallout = (props: InfoCalloutProps) => {
+  return <EuiCallOut color="primary" {...props} />;
 };

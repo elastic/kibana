@@ -7,18 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-    '../../../../../kbn-ui/**/*.stories.+(tsx|mdx)',
-  ],
-  typescript: {
-    reactDocgen: 'react-docgen-typescript',
-  },
-};
+export { InfoCallout, type InfoCalloutProps } from './src/info_callout';
+export { SuccessCallout, type SuccessCalloutProps } from './src/success_callout';
+export { WarningCallout, type WarningCalloutProps } from './src/warning_callout';
+export { ErrorCallout, type ErrorCalloutProps } from './src/error_callout';
