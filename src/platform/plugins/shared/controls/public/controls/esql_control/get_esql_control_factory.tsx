@@ -120,19 +120,8 @@ export const getESQLControlFactory = <
             return true;
           }
 
-          // Panels that publish an ES|QL query are related to ES|QL controls that publish variables they use
-          const isSiblingESQLControl = apiPublishesESQLVariable(sibling);
-          if (isSiblingESQLControl) {
-            const usedVariables = getESQLQueryVariables(selections.api.query$.getValue().esql);
-            if (usedVariables.includes(sibling.esqlVariable$.value.key)) {
-              return true;
-            }
-          }
           return false;
         },
-        relatedObservables: [
-          selections.api.query$?.pipe(map((query) => query?.esql)) ?? of(undefined),
-        ],
         relatedSiblingObservables: ['query$'],
       });
 

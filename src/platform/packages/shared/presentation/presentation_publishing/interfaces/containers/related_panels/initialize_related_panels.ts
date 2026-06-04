@@ -30,13 +30,11 @@ import { apiHasSections, apiPublishesChildren } from '../presentation_container'
 export const initializeRelatedPanels = ({
   uuid,
   parentApi,
-  relatedObservables,
   relatedSiblingObservables,
   isRelated,
 }: {
   uuid: string;
   parentApi: unknown;
-  relatedObservables?: Observable<unknown>[];
   relatedSiblingObservables?: string[];
   isRelated: (sibling: unknown) => boolean;
 }): { relatedPanels$: BehaviorSubject<string[]> } => {
@@ -67,9 +65,9 @@ export const initializeRelatedPanels = ({
     .pipe(
       skipWhile(([viewMode, childrenLoading]) => childrenLoading || viewMode !== 'edit'),
       distinctUntilChanged(),
-      switchMap(([viewMode, childrenLoading]) => {
-        return combineLatest([childrenApi.children$, section$, ...(relatedObservables ?? [])]).pipe(
-          switchMap(([children, section, ...relatedValues]) => {
+      switchMap(() => {
+        return combineLatest([childrenApi.children$, section$]).pipe(
+          switchMap(([children, section]) => {
             const siblingEntries = Object.entries(children).filter(
               ([siblingUuid]) => siblingUuid !== uuid
             );
