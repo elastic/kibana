@@ -47,6 +47,11 @@ export const OverviewStatusMetaDataCodec = t.intersection([
           status: t.string,
         }),
         t.partial({
+          // The last-known up/down for this location before it was demoted to
+          // `no_data` by the live-window freshness guard. Lets the UI optionally
+          // render the stale last run (via the "show last run" toggle) without a
+          // refetch. Only set when `status === 'no_data'`.
+          lastStatus: t.string,
           // ISO timestamp of when this location entered its current state
           // segment. Only set when the location is currently down so the UI
           // can render "Down · 12m" without stale data.
@@ -87,10 +92,12 @@ export const OverviewStatusCodec = t.interface({
   up: t.number,
   down: t.number,
   pending: t.number,
+  noData: t.number,
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  noDataConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   disabledConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   disabledMonitorQueryIds: t.array(t.string),

@@ -61,6 +61,21 @@ type LocationStatus = LocationStatusEntry[];
 
 export const SUMMARIES_PAGE_SIZE = 5000;
 
+// A monitor/location whose most recent run inside a *live* date-range window
+// (one that ends at ~now) is older than ~2 schedule intervals — with a
+// 15-minute floor — is surfaced as `no_data` rather than its last-known
+// up/down. Without this, a monitor that stopped reporting would keep showing a
+// stale, falsely-healthy status until it aged out of the window. `no_data`
+// (had a run, stopped reporting) is deliberately distinct from `pending` (no
+// run found in the window at all, e.g. a brand-new first-run monitor). This
+// only applies to the windowed overview view; the default (no-range) view
+// enforces freshness through the `monitor.timespan` filter instead.
+const STALE_FRESHNESS_FLOOR_MINUTES = 15;
+// How close a window's end must be to `now` for the freshness guard to kick in.
+// Windows that end clearly in the past are treated as historical, where the
+// latest in-window run is exactly the status the user asked to see.
+const LIVE_WINDOW_TOLERANCE_MINUTES = 5;
+
 export class OverviewStatusService {
   filterData: {
     locationIds?: string[] | string;
@@ -78,16 +93,11 @@ export class OverviewStatusService {
       this.getQueryResult(),
     ]);
 
-    // When the user opts into date-range filtering, drop any configured
-    // monitor that has no final summary in the selected window. Disabled
-    // monitors (which never run) get filtered out as a side effect — that's
-    // intentional: the toggle is about "what ran in the window".
-    const filterByDateRange = Boolean(this.routeContext.request.query?.filterByDateRange);
-    const allConfigs = filterByDateRange
-      ? rawConfigs.filter((c) => statusResult.has(c.attributes[ConfigKey.MONITOR_QUERY_ID]))
-      : rawConfigs;
-
-    return this.buildOverviewStatusResult(allConfigs, statusResult);
+    // Every configured monitor is always returned rather than dropped, so the
+    // overview never silently hides one. Monitors with no run in the queried
+    // window surface as `pending`; in a live window, monitors whose latest run
+    // went stale surface as `no_data` (see `processOverviewStatus`).
+    return this.buildOverviewStatusResult(rawConfigs, statusResult);
   }
 
   /**
@@ -110,8 +120,17 @@ export class OverviewStatusService {
     >,
     statusResult: Map<string, LocationStatus>
   ) {
-    const { up, down, pending, upConfigs, downConfigs, pendingConfigs, disabledConfigs } =
-      this.processOverviewStatus(allConfigs, statusResult);
+    const {
+      up,
+      down,
+      pending,
+      noData,
+      upConfigs,
+      downConfigs,
+      pendingConfigs,
+      noDataConfigs,
+      disabledConfigs,
+    } = this.processOverviewStatus(allConfigs, statusResult);
 
     const {
       enabledMonitorQueryIds,
@@ -133,9 +152,11 @@ export class OverviewStatusService {
       up,
       down,
       pending,
+      noData,
       upConfigs,
       downConfigs,
       pendingConfigs,
+      noDataConfigs,
       disabledConfigs,
     };
   }
@@ -281,19 +302,19 @@ export class OverviewStatusService {
   }
 
   /**
-   * Compute the `[from, to]` window we use to pull final-summary docs. By
-   * default we look back 4h+20m so we always capture the latest summary for
-   * every enabled monitor (max schedule is 4h). When the user has explicitly
-   * opted into `filterByDateRange`, we honor their picker range — but we only
-   * narrow, never widen below the default window, because the picker can be
-   * useful even with `now-15m` style values.
+   * Compute the `[from, to]` window we use to pull final-summary docs. The
+   * overview page always sends the date picker's range, so we honor it whenever
+   * it's present. Callers that don't pass a range (e.g. the diagnostics bundle
+   * or embeddables) fall back to a 4h+20m look-back, which always captures the
+   * latest summary for every enabled monitor (max schedule is 4h) — preserving
+   * the legacy "current status" behavior for those consumers.
    */
   getStatusQueryRange(): { from: string; to: string } {
     const params = this.routeContext.request.query || {};
-    const { filterByDateRange, dateRangeStart, dateRangeEnd } = params;
+    const { dateRangeStart, dateRangeEnd } = params;
     const defaultFrom = moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString();
 
-    if (!filterByDateRange || !dateRangeStart || !dateRangeEnd) {
+    if (!dateRangeStart || !dateRangeEnd) {
       return { from: defaultFrom, to: 'now' };
     }
 
@@ -309,6 +330,38 @@ export class OverviewStatusService {
       from: fromDate.toISOString(),
       to: toDate.toISOString(),
     };
+  }
+
+  /**
+   * Whether the status freshness guard should run. It only applies to the
+   * windowed overview view (both picker bounds present) whose window ends at
+   * ~now — i.e. a live "what's happening right now" view. Historical windows and
+   * the default no-range view (which relies on the `monitor.timespan` filter)
+   * are left untouched.
+   */
+  shouldApplyFreshnessGuard(): boolean {
+    const { dateRangeStart, dateRangeEnd } = this.routeContext.request.query || {};
+    if (!dateRangeStart || !dateRangeEnd) {
+      return false;
+    }
+    const toDate = datemath.parse(dateRangeEnd, { roundUp: true });
+    if (!toDate?.isValid()) {
+      return false;
+    }
+    return toDate.isSameOrAfter(moment().subtract(LIVE_WINDOW_TOLERANCE_MINUTES, 'minutes'));
+  }
+
+  /**
+   * A run is "stale" when its latest summary in a live window is older than
+   * ~2 schedule intervals (15-minute floor) — the monitor has effectively
+   * stopped reporting and its last status can no longer be trusted as current.
+   */
+  isStaleRun(timestamp: string | undefined, scheduleMinutes: number): boolean {
+    if (!timestamp) {
+      return false;
+    }
+    const thresholdMinutes = Math.max(scheduleMinutes * 2, STALE_FRESHNESS_FLOOR_MINUTES);
+    return moment().diff(moment(timestamp), 'minutes') > thresholdMinutes;
   }
 
   async getQueryResult() {
@@ -345,10 +398,12 @@ export class OverviewStatusService {
       ];
 
       // The `timespan` filter is a "currently fresh" constraint anchored to
-      // `now` — when the user is explicitly inspecting a historic window via
-      // the date picker we drop it, otherwise older summaries inside the
-      // window would be filtered out unfairly.
-      const isUserSelectedRange = Boolean(this.routeContext.request.query?.filterByDateRange);
+      // `now`. When the caller passes an explicit date range (the overview page
+      // always does) we drop it, otherwise older summaries inside the window
+      // would be filtered out unfairly. Callers without a range keep it so they
+      // still get a "current status" snapshot.
+      const { dateRangeStart, dateRangeEnd } = this.routeContext.request.query || {};
+      const isUserSelectedRange = Boolean(dateRangeStart && dateRangeEnd);
 
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
@@ -553,12 +608,17 @@ export class OverviewStatusService {
     const upConfigs: Record<string, OverviewStatusMetaData> = {};
     const downConfigs: Record<string, OverviewStatusMetaData> = {};
     const pendingConfigs: Record<string, OverviewStatusMetaData> = {};
+    const noDataConfigs: Record<string, OverviewStatusMetaData> = {};
     const disabledConfigs: Record<string, OverviewStatusMetaData> = {};
 
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
 
     const queryLocIds = this.filterData?.locationIds;
+
+    // In a live windowed view, demote monitors that stopped reporting to
+    // `no_data` so a stale last-known status can't look falsely healthy.
+    const applyFreshnessGuard = this.shouldApplyFreshnessGuard();
 
     // Track which monitor IDs have been processed via local saved objects
     const processedMonitorIds = new Set<string>();
@@ -609,17 +669,26 @@ export class OverviewStatusService {
         const remote = locData?.index
           ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
           : undefined;
-        const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
+        const scheduleMinutes = Number(monitor.attributes[ConfigKey.SCHEDULE]?.number) || 0;
+        const status =
+          applyFreshnessGuard && this.isStaleRun(locData?.timestamp, scheduleMinutes)
+            ? MONITOR_STATUS_ENUM.NO_DATA
+            : locData?.status || MONITOR_STATUS_ENUM.PENDING;
         // Only attach `error` / `downSince` when this location is currently
         // down — otherwise we'd carry stale error text from the previous
         // failure which is misleading on the overview row.
         const isDown = status === MONITOR_STATUS_ENUM.DOWN;
+        // When the freshness guard demotes this location to `no_data`, keep the
+        // stale last-known up/down so the UI can optionally surface the last run
+        // without a refetch.
+        const isNoData = status === MONITOR_STATUS_ENUM.NO_DATA;
         const location = {
           status,
           id: monLocation.id,
           label: monLocation.label,
           ...(isDown && locData?.error ? { error: locData.error } : {}),
           ...(isDown && locData?.downSince ? { downSince: locData.downSince } : {}),
+          ...(isNoData && locData?.status ? { lastStatus: locData.status } : {}),
         };
         const meta = {
           ...metaInfo,
@@ -705,6 +774,23 @@ export class OverviewStatusService {
       }
     }
 
+    // Split the "no status in window" catch-all. At this point pendingConfigs
+    // holds only monitors with no up/down location, so each location is either
+    // `pending` (never ran in the window) or `no_data` (ran, then went stale).
+    // A monitor with at least one stale location stopped reporting → surface it
+    // as `no_data`; monitors that are purely first-run stay `pending`. Inspect
+    // the locations directly (rather than the incrementally-built
+    // `overallStatus`) so classification is deterministic regardless of the
+    // order ES returned the buckets in.
+    for (const [id, meta] of Object.entries(pendingConfigs)) {
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.NO_DATA)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.NO_DATA;
+        meta.locations = movePendingToEnd(meta.locations);
+        noDataConfigs[id] = meta;
+        delete pendingConfigs[id];
+      }
+    }
+
     // Process remote-only monitors: pings from CCS indices that have no local saved object.
     // These monitors exist only on remote clusters and are discovered purely from ping data.
     if (isCCSEnabled(this.routeContext.server)) {
@@ -728,17 +814,27 @@ export class OverviewStatusService {
           }
 
           const configId = locData.configId || monitorId;
-          const status = locData.status;
+          const scheduleMinutes = locData.monitorIntervalSeconds
+            ? locData.monitorIntervalSeconds / 60
+            : 0;
+          const status =
+            applyFreshnessGuard && this.isStaleRun(locData.timestamp, scheduleMinutes)
+              ? MONITOR_STATUS_ENUM.NO_DATA
+              : locData.status;
           // Mirror local-monitor handling: only attach `error` / `downSince`
           // for currently-down locations to avoid surfacing stale failure
           // text from a previous run.
           const isDown = status === MONITOR_STATUS_ENUM.DOWN;
+          // Keep the stale last-known status when demoted to `no_data` so the
+          // "show last run" toggle can render it without a refetch.
+          const isNoData = status === MONITOR_STATUS_ENUM.NO_DATA;
           const location = {
             id: locData.locationId,
             label: locData.locationLabel || locData.locationId,
             status,
             ...(isDown && locData.error ? { error: locData.error } : {}),
             ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
+            ...(isNoData && locData.status ? { lastStatus: locData.status } : {}),
           };
           const meta: OverviewStatusMetaData = {
             monitorQueryId: monitorId,
@@ -769,6 +865,8 @@ export class OverviewStatusService {
           } else if (status === MONITOR_STATUS_ENUM.UP) {
             up += 1;
             upConfigs[monLocId] = meta;
+          } else if (status === MONITOR_STATUS_ENUM.NO_DATA) {
+            noDataConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.NO_DATA };
           } else {
             pendingConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.PENDING };
           }
@@ -780,9 +878,11 @@ export class OverviewStatusService {
       up,
       down,
       pending: Object.values(pendingConfigs).length,
+      noData: Object.values(noDataConfigs).length,
       upConfigs,
       downConfigs,
       pendingConfigs,
+      noDataConfigs,
       disabledConfigs,
     };
   }

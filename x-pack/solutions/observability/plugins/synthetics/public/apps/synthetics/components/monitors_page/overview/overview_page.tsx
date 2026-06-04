@@ -19,7 +19,7 @@ import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/
 
 import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewStatus } from '../hooks/use_overview_status';
-import { useSyncDateRangeFilter } from '../common/use_sync_date_range_filter';
+import { useSyncOverviewDateRange } from '../common/use_sync_overview_date_range';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
@@ -36,9 +36,9 @@ export const OverviewPage: React.FC = () => {
   useOverviewBreadcrumbs();
 
   // Mounted at the page level (above any empty-state early returns) so the
-  // URL stays the source of truth for the date-range filter even when the
-  // grid unmounts because the previous request returned zero monitors.
-  useSyncDateRangeFilter();
+  // URL stays the source of truth for the date range even when the grid
+  // unmounts because the previous request returned zero monitors.
+  useSyncOverviewDateRange();
 
   const view = useSelector(selectOverviewView);
 

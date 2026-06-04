@@ -126,6 +126,10 @@ export const MONITOR_STATUS_ENUM = {
   UP: 'up',
   DOWN: 'down',
   PENDING: 'pending',
+  // The monitor produced a run inside the queried window but its latest run has
+  // gone stale (it stopped reporting). Distinct from `pending`, which means no
+  // run was found in the window at all (e.g. a brand-new, first-run monitor).
+  NO_DATA: 'no_data',
   SUCCESS: 'succeeded',
   DISABLED: 'disabled',
 };

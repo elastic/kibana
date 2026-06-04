@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiSpacer,
+  EuiStat,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -28,6 +35,7 @@ interface MonitorStatProps {
   numberColor: string;
   isClickable: boolean;
   onClickStat: () => void;
+  tooltipContent?: string;
 }
 
 const MonitorStat = ({
@@ -37,11 +45,23 @@ const MonitorStat = ({
   numberColor,
   isClickable,
   onClickStat,
+  tooltipContent,
 }: MonitorStatProps) => {
+  const description = tooltipContent ? (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{statName}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip type="question" content={tooltipContent} position="top" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    statName
+  );
+
   const statComponent = (
     <EuiStat
       data-test-subj={dataTestSubj}
-      description={statName}
+      description={description}
       reverse
       title={statNo}
       titleColor={numberColor}
@@ -75,6 +95,7 @@ export function OverviewStatus({
     up: status?.up,
     down: status?.down,
     pending: status?.pending,
+    noData: status?.noData,
     disabledCount: status?.disabledCount,
   });
 
@@ -97,6 +118,7 @@ export function OverviewStatus({
             down: 0,
             disabledCount: 0,
             pending: 0,
+            noData: 0,
           });
           break;
         case 'down':
@@ -105,6 +127,7 @@ export function OverviewStatus({
             down: status?.down || 0,
             disabledCount: 0,
             pending: 0,
+            noData: 0,
           });
           break;
         case 'disabled':
@@ -113,6 +136,7 @@ export function OverviewStatus({
             down: 0,
             disabledCount: status?.disabledCount || 0,
             pending: 0,
+            noData: 0,
           });
           break;
         case 'pending':
@@ -121,6 +145,16 @@ export function OverviewStatus({
             down: 0,
             disabledCount: 0,
             pending: status?.pending || 0,
+            noData: 0,
+          });
+          break;
+        case 'no_data':
+          setStatusConfig({
+            up: 0,
+            down: 0,
+            disabledCount: 0,
+            pending: 0,
+            noData: status?.noData || 0,
           });
           break;
       }
@@ -130,6 +164,7 @@ export function OverviewStatus({
         down: status.down,
         disabledCount: status.disabledCount,
         pending: status?.pending,
+        noData: status?.noData,
       });
     }
   }, [status, statusFilter]);
@@ -181,6 +216,19 @@ export function OverviewStatus({
         numberColor: 'subdued',
         isClickable: areStatsClickable,
         onClickStat: getOnClickStat('pending'),
+        tooltipContent: pendingTooltip,
+      });
+    }
+
+    if (statusConfig?.noData) {
+      stats.push({
+        dataTestSubj: 'xpack.uptime.synthetics.overview.status.noData',
+        statName: noDataDescription,
+        statNo: title(statusConfig.noData),
+        numberColor: 'warning',
+        isClickable: areStatsClickable,
+        onClickStat: getOnClickStat('no_data'),
+        tooltipContent: noDataTooltip,
       });
     }
     return stats;
@@ -219,6 +267,20 @@ const downDescription = i18n.translate('xpack.synthetics.overview.status.down.de
 
 const pendingDescription = i18n.translate('xpack.synthetics.overview.status.pending.description', {
   defaultMessage: 'Pending',
+});
+
+const noDataDescription = i18n.translate('xpack.synthetics.overview.status.noData.description', {
+  defaultMessage: 'No data',
+});
+
+const pendingTooltip = i18n.translate('xpack.synthetics.overview.status.pending.tooltip', {
+  defaultMessage:
+    'No checks have run yet in the selected time range — typically a newly created monitor awaiting its first run.',
+});
+
+const noDataTooltip = i18n.translate('xpack.synthetics.overview.status.noData.tooltip', {
+  defaultMessage:
+    'The monitor reported earlier but has stopped reporting in the selected time range. Its last known status may be stale and is worth investigating.',
 });
 
 const disabledDescription = i18n.translate(

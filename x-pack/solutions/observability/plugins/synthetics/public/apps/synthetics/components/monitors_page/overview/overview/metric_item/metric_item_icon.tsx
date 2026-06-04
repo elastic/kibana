@@ -111,6 +111,21 @@ export const MetricItemIcon = ({
     dispatch(toggleErrorPopoverOpen(null));
   };
 
+  if (status === 'no_data') {
+    return (
+      <Container>
+        <EuiIconTip
+          content={NO_DATA_TOOLTIP}
+          type="warning"
+          color="warning"
+          iconProps={{
+            'data-test-subj': 'syntheticsMetricItemNoDataIcon',
+          }}
+        />
+      </Container>
+    );
+  }
+
   if (status === 'down') {
     return (
       <Container>
@@ -211,4 +226,9 @@ const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
 
 const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
   defaultMessage: 'Manual test run is in progress.',
+});
+
+const NO_DATA_TOOLTIP = i18n.translate('xpack.synthetics.metricItemIcon.noDataTooltip', {
+  defaultMessage:
+    'This monitor stopped reporting in the selected window. Its last known status may be stale — worth investigating.',
 });

@@ -28,7 +28,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
 
     let result: OverviewStatusMetaData[] = [];
 
-    const { downConfigs, pendingConfigs, upConfigs } = status;
+    const { downConfigs, pendingConfigs, noDataConfigs, upConfigs } = status;
 
     if (statusFilter) {
       switch (statusFilter) {
@@ -44,6 +44,9 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         case 'pending':
           result = Object.values(pendingConfigs) as OverviewStatusMetaData[];
           break;
+        case 'no_data':
+          result = Object.values(noDataConfigs ?? {}) as OverviewStatusMetaData[];
+          break;
         default:
           break;
       }
@@ -57,6 +60,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         ...upAndDownMonitors,
         ...Object.values(disabledConfigs ?? {}),
         ...Object.values(pendingConfigs),
+        ...Object.values(noDataConfigs ?? {}),
       ] as OverviewStatusMetaData[];
     }
 

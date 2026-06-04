@@ -87,6 +87,10 @@ const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorStatus.pendingLabe
   defaultMessage: 'Pending',
 });
 
+const NO_DATA_LABEL = i18n.translate('xpack.synthetics.monitorStatus.noDataLabel', {
+  defaultMessage: 'No data',
+});
+
 const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.succeededLabel', {
   defaultMessage: 'Succeeded',
 });
@@ -121,6 +125,11 @@ const badgeMapping: Record<string, BadgeData> = {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },
+  },
+  no_data: {
+    color: 'warning',
+    dataTestSubj: 'monitorLatestStatusNoData',
+    labels: { default: NO_DATA_LABEL },
   },
   up: {
     color: 'success',

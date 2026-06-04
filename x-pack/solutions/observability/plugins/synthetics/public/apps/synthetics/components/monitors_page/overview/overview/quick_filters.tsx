@@ -39,6 +39,12 @@ export const QuickFilters = () => {
       label: PENDING_LABEL,
     });
   }
+  if (status?.noData && status?.noData > 0) {
+    statusButtons.push({
+      id: 'no_data',
+      label: NO_DATA_LABEL,
+    });
+  }
   return (
     <EuiButtonGroup
       buttonSize="m"
@@ -66,4 +72,8 @@ const DISABLED_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.
 
 const PENDING_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.pending', {
   defaultMessage: 'Pending',
+});
+
+const NO_DATA_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.noData', {
+  defaultMessage: 'No data',
 });

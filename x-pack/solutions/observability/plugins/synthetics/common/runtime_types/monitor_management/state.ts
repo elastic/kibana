@@ -29,11 +29,10 @@ const FetchMonitorQueryArgsCommon = {
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
   showFromAllSpaces: t.boolean,
   useLogicalAndFor: t.array(t.union(useLogicalAndFileLiteral)),
-  // Optional date-range filter for the overview list. When `filterByDateRange`
-  // is true, the server narrows the result set to monitors that have a final
-  // summary in `[dateRangeStart, dateRangeEnd]`. The range strings accept
-  // datemath (e.g. `now-15m`) or ISO timestamps.
-  filterByDateRange: t.boolean,
+  // Date-range window for the overview list. When `[dateRangeStart, dateRangeEnd]`
+  // are present, the server scopes each monitor's status to that window (and
+  // surfaces monitors with no run in the window as `pending`). The range strings
+  // accept datemath (e.g. `now-24h`) or ISO timestamps.
   dateRangeStart: t.string,
   dateRangeEnd: t.string,
 };

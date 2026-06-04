@@ -188,6 +188,8 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
+          "noData": 0,
+          "noDataConfigs": Object {},
           "pending": 0,
           "pendingConfigs": Object {},
           "projectMonitorsCount": 0,
@@ -350,6 +352,8 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
+          "noData": 0,
+          "noDataConfigs": Object {},
           "pending": 0,
           "pendingConfigs": Object {},
           "projectMonitorsCount": 0,
@@ -423,6 +427,8 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
+          "noData": 0,
+          "noDataConfigs": Object {},
           "pending": 2,
           "pendingConfigs": Object {
             "id1": Object {
@@ -553,6 +559,52 @@ describe('current status route', () => {
       expect(result.upConfigs.mon1.locations[0].id).toBe(usLoc.id);
       expect(result.upConfigs.mon1.locations[1].id).toBe(euLoc.id);
       expect(result.upConfigs.mon1.overallStatus).toBe('up');
+    });
+
+    it('classifies a multi-location monitor with any stale location as no_data regardless of bucket order', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      // Only the *second*-listed location (eu_west) has a run, and it's stale.
+      // The first-listed location (us_east) never ran in the window → pending.
+      // This ordering used to leave the monitor stuck in `pending` because the
+      // incrementally-built `overallStatus` stayed `pending`; classification
+      // must instead inspect the locations so it's deterministic.
+      const staleTs = moment().subtract(3, 'hours').toISOString();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: euLoc.id },
+              status: {
+                top: [{ metrics: { 'monitor.status': 'up' }, sort: [staleTs] }],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: { dateRangeStart: 'now-24h', dateRangeEnd: 'now' } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: false } } },
+        },
+      };
+      const service = new OverviewStatusService(routeContext);
+      service.getMonitorConfigs = jest
+        .fn()
+        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+
+      const result = await service.getOverviewStatus();
+
+      expect(result.pendingConfigs.mon1).toBeUndefined();
+      expect(result.noDataConfigs.mon1).toBeDefined();
+      expect(result.noDataConfigs.mon1.overallStatus).toBe('no_data');
+      // The stale location carries its last-known status for the "show last run" view.
+      const euLocation = result.noDataConfigs.mon1.locations.find((l: any) => l.id === euLoc.id);
+      expect(euLocation?.status).toBe('no_data');
+      expect(euLocation?.lastStatus).toBe('up');
+      expect(result.noData).toBe(1);
     });
 
     it('sets overallStatus to down when any location is down', async () => {
@@ -1961,7 +2013,7 @@ describe('current status route', () => {
       expect(result.upConfigs.id1.remote).toBeUndefined();
     });
 
-    describe('date range filter (filterByDateRange)', () => {
+    describe('date range window', () => {
       // Only `id1` reports a final summary; `id2` has no bucket in the window.
       const onlyId1Buckets = [
         {
@@ -1993,15 +2045,14 @@ describe('current status route', () => {
           );
         };
 
-        it('falls back to the default 4h20m look-back window when the filter is off', () => {
+        it('falls back to the default 4h20m look-back window when no range is provided', () => {
           const service = new OverviewStatusService(buildRouteContext({}));
           expectDefaultWindow(service.getStatusQueryRange());
         });
 
-        it('honors the picker window when the filter is on with a valid range', () => {
+        it('honors the picker window when a valid range is provided', () => {
           const service = new OverviewStatusService(
             buildRouteContext({
-              filterByDateRange: true,
               dateRangeStart: '2022-01-01T00:00:00.000Z',
               dateRangeEnd: '2022-01-02T00:00:00.000Z',
             })
@@ -2012,17 +2063,16 @@ describe('current status route', () => {
           });
         });
 
-        it('falls back to the default window when the filter is on but the picker bounds are missing', () => {
+        it('falls back to the default window when only one bound is provided', () => {
           const service = new OverviewStatusService(
-            buildRouteContext({ filterByDateRange: true, dateRangeStart: 'now-15m' })
+            buildRouteContext({ dateRangeStart: 'now-15m' })
           );
           expectDefaultWindow(service.getStatusQueryRange());
         });
 
-        it('falls back to the default window when datemath cannot parse the picker bounds', () => {
+        it('falls back to the default window when datemath cannot parse the bounds', () => {
           const service = new OverviewStatusService(
             buildRouteContext({
-              filterByDateRange: true,
               dateRangeStart: 'not-a-date',
               dateRangeEnd: 'also-bad',
             })
@@ -2031,14 +2081,13 @@ describe('current status route', () => {
         });
       });
 
-      it('drops configs with no summary in the window when the filter is enabled', async () => {
+      it('keeps monitors with no summary in the window, surfacing them as pending', async () => {
         const { esClient, syntheticsEsClient } = getUptimeESMockClient();
         esClient.search.mockResponseOnce(getEsResponse({ buckets: onlyId1Buckets }));
 
         const overviewStatusService = new OverviewStatusService(
           buildRouteContext(
             {
-              filterByDateRange: true,
               dateRangeStart: '2022-09-01T00:00:00.000Z',
               dateRangeEnd: '2022-09-30T00:00:00.000Z',
             },
@@ -2049,16 +2098,16 @@ describe('current status route', () => {
 
         const result = await overviewStatusService.getOverviewStatus();
 
-        // id2 never reported in the window, so it is excluded entirely.
-        expect(result.allMonitorsCount).toBe(1);
-        expect(result.allIds).toEqual(['id1']);
+        // id2 never reported in the window, so it stays in the list as pending
+        // rather than being dropped — the overview never hides a configured monitor.
+        expect(result.allMonitorsCount).toBe(2);
+        expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
         expect(result.upConfigs.id1).toBeDefined();
-        expect(result.pendingConfigs).toEqual({});
+        expect(result.pendingConfigs.id2).toBeDefined();
       });
 
-      it('keeps every configured monitor when the filter is disabled (legacy behavior)', async () => {
+      it('keeps every configured monitor when no range is provided (current-status snapshot)', async () => {
         const { esClient, syntheticsEsClient } = getUptimeESMockClient();
-        // Same ES data as the previous test — only the toggle differs.
         esClient.search.mockResponseOnce(getEsResponse({ buckets: onlyId1Buckets }));
 
         const overviewStatusService = new OverviewStatusService(
@@ -2068,20 +2117,143 @@ describe('current status route', () => {
 
         const result = await overviewStatusService.getOverviewStatus();
 
-        // Without the toggle, id2 stays in the list as pending rather than being dropped.
         expect(result.allMonitorsCount).toBe(2);
         expect(result.allIds).toEqual(expect.arrayContaining(['id1', 'id2']));
         expect(result.pendingConfigs.id2).toBeDefined();
       });
 
-      it('drops the "currently fresh" timespan filter and uses the picker range when enabled', async () => {
+      describe('freshness guard', () => {
+        const id1BucketAt = (timestamp: string, status = 'up') => [
+          {
+            key: { monitorId: 'id1', locationId: japanLoc.id },
+            status: {
+              key: japanLoc.id,
+              top: [{ metrics: { 'monitor.status': status }, sort: [timestamp] }],
+            },
+          },
+        ];
+
+        describe('shouldApplyFreshnessGuard', () => {
+          it('is off without an explicit range (freshness handled by the timespan filter)', () => {
+            expect(
+              new OverviewStatusService(buildRouteContext({})).shouldApplyFreshnessGuard()
+            ).toBe(false);
+          });
+
+          it('is on for a window that ends at ~now', () => {
+            const service = new OverviewStatusService(
+              buildRouteContext({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' })
+            );
+            expect(service.shouldApplyFreshnessGuard()).toBe(true);
+          });
+
+          it('is off for a historical window that ends in the past', () => {
+            const service = new OverviewStatusService(
+              buildRouteContext({
+                dateRangeStart: '2022-01-01T00:00:00.000Z',
+                dateRangeEnd: '2022-01-02T00:00:00.000Z',
+              })
+            );
+            expect(service.shouldApplyFreshnessGuard()).toBe(false);
+          });
+        });
+
+        describe('isStaleRun', () => {
+          const service = new OverviewStatusService(buildRouteContext({}));
+
+          it('treats a run older than ~2 schedule intervals (15m floor) as stale', () => {
+            // 1m schedule → 15m floor applies.
+            expect(service.isStaleRun(moment().subtract(10, 'minutes').toISOString(), 1)).toBe(
+              false
+            );
+            expect(service.isStaleRun(moment().subtract(20, 'minutes').toISOString(), 1)).toBe(
+              true
+            );
+            // 30m schedule → threshold scales to ~60m.
+            expect(service.isStaleRun(moment().subtract(45, 'minutes').toISOString(), 30)).toBe(
+              false
+            );
+            expect(service.isStaleRun(moment().subtract(2, 'hours').toISOString(), 30)).toBe(true);
+          });
+
+          it('is never stale when there is no timestamp', () => {
+            expect(service.isStaleRun(undefined, 1)).toBe(false);
+          });
+        });
+
+        it('demotes a monitor whose latest run is stale to no_data in a live window', async () => {
+          const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+          // id1 last reported 3h ago — well past its 1m schedule — so in a live
+          // "now" window its green status can no longer be trusted as current.
+          // id2 never reported at all, so it stays `pending` (first-run): the two
+          // are deliberately distinct buckets.
+          const staleTs = moment().subtract(3, 'hours').toISOString();
+          esClient.search.mockResponseOnce(getEsResponse({ buckets: id1BucketAt(staleTs, 'up') }));
+
+          const overviewStatusService = new OverviewStatusService(
+            buildRouteContext(
+              { dateRangeStart: 'now-24h', dateRangeEnd: 'now' },
+              syntheticsEsClient
+            )
+          );
+          overviewStatusService.getMonitorConfigs = jest
+            .fn()
+            .mockResolvedValue(testMonitors as any);
+
+          const result = await overviewStatusService.getOverviewStatus();
+
+          // id1 stopped reporting → no_data (distinct from its stale "up").
+          expect(result.upConfigs.id1).toBeUndefined();
+          expect(result.pendingConfigs.id1).toBeUndefined();
+          expect(result.noDataConfigs.id1).toBeDefined();
+          expect(result.noDataConfigs.id1.overallStatus).toBe('no_data');
+          expect(result.noDataConfigs.id1.locations[0].status).toBe('no_data');
+          // The stale last-known status is carried so the "show last run" toggle
+          // can restore it client-side without a refetch.
+          expect(result.noDataConfigs.id1.locations[0].lastStatus).toBe('up');
+          expect(result.noData).toBe(1);
+
+          // id2 never reported in the window at all → genuine first-run pending.
+          expect(result.noDataConfigs.id2).toBeUndefined();
+          expect(result.pendingConfigs.id2).toBeDefined();
+          expect(result.pendingConfigs.id2.locations[0].status).toBe('pending');
+        });
+
+        it("keeps a stale run's last-known status when inspecting a historical window", async () => {
+          const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+          // Same old data, but the window ends in the past — the user explicitly
+          // asked for that point in time, so the in-window status stands.
+          esClient.search.mockResponseOnce(
+            getEsResponse({ buckets: id1BucketAt('2022-01-01T12:00:00.000Z', 'up') })
+          );
+
+          const overviewStatusService = new OverviewStatusService(
+            buildRouteContext(
+              {
+                dateRangeStart: '2022-01-01T00:00:00.000Z',
+                dateRangeEnd: '2022-01-02T00:00:00.000Z',
+              },
+              syntheticsEsClient
+            )
+          );
+          overviewStatusService.getMonitorConfigs = jest
+            .fn()
+            .mockResolvedValue(testMonitors as any);
+
+          const result = await overviewStatusService.getOverviewStatus();
+
+          expect(result.upConfigs.id1).toBeDefined();
+          expect(result.upConfigs.id1.locations[0].status).toBe('up');
+        });
+      });
+
+      it('drops the "currently fresh" timespan filter and uses the picker range when a range is provided', async () => {
         const { esClient, syntheticsEsClient } = getUptimeESMockClient();
         esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
 
         const overviewStatusService = new OverviewStatusService(
           buildRouteContext(
             {
-              filterByDateRange: true,
               dateRangeStart: '2022-01-01T00:00:00.000Z',
               dateRangeEnd: '2022-01-02T00:00:00.000Z',
             },
@@ -2100,7 +2272,7 @@ describe('current status route', () => {
         });
       });
 
-      it('keeps the timespan filter and default look-back window when disabled', async () => {
+      it('keeps the timespan filter and default look-back window when no range is provided', async () => {
         const { esClient, syntheticsEsClient } = getUptimeESMockClient();
         esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
 

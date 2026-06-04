@@ -40,8 +40,9 @@ const CommonQuerySchema = {
   useLogicalAndFor: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
   ),
-  // Optional date-range filter for the overview list (see runtime type docs).
-  filterByDateRange: schema.maybe(schema.boolean()),
+  // Date-range window for the overview list (see runtime type docs). The
+  // overview page always sends these; their presence scopes each monitor's
+  // status to the window instead of the default "current status" look-back.
   dateRangeStart: schema.maybe(schema.string()),
   dateRangeEnd: schema.maybe(schema.string()),
 };

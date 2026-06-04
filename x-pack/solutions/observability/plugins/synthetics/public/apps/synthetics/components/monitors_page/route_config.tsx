@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ErrorsTab } from './errors/errors_tab';
 import { RefreshButton } from '../common/components/refresh_button';
+import { SyntheticsDatePicker } from '../common/date_picker/synthetics_date_picker';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
@@ -40,6 +41,12 @@ export const getMonitorsRoute = (
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
         ...sharedProps,
+        // The overview always scopes status by the page-level date range, so it
+        // gets a <SyntheticsDatePicker /> in the header. The picker's built-in
+        // refresh replaces the shared <RefreshButton />, which we drop here to
+        // avoid two refresh controls. `rightSideItems` render right-to-left, so
+        // the picker (last) sits to the left of Create Monitor.
+        rightSideItems: [<CreateMonitorButton />, <SyntheticsDatePicker />],
         tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },

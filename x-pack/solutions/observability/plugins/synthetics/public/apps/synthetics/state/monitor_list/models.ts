@@ -28,12 +28,10 @@ export interface MonitorFilterState {
   configIds?: string[]; // Config IDs (UUIDs)
   showFromAllSpaces?: boolean;
   useLogicalAndFor?: UseLogicalAndField[];
-  // When true, the overview list is restricted to monitors that have a final
-  // summary inside `[dateRangeStart, dateRangeEnd]`. When false (default),
-  // the list shows every configured monitor regardless of recent activity —
-  // matching the legacy behavior. The fields are sourced from the page-level
-  // date picker so they stay in sync with the visualizations.
-  filterByDateRange?: boolean;
+  // Date-range window for the overview list, sourced from the page-level date
+  // picker so it stays in sync with the visualizations. Each monitor's status
+  // is scoped to this window; monitors with no run in the window show as
+  // `pending` rather than being removed from the list.
   dateRangeStart?: string;
   dateRangeEnd?: string;
 }
