@@ -6,7 +6,31 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { offsetRangeToMonacoRange } from './utils';
+import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
+import { ESQL_NEW_LINE_COMMAND } from '@kbn/esql-language/src/commands/registry/constants';
+import { filterSuggestionsWithCustomCommands, offsetRangeToMonacoRange } from './utils';
+
+describe('filterSuggestionsWithCustomCommands', () => {
+  const suggestion = (command?: { id: string; title: string }): ISuggestionItem =>
+    ({ label: 'x', text: 'x', kind: 'Keyword', command } as ISuggestionItem);
+
+  test('returns ids of suggestions carrying a custom command', () => {
+    const result = filterSuggestionsWithCustomCommands([
+      suggestion(),
+      suggestion({ id: 'esql.control.values.create', title: 'Create control' }),
+    ]);
+    expect(result).toEqual(['esql.control.values.create']);
+  });
+
+  test('excludes the trigger-suggest and "New line" commands', () => {
+    const result = filterSuggestionsWithCustomCommands([
+      suggestion({ id: 'editor.action.triggerSuggest', title: 'Trigger' }),
+      suggestion({ id: ESQL_NEW_LINE_COMMAND, title: 'New line' }),
+      suggestion({ id: 'esql.timepicker.choose', title: 'Time picker' }),
+    ]);
+    expect(result).toEqual(['esql.timepicker.choose']);
+  });
+});
 
 describe('offsetRangeToMonacoRange', () => {
   test('single line', () => {

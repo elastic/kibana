@@ -9,6 +9,7 @@
 
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
+import { ESQL_NEW_LINE_COMMAND } from '@kbn/esql-language/src/commands/registry/constants';
 import { monaco } from '../../../../monaco_imports';
 import type { MonacoMessage } from '../providers/types';
 
@@ -120,14 +121,15 @@ export const getDecorationHoveredMessages = (
 
 /**
  * Extracts the suggestions with custom commands from a list of suggestions.
- * Suggestions with editor.action.triggerSuggest are excluded.
+ * Suggestions with editor.action.triggerSuggest and the "New line" affordance are excluded.
  * @param suggestions
  * @returns
  */
+const NON_CUSTOM_COMMAND_IDS = new Set(['editor.action.triggerSuggest', ESQL_NEW_LINE_COMMAND]);
 export const filterSuggestionsWithCustomCommands = (suggestions: ISuggestionItem[]): string[] => {
   return suggestions
     .filter(
-      (suggestion) => suggestion.command && suggestion.command.id !== 'editor.action.triggerSuggest'
+      (suggestion) => suggestion.command && !NON_CUSTOM_COMMAND_IDS.has(suggestion.command.id)
     )
     .map((suggestion) => suggestion.command!.id); // we know command is defined because of the filter
 };
