@@ -1172,6 +1172,8 @@
       "@kbn/eslint-plugin-i18n/*": ["packages/kbn-eslint-plugin-i18n/*"],
       "@kbn/eslint-plugin-imports": ["packages/kbn-eslint-plugin-imports"],
       "@kbn/eslint-plugin-imports/*": ["packages/kbn-eslint-plugin-imports/*"],
+      "@kbn/eslint-plugin-kbn-ui": ["packages/kbn-eslint-plugin-kbn-ui"],
+      "@kbn/eslint-plugin-kbn-ui/*": ["packages/kbn-eslint-plugin-kbn-ui/*"],
       "@kbn/eslint-plugin-telemetry": ["packages/kbn-eslint-plugin-telemetry"],
       "@kbn/eslint-plugin-telemetry/*": ["packages/kbn-eslint-plugin-telemetry/*"],
       "@kbn/eso-model-version-example": ["examples/eso_model_version_example"],
