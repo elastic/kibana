@@ -17,7 +17,6 @@ import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { callKibanaApi, CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 import {
   getOutboundEventChainHeaders,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -233,14 +232,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       };
     }
 
-    // Delegate to the shared helper for the simple JSON-body path (no multipart, no fetcher
-    // options). The helper enforces cross-cutting auth / origin / event-chain headers and
-    // owns the fetch + response parsing. Falls back to `makeHttpRequest` for the multipart
-    // and fetcher-options paths, which need bespoke handling.
-    const canUseSharedHelper = !requestConfig.formData && !fetcherOptions;
-    const result = canUseSharedHelper
-      ? await this.callSharedKibanaApi(kibanaUrl, requestConfig)
-      : await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);
+    // Use the local implementation to handle all requests including multipart and fetcher options.
+    const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);
 
     if (debug) {
       // _debug is only meaningful for object responses (JSON). For Buffers / strings / null
@@ -262,70 +255,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     }
 
     return result;
-  }
-
-  /**
-   * Routes a simple JSON-body request through the shared `callKibanaApi` helper. The helper
-   * is the canonical implementation for in-process Kibana API calls and is also used by the
-   * `callKibanaApi` tool exposed to custom step handlers. Behavior parity with the existing
-   * `makeHttpRequest` path: returns the raw response body (not the `{status, headers, body}`
-   * envelope), throws `Error('HTTP <status>: <body>')` on non-2xx, and returns `{}` for 204/304.
-   */
-  private async callSharedKibanaApi(
-    kibanaUrl: string,
-    requestConfig: {
-      method: string;
-      path: string;
-      body?: any;
-      query?: any;
-      headers?: Record<string, string>;
-    }
-  ): Promise<any> {
-    const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
-    if (!fakeRequest) {
-      throw new Error('No authentication headers found');
-    }
-
-    const workflowRunId = this.stepExecutionRuntime.workflowExecution?.id;
-    const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
-    const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
-
-    // Coerce the request method to the helper's strict union; default to GET on unknown
-    // values (matches the existing `cleanParams.request.method = 'GET'` default).
-    const method = (requestConfig.method?.toUpperCase() ?? 'GET') as
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'DELETE'
-      | 'PATCH';
-
-    try {
-      const response = await callKibanaApi(
-        {
-          fakeRequest,
-          workflowRunId,
-          coreStart,
-          cloudSetup,
-          baseUrlOverride: kibanaUrl,
-          maxResponseBytes: this.getMaxResponseBytes(),
-        },
-        {
-          method,
-          path: requestConfig.path,
-          body: requestConfig.body,
-          query: requestConfig.query,
-          headers: requestConfig.headers,
-        }
-      );
-      return response.body;
-    } catch (error) {
-      // Map the helper's transport-agnostic size-limit error to the engine-wide
-      // ResponseSizeLimitError used by the rest of the step infrastructure.
-      if (error instanceof CallKibanaApiResponseTooLargeError) {
-        throw new ResponseSizeLimitError(error.limitBytes, this.step.name);
-      }
-      throw error;
-    }
   }
 
   private buildFullUrl(kibanaUrl: string, path: string, query?: Record<string, string>): string {

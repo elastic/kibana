@@ -1199,7 +1199,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
   });
 
-  describe('shared callKibanaApi helper integration', () => {
+  describe('JSON-body path integration', () => {
     it('propagates x-kibana-workflow-execution-id header on the JSON-body path', async () => {
       (mockStepExecutionRuntime as any).workflowExecution = { id: 'workflow-run-helper' };
 
