@@ -409,7 +409,12 @@ export const performBulkUpdate = async <T>(
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
-      const { [type]: attributes, references, updated_at, updated_by } = documentToSave as {
+      const {
+        [type]: attributes,
+        references,
+        updated_at,
+        updated_by,
+      } = documentToSave as {
         [key: string]: Partial<T>;
       } & Pick<SavedObjectsUpdateResponse<T>, 'references' | 'updated_at' | 'updated_by'>;
 
