@@ -1,5 +1,7 @@
 # Managed workflows: registration and rollout patterns
 
+> **AI agent skill:** For Cursor/Claude-assisted registration and PR review, see [workflows-managed-workflows SKILL.md](../.claude/skills/workflows-managed-workflows/SKILL.md).
+
 This guide explains how plugin owners declare, install, and run **managed workflows** through `workflows_extensions`. Managed workflows are workflow documents owned by code (not by users): the platform creates and maintains them based on definitions you ship with your plugin.
 
 This guide covers:
