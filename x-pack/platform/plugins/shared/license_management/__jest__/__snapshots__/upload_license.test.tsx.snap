@@ -154,28 +154,43 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-4ee039-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-19b7t2f-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  The supplied license has expired.
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        The supplied license has expired.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -298,28 +313,43 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-4ee039-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-19b7t2f-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  The supplied license is not valid for this product.
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        The supplied license is not valid for this product.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -442,28 +472,43 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-4ee039-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-19b7t2f-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  Error encountered uploading license: Check your license file.
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        Error encountered uploading license: Check your license file.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -586,28 +631,43 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         >
           <div
             aria-live="assertive"
-            class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-danger-euiCallOut-danger"
+            data-size="m"
             role="alert"
+            style="--euiCallOutTypeColor: #C61E25;"
             tabindex="-1"
           >
-            <p
-              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-            >
-              Please address the highlighted errors.
-            </p>
             <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-s-euiTextColor-default"
+              class="css-4ee039-wrapper"
             >
-              <ul>
-                <li
-                  class="euiForm__error"
+              <div
+                class="css-wlziyu-body"
+              >
+                <span
+                  class="css-19b7t2f-icon"
+                  data-euiicon-type="errorFill"
+                />
+                <div
+                  class="css-ak2bmi-content"
                 >
-                  Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-                </li>
-              </ul>
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+                  >
+                    Please address the highlighted errors.
+                  </p>
+                  <div
+                    class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+                  >
+                    <ul>
+                      <li
+                        class="euiForm__error"
+                      >
+                        Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div

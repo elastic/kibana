@@ -96,9 +96,7 @@ describe('callout', () => {
         <CallOut message={message} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="callout-some-id"]').first().prop('iconType')).toEqual(
-      'info'
-    );
+    expect(wrapper.find('EuiNotificationIcon').first().prop('type')).toEqual('info');
   });
 
   test('icon type can be changed from the type within the message', () => {

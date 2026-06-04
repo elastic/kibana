@@ -8,47 +8,62 @@ Array [
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
-    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-m-danger-euiCallOut"
+    class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-danger-euiCallOut-danger"
+    data-size="m"
+    style="--euiCallOutTypeColor:#C61E25"
   >
-    <p
-      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
-    >
-      Errors found
-    </p>
     <div
-      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-    />
-    <div
-      class="euiText emotion-euiText-s-euiTextColor-default"
+      class="css-4ee039-wrapper"
     >
-      <p>
-        There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
-      </p>
-      <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left"
-        data-type="row"
+      <div
+        class="css-wlziyu-body"
       >
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+        <span
+          class="css-19b7t2f-icon"
+          data-euiicon-type="errorFill"
+        />
+        <div
+          class="css-ak2bmi-content"
         >
-          403 Forbidden
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          no access for you
-        </dd>
-        <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
-        >
-          500 Internal Server Error
-        </dt>
-        <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-        >
-          An internal server error occurred
-        </dd>
-      </dl>
+          <p
+            class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+          >
+            Errors found
+          </p>
+          <div
+            class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+          >
+            <p>
+              There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
+            </p>
+            <dl
+              class="euiDescriptionList emotion-euiDescriptionList-row-left"
+              data-type="row"
+            >
+              <dt
+                class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+              >
+                403 Forbidden
+              </dt>
+              <dd
+                class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+              >
+                no access for you
+              </dd>
+              <dt
+                class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+              >
+                500 Internal Server Error
+              </dt>
+              <dd
+                class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+              >
+                An internal server error occurred
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
     </div>
   </div>,
 ]

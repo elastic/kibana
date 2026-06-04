@@ -26,19 +26,33 @@ exports[`AnnotationsTable Initialization with job config prop. 1`] = `
 
 exports[`AnnotationsTable Minimal initialization without props. 1`] = `
 <div
-  class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+  class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+  data-size="m"
   role="alert"
+  style="--euiCallOutTypeColor: #0B64DD;"
 >
-  <p
-    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+  <div
+    class="css-4ee039-wrapper"
   >
-    <span
-      aria-hidden="true"
-      class="emotion-euiCallOut__icon"
-      color="inherit"
-      data-euiicon-type="info"
-    />
-    No annotations created for this job
-  </p>
+    <div
+      class="css-wlziyu-body"
+    >
+      <span
+        aria-hidden="true"
+        class="css-5neova-icon-l-icon"
+        color="#0B64DD"
+        data-euiicon-type="info"
+      />
+      <div
+        class="css-ak2bmi-content"
+      >
+        <p
+          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+        >
+          No annotations created for this job
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 `;

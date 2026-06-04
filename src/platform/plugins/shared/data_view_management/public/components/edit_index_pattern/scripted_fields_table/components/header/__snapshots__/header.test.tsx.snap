@@ -8,42 +8,53 @@ exports[`Header should render normally 1`] = `
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+      class="euiPanel euiPanel--warning euiCallOut euiCallOut--warning emotion-euiPanel-none-warning-euiCallOut-warning"
+      data-size="m"
+      style="--euiCallOutTypeColor: #966B03;"
     >
-      <p
-        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
-      >
-        <span
-          aria-hidden="true"
-          class="emotion-euiCallOut__icon"
-          color="inherit"
-          data-euiicon-type="warning"
-        />
-        Scripted fields are deprecated
-      </p>
       <div
-        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-      />
-      <div
-        class="euiText emotion-euiText-s-euiTextColor-default"
+        class="css-4ee039-wrapper"
       >
-        <span>
-          Use 
-          <button
-            class="euiLink emotion-euiLink-primary"
-            type="button"
+        <div
+          class="css-wlziyu-body"
+        >
+          <span
+            aria-hidden="true"
+            class="css-5neova-icon-l-icon"
+            color="#966B03"
+            data-euiicon-type="warning"
+          />
+          <div
+            class="css-ak2bmi-content"
           >
-            runtime fields
-          </button>
-           instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the 
-          <button
-            class="euiLink emotion-euiLink-primary"
-            type="button"
-          >
-            Elasticsearch Query Language (ES|QL)
-          </button>
-           to compute values directly at query time.
-        </span>
+            <p
+              class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+            >
+              Scripted fields are deprecated
+            </p>
+            <div
+              class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+            >
+              <span>
+                Use 
+                <button
+                  class="euiLink emotion-euiLink-primary"
+                  type="button"
+                >
+                  runtime fields
+                </button>
+                 instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the 
+                <button
+                  class="euiLink emotion-euiLink-primary"
+                  type="button"
+                >
+                  Elasticsearch Query Language (ES|QL)
+                </button>
+                 to compute values directly at query time.
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div
