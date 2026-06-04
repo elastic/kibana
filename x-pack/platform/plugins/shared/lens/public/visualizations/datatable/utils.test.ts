@@ -173,10 +173,32 @@ describe('datatable progress bar utils', () => {
       ]);
     });
 
-    it('recomputes default-palette stops when serialized stops are empty', () => {
-      const stops = getProgressBarPaletteStops(paletteService, { min: 0, max: 100 }, ['#aaa'], []);
-      // The default by-value palette serializes empty stops, so they are recomputed
-      // from the palette service rather than producing a flat (empty) fill.
+    it('distributes serialized colors across the domain when stops are empty', () => {
+      // Predefined (by-name) palettes serialize their resolved colors but omit
+      // numeric stops; the selected colors must drive the bar rather than being
+      // discarded in favor of the default palette.
+      const stops = getProgressBarPaletteStops(
+        paletteService,
+        { min: 0, max: 100 },
+        ['#111', '#222', '#333', '#444'],
+        []
+      );
+      expect(stops).toEqual([
+        { color: '#111', stop: 0 },
+        { color: '#222', stop: 25 },
+        { color: '#333', stop: 50 },
+        { color: '#444', stop: 75 },
+      ]);
+    });
+
+    it('honors a single serialized color as a flat fill anchored at min', () => {
+      expect(
+        getProgressBarPaletteStops(paletteService, { min: -20, max: 50 }, ['#abcdef'], [])
+      ).toEqual([{ color: '#abcdef', stop: -20 }]);
+    });
+
+    it('recomputes the default palette only when no colors are serialized', () => {
+      const stops = getProgressBarPaletteStops(paletteService, { min: 0, max: 100 }, [], []);
       expect(stops.length).toBeGreaterThan(0);
       stops.forEach((s) => {
         expect(typeof s.color).toBe('string');

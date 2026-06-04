@@ -238,10 +238,14 @@ export function getProgressBarDomain(
  * Resolves the palette color stops (domain-valued `{ color, stop }[]`) for a
  * solid/gradient progress bar.
  *
- * The serialized expression palette only carries explicit `stops` for the
- * `custom` palette; the default by-value palette serializes empty `stops`, so the
- * stops must be recomputed from the palette service against the data bounds —
- * mirroring how cell/text coloring resolves its default palette at render time.
+ * The expression serializes the resolved palette `colors` for every palette, but
+ * only carries explicit numeric `stops` for the `custom` palette; predefined
+ * (by-name) palettes serialize empty `stops`. So the resolution order is:
+ *
+ * 1. `colors` + matching `stops` → zip them directly (custom palette).
+ * 2. `colors` only → distribute those colors evenly across the data bounds, so
+ *    the user's chosen palette is honored rather than discarded.
+ * 3. nothing usable → recompute the default by-value palette from the service.
  */
 export function getProgressBarPaletteStops(
   paletteService: PaletteRegistry,
@@ -257,9 +261,33 @@ export function getProgressBarPaletteStops(
     }, []);
   }
 
-  // No usable serialized stops (default palette): recompute domain-valued stops.
+  // Predefined palettes serialize their resolved colors but omit numeric stops.
+  // Spread those colors evenly across the domain so the selected palette drives
+  // the bar instead of silently falling back to the default palette.
+  if (colors?.length) {
+    return distributeColorsAcrossDomain(colors, dataBounds);
+  }
+
+  // No usable serialized colors: recompute domain-valued stops from the default.
   const defaultPalette = getColorByValuePalette(paletteService, dataBounds);
   return defaultPalette.params?.stops ?? [];
+}
+
+/**
+ * Spreads palette `colors` across `[min, max]` as evenly spaced lower-bound
+ * stops (the first stop anchors at `min`). A single color collapses to one stop
+ * at `min`, yielding a flat fill in that color.
+ */
+function distributeColorsAcrossDomain(
+  colors: string[],
+  { min, max }: DataBounds
+): Array<{ color: string; stop: number }> {
+  if (colors.length === 1) {
+    return [{ color: colors[0], stop: min }];
+  }
+  const span = max - min;
+  const step = span / colors.length;
+  return colors.map((color, index) => ({ color, stop: min + step * index }));
 }
 
 /**
