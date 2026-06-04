@@ -15,9 +15,9 @@ type WorkflowApi = WorkflowsServerPluginSetup['management'];
 const mockSetAttribute = jest.fn();
 
 jest.mock('@kbn/inference-tracing', () => ({
+  ...jest.requireActual('@kbn/inference-tracing'),
   withActiveInferenceSpan: (_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
-    fn({ setAttribute: mockSetAttribute }),
-  ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
+    fn({ setAttribute: mockSetAttribute, updateName: jest.fn() }),
 }));
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
@@ -82,7 +82,7 @@ describe('executeWorkflow', () => {
       completionTimeoutSec: 120,
       metadata: { agent_id: 'agent-abc' },
     });
-    expect(mockSetAttribute).toHaveBeenCalledWith('elastic.workflow.name', 'Test Workflow');
+    expect(mockSetAttribute).toHaveBeenCalledWith('gen_ai.workflow.name', 'Test Workflow');
   });
 
   it('passes undefined metadata to executeWorkflow when not provided', async () => {
