@@ -62,6 +62,7 @@ jest.mock('../../app_context', () => {
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
       getCloud: jest.fn(),
+      getTaskManagerStart: jest.fn(() => ({ runSoon: jest.fn().mockResolvedValue({}) })),
     },
   };
 });
