@@ -14,41 +14,41 @@ import type {
 } from '@kbn/core/server';
 import {
   NOTIFICATION_TYPE_FLAGS,
-  NOTIFICATIONS_CENTER_UI_ENABLED_DEFAULT,
-  NOTIFICATIONS_CENTER_UI_ENABLED_FLAG,
+  NOTIFICATION_CENTER_UI_ENABLED_DEFAULT,
+  NOTIFICATION_CENTER_UI_ENABLED_FLAG,
 } from '../common';
-import type { NotificationsCenterConfig } from './config';
+import type { NotificationCenterConfig } from './config';
 import type {
-  NotificationsCenterPluginSetup,
-  NotificationsCenterPluginStart,
-  NotificationsCenterSetupDependencies,
-  NotificationsCenterStartDependencies,
+  NotificationCenterPluginSetup,
+  NotificationCenterPluginStart,
+  NotificationCenterSetupDependencies,
+  NotificationCenterStartDependencies,
 } from './types';
 
-export class NotificationsCenterPlugin
+export class NotificationCenterPlugin
   implements
     Plugin<
-      NotificationsCenterPluginSetup,
-      NotificationsCenterPluginStart,
-      NotificationsCenterSetupDependencies,
-      NotificationsCenterStartDependencies
+      NotificationCenterPluginSetup,
+      NotificationCenterPluginStart,
+      NotificationCenterSetupDependencies,
+      NotificationCenterStartDependencies
     >
 {
   private readonly logger: Logger;
 
-  constructor(context: PluginInitializerContext<NotificationsCenterConfig>) {
+  constructor(context: PluginInitializerContext<NotificationCenterConfig>) {
     this.logger = context.logger.get();
   }
 
   public setup(
-    _core: CoreSetup<NotificationsCenterStartDependencies, NotificationsCenterPluginStart>
-  ): NotificationsCenterPluginSetup {
-    // Gated by `xpack.notificationsCenter.enabled` in kibana config
-    this.logger.debug('Setting up Notifications Center plugin');
+    _core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
+  ): NotificationCenterPluginSetup {
+    // Gated by `xpack.notificationCenter.enabled` in kibana config
+    this.logger.debug('Setting up Notification Center plugin');
     return {};
   }
 
-  public start(core: CoreStart): NotificationsCenterPluginStart {
+  public start(core: CoreStart): NotificationCenterPluginStart {
     // Per the feature-flags service contract, evaluation
     // must never gate plugin setup — it is purely observational here.
     this.logResolvedFeatureFlags(core.featureFlags);
@@ -60,8 +60,8 @@ export class NotificationsCenterPlugin
   private async logResolvedFeatureFlags(featureFlags: CoreStart['featureFlags']): Promise<void> {
     try {
       const uiEnabled = await featureFlags.getBooleanValue(
-        NOTIFICATIONS_CENTER_UI_ENABLED_FLAG,
-        NOTIFICATIONS_CENTER_UI_ENABLED_DEFAULT
+        NOTIFICATION_CENTER_UI_ENABLED_FLAG,
+        NOTIFICATION_CENTER_UI_ENABLED_DEFAULT
       );
       const notificationTypeFlags = await Promise.all(
         Object.values(NOTIFICATION_TYPE_FLAGS).map((flag) =>
@@ -69,13 +69,13 @@ export class NotificationsCenterPlugin
         )
       );
       this.logger.debug(
-        `Notifications Center feature flags resolved: ${JSON.stringify({
+        `Notification Center feature flags resolved: ${JSON.stringify({
           uiEnabled,
           notificationTypeFlags,
         })}`
       );
     } catch (error) {
-      this.logger.warn(`Failed to resolve Notifications Center feature flags: ${String(error)}`);
+      this.logger.warn(`Failed to resolve Notification Center feature flags: ${String(error)}`);
     }
   }
 }

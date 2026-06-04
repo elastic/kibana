@@ -10,9 +10,9 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   /**
    * Plugin enablement switch. Defaults to `false`.
-   * Controlled by `xpack.notificationsCenter.enabled: <boolean>` in kibana.yml
+   * Controlled by `xpack.notificationCenter.enabled: <boolean>` in kibana.yml
    */
   enabled: schema.boolean({ defaultValue: false }),
 });
 
-export type NotificationsCenterConfig = TypeOf<typeof configSchema>;
+export type NotificationCenterConfig = TypeOf<typeof configSchema>;

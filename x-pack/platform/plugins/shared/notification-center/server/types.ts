@@ -11,13 +11,13 @@
  * Empty while the plugin is a bare shell. The external `submit(draft)`
  * API that consumers call to push notifications will be added here
  */
-export type NotificationsCenterPluginSetup = Record<string, never>;
+export type NotificationCenterPluginSetup = Record<string, never>;
 
 /**
- * Public server-side start contract. Empty for now (see {@link NotificationsCenterPluginSetup}).
+ * Public server-side start contract. Empty for now (see {@link NotificationCenterPluginSetup}).
  */
-export type NotificationsCenterPluginStart = Record<string, never>;
+export type NotificationCenterPluginStart = Record<string, never>;
 
-export type NotificationsCenterSetupDependencies = Record<string, never>;
+export type NotificationCenterSetupDependencies = Record<string, never>;
 
-export type NotificationsCenterStartDependencies = Record<string, never>;
+export type NotificationCenterStartDependencies = Record<string, never>;

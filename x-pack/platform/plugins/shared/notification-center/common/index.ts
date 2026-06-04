@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'notificationsCenter' as const;
-export const PLUGIN_NAME = 'Notifications Center' as const;
+export const PLUGIN_ID = 'notificationCenter' as const;
+export const PLUGIN_NAME = 'Notification Center' as const;
 
 export {
-  NOTIFICATIONS_CENTER_UI_ENABLED_FLAG,
-  NOTIFICATIONS_CENTER_UI_ENABLED_DEFAULT,
+  NOTIFICATION_CENTER_UI_ENABLED_FLAG,
+  NOTIFICATION_CENTER_UI_ENABLED_DEFAULT,
   NOTIFICATION_TYPE_FLAGS,
   NOTIFICATION_TYPE_ENABLED_DEFAULT,
 } from './feature_flags';

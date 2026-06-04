@@ -6,8 +6,8 @@
  */
 
 /**
- * UI plugin setup is gated on `notificationsCenter.uiEnabled` feature flag
+ * UI plugin setup is gated on `notificationCenter.uiEnabled` feature flag
  */
-export type NotificationsCenterPublicSetup = Record<string, never>;
+export type NotificationCenterPublicSetup = Record<string, never>;
 
-export type NotificationsCenterPublicStart = Record<string, never>;
+export type NotificationCenterPublicStart = Record<string, never>;

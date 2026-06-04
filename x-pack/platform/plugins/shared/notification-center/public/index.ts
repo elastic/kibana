@@ -6,12 +6,12 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import { NotificationsCenterPlugin } from './plugin';
-import type { NotificationsCenterPublicSetup, NotificationsCenterPublicStart } from './types';
+import { NotificationCenterPlugin } from './plugin';
+import type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
-export type { NotificationsCenterPublicSetup, NotificationsCenterPublicStart } from './types';
+export type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
 export const plugin: PluginInitializer<
-  NotificationsCenterPublicSetup,
-  NotificationsCenterPublicStart
-> = () => new NotificationsCenterPlugin();
+  NotificationCenterPublicSetup,
+  NotificationCenterPublicStart
+> = () => new NotificationCenterPlugin();

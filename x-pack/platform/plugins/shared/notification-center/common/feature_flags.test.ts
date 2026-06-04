@@ -11,7 +11,7 @@ describe('notification type flag registry', () => {
   it('declares every flag key as a static literal string', () => {
     for (const key of Object.values(NOTIFICATION_TYPE_FLAGS)) {
       expect(typeof key).toBe('string');
-      expect(key).toMatch(/^notificationsCenter\./);
+      expect(key).toMatch(/^notificationCenter\./);
     }
   });
 
