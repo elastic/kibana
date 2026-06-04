@@ -15,6 +15,7 @@ import {
   selectBrowserJourney,
   selectBrowserJourneyLoading,
 } from '../../../state';
+import { useGetUrlParams } from '../../../hooks';
 
 export const useJourneySteps = (
   checkGroup?: string,
@@ -25,6 +26,8 @@ export const useJourneySteps = (
     stepIndex: string;
     checkGroupId: string;
   }>();
+
+  const { remoteName } = useGetUrlParams();
 
   const stepIndex = stepIndexArg ?? stepIndexUrl;
 
@@ -37,9 +40,12 @@ export const useJourneySteps = (
 
   useEffect(() => {
     if (checkGroupId) {
-      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId }));
+      // For remote monitors we forward `remoteName` so the server-side
+      // journey query targets `${remoteName}:synthetics-*` via CCS instead
+      // of the local heartbeat indices.
+      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId, remoteName }));
     }
-  }, [checkGroupId, dispatch, lastRefresh]);
+  }, [checkGroupId, dispatch, lastRefresh, remoteName]);
 
   const stepEnds: JourneyStep[] = (journeyData?.steps ?? []).filter(isStepEnd);
   const failedStep = journeyData?.steps.find((step) => step.synthetics?.step?.status === 'failed');

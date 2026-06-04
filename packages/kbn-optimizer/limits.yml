@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
-  alertingVTwo: 51297
+  alertingVTwo: 56591
   apm: 54371
   apmSourcesAccess: 2278
   automaticImport: 18629
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 29547
+  esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6117
@@ -72,7 +72,7 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
-  feedback: 6248
+  feedback: 7642
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
@@ -93,7 +93,7 @@ pageLoadAssetSize:
   inference: 10368
   inferenceWorkflows: 25000
   infra: 56302
-  ingestHub: 13422
+  ingestHub: 14788
   ingestPipelines: 17866
   inputControlVis: 7638
   inspectComponent: 4590
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   logstash: 15882
   maintenanceWindows: 8775
   management: 14304
-  maps: 45917
+  maps: 36281
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
@@ -171,7 +171,7 @@ pageLoadAssetSize:
   serverless: 7412
   serverlessObservability: 21437
   serverlessSearch: 26287
-  serverlessVectordb: 7618
+  serverlessVectordb: 11999
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
@@ -206,7 +206,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
   visTypeTimeseries: 20000
-  visTypeVega: 38538
+  visTypeVega: 11562
   visTypeVislib: 14679
   visTypeXy: 32342
   visualizationListing: 5148
