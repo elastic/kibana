@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  type EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import type { FlowType } from '../../../hooks/use_wired_streams_status';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -84,7 +85,7 @@ export function WiredStreamsIngestionSelector({
     }
   }, [onEnableWiredStreams, flowType, onChange]);
 
-  const ingestionModeOptions = [
+  const ingestionModeOptions: EuiButtonGroupOptionProps[] = [
     {
       id: 'classic' as const,
       label: i18n.translate('xpack.observability_onboarding.wiredStreams.classicIngestion', {
@@ -104,7 +105,6 @@ export function WiredStreamsIngestionSelector({
         title: i18n.translate('xpack.observability_onboarding.wiredStreams.tooltip.title', {
           defaultMessage: 'Wired Streams (Tech Preview)',
         }),
-        position: 'top',
       },
       label: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
