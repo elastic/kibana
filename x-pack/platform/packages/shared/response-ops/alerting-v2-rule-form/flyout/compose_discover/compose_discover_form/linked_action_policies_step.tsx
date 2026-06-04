@@ -92,8 +92,8 @@ interface Props {
 
 export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
   const metadata = useWatch<ComposeFormValues, 'metadata'>({ name: 'metadata' });
-  const name = ruleId ? undefined : metadata?.name;
-  const tags = ruleId ? undefined : metadata?.tags;
+  const name = metadata?.name;
+  const tags = metadata?.tags;
 
   const { isLoading, error, items } = useMatchedActionPolicies({ http, ruleId, name, tags });
 
