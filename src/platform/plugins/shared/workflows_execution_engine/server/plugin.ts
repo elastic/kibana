@@ -1412,6 +1412,8 @@ export class WorkflowsExecutionEnginePlugin
       ...workflowExecution,
     } as EsWorkflowExecution;
 
+    // Concurrency keys are evaluated before validateWorkflowInputs renders and persists inputs.
+    // Liquid-rendered input defaults or templated input values are not supported here.
     return this.concurrencyManager.evaluateConcurrencyKey(
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
