@@ -213,7 +213,7 @@ a. **CI Stats (recommended)**
 
 b. **Buildkite directly:**
 
-1.  Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
+1.  Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
 2.  Click **New build**, select branch/commit
 3.  Add environment variables:
 
