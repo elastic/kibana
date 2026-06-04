@@ -2,24 +2,18 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*",
-    "**/*.ts",
-  ],
+  "include": ["src/**/*", "**/*.ts", "jest.integration.config.js"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/esql-types",
     "@kbn/core-pricing-common",
     "@kbn/licensing-types",
     "@kbn/field-types",
+    "@kbn/test-es-server",
+    "@kbn/tooling-log",
     "@kbn/esql-scripts",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

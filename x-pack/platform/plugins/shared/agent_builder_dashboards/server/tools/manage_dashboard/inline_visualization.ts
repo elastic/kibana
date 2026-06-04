@@ -15,10 +15,6 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
 
-const DASHBOARD_CHART_CONFIG_INSTRUCTIONS = `XY AXIS TITLE RULES:
-- For XY charts, do NOT set axis titles. Rely on the visualization title and column labels to convey meaning.
-- Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.`;
-
 export type VisualizationAttempt =
   | {
       type: 'success';
@@ -95,7 +91,6 @@ export const createVisualizationResolver = ({
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         includeTimeRange: false,
-        additionalChartConfigInstructions: DASHBOARD_CHART_CONFIG_INSTRUCTIONS,
         modelProvider,
         logger,
         events,
