@@ -24,7 +24,7 @@ import {
   licenseService,
 } from '../../services';
 import { type AgentClient } from '../../services/agents';
-import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
+import { UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -102,7 +102,7 @@ export async function populateAssignedAgentsCount(
   const policyKueryById = new Map(
     agentPolicies.map((agentPolicy) => [
       agentPolicy.id,
-      `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(agentPolicy.id)}"`,
+      `policy_id:"${escapeQuotes(agentPolicy.id)}"`,
     ])
   );
 
