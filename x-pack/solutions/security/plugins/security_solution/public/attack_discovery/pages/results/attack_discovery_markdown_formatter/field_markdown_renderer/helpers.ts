@@ -14,17 +14,19 @@ export const getFlyoutPanelProps = ({
   contextId,
   fieldName,
   value,
+  entityId,
 }: {
   contextId: string;
   fieldName: string;
   value: string | number | undefined;
+  entityId?: string;
 }): FlyoutPanelProps | null => {
   if (isHostName(fieldName) && typeof value === 'string') {
-    return getHostFlyoutPanelProps({ contextId, hostName: value });
+    return getHostFlyoutPanelProps({ contextId, hostName: value, entityId });
   }
 
   if (isUserName(fieldName) && typeof value === 'string') {
-    return getUserFlyoutPanelProps({ contextId, userName: value });
+    return getUserFlyoutPanelProps({ contextId, userName: value, entityId });
   }
 
   return null;

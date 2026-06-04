@@ -69,11 +69,17 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
     showAnonymized,
   ]);
 
+  const originalAlertIds = useMemo(
+    () => attack.alertIds.map((id) => attack.replacements?.[id] ?? id),
+    [attack.alertIds, attack.replacements]
+  );
+
   return (
     <AttackDiscoveryMarkdownFormatter
       scopeId={TableId.alertsOnAttacksPage}
       disableActions={showAnonymized}
       markdown={subtitleMarkdownText}
+      alertIds={originalAlertIds}
     />
   );
 });

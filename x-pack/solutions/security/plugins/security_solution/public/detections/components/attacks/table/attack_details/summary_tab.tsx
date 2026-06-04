@@ -84,6 +84,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
           scopeId={TableId.alertsOnAttacksPage}
           disableActions={showAnonymized}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -99,6 +100,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
           scopeId={TableId.alertsOnAttacksPage}
           disableActions={showAnonymized}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 

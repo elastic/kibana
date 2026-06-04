@@ -75,6 +75,11 @@ const ActionableSummaryComponent: React.FC<Props> = ({
 
   const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
 
+  const originalAlertIds = useMemo(
+    () => attackDiscovery.alertIds.map((id) => replacements?.[id] ?? id),
+    [attackDiscovery.alertIds, replacements]
+  );
+
   return (
     <EuiPanel color="subdued" data-test-subj="actionableSummary">
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
@@ -82,6 +87,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
           <AttackDiscoveryMarkdownFormatter
             disableActions={disabledActions}
             markdown={entitySummaryOrTitle}
+            alertIds={originalAlertIds}
           />
         </EuiFlexItem>
 

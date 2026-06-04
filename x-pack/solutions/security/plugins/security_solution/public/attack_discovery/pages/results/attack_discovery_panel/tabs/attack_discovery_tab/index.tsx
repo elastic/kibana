@@ -98,6 +98,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -112,6 +113,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}
+          alertIds={originalAlertIds}
         />
       </div>
 
@@ -158,7 +160,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               wrap={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon data-test-subj="timelineIcon" type="timeline" />
+                <EuiIcon aria-hidden={true} data-test-subj="timelineIcon" type="timeline" />
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="investigateInTimelineLabel" grow={false}>
                 {i18n.INVESTIGATE_IN_TIMELINE}

@@ -20,7 +20,7 @@ const FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
  * Centralized hook for Attack overview tab only
  */
 export const useOverviewTabData = () => {
-  const { getFieldsData } = useAttackDetailsContext();
+  const { getFieldsData, attack } = useAttackDetailsContext();
 
   const summaryMarkdown = useMemo(
     () => getField(getFieldsData(FIELD_SUMMARY_MARKDOWN)) ?? '',
@@ -39,18 +39,25 @@ export const useOverviewTabData = () => {
     [getFieldsData]
   );
 
+  const originalAlertIds = useMemo(
+    () => attack?.alertIds.map((id) => attack.replacements?.[id] ?? id) ?? [],
+    [attack]
+  );
+
   return useMemo(
     () => ({
       summaryMarkdown,
       summaryMarkdownWithReplacements,
       detailsMarkdown,
       detailsMarkdownWithReplacements,
+      originalAlertIds,
     }),
     [
       detailsMarkdown,
       detailsMarkdownWithReplacements,
       summaryMarkdown,
       summaryMarkdownWithReplacements,
+      originalAlertIds,
     ]
   );
 };

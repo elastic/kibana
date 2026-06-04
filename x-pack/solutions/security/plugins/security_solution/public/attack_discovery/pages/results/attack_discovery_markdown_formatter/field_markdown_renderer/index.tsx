@@ -5,25 +5,41 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiToolTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 import { getFlyoutPanelProps } from './helpers';
+import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import type { ParsedField } from '../types';
 
 const contextId = 'FieldMarkdownRenderer';
 
-export const getFieldMarkdownRenderer = (disableActions: boolean, scopeId?: string) => {
+export const getFieldMarkdownRenderer = (
+  disableActions: boolean,
+  scopeId?: string,
+  alertIds?: string[]
+) => {
   const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     const { openRightPanel } = useExpandableFlyoutApi();
     const { euiTheme } = useEuiTheme();
 
+    const isEntityField =
+      (name === 'host.name' || name === 'host.hostname' || name === 'user.name') &&
+      typeof value === 'string';
+
+    const { euid, isLoading } = useEntityEuidFromAlerts({
+      alertIds: alertIds ?? [],
+      fieldName: name,
+      fieldValue: typeof value === 'string' ? value : '',
+      enabled: !disableActions && isEntityField,
+    });
+
     const flyoutPanelProps = useMemo(
-      () => getFlyoutPanelProps({ contextId, fieldName: name, value }),
-      [name, value]
+      () => getFlyoutPanelProps({ contextId, fieldName: name, value, entityId: euid }),
+      [euid, name, value]
     );
 
     const onEntityClick = useCallback(() => {
@@ -41,14 +57,16 @@ export const getFieldMarkdownRenderer = (disableActions: boolean, scopeId?: stri
             `}
             data-test-subj="entityButton"
             flush="both"
+            isDisabled={isLoading}
+            // iconType={isLoading ? undefined : icon}
             onClick={onEntityClick}
             size="xs"
           >
-            {value}
+            {isLoading ? <EuiLoadingSpinner size="s" /> : value}
           </EuiButtonEmpty>
         ) : null,
 
-      [euiTheme.font.scale.s, flyoutPanelProps, onEntityClick, value]
+      [euiTheme.font.scale.s, flyoutPanelProps, isLoading, onEntityClick, value, icon]
     );
 
     return (
