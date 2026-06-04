@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/aiops-components'
   - '@kbn/aiops-log-pattern-analysis'
   - '@kbn/aiops-log-rate-analysis'
+  - '@kbn/aiops-server-schemas'
   - '@kbn/aiops-test-utils'
   - '@kbn/analytics'
   - '@kbn/cases-plugin'
@@ -88,6 +89,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/cps'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

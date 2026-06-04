@@ -19,7 +19,7 @@ export const createTableVisCell =
     // incoming data might change and put the current page out of bounds - check whether row actually exists
     const rowValue = rows[rowIndex]?.[columnId];
     const column = formattedColumns[columnId];
-    const content = column?.formatter.reactConvert(rowValue);
+    const content = column?.formatter.convertToReact(rowValue);
 
     const cellContent = (
       <div

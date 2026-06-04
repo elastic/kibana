@@ -70,7 +70,10 @@ export const mockCasesContract = (): CaseUiClientMock => ({
   ui: uiMock,
   hooks: hooksMock,
   helpers: helpersMock,
-  config: { templatesEnabled: false },
+  config: {
+    templatesEnabled: false,
+    casesRedesign: { list: false, details: false, settings: false },
+  },
 });
 
 export const casesPluginMock = {

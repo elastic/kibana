@@ -10,7 +10,7 @@
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
-
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -18,7 +18,7 @@ import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
 import { initializeFiltersManager } from './filters_manager';
-import { getLastSavedState } from './default_dashboard_state';
+import { getLastSavedState } from '../../common/default_dashboard_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
@@ -34,6 +34,7 @@ import type {
   DashboardInternalApi,
   DashboardSaveEvent,
   DashboardUser,
+  UserActivity,
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
@@ -46,6 +47,7 @@ import { initializeRelatedPanelsManager } from './related_panels_manager';
 
 export function getDashboardApi({
   creationOptions,
+  panelFlyoutType,
   incomingEmbeddables,
   initialState,
   readResult,
@@ -54,6 +56,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
+  panelFlyoutType?: EuiFlyoutProps['type'];
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;
@@ -66,6 +69,7 @@ export function getDashboardApi({
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const onSave$ = new Subject<DashboardSaveEvent>();
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
+  const userActivity$ = new Subject<UserActivity>();
 
   const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
 
@@ -114,6 +118,7 @@ export function getDashboardApi({
     settingsManager.api.timeRestore$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     () => unsavedChangesManager.internalApi.getLastSavedState(),
+    userActivity$,
     creationOptions
   );
   const filtersManager = initializeFiltersManager(
@@ -185,6 +190,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
+    panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
@@ -292,6 +298,7 @@ export function getDashboardApi({
     uuid: v4(),
     createdBy: readResult?.meta?.created_by,
     user,
+    userActivity$,
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
@@ -321,6 +328,7 @@ export function getDashboardApi({
     } as DashboardApi,
     internalApi,
     cleanup: () => {
+      trackOverlayApi.clearOverlays();
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();

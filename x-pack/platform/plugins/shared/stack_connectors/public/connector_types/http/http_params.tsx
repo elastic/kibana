@@ -19,6 +19,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   type EuiSelectOption,
 } from '@elastic/eui';
 import { HTTP_METHODS, type ActionParamsType, type HttpMethod } from '@kbn/connector-schemas/http';
@@ -265,18 +266,25 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={() => removeQueryParam(idx)}
-                aria-label={i18n.translate(
-                  'xpack.stackConnectors.components.http.removeQueryParam',
-                  {
-                    defaultMessage: 'Remove query parameter',
-                  }
-                )}
-                data-test-subj={`httpQueryRemoveButton-${idx}`}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.stackConnectors.components.http.removeQueryParam', {
+                  defaultMessage: 'Remove query parameter',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => removeQueryParam(idx)}
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.http.removeQueryParam',
+                    {
+                      defaultMessage: 'Remove query parameter',
+                    }
+                  )}
+                  data-test-subj={`httpQueryRemoveButton-${idx}`}
+                />
+              </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -344,15 +352,22 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                onClick={() => removeHeader(idx)}
-                aria-label={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
+              <EuiToolTip
+                content={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
                   defaultMessage: 'Remove header',
                 })}
-                data-test-subj={`httpHeaderRemoveButton-${idx}`}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => removeHeader(idx)}
+                  aria-label={i18n.translate('xpack.stackConnectors.components.http.removeHeader', {
+                    defaultMessage: 'Remove header',
+                  })}
+                  data-test-subj={`httpHeaderRemoveButton-${idx}`}
+                />
+              </EuiToolTip>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>

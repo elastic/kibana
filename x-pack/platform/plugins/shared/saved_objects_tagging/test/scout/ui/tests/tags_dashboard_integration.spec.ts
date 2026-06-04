@@ -33,7 +33,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     const listingPage = new SavedObjectsListingPage(page);
     await listingPage.searchForItemWithName('tag:(tag-1)', { escape: false });
 
-    await listingPage.expectItemsCount('dashboard', 2);
+    await expect(listingPage.getItemLinks('dashboard')).toHaveCount(2);
     const itemNames = await listingPage.getAllItemNames('dashboard');
     for (const expectedName of [
       'dashboard 3 (tag-1 and tag-3)',
@@ -47,7 +47,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     const listingPage = new SavedObjectsListingPage(page);
     await listingPage.selectFilterTags('tag-3');
 
-    await listingPage.expectItemsCount('dashboard', 2);
+    await expect(listingPage.getItemLinks('dashboard')).toHaveCount(2);
     const itemNames = await listingPage.getAllItemNames('dashboard');
     for (const expectedName of ['dashboard 2 (tag-3)', 'dashboard 3 (tag-1 and tag-3)']) {
       expect(itemNames).toContain(expectedName);
@@ -58,7 +58,7 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     const listingPage = new SavedObjectsListingPage(page);
     await listingPage.selectFilterTags('tag-2', 'tag-3');
 
-    await listingPage.expectItemsCount('dashboard', 3);
+    await expect(listingPage.getItemLinks('dashboard')).toHaveCount(3);
     const itemNames = await listingPage.getAllItemNames('dashboard');
     for (const expectedName of [
       'dashboard 1 (tag-2)',

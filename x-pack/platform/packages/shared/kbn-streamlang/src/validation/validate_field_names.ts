@@ -52,6 +52,10 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
     case 'grok':
       fields.push(processor.from);
       break;
+    case 'uri_parts':
+      fields.push(processor.from);
+      if (processor.to) fields.push(processor.to);
+      break;
     case 'rename':
       fields.push(processor.from, processor.to);
       break;

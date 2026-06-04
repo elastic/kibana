@@ -15,17 +15,18 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
-  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
+import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -40,6 +41,11 @@ import { registerRules } from './lib/sig_events/rules/register_rules';
 import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
+import {
+  isSignificantEventsAlertingV2Active,
+  logAlertingV2PluginUnavailable,
+  readSignificantEventsAlertingV2UiEnabled,
+} from './lib/sig_events/significant_events_alerting_v2';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -54,6 +60,7 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import type { FeatureClient } from './lib/streams/feature/feature_client';
 import type { QueryClient } from './lib/streams/assets/query/query_client';
+import { initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -78,6 +85,9 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+
+const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -202,9 +212,47 @@ export class StreamsPlugin
         space,
       });
 
+      let significantEventsAlertingV2StatePromise:
+        | Promise<{
+            alertingV2UiEnabled: boolean;
+            alertingV2Active: boolean;
+            alertingV2RulesClient?: RulesClientApi;
+          }>
+        | undefined;
+
+      const getSignificantEventsAlertingV2State = () => {
+        significantEventsAlertingV2StatePromise ??= (async () => {
+          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
+            uiSettingsClient,
+            this.logger
+          );
+          const alertingV2RulesClient = pluginsStart.alertingVTwo
+            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
+                request,
+                DEFAULT_SPACE_ID
+              )
+            : undefined;
+
+          if (alertingV2UiEnabled && !alertingV2RulesClient) {
+            logAlertingV2PluginUnavailable(this.logger);
+          }
+
+          return {
+            alertingV2UiEnabled,
+            alertingV2Active: isSignificantEventsAlertingV2Active(
+              alertingV2UiEnabled,
+              alertingV2RulesClient
+            ),
+            alertingV2RulesClient,
+          };
+        })();
+        return significantEventsAlertingV2StatePromise;
+      };
+
       let queryClientPromise: Promise<QueryClient> | undefined;
       const getQueryClient = (): Promise<QueryClient> => {
         queryClientPromise ??= (async () => {
+          const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
             request,
             DEFAULT_SPACE_ID,
@@ -213,11 +261,17 @@ export class StreamsPlugin
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
-            rulesClient,
+            alertingRulesClient: rulesClient,
+            alertingV2RulesClient,
             config: tuningConfig,
           });
         })();
         return queryClientPromise;
+      };
+
+      const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
+        const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
+        return alertingV2RulesClient;
       };
 
       const license = await licensing.getLicense();
@@ -249,6 +303,7 @@ export class StreamsPlugin
         inferenceClient,
         contentClient,
         getQueryClient,
+        getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
@@ -262,19 +317,23 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
+    const streamsKIsOnboardingClient = plugins.workflowsManagement
+      ? new StreamsKIsOnboardingClient({ managementApi: plugins.workflowsManagement.management })
+      : undefined;
+
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
+        agentContextLayer: plugins.agentContextLayer,
         getScopedClients,
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
+        streamsKIsOnboardingClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
-            const soClient = coreStart.savedObjects.createInternalRepository();
-            const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+            return await isSignificantEventsMemoryEnabled(coreStart.featureFlags);
           } catch {
             return false;
           }
@@ -290,12 +349,15 @@ export class StreamsPlugin
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
-    if (plugins.workflowsManagement) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
-        this.logger,
-        plugins.workflowsManagement.management
-      );
+    if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
+      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
+        logger: this.logger,
+        managementApi: plugins.workflowsManagement.management,
+        streamsKIsOnboardingClient,
+      });
     }
+
+    plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
     taskService.registerTasks({
       getScopedClients,
@@ -372,6 +434,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
+        streamsKIsOnboardingClient,
       },
       core,
       logger: this.logger,
@@ -380,7 +443,9 @@ export class StreamsPlugin
 
     registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
 
-    registerFeatureFlags(core, this.logger);
+    registerFeatureFlags(core, this.logger, {
+      isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
+    });
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
@@ -521,6 +586,17 @@ export class StreamsPlugin
       );
     });
 
+    initializeKnowledgeIndicatorsTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize knowledge indicators template: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -566,9 +642,34 @@ export class StreamsPlugin
       };
     }
 
+    if (plugins.workflowsExtensions) {
+      void this.installManagedWorkflows(plugins.workflowsExtensions);
+    }
+
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
+  }
+
+  private async installManagedWorkflows(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+  ): Promise<void> {
+    try {
+      const client = await workflowsExtensions.initManagedWorkflowsClient(
+        STREAMS_MANAGED_WORKFLOW_OWNER
+      );
+
+      await installWorkflows({ client });
+      this.logger.info('Streams managed workflows installed');
+
+      await client.ready();
+    } catch (error) {
+      this.logger.warn(
+        `Failed to install streams managed workflows: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   public async stop() {

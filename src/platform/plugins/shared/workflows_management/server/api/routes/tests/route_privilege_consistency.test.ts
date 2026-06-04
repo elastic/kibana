@@ -88,6 +88,11 @@ const PRIVILEGE_SCOPE: Record<string, PrivilegeScope> = {
     writes: [WORKFLOWS_INDEX],
     delegates: [],
   },
+  [WorkflowsManagementApiActions.updateManaged]: {
+    reads: [],
+    writes: [WORKFLOWS_INDEX],
+    delegates: [],
+  },
   [WorkflowsManagementApiActions.delete]: {
     reads: [],
     writes: [WORKFLOWS_INDEX],
@@ -116,6 +121,7 @@ const PRIVILEGE_SCOPE: Record<string, PrivilegeScope> = {
  */
 const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   'PUT:/api/workflows/workflow/{id}': [WORKFLOWS_INDEX],
+  'PUT:/api/workflows/managed/workflow/{id}': [WORKFLOWS_INDEX],
   'DELETE:/api/workflows/workflow/{id}': [WORKFLOWS_INDEX],
   'DELETE:/api/workflows': [WORKFLOWS_INDEX],
   // ID collision detection during single create (see WorkflowsService.resolveUniqueWorkflowIds / getWorkflow)
@@ -233,6 +239,10 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   'GET:/api/workflows/workflow/{id}': { params: { id: 'test-workflow-id' } },
   'POST:/api/workflows/workflow': { body: { yaml: 'name: Test\nenabled: true' } },
   'PUT:/api/workflows/workflow/{id}': {
+    params: { id: 'test-workflow-id' },
+    body: { yaml: 'name: Updated\nenabled: true' },
+  },
+  'PUT:/api/workflows/managed/workflow/{id}': {
     params: { id: 'test-workflow-id' },
     body: { yaml: 'name: Updated\nenabled: true' },
   },

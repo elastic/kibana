@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, SIDE_PANEL_CONTENT_GAP } from '@kbn/ui-chrome-layout-constants';
 
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';

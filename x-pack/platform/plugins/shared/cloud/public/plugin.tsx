@@ -32,7 +32,9 @@ export interface CloudConfigType {
   profile_url?: string;
   deployments_url?: string;
   deployment_url?: string;
+  create_deployment_url?: string;
   projects_url?: string;
+  create_project_url?: string;
   billing_url?: string;
   organization_url?: string;
   users_and_roles_url?: string;
@@ -40,6 +42,9 @@ export interface CloudConfigType {
   trial_end_date?: string;
   isSaasContainer?: boolean;
   is_elastic_staff_owned?: boolean;
+  managed_otlp?: {
+    url?: string;
+  };
   onboarding?: {
     default_solution?: string;
   };
@@ -95,6 +100,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
+      },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },
@@ -165,6 +173,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         organizationInTrial: this.config.serverless?.in_trial,
       },
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
+      },
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),

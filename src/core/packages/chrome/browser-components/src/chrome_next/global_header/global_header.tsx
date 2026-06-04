@@ -8,11 +8,19 @@
  */
 
 import React from 'react';
-import { ChromeNextGlobalHeaderShell } from './global_header_shell';
 import { ChromeNextGlobalHeaderLogo } from './global_header_logo';
+import { SearchButton } from './search_button';
+import { HelpButton } from './help_button';
+import { ChromeNextGlobalHeaderShell } from './global_header_shell';
+import { useContextSwitcher } from '../../shared/chrome_hooks';
 
 export const ChromeNextGlobalHeader = React.memo(() => (
-  <ChromeNextGlobalHeaderShell logo={<ChromeNextGlobalHeaderLogo />} />
+  <ChromeNextGlobalHeaderShell
+    logo={<ChromeNextGlobalHeaderLogo />}
+    search={<SearchButton />}
+    help={<HelpButton />}
+    switcher={useContextSwitcher()}
+  />
 ));
 
 ChromeNextGlobalHeader.displayName = 'ChromeNextGlobalHeader';

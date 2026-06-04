@@ -34,11 +34,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const handleRuleDelete = () => {
     setShowDeleteConfirmation(false);
-    deleteRule(rule.id, {
-      onSuccess: () => {
-        history.push('/');
-      },
-    });
+    deleteRule(
+      { id: rule.id, name: rule.metadata.name },
+      {
+        onSuccess: () => {
+          history.push('/');
+        },
+      }
+    );
   };
 
   return (
