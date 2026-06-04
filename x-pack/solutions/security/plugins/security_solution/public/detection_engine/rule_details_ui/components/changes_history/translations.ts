@@ -20,3 +20,17 @@ export const CLOSE_VERSION_HISTORY = i18n.translate(
     defaultMessage: 'Close version history',
   }
 );
+
+export const NO_CHANGE_HISTORY_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.noChangeHistoryTitle',
+  {
+    defaultMessage: 'No changes have been recorded for this rule yet.',
+  }
+);
+
+export const NO_CHANGE_HISTORY_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.noChangeHistoryBody',
+  {
+    defaultMessage: 'Subsequent edits will appear here.',
+  }
+);

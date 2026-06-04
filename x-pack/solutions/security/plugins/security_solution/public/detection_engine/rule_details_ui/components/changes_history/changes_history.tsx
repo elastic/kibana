@@ -9,16 +9,19 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiImage,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import noChangeHistoryImg from './images/no_change_history.png';
 import { SecurityPageName } from '../../../../app/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -31,6 +34,7 @@ import { RuleChangesDiff } from '../changes_diff/changes_diff';
 import * as i18n from './translations';
 
 const SIDEBAR_WIDTH = 400;
+const NO_HISTORY_IMG_SIZE = 128;
 
 interface RuleChangesHistoryProps {
   header?: React.ReactNode;
@@ -103,6 +107,28 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     }),
     [euiTheme]
   );
+
+  const hasNoHistory = !isLoading && items.length === 0;
+
+  if (hasNoHistory) {
+    return (
+      <div css={styles.mainCss}>
+        {header}
+        <EuiEmptyPrompt
+          icon={
+            <EuiImage
+              src={noChangeHistoryImg}
+              size={NO_HISTORY_IMG_SIZE}
+              alt={i18n.NO_CHANGE_HISTORY_TITLE}
+            />
+          }
+          title={<h2>{i18n.NO_CHANGE_HISTORY_TITLE}</h2>}
+          body={<p>{i18n.NO_CHANGE_HISTORY_BODY}</p>}
+          data-test-subj="ruleChangesHistoryEmpty"
+        />
+      </div>
+    );
+  }
 
   return (
     <>
