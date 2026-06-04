@@ -45,10 +45,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
         await discover.createNewTab();
         await discover.waitUntilTabIsLoaded();
 
-        await discover.createDataViewFromSearchBar({
-          name: 'logsta',
-          hasTimeField: true,
-        });
+        await discover.createDataViewFromSearchBar({ name: 'logsta' });
         await discover.waitUntilTabIsLoaded();
 
         await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpeg' });
@@ -103,7 +100,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
 
     await spaceTest.step('tab 0: create an ad hoc data view from the search bar', async () => {
       expect(await discover.getCurrentQueryMode()).toBe('classic');
-      await discover.createDataViewFromSearchBar({ name: 'logst', hasTimeField: true });
+      await discover.createDataViewFromSearchBar({ name: 'logst' });
     });
 
     await spaceTest.step(

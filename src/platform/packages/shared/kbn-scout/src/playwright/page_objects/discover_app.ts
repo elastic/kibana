@@ -12,7 +12,6 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
-import { EuiComboBoxWrapper } from '../eui_components';
 import { DataViewEditorPage } from './data_view_editor_page';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
@@ -28,10 +27,6 @@ export interface DataViewOptions {
   name: string;
   /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
   adHoc?: boolean;
-  /** Whether the data view has a timestamp field; when false, "no time filter" is selected. */
-  hasTimeField?: boolean;
-  /** Optionally override the default timestamp field (only applies when `hasTimeField` is true). */
-  changeTimestampField?: string;
 }
 
 /**
@@ -120,28 +115,7 @@ export class DiscoverApp {
     return (await this.getSelectedDataView().innerText()).trim();
   }
 
-  /**
-   * Selects the "no time filter" option for the timestamp field in the open data
-   * view editor flyout, so the created data view has no time field.
-   */
-  async selectNoTimeFieldInDataViewEditor() {
-    await this.setTimestampFieldInDataViewEditor("--- I don't want to use the time filter ---");
-  }
-
-  /**
-   * Selects an option in the open data view editor's timestamp field combo box.
-   */
-  private async setTimestampFieldInDataViewEditor(value: string) {
-    const timestampField = new EuiComboBoxWrapper(this.page, 'timestampField');
-    await timestampField.selectSingleOption(value);
-  }
-
-  private async fillAndSubmitDataViewEditor({
-    name,
-    adHoc = false,
-    hasTimeField = false,
-    changeTimestampField,
-  }: DataViewOptions) {
+  private async fillAndSubmitDataViewEditor({ name, adHoc = false }: DataViewOptions) {
     const editor = new DataViewEditorPage(this.page);
     await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
 
@@ -150,11 +124,10 @@ export class DiscoverApp {
     // here to preserve that contract (`name`, `* will be added automatically`).
     await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
 
-    if (!hasTimeField) {
-      await this.selectNoTimeFieldInDataViewEditor();
-    } else if (changeTimestampField) {
-      await this.setTimestampFieldInDataViewEditor(changeTimestampField);
-    }
+    // FTR `dataViews.create()` — wait for timestamp options; default @timestamp applies.
+    await editor.timestampField
+      .and(this.page.locator('[data-is-loading="0"]'))
+      .waitFor({ state: 'visible', timeout: 30_000 });
 
     if (adHoc) {
       await this.page.testSubj.click('exploreIndexPatternButton');
@@ -163,25 +136,6 @@ export class DiscoverApp {
       await editor.save();
     }
 
-    await this.waitUntilTabIsLoaded();
-  }
-
-  /**
-   * Creates a new data view from the Discover "no data views" empty state by
-   * clicking its create button. The editor appends `*` to the title
-   * automatically.
-   */
-  async createDataViewFromPrompt(options: DataViewOptions) {
-    await this.page.testSubj.click('createDataViewButton');
-    await this.fillAndSubmitDataViewEditor(options);
-  }
-
-  /**
-   * Enters ES|QL mode from the Discover "no data views" empty-state prompt
-   * (the `tryESQLLink` button) and waits for the tab to finish loading.
-   */
-  async enterEsqlModeFromPrompt() {
-    await this.page.testSubj.click('tryESQLLink');
     await this.waitUntilTabIsLoaded();
   }
 
@@ -197,7 +151,7 @@ export class DiscoverApp {
   }
 
   /** Locator for the unified-tabs tab bar (present when a data view is active). */
-  getTabsBar(): Locator {
+  private getTabsBar(): Locator {
     return this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBar);
   }
 
@@ -206,16 +160,6 @@ export class DiscoverApp {
     return this.getTabsBar().locator(
       `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`
     );
-  }
-
-  /** Locator for the Discover "no data views" empty-state prompt. */
-  getNoDataViewsPrompt(): Locator {
-    return this.page.testSubj.locator('noDataViewsPrompt');
-  }
-
-  /** Number of rendered rows in the Discover document grid. */
-  async getDocTableRowCount(): Promise<number> {
-    return this.page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]').count();
   }
 
   private async clickAppMenuItem(
