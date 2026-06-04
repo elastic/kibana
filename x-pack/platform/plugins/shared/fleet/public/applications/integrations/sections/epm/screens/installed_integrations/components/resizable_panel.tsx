@@ -11,12 +11,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPortal,
+  EuiToolTip,
   useEuiPaddingCSS,
   useEuiTheme,
 } from '@elastic/eui';
 import { EuiResizableButton, EuiPanel, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 const getMouseOrTouchY = (
   e: TouchEvent | MouseEvent | React.MouseEvent | React.TouchEvent
@@ -120,10 +122,12 @@ export const ResizablePanelComponent: React.FunctionComponent<{
         position: fixed;
         padding: 0;
         bottom: 0;
+        left: ${layoutVar('application.left')};
         background: ${euiTheme.euiTheme.colors.backgroundBasePlain};
       `}
     >
       {topBar}
+
       <EuiResizableButton
         css={css`
           position: absolute;
@@ -178,38 +182,57 @@ export const ResizablePanel: React.FunctionComponent<{
         <EuiFlexGroup responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>
             {isCollapsed ? (
-              <EuiButtonIcon
-                key="chevronSingleUp"
-                iconType="chevronSingleUp"
-                aria-label={i18n.translate(
-                  'xpack.fleet.integrationsResizablePanel.collapseButton',
-                  { defaultMessage: 'Collapse panel' }
-                )}
-                color="text"
-                onClick={toggleCollpase}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.integrationsResizablePanel.collapseButton', {
+                  defaultMessage: 'Collapse panel',
+                })}
+              >
+                <EuiButtonIcon
+                  key="chevronSingleUp"
+                  iconType="chevronSingleUp"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.integrationsResizablePanel.collapseButton',
+                    { defaultMessage: 'Collapse panel' }
+                  )}
+                  color="text"
+                  onClick={toggleCollpase}
+                />
+              </EuiToolTip>
             ) : (
-              <EuiButtonIcon
-                key="chevronSingleDown"
-                iconType="chevronSingleDown"
-                aria-label={i18n.translate(
-                  'xpack.fleet.integrationsResizablePanel.collapseButton',
-                  { defaultMessage: 'Collapse panel' }
-                )}
-                color="text"
-                onClick={toggleCollpase}
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.integrationsResizablePanel.collapseButton', {
+                  defaultMessage: 'Collapse panel',
+                })}
+              >
+                <EuiButtonIcon
+                  key="chevronSingleDown"
+                  iconType="chevronSingleDown"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.integrationsResizablePanel.collapseButton',
+                    { defaultMessage: 'Collapse panel' }
+                  )}
+                  color="text"
+                  onClick={toggleCollpase}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={i18n.translate('xpack.fleet.integrationsResizablePanel.closeButton', {
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.integrationsResizablePanel.closeButton', {
                 defaultMessage: 'Close panel',
               })}
-              color="text"
-              onClick={onClose}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={i18n.translate('xpack.fleet.integrationsResizablePanel.closeButton', {
+                  defaultMessage: 'Close panel',
+                })}
+                color="text"
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

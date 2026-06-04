@@ -434,6 +434,63 @@ describe('EvaluateMatchersStep', () => {
     });
   });
 
+  describe('top-level severity matching', () => {
+    it('matches on top-level severity when episode severity equals the matcher value', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', severity: 'critical' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when episode severity differs from the matcher value', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', severity: 'low' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('does not match and does not throw when episode has no severity', async () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1' });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "critical"',
+      });
+
+      const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('matches combined severity and rule conditions', async () => {
+      const episodes = [
+        createAlertEpisode({ rule_id: 'r1', severity: 'high' }),
+        createAlertEpisode({ rule_id: 'r1', severity: 'low' }),
+      ];
+      const rule = createRule({ id: 'r1', tags: ['production'] });
+      const policy = createActionPolicy({
+        id: 'p1',
+        matcher: 'severity: "high" and rule.tags: "production"',
+      });
+
+      const matched = await runStep(episodes, new Map([['r1', rule]]), new Map([['p1', policy]]));
+
+      expect(matched).toHaveLength(1);
+    });
+  });
+
   describe('single_rule policy filtering', () => {
     it('matches a single_rule policy when ruleId equals the episode rule', async () => {
       const episode = createAlertEpisode({ rule_id: 'r1' });

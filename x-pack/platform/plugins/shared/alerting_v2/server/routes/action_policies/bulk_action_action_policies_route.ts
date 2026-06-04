@@ -40,7 +40,7 @@ export class BulkActionActionPoliciesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => bulkActionActionPoliciesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the result of the bulk action on action policies.',
       },
       400: {
         body: () => errorResponseSchema,

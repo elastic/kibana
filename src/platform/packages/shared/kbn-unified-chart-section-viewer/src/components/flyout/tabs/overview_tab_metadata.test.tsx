@@ -31,7 +31,7 @@ jest.mock('../../../common/utils', () => ({
 describe('OverviewTabMetadata', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
     metricName: 'test.metric',
-    dataStream: 'test-data-stream',
+    indexName: 'test-data-stream',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     units: ['ms'],
     dimensionFields: [],
@@ -46,7 +46,7 @@ describe('OverviewTabMetadata', () => {
   describe('basic rendering', () => {
     it('renders the description list and hides the source row when no indexRow is provided', () => {
       const metricItem = createMockMetric({
-        dataStream: 'my-data-stream',
+        indexName: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
       });
       const { getByTestId, getByText, queryByText, queryByTestId } = render(
@@ -125,7 +125,7 @@ describe('OverviewTabMetadata', () => {
 
     it('omits the source row when indexRow is not provided', () => {
       const { queryByTestId, queryByText } = render(
-        <OverviewTabMetadata metricItem={createMockMetric({ dataStream: 'my-source' })} />
+        <OverviewTabMetadata metricItem={createMockMetric({ indexName: 'my-source' })} />
       );
 
       expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();

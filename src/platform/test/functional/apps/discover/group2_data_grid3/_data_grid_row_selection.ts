@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const security = getService('security');
@@ -36,9 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid row selection', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -56,9 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

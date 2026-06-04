@@ -37,14 +37,14 @@ jest.mock('../../queries/helpers', () => {
   };
 });
 
-const mockedSourcererDataView = {
+const mockedDataViewSpec = {
   title: 'test-*',
   fields: {},
 };
 
 describe('UserActivityPrivilegedUsersPanel', () => {
   it('renders panel title', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 
@@ -52,7 +52,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the toggle button group', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
     expect(
@@ -61,7 +61,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the stack by select with options', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 
@@ -78,7 +78,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the EsqlDashboardPanel', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 
@@ -86,7 +86,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('changes stack by option when select changes', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByDisplayValue('privileged_user')).toBeInTheDocument(); // Assert that input value before change
@@ -103,7 +103,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the "View all events by privileged users" link', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
+    render(<UserActivityPrivilegedUsersPanel dataViewSpec={mockedDataViewSpec} />, {
       wrapper: TestProviders,
     });
 

@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/alerting-comparators'
   - '@kbn/test'
   - '@kbn/scout'
-  - '@kbn/some-dev-log'
   - '@kbn/synthtrace'
   - '@kbn/agent-builder-common'
 tags:

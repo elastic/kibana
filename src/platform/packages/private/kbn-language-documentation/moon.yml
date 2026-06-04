@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/shared-ux-markdown'
   - '@kbn/licensing-types'
+  - '@kbn/esql-scripts'
 tags:
   - shared-common
   - package

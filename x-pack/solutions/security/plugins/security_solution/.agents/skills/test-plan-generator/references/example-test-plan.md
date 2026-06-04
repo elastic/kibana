@@ -1,6 +1,6 @@
 # Example Test Plan
 
-This file is a worked example of a correctly-formed test plan. Use it as a reference when generating plans — it shows the correct structure, scenario format, automation coverage lines, and summary table for a realistic Security Solution feature.
+This file is a worked example of a correctly-formed test plan for a **UI feature with a linked PR**. Use it as a reference when generating plans — it shows the correct structure, scenario format, automation coverage lines, and summary table for a realistic Security Solution feature. For a backend / parser feature without UI or a linked PR, see [`example-test-plan-backend.md`](example-test-plan-backend.md).
 
 The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** — every required section is present, optional sections are omitted because the fictional issue does not warrant them, and all self-review checks pass.
 
@@ -17,6 +17,7 @@ The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** �
 - A `Known Limitations` entry for an inaccessible source (no Figma)
 - A `Known Limitations` entry for a coverage gap (no API integration tests)
 - Optional sections (RBAC, upgrade, CCS, multi-space) omitted — the fictional issue does not mention them
+- An *Issue Clarity Assessment* section showing the canonical layout for a single-issue plan, with combined readability matching the per-issue score and no Actionable feedback bullets (the issue scored 4/5 and the Coverage Ratio is above 60%, so the bullets are intentionally omitted per the rules in [`output-formats.md`](output-formats.md#issue-clarity-assessment-section))
 - The footer with model identifier and date
 
 ---
@@ -213,6 +214,21 @@ And no note rows are rendered
 
 **P2 — run as capacity allows, limited blast radius:**
 - Note text at the maximum character limit is accepted
+
+---
+
+<details>
+<summary>📊 Issue Clarity Assessment</summary>
+
+| Issue | Type | Score | Critical gaps |
+|---|---|---|---|
+| #12345 (target) | Target | 4/5 | UI described in text but no Figma mockup available |
+
+**Combined readability: 4/5** — Single-issue plan with no parent or sub-issues; combined readability matches the per-issue score.
+
+**Issue Coverage Ratio: 5 / 6 scenarios (83%)** are derivable from issue text alone. The 10 000-character maximum was sourced from the PR diff; all other scenario facts derive from the issue body and its acceptance criteria.
+
+</details>
 
 ---
 

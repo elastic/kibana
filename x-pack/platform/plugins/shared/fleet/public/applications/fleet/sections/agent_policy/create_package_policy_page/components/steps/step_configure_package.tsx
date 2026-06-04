@@ -208,6 +208,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                         forceShowErrors={submitAttempted}
                         isEditPage={isEditPage}
                         isUpgrade={isUpgrade}
+                        isAgentless={deploymentMode === 'agentless'}
                         varGroupSelections={varGroupSelections}
                       />
                       <EuiHorizontalRule margin="m" />

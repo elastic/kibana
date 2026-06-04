@@ -12,12 +12,10 @@ import { PreviewTab } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 const mockDispatch = jest.fn();
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
@@ -32,9 +30,6 @@ jest.mock('react-redux', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseSignalIndex = useSignalIndex as jest.MockedFunction<typeof useSignalIndex>;
 
 describe('PreviewTab', () => {
@@ -66,11 +61,6 @@ describe('PreviewTab', () => {
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 
     mockUseSignalIndex.mockReturnValue({
       loading: false,

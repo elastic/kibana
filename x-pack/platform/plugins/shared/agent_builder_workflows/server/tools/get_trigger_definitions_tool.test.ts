@@ -7,16 +7,35 @@
 
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { builtInTriggerDefinitions } from '@kbn/workflows';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { z } from '@kbn/zod/v4';
 import { registerGetTriggerDefinitionsTool } from './get_trigger_definitions_tool';
+
+type GetRegisteredTriggersApi = Pick<
+  WorkflowsServerPluginSetup['management'],
+  'getRegisteredTriggers'
+>;
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
 
+const mockCasesTrigger = {
+  id: 'cases.caseUpdated',
+  eventSchema: z.object({
+    caseId: z.string(),
+    owner: z.string(),
+  }),
+};
+
 describe('registerGetTriggerDefinitionsTool', () => {
   let registeredTool: BuiltinToolDefinition;
+  let mockApi: jest.Mocked<GetRegisteredTriggersApi>;
 
   beforeEach(() => {
+    mockApi = {
+      getRegisteredTriggers: jest.fn().mockResolvedValue([mockCasesTrigger]),
+    };
+
     const agentBuilder = {
       tools: {
         register: jest.fn((tool: BuiltinToolDefinition) => {
@@ -24,60 +43,22 @@ describe('registerGetTriggerDefinitionsTool', () => {
         }),
       },
     } as any;
-    registerGetTriggerDefinitionsTool(agentBuilder);
+    registerGetTriggerDefinitionsTool(agentBuilder, mockApi);
   });
 
   it('registers with correct id', () => {
     expect(registeredTool.id).toBe('platform.workflows.get_trigger_definitions');
   });
 
-  it('returns all trigger types without filter', async () => {
-    const result = await invokeHandler(registeredTool, {}, {});
-    const data = result.results[0].data as any;
-    expect(data.count).toBe(builtInTriggerDefinitions.length);
-    expect(data.triggerTypes.length).toBe(builtInTriggerDefinitions.length);
-  });
+  it('wraps lookup result in agent builder tool response shape', async () => {
+    const result = await invokeHandler(registeredTool, { triggerType: 'manual' }, {});
 
-  it('returns jsonSchema and examples for each trigger', async () => {
-    const result = await invokeHandler(registeredTool, {}, {});
-    const data = result.results[0].data as any;
-    for (const trigger of data.triggerTypes) {
-      expect(trigger).toHaveProperty('id');
-      expect(trigger).toHaveProperty('label');
-      expect(trigger).toHaveProperty('description');
-      expect(trigger).toHaveProperty('jsonSchema');
-      expect(trigger).toHaveProperty('examples');
-      expect(trigger.examples.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('filters by triggerType', async () => {
-    const result = await invokeHandler(registeredTool, { triggerType: 'scheduled' }, {});
-    const data = result.results[0].data as any;
-    expect(data.count).toBe(1);
-    expect(data.triggerTypes[0].id).toBe('scheduled');
-  });
-
-  it('returns error for unknown trigger type', async () => {
-    const result = await invokeHandler(registeredTool, { triggerType: 'nonexistent' }, {});
-    const data = result.results[0].data as any;
-    expect(data.error).toContain('not found');
-    expect(data.availableTypes).toContain('manual');
-  });
-
-  it('compacts large enums like timezone names in the schema', async () => {
-    const result = await invokeHandler(registeredTool, { triggerType: 'scheduled' }, {});
-    const data = result.results[0].data as any;
-    const schemaStr = JSON.stringify(data.triggerTypes[0].jsonSchema);
-    expect(schemaStr).not.toContain('Pacific/Honolulu');
-    expect(schemaStr).toContain('allowed values');
-  });
-
-  it('returns results in expected shape', async () => {
-    const result = await invokeHandler(registeredTool, {}, {});
-    expect(result).toHaveProperty('results');
+    expect(mockApi.getRegisteredTriggers).toHaveBeenCalled();
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
-    expect(result.results[0]).toHaveProperty('data');
+    expect(result.results[0].data).toEqual({
+      count: 1,
+      triggerTypes: [expect.objectContaining({ id: 'manual' })],
+    });
   });
 });

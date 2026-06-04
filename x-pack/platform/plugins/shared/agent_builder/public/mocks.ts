@@ -35,6 +35,7 @@ export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> &
 const createAgentStartMock = (): AgentsServiceStartContractMock => {
   return {
     list: jest.fn(),
+    addSkillToAgent: jest.fn(),
   };
 };
 

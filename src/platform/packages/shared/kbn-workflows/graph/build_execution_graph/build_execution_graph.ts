@@ -459,6 +459,7 @@ function createSwitchGraph(
     stepId,
     stepType: switchStep.type,
     exitNodeId: exitSwitchNodeId,
+    templateDependencies: (switchStep.cases ?? []).map(({ match }) => match),
     configuration: {
       ...omit(switchStep, ['cases', 'default']),
     },

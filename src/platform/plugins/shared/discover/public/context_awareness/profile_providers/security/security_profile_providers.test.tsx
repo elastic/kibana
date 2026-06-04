@@ -24,7 +24,7 @@ const createRecord = (flattened: DataTableRecord['flattened']): DataTableRecord 
 
 const getDocViewerResult = (
   record: DataTableRecord,
-  actions: {
+  toolkitActions: {
     refreshData?: () => void;
   } = {}
 ) => {
@@ -40,8 +40,9 @@ const getDocViewerResult = (
   const prev = jest.fn().mockReturnValue(prevDocViewer);
   const getDocViewer = enhancedProvider.profile.getDocViewer!(prev, {
     context: { type: DocumentType.Default },
+    toolkit: { actions: toolkitActions },
   });
-  const result = getDocViewer({ actions, record } as Parameters<typeof getDocViewer>[0]);
+  const result = getDocViewer({ record } as Parameters<typeof getDocViewer>[0]);
   return { result, prevRenderHeader, prevRenderFooter };
 };
 

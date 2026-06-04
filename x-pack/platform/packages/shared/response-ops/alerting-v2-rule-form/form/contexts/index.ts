@@ -9,6 +9,7 @@ export {
   RuleFormProvider,
   useRuleFormServices,
   useRuleFormMeta,
+  NOOP_WORKFLOW_FORM,
   type RuleFormServices,
   type RuleFormMeta,
   type RuleFormLayout,

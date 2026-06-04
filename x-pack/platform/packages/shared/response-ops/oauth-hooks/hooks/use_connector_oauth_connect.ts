@@ -89,6 +89,7 @@ export const useConnectorOAuthConnect = ({
   onErrorRef.current = onError;
 
   const [isAwaitingCallback, setIsAwaitingCallback] = useState(false);
+  const pendingStateRef = useRef<string | undefined>();
 
   const handleAuthRedirect = useCallback(
     (authorizationUrl: string) => {
@@ -110,13 +111,14 @@ export const useConnectorOAuthConnect = ({
     StartOAuthFlowRequestBody
   >({
     mutationFn: (request) =>
-      http.post<{ authorizationUrl: string }>(
+      http.post<StartOAuthFlowResponse>(
         `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
           connectorId
         )}/_start_oauth_flow`,
         { body: JSON.stringify({ returnUrl: request.returnUrl }) }
       ),
-    onSuccess: ({ authorizationUrl }) => {
+    onSuccess: ({ authorizationUrl, state }) => {
+      pendingStateRef.current = state;
       setIsAwaitingCallback(true);
       handleAuthRedirect(authorizationUrl);
     },
@@ -126,6 +128,7 @@ export const useConnectorOAuthConnect = ({
   });
 
   const connect = useCallback(() => {
+    pendingStateRef.current = undefined;
     setIsAwaitingCallback(false);
     let resolvedReturnUrl: string | undefined;
     if (returnUrl) {
@@ -139,8 +142,21 @@ export const useConnectorOAuthConnect = ({
   }, [startOAuthFlow, redirectMode, returnUrl]);
 
   const cancelConnect = useCallback(() => {
+    const state = pendingStateRef.current;
+    pendingStateRef.current = undefined;
     setIsAwaitingCallback(false);
-  }, []);
+    if (state) {
+      // Fire-and-forget: best-effort server cancel; UI state is already reset above.
+      http
+        .post(
+          `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
+            connectorId
+          )}/_oauth_cancel`,
+          { body: JSON.stringify({ state }) }
+        )
+        .catch(() => {});
+    }
+  }, [http, connectorId]);
 
   // Handle OAuth callback timeout
   useEffect(() => {
@@ -149,6 +165,7 @@ export const useConnectorOAuthConnect = ({
     }
 
     const callbackTimeout = setTimeout(() => {
+      pendingStateRef.current = undefined;
       setIsAwaitingCallback(false);
       onErrorRef.current?.(
         new Error(
@@ -173,6 +190,7 @@ export const useConnectorOAuthConnect = ({
       if (event.data.connectorId !== connectorId) {
         return;
       }
+      pendingStateRef.current = undefined;
       if (event.data.status === OAuthAuthorizationStatus.Success) {
         onSuccessRef.current?.();
       } else {

@@ -16,7 +16,10 @@
     "@kbn/config-schema",
     "@kbn/feedback-registry",
     "@kbn/feedback-components",
-    "@kbn/core-http-router-server-mocks"
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-chrome-feature-flags",
+    "@kbn/react-kibana-mount",
+    "@kbn/i18n"
   ],
   "exclude": [
     "target/**/*",

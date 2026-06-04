@@ -339,18 +339,27 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async validateAttachmentsIfProvided(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
-  ): Promise<Attachment[] | undefined> {
+  ): Promise<AttachmentInput[] | undefined> {
     if (!attachments || attachments.length === 0) {
       return undefined;
     }
 
-    const validated: Attachment[] = [];
+    const validated: AttachmentInput[] = [];
     for (const attachment of attachments) {
       const result = await this.deps.attachmentsService.validate(attachment, request);
       if (!result.valid) {
         throw createBadRequestError(`Attachment validation failed: ${result.error}`);
       }
-      validated.push(result.attachment as Attachment);
+      const a = result.attachment as Attachment;
+      validated.push({
+        id: a.id,
+        type: a.type,
+        data: a.data,
+        ...(a.description !== undefined ? { description: a.description } : {}),
+        ...(a.hidden !== undefined ? { hidden: a.hidden } : {}),
+        ...(a.origin !== undefined ? { origin: a.origin } : {}),
+        ...(a.groupId !== undefined ? { group_id: a.groupId } : {}),
+      });
     }
 
     return validated;

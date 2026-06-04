@@ -64,7 +64,7 @@ export function serviceMapMultiEnv({
     .instance('staging-cache-1');
 
   return range
-    .interval('1s')
+    .interval('2m')
     .rate(1)
     .generator((timestamp) => [
       serviceProduction

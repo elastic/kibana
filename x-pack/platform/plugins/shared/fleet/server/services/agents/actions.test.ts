@@ -13,6 +13,10 @@ import { createAppContextStartContractMock, type MockedFleetAppContext } from '.
 import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
 
+import { agentPolicyService } from '../agent_policy';
+
+import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../../common/constants';
+
 import {
   bulkCreateAgentActionResults,
   bulkCreateAgentActions,
@@ -21,14 +25,18 @@ import {
   getAgentsByActionsIds,
   transformDataSecrets,
 } from './actions';
+
 import { bulkUpdateAgents } from './crud';
 
 jest.mock('./crud');
 jest.mock('../audit_logging');
+jest.mock('../agent_policy');
 jest.mock('../secrets', () => ({
   isActionSecretStorageEnabled: jest.fn(),
   toCompiledSecretRef: jest.fn((id: string) => `$co.elastic.secret{${id}}`),
 }));
+
+const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -315,6 +323,10 @@ describe('Agent actions', () => {
   });
 
   describe('cancelAgentAction', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should throw if the target action is not found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       esClient.search.mockResolvedValue({
@@ -404,6 +416,312 @@ describe('Agent actions', () => {
         ],
         {}
       );
+    });
+
+    it('should create a CANCEL action for a scheduled UNENROLL action', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      // 1: find UNENROLL action
+      // 2: look up agent policy_ids from .fleet-agents
+      // 3: concurrent-batch re-query
+      // 4: look up other pending scheduled UNENROLL batches (cancelPendingBatches)
+      esClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'unenroll-action-1',
+                  agents: ['agent1', 'agent2'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [{ _source: { policy_id: 'policy-1' } }, { _source: { policy_id: 'policy-1' } }],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'unenroll-action-1',
+                  agents: ['agent1', 'agent2'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any); // no other pending batches
+
+      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
+
+      expect(esClient.create).toBeCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            type: 'CANCEL',
+            data: { target_id: 'unenroll-action-1' },
+            agents: ['agent1', 'agent2'],
+          }),
+        })
+      );
+    });
+
+    it('should NOT call bulkUpdateAgents (updateAgentsToHealthy) when cancelling UNENROLL', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'unenroll-action-1',
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any) // agent policy lookup (no policy_id found)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'unenroll-action-1',
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                },
+              },
+            ],
+          },
+        } as any);
+      // No policy IDs found so cancel-other-batches step is skipped (no searches 4/5)
+
+      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'unenroll-action-1');
+
+      expect(mockedBulkUpdateAgents).not.toBeCalled();
+    });
+
+    it('should disable unenroll_timeout on the agent policy when cancelling UNENROLL', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const scheduledActionId = `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}test-action-1`;
+      esClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: scheduledActionId,
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: { policy_id: 'policy-abc' } }] },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: scheduledActionId,
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any); // no other pending batches
+
+      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, scheduledActionId);
+
+      expect(mockedAgentPolicyService.update).toHaveBeenCalledWith(
+        soClient,
+        expect.anything(),
+        'policy-abc',
+        { unenroll_timeout: 0 }
+      );
+    });
+
+    it('should cancel other pending scheduled UNENROLL batches for the same policy', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'ScheduledUnenrollInactiveAgents-batch-1',
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: { policy_id: 'policy-abc' } }] },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'ScheduledUnenrollInactiveAgents-batch-1',
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  // batch-2 shares agent1 with batch-1, so the in-memory intersection matches
+                  action_id: 'ScheduledUnenrollInactiveAgents-batch-2',
+                  agents: ['agent1', 'agent2'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                  start_time: '2099-05-12T18:00:00.000Z',
+                },
+              },
+            ],
+          },
+        } as any); // another pending batch for same policy
+
+      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'ScheduledUnenrollInactiveAgents-batch-1');
+
+      // Should have created two CANCEL actions: one for batch-1, one for batch-2
+      expect(esClient.create).toHaveBeenCalledTimes(2);
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            type: 'CANCEL',
+            data: { target_id: 'ScheduledUnenrollInactiveAgents-batch-2' },
+          }),
+        })
+      );
+    });
+
+    it('should NOT call cancelPendingBatches or agentPolicyService.update when cancelling a manual (non-prefixed) UNENROLL', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      // 1: find UNENROLL action (non-prefixed action_id — manual unenrollment)
+      // 2: agent policy lookup
+      // 3: concurrent-batch re-query
+      esClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'manual-unenroll-action-1',
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                },
+              },
+            ],
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: { policy_id: 'policy-abc' } }] },
+        } as any)
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: 'UNENROLL',
+                  action_id: 'manual-unenroll-action-1',
+                  agents: ['agent1'],
+                  expiration: '2099-05-12T18:16:18.019Z',
+                },
+              },
+            ],
+          },
+        } as any);
+      // No searches 4/5 — cancelPendingBatches must NOT be called
+
+      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'manual-unenroll-action-1');
+
+      // CANCEL action is still created (cancellation itself works)
+      expect(esClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            type: 'CANCEL',
+            data: { target_id: 'manual-unenroll-action-1' },
+          }),
+        })
+      );
+      // Side effects are skipped because the action ID lacks the scheduled prefix
+      expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
+      // Only 3 searches (find action, policy lookup, concurrent re-query) — no cancelPendingBatches searches
+      expect(esClient.search).toHaveBeenCalledTimes(3);
+    });
+
+    it('should NOT call agentPolicyService.update when cancelling UPGRADE', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                type: 'UPGRADE',
+                action_id: 'action1',
+                agents: ['agent1'],
+                expiration: '2022-05-12T18:16:18.019Z',
+              },
+            },
+          ],
+        },
+      } as any);
+
+      mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'action1');
+
+      expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
     });
   });
 

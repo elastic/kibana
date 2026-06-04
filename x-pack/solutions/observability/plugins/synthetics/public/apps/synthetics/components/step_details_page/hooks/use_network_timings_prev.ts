@@ -20,8 +20,9 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useGetUrlParams } from '../../../hooks';
 import { getTimingWithLabels } from './use_network_timings';
 
 export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
@@ -54,6 +55,9 @@ export const useNetworkTimingsPrevious24Hours = (
 
   const timestamp = timestampArg ?? currentStep?.['@timestamp'];
 
+  const { remoteName } = useGetUrlParams();
+  const index = getSyntheticsCcsIndex(remoteName);
+
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
       ...acc,
@@ -66,7 +70,7 @@ export const useNetworkTimingsPrevious24Hours = (
 
   const { data, loading } = useReduxEsSearch(
     {
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       runtime_mappings: runTimeMappings,
       query: {
@@ -156,7 +160,7 @@ export const useNetworkTimingsPrevious24Hours = (
         },
       },
     },
-    [],
+    [remoteName],
     {
       name: `stepNetworkPreviousTimings/${configId}/${checkGroupId}/${stepIndex}`,
       isRequestReady: Boolean(timestamp),

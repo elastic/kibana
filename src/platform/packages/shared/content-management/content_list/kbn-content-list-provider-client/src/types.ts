@@ -8,9 +8,15 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { ContentListFeatures, ContentListServices } from '@kbn/content-list-provider';
+import type {
+  ContentListFeatures,
+  ContentListServices,
+  SortingConfig,
+} from '@kbn/content-list-provider';
 import type { ContentEditorKibanaDependencies } from '@kbn/content-management-content-editor';
 import type { ContentEditorConfig } from './content_editor';
+import type { ContentListFilterMap } from './filters';
+import type { ContentListSortFieldConfig } from './sorting';
 
 /**
  * Kibana `CoreStart` slice required by {@link ContentEditorKibanaProvider}.
@@ -43,11 +49,24 @@ export interface ContentListClientServices extends ContentListServices {
 /**
  * Feature configuration for {@link ContentListClientProvider}.
  */
-export interface ContentListClientFeatures extends Omit<ContentListFeatures, 'contentEditor'> {
+export type ContentListFilterConfig =
+  | ContentListFilterMap
+  | ((defaults: ContentListFilterMap) => ContentListFilterMap);
+
+export interface ContentListClientSortingConfig extends Omit<SortingConfig, 'fields'> {
+  fields?: SortingConfig['fields'] | ContentListSortFieldConfig;
+}
+
+export interface ContentListClientFeatures
+  extends Omit<ContentListFeatures, 'contentEditor' | 'sorting' | 'toolbarFilters'> {
   /**
    * Content editor (metadata editing flyout) feature configuration.
    */
   contentEditor?: ContentEditorConfig;
+  /** Client-side custom filters keyed by filter id. */
+  filters?: ContentListFilterConfig;
+  /** Sorting configuration with client-side custom sort field support. */
+  sorting?: boolean | ContentListClientSortingConfig;
 }
 
 /**

@@ -17,9 +17,13 @@ import { useCollectorsSessionState } from './use_session_state';
 
 interface UseCollectorsListOptions {
   refetchInterval: number | false;
+  enabled?: boolean;
 }
 
-export const useCollectorsList = ({ refetchInterval }: UseCollectorsListOptions) => {
+export const useCollectorsList = ({
+  refetchInterval,
+  enabled = true,
+}: UseCollectorsListOptions) => {
   const { kuery: userKuery, pageIndex } = useCollectorsUrlFilters();
   const setUrlFilters = useSetCollectorsUrlFilters();
   const { pageSize, setPageSize } = useCollectorsSessionState();
@@ -29,7 +33,7 @@ export const useCollectorsList = ({ refetchInterval }: UseCollectorsListOptions)
 
   const { data, isLoading, isInitialLoading, isError, error, dataUpdatedAt } = useGetAgentsQuery(
     { kuery, page: pageIndex + 1, perPage: pageSize, showInactive: false },
-    { refetchInterval, keepPreviousData: true }
+    { enabled, refetchInterval, keepPreviousData: true }
   );
 
   const onTableChange = useCallback(

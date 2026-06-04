@@ -30,7 +30,7 @@ const createTestState = () => ({
   prompt: {
     responses: {
       'tools.my-tool.confirmation': {
-        type: AgentPromptType.confirmation,
+        type: AgentPromptType.confirmation as const,
         response: { allow: true },
       },
     },

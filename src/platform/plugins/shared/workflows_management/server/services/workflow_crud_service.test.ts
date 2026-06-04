@@ -74,7 +74,38 @@ const makeDeps = (
   return { deps, client };
 };
 
+const lightweightWorkflowYaml = [
+  'name: My Workflow',
+  'enabled: true',
+  'triggers:',
+  '  - type: manual',
+  'steps:',
+  '  - name: step-one',
+  '    type: console',
+  '    with:',
+  '      message: "hi"',
+].join('\n');
+
 describe('WorkflowCrudService', () => {
+  describe('prepareWorkflowDocumentForStorage', () => {
+    it('uses lightweight validation only when explicitly requested', async () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowCrudService(deps);
+
+      await service.prepareWorkflowDocumentForStorage({
+        id: 'managed-workflow',
+        yaml: lightweightWorkflowYaml,
+        actor: 'system',
+        lightweightValidation: true,
+        now: new Date('2024-01-01T00:00:00.000Z'),
+        spaceId: 'default',
+        request: { auth: { credentials: { username: 'alice' } } } as any,
+      });
+
+      expect(deps.validationService.getWorkflowZodSchema).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getWorkflow', () => {
     it('returns WorkflowDetailDto for existing workflow', async () => {
       const source = makeSource();
@@ -335,6 +366,26 @@ describe('WorkflowCrudService', () => {
           document: expect.objectContaining({
             name: 'My Workflow',
             spaceId: 'default',
+          }),
+        })
+      );
+    });
+
+    it('does not generate a reserved workflow ID from the YAML name', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const reservedNameYaml = validYaml.replace('name: My Workflow', 'name: system-workflow Copy');
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.createWorkflow({ yaml: reservedNameYaml }, 'default', request);
+
+      expect(result.id).toBe('workflow-system-workflow-copy');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow-system-workflow-copy',
+          op_type: 'create',
+          document: expect.objectContaining({
+            name: 'system-workflow Copy',
           }),
         })
       );

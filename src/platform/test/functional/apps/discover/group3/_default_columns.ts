@@ -30,9 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover default columns', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
       );
@@ -53,9 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'

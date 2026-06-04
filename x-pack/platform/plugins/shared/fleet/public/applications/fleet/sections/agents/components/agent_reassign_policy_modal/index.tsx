@@ -70,6 +70,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   }, [agentPolicies, selectedAgentPolicyId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasInvalidPolicySearch, setHasInvalidPolicySearch] = useState(false);
   async function onSubmit() {
     try {
       setIsSubmitting(true);
@@ -125,6 +126,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       confirmButtonDisabled={
         isSubmitting ||
         !selectedAgentPolicyId ||
+        hasInvalidPolicySearch ||
         (isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id)
       }
       confirmButtonText={
@@ -162,12 +164,16 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
                 label: agentPolicy.name,
               }))}
               singleSelection
+              isInvalid={hasInvalidPolicySearch}
               onChange={(newOptions) => {
                 if (newOptions.length) {
                   setSelectedAgentPolicyId(newOptions[0].key);
                 } else {
                   setSelectedAgentPolicyId(undefined);
                 }
+              }}
+              onSearchChange={(value, hasMatchingOptions) => {
+                setHasInvalidPolicySearch(!!value && !hasMatchingOptions);
               }}
               selectedOptions={
                 selectedAgentPolicyId

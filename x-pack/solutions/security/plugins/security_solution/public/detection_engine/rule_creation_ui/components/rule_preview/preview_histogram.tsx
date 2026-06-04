@@ -193,7 +193,7 @@ const PreviewHistogramComponent = ({
           renderCellValue={PreviewRenderCellValue}
           rowRenderers={defaultRowRenderers}
           start={startDate}
-          sourcererScope={PageScope.alerts}
+          pageScope={PageScope.alerts}
           indexNames={[`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]}
           bulkActions={false}
         />

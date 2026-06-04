@@ -26,7 +26,7 @@ export async function fetchRuleVersionsTriad({
   versionSpecifiers,
   filter,
 }: GetRuleVersionsMapArgs): Promise<Map<string, RuleVersions>> {
-  const [currentRules, latestRules] = await Promise.all([
+  const [currentRules, latestRulesFetch] = await Promise.all([
     versionSpecifiers
       ? ruleObjectsClient.fetchInstalledRulesByIds({
           ruleIds: versionSpecifiers.map(({ rule_id: ruleId }) => ruleId),
@@ -40,6 +40,7 @@ export async function fetchRuleVersionsTriad({
       ? ruleAssetsClient.fetchAssetsByVersion(versionSpecifiers)
       : ruleAssetsClient.fetchLatestAssets(),
   ]);
-  const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
+  const latestRules = Array.isArray(latestRulesFetch) ? latestRulesFetch : latestRulesFetch.assets;
+  const { assets: baseRules } = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
   return zipRuleVersions(currentRules, baseRules, latestRules);
 }

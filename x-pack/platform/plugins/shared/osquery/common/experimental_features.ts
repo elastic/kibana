@@ -30,6 +30,15 @@ export const allowedExperimentalValues = Object.freeze({
    * for downloading osquery results as NDJSON, JSON, or CSV files.
    */
   exportResults: false,
+  /**
+   * Enables RFC 5545 RRULE-based recurrence scheduling for packs and pack queries
+   * as an alternative to native interval-based scheduling. When enabled, the
+   * pack form and pack query flyout expose a Schedule section, the API accepts
+   * `schedule_type` / `interval` (pack-level) / `rrule_schedule` fields, and the
+   * Fleet config fans the pack-level schedule onto each query that doesn't have
+   * its own override. Requires osquerybeat with RRULE support.
+   */
+  rruleScheduling: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

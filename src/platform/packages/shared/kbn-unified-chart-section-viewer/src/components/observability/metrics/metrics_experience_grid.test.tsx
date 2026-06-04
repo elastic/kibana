@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
@@ -23,6 +24,11 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EsqlResponseError } from '../../../common/errors/esql_response_error';
+import {
+  ExternalServicesProvider,
+  type ExternalServices,
+} from '../../../context/external_services';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
@@ -48,6 +54,83 @@ jest.mock('./metrics_experience_grid_content', () => ({
     <div data-test-subj="metricsExperienceGridContent" />
   )),
 }));
+
+// Simplified ToolbarSelector so dimension options are clickable in JSDOM without
+// needing EUI portals or keyboard simulation.
+jest.mock('@kbn/shared-ux-toolbar-selector', () => {
+  const actual = jest.requireActual('@kbn/shared-ux-toolbar-selector');
+  return {
+    ...actual,
+    ToolbarSelector: ({
+      options,
+      onChange,
+      buttonLabel,
+      'data-test-subj': dataTestSubj,
+      singleSelection,
+    }: {
+      options: any[];
+      onChange?: (option: any) => void;
+      buttonLabel: React.ReactNode;
+      'data-test-subj'?: string;
+      singleSelection?: boolean;
+    }) => {
+      const handleOptionClick = (clickedOption: any) => {
+        if (clickedOption.disabled) return;
+        if (singleSelection) {
+          onChange?.(clickedOption);
+          return;
+        }
+        const wasChecked = clickedOption.checked === 'on';
+        const nextSelected = options
+          .filter((opt) => {
+            if (opt.value === clickedOption.value) return !wasChecked;
+            return opt.checked === 'on';
+          })
+          .map((opt) => ({ ...opt, checked: 'on' }));
+        onChange?.(nextSelected);
+      };
+      return (
+        <div data-test-subj={dataTestSubj}>
+          <div data-test-subj={`${dataTestSubj}Button`}>{buttonLabel}</div>
+          <div data-test-subj={`${dataTestSubj}Popover`}>
+            {options.map((option) => (
+              <div
+                key={option.key ?? option.value}
+                data-test-subj={`${dataTestSubj}Option-${option.value}`}
+                data-checked={option.checked}
+                onClick={() => handleOptionClick(option)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOptionClick(option);
+                  }
+                }}
+                role="option"
+                aria-selected={option.checked === 'on'}
+                tabIndex={option.disabled ? -1 : 0}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    },
+  };
+});
+
+// Make lodash debounce synchronous so dimension-change callbacks fire in act().
+jest.mock('lodash', () => {
+  const actual = jest.requireActual('lodash');
+  return {
+    ...actual,
+    debounce: (fn: any) => {
+      const debounced = (...args: any[]) => fn(...args);
+      debounced.cancel = jest.fn();
+      return debounced;
+    },
+  };
+});
 
 /**
  * Mock EuiDelayRender to render immediately in tests.
@@ -83,12 +166,28 @@ const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as j
   typeof hooks.useDiscoverFieldForBreakdown
 >;
 
+const TestWrapper = ({
+  children,
+  externalServices,
+}: {
+  children: React.ReactNode;
+  externalServices?: ExternalServices;
+}) => (
+  <EuiProvider highContrastMode={false}>
+    <IntlProvider locale="en">
+      <ExternalServicesProvider externalServices={externalServices}>
+        {children}
+      </ExternalServicesProvider>
+    </IntlProvider>
+  </EuiProvider>
+);
+
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
     dimensionFields: [dimensions[0]],
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [],
     metricTypes: [],
     fieldTypes: [],
@@ -96,7 +195,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field2',
     dimensionFields: [dimensions[1]],
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [],
     metricTypes: [],
     fieldTypes: [],
@@ -197,7 +296,55 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
-  it('renders only the METRICS_INFO error state when fetch fails', () => {
+  it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: new Error('Network error'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    expect(getByTestId('discoverErrorCalloutTitle')).toHaveTextContent(
+      'Unable to retrieve search results'
+    );
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent('Network error');
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+  });
+
+  it('renders Discover ErrorCallout with embedded ES|QL error message (HTTP 200 + error body)', () => {
+    const embeddedError = new EsqlResponseError(
+      {
+        type: 'illegal_argument_exception',
+        reason: 'Unknown column [bad.field]',
+      },
+      { status: 400 }
+    );
+
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: embeddedError,
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent(
+      'illegal_argument_exception: Unknown column [bad.field]'
+    );
+  });
+
+  it('renders ES|QL reference link when externalServices provides docLinks', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
@@ -207,16 +354,26 @@ describe('MetricsExperienceGrid', () => {
     });
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
-    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: ({ children }) => (
+        <TestWrapper
+          externalServices={
+            {
+              docLinks: {
+                links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
+              },
+            } as ExternalServices
+          }
+        >
+          {children}
+        </TestWrapper>
+      ),
     });
 
-    expect(getByTestId('metricsInfoError')).toBeInTheDocument();
-    expect(getByTestId('metricsInfoErrorTitle')).toHaveTextContent('Unable to load visualization');
-    expect(getByTestId('metricsInfoErrorDescription')).toHaveTextContent(
-      'trouble retrieving the information needed for this visualization'
+    expect(getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/reference/esql'
     );
-    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
   });
 
   it('does not render the METRICS_INFO error state for AbortError (shows chart grid instead)', () => {
@@ -236,7 +393,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
     expect(getByTestId('toggleActions')).toBeInTheDocument();
   });
 
@@ -254,7 +411,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
   });
 
@@ -426,6 +583,44 @@ describe('MetricsExperienceGrid', () => {
 
       expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
       expect(onBreakdownFieldChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onToolbarDimensionsChange', () => {
+    it('calls onDimensionsChange and onBreakdownFieldChange when user picks a dimension via the toolbar', () => {
+      const onPageChange = jest.fn();
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 2,
+        selectedDimensions: [],
+        onDimensionsChange,
+        onPageChange,
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      const { getByTestId } = render(
+        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        { wrapper: IntlProvider }
+      );
+
+      act(() => {
+        getByTestId('metricsExperienceBreakdownSelectorOption-foo').click();
+      });
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([dimensions[0]]);
+      // Page reset is now owned exclusively by useDiscoverFieldForBreakdown reacting
+      // to the breakdownField prop change — not by the toolbar handler directly.
+      expect(onPageChange).not.toHaveBeenCalled();
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith(dimensions[0].name);
     });
   });
 });

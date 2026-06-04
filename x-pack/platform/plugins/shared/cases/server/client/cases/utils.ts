@@ -92,8 +92,26 @@ export const getLatestPushInfo = (
   return null;
 };
 
-// Only used for comment and action attachments.
-// TODO: https://github.com/elastic/kibana/issues/262574
+/**
+ * Builds the connector-comment string that gets posted alongside the case to
+ * external incident systems (ServiceNow, Jira, Resilient, Swimlane).
+ *
+ * The legacy `actions` branch is intentionally absent: legacy `actions`
+ * attachments are projected to the unified `security.endpoint` shape on read
+ * (see `actionsAttachmentTransformer`), so they never surface here as
+ * `AttachmentType.actions`. The user-facing host-isolation comment now lives
+ * on the unified attachment's `data.content`, which the registry-hook
+ * redesign tracked in https://github.com/elastic/kibana/issues/262574 will
+ * surface to push-to-connector. Today host-isolation comments are not pushed
+ * (matches existing behavior for the `externalReference` + `endpoint` shape
+ * that has been in place since multi-EDR support landed).
+ *
+ * Likewise the `alert` branch below is currently unreachable because
+ * `formatComments` filters alerts out before this function is called; that
+ * dead code is preserved here intentionally as a placeholder for the same
+ * registry-hook redesign (#262574), which will fold both alert and unified
+ * attachment formatting into per-type registrations.
+ */
 const getCommentContent = (comment: AttachmentV2): string => {
   if (isLegacyAttachmentRequest(comment)) {
     if (comment.type === AttachmentType.user) {
@@ -101,17 +119,6 @@ const getCommentContent = (comment: AttachmentV2): string => {
     } else if (comment.type === AttachmentType.alert) {
       const ids = getAlertIds(comment);
       return `Alert with ids ${ids.join(', ')} added to case`;
-    } else if (
-      comment.type === AttachmentType.actions &&
-      (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
-    ) {
-      const firstHostname =
-        comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
-      const totalHosts = comment.actions.targets.length;
-      const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
-      const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
-
-      return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
     }
   }
 
@@ -272,10 +279,13 @@ export const formatComments = ({
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
-    (comment) =>
-      // We push only user's comments
-      (comment.type === AttachmentType.user || comment.type === AttachmentType.actions) &&
-      commentsIdsToBeUpdated.has(comment.id)
+    // We push only user-authored comments. `AttachmentType.actions` was dropped
+    // when legacy `actions` attachments were folded into `security.endpoint`
+    // (the unified type does not surface here as legacy `actions`). The
+    // registry-hook redesign tracked in
+    // https://github.com/elastic/kibana/issues/262574 will let unified
+    // attachment types opt into push-to-connector formatting.
+    (comment) => comment.type === AttachmentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
   let comments: ExternalServiceComment[] = [];

@@ -651,6 +651,23 @@ describe('params validation', () => {
       ...params,
     });
   });
+
+  test('params validation passes when form_data is provided', () => {
+    const params: Record<string, any> = {
+      form_data: {
+        file: {
+          content: 'hello world',
+          filename: 'hello.txt',
+          content_type: 'text/plain',
+        },
+        description: { content: 'monthly sync' },
+      },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
 });
 
 describe('execute()', () => {
@@ -964,22 +981,415 @@ describe('execute()', () => {
         },
       },
     };
-    await expect(
-      connectorType.executor?.({
+    const result = await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: body as any,
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(result?.status).toBe('error');
+    expect(result?.serviceMessage).toContain(
+      'Error serializing request body: foo is not serializable'
+    );
+    expect(requestMock).not.toHaveBeenCalled();
+  });
+
+  describe('form_data (multipart/form-data)', () => {
+    const baseConfig: ConnectorTypeConfigType = { ...emptyConfig, url: 'https://abc.def' };
+
+    test('sends a native FormData body when form_data is set', async () => {
+      await connectorType.executor?.({
         actionId: 'some-id',
         services,
-        config,
+        config: baseConfig,
         secrets: { ...emptySecrets, user: 'abc', password: '123' },
         params: {
           method: 'POST',
-          path: '/my-endpoint',
-          body: body as any,
+          path: '/upload',
+          form_data: {
+            file: {
+              content: '{"a":1}\n',
+              filename: 'export.ndjson',
+              content_type: 'application/ndjson',
+            },
+          },
         },
         configurationUtilities,
         logger: mockedLogger,
         connectorUsageCollector,
-      })
-    ).rejects.toThrow('Error serializing request body: foo is not serializable');
+      });
+
+      const call = requestMock.mock.calls[0][0];
+      // Native FormData; axios will set the multipart Content-Type with the
+      // correct boundary itself, so we don't pass a Content-Type header.
+      expect(call.data).toBeInstanceOf(FormData);
+      expect(call.headers['content-type']).toBeUndefined();
+      expect(call.headers['Content-Type']).toBeUndefined();
+    });
+
+    test('strips user-supplied Content-Type so axios can set the multipart boundary', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: { ...baseConfig, headers: { 'content-type': 'application/json' } },
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          headers: { 'content-type': 'text/plain' },
+          form_data: {
+            file: { content: 'hello', filename: 'h.txt' },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const headers = requestMock.mock.calls[0][0].headers;
+      // Both casings of Content-Type are removed in form_data mode so axios
+      // can set its own multipart Content-Type with the correct boundary.
+      expect(headers['content-type']).toBeUndefined();
+      expect(headers['Content-Type']).toBeUndefined();
+    });
+
+    test('appends a file part when filename is provided and a plain field when it is not', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: { content: 'binary-ish', filename: 'a.bin', content_type: 'application/x-bin' },
+            description: { content: 'monthly sync' },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entries = Array.from(form.entries());
+
+      // File field is wrapped as a File (Blob with a name) carrying the
+      // user's content_type; the Blob content round-trips intact.
+      const fileEntry = entries.find(([key]) => key === 'file')?.[1];
+      expect(fileEntry).toBeInstanceOf(Blob);
+      const file = fileEntry as File;
+      expect(file.name).toBe('a.bin');
+      expect(file.type).toBe('application/x-bin');
+      expect(await file.text()).toBe('binary-ish');
+
+      // Plain field is stored as a string (no filename, no per-part content type).
+      const descEntry = entries.find(([key]) => key === 'description')?.[1];
+      expect(typeof descEntry).toBe('string');
+      expect(descEntry).toBe('monthly sync');
+    });
+
+    test('returns an error when both body and form_data are provided', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          body: 'some data',
+          form_data: { file: { content: 'x', filename: 'x.txt' } },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Cannot set both body and form_data');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('returns an error when body is set and form_data is an empty object', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          body: 'some data',
+          form_data: {},
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Cannot set both body and form_data');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('round-trips raw bytes when encoding is base64', async () => {
+      const bytes = Buffer.from([0x00, 0xff, 0x10, 0x20, 0x7f, 0x80, 0xab, 0xcd]);
+
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: bytes.toString('base64'),
+              filename: 'binary.bin',
+              content_type: 'application/x-bin',
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entry = Array.from(form.entries()).find(([key]) => key === 'file')?.[1];
+      expect(entry).toBeInstanceOf(Blob);
+      const file = entry as File;
+      expect(file.name).toBe('binary.bin');
+      expect(file.type).toBe('application/x-bin');
+      const roundTripped = Buffer.from(await file.arrayBuffer());
+      expect(roundTripped.equals(bytes)).toBe(true);
+    });
+
+    test('defaults base64 fields to application/octet-stream when content_type is omitted', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            blob_field: {
+              content: Buffer.from([0x01, 0x02, 0x03]).toString('base64'),
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entry = Array.from(form.entries()).find(([key]) => key === 'blob_field')?.[1];
+      // Base64 fields always go through the Blob branch (never plain text),
+      // even when no filename or content_type is set.
+      expect(entry).toBeInstanceOf(Blob);
+      expect((entry as Blob).type).toBe('application/octet-stream');
+    });
+
+    test('tolerates whitespace inside base64 content (e.g. line-wrapped input)', async () => {
+      const bytes = Buffer.from('hello world');
+      const wrapped = bytes.toString('base64').replace(/(.{4})/g, '$1\n');
+
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: wrapped,
+              filename: 'hello.txt',
+              content_type: 'text/plain',
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      const form = requestMock.mock.calls[0][0].data as FormData;
+      const entry = Array.from(form.entries()).find(([key]) => key === 'file')?.[1] as File;
+      expect(await entry.text()).toBe('hello world');
+    });
+
+    test('returns an error when encoding is base64 and content is not valid base64', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: {
+              content: 'not valid base64!!!',
+              encoding: 'base64',
+            },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Invalid base64 content in form_data field "file"');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('returns an error when aggregate form_data size exceeds max_content_length', async () => {
+      // Each field is well under the cap individually, but together they overflow.
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            a: { content: 'x'.repeat(400) },
+            b: { content: 'y'.repeat(400) },
+            c: { content: 'z'.repeat(400) },
+          },
+          fetcher: { max_content_length: 1000 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('form_data exceeds max_content_length (1000 bytes)');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('sends form_data when aggregate size is under max_content_length', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            a: { content: 'x'.repeat(400) },
+            b: { content: 'y'.repeat(400) },
+            c: { content: 'z'.repeat(400) },
+          },
+          fetcher: { max_content_length: 2000 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock.mock.calls[0][0].data).toBeInstanceOf(FormData);
+    });
+
+    test('returns an error when a single form_data field exceeds max_content_length', async () => {
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: { content: 'x'.repeat(2000), filename: 'big.txt' },
+          },
+          fetcher: { max_content_length: 1000 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('form_data exceeds max_content_length (1000 bytes)');
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+
+    test('skips the form_data size check when max_content_length is not set', async () => {
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            big: { content: 'x'.repeat(100_000) },
+          },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock.mock.calls[0][0].data).toBeInstanceOf(FormData);
+    });
+
+    test('uses the decoded byte estimate (not the encoded length) for base64 fields', async () => {
+      // 100 raw bytes → 136 base64 chars. With cap=120, the encoded length
+      // exceeds the cap but the decoded size (~102 with ceil(.75 * 136)) is
+      // what matters — and even that is over 120? No: 102 < 120, passes.
+      const bytes = Buffer.alloc(100, 0xab);
+      const encoded = bytes.toString('base64');
+      expect(encoded.length).toBeGreaterThan(120); // sanity check on the fixture
+
+      await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config: baseConfig,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/upload',
+          form_data: {
+            file: { content: encoded, encoding: 'base64' },
+          },
+          fetcher: { max_content_length: 120 },
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   test('renders parameter templates as expected', async () => {

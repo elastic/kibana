@@ -222,9 +222,10 @@ export class DashboardApp {
   /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
-  async openAddPanelFlyout() {
+  async openAddPanelFlyout(options?: TimeoutOptions) {
+    await this.addTopNavButton.waitFor({ state: 'visible', timeout: options?.timeout ?? 10_000 });
     await this.addTopNavButton.click();
-    await expect(this.panelSelectionFlyout).toBeVisible();
+    await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 10_000 });
   }
 
   async saveDashboard(name: string) {
@@ -915,8 +916,16 @@ export class DashboardApp {
     return this.page.locator(`[data-test-embeddable-id="${id}"]`);
   }
 
+  async addNewLensPanel() {
+    await this.addNewPanel('Visualization');
+  }
+
+  async addNewESQLPanel() {
+    await this.addNewPanel('Visualization (query)');
+  }
+
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
-  async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Vega' | 'Maps' | 'Links') {
+  async addNewPanel(panelType: string) {
     await this.openAddPanelFlyout();
     await this.page.testSubj.click(`create-action-${panelType}`);
     await expect(this.panelSelectionFlyout).toBeHidden();

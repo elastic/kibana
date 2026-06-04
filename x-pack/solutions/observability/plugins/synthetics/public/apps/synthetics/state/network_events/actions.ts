@@ -11,6 +11,7 @@ import type { SyntheticsNetworkEventsApiResponse } from '../../../../../common/r
 export interface FetchNetworkEventsParams {
   checkGroup: string;
   stepIndex: number;
+  remoteName?: string;
 }
 
 export interface FetchNetworkEventsFailPayload {

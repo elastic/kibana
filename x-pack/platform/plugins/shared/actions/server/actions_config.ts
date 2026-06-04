@@ -77,6 +77,7 @@ export interface ActionsConfigurationUtilities {
   getMaxEmailBodyLength: () => number;
   getEarsUrl: () => string | undefined;
   isEarsEnabled: () => boolean;
+  isEarsExperimentalEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -283,5 +284,6 @@ export function getActionsConfigurationUtilities(
     },
     getEarsUrl: () => config.auth.ears?.url,
     isEarsEnabled: () => config.auth.ears?.enabled ?? false,
+    isEarsExperimentalEnabled: () => config.auth.ears?.enableExperimental ?? false,
   };
 }

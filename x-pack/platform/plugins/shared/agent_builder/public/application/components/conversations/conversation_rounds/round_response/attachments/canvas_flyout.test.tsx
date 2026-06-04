@@ -43,6 +43,7 @@ jest.mock('../../../../../hooks/use_conversation', () => ({
   useConversation: () => ({
     conversation: null,
   }),
+  useAgentId: () => 'agent-1',
 }));
 
 jest.mock('../../../../../hooks/use_agent_builder_service', () => ({

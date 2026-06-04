@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type {
-  PublicTriggerDefinition,
-  WorkflowsExtensionsPublicPluginSetup,
-} from '@kbn/workflows-extensions/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { episodeAssignedTriggerPublicDefinition } from './triggers/episode_assigned';
 
 /**
  * Registers all alerting-v2 public workflow trigger definitions (UI metadata).
@@ -17,11 +15,5 @@ import type {
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
-  const triggerDefinitions: PublicTriggerDefinition[] = [
-    // Add PublicTriggerDefinition entries here (spread common id + eventSchema + title, icon, docs).
-  ];
-
-  for (const definition of triggerDefinitions) {
-    workflowsExtensions.registerTriggerDefinition(definition);
-  }
+  workflowsExtensions.registerTriggerDefinition(episodeAssignedTriggerPublicDefinition);
 }

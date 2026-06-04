@@ -1,5 +1,5 @@
 {
-  "sha1": "d686f02384a84239944421c7601ad4b10094e94b",
+  "sha1": "630d0a85a0d6685f8e83f63b64cbb658ea0d568f",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -3383,6 +3383,198 @@
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uppercase.spec.ts",
         "line": 88,
         "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-cf5aa4d3e4acb3b",
+      "title": "Cross-compatibility - URI Parts Processor extracts every documented sub-field from a fully-populated URI in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-62fd62d82318095",
+      "title": "Cross-compatibility - URI Parts Processor honors a custom target prefix in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-99d9e5896cf6bb4",
+      "title": "Cross-compatibility - URI Parts Processor parses relative URIs with null scheme+domain but populated path/query in both transpilers (testNoSchemeUri parity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 153,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-bcb0c1b29523518",
+      "title": "Cross-compatibility - URI Parts Processor invalid URIs null every output column in ES|QL and, with ignore_failure=true, leave the ingest doc unchanged (testInvalidUri parity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 214,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-bdf01a385f6f119",
+      "title": "Cross-compatibility - URI Parts Processor keep_original=false drops `<prefix>.original` in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 285,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-a21b118d130ceed",
+      "title": "Cross-compatibility - URI Parts Processor remove_if_successful=true nulls the source field on success in both transpilers, and keeps it on ignored failure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 337,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-2970c7d3e161653",
+      "title": "Cross-compatibility - URI Parts Processor where clause is respected by both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 404,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-2a0180a7de6b3e5",
+      "title": "Cross-compatibility - URI Parts Processor preserves pre-existing `<to>.*` and `<to>.original` values on where:false rows for every sub-field (destruction-fix parity, full coverage)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 471,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-1df6274d16b6aa9",
+      "title": "Cross-compatibility - URI Parts Processor ignore_missing=true lets documents without the source field through in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 576,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-91c7ad569b9ab4d",
+      "title": "Cross-compatibility - URI Parts Processor missing source field with ignore_missing=false fails ingest and drops the ES|QL row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 645,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-f61027bfc59bcf1",
+      "title": "Cross-compatibility - URI Parts Processor consistently rejects {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 693,
+        "column": 14
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-00f371a55541d6a",
+      "title": "Cross-compatibility - URI Parts Processor consistently rejects {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 693,
+        "column": 14
       }
     },
     {

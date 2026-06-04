@@ -19,6 +19,22 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 let mockScreenReaderAnnouncementValue = '';
 const mockSetScreenReaderAnnouncement = jest.fn();
 

@@ -797,4 +797,17 @@ export class SpaceTestApiClient {
 
     return res.body;
   }
+
+  async postManagedOtlpApiKey(name: string, spaceId?: string) {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/create_managed_otlp_api_key`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .send({ name });
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
 }

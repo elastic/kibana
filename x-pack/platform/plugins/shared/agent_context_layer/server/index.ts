@@ -17,6 +17,8 @@ export type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
   SmlIndexAttachmentParams,
+  SmlIndexAttachmentOriginParams,
+  SmlIndexAttachmentContentParams,
 } from './types';
 
 export type {
@@ -30,6 +32,9 @@ export type {
   SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
+  SmlIngestionMethod,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';

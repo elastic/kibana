@@ -20,6 +20,7 @@ export const ensureInferenceDeployed = async ({
     {
       inference_id: inferenceId,
       input: 'I just want to call the API to force the model to download and allocate',
+      timeout: '5m',
     },
     { requestTimeout: 10 * 60 * 1000 }
   );

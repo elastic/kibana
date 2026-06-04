@@ -30,6 +30,8 @@ const printUsage = () =>
     [--concurrentBatches]: how many batches to run concurrently, defaults to 10
     [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
     [--revisions]: includes the number of revisions to create per policy, defaults to 0
+    [--opamp]: create OpAMP collector agents instead of regular agents, with different effective_config groups
+               "count" number of collectors will be created for each config group (5 groups total)
 `);
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
@@ -59,6 +61,7 @@ const {
   outdated: outdatedArg = false,
   concurrentBatches: concurrentBatchesArg = 10,
   revisions: revisionsArg = 0,
+  opamp: opampArg = false,
   // ignore yargs positional args, we only care about named args
   _,
   $0,
@@ -495,6 +498,185 @@ function logStatusMap(statusMap: Partial<{ [status in AgentStatus]: number }>) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// OpAMP / OTel collector fixtures
+// ---------------------------------------------------------------------------
+// Each group has a fixed topology (component names + pipeline wiring) but
+// per-instance values (endpoint URLs, api_key) vary between collectors so
+// they don't hash to the same effective_config_hash — demonstrating that
+// pipeline_config correctly groups them despite the per-instance differences.
+
+const OPAMP_CONFIG_GROUPS = [
+  {
+    label: 'basic-logs',
+    effective_config: (i: number) => ({
+      receivers: {
+        otlp: { protocols: { grpc: { endpoint: `0.0.0.0:${4317 + i}` } } },
+      },
+      exporters: {
+        otlphttp: {
+          endpoint: `https://collector-${i}.example.com:4318`,
+          headers: { Authorization: `Bearer key-${i}` },
+        },
+      },
+      service: {
+        pipelines: {
+          logs: { receivers: ['otlp'], processors: [], exporters: ['otlphttp'] },
+        },
+      },
+    }),
+  },
+  {
+    label: 'logs-and-metrics',
+    effective_config: (i: number) => ({
+      receivers: {
+        otlp: { protocols: { grpc: { endpoint: `0.0.0.0:${4317 + i}` } } },
+        hostmetrics: { collection_interval: '30s', scrapers: { cpu: {}, memory: {} } },
+      },
+      exporters: {
+        otlphttp: {
+          endpoint: `https://collector-${i}.example.com:4318`,
+          headers: { Authorization: `Bearer key-${i}` },
+        },
+      },
+      service: {
+        pipelines: {
+          logs: { receivers: ['otlp'], processors: [], exporters: ['otlphttp'] },
+          metrics: { receivers: ['hostmetrics'], processors: [], exporters: ['otlphttp'] },
+        },
+      },
+    }),
+  },
+  {
+    label: 'batch-processor',
+    effective_config: (i: number) => ({
+      receivers: {
+        otlp: { protocols: { grpc: { endpoint: `0.0.0.0:${4317 + i}` } } },
+      },
+      processors: {
+        batch: { send_batch_size: 1024, timeout: '5s' },
+      },
+      exporters: {
+        otlphttp: {
+          endpoint: `https://collector-${i}.example.com:4318`,
+          headers: { Authorization: `Bearer key-${i}` },
+        },
+      },
+      service: {
+        pipelines: {
+          logs: { receivers: ['otlp'], processors: ['batch'], exporters: ['otlphttp'] },
+          metrics: { receivers: ['otlp'], processors: ['batch'], exporters: ['otlphttp'] },
+        },
+      },
+    }),
+  },
+  {
+    label: 'spanmetrics-connector',
+    effective_config: (i: number) => ({
+      receivers: {
+        otlp: { protocols: { grpc: { endpoint: `0.0.0.0:${4317 + i}` } } },
+      },
+      processors: {
+        batch: { send_batch_size: 512, timeout: '2s' },
+      },
+      exporters: {
+        otlphttp: {
+          endpoint: `https://collector-${i}.example.com:4318`,
+          headers: { Authorization: `Bearer key-${i}` },
+        },
+      },
+      connectors: {
+        spanmetrics: { histogram: { explicit: { buckets: ['100ms', '1s', '2s'] } } },
+      },
+      service: {
+        pipelines: {
+          traces: { receivers: ['otlp'], processors: ['batch'], exporters: ['spanmetrics'] },
+          metrics: { receivers: ['spanmetrics'], processors: [], exporters: ['otlphttp'] },
+        },
+      },
+    }),
+  },
+  {
+    label: 'extensions',
+    effective_config: (i: number) => ({
+      receivers: {
+        otlp: { protocols: { grpc: { endpoint: `0.0.0.0:${4317 + i}` } } },
+      },
+      processors: {
+        batch: { send_batch_size: 1024, timeout: '5s' },
+        memory_limiter: { limit_mib: 512 },
+      },
+      exporters: {
+        otlphttp: {
+          endpoint: `https://collector-${i}.example.com:4318`,
+          headers: { Authorization: `Bearer key-${i}` },
+        },
+        debug: { verbosity: 'detailed' },
+      },
+      extensions: {
+        health_check: { endpoint: `0.0.0.0:${13133 + i}` },
+        zpages: { endpoint: `0.0.0.0:${55679 + i}` },
+      },
+      service: {
+        extensions: ['health_check', 'zpages'],
+        pipelines: {
+          logs: {
+            receivers: ['otlp'],
+            processors: ['memory_limiter', 'batch'],
+            exporters: ['otlphttp', 'debug'],
+          },
+          metrics: {
+            receivers: ['otlp'],
+            processors: ['memory_limiter', 'batch'],
+            exporters: ['otlphttp'],
+          },
+        },
+      },
+    }),
+  },
+];
+
+function createOpampCollector(
+  groupLabel: string,
+  effectiveConfig: object,
+  index: number,
+  policyId: string
+) {
+  const id = uuidv4();
+  return {
+    agent: { id, version: '9.0.0', type: 'otelcol' },
+    access_api_key_id: 'api-key-opamp',
+    active: true,
+    policy_id: policyId,
+    type: 'OPAMP',
+    enrolled_at: new Date().toISOString(),
+    last_checkin: new Date().toISOString(),
+    last_checkin_status: 'online',
+    tags: ['script_create_agents', 'opamp', groupLabel],
+    identifying_attributes: {
+      'service.instance.id': id,
+      'service.name': 'otelcol',
+      'service.version': '0.120.0',
+    },
+    non_identifying_attributes: {
+      'elastic.display.name': `collector-${groupLabel}-${index}`,
+      'host.name': `host-${groupLabel}-${index}.example.com`,
+    },
+    effective_config: effectiveConfig,
+    local_metadata: {
+      elastic: {
+        agent: {
+          snapshot: false,
+          upgradeable: false,
+          version: '9.0.0',
+        },
+      },
+      host: { hostname: `host-${groupLabel}-${index}.example.com` },
+    },
+    user_provided_metadata: {},
+  };
+}
+
 /**
  * Script to create large number of agent documents at once.
  * This is helpful for testing agent bulk actions locally as the kibana async logic kicks in for >10k agents.
@@ -524,50 +706,75 @@ export async function run() {
   logger.info(`Role "${ES_SUPERUSER}" ${role.role.created ? 'created' : 'already exists'}`);
   logger.info(`User "${ES_SUPERUSER}" ${user.created ? 'created' : 'already exists'}`);
 
-  let batchesRemaining = batches;
   let totalAgents = 0;
-  while (batchesRemaining > 0) {
-    const currentBatchSize = Math.min(concurrentBatches, batchesRemaining);
-    if (batches > 1) {
-      logger.info(`Running ${currentBatchSize} batches. ${batchesRemaining} batches remaining`);
+
+  if (opampArg) {
+    // --opamp mode: create OpAMP collector agents grouped by effective_config topology
+    const agentPolicyId = uuidv4();
+    const agentPolicy = await createAgentPolicy(agentPolicyId, 'OpAMP Collectors Policy');
+    const policyId = agentPolicy.item.id;
+    logger.info(`Created agent policy ${policyId}`);
+
+    for (const group of OPAMP_CONFIG_GROUPS) {
+      const collectors = Array.from({ length: count }, (_unused, i) =>
+        createOpampCollector(group.label, group.effective_config(i), i, policyId)
+      );
+      const createRes = await createAgentDocsBulk(collectors as any);
+      logger.info(
+        `Config group "${group.label}": created ${createRes.items.length} collectors, errors: ${createRes.errors}`
+      );
+      totalAgents += createRes.items.length;
     }
+  } else {
+    let batchesRemaining = batches;
+    while (batchesRemaining > 0) {
+      const currentBatchSize = Math.min(concurrentBatches, batchesRemaining);
+      if (batches > 1) {
+        logger.info(`Running ${currentBatchSize} batches. ${batchesRemaining} batches remaining`);
+      }
 
-    await Promise.all(
-      Array(currentBatchSize)
-        .fill(0)
-        .map(async (__, i) => {
-          let agentPolicyId = uuidv4();
-          const agentPolicy = await createAgentPolicy(agentPolicyId, `Policy ${i}`);
-          agentPolicyId = agentPolicy.item.id;
-          logger.info(`Created agent policy ${agentPolicy.item.id}`);
+      await Promise.all(
+        Array(currentBatchSize)
+          .fill(0)
+          .map(async (__, i) => {
+            let agentPolicyId = uuidv4();
+            const agentPolicy = await createAgentPolicy(agentPolicyId, `Policy ${i}`);
+            agentPolicyId = agentPolicy.item.id;
+            logger.info(`Created agent policy ${agentPolicy.item.id}`);
 
-          let latestRevision: number = agentPolicy.item.revision ?? 1;
-          if (revisionsCount > 0) {
-            logger.info(`Creating ${revisionsCount} revisions for agent policy ${agentPolicyId}`);
-            latestRevision = await createPolicyRevisions(agentPolicyId, latestRevision);
-          }
-          const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
-          logStatusMap(statusMap);
-          const agents = createAgentsWithStatuses(
-            statusMap,
-            agentPolicyId,
-            agentVersion,
-            i > 0 ? `batch-${i}` : undefined,
-            latestRevision
-          );
-          const createRes = await createAgentDocsBulk(agents);
-          if (outdatedArg) {
-            logger.info(`Bumping agent policy revision so that agents will have outdated policies`);
-            bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
-          }
-          logger.info(
-            `Batch complete, created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
-          );
-          totalAgents += createRes.items.length;
-        })
-    );
+            let latestRevision: number = agentPolicy.item.revision ?? 1;
+            if (revisionsCount > 0) {
+              logger.info(`Creating ${revisionsCount} revisions for agent policy ${agentPolicyId}`);
+              latestRevision = await createPolicyRevisions(agentPolicyId, latestRevision);
+            }
+            const statusMap = statusesArg.reduce(
+              (acc, status) => ({ ...acc, [status]: count }),
+              {}
+            );
+            logStatusMap(statusMap);
+            const agents = createAgentsWithStatuses(
+              statusMap,
+              agentPolicyId,
+              agentVersion,
+              i > 0 ? `batch-${i}` : undefined,
+              latestRevision
+            );
+            const createRes = await createAgentDocsBulk(agents);
+            if (outdatedArg) {
+              logger.info(
+                `Bumping agent policy revision so that agents will have outdated policies`
+              );
+              bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
+            }
+            logger.info(
+              `Batch complete, created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
+            );
+            totalAgents += createRes.items.length;
+          })
+      );
 
-    batchesRemaining -= currentBatchSize;
+      batchesRemaining -= currentBatchSize;
+    }
   }
 
   logger.info(`All batches complete. Created ${totalAgents} agents in total. Goodbye!`);

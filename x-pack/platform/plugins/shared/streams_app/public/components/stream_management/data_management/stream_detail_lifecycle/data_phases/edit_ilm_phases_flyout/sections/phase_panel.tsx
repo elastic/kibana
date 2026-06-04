@@ -12,7 +12,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 
 import { useIlmPhasesColorAndDescription } from '../../../hooks/use_ilm_phases_color_and_description';
-import { useStyles } from '../use_styles';
+import { useDataPhasesFlyoutStyles } from '../../shared';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 import { DeleteSearchableSnapshotToggleField, MinAgeField, ReadOnlyToggleField } from '../form';
 import { TIME_UNIT_OPTIONS } from '../constants';
@@ -52,7 +52,8 @@ export const PhasePanel = ({
 }: PhasePanelProps) => {
   const isHidden = selectedPhase !== phase;
   const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
-  const { phaseDescriptionStyles, phaseDescriptionNoBottomPaddingStyles } = useStyles();
+  const { phaseDescriptionStyles, phaseDescriptionNoBottomPaddingStyles } =
+    useDataPhasesFlyoutStyles();
 
   const { ilmPhases } = useIlmPhasesColorAndDescription();
 

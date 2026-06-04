@@ -123,7 +123,9 @@
     "@kbn/dashboard-navigation-options-common",
     "@kbn/dashboard-navigation-options-components",
     "@kbn/dashboard-navigation-options-schema",
-    "@kbn/as-code-shared-telemetry"
+    "@kbn/as-code-shared-telemetry",
+    "@kbn/core-user-activity-server",
+    "@kbn/core-test-helpers-test-utils"
   ],
   "exclude": [
     "target/**/*"

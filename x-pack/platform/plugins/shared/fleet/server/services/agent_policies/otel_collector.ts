@@ -117,16 +117,58 @@ export function generateOtelcolConfig({
           signalTypes
         );
 
+        // Build the bare→suffixed map BEFORE suffixing keys, so we can rewrite
+        // auth.authenticator references inside component bodies that point to
+        // extensions declared in this stream.
+        const originalToSuffixedExtensionIds: Record<string, string> = Object.fromEntries(
+          Object.keys(stream?.extensions ?? {}).map((id) => [id, `${id}/${suffix}`])
+        );
+
+        const rewriteExtRefs = (components: any): any => {
+          if (!components || !Object.keys(originalToSuffixedExtensionIds).length) {
+            return components;
+          }
+          return Object.fromEntries(
+            Object.entries(components as Record<string, unknown>).map(([key, body]) => [
+              key,
+              rewriteOtelcolExtensionReferences(body, originalToSuffixedExtensionIds),
+            ])
+          );
+        };
+
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
-          ...addSuffixToOtelcolComponentsConfig('receivers', suffix, stream?.receivers),
-          ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
-          ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
-          ...addSuffixToOtelcolComponentsConfig('exporters', suffix, stream?.exporters),
+          ...addSuffixToOtelcolComponentsConfig(
+            'receivers',
+            suffix,
+            rewriteExtRefs(stream?.receivers)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'processors',
+            suffix,
+            rewriteExtRefs(stream?.processors)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'connectors',
+            suffix,
+            rewriteExtRefs(stream?.connectors)
+          ),
+          ...addSuffixToOtelcolComponentsConfig(
+            'exporters',
+            suffix,
+            rewriteExtRefs(stream?.exporters)
+          ),
           ...(stream?.service
             ? {
                 service: {
                   ...stream.service,
+                  ...(stream.service.extensions?.length
+                    ? {
+                        extensions: stream.service.extensions.map(
+                          (id: string) => originalToSuffixedExtensionIds[id] ?? id
+                        ),
+                      }
+                    : {}),
                   pipelines: conditionallyAddApmToPipelines(
                     addSuffixToOtelcolComponentsConfig(
                       'pipelines',
@@ -372,6 +414,40 @@ function alignPipelineSignalType(
   }
   const newKey = [dataStreamType, ...rest].join('/') as OTelCollectorPipelineID;
   return { [newKey]: pipeline };
+}
+
+// Recursively walks a component config body and rewrites auth.authenticator
+// references whose bare ID appears in originalToSuffixedExtensionIds.
+// This covers the OTel configauth convention where receivers/exporters/etc.
+// reference extensions via `auth: { authenticator: <extension-id> }`.
+function rewriteOtelcolExtensionReferences(
+  value: unknown,
+  originalToSuffixedExtensionIds: Record<string, string>
+): unknown {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return value;
+  }
+  const obj = value as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (
+      key === 'auth' &&
+      val !== null &&
+      typeof val === 'object' &&
+      !Array.isArray(val) &&
+      typeof (val as Record<string, unknown>).authenticator === 'string'
+    ) {
+      const authObj = val as Record<string, unknown>;
+      const authenticator = authObj.authenticator as string;
+      result[key] = {
+        ...authObj,
+        authenticator: originalToSuffixedExtensionIds[authenticator] ?? authenticator,
+      };
+    } else {
+      result[key] = rewriteOtelcolExtensionReferences(val, originalToSuffixedExtensionIds);
+    }
+  }
+  return result;
 }
 
 function addSuffixToOtelcolPipelinesComponents(

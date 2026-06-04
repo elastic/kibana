@@ -60,10 +60,10 @@ describe('TextareaInputArgument component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test-popoverPanel')).toBeTruthy();
-    expect(getByTestId('test-openInputButton').title).toEqual(OPEN_INPUT);
+    expect(getByTestId('test-openInputButton').getAttribute('aria-label')).toEqual(OPEN_INPUT);
     expect(getByTestId('test-selectionDisplay').textContent).toEqual(NO_INPUT_ENTERED_MESSAGE);
     expect(getByTestId('test-closeButton').textContent).toEqual(CLOSE_POPUP_BUTTON_LABEL);
-    expect(getByTestId('test-helpButton').title).toEqual(HELP_ICON_LABEL);
+    expect(getByTestId('test-helpButton').getAttribute('aria-label')).toEqual(HELP_ICON_LABEL);
     expect(getByTestId('test-title').textContent).toEqual('foo'); // << Default is the argument name
     expect((getByTestId('test-textarea') as HTMLTextAreaElement).placeholder).toEqual(
       TEXTAREA_PLACEHOLDER_TEXT
@@ -82,14 +82,18 @@ describe('TextareaInputArgument component', () => {
     });
     const { getByTestId } = render();
 
-    expect(getByTestId('test-openInputButton').title).toEqual(componentPropsMock.openLabel);
+    expect(getByTestId('test-openInputButton').getAttribute('aria-label')).toEqual(
+      componentPropsMock.openLabel
+    );
     expect(getByTestId('test-selectionDisplay').textContent).toEqual(
       componentPropsMock.noInputEnteredMessage
     );
     expect(getByTestId('test-closeButton').textContent).toEqual(
       componentPropsMock.closePopupButtonLabel
     );
-    expect(getByTestId('test-helpButton').title).toEqual(componentPropsMock.helpIconLabel);
+    expect(getByTestId('test-helpButton').getAttribute('aria-label')).toEqual(
+      componentPropsMock.helpIconLabel
+    );
     expect(getByTestId('test-title').textContent).toEqual(componentPropsMock.textareaLabel);
     expect((getByTestId('test-textarea') as HTMLTextAreaElement).placeholder).toEqual(
       componentPropsMock.textareaPlaceholderLabel

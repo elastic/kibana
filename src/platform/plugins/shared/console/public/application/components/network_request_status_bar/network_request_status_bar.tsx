@@ -55,7 +55,7 @@ export const NetworkRequestStatusBar: FunctionComponent = () => {
   if (requestInFlight) {
     content = (
       <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">
+        <EuiBadge color="hollow" data-test-subj="consoleRequestInProgressBadge">
           {i18n.translate('console.requestInProgressBadgeText', {
             defaultMessage: 'Request in progress',
           })}

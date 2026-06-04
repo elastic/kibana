@@ -58,7 +58,13 @@ export const SessionExpirationModal: FunctionComponent<SessionExpirationModalPro
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id="session-expiration-modal-title">
-          <EuiIcon type="clock" color="warning" size="l" style={{ marginRight: 8 }} />
+          <EuiIcon
+            type="clock"
+            color="warning"
+            size="l"
+            style={{ marginRight: 8 }}
+            aria-hidden={true}
+          />
           {i18n.translate('xpack.security.sessionExpirationModal.title', {
             defaultMessage: 'Session timeout',
           })}

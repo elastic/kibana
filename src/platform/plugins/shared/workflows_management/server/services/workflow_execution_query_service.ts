@@ -91,7 +91,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
-      { term: { workflowId: params.workflowId } },
+      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
       {
         bool: {
           should: [{ term: { spaceId } }, { bool: { must_not: { exists: { field: 'spaceId' } } } }],
@@ -166,6 +166,7 @@ export class WorkflowExecutionQueryService {
       from,
       page,
       sort,
+      collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }
 

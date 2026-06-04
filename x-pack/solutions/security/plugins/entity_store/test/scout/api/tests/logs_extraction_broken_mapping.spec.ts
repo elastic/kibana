@@ -71,9 +71,10 @@ const EXPECTED_HOST_LATEST_SOURCES = [
  */
 const EXPECTED_USER_LATEST_SOURCES = [
   {
+    // user.id is long in source — TO_STRING converts 1001 → "1001" for the EUID and stored value
     '@timestamp': '2026-04-14T10:02:00.000Z',
     entity: {
-      id: 'user:broken-idp-1@okta',
+      id: 'user:1001@okta',
       name: 'Broken Idp Name',
       type: 'Identity',
       namespace: 'okta',
@@ -81,7 +82,7 @@ const EXPECTED_USER_LATEST_SOURCES = [
       EngineMetadata: { Type: 'user' },
     },
     user: {
-      id: 'broken-idp-1',
+      id: '1001',
       name: 'Broken Idp Name',
     },
     event: {
@@ -111,6 +112,23 @@ const EXPECTED_USER_LATEST_SOURCES = [
       category: 'network',
       outcome: 'success',
     },
+  },
+] as const;
+
+/**
+ * Full expected `_source` for the service entity. service.name is long in source —
+ * TO_STRING (via castField) converts 99999 → "99999" for the EUID and stored value.
+ */
+const EXPECTED_SERVICE_LATEST_SOURCES = [
+  {
+    '@timestamp': '2026-04-14T10:03:00.000Z',
+    entity: {
+      id: 'service:99999',
+      name: '99999',
+      type: 'Service',
+      EngineMetadata: { Type: 'service', UntypedId: '99999' },
+    },
+    service: { name: '99999' },
   },
 ] as const;
 
@@ -170,7 +188,7 @@ const createBrokenMappingTemplate = async (esClient: EsClient) => {
           // User identity + IDP / documentsFilter / namespace evaluation (normally keyword-heavy ECS)
           user: {
             properties: {
-              id: { type: 'text' },
+              id: { type: 'long' }, // expected as keyword in entity definition; tests long → string coercion via TO_STRING
               name: { type: 'text' },
               email: { type: 'text' },
               domain: { type: 'text' },
@@ -183,6 +201,13 @@ const createBrokenMappingTemplate = async (esClient: EsClient) => {
               type: { type: 'text' },
               outcome: { type: 'text' },
               module: { type: 'text' },
+              dataset: { type: 'text' }, // used in entity.source field evaluation; tests text mapping in SPLIT/MV_FIRST path
+            },
+          },
+          // Service identity field; tests long → string coercion via castField (TO_STRING)
+          service: {
+            properties: {
+              name: { type: 'long' }, // expected as keyword in entity definition
             },
           },
           data_stream: {
@@ -248,14 +273,22 @@ const ingestBrokenUserDocs = async (esClient: EsClient) => {
     operations: [
       { create: { _index: BROKEN_MAPPING_DATA_STREAM } },
       {
+        // user.id is long (not keyword) — entity store must TO_STRING it for the EUID
+        // event.dataset is text — exercises the SPLIT/MV_FIRST text path in entity.source evaluation
         '@timestamp': '2026-04-14T10:02:00Z',
-        event: { kind: 'asset', module: 'okta' },
-        user: { id: 'broken-idp-1', name: 'Broken Idp Name' },
+        event: { kind: 'asset', module: 'okta', dataset: 'okta.users' },
+        user: { id: 1001, name: 'Broken Idp Name' },
       },
       { create: { _index: BROKEN_MAPPING_DATA_STREAM } },
       {
+        // event.dataset as text — exercises entity.source evaluation on the local identity path
         '@timestamp': '2026-04-14T10:04:00Z',
-        event: { kind: 'event', category: 'network', outcome: 'success' },
+        event: {
+          kind: 'event',
+          category: 'network',
+          outcome: 'success',
+          dataset: 'endpoint.events.network',
+        },
         user: { name: 'broken-local-user' },
         host: { id: 'broken-user-host-1', name: 'broken-ws-99' },
       },
@@ -271,6 +304,20 @@ const ingestBrokenUserDocs = async (esClient: EsClient) => {
 const cleanupBrokenMappingArtifacts = async (esClient: EsClient) => {
   await esClient.indices.deleteDataStream({ name: BROKEN_MAPPING_DATA_STREAM }, { ignore: [404] });
   await esClient.indices.deleteIndexTemplate({ name: BROKEN_MAPPING_TEMPLATE }, { ignore: [404] });
+};
+
+const ingestBrokenServiceDoc = async (esClient: EsClient) => {
+  const bulkResponse = await esClient.bulk({
+    refresh: 'wait_for',
+    operations: [
+      { create: { _index: BROKEN_MAPPING_DATA_STREAM } },
+      {
+        '@timestamp': '2026-04-14T10:03:00Z',
+        service: { name: 99999 },
+      },
+    ],
+  });
+  expect(bulkResponse.errors).toBe(false);
 };
 
 apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_STORE_TAGS }, () => {
@@ -380,7 +427,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
             '@timestamp': sec(1),
             event: { kind: 'asset', module: 'okta' },
             user: {
-              id: 'multifield-test-user',
+              id: 2001, // long; entity id = user:2001@okta
               name: 'multifield-test-user',
               full_name: 'First Full Name',
             },
@@ -404,7 +451,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         (
           await esClient.search({
             index: LATEST_ALIAS,
-            query: { term: { 'entity.id': 'user:multifield-test-user@okta' } },
+            query: { term: { 'entity.id': 'user:2001@okta' } },
           })
         ).hits.hits
       ).toHaveLength(1);
@@ -420,7 +467,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
             '@timestamp': sec(30),
             event: { kind: 'asset', module: 'okta' },
             user: {
-              id: 'multifield-test-user',
+              id: 2001, // long; same entity as first doc
               name: 'multifield-test-user',
               full_name: 'Second Full Name',
             },
@@ -442,7 +489,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
       await esClient.indices.refresh({ index: LATEST_ALIAS });
       const afterSecond = await esClient.search({
         index: LATEST_ALIAS,
-        query: { term: { 'entity.id': 'user:multifield-test-user@okta' } },
+        query: { term: { 'entity.id': 'user:2001@okta' } },
       });
       expect(afterSecond.hits.hits).toHaveLength(1);
 
@@ -488,7 +535,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
               {
                 terms: {
                   'entity.id': [
-                    'user:broken-idp-1@okta',
+                    'user:1001@okta',
                     'user:broken-local-user@broken-user-host-1@local',
                   ],
                 },
@@ -498,6 +545,51 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         },
       });
       matchExpectedLatestSources(bothUsers.hits.hits, EXPECTED_USER_LATEST_SOURCES);
+    }
+  );
+
+  apiTest(
+    'should extract service successfully when service.name is mapped as long (triggers castField ambiguity fix)',
+    async ({ apiClient, esClient }) => {
+      await ingestBrokenServiceDoc(esClient);
+
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: FROM_DATE,
+            toDateISO: TO_DATE,
+          },
+        }
+      );
+
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({
+        success: true,
+        count: 1,
+        pages: 1,
+      });
+
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
+      const serviceEntities = await esClient.search({
+        index: LATEST_ALIAS,
+        size: 10,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'entity.EngineMetadata.Type': 'service' } },
+              {
+                terms: {
+                  'entity.id': ['service:99999'],
+                },
+              },
+            ],
+          },
+        },
+      });
+      matchExpectedLatestSources(serviceEntities.hits.hits, EXPECTED_SERVICE_LATEST_SOURCES);
     }
   );
 });

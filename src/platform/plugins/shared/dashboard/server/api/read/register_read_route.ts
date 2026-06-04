@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { getRouteConfig } from '../get_route_config';
-import { getReadResponseBodySchema } from './schemas';
-import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getRouteConfig } from '../get_route_config';
 import { logRequest } from '../log_request';
+import { read } from './read';
+import { getReadResponseBodySchema } from './schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -37,7 +37,7 @@ export function registerReadRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false, true);
   });
 
   readRoute.addVersion(
@@ -77,7 +77,9 @@ export function registerReadRoute(
       telemetryHandler(req, usageCounter, async () => {
         try {
           const { body, resolveHeaders } = await read(
-            ctx,
+            (
+              await ctx.resolve(['core'])
+            ).core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.serverTiming,

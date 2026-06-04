@@ -3,6 +3,7 @@
 exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
+  aria-label="Groups"
   button={
     <EuiFilterButton
       data-test-subj="groups-filter-popover-button"

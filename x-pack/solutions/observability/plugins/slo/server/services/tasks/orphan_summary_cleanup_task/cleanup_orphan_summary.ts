@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
-import type { StoredSLODefinition } from '../../../domain/models';
-import { SO_SLO_TYPE } from '../../../saved_objects';
-
-interface Dependencies {
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClient;
-  logger: Logger;
-  abortController: AbortController;
-}
+import { findSloDefinitionMap, getKey, type SLO } from './find_slo_definitions';
+import { isAbortError, type Dependencies, type RunResult } from './types';
 
 interface RunParams {
   searchAfter?: AggregationsCompositeAggregateKey;
@@ -26,27 +16,9 @@ interface RunParams {
   maxRuns?: number;
 }
 
-interface AbortedRunResult {
-  aborted: true;
-  completed: false;
-  nextState: {
-    searchAfter: AggregationsCompositeAggregateKey | undefined;
-  };
-}
-
-interface CompletedRunResult {
-  completed: true;
-  aborted: false;
-}
-
-type RunResult = AbortedRunResult | CompletedRunResult;
-
-interface SLO {
-  id: string;
-  revision: number;
-}
-
-type SLOKey = `${SLO['id']}:::${SLO['revision']}`;
+type SummaryCleanupRunResult = RunResult<{
+  searchAfter: AggregationsCompositeAggregateKey | undefined;
+}>;
 
 const DEFAULT_CHUNK_SIZE = 1000;
 const DEFAULT_MAX_RUNS = 10;
@@ -54,8 +26,8 @@ const DEFAULT_MAX_RUNS = 10;
 export async function cleanupOrphanSummaries(
   params: RunParams,
   dependencies: Dependencies
-): Promise<RunResult> {
-  const { esClient, logger } = dependencies;
+): Promise<SummaryCleanupRunResult> {
+  const { esClient, logger, abortController } = dependencies;
   const chunkSize = params.chunkSize ?? DEFAULT_CHUNK_SIZE;
   const maxRuns = params.maxRuns ?? DEFAULT_MAX_RUNS;
   let searchAfter = params.searchAfter;
@@ -63,6 +35,7 @@ export async function cleanupOrphanSummaries(
 
   try {
     do {
+      abortController.signal.throwIfAborted();
       currentRun++;
 
       const { list, nextSearchAfter } = await fetchUniqueSloFromSummary(
@@ -77,8 +50,12 @@ export async function cleanupOrphanSummaries(
         return { aborted: false, completed: true };
       }
 
-      const existingDefinitionSet = await findSloDefinitionSet(list, dependencies);
-      const nextDelete = list.filter((item) => !existingDefinitionSet.has(getKey(item)));
+      abortController.signal.throwIfAborted();
+      const definitionMap = await findSloDefinitionMap(
+        list.map(({ id }) => id),
+        dependencies
+      );
+      const nextDelete = list.filter((item) => !definitionMap.has(getKey(item)));
 
       if (nextDelete.length > 0) {
         logger.debug(
@@ -114,7 +91,7 @@ export async function cleanupOrphanSummaries(
               },
             },
           },
-          { signal: dependencies.abortController.signal }
+          { signal: abortController.signal }
         );
       }
 
@@ -130,7 +107,7 @@ export async function cleanupOrphanSummaries(
       }
     } while (searchAfter);
   } catch (error) {
-    if (error instanceof errors.RequestAbortedError) {
+    if (isAbortError(error, abortController)) {
       logger.debug(`Task aborted during execution`);
 
       return {
@@ -220,39 +197,4 @@ async function fetchUniqueSloFromSummary(
       revision: Number(key.revision),
     })),
   };
-}
-
-async function findSloDefinitionSet(
-  list: Array<SLO>,
-  { logger, soClient }: Dependencies
-): Promise<Set<SLOKey>> {
-  const response = await soClient.find<Pick<StoredSLODefinition, 'id' | 'revision'>>({
-    type: SO_SLO_TYPE,
-    page: 1,
-    perPage: list.length,
-    filter: `slo.attributes.id:(${list.map((item) => item.id).join(' or ')})`,
-    namespaces: [ALL_SPACES_ID],
-    fields: ['id', 'revision'],
-  });
-
-  logger.debug(
-    `Found ${response.total} matching SLO definitions for ${list.length} SLO summary items to check`
-  );
-
-  if (response.total === 0) {
-    return new Set();
-  }
-
-  return new Set(
-    response.saved_objects.map(({ attributes }) =>
-      getKey({
-        id: attributes.id,
-        revision: attributes.revision,
-      })
-    )
-  );
-}
-
-function getKey(item: SLO): SLOKey {
-  return `${item.id}:::${item.revision}`;
 }

@@ -29,6 +29,7 @@ describe('Execution Routes', () => {
       managedWorkflows: {
         install: jest.fn(),
         uninstall: jest.fn(),
+        getWorkflowStatus: jest.fn(),
         execute: jest.fn(),
       },
     }),
@@ -332,6 +333,7 @@ describe('Execution Routes', () => {
           startedBefore: 'now',
           finishedAfter: '2026-05-01T00:00:00.000Z',
           finishedBefore: '2026-05-14T00:00:00.000Z',
+          collapse: 'concurrencyGroupKey',
           sortField: 'finishedAt',
           sortOrder: 'desc',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
@@ -354,6 +356,7 @@ describe('Execution Routes', () => {
           startedBefore: 'now',
           finishedAfter: '2026-05-01T00:00:00.000Z',
           finishedBefore: '2026-05-14T00:00:00.000Z',
+          collapse: 'concurrencyGroupKey',
           sortField: 'finishedAt',
           sortOrder: 'desc',
         }),

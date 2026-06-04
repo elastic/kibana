@@ -7,6 +7,27 @@
 
 import { SYNTHETICS_INDEX_PATTERN } from './constants';
 
+/**
+ * Resolves the index to query for a monitor, prefixing it with a remote cluster
+ * alias when the monitor lives on a remote cluster (so it is queried via
+ * Cross-Cluster Search). Returns the local pattern unchanged when `remoteName`
+ * is not provided.
+ *
+ * `indexPattern` defaults to {@link SYNTHETICS_INDEX_PATTERN} — the value used
+ * by virtually every caller — so only pass it for the rare cases that target a
+ * different base, e.g. the alerts index (`.alerts-observability*`) or a
+ * `SyntheticsEsClient`'s configurable `heartbeatIndices`.
+ *
+ * @example
+ *   getSyntheticsCcsIndex();                          // 'synthetics-*'
+ *   getSyntheticsCcsIndex('cluster');                 // 'cluster:synthetics-*'
+ *   getSyntheticsCcsIndex('cluster', alertsPattern);  // 'cluster:.alerts-observability*'
+ */
+export const getSyntheticsCcsIndex = (
+  remoteName?: string,
+  indexPattern: string = SYNTHETICS_INDEX_PATTERN
+): string => (remoteName ? `${remoteName}:${indexPattern}` : indexPattern);
+
 export interface RemoteCluster {
   name: string;
   isConnected: boolean;

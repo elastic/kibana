@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { UpdateCompositeSLOInput, UpdateCompositeSLOResponse } from '@kbn/slo-schema';
+import type { UpdateCompositeSLOInput, CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { persistCompositeSummaryDoc } from './composite_summary_writer';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
@@ -29,7 +29,7 @@ export interface UpdateCompositeSloDeps {
 export const updateCompositeSlo = async (
   params: UpdateCompositeSloParams,
   deps: UpdateCompositeSloDeps
-): Promise<UpdateCompositeSLOResponse> => {
+): Promise<CompositeSLODefinitionResponse> => {
   const { id, spaceId, userId, ...body } = params;
   const existing = await deps.compositeSloRepository.findById(id);
 

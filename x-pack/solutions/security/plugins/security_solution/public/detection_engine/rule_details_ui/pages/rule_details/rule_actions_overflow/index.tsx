@@ -297,6 +297,7 @@ const RuleActionsOverflowComponent = ({
         ownFocus={true}
         panelPaddingSize="none"
         repositionOnScroll
+        aria-label={i18n.ALL_ACTIONS}
       >
         <EuiContextMenuPanel data-test-subj="rules-details-menu-panel" items={actions} />
       </EuiPopover>

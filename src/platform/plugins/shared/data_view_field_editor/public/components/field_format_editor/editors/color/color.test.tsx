@@ -18,7 +18,7 @@ import { screen } from '@testing-library/react';
 const fieldType = 'string';
 
 const format = {
-  reactConvert: jest.fn(),
+  convertToReact: jest.fn(),
 };
 
 const formatParams = {

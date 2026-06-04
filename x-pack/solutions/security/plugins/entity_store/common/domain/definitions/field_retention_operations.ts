@@ -16,13 +16,12 @@ type Operation = Omit<EntityField, 'retention' | 'destination'> & {
 export const collectValues = ({
   destination,
   source,
-  fieldHistoryLength = 10,
   mapping = { type: 'keyword' },
   allowAPIUpdate = false,
-}: Operation & { fieldHistoryLength?: number }): EntityField => ({
+}: Operation): EntityField => ({
   destination: destination ?? source,
   source,
-  retention: { operation: 'collect_values', maxLength: fieldHistoryLength },
+  retention: { operation: 'collect_values' },
   mapping,
   allowAPIUpdate,
 });

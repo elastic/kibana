@@ -10,14 +10,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import type { FieldStatsType } from '../../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const testSubjects = getService('testSubjects');
   const editedDescription = 'Edited description';
 
   describe('classification saved search creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');

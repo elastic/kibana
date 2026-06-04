@@ -55,7 +55,6 @@ export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitlePro
 
   return (
     <EuiText size="s">
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click -- Intentional when `shouldUseHref` preserves native link affordances while `onClick` handles plain clicks. */}
       <EuiLink href={href} onClick={handleClick} data-test-subj="content-list-table-item-link">
         {title}
       </EuiLink>

@@ -121,6 +121,7 @@ export const ModelSettings: React.FC = () => {
 
   const isDirty = isFeatureDirty || isDefaultModelDirty;
   const hasNoModels = !connectorsLoading && connectors && !connectors.length;
+  const hasAdvancedSettingsSavePermission = application.capabilities.advancedSettings.save === true;
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
@@ -250,6 +251,33 @@ export const ModelSettings: React.FC = () => {
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
+        {!hasAdvancedSettingsSavePermission && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.title',
+                {
+                  defaultMessage: 'Advanced Settings permission required',
+                }
+              )}
+              color="warning"
+              iconType="lock"
+              data-test-subj="noAdvancedSettingsPermissionCallout"
+              announceOnMount={false}
+            >
+              <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
+                  {
+                    defaultMessage:
+                      'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
         {showFeatureSections && invalidEndpointIds.size > 0 && (
           <>
             <EuiCallOut
@@ -323,6 +351,7 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
+          disabled={!hasAdvancedSettingsSavePermission}
         />
         {showFeatureSections && (
           <>

@@ -8,6 +8,6 @@
  */
 
 export { downloadFile } from './download_file';
-export { expandGitRev, getFileFromKibanaRepo } from './git';
+export { expandGitRev, assertCommitSha } from './git';
 export { startElasticsearch, getKibanaServer, stopElasticsearch } from './servers';
 export { fileToJson, jsonToFile } from './json';

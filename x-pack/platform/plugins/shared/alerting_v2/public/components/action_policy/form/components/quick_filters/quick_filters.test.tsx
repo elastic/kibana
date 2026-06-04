@@ -99,6 +99,14 @@ describe('RuleFilter', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true }));
   });
 
+  it('restricts fetched rules to kind:alert', () => {
+    renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
+
+    expect(mockUseFetchRules).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: 'kind:alert' })
+    );
+  });
+
   it('displays rules from API', async () => {
     renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
 
@@ -113,8 +121,8 @@ describe('RuleFilter', () => {
 
     await user.click(screen.getByTestId('quickFilterRule'));
 
-    expect(screen.getByText('Alerting')).toBeInTheDocument();
-    expect(screen.getByText('Detect only')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
+    expect(screen.getByText('Signal')).toBeInTheDocument();
   });
 
   it('calls onChange with rule.id clause when selecting a rule', async () => {
@@ -301,6 +309,14 @@ describe('TagsFilter', () => {
 
     expect(mockUseFetchRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('restricts fetched tags to kind:alert', () => {
+    renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
+
+    expect(mockUseFetchRuleTags).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: 'kind:alert' })
     );
   });
 

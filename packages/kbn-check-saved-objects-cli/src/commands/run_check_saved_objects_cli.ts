@@ -16,7 +16,7 @@ import {
   type SavedObjectsCheckReport,
   type TypeChangeDetails,
 } from '../findings';
-import { classifyUpdatedTypes, getNewTypes } from '../snapshots';
+import { classifyUpdatedTypes, getNewTypes, resolveSnapshotSha } from '../snapshots';
 import type { MigrationSnapshot } from '../types';
 import type { MigrationAlgorithm, TaskContext } from './types';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
@@ -84,9 +84,39 @@ export function runCheckSavedObjectsCli() {
         );
       }
 
+      let resolvedGitRev = gitRev;
+      let baselineUsedAncestorSnapshot = false;
+      if (!server && !test && gitRev) {
+        const resolvedBaseline = await resolveSnapshotSha(gitRev);
+        resolvedGitRev = resolvedBaseline.resolvedSha;
+        baselineUsedAncestorSnapshot = resolvedBaseline.usedAncestorSnapshot;
+        if (baselineUsedAncestorSnapshot) {
+          log.warning(
+            `Using ancestor snapshot '${resolvedBaseline.resolvedSha}' as baseline because no snapshot exists yet for requested merge-base '${resolvedBaseline.requestedSha}'.`
+          );
+        }
+      }
+
+      let resolvedServerlessGitRev = serverlessGitRev;
+      let serverlessBaselineUsedAncestorSnapshot = false;
+      if (!server && !test && serverlessGitRev) {
+        const resolvedServerlessBaseline = await resolveSnapshotSha(serverlessGitRev);
+        resolvedServerlessGitRev = resolvedServerlessBaseline.resolvedSha;
+        serverlessBaselineUsedAncestorSnapshot = resolvedServerlessBaseline.usedAncestorSnapshot;
+        if (serverlessBaselineUsedAncestorSnapshot) {
+          log.warning(
+            `Using ancestor snapshot '${resolvedServerlessBaseline.resolvedSha}' as serverless baseline because no snapshot exists yet for requested SHA '${resolvedServerlessBaseline.requestedSha}'.`
+          );
+        }
+      }
+
       const context: TaskContext = {
-        gitRev: gitRev!,
-        serverlessGitRev,
+        gitRev: resolvedGitRev!,
+        requestedGitRev: gitRev,
+        baselineUsedAncestorSnapshot,
+        serverlessGitRev: resolvedServerlessGitRev,
+        requestedServerlessGitRev: serverlessGitRev,
+        serverlessBaselineUsedAncestorSnapshot,
         updatedTypes: [],
         typesWithNewModelVersions: [],
         wipTypes: [],
@@ -104,9 +134,11 @@ export function runCheckSavedObjectsCli() {
       globalTask = new Listr(
         [
           {
-            title: 'Start ES',
+            title: 'Start ES asynchronously',
             // we launch the ES server in the background and store a promise that resolves when the server is ready
-            task: (ctx) => (ctx.esServer = startElasticsearch()),
+            task: (ctx) => {
+              ctx.esServer = startElasticsearch();
+            },
             enabled: !client, // we skip this step if '--client' is passed
           },
           {
@@ -243,13 +275,22 @@ export function runCheckSavedObjectsCli() {
 
             const report: SavedObjectsCheckReport = {
               status: exitCode === 0 ? 'pass' : 'fail',
-              baseline: gitRev,
-              serverlessBaseline: serverlessGitRev,
+              baseline: context.requestedGitRev ?? gitRev,
+              ...(context.baselineUsedAncestorSnapshot && {
+                baselineSnapshotSha: context.gitRev,
+                baselineSnapshotUsedAncestor: true,
+              }),
+              serverlessBaseline: context.requestedServerlessGitRev ?? serverlessGitRev,
+              ...(context.serverlessBaselineUsedAncestorSnapshot && {
+                serverlessBaselineSnapshotSha: context.serverlessGitRev,
+                serverlessBaselineSnapshotUsedAncestor: true,
+              }),
               newTypes,
               updatedTypes,
               removedTypes: context.newRemovedTypes,
               findings: collector.getFindings(),
               ...(Object.keys(typeChanges).length > 0 && { typeChanges }),
+              ...(context.test && { testMode: true }),
             };
             writeFileSync(reportPath, JSON.stringify(report, null, 2));
           } catch (writeErr) {
@@ -261,7 +302,7 @@ export function runCheckSavedObjectsCli() {
       }
       if (exitCode) {
         log.warning(
-          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/validate#troubleshooting'
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/troubleshooting'
         );
       }
       process.exit(exitCode);

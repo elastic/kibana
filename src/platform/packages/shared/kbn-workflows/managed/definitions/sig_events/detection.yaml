@@ -1,0 +1,710 @@
+version: "1"
+name: ".significant-events-detection"
+description: "Detects statistically significant changes in alert firing patterns per rule using the Elasticsearch change_point aggregation."
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - detection
+settings:
+  timeout: "10m"
+  concurrency:
+    key: significant-events-detection
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      - name: lookback
+        type: string
+        default: "now-30m"
+        required: false
+        description: "Time window start for the change_point aggregation (ES date math, e.g. now-1h)."
+      - name: bucketInterval
+        type: string
+        default: "30s"
+        required: false
+        description: "Fixed interval for the date_histogram bucketing inside change_point."
+      - name: quickRecoveryLookback
+        type: string
+        default: "now-11m"
+        required: false
+        description: "Short window for fast-path recovery; must yield ≥22 buckets at bucket_interval."
+      - name: cooldown
+        type: string
+        default: "now-30m"
+        required: false
+        description: "Suppress re-detection for this duration after a rule resolves."
+consts:
+  ACTIVITY_HISTORY_LOOKBACK: "now-1h"
+  ACTIVITY_WINDOW_INTERVAL: "30m"
+  ALERTS_INDEX: ".alerts-streams.alerts-default"
+  BOOTSTRAP_MIN_ALERT_COUNT: 20
+  CP_TYPE_INDETERMINABLE: "indeterminable"
+  CP_TYPE_STATIONARY: "stationary"
+  DETECTIONS_INDEX: ".significant_events-detections"
+  DETECTION_RETENTION_WINDOW: "now-24h"
+  KIND_DETECTION: "detection"
+  KIND_HANDLED: "handled"
+  KIND_QUIET: "quiet"
+  LOOKBACK_MINUTES_CEILING: 60
+  LOOKBACK_MINUTES_FLOOR: 20
+  STALE_SCAN_SIZE: 100
+  RECENT_ACTIVITY_MINUTES: 5
+  RESOLUTION_WINDOW_MINUTES: 60
+  RULES_BUCKET_SIZE: 1000
+steps:
+  # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
+  - name: set_space_vars
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+  # -----------------------------------------------------------------------
+  # Pre-pass: Early exit — skip when no alerts and no active detections.
+  # -----------------------------------------------------------------------
+  - name: count_alerts_in_lookback
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.ALERTS_INDEX }}/_count?ignore_unavailable=true'
+      body:
+        query:
+          bool:
+            filter:
+              - terms:
+                  kibana.space_ids:
+                    - "{{ variables.spaceId }}"
+                    - "*"
+              - range:
+                  "@timestamp":
+                    gte: '{{ inputs.lookback }}'
+    on-failure:
+      continue: true
+
+  - name: count_active_detections
+    # Conservative overcount (ignores later quiet docs) — false positives just run change_point.
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.DETECTIONS_INDEX }}/_count?ignore_unavailable=true'
+      body:
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.space_ids: "{{ variables.spaceId }}"
+              - term:
+                  kind: '{{ consts.KIND_DETECTION }}'
+              - range:
+                  "@timestamp":
+                    gte: '{{ consts.DETECTION_RETENTION_WINDOW }}'
+    on-failure:
+      continue: true
+
+  - name: compute_idle_counts
+    type: data.set
+    with:
+      alerts_count: "${{ steps.count_alerts_in_lookback.output.count | default: 1 }}"
+      detections_count: "${{ steps.count_active_detections.output.count | default: 1 }}"
+
+  # -----------------------------------------------------------------------
+  # Stale sweep — two-step truth check to avoid redundant quiet writes.
+  # -----------------------------------------------------------------------
+  - name: get_stale_candidates
+    # WITH lte — candidates whose latest doc within the window is a detection.
+    # lte excludes rules resolved within LOOKBACK_MINUTES_FLOOR.
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: "${{ consts.STALE_SCAN_SIZE }}"
+        sort:
+          - "@timestamp":
+              order: desc
+        collapse:
+          field: rule_uuid
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.space_ids: "{{ variables.spaceId }}"
+              - range:
+                  "@timestamp":
+                    gte: '{{ consts.DETECTION_RETENTION_WINDOW }}'
+                    lte: "now-{{ consts.LOOKBACK_MINUTES_FLOOR }}m"
+            must_not:
+              - term:
+                  kind: '{{ consts.KIND_HANDLED }}'
+    on-failure:
+      continue: true
+
+  - name: get_stale_candidate_docs
+    # WITHOUT lte — reveals quiet docs outside the lte window.
+    # Prevents ~1,440 redundant writes/day per resolved rule on the 1m cron.
+    type: elasticsearch.request
+    if: "${{ steps.get_stale_candidates.error == null and steps.get_stale_candidates.output.hits.total.value > 0 }}"
+    with:
+      method: POST
+      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: "${{ consts.STALE_SCAN_SIZE }}"
+        sort:
+          - "@timestamp":
+              order: desc
+        collapse:
+          field: rule_uuid
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.space_ids: "{{ variables.spaceId }}"
+              - terms:
+                  rule_uuid: "${{ steps.get_stale_candidates.output.hits.hits | where: '_source.kind', 'detection' | map: '_source.rule_uuid' | default: [] }}"
+              - range:
+                  "@timestamp":
+                    gte: '{{ consts.DETECTION_RETENTION_WINDOW }}'
+            must_not:
+              - term:
+                  kind: '{{ consts.KIND_HANDLED }}'
+    on-failure:
+      continue: true
+
+  - name: foreach_stale_candidate
+    type: foreach
+    if: "${{ steps.get_stale_candidate_docs.error == null and steps.get_stale_candidate_docs.output.hits.total.value > 0 }}"
+    foreach: "${{ steps.get_stale_candidate_docs.output.hits.hits }}"
+    steps:
+      - name: check_doc_is_fresh
+        # get_stale_candidate_docs (no lte) can surface detections written within
+        # LOOKBACK_MINUTES_FLOOR that get_stale_candidates (with lte) never saw.
+        if: "${{ foreach.item._source.kind == consts.KIND_DETECTION }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_count?ignore_unavailable=true'
+          body:
+            query:
+              bool:
+                filter:
+                  - term:
+                      kibana.space_ids: "{{ variables.spaceId }}"
+                  - term:
+                      rule_uuid: "${{ foreach.item._source.rule_uuid }}"
+                  - term:
+                      kind: '{{ consts.KIND_DETECTION }}'
+                  - range:
+                      "@timestamp":
+                        gte: "now-{{ consts.LOOKBACK_MINUTES_FLOOR }}m"
+        on-failure:
+          continue: true
+
+      - name: compute_stale_candidate
+        type: data.set
+        with:
+          is_not_fresh: >-
+            ${{ foreach.item._source.kind == consts.KIND_DETECTION
+            and steps.check_doc_is_fresh.error != null
+            or foreach.item._source.kind == consts.KIND_DETECTION
+            and steps.check_doc_is_fresh.output.count < 1 }}
+
+      - name: check_recent_alerts_for_stale
+        if: "${{ foreach.item._source.kind == consts.KIND_DETECTION and steps.compute_stale_candidate.output.is_not_fresh }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.ALERTS_INDEX }}/_count?ignore_unavailable=true'
+          body:
+            query:
+              bool:
+                filter:
+                  - terms:
+                      kibana.space_ids:
+                        - "{{ variables.spaceId }}"
+                        - "*"
+                  - term:
+                      kibana.alert.rule.uuid: "${{ foreach.item._source.rule_uuid }}"
+                  - range:
+                      "@timestamp":
+                        gte: "now-{{ foreach.item._source.resolution_lookback_minutes | default: 30 }}m"
+        on-failure:
+          continue: true
+
+      - name: write_stale_quiet_doc
+        type: elasticsearch.request
+        if: >-
+          ${{ foreach.item._source.kind == consts.KIND_DETECTION
+          and steps.compute_stale_candidate.output.is_not_fresh
+          and steps.check_recent_alerts_for_stale.error == null
+          and steps.check_recent_alerts_for_stale.output.count < 1 }}
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          body:
+            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - "{{ variables.spaceId }}"
+            kind: '{{ consts.KIND_QUIET }}'
+            alert_index: "{{ foreach.item._source.alert_index }}"
+            detection_evidence:
+              change_point_type: '{{ consts.CP_TYPE_STATIONARY }}'
+              p_value: 0
+            detected_at: "{{ foreach.item._source.detected_at | default: foreach.item._source['@timestamp'] }}"
+            detection_id: "{{ foreach.item._source.detection_id }}"
+            resolution_lookback_minutes: "${{ foreach.item._source.resolution_lookback_minutes | default: 30 | plus: 0 }}"
+            rule_name: "{{ foreach.item._source.rule_name }}"
+            rule_uuid: "{{ foreach.item._source.rule_uuid }}"
+            stream_name: "{{ foreach.item._source.stream_name }}"
+            workflow_execution_id: "{{ execution.id }}"
+        on-failure:
+          continue: true
+
+  - name: exit_idle
+    type: workflow.output
+    if: "${{ steps.compute_idle_counts.output.alerts_count == 0 and steps.compute_idle_counts.output.detections_count == 0 }}"
+    status: cancelled
+    with:
+      reason: "No recent alerts and no active detections — change point scan skipped"
+
+  # -----------------------------------------------------------------------
+  # Step 1: Per-rule change_point over the main lookback.
+  # -----------------------------------------------------------------------
+  - name: run_change_point_aggregation
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.ALERTS_INDEX }}/_search?filter_path=-aggregations.by_rule.buckets.over_time&ignore_unavailable=true'
+      body:
+        size: 0
+        query:
+          bool:
+            filter:
+              - terms:
+                  kibana.space_ids:
+                    - "{{ variables.spaceId }}"
+                    - "*"
+              - range:
+                  "@timestamp":
+                    gte: '{{ inputs.lookback }}'
+        aggs:
+          by_rule:
+            terms:
+              field: kibana.alert.rule.uuid
+              size: "${{ consts.RULES_BUCKET_SIZE }}"
+            aggs:
+              rule_name:
+                top_metrics:
+                  metrics:
+                    - field: kibana.alert.rule.name
+                  sort:
+                    "@timestamp": desc
+                  size: 1
+              stream:
+                terms:
+                  field: kibana.alert.rule.tags
+                  exclude: "streams"
+                  size: 1
+              over_time:
+                date_histogram:
+                  field: "@timestamp"
+                  fixed_interval: '{{ inputs.bucketInterval }}'
+                  min_doc_count: 0
+                  extended_bounds:
+                    min: '{{ inputs.lookback }}'
+                    max: "now-{{ inputs.bucketInterval }}"
+              last_5m:
+                filter:
+                  range:
+                    "@timestamp":
+                      gte: "now-{{ consts.RECENT_ACTIVITY_MINUTES }}m"
+              change_points:
+                change_point:
+                  buckets_path: "over_time>_count"
+
+  # -----------------------------------------------------------------------
+  # Step 2: Foreach rule bucket — detect, recover, resolve.
+  # -----------------------------------------------------------------------
+  - name: foreach_rule
+    type: foreach
+    if: "${{ steps.run_change_point_aggregation.output.aggregations.by_rule.buckets != null }}"
+    foreach: "${{ steps.run_change_point_aggregation.output.aggregations.by_rule.buckets }}"
+    steps:
+      # Phase 1: Read state
+      - name: compute_rule_context
+        # change_point_type computed once — used as a dynamic key and in multiple conditions.
+        # has_rule_uuid guards writes: by_rule buckets with an empty key produce broken docs.
+        type: data.set
+        with:
+          change_point_type: "${{ foreach.item.change_points.type | entries | map: 'key' | first | default: '' }}"
+          has_rule_uuid: "${{ foreach.item.key != null and foreach.item.key != '' }}"
+
+      - name: check_active_result
+        if: "${{ steps.compute_rule_context.output.has_rule_uuid }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+          body:
+            size: 1
+            sort:
+              - "@timestamp":
+                  order: desc
+            query:
+              bool:
+                filter:
+                  - term:
+                      kibana.space_ids: "{{ variables.spaceId }}"
+                  - term:
+                      rule_uuid: "{{ foreach.item.key }}"
+                must_not:
+                  - term:
+                      kind: '{{ consts.KIND_HANDLED }}'
+        on-failure:
+          continue: true
+
+      - name: check_recent_active
+        # kind:detection filter — a quiet doc written after a detection would otherwise
+        # suppress is_recent_active and allow re-detection after cooldown expires.
+        if: "${{ steps.compute_rule_context.output.has_rule_uuid }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+          body:
+            size: 1
+            sort:
+              - "@timestamp":
+                  order: desc
+            query:
+              bool:
+                filter:
+                  - term:
+                      kibana.space_ids: "{{ variables.spaceId }}"
+                  - term:
+                      rule_uuid: "{{ foreach.item.key }}"
+                  - term:
+                      kind: '{{ consts.KIND_DETECTION }}'
+                  - range:
+                      "@timestamp":
+                        gte: '{{ inputs.cooldown }}'
+        on-failure:
+          continue: true
+
+      - name: check_recent_clearance
+        # No kind filter — returns the most recent doc of any kind; is_recent_clearance
+        # then checks kind == KIND_QUIET. Do NOT add kind:quiet here — it would hide
+        # handled docs that act as timestamp barriers, allowing re-detection during cooldown.
+        if: "${{ steps.compute_rule_context.output.has_rule_uuid }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+          body:
+            size: 1
+            sort:
+              - "@timestamp":
+                  order: desc
+            query:
+              bool:
+                filter:
+                  - term:
+                      kibana.space_ids: "{{ variables.spaceId }}"
+                  - term:
+                      rule_uuid: "{{ foreach.item.key }}"
+                  - range:
+                      "@timestamp":
+                        gte: "now-{{ consts.RECENT_ACTIVITY_MINUTES }}m"
+        on-failure:
+          continue: true
+
+      - name: compute_rule_state
+        type: data.set
+        with:
+          latest_is_detection: >-
+            ${{ steps.check_active_result.output.hits.total.value > 0
+            and steps.check_active_result.output.hits.hits[0]._source.kind == consts.KIND_DETECTION }}
+          is_recent_active: >-
+            ${{ steps.check_recent_active.output.hits.total.value > 0
+            and steps.check_recent_active.output.hits.hits[0]._source.kind == consts.KIND_DETECTION }}
+          is_recent_clearance: >-
+            ${{ steps.check_recent_clearance.output.hits.total.value > 0
+            and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_QUIET }}
+
+      - name: compute_change_point_type
+        type: data.set
+        with:
+          detection_p_value: "${{ foreach.item.change_points.type[steps.compute_rule_context.output.change_point_type].p_value | default: 0 }}"
+          prior_type: "{% if steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_active.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detection_evidence.change_point_type | default: '' }}{% else %}{% endif %}"
+
+      - name: compute_event_signals
+        type: data.set
+        with:
+          has_change_point: >-
+            ${{ steps.compute_rule_context.output.change_point_type != ''
+            and steps.compute_rule_context.output.change_point_type != consts.CP_TYPE_STATIONARY }}
+          is_new_occurrence: >-
+            ${{ not steps.compute_rule_state.output.is_recent_active
+            and not steps.compute_rule_state.output.is_recent_clearance
+            and foreach.item.last_5m.doc_count > 0 }}
+          is_type_changed: >-
+            ${{ steps.compute_rule_context.output.change_point_type != steps.compute_change_point_type.output.prior_type
+            and not steps.compute_rule_state.output.is_recent_clearance
+            and foreach.item.last_5m.doc_count > 0 }}
+
+      - name: compute_gates
+        type: data.set
+        with:
+          has_active_detection: "${{ steps.compute_rule_state.output.latest_is_detection }}"
+          is_detectable: >-
+            ${{ steps.compute_event_signals.output.has_change_point
+            or steps.compute_rule_context.output.change_point_type == consts.CP_TYPE_STATIONARY
+            and steps.check_active_result.output.hits.total.value < 1
+            and foreach.item.doc_count >= consts.BOOTSTRAP_MIN_ALERT_COUNT }}
+          needs_new_event: >-
+            ${{ steps.check_recent_active.error != null
+            or steps.check_recent_clearance.error != null
+            or steps.compute_change_point_type.error != null
+            or steps.compute_event_signals.output.is_new_occurrence
+            or steps.compute_event_signals.output.is_type_changed }}
+
+      # Phase 2: Quick recovery
+      - name: run_quick_recovery
+        type: if
+        condition: "${{ steps.compute_rule_state.output.latest_is_detection }}"
+        steps:
+          - name: get_quick_recovery_change_point
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: '/{{ consts.ALERTS_INDEX }}/_search?ignore_unavailable=true'
+              body:
+                size: 0
+                query:
+                  bool:
+                    filter:
+                      - terms:
+                          kibana.space_ids:
+                            - "{{ variables.spaceId }}"
+                            - "*"
+                      - range:
+                          "@timestamp":
+                            gte: '{{ inputs.quickRecoveryLookback }}'
+                      - term:
+                          kibana.alert.rule.uuid: "{{ foreach.item.key }}"
+                aggs:
+                  over_time:
+                    date_histogram:
+                      field: "@timestamp"
+                      fixed_interval: '{{ inputs.bucketInterval }}'
+                      min_doc_count: 0
+                      extended_bounds:
+                        min: '{{ inputs.quickRecoveryLookback }}'
+                        max: "now"
+                  change_points:
+                    change_point:
+                      buckets_path: "over_time>_count"
+            on-failure:
+              continue: true
+
+          - name: compute_quick_recovery_type
+            type: data.set
+            with:
+              quick_recovery_type: "${{ steps.get_quick_recovery_change_point.output.aggregations.change_points.type | entries | map: 'key' | first | default: consts.CP_TYPE_INDETERMINABLE }}"
+
+          - name: get_quick_recovery_day_over_day
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: '/{{ consts.ALERTS_INDEX }}/_search?ignore_unavailable=true'
+              body:
+                size: 0
+                query:
+                  bool:
+                    filter:
+                      - terms:
+                          kibana.space_ids:
+                            - "{{ variables.spaceId }}"
+                            - "*"
+                      - term:
+                          kibana.alert.rule.uuid: "{{ foreach.item.key }}"
+                aggs:
+                  current_window:
+                    filter:
+                      range:
+                        "@timestamp":
+                          gte: '{{ inputs.quickRecoveryLookback }}'
+                  reference_window:
+                    filter:
+                      range:
+                        "@timestamp":
+                          gte: "now-1d{{ inputs.quickRecoveryLookback | remove: 'now' }}"
+                          lt: "now-1d"
+            on-failure:
+              continue: true
+
+          - name: compute_quick_recovery_thresholds
+            type: data.set
+            with:
+              quick_recovery_reference: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.reference_window.doc_count }}"
+              quick_recovery_current: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.current_window.doc_count }}"
+              quick_recovery_spike_threshold: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.reference_window.doc_count | times: 2 }}"
+              current_rate_scaled: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.current_window.doc_count | times: 60 }}"
+              detection_rate_scaled: "${{ steps.check_active_result.output.hits.hits[0]._source.peak_alert_count | times: 11 }}"
+
+          - name: check_quick_recovery_rate
+            type: data.set
+            with:
+              rate_back_to_historical: >-
+                ${{ steps.compute_quick_recovery_thresholds.output.quick_recovery_reference >= 1
+                and steps.compute_quick_recovery_thresholds.output.quick_recovery_current <= steps.compute_quick_recovery_thresholds.output.quick_recovery_spike_threshold }}
+              first_run_all_clear: >-
+                ${{ steps.compute_quick_recovery_thresholds.output.quick_recovery_reference < 1
+                and steps.compute_rule_context.output.change_point_type == consts.CP_TYPE_STATIONARY }}
+              first_run_rate_dropped: >-
+                ${{ steps.compute_quick_recovery_thresholds.output.quick_recovery_reference < 1
+                and steps.compute_quick_recovery_thresholds.output.current_rate_scaled <= steps.compute_quick_recovery_thresholds.output.detection_rate_scaled }}
+
+          - name: compute_quick_recovery_gate
+            type: data.set
+            with:
+              quick_recovery_rate_is_normal: >-
+                ${{ steps.check_quick_recovery_rate.output.rate_back_to_historical
+                or steps.check_quick_recovery_rate.output.first_run_all_clear
+                or steps.check_quick_recovery_rate.output.first_run_rate_dropped }}
+
+      # Phase 3: Gather activity metrics
+      - name: get_rule_activity
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.ALERTS_INDEX }}/_search?ignore_unavailable=true'
+          body:
+            size: 0
+            query:
+              bool:
+                filter:
+                  - terms:
+                      kibana.space_ids:
+                        - "{{ variables.spaceId }}"
+                        - "*"
+                  - term:
+                      kibana.alert.rule.uuid: "{{ foreach.item.key }}"
+                  - range:
+                      "@timestamp":
+                        gte: '{{ consts.ACTIVITY_HISTORY_LOOKBACK }}'
+            aggs:
+              activity_windows:
+                date_histogram:
+                  field: "@timestamp"
+                  fixed_interval: '{{ consts.ACTIVITY_WINDOW_INTERVAL }}'
+                  min_doc_count: 0
+              peak:
+                max_bucket:
+                  buckets_path: "activity_windows._count"
+        on-failure:
+          continue: true
+
+      # Phase 4: Write
+      - name: compute_write_signals
+        type: data.set
+        with:
+          peak_alert_count: "${{ steps.get_rule_activity.output.aggregations.peak.value | default: 0 }}"
+          resolution_lookback_minutes: "{% assign parent = steps.check_active_result.output.hits.hits[0]._source.resolution_lookback_minutes | default: 0 | plus: 0 %}{% if parent > 0 %}{{ parent }}{% else %}{%- assign peak = steps.get_rule_activity.output.aggregations.peak.value | default: 0 | at_least: 1 -%}{{ consts.RESOLUTION_WINDOW_MINUTES | divided_by: peak | at_least: consts.LOOKBACK_MINUTES_FLOOR | at_most: consts.LOOKBACK_MINUTES_CEILING }}{% endif %}"
+          is_quick_recovery: >-
+            ${{ steps.compute_quick_recovery_type.output.quick_recovery_type == consts.CP_TYPE_STATIONARY
+            and steps.compute_gates.output.has_active_detection
+            and steps.compute_quick_recovery_gate.output.quick_recovery_rate_is_normal
+            and steps.check_active_result.output.hits.hits[0]._source.detection_evidence.change_point_type != consts.CP_TYPE_STATIONARY
+            and foreach.item.last_5m.doc_count == 0 }}
+          is_stationary_recovery: >-
+            ${{ steps.compute_rule_context.output.change_point_type == consts.CP_TYPE_STATIONARY
+            and steps.compute_gates.output.has_active_detection
+            and steps.check_active_result.output.hits.hits[0]._source.detection_evidence.change_point_type != consts.CP_TYPE_STATIONARY
+            and foreach.item.last_5m.doc_count == 0
+            and steps.compute_quick_recovery_type.output.quick_recovery_type != consts.CP_TYPE_STATIONARY }}
+          is_quiet_stationary: >-
+            ${{ steps.compute_gates.output.has_active_detection
+            and foreach.item.last_5m.doc_count == 0
+            and steps.check_active_result.output.hits.hits[0]._source.peak_alert_count >= 30 }}
+
+      - name: compute_write_ids
+        # detection_id: carry over only when the episode is still open (most recent doc is kind:detection).
+        #   A kind:quiet or kind:handled doc after the detection means the episode closed; a re-fire
+        #   must start a fresh episode with a new id even if the change-point type differs.
+        # detected_at: same carry-over guard as detection_id.
+        # quiet_p_value: source differs by recovery type.
+        type: data.set
+        with:
+          detection_id: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detection_id }}{% else %}{{ foreach.item.key }}-{{ 'now' | date: '%Y%m%dT%H%M' }}{% endif %}"
+          detected_at: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detected_at | default: steps.check_recent_active.output.hits.hits[0]._source['@timestamp'] }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
+          quiet_p_value: "{% if steps.compute_write_signals.output.is_quick_recovery %}{{ steps.get_quick_recovery_change_point.output.aggregations.change_points.type.stationary.p_value | default: 0 }}{% elsif steps.compute_write_signals.output.is_stationary_recovery %}{{ foreach.item.change_points.type.stationary.p_value | default: 0 }}{% else %}0{% endif %}"
+
+      - name: write_detection_doc
+        # Two paths to a new detection doc:
+        # 1. change_point signal (or stationary bootstrap for brand-new rules) + needs_new_event
+        # 2. is_new_occurrence — quiet→active transition bypasses is_detectable because the
+        #    transition itself is the signal; no change_point edge needed.
+        #    doc_count guard keeps the bootstrap minimum consistent with path 1.
+        if: >-
+          ${{ steps.compute_rule_context.output.has_rule_uuid
+          and steps.compute_gates.output.is_detectable
+          and steps.compute_gates.output.needs_new_event
+          or steps.compute_rule_context.output.has_rule_uuid
+          and steps.compute_event_signals.output.is_new_occurrence }}
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          body:
+            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - "{{ variables.spaceId }}"
+            kind: '{{ consts.KIND_DETECTION }}'
+            alert_count: "${{ foreach.item.doc_count }}"
+            alert_index: "{{ consts.ALERTS_INDEX }}"
+            detection_evidence:
+              change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
+              p_value: "${{ steps.compute_change_point_type.output.detection_p_value }}"
+            detected_at: "{{ steps.compute_write_ids.output.detected_at }}"
+            detection_id: "{{ steps.compute_write_ids.output.detection_id }}"
+            peak_alert_count: "${{ steps.compute_write_signals.output.peak_alert_count }}"
+            resolution_lookback_minutes: "${{ steps.compute_write_signals.output.resolution_lookback_minutes | plus: 0 }}"
+            rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
+            rule_uuid: "{{ foreach.item.key }}"
+            rules_activity: "${{ steps.get_rule_activity.output.aggregations.activity_windows.buckets }}"
+            stream_name: "{{ foreach.item.stream.buckets[0].key }}"
+            workflow_execution_id: "{{ execution.id }}"
+        on-failure:
+          continue: true
+
+      - name: write_quiet_doc
+        if: >-
+          ${{ steps.compute_write_signals.output.is_quick_recovery
+          or steps.compute_write_signals.output.is_stationary_recovery
+          or steps.compute_write_signals.output.is_quiet_stationary }}
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          body:
+            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - "{{ variables.spaceId }}"
+            kind: '{{ consts.KIND_QUIET }}'
+            alert_index: "{{ consts.ALERTS_INDEX }}"
+            detection_evidence:
+              change_point_type: '{{ consts.CP_TYPE_STATIONARY }}'
+              p_value: "${{ steps.compute_write_ids.output.quiet_p_value }}"
+            detected_at: "{{ steps.check_active_result.output.hits.hits[0]._source.detected_at | default: steps.check_active_result.output.hits.hits[0]._source['@timestamp'] }}"
+            detection_id: "{{ steps.check_active_result.output.hits.hits[0]._source.detection_id }}"
+            resolution_lookback_minutes: "${{ steps.compute_write_signals.output.resolution_lookback_minutes | plus: 0 }}"
+            rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
+            rule_uuid: "{{ foreach.item.key }}"
+            stream_name: "{{ foreach.item.stream.buckets[0].key }}"
+            workflow_execution_id: "{{ execution.id }}"
+        on-failure:
+          continue: true

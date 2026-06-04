@@ -171,6 +171,31 @@ describe('extractReferencedStepIds', () => {
     expect(extractReferencedStepIds(node)).toEqual(new Set(['check']));
   });
 
+  it('should extract step ID from an exit-while node condition', () => {
+    const node = {
+      id: 'exit-while',
+      type: 'exit-while',
+      stepId: 'test_while',
+      stepType: 'while',
+      startNodeId: 'enter-while',
+      condition: '{{steps.check.output.done}}',
+    } as unknown as GraphNodeUnion;
+    expect(extractReferencedStepIds(node)).toEqual(new Set(['check']));
+  });
+
+  it('should extract step IDs from node template dependencies', () => {
+    const node = {
+      id: 'test-switch',
+      type: 'enter-switch',
+      stepId: 'test_switch',
+      stepType: 'switch',
+      exitNodeId: 'exit-switch',
+      configuration: { expression: '{{steps.expression_source.output}}' },
+      templateDependencies: ['{{steps.match_source.output}}'],
+    } as unknown as GraphNodeUnion;
+    expect(extractReferencedStepIds(node)).toEqual(new Set(['expression_source', 'match_source']));
+  });
+
   it('should extract step ID from an enter-continue node condition', () => {
     const node = {
       id: 'test-continue',

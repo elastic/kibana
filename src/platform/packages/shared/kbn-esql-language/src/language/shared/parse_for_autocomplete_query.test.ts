@@ -8,12 +8,21 @@
  */
 
 import { Walker } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstItem, ESQLSingleAstItem } from '@elastic/esql/types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import { isMarkerNode } from '../../commands/definitions/utils/ast';
-import { getAutocompleteCursorContext } from './parse_for_autocomplete_query';
+import {
+  findAutocompleteAstPosition,
+  getAutocompleteCursorContext,
+  parseAutocompleteQuery,
+} from './parse_for_autocomplete_query';
 
 function assertNoMarker(
-  node: ESQLSingleAstItem | ESQLAstAllCommands | undefined,
+  node: ESQLSingleAstItem | ESQLAstAllCommands | ESQLAstQueryExpression | undefined,
   query: string,
   label: string
 ) {
@@ -31,25 +40,63 @@ function assertNoMarker(
 }
 
 describe('getAutocompleteCursorContext', () => {
-  it('returns marker-free autocomplete context for incomplete expressions', () => {
-    const queries = [
-      'FROM employees | EVAL total = ',
-      'ROW total = ',
-      'FROM employees | EVAL total = ROUND(salary, ',
-      'FROM employees | WHERE age IN (1, ',
-    ];
+  const markerInsertionQueries = [
+    ['empty source command', 'FROM '],
+    ['source command after comma', 'FROM employees, '],
+    ['empty timeseries source command', 'TS '],
+    ['timeseries source command after comma', 'TS timeseries_index, '],
+    ['row assignment', 'ROW total = '],
+    ['eval assignment', 'FROM employees | EVAL total = '],
+    ['inline cast type', 'FROM employees | EVAL casted = keywordField::'],
+    ['function argument', 'FROM employees | EVAL total = ROUND(salary, '],
+    ['where binary expression', 'FROM employees | WHERE age > '],
+    ['where list value', 'FROM employees | WHERE age IN (1, '],
+    ['stats aggregation after comma', 'FROM employees | STATS total = SUM(salary), '],
+    ['stats where predicate', 'FROM employees | STATS MIN(salary) WHERE age > '],
+    ['fork branch expression', 'FROM employees | FORK (WHERE age > '],
+    ['grok field argument', 'FROM employees | GROK '],
+    ['dissect field argument', 'FROM employees | DISSECT '],
+    ['rerank on field list', 'FROM employees | RERANK "query" ON keywordField, '],
+    ['subquery expression', 'FROM (FROM employees | EVAL total = '],
+  ];
 
-    for (const query of queries) {
+  it.each(markerInsertionQueries)(
+    'returns marker-free autocomplete parse data for %s',
+    (_, query) => {
+      const parsed = parseAutocompleteQuery(query, query.length);
+
+      expect(parsed.innerText).toBe(query);
+      assertNoMarker(parsed.root, query, 'root');
+
+      const { root, command, node, option, containingFunction } = findAutocompleteAstPosition(
+        query,
+        query.length
+      );
+
+      assertNoMarker(root, query, 'root');
+      assertNoMarker(command, query, 'command');
+      assertNoMarker(node, query, 'node');
+      assertNoMarker(option, query, 'option');
+      assertNoMarker(containingFunction, query, 'containingFunction');
+
       const { astContext } = getAutocompleteCursorContext(query, query.length);
 
-      if (astContext.type !== 'expression') {
-        throw new Error(`Expected expression context for query: ${query}`);
-      }
-
+      assertNoMarker(astContext.astForContext, query, 'astForContext');
       assertNoMarker(astContext.command, query, 'command');
       assertNoMarker(astContext.node, query, 'node');
       assertNoMarker(astContext.option, query, 'option');
       assertNoMarker(astContext.containingFunction, query, 'containingFunction');
     }
+  );
+
+  it.each([
+    'FROM employees | EVAL total = ',
+    'ROW total = ',
+    'FROM employees | EVAL total = ROUND(salary, ',
+    'FROM employees | WHERE age IN (1, ',
+  ])('resolves an expression context (not just marker-free) for %s', (query) => {
+    const { astContext } = getAutocompleteCursorContext(query, query.length);
+
+    expect(astContext.type).toBe('expression');
   });
 });

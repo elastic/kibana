@@ -10,23 +10,24 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiButtonIcon,
+  EuiFlyout,
   EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
-  EuiFilePicker,
-  EuiSpacer,
-  EuiPanel,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFormRow,
-  EuiFieldText,
-  EuiCallOut,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -357,15 +358,22 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
   );
 
   const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
-    <EuiButtonIcon
-      iconType="trash"
-      aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
+    <EuiToolTip
+      content={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
         defaultMessage: 'Delete',
       })}
-      color={deleteDisabled ? 'text' : 'danger'}
-      disabled={deleteDisabled}
-      onClick={() => deleteJob(index)}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="trash"
+        aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
+          defaultMessage: 'Delete',
+        })}
+        color={deleteDisabled ? 'text' : 'danger'}
+        disabled={deleteDisabled}
+        onClick={() => deleteJob(index)}
+      />
+    </EuiToolTip>
   );
 
   if (isADEnabled === false && isDFAEnabled === false) {

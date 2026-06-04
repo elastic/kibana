@@ -17,6 +17,13 @@ import { createMemoryRecentChangesTool } from './memory_recent_changes';
 import type { MemoryToolsOptions } from './types';
 
 export type { MemoryToolsOptions } from './types';
+export { createMemorySearchTool } from './memory_search';
+export { createMemoryReadTool } from './memory_read';
+export { createMemoryWriteTool } from './memory_write';
+export { createMemoryPatchTool } from './memory_patch';
+export { createMemoryListTool } from './memory_list';
+export { createMemoryDeleteTool } from './memory_delete';
+export { createMemoryRecentChangesTool } from './memory_recent_changes';
 
 /**
  * All memory tool IDs.

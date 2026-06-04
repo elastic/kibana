@@ -111,6 +111,7 @@ describe('convertToWorkflowGraph - switch step', () => {
         stepId: 'testSwitchStep',
         stepType: 'switch',
         exitNodeId: 'exitSwitch_testSwitchStep',
+        templateDependencies: ['success', 'failure'],
         configuration: {
           name: 'testSwitchStep',
           type: 'switch',

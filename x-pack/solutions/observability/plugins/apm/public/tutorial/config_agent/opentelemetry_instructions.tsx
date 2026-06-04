@@ -47,7 +47,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
     {
       setting: 'OTEL_RESOURCE_ATTRIBUTES',
       value:
-        'service.name=<app-name>,service.version=<app-version>,deployment.environment=production',
+        'service.name=<app-name>,service.version=<app-version>,deployment.environment.name=production',
     },
   ];
 
@@ -117,7 +117,10 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
-                OTEL_EXPORTER_OTLP_ENDPOINT
+                {i18n.translate(
+                  'xpack.apm.openTelemetryInstructions.otelexporterotlpendpointLinkLabel',
+                  { defaultMessage: 'OTEL_EXPORTER_OTLP_ENDPOINT' }
+                )}
               </EuiLink>
             ),
             otelExporterOtlpHeaders: (
@@ -126,7 +129,10 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
-                OTEL_EXPORTER_OTLP_HEADERS
+                {i18n.translate(
+                  'xpack.apm.openTelemetryInstructions.otelexporterotlpheadersLinkLabel',
+                  { defaultMessage: 'OTEL_EXPORTER_OTLP_HEADERS' }
+                )}
               </EuiLink>
             ),
             otelResourceAttributes: (
@@ -135,7 +141,10 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
               >
-                OTEL_RESOURCE_ATTRIBUTES
+                {i18n.translate(
+                  'xpack.apm.openTelemetryInstructions.otelresourceattributesLinkLabel',
+                  { defaultMessage: 'OTEL_RESOURCE_ATTRIBUTES' }
+                )}
               </EuiLink>
             ),
           }}

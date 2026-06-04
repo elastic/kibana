@@ -12,12 +12,19 @@ export {
   ruleLastRunSchema,
   monitoringSchema,
   ruleResponseSchema,
+  ruleResponseInternalSchema,
   ruleSnoozeScheduleSchema,
   notifyWhenSchema,
   scheduleIdsSchema,
 } from './schemas/latest';
 
-export type { RuleResponse, RuleSnoozeSchedule, RuleLastRun, Monitoring } from './types/latest';
+export type {
+  RuleResponse,
+  RuleSnoozeSchedule,
+  RuleLastRun,
+  Monitoring,
+  RuleResponseInternal,
+} from './types/latest';
 
 export {
   actionParamsSchema as actionParamsSchemaV1,
@@ -26,6 +33,7 @@ export {
   ruleLastRunSchema as ruleLastRunSchemaV1,
   monitoringSchema as monitoringSchemaV1,
   ruleResponseSchema as ruleResponseSchemaV1,
+  ruleResponseInternalSchema as ruleResponseInternalSchemaV1,
   ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
   notifyWhenSchema as notifyWhenSchemaV1,
   scheduleIdsSchema as scheduleIdsSchemaV1,
@@ -38,6 +46,7 @@ export type {
   RuleSnoozeSchedule as RuleSnoozeScheduleV1,
   RuleLastRun as RuleLastRunV1,
   Monitoring as MonitoringV1,
+  RuleResponseInternal as RuleResponseInternalV1,
 } from './types/v1';
 
 export { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';

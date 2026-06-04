@@ -14,10 +14,12 @@ const baseConfig = {
   billing_url: '/billing/',
   deployments_url: '/user/deployments',
   deployment_url: '/abc123',
+  create_deployment_url: '/deployments/create',
   profile_url: '/user/settings/',
   organization_url: '/account/',
   performance_url: '/performance/',
   projects_url: '/projects/',
+  create_project_url: '/projects/create',
   users_and_roles_url: '/users_and_roles/',
 };
 
@@ -63,11 +65,13 @@ describe('Cloud Plugin URLs Service', () => {
       baseUrl: 'https://cloud.elastic.co',
       deploymentUrl: 'https://cloud.elastic.co/abc123',
       deploymentsUrl: 'https://cloud.elastic.co/user/deployments',
+      createDeploymentUrl: 'https://cloud.elastic.co/deployments/create',
       kibanaUrl: 'https://cloud.elastic.co/abc123/kibana',
       organizationUrl: 'https://cloud.elastic.co/account/',
       performanceUrl: 'https://cloud.elastic.co/performance/',
       profileUrl: 'https://cloud.elastic.co/user/settings/',
       projectsUrl: 'https://cloud.elastic.co/projects/',
+      createProjectUrl: 'https://cloud.elastic.co/projects/create',
       snapshotsUrl: 'https://cloud.elastic.co/abc123/elasticsearch/snapshots/',
     });
   });

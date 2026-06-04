@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: GetExampleScores
-      description: Get score documents for a specific example across runs
+      description: Get score documents for a specific example across experiments
       summary: Get example scores
       tags:
         - Evals API

@@ -6,7 +6,6 @@
  */
 
 import type { SnippetSet } from './languages';
-import type { VectorPath } from './snippets';
 
 export const HAVE_VECTORS_INGEST_SNIPPETS: SnippetSet = {
   python: `from elasticsearch import Elasticsearch
@@ -405,9 +404,3 @@ println!("{:#?}", body["hits"]["hits"]);`,
 
 foreach (var hit in response.Hits) Console.WriteLine(hit.Source);`,
 };
-
-export const getIngestSnippets = (path: VectorPath): SnippetSet =>
-  path === 'have-vectors' ? HAVE_VECTORS_INGEST_SNIPPETS : GENERATE_VECTORS_INGEST_SNIPPETS;
-
-export const getSearchSnippets = (path: VectorPath): SnippetSet =>
-  path === 'have-vectors' ? HAVE_VECTORS_SEARCH_SNIPPETS : GENERATE_VECTORS_SEARCH_SNIPPETS;

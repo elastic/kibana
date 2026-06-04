@@ -63,9 +63,7 @@ export class UserActionPersister {
   private readonly auditLogger: UserActionAuditLogger;
 
   constructor(private readonly context: ServiceContext) {
-    this.builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry: this.context.persistableStateAttachmentTypeRegistry,
-    });
+    this.builderFactory = new BuilderFactory();
 
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }

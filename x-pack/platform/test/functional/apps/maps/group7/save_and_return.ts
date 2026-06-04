@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Create maps from dashboard smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, header, maps, timePicker } = getPageObjects([
     'dashboard',

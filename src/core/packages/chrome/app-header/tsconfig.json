@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-http-browser",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/i18n",
+    "@kbn/use-observable",
+    "@kbn/core-chrome-browser-internal-types",
+    "@kbn/core-chrome-browser-mocks"
+  ]
+}

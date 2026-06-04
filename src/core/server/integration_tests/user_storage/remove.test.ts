@@ -110,12 +110,4 @@ describe('UserStorage remove() / null-merge behavior', () => {
     expect(await userStorage.get('test:string_a')).toBe('default_a');
     expect(await userStorage.get('test:string_b')).toBe('value_b');
   });
-
-  it('getAll() treats null the same as undefined (returns default)', async () => {
-    await userStorage.set('test:string_a', 'custom_value');
-    await userStorage.remove('test:string_a');
-
-    const all = await userStorage.getAll();
-    expect(all['test:string_a']).toBe('default_a');
-  });
 });

@@ -102,4 +102,59 @@ describe('generateYamlSchemaFromConnectors', () => {
       ).toThrow();
     });
   });
+
+  describe('lazy step union memoization', () => {
+    it('returns the same discriminated union instance across visits', () => {
+      const connectors: ConnectorContractUnion[] = [
+        {
+          summary: 'A',
+          description: null,
+          type: 'a.step',
+          paramsSchema: z.object({}),
+          outputSchema: z.unknown(),
+        },
+        {
+          summary: 'B',
+          description: null,
+          type: 'b.step',
+          paramsSchema: z.object({}),
+          outputSchema: z.unknown(),
+        },
+      ];
+
+      const schema = generateYamlSchemaFromConnectors(connectors) as z.ZodObject;
+      const stepsArray = schema.shape.steps as z.ZodArray<z.ZodLazy<z.ZodType>>;
+      const lazy = stepsArray.def.element as z.ZodLazy<z.ZodType>;
+      const getter = (lazy as unknown as { _def: { getter: () => z.ZodType } })._def.getter;
+
+      const first = getter();
+      const second = getter();
+      // Required for `z.toJSONSchema({ reused: 'ref' })` to dedupe via `$ref`.
+      expect(first).toBe(second);
+    });
+
+    it('rejects a malformed `steps` mapping quickly', () => {
+      const connectors: ConnectorContractUnion[] = Array.from({ length: 40 }, (_, i) => ({
+        summary: `Connector ${i}`,
+        description: null,
+        type: `conn.${i}`,
+        paramsSchema: z.object({ message: z.string().optional() }),
+        outputSchema: z.unknown(),
+      }));
+
+      const schema = generateYamlSchemaFromConnectors(connectors);
+
+      // Shape produced by pasting steps without a leading dash: `steps`
+      // becomes a map instead of an array.
+      const start = Date.now();
+      const result = schema.safeParse({
+        ...BASE_WORKFLOW,
+        steps: { name: 'filter_results', type: 'conn.0' },
+      });
+      const elapsed = Date.now() - start;
+
+      expect(result.success).toBe(false);
+      expect(elapsed).toBeLessThan(500);
+    });
+  });
 });

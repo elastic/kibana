@@ -28,6 +28,10 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'alertingV2.episodeAssigned',
+    schemaHash: 'fce48752c788e4620a70cf8d33040117c7a46c78508a5cf98c5c0fa93f631ad0',
+  },
+  {
     id: 'cases.caseCreated',
     schemaHash: '5b562db9463664a1e28ff2f3ee7edec229e83912569190cd8a83f53d38da9ed8',
   },

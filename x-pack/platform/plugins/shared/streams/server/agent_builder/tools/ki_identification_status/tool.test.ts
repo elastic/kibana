@@ -5,43 +5,69 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { ExecutionStatus } from '@kbn/workflows';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext } from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
   const setup = () => {
-    const { getScopedClients, taskClient } = createMockGetScopedClients();
-    const tool = createKiIdentificationStatusTool({ getScopedClients });
+    const managementApi = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        results: [
+          {
+            id: 'exec-1',
+            status: ExecutionStatus.COMPLETED,
+            startedAt: '2026-01-01T00:00:00Z',
+            finishedAt: '2026-01-01T00:01:00Z',
+            error: null,
+          },
+        ],
+      }),
+      getWorkflowExecution: jest.fn().mockResolvedValue({
+        context: {
+          output: {
+            featuresSkipped: false,
+            discoveredFeatures: ['f1'],
+            featuresConnectorUsed: 'c1',
+            queriesSkipped: false,
+            persistedQueries: ['q1'],
+            queriesConnectorUsed: 'c2',
+          },
+        },
+      }),
+    };
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: managementApi as never,
+    });
+
+    const tool = createKiIdentificationStatusTool({
+      streamsKIsOnboardingClient,
+    });
     const context = createMockToolContext();
-    return { tool, context, taskClient };
+    return { tool, context, managementApi };
   };
 
   it('returns onboarding status for stream', async () => {
-    const { tool, context, taskClient } = setup();
-    taskClient.getStatus.mockResolvedValueOnce({
-      status: TaskStatus.Completed,
-    });
+    const { tool, context } = setup();
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
-
-    expect(taskClient.getStatus).toHaveBeenCalledWith('streams_onboarding_logs.nginx');
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
           stream_name: 'logs.nginx',
-          task_id: 'streams_onboarding_logs.nginx',
-          status: TaskStatus.Completed,
+          status: StreamsKIsOnboardingStatus.Completed,
         })
       );
     }
   });
 
   it('returns error result when status retrieval fails', async () => {
-    const { tool, context, taskClient } = setup();
-    taskClient.getStatus.mockRejectedValueOnce(new Error('boom'));
+    const { tool, context, managementApi } = setup();
+    managementApi.getWorkflowExecutions.mockRejectedValueOnce(new Error('boom'));
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 

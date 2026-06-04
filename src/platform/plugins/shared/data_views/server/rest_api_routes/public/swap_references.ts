@@ -110,7 +110,7 @@ export const swapReferencesRoute =
                   },
                 }),
                 forId: schema.maybe(
-                  schema.oneOf([idSchema, schema.arrayOf(idSchema)], {
+                  schema.oneOf([idSchema, schema.arrayOf(idSchema, { maxSize: 10_000 })], {
                     meta: {
                       description:
                         'Limit the swap to specific saved objects. Can be a single ID or an array of IDs.',
@@ -150,6 +150,7 @@ export const swapReferencesRoute =
                         }),
                       }),
                       {
+                        maxSize: 10_000,
                         meta: {
                           description:
                             'The list of saved objects whose references were updated (or would be updated in a preview).',

@@ -63,7 +63,8 @@ This documentation is organized into the following sections:
 * [Structure](saved-objects/structure.md) — Parts of a Saved Object type definition (name, index pattern, mappings, model versions) and the structure of a model version.
 * [Create a type](saved-objects/create.md) — Register a new Saved Object type, define mappings and references, and define the initial model version.
 * [Update a type](saved-objects/update.md) — Upgrade existing Saved Object types (legacy transition and new model versions).
-* [Validate type changes](saved-objects/validate.md) — Test model versions, ensure safe type definition changes, and troubleshoot validation failures.
+* [Validate type changes](saved-objects/validate.md) — Test model versions and ensure safe type definition changes.
+* [Troubleshooting validation](saved-objects/troubleshooting.md) — Resolve CI failures and startup errors from Saved Object type checks.
 * [Delete a type](saved-objects/delete.md) — Remove a Saved Object type registration.
 * [CRUD operations](saved-objects/use.md) — Perform CRUD on Saved Object instances via the Core service (create, get, find, update, delete). Do not use the deprecated HTTP API.
 * [Export and import](saved-objects/export.md) — Exporting and importing Saved Object documents.

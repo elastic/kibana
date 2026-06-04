@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import {
-  compositeSloIdSchema,
-  compositeSloBaseDefinitionSchema,
-  compositeSloMemberSummarySchema,
-  compositeSloSummarySchema,
-} from '../../../schema/composite_slo';
+import { compositeSloIdSchema } from '../../../schema/composite_slo';
 
 const getCompositeSLOParamsSchema = z.object({
   path: z.object({
@@ -18,12 +13,4 @@ const getCompositeSLOParamsSchema = z.object({
   }),
 });
 
-const getCompositeSLOResponseSchema = compositeSloBaseDefinitionSchema.extend({
-  summary: compositeSloSummarySchema,
-  members: z.array(compositeSloMemberSummarySchema),
-});
-
-type GetCompositeSLOResponse = z.infer<typeof getCompositeSLOResponseSchema>;
-
-export { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema };
-export type { GetCompositeSLOResponse };
+export { getCompositeSLOParamsSchema };

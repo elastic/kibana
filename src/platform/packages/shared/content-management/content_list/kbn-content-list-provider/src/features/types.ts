@@ -163,6 +163,15 @@ export interface ContentListFeatures {
   flags?: FlagDefinition[];
 
   /**
+   * Toolbar filter configs compiled by a provider variant.
+   *
+   * Internal pass-through from a provider to {@link `@kbn/content-list-toolbar`};
+   * the toolbar narrows each value to `SearchFilterConfig` at the consumption
+   * site, keeping the EUI dependency out of this base package's public types.
+   */
+  toolbarFilters?: Record<string, unknown>;
+
+  /**
    * Content editor configuration. See {@link ContentEditorFeatureConfig}.
    * Populated automatically by the client provider.
    */

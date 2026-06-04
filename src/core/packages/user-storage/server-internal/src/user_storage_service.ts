@@ -74,6 +74,19 @@ export class UserStorageService {
               `userStorage key [${key}] has a defaultValue that does not match its schema: ${message}`
             );
           }
+          if (definition.schema.safeParse(undefined).success) {
+            throw new Error(
+              `userStorage key [${key}] schema must not accept undefined. ` +
+                `undefined is reserved for absent cache entries and JSON.stringify omits ` +
+                `undefined properties, so it cannot be a reliable stored value.`
+            );
+          }
+          if (definition.schema.safeParse(null).success) {
+            throw new Error(
+              `userStorage key [${key}] schema must not accept null. ` +
+                `null is reserved as the removal tombstone in the underlying storage layer.`
+            );
+          }
           this.definitions.set(key, definition);
         }
       },

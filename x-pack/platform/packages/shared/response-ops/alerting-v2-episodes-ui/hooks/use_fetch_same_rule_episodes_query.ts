@@ -9,6 +9,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
+import { QUERY_STALE_TIME } from '../constants';
 import { useSpaceId } from './use_space_id';
 import {
   buildRelatedBaseQuery,
@@ -94,6 +95,7 @@ export const useFetchSameRuleEpisodesQuery = ({
       });
     },
     enabled: Boolean(ruleId && excludeEpisodeId),
+    staleTime: QUERY_STALE_TIME,
     onError: () => {
       toastDanger?.(RELATED_EPISODES_LOAD_ERROR);
     },

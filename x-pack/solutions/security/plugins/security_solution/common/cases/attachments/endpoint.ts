@@ -27,21 +27,31 @@ const EndpointTargetSchema = z
 const EndpointAttachmentMetadataSchema = z
   .object({
     command: z.string(),
-    comment: z.string(),
     targets: z.array(EndpointTargetSchema).min(1, 'targets must contain at least one entry'),
   })
   .strict();
+
+const EndpointAttachmentDataSchema = z.object({ content: z.string() }).strict();
 
 /**
  * Full unified-payload schema for `security.endpoint`. Registered on the unified
  * registry via `schema:` so the cases plugin validates the entire payload (not
  * just the metadata slice). Strict objects reject unknown keys.
+ *
+ * `attachmentId` semantics: for new `security.endpoint` writes this is the
+ * response-action id and is safe to use to deep-link / fetch action details.
+ * For rows projected from the retired legacy `actions` type, `attachmentId` is
+ * a synthetic sentinel (`'legacy-actions'`, see `LEGACY_ACTIONS_SYNTHETIC_ATTACHMENT_ID`
+ * in cases/server/common/attachments/actions.ts) — the legacy shape carried no
+ * foreign-reference id, so any feature that keys off `attachmentId` to fetch
+ * action details must guard for the sentinel or those rows will dead-link.
  */
 export const EndpointAttachmentPayloadSchema = z
   .object({
     type: z.literal(SECURITY_ENDPOINT_ATTACHMENT_TYPE),
     owner: z.string(),
     attachmentId: z.string(),
+    data: EndpointAttachmentDataSchema,
     metadata: EndpointAttachmentMetadataSchema,
   })
   .strict();
@@ -49,3 +59,4 @@ export const EndpointAttachmentPayloadSchema = z
 export type EndpointAttachmentPayload = z.infer<typeof EndpointAttachmentPayloadSchema>;
 export type EndpointAttachmentMetadata = EndpointAttachmentPayload['metadata'];
 export type EndpointAttachmentTarget = EndpointAttachmentMetadata['targets'][number];
+export type EndpointAttachmentData = EndpointAttachmentPayload['data'];

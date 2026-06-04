@@ -148,6 +148,45 @@ describe('findAttackDiscoveriesRoute', () => {
     expect(throwValidationError).toHaveBeenCalled();
   });
 
+  it('returns 400 if both shared and include_all_authors are provided', async () => {
+    const req = {
+      ...mockRequest,
+      query: {
+        ...(mockRequest.query as Record<string, unknown>),
+        shared: true,
+        include_all_authors: true,
+      },
+    };
+
+    await getHandler(mockContext, req, mockResponse);
+
+    expect(mockResponse.custom).toHaveBeenCalledWith({
+      body: Buffer.from(
+        JSON.stringify({
+          message: 'The parameters "shared" and "include_all_authors" are mutually exclusive.',
+          status_code: 400,
+        })
+      ),
+      headers: expect.any(Object),
+      statusCode: 400,
+    });
+  });
+
+  it('passes includeAllAuthors to the data client when the request provides include_all_authors', async () => {
+    const req = {
+      ...mockRequest,
+      query: {
+        ...(mockRequest.query as Record<string, unknown>),
+        include_all_authors: true,
+      },
+    };
+
+    await getHandler(mockContext, req, mockResponse);
+
+    const callArg = mockDataClient.findAttackDiscoveryAlerts.mock.calls[0][0];
+    expect(callArg.findAttackDiscoveryAlertsParams.includeAllAuthors).toBe(true);
+  });
+
   it('passes withReplacements: true to the data client when the request provides with_replacements: true', async () => {
     const req = {
       ...mockRequest,

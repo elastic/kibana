@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
 
         await dashboard.switchToEditMode();
-        await dashboard.modifyExistingDashboardDetails(dashboardNameFlyout);
+        await dashboard.modifySettings({ title: dashboardNameFlyout });
       });
     });
   });

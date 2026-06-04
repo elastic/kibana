@@ -8,6 +8,8 @@
  */
 
 export type * from './types';
+export type * from './toolkit';
+export { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export {

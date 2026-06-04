@@ -14,16 +14,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['settings']);
+  const PageObjects = getPageObjects(['settings', 'header']);
   const es = getService('es');
 
   describe('index pattern filter', function describeIndexTests() {
+    let logstashDataViewId: string;
+
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.createIndexPattern('logstash-*');
+      logstashDataViewId = await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function () {
@@ -32,9 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should filter indexed fields by type', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
       await PageObjects.settings.getFieldTypes();
       await PageObjects.settings.setFieldTypeFilter('keyword');
 
@@ -60,9 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should filter indexed fields by schema type', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
       await PageObjects.settings.addRuntimeField('_test', 'keyword', "emit('hi')");
 
@@ -91,9 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should filter indexed fields when searched', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
       const unfilteredFields = [
         '@message',
@@ -135,8 +131,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should set "conflict" filter when "View conflicts" button is pressed', async function () {
       const additionalIndexWithWrongMapping = 'logstash-wrong';
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
 
       if (await es.indices.exists({ index: additionalIndexWithWrongMapping })) {
         await es.indices.delete({ index: additionalIndexWithWrongMapping });
@@ -161,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         refresh: 'wait_for',
       });
 
-      await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.navigateToDataViewById(logstashDataViewId);
 
       await PageObjects.settings.refreshDataViewFieldList();
 

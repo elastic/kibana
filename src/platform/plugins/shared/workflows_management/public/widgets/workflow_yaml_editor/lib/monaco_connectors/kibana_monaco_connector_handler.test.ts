@@ -15,6 +15,7 @@ import {
   parseStepNodeFromListYaml,
 } from './test_utils/mock_factories';
 import type { ConnectorExamples } from '../monaco_providers/provider_interfaces';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 jest.mock('../../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
@@ -32,6 +33,7 @@ describe('KibanaMonacoConnectorHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockStabilityBadgeThemeForTests();
 
     getAllConnectors.mockReturnValue([
       {
@@ -118,7 +120,10 @@ describe('KibanaMonacoConnectorHandler', () => {
       const result = await handler.generateHoverContent(context);
 
       expect(result).not.toBeNull();
-      expect(result?.value).toContain('Tech Preview');
+      expect(result?.value).toContain('Tech preview');
+      expect(result?.value.indexOf('<img src="data:image/svg+xml,')).toBeLessThan(
+        result!.value.indexOf('**Endpoint**')
+      );
     });
 
     it('should return null when connector is not found', async () => {

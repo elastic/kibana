@@ -30,6 +30,20 @@ const makeBulkError = (id: string, statusCode: number, message: string) => ({
   error: { statusCode, message } as unknown as SavedObjectError,
 });
 
+const makeBulkRemoveStatus = (
+  workflowId: string,
+  success: boolean,
+  statusCode?: number,
+  message?: string
+) => ({
+  id: `workflow:${workflowId}:scheduled`,
+  type: 'task',
+  success,
+  ...(success || statusCode === undefined
+    ? {}
+    : { error: { statusCode, message: message ?? '' } as unknown as SavedObjectError }),
+});
+
 const mockLogger: Logger = {
   debug: jest.fn(),
   info: jest.fn(),
@@ -47,7 +61,8 @@ const makeMockTaskManager = (
   ({
     schedule: jest.fn().mockResolvedValue(makeTaskInstance('test-task-id')),
     fetch: jest.fn().mockResolvedValue(makeFetchResult([])),
-    bulkRemove: jest.fn().mockResolvedValue(undefined),
+    bulkRemove: jest.fn().mockResolvedValue({ statuses: [] }),
+    removeIfExists: jest.fn().mockResolvedValue(undefined),
     bulkUpdateSchedules: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
     ...overrides,
   } as any);
@@ -77,6 +92,10 @@ const makeWorkflow = (overrides?: Partial<EsWorkflow>): EsWorkflow => ({
 });
 
 describe('WorkflowTaskScheduler', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('scheduleWorkflowTasks', () => {
     it('schedules a task for each scheduled trigger and returns task IDs', async () => {
       const mockTm = makeMockTaskManager();
@@ -278,56 +297,97 @@ describe('WorkflowTaskScheduler', () => {
   });
 
   describe('unscheduleWorkflowTasks', () => {
-    it('fetches and removes tasks for the given workflow', async () => {
+    it('removes scheduled task by id', async () => {
       const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockResolvedValueOnce(makeFetchResult(['task-1', 'task-2']));
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
       await scheduler.unscheduleWorkflowTasks('wf-1');
 
-      expect(mockTm.fetch).toHaveBeenCalledWith({
-        query: {
-          bool: {
-            must: [
-              { term: { 'task.taskType': 'workflow:scheduled' } },
-              { ids: { values: ['task:workflow:wf-1:scheduled'] } },
-            ],
-          },
-        },
-      });
-      expect(mockTm.bulkRemove).toHaveBeenCalledWith(['task-1', 'task-2']);
-      expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('Unscheduled 2 tasks'));
-    });
-
-    it('does not call bulkRemove when no tasks found', async () => {
-      const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockResolvedValueOnce(makeFetchResult([]));
-      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
-
-      await scheduler.unscheduleWorkflowTasks('wf-1');
-
+      expect(mockTm.fetch).not.toHaveBeenCalled();
       expect(mockTm.bulkRemove).not.toHaveBeenCalled();
+      expect(mockTm.removeIfExists).toHaveBeenCalledWith('workflow:wf-1:scheduled');
     });
 
-    it('logs error and re-throws when fetch fails', async () => {
+    it('logs error and re-throws when removeIfExists fails', async () => {
       const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockRejectedValueOnce(new Error('ES unavailable'));
-      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
-
-      await expect(scheduler.unscheduleWorkflowTasks('wf-1')).rejects.toThrow('ES unavailable');
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to unschedule tasks for workflow wf-1')
-      );
-    });
-
-    it('logs error and re-throws when bulkRemove fails', async () => {
-      const mockTm = makeMockTaskManager();
-      mockTm.fetch.mockResolvedValueOnce(makeFetchResult(['task-1']));
-      mockTm.bulkRemove.mockRejectedValueOnce(new Error('remove failed'));
+      mockTm.removeIfExists.mockRejectedValueOnce(new Error('remove failed'));
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
 
       await expect(scheduler.unscheduleWorkflowTasks('wf-1')).rejects.toThrow('remove failed');
       expect(mockLogger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkUnscheduleWorkflowTasks', () => {
+    it('bulk-removes scheduled tasks by id', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.bulkRemove.mockResolvedValueOnce({
+        statuses: [makeBulkRemoveStatus('wf-1', true), makeBulkRemoveStatus('wf-2', true)],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await scheduler.bulkUnscheduleWorkflowTasks(['wf-1', 'wf-2']);
+
+      expect(mockTm.fetch).not.toHaveBeenCalled();
+      expect(mockTm.bulkRemove).toHaveBeenCalledWith([
+        'workflow:wf-1:scheduled',
+        'workflow:wf-2:scheduled',
+      ]);
+    });
+
+    it('does nothing when workflowIds is empty', async () => {
+      const mockTm = makeMockTaskManager();
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await scheduler.bulkUnscheduleWorkflowTasks([]);
+
+      expect(mockTm.bulkRemove).not.toHaveBeenCalled();
+    });
+
+    it('ignores 404 from bulkRemove', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.bulkRemove.mockResolvedValueOnce({
+        statuses: [makeBulkRemoveStatus('wf-1', true), makeBulkRemoveStatus('wf-2', false, 404)],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await scheduler.bulkUnscheduleWorkflowTasks(['wf-1', 'wf-2']);
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('logs warnings for non-404 failures without throwing', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          makeBulkRemoveStatus('wf-1', true),
+          makeBulkRemoveStatus('wf-2', false, 500, 'delete failed'),
+          makeBulkRemoveStatus('wf-3', false, 503, 'unavailable'),
+        ],
+      });
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await expect(
+        scheduler.bulkUnscheduleWorkflowTasks(['wf-1', 'wf-2', 'wf-3'])
+      ).resolves.toBeUndefined();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to unschedule tasks for deleted workflow wf-2')
+      );
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to unschedule tasks for deleted workflow wf-3')
+      );
+    });
+
+    it('logs error but does not throw when bulkRemove fails', async () => {
+      const mockTm = makeMockTaskManager();
+      mockTm.bulkRemove.mockRejectedValueOnce(new Error('ES unavailable'));
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      await expect(scheduler.bulkUnscheduleWorkflowTasks(['wf-1'])).resolves.toBeUndefined();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to bulk unschedule workflow tasks')
+      );
     });
   });
 
@@ -339,7 +399,7 @@ describe('WorkflowTaskScheduler', () => {
       await scheduler.updateWorkflowTasks(makeWorkflow(), 'default', mockRequest);
 
       expect(mockTm.fetch).not.toHaveBeenCalled();
-      expect(mockTm.bulkRemove).not.toHaveBeenCalled();
+      expect(mockTm.removeIfExists).not.toHaveBeenCalled();
       expect(mockTm.schedule).toHaveBeenCalledTimes(1);
     });
   });

@@ -70,7 +70,8 @@ const checkViewLikeSourceForTimestamp = async ({
 const resolveTimeField = async (
   client: ElasticsearchClient,
   query: string,
-  logger: Logger
+  logger: Logger,
+  isServerless: boolean
 ): Promise<{ timeField: string | undefined }> => {
   // Query is of the form "from index | where timefield >= ?_tstart".
   // At this point we just want to extract the timefield if present in the query
@@ -89,16 +90,19 @@ const resolveTimeField = async (
   const subqueryArgs = sourceCommand.args.filter(isSubQuery);
   const hasSubqueries = subqueryArgs.length > 0;
   const service = new EsqlService({ client });
-  const { views } = await service.getViews().catch((viewsError) => {
-    const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
-    logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
-      tags: ['esql', 'timefield', 'views'],
-      error: {
-        stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
-      },
-    });
-    return { views: [] };
-  });
+  // TODO: Remove this once views are available in serverless
+  const { views } = isServerless
+    ? { views: [] }
+    : await service.getViews().catch((viewsError) => {
+        const message = viewsError instanceof Error ? viewsError.message : String(viewsError);
+        logger.error(`Failed to fetch ES|QL views while resolving timefield: ${message}`, {
+          tags: ['esql', 'timefield', 'views'],
+          error: {
+            stack_trace: viewsError instanceof Error ? viewsError.stack : undefined,
+          },
+        });
+        return { views: [] };
+      });
   const viewNames = new Set(views.map(({ name }) => name));
   const splitSources = sources
     .split(',')
@@ -174,7 +178,8 @@ const resolveTimeField = async (
 
 export const registerGetTimeFieldRoute = (
   router: IRouter,
-  { logger }: PluginInitializerContext
+  { logger }: PluginInitializerContext,
+  isServerless: boolean
 ) => {
   router.post(
     {
@@ -197,7 +202,7 @@ export const registerGetTimeFieldRoute = (
       const client = core.elasticsearch.client.asCurrentUser;
 
       try {
-        const body = await resolveTimeField(client, query, logger.get());
+        const body = await resolveTimeField(client, query, logger.get(), isServerless);
         esqlRouteRequestCounter.add(1, {
           route: 'timefield',
           outcome: 'success',

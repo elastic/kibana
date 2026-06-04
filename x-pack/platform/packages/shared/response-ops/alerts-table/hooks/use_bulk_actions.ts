@@ -23,12 +23,15 @@ import type {
   BulkActionsReducerAction,
   TimelineItem,
   BulkEditTagsFlyoutState,
+  BulkAddToChatConfig,
+  OpenChatService,
 } from '../types';
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
+  ADD_TO_CHAT,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
   EDIT_TAGS,
   MARK_AS_UNTRACKED,
@@ -49,6 +52,8 @@ interface BulkActionsProps {
   hideBulkActions?: boolean;
   application: ApplicationStart;
   casesService?: CasesService;
+  agentBuilderService?: OpenChatService;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
   http: HttpStart;
   notifications: NotificationsStart;
 }
@@ -408,6 +413,45 @@ export const useBulkMuteActions = ({
   );
 };
 
+export const useBulkAddToChatActions = ({
+  agentBuilderService,
+  bulkAddToChatConfig,
+}: {
+  agentBuilderService?: OpenChatService;
+  bulkAddToChatConfig?: BulkAddToChatConfig;
+}) => {
+  const { convertAlertToAttachment, initialMessage, onAddedToChat } = bulkAddToChatConfig ?? {};
+
+  const onAddToChatClick = useCallback(
+    (alerts?: TimelineItem[]) => {
+      if (!agentBuilderService || !convertAlertToAttachment) return;
+      const items = alerts ?? [];
+      agentBuilderService.openChat({
+        autoSendInitialMessage: false,
+        newConversation: true,
+        initialMessage,
+        attachments: convertAlertToAttachment(items),
+      });
+      onAddedToChat?.(items.length);
+    },
+    [agentBuilderService, convertAlertToAttachment, initialMessage, onAddedToChat]
+  );
+
+  return useMemo(() => {
+    if (!agentBuilderService || !convertAlertToAttachment) return [];
+    return [
+      {
+        label: ADD_TO_CHAT,
+        key: 'bulk-add-to-chat',
+        disableOnQuery: true,
+        disabledLabel: ADD_TO_CHAT,
+        'data-test-subj': 'bulk-add-to-chat',
+        onClick: onAddToChatClick,
+      },
+    ];
+  }, [agentBuilderService, convertAlertToAttachment, onAddToChatClick]);
+};
+
 const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
@@ -422,6 +466,8 @@ export function useBulkActions({
   notifications,
   application,
   casesService,
+  agentBuilderService,
+  bulkAddToChatConfig,
 }: BulkActionsProps): UseBulkActions {
   const {
     bulkActionsStore: [bulkActionsState, updateBulkActionsState],
@@ -491,16 +537,28 @@ export function useBulkActions({
           },
         ];
   }, [tagsAction, application?.capabilities]);
+  const addToChatActions = useBulkAddToChatActions({
+    agentBuilderService,
+    bulkAddToChatConfig,
+  });
 
   const initialItems = useMemo(() => {
     const isSiem = ruleTypeIds?.some(isSiemRuleType);
     return [
       ...caseBulkActions,
+      ...addToChatActions,
       ...(isSiem ? [] : untrackBulkActions),
       ...(isSiem ? [] : tagsBulkActions),
       ...(isSiem ? [] : muteBulkActions),
     ];
-  }, [caseBulkActions, ruleTypeIds, untrackBulkActions, tagsBulkActions, muteBulkActions]);
+  }, [
+    caseBulkActions,
+    ruleTypeIds,
+    untrackBulkActions,
+    tagsBulkActions,
+    muteBulkActions,
+    addToChatActions,
+  ]);
 
   const bulkActions = useMemo(() => {
     if (hideBulkActions) {

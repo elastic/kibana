@@ -30,3 +30,10 @@ export {
   LIQUID_ALLOWED_TAGS,
   createWorkflowLiquidEngine,
 } from './create_workflow_liquid_engine/create_workflow_liquid_engine';
+export {
+  pickManagedWorkflowFields,
+  toManagedWorkflowTelemetryFields,
+  type ManagedWorkflowFields,
+  type ManagedWorkflowFieldsSource,
+  type ManagedWorkflowTelemetryFields,
+} from './pick_managed_workflow_fields/pick_managed_workflow_fields';

@@ -1,4 +1,75 @@
 {
-  "sha1": "c4f42589b585a44d63e5eb75ba5eb736ec4d8efa",
-  "tests": []
+  "sha1": "41163a7654400565a3114df627295fcb119991eb",
+  "tests": [
+    {
+      "id": "993254e341ff769-79593c552c24fe9",
+      "title": "Machine Learning feature controls global:all sees Machine Learning navlink and ml management entry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 35,
+        "column": 10
+      }
+    },
+    {
+      "id": "993254e341ff769-2ba615175b3a3b1",
+      "title": "Machine Learning feature controls ml:read sees Machine Learning navlink with read-only ML capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "993254e341ff769-c0674ec3f3659af",
+      "title": "Machine Learning feature controls discover:read alone does NOT see Machine Learning navlink",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "993254e341ff769-b12769be88ed310",
+      "title": "Machine Learning feature controls global:all sees Machine Learning navlink in a space where ML is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 86,
+        "column": 10
+      }
+    },
+    {
+      "id": "993254e341ff769-b3acf852a33d0b8",
+      "title": "Machine Learning feature controls global:all does NOT see Machine Learning navlink in a space where ML is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 102,
+        "column": 10
+      }
+    }
+  ]
 }

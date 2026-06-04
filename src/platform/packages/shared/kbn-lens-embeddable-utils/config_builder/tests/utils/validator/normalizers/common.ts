@@ -11,9 +11,16 @@ import { orderBy } from 'lodash';
 
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
-import type { FormBasedPersistedState, TextBasedPersistedState } from '@kbn/lens-common';
+import type {
+  FormBasedPersistedState,
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+
+import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -23,9 +30,12 @@ import type { LensAttributes } from '../../../../types';
 import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
-import { generateAdHocDataViewId } from '../../../../transforms/utils';
+import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const COMMON_STATE_IGNORE_PATHS = [
+  'savedObjectId', // panel-level SO reference, not part of LensAttributes
   'type', // misplaced type, see https://github.com/elastic/kibana/issues/245683
   'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
@@ -40,22 +50,43 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.formBased.layers.*.columns.*.scale', // conditionally set for data columns
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
-  'state.datasourceStates.textBased.layers.*.columns.*.meta.esType',
+  'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
+  'state.datasourceStates.textBased.layers.*.allColumns', // runtime-only property, not persisted or produced by transform
+  'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
   // TODO: check missing/different properties on adHocDataViews
+  'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
   'state.adHocDataViews.*.fieldAttrs',
   'state.adHocDataViews.*.managed',
-  'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
+  'state.adHocDataViews.*.allowNoIndex', // hardcoded to false by transform; if original was true, missing indices would error instead of returning empty
+  'state.adHocDataViews.*.allowHidden', // hardcoded to false by transform; if original was true, hidden indices would no longer be queried
+  'state.adHocDataViews.*.fieldFormats', // custom field formats (e.g. url formatters) will be lost
+  'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
 
 export type IdRemapping = Array<[old: string | undefined, new: string]>;
 
-function normalizeAdHocDataViews(attributes: LensAttributes) {
-  if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
-    delete attributes.state.adHocDataViews;
-  }
+/**
+ * Resolve the form-based datasource state, falling back to the legacy
+ * `indexpattern` key.
+ */
+export const getFormBasedDatasourceState = (
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): FormBasedPersistedState | undefined =>
+  datasourceStates.formBased ?? ((datasourceStates as any).indexpattern as FormBasedPersistedState);
 
+export const isReferenceBasedColumn = (
+  c: GenericIndexPatternColumn
+): c is ReferenceBasedIndexPatternColumn => 'references' in c && Array.isArray(c.references);
+/**
+ * ES|QL ad-hoc data views: remap existing ones to deterministic IDs or create
+ * new ones from the ES|QL query. Returns rebuilt internalReferences with standard naming.
+ */
+function normalizeESQLAdHocDataViews(
+  attributes: LensAttributes,
+  internalReferences: Reference[]
+): Reference[] {
   if (
     attributes.state.datasourceStates.textBased &&
     'indexPatternRefs' in attributes.state.datasourceStates.textBased
@@ -63,44 +94,212 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
     delete attributes.state.datasourceStates.textBased.indexPatternRefs;
   }
 
-  const internalReferences = attributes.state.internalReferences ?? [];
+  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+  if (textBasedLayers.length === 0) return internalReferences;
 
-  if (
-    attributes.state.datasourceStates.textBased &&
-    attributes.state.adHocDataViews &&
-    attributes.state.datasourceStates.textBased?.layers
-  ) {
-    const layers = Object.values(attributes.state.datasourceStates.textBased.layers);
-    for (const layer of layers) {
-      const oldIndex = layer.index;
-      if (!oldIndex) continue;
+  // Remove 'textBasedLanguages-datasource-layer-*' references — they are rebuilt below
+  const refs = internalReferences.filter(
+    (r) => !r.name.startsWith('textBasedLanguages-datasource-layer-')
+  );
 
+  if (!attributes.state.adHocDataViews) {
+    attributes.state.adHocDataViews = {};
+  }
+
+  for (const layer of textBasedLayers) {
+    const esqlQuery = layer.query?.esql;
+    const oldIndex = layer.index;
+
+    if (oldIndex && attributes.state.adHocDataViews[oldIndex]) {
+      // Existing adHocDataView: remap to a deterministic ID
       const adHocDataView: DataViewSpec = attributes.state.adHocDataViews[oldIndex];
-      if (!adHocDataView) continue;
-
+      // Use the same logic as the transform: derive timeField from the ES|QL query
+      const timeFieldName = esqlQuery
+        ? getTimeFieldFromESQLQuery(esqlQuery)
+        : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
       const newId = generateAdHocDataViewId({
         index: adHocDataView.name ?? '',
         dataSourceType: 'esql',
-        esqlQuery: layer.query?.esql,
-        timeFieldName: undefined, // not saved in API re-derived at runtime
+        esqlQuery,
+        timeFieldName,
       });
 
       layer.index = newId;
       adHocDataView.id = newId;
       attributes.state.adHocDataViews[newId] = adHocDataView;
       delete attributes.state.adHocDataViews[oldIndex];
+    } else if (esqlQuery) {
+      // No adHocDataView exists: create one from the ES|QL query (matches what the transform produces)
+      const indexPattern = getIndexPatternFromESQLQuery(esqlQuery);
+      const spec = getAdHocDataViewSpec({
+        type: 'adHocDataView',
+        index: indexPattern,
+        dataSourceType: 'esql',
+        esqlQuery,
+        timeFieldName: getTimeFieldFromESQLQuery(esqlQuery),
+      });
 
-      internalReferences.push({
-        id: newId,
+      layer.index = spec.id;
+      attributes.state.adHocDataViews[spec.id] = spec;
+    }
+
+    if (layer.index) {
+      refs.push({
+        id: layer.index,
         name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
         type: 'index-pattern',
       });
     }
   }
 
+  return refs;
+}
+
+/**
+ * Form-based ad-hoc data views: remap UUID-keyed entries to deterministic IDs
+ * and update internal references to match.
+ */
+function normalizeFormBasedAdHocDataViews(
+  attributes: LensAttributes,
+  internalReferences: Reference[]
+): Reference[] {
+  const formBasedLayers = attributes.state.datasourceStates.formBased?.layers ?? {};
+  const adHocDataViews = attributes.state.adHocDataViews ?? {};
+  const refs = [...internalReferences];
+
+  for (const [layerId, layer] of Object.entries(formBasedLayers)) {
+    const layerRefName = `indexpattern-datasource-layer-${layerId}`;
+    const ref = refs.find((r) => r.name === layerRefName);
+    const adHocId = ref?.id ?? (layer as any).indexPatternId;
+
+    if (adHocId && adHocDataViews[adHocId]) {
+      const adHocDataView: DataViewSpec = adHocDataViews[adHocId];
+      const newId = generateAdHocDataViewId({
+        index: adHocDataView.title ?? '',
+        timeFieldName: adHocDataView.timeFieldName,
+      });
+
+      delete adHocDataViews[adHocId];
+      adHocDataView.id = newId;
+      adHocDataView.name = adHocDataView.title ?? adHocDataView.name;
+      adHocDataViews[newId] = adHocDataView;
+
+      if (ref) {
+        ref.id = newId;
+        ref.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+      } else {
+        refs.push({
+          id: newId,
+          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+          type: 'index-pattern',
+        });
+      }
+    }
+  }
+
+  return refs;
+}
+
+/**
+ * Remove ad-hoc data views not referenced by any layer or internal reference.
+ */
+function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalReferences: Reference[]) {
+  const referencedAdHocIds = new Set<string>();
+
+  for (const layer of Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})) {
+    if (layer.index) {
+      referencedAdHocIds.add(layer.index);
+    }
+  }
+
+  for (const ref of internalReferences) {
+    referencedAdHocIds.add(ref.id);
+  }
+
+  for (const id of Object.keys(attributes.state.adHocDataViews ?? {})) {
+    if (!referencedAdHocIds.has(id)) {
+      delete attributes.state.adHocDataViews![id];
+    }
+  }
+}
+
+function normalizeAdHocDataViews(attributes: LensAttributes) {
+  // Clear empty typeMeta objects
+  for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
+    if (dv.typeMeta && Object.keys(dv.typeMeta).length === 0) {
+      delete dv.typeMeta;
+    }
+  }
+
+  let internalReferences = attributes.state.internalReferences ?? [];
+  removeOrphanedAdHocDataViews(attributes, internalReferences);
+  internalReferences = normalizeESQLAdHocDataViews(attributes, internalReferences);
+  internalReferences = normalizeFormBasedAdHocDataViews(attributes, internalReferences);
+
+  if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
+    delete attributes.state.adHocDataViews;
+  }
+
   attributes.state.internalReferences = internalReferences;
   if (attributes.state.internalReferences.length === 0) {
     delete attributes.state.internalReferences;
+  }
+}
+
+/**
+ * For ES|QL panels, the layer query is the source of truth at runtime.
+ * The top-level state.query may diverge in legacy SOs — sync it to the layer.
+ */
+function normalizeESQLQuery(attributes: LensAttributes) {
+  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+  if (textBasedLayers.length > 0) {
+    const layerQuery = textBasedLayers[0].query;
+    if (
+      layerQuery?.esql &&
+      attributes.state.query &&
+      'esql' in attributes.state.query &&
+      attributes.state.query.esql !== layerQuery.esql
+    ) {
+      attributes.state.query = layerQuery;
+    }
+  }
+}
+
+/**
+ * An empty query (query: "") is dropped during SO→API conversion, and the API→SO
+ * step defaults to { language: 'kuery', query: '' }. Both are semantically identical.
+ */
+function normalizeEmptyQuery(attributes: LensAttributes) {
+  const q = attributes.state.query;
+  if (q && 'language' in q && typeof q.query === 'string' && q.query === '') {
+    q.language = 'kuery';
+  }
+}
+
+/**
+ * description: null is equivalent to absent
+ */
+function normalizeDescription(attributes: LensAttributes) {
+  if (attributes.description === null) {
+    delete attributes.description;
+  }
+}
+
+/**
+ * dataType cannot be preserved through transforms — it falls back to the
+ * actual field type at runtime. These are the known remappings the transform applies.
+ */
+function normalizeDataTypes(col: GenericIndexPatternColumn) {
+  const { dataType, isBucketed, operationType } = col;
+  if (operationType === 'terms' && dataType === 'number') {
+    col.dataType = 'string';
+  } else if (
+    !isBucketed &&
+    (dataType === 'date' || dataType === 'string' || dataType === 'ip' || dataType === 'boolean')
+  ) {
+    col.dataType = 'number';
+  } else if (isBucketed && (dataType === 'ip' || dataType === 'boolean')) {
+    col.dataType = 'string';
   }
 }
 
@@ -115,8 +314,11 @@ const normalizeReferences = <T extends LensAttributes>(
   return orderBy(
     references
       .filter((reference) => {
-        // ignore filter index pattern references
-        return !(reference.type === 'index-pattern' && filterIndexIds.has(reference.name));
+        // ignore filter index pattern references (legacy: filter-index-pattern-*, current: via filter.meta.index)
+        return !(
+          reference.type === 'index-pattern' &&
+          (filterIndexIds.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
+        );
       })
       // ignore current index pattern reference
       .filter((reference) => {
@@ -124,6 +326,17 @@ const normalizeReferences = <T extends LensAttributes>(
           reference.type === 'index-pattern' &&
           reference.name === 'indexpattern-datasource-current-indexpattern'
         );
+      })
+      // textBasedLanguages-* references are replaced by indexpattern-datasource-layer-* in internalReferences
+      .filter((reference) => {
+        return !(
+          reference.type === 'index-pattern' &&
+          reference.name.startsWith('textBasedLanguages-datasource-layer-')
+        );
+      })
+      // legacy bare-UUID-named references (pre-standardized naming), probably from dashboard reference extraction
+      .filter((reference) => {
+        return !(reference.type === 'index-pattern' && UUID_PATTERN.test(reference.name));
       })
       .map((reference) => {
         let name = reference.name;
@@ -144,6 +357,23 @@ const normalizeReferences = <T extends LensAttributes>(
   );
 };
 
+/**
+ * Remap column references (e.g. counter_rate → max) using the column ID map.
+ * Formula columns have their internal references cleared — they are not preserved through transforms.
+ */
+function normalizeColumnReferences(
+  col: GenericIndexPatternColumn,
+  columnIdMap: Map<string | undefined, string>
+) {
+  if (isReferenceBasedColumn(col)) {
+    col.references = col.references.map((refId: string) => columnIdMap.get(refId) ?? refId);
+  }
+
+  if (col.operationType === 'formula') {
+    (col as any).references = [];
+  }
+}
+
 export const getCommonNormalizer = <T extends LensAttributes>(
   getArgs: (attributes: T) => { layerRemapping: IdRemapping; columnRemapping: IdRemapping }
 ): NormalizerConfig<T> => ({
@@ -153,6 +383,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     const { layerRemapping, columnRemapping } = getArgs(attributes);
 
     normalizeAdHocDataViews(attributes);
+    normalizeESQLQuery(attributes);
+    normalizeEmptyQuery(attributes);
+    normalizeDescription(attributes);
 
     // replace layer in reference name
     attributes.references = normalizeReferences(attributes, layerRemapping);
@@ -201,8 +434,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
         return ds;
       }),
       formBased: normalizeDatasourceState(
-        attributes.state.datasourceStates.formBased ??
-          ((attributes.state.datasourceStates as any).indexpattern as FormBasedPersistedState), // fallback to legacy
+        getFormBasedDatasourceState(attributes.state.datasourceStates),
         (ds) => {
           for (const layer of Object.values(ds.layers)) {
             layer.columns = columnRemapping.reduce((columns, [oldColumn, newColumn]) => {
@@ -220,7 +452,10 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                   columnRemapping.find(([oldColumn]) => oldColumn === colId)?.[1] ?? colId
               );
 
-            // TODO: validate this is order should only be preserved for datatable
+            // Datatable uses its own canonical (rows → splits → metrics) sort in
+            // the datatable normalizer. For every other chart, alphabetical
+            // canonicalization is fine because column order does not drive
+            // rendering.
             if (attributes.visualizationType !== 'lnsDatatable') {
               layer.columnOrder.sort();
             }
@@ -247,14 +482,8 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                 (col as any).params.orderBy.columnId = columnIdMap.get(orderByCol);
               }
 
-              if (col.operationType === 'formula') {
-                (col as any).references = [];
-              }
-
-              // TODO: check this dataType mismatch
-              if (col.dataType === 'ip') {
-                col.dataType = 'string'; // ip is set to string in transforms
-              }
+              normalizeColumnReferences(col, columnIdMap);
+              normalizeDataTypes(col);
             }
           }
           return ds;
@@ -283,7 +512,6 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
     attributes.state.needsRefresh = attributes.state.needsRefresh ?? false;
 
-    // TODO: validate this is order should only be preserved for datatable
     if (attributes.visualizationType !== 'lnsDatatable') {
       Object.values(attributes.state.datasourceStates.formBased?.layers ?? {}).forEach((layer) => {
         layer.columnOrder.sort();
@@ -307,14 +535,20 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(attributes, palettePath);
+      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(
+        attributes,
+        palettePath
+      ).filter(Boolean);
 
       palettes.forEach((palette) => {
         const rangeMin = getRangeValue(palette.params?.rangeMin);
         const rangeMax = getRangeValue(palette.params?.rangeMax);
 
         if (palette.params) {
-          if (palette.params.stops && rangeMax === null) {
+          // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
+          // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
+          // so the last stop always becomes rangeMax after the round-trip.
+          if (palette.params.stops) {
             const isLegacy = palette.name !== 'custom';
             const needsPaletteShift =
               isLegacy &&
@@ -335,13 +569,29 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           if (palette.name !== 'custom') {
             delete palette.params.colorStops;
           }
+
+          // Legacy SOs may omit params.name, but the transform always sets it from the root name
+          if (palette.params.name === undefined && palette.name) {
+            palette.params.name = palette.name;
+          }
+
+          // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
+          if (!('rangeMin' in palette.params)) {
+            palette.params.rangeMin = null as unknown as number;
+          }
+          if (!('rangeMax' in palette.params)) {
+            palette.params.rangeMax = null as unknown as number;
+          }
         }
       });
 
       return attributes;
     },
     transformed: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(attributes, palettePath);
+      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(
+        attributes,
+        palettePath
+      ).filter(Boolean);
 
       palettes.forEach((palette) => {
         if (palette.name !== 'custom') {

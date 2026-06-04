@@ -14,6 +14,7 @@ import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
+const onCreateThresholdAlert = jest.fn();
 
 const renderFlyout = () =>
   render(
@@ -22,6 +23,7 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
+        onCreateThresholdAlert={onCreateThresholdAlert}
       />
     </I18nProvider>
   );
@@ -64,5 +66,21 @@ describe('RuleCreateOptionsFlyout', () => {
     fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the "Start from a rule builder" heading', () => {
+    renderFlyout();
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Start from a rule builder' })
+    ).toBeInTheDocument();
+  });
+
+  it('calls onCreateThresholdAlert when the Threshold Alert option is selected', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByRole('button', { name: /threshold alert/i }));
+
+    expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 });

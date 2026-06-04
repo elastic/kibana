@@ -133,6 +133,7 @@ export const createPromptManagerMock = (): PromptManagerMock => {
     get: jest.fn(),
     dump: jest.fn(),
     getConfirmationStatus: jest.fn(),
+    getAuthorizationStatus: jest.fn(),
     clear: jest.fn(),
     forTool: jest.fn(),
   };
@@ -235,7 +236,9 @@ export const createFileSystemStoreMock = (): FileSystemStoreMock => {
 export const createToolPromptManagerMock = (): ToolPromptManagerMock => {
   return {
     checkConfirmationStatus: jest.fn(),
+    checkAuthorizationStatus: jest.fn(),
     askForConfirmation: jest.fn(),
+    askForAuthorization: jest.fn(),
   };
 };
 

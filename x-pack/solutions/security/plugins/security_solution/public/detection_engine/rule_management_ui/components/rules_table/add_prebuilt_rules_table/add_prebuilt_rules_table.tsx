@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
 import * as i18n from '../../../pages/add_rules/translations';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';

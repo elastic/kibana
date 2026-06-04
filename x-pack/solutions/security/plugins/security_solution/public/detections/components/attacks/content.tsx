@@ -100,7 +100,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     http,
     isAssistantEnabled: true,
     start: from,
-    scheduled: true,
+    includeAllAuthors: true,
   });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 

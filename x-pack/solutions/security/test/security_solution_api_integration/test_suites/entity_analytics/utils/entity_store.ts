@@ -271,12 +271,30 @@ export const EntityStoreUtils = (
     if (namespace !== 'default') {
       settingsUrl = `/s/${namespace}${settingsUrl}`;
     }
-    await supertest
-      .post(settingsUrl)
-      .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
-      .expect(200);
+
+    await retry.waitForWithTimeout(
+      'entityStoreEnableV2 uiSetting to read back as enabled',
+      60_000,
+      async () => {
+        // Try to enable
+        await supertest
+          .post(settingsUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+          .expect(200);
+
+        // Check that it worked
+        const settingsRes = await supertest
+          .get(settingsUrl)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .expect(200);
+        return (
+          settingsRes.body?.settings?.['securitySolution:entityStoreEnableV2']?.userValue === true
+        );
+      }
+    );
 
     let url = '/api/security/entity_store/install';
     if (namespace !== 'default') {

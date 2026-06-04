@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonIcon, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { throttle } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -97,15 +97,16 @@ export const useResponsiveTabs = ({
   const scrollLeftButton = useMemo(
     () =>
       tabsSizeConfig.isScrollable ? (
-        <EuiButtonIcon
-          data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
-          iconType="chevronSingleLeft"
-          color="text"
-          disabled={scrollState?.isScrollableLeft === false}
-          aria-label={scrollLeftButtonLabel}
-          title={scrollLeftButtonLabel}
-          onClick={scrollLeft}
-        />
+        <EuiToolTip content={scrollLeftButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="unifiedTabs_tabsBar_scrollLeftBtn"
+            iconType="chevronSingleLeft"
+            color="text"
+            disabled={scrollState?.isScrollableLeft === false}
+            aria-label={scrollLeftButtonLabel}
+            onClick={scrollLeft}
+          />
+        </EuiToolTip>
       ) : null,
     [scrollLeftButtonLabel, scrollLeft, tabsSizeConfig.isScrollable, scrollState?.isScrollableLeft]
   );
@@ -113,15 +114,16 @@ export const useResponsiveTabs = ({
   const scrollRightButton = useMemo(
     () =>
       tabsSizeConfig.isScrollable ? (
-        <EuiButtonIcon
-          data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
-          iconType="chevronSingleRight"
-          color="text"
-          disabled={scrollState?.isScrollableRight === false}
-          aria-label={scrollRightButtonLabel}
-          title={scrollRightButtonLabel}
-          onClick={scrollRight}
-        />
+        <EuiToolTip content={scrollRightButtonLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="unifiedTabs_tabsBar_scrollRightBtn"
+            iconType="chevronSingleRight"
+            color="text"
+            disabled={scrollState?.isScrollableRight === false}
+            aria-label={scrollRightButtonLabel}
+            onClick={scrollRight}
+          />
+        </EuiToolTip>
       ) : null,
     [
       scrollRightButtonLabel,

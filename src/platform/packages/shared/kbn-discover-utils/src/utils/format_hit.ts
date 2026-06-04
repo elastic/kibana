@@ -58,7 +58,7 @@ export function formatHitReact(
     return cached.formattedHit;
   }
 
-  const highlights = hit.raw.highlight ?? {};
+  const highlights = hit.raw.highlight ?? hit.raw.inline_highlights ?? {};
   const flattened = hit.flattened;
   const renderedPairs: PartialHitReactPair[] = [];
   const otherPairs: PartialHitReactPair[] = [];
@@ -114,7 +114,6 @@ export function formatHitReact(
       fieldName: key,
       columnMeta: columnsMeta?.[key],
     });
-
     pair[1] = formatFieldValueReact({
       value: flattened[key],
       hit: hit.raw,

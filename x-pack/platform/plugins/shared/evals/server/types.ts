@@ -10,10 +10,12 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
+import type { EvaluationScoreService } from './storage/evaluation_score_service';
 
 export type EvalsPluginSetup = Record<string, never>;
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
+  evaluationScoreService?: EvaluationScoreService;
 }
 
 export interface EvalsSetupDependencies {
@@ -27,6 +29,7 @@ export interface EvalsStartDependencies {
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
+  evaluationScoreService: EvaluationScoreService;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{

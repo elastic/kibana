@@ -29,13 +29,13 @@ interface CreateESQLQueryParams {
 }
 
 /**
- * METRICS_INFO returns the parent data stream name, even when invoked against
- * a single backing index. Naively reusing that for the rebuilt chart query
- * widens the scope back to the whole data stream and re-introduces any cross
- * backing-index field-type conflicts that METRICS_INFO had already filtered
- * out at the narrower scope. When the user typed a single concrete source
- * (no glob, no comma list), prefer it so the chart query stays at the same
- * scope METRICS_INFO actually scanned.
+ * METRICS_INFO returns the parent source name (index or data stream), even
+ * when invoked against a single backing index. Naively reusing that for the
+ * rebuilt chart query widens the scope back to the whole source and
+ * re-introduces any cross backing-index field-type conflicts that
+ * METRICS_INFO had already filtered out at the narrower scope. When the user
+ * typed a single concrete source (no glob, no comma list), prefer it so the
+ * chart query stays at the same scope METRICS_INFO actually scanned.
  */
 function isConcreteSingleSource(source: string | undefined): source is string {
   return !!source && !source.includes('*') && !source.includes(',');
@@ -51,7 +51,7 @@ function isConcreteSingleSource(source: string | undefined): source is string {
  * @param whereStatements - Optional WHERE clause statements.
  * @param originalSource - The source the user typed in their query. When it is a single
  *   concrete index (e.g., a backing index), it is used as the chart query source instead
- *   of `metricItem.dataStream` so the chart's scope matches the scope METRICS_INFO scanned.
+ *   of `metricItem.indexName` so the chart's scope matches the scope METRICS_INFO scanned.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
@@ -60,8 +60,8 @@ export function createESQLQuery({
   whereStatements = [],
   originalSource,
 }: CreateESQLQueryParams) {
-  const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
-  const index = isConcreteSingleSource(originalSource) ? originalSource : dataStream;
+  const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
+  const index = isConcreteSingleSource(originalSource) ? originalSource : indexName;
   const instrument = firstNonNullable(metricTypes);
 
   if (fieldTypes.length === 0 || !instrument) {

@@ -6,12 +6,14 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
 import type { SyntheticsEsClient } from '../lib';
 import type { NetworkEvent } from '../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
   checkGroup: string;
   stepIndex: string;
+  remoteName?: string;
 }
 
 export const secondsToMillis = (seconds: number) =>
@@ -22,6 +24,7 @@ export const getNetworkEvents = async ({
   syntheticsEsClient,
   checkGroup,
   stepIndex,
+  remoteName,
 }: GetNetworkEventsParams & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<{
@@ -31,6 +34,7 @@ export const getNetworkEvents = async ({
   hasNavigationRequest: boolean;
 }> => {
   const params = {
+    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     track_total_hits: true,
     query: {
       bool: {

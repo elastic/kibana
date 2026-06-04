@@ -10,7 +10,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -49,15 +49,15 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
               const { _task } = runContext.taskInstance
                 .params as TaskParams<ConversationScraperTaskParams>;
 
-              const { taskClient, inferenceClient, uiSettingsClient } =
+              const { taskClient, inferenceClient, scopedClusterClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
 
               const taskLogger = taskContext.logger.get('conversation_scraper');
 
-              const useMemory = await uiSettingsClient.get<boolean>(
-                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              const useMemory = await isSignificantEventsMemoryEnabled(
+                taskContext.server.core.featureFlags
               );
 
               if (!useMemory) {
@@ -99,7 +99,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),
-                esClient: taskContext.getInternalEsClient(),
+                esClient: scopedClusterClient.asCurrentUser,
               });
 
               try {

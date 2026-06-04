@@ -9,21 +9,36 @@
 
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { GrokCollection } from './grok_collection_and_pattern';
+import type { GrokCollection, GrokFieldUsageSource } from './grok_collection_and_pattern';
 import { GrokPattern } from './grok_collection_and_pattern';
 
-export class DraftGrokExpression {
+export interface DraftGrokExpressionOptions {
+  patternSlotId?: string | number;
+}
+
+export class DraftGrokExpression implements GrokFieldUsageSource {
   private expression: string = '';
   private grokPattern: GrokPattern;
   private expression$: BehaviorSubject<string>;
   private customPatternsSubscription: Subscription;
+  private readonly unregisterFieldUsage: () => void;
+  private previousFieldNames: Set<string>;
+  private readonly patternSlotId: string | number | undefined;
 
-  constructor(collection: GrokCollection, initialExpression?: string) {
+  constructor(
+    collection: GrokCollection,
+    initialExpression?: string,
+    options?: DraftGrokExpressionOptions
+  ) {
     const expression = initialExpression ?? '';
     this.expression = expression;
+    this.patternSlotId = options?.patternSlotId;
+    this.previousFieldNames = collection.parseFieldNames(expression);
+    this.unregisterFieldUsage = collection.registerFieldUsageSource(this);
     this.grokPattern = new GrokPattern(expression || '', 'DRAFT_GROK_EXPRESSION', collection);
     this.grokPattern.resolvePattern();
     this.expression$ = new BehaviorSubject<string>(expression);
+    collection.flushFieldUsage();
     this.customPatternsSubscription = collection.customPatternsChanged$.subscribe(() => {
       this.grokPattern.resolvePattern(true);
       this.expression$.next(this.expression);
@@ -31,9 +46,14 @@ export class DraftGrokExpression {
   }
 
   public updateExpression = (expression: string) => {
+    const collection = this.grokPattern.getParentCollection();
+    const nextFieldNames = collection.parseFieldNames(expression);
+    collection.reconcileFieldUsage(this, this.previousFieldNames, nextFieldNames);
     this.expression = expression;
+    this.previousFieldNames = nextFieldNames;
     this.grokPattern.updatePattern(this.expression);
     this.grokPattern.resolvePattern(true);
+    collection.flushFieldUsage();
     this.expression$.next(this.expression);
   };
 
@@ -57,11 +77,21 @@ export class DraftGrokExpression {
     return this.expression;
   };
 
+  public getFieldNames = (): ReadonlySet<string> => {
+    return this.previousFieldNames;
+  };
+
+  public getPatternSlotId = () => {
+    return this.patternSlotId;
+  };
+
   public getExpression$ = () => {
     return this.expression$;
   };
 
   public destroy = () => {
     this.customPatternsSubscription.unsubscribe();
+    this.unregisterFieldUsage();
+    this.grokPattern.getParentCollection().flushFieldUsage();
   };
 }

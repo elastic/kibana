@@ -25,7 +25,7 @@ import type {
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
 import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
-import { installationStatuses } from '../../../../../../../common/constants';
+import { dataTypes, installationStatuses } from '../../../../../../../common/constants';
 import type {
   DeprecationInfo,
   EpmPackageInstallStatus,
@@ -177,15 +177,31 @@ export const mapToCard = ({
     cardResult.supportsAgentless = true;
   }
 
-  if ('data_streams' in item && Array.isArray(item.data_streams)) {
-    const types = [...new Set(item.data_streams.map((ds) => ds.type))];
-    if (types.length > 0) {
-      cardResult.signalTypes = types;
-    }
+  const signalTypes = getSignalTypes(item);
+  if (signalTypes.length > 0) {
+    cardResult.signalTypes = signalTypes;
   }
 
   return cardResult;
 };
+
+// Derive the signal types (logs/metrics/traces) a card matches so the browse-page
+// signal filter can include it. Integration packages expose their signal types via
+// `data_streams`. Input packages have no concrete data streams, and the EPR search
+// response doesn't carry their policy template `type`/`dynamic_signal_types`, so the
+// signal type isn't knowable from the browse list. Since input packages choose the
+// data stream type at configuration time, match them against every signal filter.
+function getSignalTypes(item: CustomIntegration | PackageListItem): string[] {
+  if ('type' in item && item.type === 'input') {
+    return Object.values(dataTypes);
+  }
+
+  if ('data_streams' in item && Array.isArray(item.data_streams)) {
+    return [...new Set(item.data_streams.map((ds) => ds.type))];
+  }
+
+  return [];
+}
 
 export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
   const extraLabelsBadges: React.ReactNode[] = [];

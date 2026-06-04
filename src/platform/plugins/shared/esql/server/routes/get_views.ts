@@ -12,7 +12,11 @@ import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
-export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
+export const registerGetViewsRoute = (
+  router: IRouter,
+  { logger }: PluginInitializerContext,
+  isServerless: boolean
+) => {
   router.get(
     {
       path: VIEWS_ROUTE,
@@ -25,6 +29,11 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
       },
     },
     async (requestHandlerContext, request, response) => {
+      // TODO: Remove this once views are available in serverless
+      if (isServerless) {
+        return response.ok({ body: { views: [] } });
+      }
+
       try {
         const core = await requestHandlerContext.core;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });

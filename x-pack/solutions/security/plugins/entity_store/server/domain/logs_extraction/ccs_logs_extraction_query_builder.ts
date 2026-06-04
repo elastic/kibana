@@ -23,6 +23,7 @@ import {
   extractPaginationParams,
   buildPaginationSection,
   hasFieldEvaluations,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
 
 const CCS_FIELDS_TO_KEEP = [
@@ -69,7 +70,7 @@ export function buildCcsLogsExtractionEsqlQuery({
   const parts = [];
 
   // Because we don't have updates on remote clusters, we need to nullify the unmapped fields
-  parts.push(`SET unmapped_fields="nullify";`);
+  parts.push(NULLIFY_UNMAPPED_FIELDS_SETTING);
 
   // FROM and WHERE
   parts.push(

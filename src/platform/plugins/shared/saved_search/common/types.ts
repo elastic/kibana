@@ -44,7 +44,7 @@ export type VisContextUnmapped =
     }
   | {}; // cleared value
 
-/** @internal **/
+/** @deprecated Use DiscoverSessionAttributes instead **/
 export interface SavedSearchAttributes {
   title: string;
   sort: SortOrder[];

@@ -89,7 +89,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
-              const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+
+              const { monitoring, ...match } = response.body.data.find(
+                (obj: any) => obj.id === createdAlert.id
+              );
+
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -299,7 +303,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
-              const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+
+              const { monitoring, ...match } = response.body.data.find(
+                (obj: any) => obj.id === createdAlert.id
+              );
+
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',

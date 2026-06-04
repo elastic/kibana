@@ -46,41 +46,34 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/UserIds'
-        - description: >-
-            A start date in ISO 8601 format or Date Math format (for example,
+        - description: A start date in ISO 8601 format or Date Math format (for example,
             `now-24h`).
           in: query
           name: startDate
           required: false
           schema:
             $ref: '#/components/schemas/StartDate'
-        - description: >-
-            An end date in ISO 8601 format or Date Math format (for example,
+        - description: An end date in ISO 8601 format or Date Math format (for example,
             `now`).
           in: query
           name: endDate
           required: false
           schema:
             $ref: '#/components/schemas/EndDate'
-        - description: >-
-            The agent type to filter response actions by. Defaults to
-            `endpoint`.
+        - description: The agent type to filter response actions by. Defaults to `endpoint`.
           in: query
           name: agentTypes
           required: false
           schema:
             $ref: '#/components/schemas/AgentTypes'
-        - description: >-
-            A list of response action IDs whose outputs should be included in
+        - description: A list of response action IDs whose outputs should be included in
             the response.
           in: query
           name: withOutputs
           required: false
           schema:
             $ref: '#/components/schemas/WithOutputs'
-        - description: >-
-            A list of response action types to filter by (`automated`,
-            `manual`).
+        - description: A list of response action types to filter by (`automated`, `manual`).
           in: query
           name: types
           required: false
@@ -244,8 +237,7 @@ paths:
                       agentId: ed518850-681a-4d60-bb98-e22640cae2a8
                       agentType: endpoint
                       created: '2025-02-26T13:37:30.452Z'
-                      id: >-
-                        233db9ea-6733-4849-9226-5a7039c7161d.ed518850-681a-4d60-bb98-e22640cae2a8
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d.ed518850-681a-4d60-bb98-e22640cae2a8
                       mimeType: application/zip
                       name: memory_dump.zip
                       size: 1048576
@@ -295,17 +287,10 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: >
-        Download a file associated with a response action. Files are downloaded
-        in a password-protected `.zip` archive to prevent the file from running.
-        Use password `elastic` to open the `.zip` in a safe environment.
-
+      description: |
+        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
         > info
-
-        > Files retrieved from third-party-protected hosts require a different
-        password. Refer to [Third-party response
-        actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions)
-        for your system's password.
+        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
       operationId: EndpointFileDownload
       parameters:
         - description: The ID of the response action that generated the file.
@@ -335,9 +320,7 @@ paths:
             application/octet-stream:
               examples:
                 fileDownload:
-                  summary: >-
-                    Password-protected ZIP archive containing the response
-                    action file
+                  summary: Password-protected ZIP archive containing the response action file
                   value: binary file content (password-protected .zip)
               schema:
                 format: binary
@@ -348,18 +331,15 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/cancel:
     post:
-      description: >-
-        Cancel a running or pending response action (Applies only to some agent
-        types).
+      description: Cancel a running or pending response action (Applies only to some
+        agent types).
       operationId: CancelAction
       requestBody:
         content:
           application/json:
             examples:
               MicrosoftDefenderEndpoint:
-                summary: >-
-                  Cancel a response action on a Microsoft Defender for Endpoint
-                  host
+                summary: Cancel a response action on a Microsoft Defender for Endpoint host
                 value:
                   agent_type: microsoft_defender_endpoint
                   comment: Cancelling action due to change in requirements
@@ -520,8 +500,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/isolate:
     post:
-      description: >-
-        Isolate an endpoint from the network. The endpoint remains isolated
+      description: Isolate an endpoint from the network. The endpoint remains isolated
         until it's released.
       operationId: EndpointIsolateAction
       requestBody:
@@ -537,8 +516,7 @@ paths:
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
                     - fa89271b-b9d4-43f2-a684-307cffddeb5a
               single_endpoint:
-                summary: >-
-                  Isolates a single host with an endpoint_id value of
+                summary: Isolates a single host with an endpoint_id value of
                   ed518850-681a-4d60-bb98-e22640cae2a8
                 value:
                   endpoint_ids:
@@ -558,10 +536,9 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts. Max of 50.
+                  description: If this action is associated with any alerts, they can be specified
+                    here. The action will be logged in any cases associated with
+                    the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
@@ -572,9 +549,7 @@ paths:
                   minItems: 1
                   type: array
                 case_ids:
-                  description: >-
-                    The IDs of cases where the action taken will be logged. Max
-                    of 50.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
@@ -748,6 +723,83 @@ paths:
       summary: Generate a memory dump from the host machine
       tags:
         - Security Endpoint Management API
+  /api/endpoint/action/run_script:
+    post:
+      description: Run a script on a host. Currently supported only for some agent types.
+      operationId: RunScriptAction
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Elastic Defend:
+                description: Endpoint runscript to collect logs
+                summary: Run a script against an Elastic Defend agent
+                value:
+                  agent_type: endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                    scriptInput: --path= /usr/log/exec.log
+              MDE:
+                description: Microsoft Defender Endpoint runscript
+                summary: Run a script against a Microsoft Defender Endpoint agent
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    args: -param1 value1 -param2 value2
+                    scriptName: my-script.ps1
+              SentinelOne:
+                description: SentinelOne runscript
+                summary: Run a script against a SentinelOne agent
+                value:
+                  agent_type: sentinel_one
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                    scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
+            schema:
+              $ref: '#/components/schemas/RunScriptRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                RunScriptSuccess:
+                  summary: Run script action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: sentinel_one
+                      command: runscript
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      parameters:
+                        scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
+              schema:
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+          description: Indicates a successful call.
+      summary: Run a script
+      tags:
+        - Security Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -796,85 +848,6 @@ paths:
                 $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Get running processes
-      tags:
-        - Security Endpoint Management API
-  /api/endpoint/action/runscript:
-    post:
-      description: Run a script on a host. Currently supported only for some agent types.
-      operationId: RunScriptAction
-      requestBody:
-        content:
-          application/json:
-            examples:
-              Elastic Defend:
-                description: Endpoint runscript to collect logs
-                summary: Run a script against an Elastic Defend agent
-                value:
-                  agent_type: endpoint
-                  endpoint_ids:
-                    - ed518850-681a-4d60-bb98-e22640cae2a8
-                  parameters:
-                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: '--path= /usr/log/exec.log'
-              MDE:
-                description: Microsoft Defender Endpoint runscript
-                summary: Run a script against a Microsoft Defender Endpoint agent
-                value:
-                  agent_type: microsoft_defender_endpoint
-                  endpoint_ids:
-                    - ed518850-681a-4d60-bb98-e22640cae2a8
-                  parameters:
-                    args: '-param1 value1 -param2 value2'
-                    scriptName: my-script.ps1
-              SentinelOne:
-                description: SentinelOne runscript
-                summary: Run a script against a SentinelOne agent
-                value:
-                  agent_type: sentinel_one
-                  endpoint_ids:
-                    - ed518850-681a-4d60-bb98-e22640cae2a8
-                  parameters:
-                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                    scriptInput: >-
-                      --delete --paths-to-delete
-                      /tmp/temp_file.txt,/tmp/random_file.txt
-            schema:
-              $ref: '#/components/schemas/RunScriptRouteRequestBody'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                RunScriptSuccess:
-                  summary: Run script action successfully created
-                  value:
-                    data:
-                      agents:
-                        - ed518850-681a-4d60-bb98-e22640cae2a8
-                      agentState:
-                        ed518850-681a-4d60-bb98-e22640cae2a8:
-                          isCompleted: false
-                          wasSuccessful: false
-                      agentType: sentinel_one
-                      command: runscript
-                      createdBy: elastic
-                      hosts:
-                        ed518850-681a-4d60-bb98-e22640cae2a8:
-                          name: gke-node-1235412
-                      id: 233db9ea-6733-4849-9226-5a7039c7161d
-                      isCompleted: false
-                      isExpired: false
-                      outputs: {}
-                      parameters:
-                        scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-                      startedAt: '2022-07-29T19:08:49.126Z'
-                      status: pending
-                      wasSuccessful: false
-              schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
-          description: Indicates a successful call.
-      summary: Run a script
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/scan:
@@ -934,8 +907,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/state:
     get:
-      description: >-
-        Get a response actions state, which reports whether encryption is
+      description: Get a response actions state, which reports whether encryption is
         enabled.
       operationId: EndpointGetActionsState
       responses:
@@ -1033,8 +1005,7 @@ paths:
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
                     - fa89271b-b9d4-43f2-a684-307cffddeb5a
               singleHost:
-                summary: >-
-                  Releases a single host with an endpoint_id value of
+                summary: Releases a single host with an endpoint_id value of
                   ed518850-681a-4d60-bb98-e22640cae2a8
                 value:
                   endpoint_ids:
@@ -1054,10 +1025,9 @@ paths:
                 agent_type:
                   $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
-                  description: >-
-                    If this action is associated with any alerts, they can be
-                    specified here. The action will be logged in any cases
-                    associated with the specified alerts. Max of 50.
+                  description: If this action is associated with any alerts, they can be specified
+                    here. The action will be logged in any cases associated with
+                    the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
@@ -1068,9 +1038,7 @@ paths:
                   minItems: 1
                   type: array
                 case_ids:
-                  description: >-
-                    The IDs of cases where the action taken will be logged. Max
-                    of 50.
+                  description: The IDs of cases where the action taken will be logged. Max of 50.
                   example:
                     - case-id-1
                     - case-id-2
@@ -1172,8 +1140,7 @@ paths:
                       parameters:
                         file_id: 10e4ce3d-4abb-4f93-a0cd-eaf63a489280
                         file_name: fix-malware.sh
-                        file_sha256: >-
-                          a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
+                        file_sha256: a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
                         file_size: 69
                       startedAt: '2023-07-03T15:07:22.837Z'
                       status: pending
@@ -1207,8 +1174,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Kuery'
-        - description: >-
-            A set of host statuses to filter the results by (for example,
+        - description: A set of host statuses to filter the results by (for example,
             `healthy`, `updating`).
           in: query
           name: hostStatuses
@@ -1370,9 +1336,7 @@ paths:
                 protectionUpdatesNote:
                   summary: The protection updates note for a package policy
                   value:
-                    note: >-
-                      Pinned protection updates to 2025-01-01 while validating
-                      new signatures.
+                    note: Pinned protection updates to 2025-01-01 while validating new signatures.
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
@@ -1383,8 +1347,7 @@ paths:
       description: Create or update the protection updates note for a package policy.
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
-        - description: >-
-            The package policy ID to create or update the protection updates
+        - description: The package policy ID to create or update the protection updates
             note for.
           in: path
           name: package_policy_id
@@ -1398,9 +1361,7 @@ paths:
               setNote:
                 summary: Set a new protection updates note
                 value:
-                  note: >-
-                    Pinned protection updates to 2025-01-01 while validating new
-                    signatures.
+                  note: Pinned protection updates to 2025-01-01 while validating new signatures.
             schema:
               type: object
               properties:
@@ -1416,9 +1377,7 @@ paths:
                 noteSaved:
                   summary: Protection updates note saved
                   value:
-                    note: >-
-                      Pinned protection updates to 2025-01-01 while validating
-                      new signatures.
+                    note: Pinned protection updates to 2025-01-01 while validating new signatures.
               schema:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: Indicates a successful call.
@@ -1436,8 +1395,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/Page'
-        - description: >-
-            Number of results to return per page. Defaults to 10. Max value is
+        - description: Number of results to return per page. Defaults to 10. Max value is
             1000.
           in: query
           name: pageSize
@@ -1753,8 +1711,7 @@ components:
           type: object
           properties:
             canEncrypt:
-              description: >-
-                Whether the Kibana instance has encryption enabled for response
+              description: Whether the Kibana instance has encryption enabled for response
                 actions.
               type: boolean
       required:
@@ -1823,8 +1780,7 @@ components:
       example: updatedAt
       type: string
     ArchivePathToExecutableSchema:
-      description: >-
-        Used only for when the uploaded script is an archive (.zip file for
+      description: Used only for when the uploaded script is an archive (.zip file for
         example). This property defines the relative path to the file included
         in the archive that should be executed once its contents are extracted.
         The path should be relative to the root of the archive.
@@ -1858,10 +1814,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -1872,9 +1827,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -1969,8 +1922,7 @@ components:
         fileType:
           $ref: '#/components/schemas/EndpointScriptFileType'
         instructions:
-          description: >-
-            Instructions for using the script, including details around its
+          description: Instructions for using the script, including details around its
             supported input arguments
           type: string
         name:
@@ -2031,9 +1983,8 @@ components:
           '@timestamp': '2023-07-04T15:48:57.3609346Z'
           agent:
             build:
-              original: >-
-                version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch:
-                7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+              original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
+                commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
             id: abb8a826-6812-448c-a571-6d8269b51449
             type: endpoint
             version: 7.16.0
@@ -2083,7 +2034,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -2112,24 +2063,22 @@ components:
       type: object
       properties: {}
     EndpointRunScriptParameters:
-      description: >-
-        Parameters for Run Script response action against Elastic Defend agent
-        type.
+      description: Parameters for Run Script response action against Elastic Defend
+        agent type.
       example:
         agent_type: endpoint
         endpoint_ids:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--some-parameter some-value'
+          scriptInput: --some-parameter some-value
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
           minLength: 1
           type: string
         scriptInput:
-          description: >-
-            The input parameter arguments (if any) for the script that will be
+          description: The input parameter arguments (if any) for the script that will be
             executed.
           minLength: 1
           type: string
@@ -2151,11 +2100,9 @@ components:
           example: Collects host data for investigation
           type: string
         downloadUri:
-          description: >-
-            URI to download the script file. Note that this is the relative path
-            and does not include the space (if applicable)
-          example: >-
-            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          description: URI to download the script file. Note that this is the relative
+            path and does not include the space (if applicable)
+          example: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
           type: string
         example:
           type: string
@@ -2176,8 +2123,7 @@ components:
           format: uuid
           type: string
         instructions:
-          description: >-
-            Instructions for using the script, including details around its
+          description: Instructions for using the script, including details around its
             supported input arguments
           type: string
         name:
@@ -2209,11 +2155,10 @@ components:
         version:
           type: string
     EndpointScriptFileType:
-      description: >-
-        The type of the uploaded file, which determines the expected value of
-        `pathToExecutable`. If `fileType` is "script", then `pathToExecutable`
-        should not be included. If `fileType` is "archive", then
-        `pathToExecutable` is required and should specify the path to the
+      description: The type of the uploaded file, which determines the expected value
+        of `pathToExecutable`. If `fileType` is "script", then
+        `pathToExecutable` should not be included. If `fileType` is "archive",
+        then `pathToExecutable` is required and should specify the path to the
         executable file within the archive.
       enum:
         - script
@@ -2288,10 +2233,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2302,9 +2246,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2332,8 +2274,7 @@ components:
                   minLength: 1
                   type: string
                 timeout:
-                  description: >-
-                    The maximum timeout value in seconds before the command is
+                  description: The maximum timeout value in seconds before the command is
                     terminated.
                   minimum: 1
                   type: integer
@@ -2490,10 +2431,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2504,9 +2444,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2542,8 +2480,7 @@ components:
         agent_type:
           $ref: '#/components/schemas/AgentTypes'
         alert_ids:
-          description: >-
-            If this action is associated with any alerts, they can be specified
+          description: If this action is associated with any alerts, they can be specified
             here. The action will be logged in any cases associated with the
             specified alerts. Max of 50.
           example:
@@ -2672,9 +2609,8 @@ components:
                 - type: object
                   properties:
                     process_name:
-                      description: >-
-                        The name of the process to terminate. Valid for
-                        SentinelOne agent type only.
+                      description: The name of the process to terminate. Valid for SentinelOne agent
+                        type only.
                       type: string
     KillProcessRouteRequestBody:
       allOf:
@@ -2683,10 +2619,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2697,9 +2632,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2738,9 +2671,8 @@ components:
                 - type: object
                   properties:
                     process_name:
-                      description: >-
-                        The name of the process to terminate. Valid for
-                        SentinelOne agent type only.
+                      description: The name of the process to terminate. Valid for SentinelOne agent
+                        type only.
                       example: Elastic
                       minLength: 1
                       type: string
@@ -2748,18 +2680,17 @@ components:
             - parameters
     Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     MDERunScriptParameters:
-      description: >-
-        Parameters for Run Script response action against Microsoft Defender
-        Endpoint agent type.
+      description: Parameters for Run Script response action against Microsoft
+        Defender Endpoint agent type.
       example:
         agent_type: microsoft_defender_endpoint
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          args: '-param1 value1 -param2 value2'
+          args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
       properties:
         args:
@@ -2788,17 +2719,14 @@ components:
                       code:
                         type: string
                       disk_free_space:
-                        description: >-
-                          The free space on the host machine in bytes after the
-                          memory dump is written to disk
+                        description: The free space on the host machine in bytes after the memory dump
+                          is written to disk
                         type: number
                       file_size:
                         description: The size of the memory dump compressed file in bytes
                         type: string
                       path:
-                        description: >-
-                          The path to the memory dump compressed file on the
-                          host machine
+                        description: The path to the memory dump compressed file on the host machine
                         type: string
                     title: Memory dump output
                     type: object
@@ -2852,10 +2780,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -2866,9 +2793,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -2934,9 +2859,8 @@ components:
               '@timestamp': '2023-07-04T15:47:57.432173535Z'
               agent:
                 build:
-                  original: >-
-                    version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch:
-                    7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch: 7.16,
+                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
                 id: 285297c6-3bff-4b83-9a07-f3e749801123
                 type: endpoint
                 version: 7.16.0
@@ -2984,7 +2908,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -2995,9 +2919,7 @@ components:
                     variant: Ubuntu
                   family: ubuntu
                   full: Ubuntu 20.04.2
-                  kernel: >-
-                    5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10
-                    UTC 2021
+                  kernel: '5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021'
                   name: Linux
                   platform: ubuntu
                   type: linux
@@ -3020,9 +2942,8 @@ components:
               '@timestamp': '2023-07-04T15:44:31.4917849Z'
               agent:
                 build:
-                  original: >-
-                    version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch:
-                    7.16, commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
+                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
                 id: abb8a826-6812-448c-a571-6d8269b51449
                 type: endpoint
                 version: 7.16.0
@@ -3072,7 +2993,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -3122,9 +3043,8 @@ components:
       description: Parameters object
       type: object
     PatchUpdateScriptRouteRequestBody:
-      description: >-
-        The script entry properties to be updated. At least one property must be
-        provided.
+      description: The script entry properties to be updated. At least one property
+        must be provided.
       minProperties: 1
       type: object
       properties:
@@ -3141,8 +3061,7 @@ components:
         fileType:
           $ref: '#/components/schemas/EndpointScriptFileType'
         instructions:
-          description: >-
-            Instructions for using the script, including details around its
+          description: Instructions for using the script, including details around its
             supported input arguments
           type: string
         name:
@@ -3203,8 +3122,7 @@ components:
       type: object
       properties:
         note:
-          description: >-
-            A note associated with the protection updates for the given package
+          description: A note associated with the protection updates for the given package
             policy.
           type: string
     RawScriptParameters:
@@ -3266,9 +3184,8 @@ components:
             type: object
             properties:
               completedAt:
-                description: >-
-                  The date and time the response action was completed for the
-                  agent ID
+                description: The date and time the response action was completed for the agent
+                  ID
                 type: string
               isCompleted:
                 description: Whether the response action is completed for the agent ID
@@ -3276,8 +3193,7 @@ components:
               wasSuccessful:
                 description: Whether the response action was successful for the agent ID
                 type: boolean
-          description: >-
-            The state of the response action for each agent ID that it was sent
+          description: The state of the response action for each agent ID that it was sent
             to
           type: object
         agentType:
@@ -3299,8 +3215,7 @@ components:
               name:
                 description: The host name
                 type: string
-          description: >-
-            An object containing the host names associated with the agent IDs
+          description: An object containing the host names associated with the agent IDs
             the response action was sent to
           type: object
         id:
@@ -3319,9 +3234,8 @@ components:
             format: uuid
             properties:
               content:
-                description: >-
-                  The response action output content for the agent ID. Exact
-                  format depends on the response action command.
+                description: The response action output content for the agent ID. Exact format
+                  depends on the response action command.
                 oneOf:
                   - type: object
                   - type: string
@@ -3343,8 +3257,7 @@ components:
             have responded to the response action
           type: object
         parameters:
-          description: >-
-            The parameters of the response action. Content different depending
+          description: The parameters of the response action. Content different depending
             on the response action command
           type: object
         startedAt:
@@ -3460,10 +3373,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -3474,9 +3386,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -3536,10 +3446,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -3550,9 +3459,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -3587,8 +3494,7 @@ components:
       example:
         data:
           description: Collects host data for investigation
-          downloadUri: >-
-            /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
+          downloadUri: /api/endpoint/scripts_library/123e4567-e89b-12d3-a456-426655440000/download
           example: ./collect_host_data.sh --help
           fileHash: abf573681eb54aac5e05e35bf186d4d31abe45ecf242461490523f11d2a8fbb8
           fileName: collect_host_data.sh
@@ -3605,21 +3511,17 @@ components:
         data:
           $ref: '#/components/schemas/EndpointScript'
     SentinelOneRunScriptParameters:
-      description: >-
-        Parameters for Run Script response action against SentinelOne agent
-        type.
+      description: Parameters for Run Script response action against SentinelOne agent type.
       example:
         agent_type: sentinel_one
         endpoint_ids:
           - endpoint-id-1
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
-          scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
       properties:
         scriptId:
-          description: >-
-            The script ID from SentinelOne scripts library that will be
-            executed.
+          description: The script ID from SentinelOne scripts library that will be executed.
           minLength: 1
           type: string
         scriptInput:
@@ -3707,10 +3609,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -3721,9 +3622,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -3832,10 +3731,9 @@ components:
             agent_type:
               $ref: '#/components/schemas/AgentTypes'
             alert_ids:
-              description: >-
-                If this action is associated with any alerts, they can be
-                specified here. The action will be logged in any cases
-                associated with the specified alerts. Max of 50.
+              description: If this action is associated with any alerts, they can be specified
+                here. The action will be logged in any cases associated with the
+                specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
@@ -3846,9 +3744,7 @@ components:
               minItems: 1
               type: array
             case_ids:
-              description: >-
-                The IDs of cases where the action taken will be logged. Max of
-                50.
+              description: The IDs of cases where the action taken will be logged. Max of 50.
               example:
                 - case-id-1
                 - case-id-2
@@ -3899,8 +3795,7 @@ components:
         - minLength: 1
           type: string
     WithOutputs:
-      description: >-
-        A list of action IDs that should include the complete output of the
+      description: A list of action IDs that should include the complete output of the
         action. Max of 50.
       example:
         - action-id-1

@@ -42,7 +42,7 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
         return (
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon ?? 'gear'} size="m" />
+              <EuiIcon type={icon ?? 'gear'} size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>{capitalize(displayName)}</EuiFlexItem>
           </EuiFlexGroup>

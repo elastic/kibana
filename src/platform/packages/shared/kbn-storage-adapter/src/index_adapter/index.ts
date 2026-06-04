@@ -10,6 +10,7 @@
 import type {
   BulkOperationContainer,
   BulkOperationType,
+  EsqlQueryRequest,
   IndexResponse,
   IndicesIndexState,
   IndicesIndexTemplate,
@@ -23,6 +24,8 @@ import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
+import { esql } from '@elastic/esql';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
@@ -38,6 +41,7 @@ import type {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
+  StorageClientEsql,
   InternalIStorageClient,
   StorageTransportOptions,
 } from '../..';
@@ -82,6 +86,21 @@ function catchConflictError(error: Error) {
 
 function isNotFoundError(error: Error): error is errors.ResponseError & { statusCode: 404 } {
   return isResponseError(error) && error.statusCode === 404;
+}
+
+// ES|QL signals a missing index as a 400 `verification_exception` with
+// `"Unknown index [<name>]"` instead of 404 — match it explicitly so we
+// stay consistent with `search`/`get`'s missing-index handling.
+export function isEsqlUnknownIndexError(error: unknown): boolean {
+  if (!isResponseError(error as Error)) return false;
+  const responseError = error as errors.ResponseError;
+  if (responseError.statusCode !== 400) return false;
+  const body = responseError.body as { error?: { type?: string; reason?: string } } | undefined;
+  return (
+    body?.error?.type === 'verification_exception' &&
+    typeof body?.error?.reason === 'string' &&
+    body.error.reason.includes('Unknown index')
+  );
 }
 
 function isServerlessSettingsError(error: unknown): boolean {
@@ -715,6 +734,79 @@ export class StorageIndexAdapter<
     });
   };
 
+  /**
+   * @see {@link StorageClientEsql}
+   */
+
+  private esql: StorageClientEsql = (
+    { pipeline, metadata, filter, drop_null_columns = true, migrateSource = true, setOptions },
+    transportOptions
+  ) =>
+    this.ensureMappingsBeforeReading(async () => {
+      const emptyResponse: ESQLSearchResponse = { columns: [], values: [] };
+
+      // Build the adapter-owned FROM clause; callers supply only the pipeline.
+      const fromQuery =
+        metadata && metadata.length > 0
+          ? esql.from([this.getSearchIndexPattern()], metadata)
+          : esql.from([this.getSearchIndexPattern()]);
+
+      // Prepend any SET options (e.g. unmapped_fields="LOAD") before the FROM clause.
+      if (setOptions) {
+        for (const [key, value] of Object.entries(setOptions)) {
+          fromQuery.addSetCommand(key, value);
+        }
+      }
+
+      const { query: fromStr } = fromQuery.toRequest();
+      const { query: pipelineStr, params } = pipeline.toRequest();
+
+      // Reject pipelines that include their own FROM. The adapter owns the
+      // FROM clause; chaining `FROM <ours> | FROM <theirs>` is invalid ES|QL
+      // and would surface as an opaque 400 from ES.
+      if (/^\s*FROM\b/i.test(pipelineStr)) {
+        throw new Error(
+          `StorageClientEsql: pipeline must not start with a FROM clause; the storage adapter owns the FROM. Got: ${pipelineStr.slice(
+            0,
+            80
+          )}`
+        );
+      }
+
+      const query = `${fromStr} | ${pipelineStr}`;
+
+      try {
+        const esqlRequest = {
+          query,
+          ...(params && params.length > 0 ? { params } : {}),
+          ...(filter !== undefined ? { filter } : {}),
+          drop_null_columns,
+          format: 'json' as const,
+        } as unknown as EsqlQueryRequest;
+        const response = (await wrapEsCall(
+          this.esClient.esql.query(esqlRequest, ...optionalTransportArgs(transportOptions))
+        )) as unknown as ESQLSearchResponse;
+
+        if (migrateSource && this.options.migrateSource && metadata?.includes('_source')) {
+          const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+          if (sourceIdx >= 0) {
+            response.values = response.values.map((row) => {
+              const copy = [...row];
+              copy[sourceIdx] = this.options.migrateSource!(
+                copy[sourceIdx] as Record<string, unknown>
+              );
+              return copy;
+            });
+          }
+        }
+
+        return response;
+      } catch (error) {
+        if (isNotFoundError(error) || isEsqlUnknownIndexError(error)) return emptyResponse;
+        throw error;
+      }
+    });
+
   getClient(): InternalIStorageClient<TApplicationType> {
     return {
       bulk: this.bulk,
@@ -724,6 +816,7 @@ export class StorageIndexAdapter<
       search: this.search,
       get: this.get,
       existsIndex: this.existsIndex,
+      esql: this.esql,
     };
   }
 }

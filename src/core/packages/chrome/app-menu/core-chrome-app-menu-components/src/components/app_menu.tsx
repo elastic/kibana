@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
-import { getAppMenuItems, processStaticItems } from '../utils';
+import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
@@ -51,9 +51,9 @@ export const AppMenuComponent = ({
    * If only global static items are present, we don't want to render
    * the app menu.
    */
-  const hasNonGlobalStaticItems = !!staticItems?.length && staticItems.some((item) => !item.global);
+  const hasVisibleStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if ((!config || hasNoItems(config)) && !hasNonGlobalStaticItems) {
+  if ((!config || hasNoItems(config)) && !hasVisibleStaticItems) {
     return null;
   }
 
@@ -78,7 +78,7 @@ export const AppMenuComponent = ({
     shouldOverflow: shouldOverflowBase,
   } = getAppMenuItems({
     config,
-    hasStaticItems: hasNonGlobalStaticItems,
+    hasStaticItems: hasVisibleStaticItems,
   });
 
   const processedStaticItems = processStaticItems(staticItems);

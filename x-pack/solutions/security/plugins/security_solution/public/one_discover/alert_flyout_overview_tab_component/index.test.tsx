@@ -78,6 +78,7 @@ describe('AlertFlyoutOverviewTab', () => {
   beforeEach(() => {
     mockOverviewTab.mockClear();
     mockUseInitDataViewManager.mockReset();
+    mockUseInitDataViewManager.mockReturnValue(jest.fn());
     mockUseIsExperimentalFeatureEnabled.mockReset();
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
@@ -205,7 +206,7 @@ describe('AlertFlyoutOverviewTab', () => {
     expect(initSpy).toHaveBeenCalledWith([]);
   });
 
-  it('does not initialize when feature flag disabled', async () => {
+  it('initializes when status is pristine', async () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
 
@@ -233,7 +234,8 @@ describe('AlertFlyoutOverviewTab', () => {
       await Promise.resolve();
     });
 
-    expect(initSpy).not.toHaveBeenCalled();
+    expect(initSpy).toHaveBeenCalledTimes(1);
+    expect(initSpy).toHaveBeenCalledWith([]);
   });
 
   it('does not initialize when status is loading or ready', async () => {

@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
@@ -119,22 +120,26 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
           return (
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="expand"
-                  color="primary"
-                  aria-label={EXPAND_ENTITY_BUTTON}
-                  onClick={() => onEntityNameClick?.(entity)}
-                />
+                <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="expand"
+                    color="primary"
+                    aria-label={EXPAND_ENTITY_BUTTON}
+                    onClick={() => onEntityNameClick?.(entity)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="plus"
-                  color="primary"
-                  aria-label={ADD_ENTITY_BUTTON}
-                  onClick={() => onAddEntity(entity)}
-                  disabled={disabled || !!addingEntityId}
-                  isLoading={isThisEntityAdding}
-                />
+                <EuiToolTip content={ADD_ENTITY_BUTTON} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="plus"
+                    color="primary"
+                    aria-label={ADD_ENTITY_BUTTON}
+                    onClick={() => onAddEntity(entity)}
+                    disabled={disabled || !!addingEntityId}
+                    isLoading={isThisEntityAdding}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

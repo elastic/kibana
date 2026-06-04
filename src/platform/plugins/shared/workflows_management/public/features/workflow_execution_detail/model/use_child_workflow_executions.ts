@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ChildWorkflowExecutionItem, WorkflowExecutionDto } from '@kbn/workflows';
 import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 
 export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionItem>;
 
@@ -30,7 +32,10 @@ export function useChildWorkflowExecutions(
       .join(',');
   }, [parentExecution?.stepExecutions]);
 
-  const { data, isLoading } = useQuery({
+  const parentExecutionRef = useRef(parentExecution);
+  parentExecutionRef.current = parentExecution;
+
+  const query = useQuery({
     queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
       const executionId = parentExecution?.id ?? '';
@@ -42,12 +47,27 @@ export function useChildWorkflowExecutions(
       return map;
     },
     enabled: !!parentExecution?.id,
-    staleTime: parentExecution && isTerminalStatus(parentExecution.status) ? Infinity : 5000,
-    refetchInterval: parentExecution && isTerminalStatus(parentExecution.status) ? false : 5000,
+    staleTime:
+      parentExecution && isTerminalStatus(parentExecution.status)
+        ? Infinity
+        : CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS,
+    refetchInterval: false,
+  });
+
+  useSerialPolling({
+    poll: () => query.refetch(),
+    enabled: !!parentExecution?.id,
+    immediate: false,
+    intervalMs: CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS,
+    shouldStop: () => {
+      const execution = parentExecutionRef.current;
+      return execution !== undefined && execution !== null && isTerminalStatus(execution.status);
+    },
+    pollKey: parentExecution?.id,
   });
 
   return {
-    childExecutions: data ?? new Map(),
-    isLoading,
+    childExecutions: query.data ?? new Map(),
+    isLoading: query.isLoading,
   };
 }

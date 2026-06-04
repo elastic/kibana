@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TaskStatus, type Streams } from '@kbn/streams-schema';
-import type { PersistedTask } from '../../../../lib/tasks/types';
-import type { FeaturesIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/features_identification';
+import type { Streams } from '@kbn/streams-schema';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { classifyStreams, parseExcludePatterns } from './classify_streams';
 
 const STUB_STREAM_FIELDS = {
@@ -15,26 +15,23 @@ const STUB_STREAM_FIELDS = {
   updated_at: '2025-01-01T00:00:00Z',
 } as const;
 
-type TaskForTest = PersistedTask<FeaturesIdentificationTaskParams>;
-
-const makeTask = (
+const makeExecution = (
   streamName: string,
-  overrides: Partial<Omit<TaskForTest, 'task'>> & {
-    task?: Partial<TaskForTest['task']>;
-  } = {}
-): TaskForTest => {
-  const { task: taskOverrides, ...rest } = overrides;
-  return {
-    id: `task-${streamName}`,
-    type: 'streams:features-identification',
-    space: 'default',
-    created_at: '2025-01-01T00:00:00Z',
-    status: TaskStatus.Completed,
-    last_completed_at: '2025-01-01T00:05:00Z',
-    ...rest,
-    task: { params: { streamName, start: 0, end: 1 }, ...taskOverrides },
-  } as TaskForTest;
-};
+  overrides: Partial<WorkflowExecutionListItemDto> = {}
+): WorkflowExecutionListItemDto =>
+  ({
+    id: `exec-${streamName}`,
+    spaceId: '*',
+    status: ExecutionStatus.COMPLETED,
+    isTestRun: false,
+    startedAt: '2025-01-01T00:00:00Z',
+    finishedAt: '2025-01-01T00:05:00Z',
+    error: null,
+    workflowId: 'streams_ki/onboarding',
+    duration: 300000,
+    concurrencyGroupKey: `streams-ki-onboarding-${streamName}`,
+    ...overrides,
+  } as WorkflowExecutionListItemDto);
 
 const makeStream = (name: string, opts?: { query: boolean }): Streams.all.Definition =>
   opts?.query
@@ -81,7 +78,7 @@ describe('parseExcludePatterns', () => {
 describe('classifyStreams', () => {
   const defaultArgs = {
     allStreams: [] as ReturnType<typeof makeStream>[],
-    sortedTasks: [] as TaskForTest[],
+    executions: [] as WorkflowExecutionListItemDto[],
     excludedStreamPatterns: '',
     intervalHours: 12,
   };
@@ -107,7 +104,7 @@ describe('classifyStreams', () => {
     expect(candidateNames(result)).toEqual(['logs']);
   });
 
-  it('treats streams without a task as never-processed candidates', () => {
+  it('treats streams without an execution as never-processed candidates', () => {
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('stream-a'), makeStream('stream-b')],
@@ -116,14 +113,14 @@ describe('classifyStreams', () => {
     expect(candidateNames(result)).toEqual(['stream-a', 'stream-b']);
   });
 
-  it('identifies already running (in-progress) tasks', () => {
+  it('identifies already running (in-progress) executions', () => {
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('running-stream')],
-      sortedTasks: [
-        makeTask('running-stream', {
-          status: TaskStatus.InProgress,
-          created_at: new Date().toISOString(),
+      executions: [
+        makeExecution('running-stream', {
+          status: ExecutionStatus.RUNNING,
+          finishedAt: '',
         }),
       ],
     });
@@ -132,14 +129,14 @@ describe('classifyStreams', () => {
     expect(result.candidates).toEqual([]);
   });
 
-  it('treats BeingCanceled tasks as already running', () => {
+  it('treats pending executions as already running', () => {
     const result = classifyStreams({
       ...defaultArgs,
-      allStreams: [makeStream('canceling-stream')],
-      sortedTasks: [
-        makeTask('canceling-stream', {
-          status: TaskStatus.BeingCanceled,
-          created_at: new Date().toISOString(),
+      allStreams: [makeStream('pending-stream')],
+      executions: [
+        makeExecution('pending-stream', {
+          status: ExecutionStatus.PENDING,
+          finishedAt: '',
         }),
       ],
     });
@@ -148,12 +145,12 @@ describe('classifyStreams', () => {
     expect(result.candidates).toEqual([]);
   });
 
-  it('marks recently completed tasks as up-to-date', () => {
+  it('marks recently completed executions as up-to-date', () => {
     const recentCompletion = new Date().toISOString();
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('fresh-stream')],
-      sortedTasks: [makeTask('fresh-stream', { last_completed_at: recentCompletion })],
+      executions: [makeExecution('fresh-stream', { finishedAt: recentCompletion })],
     });
 
     expect(result.upToDate).toEqual([
@@ -162,12 +159,12 @@ describe('classifyStreams', () => {
     expect(result.candidates).toEqual([]);
   });
 
-  it('schedules streams whose last completion is past the extraction interval', () => {
+  it('schedules streams whose last execution finished past the extraction interval', () => {
     const oldCompletion = '2024-01-01T00:00:00Z';
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('old-stream')],
-      sortedTasks: [makeTask('old-stream', { last_completed_at: oldCompletion })],
+      executions: [makeExecution('old-stream', { finishedAt: oldCompletion })],
     });
 
     expect(result.candidates).toEqual([
@@ -175,33 +172,51 @@ describe('classifyStreams', () => {
     ]);
   });
 
-  it('uses failed task last_failed_at for interval calculation', () => {
+  it('uses finishedAt for failed executions in interval calculation', () => {
     const recentFailure = new Date().toISOString();
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('failed-stream')],
-      sortedTasks: [
-        makeTask('failed-stream', {
-          status: TaskStatus.Failed,
-          last_failed_at: recentFailure,
-          last_completed_at: undefined,
-          task: { params: { streamName: 'failed-stream', start: 0, end: 1 }, error: 'some error' },
+      executions: [
+        makeExecution('failed-stream', {
+          status: ExecutionStatus.FAILED,
+          finishedAt: recentFailure,
         }),
       ],
     });
 
-    expect(result.upToDate).toEqual([{ streamName: 'failed-stream', lastCompletedAt: null }]);
+    expect(result.upToDate).toEqual([
+      { streamName: 'failed-stream', lastCompletedAt: recentFailure },
+    ]);
     expect(result.candidates).toEqual([]);
   });
 
-  it('places no-task streams before old-task streams in candidates', () => {
+  it('places no-execution streams before old-execution streams in candidates', () => {
     const oldCompletion = '2024-01-01T00:00:00Z';
     const result = classifyStreams({
       ...defaultArgs,
       allStreams: [makeStream('old-stream'), makeStream('new-stream')],
-      sortedTasks: [makeTask('old-stream', { last_completed_at: oldCompletion })],
+      executions: [makeExecution('old-stream', { finishedAt: oldCompletion })],
     });
 
     expect(candidateNames(result)).toEqual(['new-stream', 'old-stream']);
+  });
+
+  it('orders candidates by oldest onboarding first', () => {
+    const finishedTwelveMinAgo = new Date(Date.now() - 12 * 60_000).toISOString();
+    const finishedTenMinAgo = new Date(Date.now() - 10 * 60_000).toISOString();
+    const result = classifyStreams({
+      ...defaultArgs,
+      intervalHours: 0,
+      // Provide executions newest-first (as the API returns them) to prove the
+      // candidates are reordered by oldest completion, not left in input order.
+      allStreams: [makeStream('recent-stream'), makeStream('older-stream')],
+      executions: [
+        makeExecution('recent-stream', { finishedAt: finishedTenMinAgo }),
+        makeExecution('older-stream', { finishedAt: finishedTwelveMinAgo }),
+      ],
+    });
+
+    expect(candidateNames(result)).toEqual(['older-stream', 'recent-stream']);
   });
 });

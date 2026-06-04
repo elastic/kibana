@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { VECTORDB_APP_ID, TUTORIALS_DEEP_LINK_ID } from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
 import type {
@@ -45,6 +47,7 @@ export class ServerlessVectordbPlugin
           title: i18n.translate('xpack.serverlessVectordb.tutorials.title', {
             defaultMessage: 'Tutorials',
           }),
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
       ],
       async mount(params) {
@@ -66,10 +69,22 @@ export class ServerlessVectordbPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     { serverless }: ServerlessVectordbStartDependencies
   ): ServerlessVectordbPluginStart {
-    serverless.initNavigation('vectordb', of(createNavigationTree()));
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
+      map(([application, chatExperience]) => {
+        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+        return createNavigationTree({
+          ...application,
+          showAiAssistant,
+          showAlertingV2: Boolean(application.capabilities.alertingVTwo),
+        });
+      })
+    );
+    serverless.initNavigation('vectordb', navigationTree$);
     return {};
   }
 

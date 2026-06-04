@@ -307,4 +307,42 @@ describe('getNetworkEvents', () => {
       }
     `);
   });
+
+  describe('remoteName CCS index override', () => {
+    const emptyResponse = {
+      hits: {
+        total: { value: 0 },
+        hits: [],
+      },
+    } as any;
+
+    it('does not override the index when remoteName is absent', async () => {
+      const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
+      mockEsClient.search.mockResponseOnce(emptyResponse);
+
+      await getNetworkEvents({
+        syntheticsEsClient,
+        checkGroup: 'my-fake-group',
+        stepIndex: '1',
+      });
+
+      const call: any = mockEsClient.search.mock.calls[0][0];
+      expect(call.index).toBe(syntheticsEsClient.heartbeatIndices);
+    });
+
+    it('prefixes the index with remoteName when present', async () => {
+      const { esClient: mockEsClient, syntheticsEsClient } = getUptimeESMockClient();
+      mockEsClient.search.mockResponseOnce(emptyResponse);
+
+      await getNetworkEvents({
+        syntheticsEsClient,
+        checkGroup: 'my-fake-group',
+        stepIndex: '1',
+        remoteName: 'cluster1',
+      });
+
+      const call: any = mockEsClient.search.mock.calls[0][0];
+      expect(call.index).toBe(`cluster1:${syntheticsEsClient.heartbeatIndices}`);
+    });
+  });
 });

@@ -18,6 +18,7 @@ jobs:
       pull-requests: write
     steps:
       - id: check
+        name: Check if PR should be auto-approved
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -30,7 +31,7 @@ jobs:
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/, token: 'kibana' },
               { user: 'kibanamachine', branchPrefix: 'scout_metadata_update', token: 'github' },
               { user: 'kibanamachine', branchPrefix: 'update-pipeline-resource-defs', baseMatch: /^main$/, token: 'github' },
-              { user: 'kibanamachine', branchPrefix: 'bump-versions', token: 'kibana' },
+              { user: 'kibanamachine', branchPrefix: 'bump-versions', token: 'github' },
               { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'], token: 'kibana' },
             ];
 
@@ -75,11 +76,13 @@ jobs:
             core.setOutput('token', matchedRule?.token ?? 'kibana');
 
       - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
+        name: Approve as github-actions[bot]
         if: steps.check.outputs.should_approve == 'true' && steps.check.outputs.token == 'github'
         with:
           github-token: ${{ github.token }}
 
       - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
+        name: Approve as kibanamachine
         if: steps.check.outputs.should_approve == 'true' && steps.check.outputs.token == 'kibana'
         with:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}

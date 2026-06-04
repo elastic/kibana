@@ -48,15 +48,22 @@ interface GetTestRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
   isExecutionsTab: boolean;
+  isSaving?: boolean;
 }
 export function getTestRunTooltipContent({
   isValid,
   canRunWorkflow,
   isExecutionsTab,
+  isSaving = false,
 }: GetTestRunTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.runWorkflow.executionsTab', {
       defaultMessage: 'Can not run workflow from executions tab',
+    });
+  }
+  if (isSaving) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.saving', {
+      defaultMessage: 'Workflow is saving',
     });
   }
   if (!isValid) {
@@ -97,11 +104,15 @@ interface GetSaveWorkflowTooltipContentProps {
   isExecutionsTab: boolean;
   canSaveWorkflow: boolean;
   isCreate: boolean;
+  hasUnsavedChanges: boolean;
+  isManagedWorkflow?: boolean;
 }
 export function getSaveWorkflowTooltipContent({
   isExecutionsTab,
   canSaveWorkflow,
   isCreate,
+  hasUnsavedChanges,
+  isManagedWorkflow = false,
 }: GetSaveWorkflowTooltipContentProps) {
   if (isExecutionsTab) {
     return i18n.translate('workflows.actionButtons.saveWorkflow.executionsTab', {
@@ -118,6 +129,16 @@ export function getSaveWorkflowTooltipContent({
         defaultMessage: 'You are not allowed to update workflows',
       });
     }
+  }
+  if (isManagedWorkflow) {
+    return i18n.translate('workflows.actionButtons.saveWorkflow.managedWorkflow', {
+      defaultMessage: 'Managed workflow YAML is read-only',
+    });
+  }
+  if (!hasUnsavedChanges) {
+    return i18n.translate('workflows.actionButtons.saveWorkflow.noChanges', {
+      defaultMessage: 'No changes to save',
+    });
   }
   return null;
 }

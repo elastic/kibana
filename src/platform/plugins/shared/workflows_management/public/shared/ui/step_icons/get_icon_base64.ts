@@ -11,6 +11,7 @@ import { type IconType } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+import { getConnectorSpecIcon } from './get_connector_spec_icon';
 import { HardcodedIcons } from './hardcoded_icons';
 import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { KibanaLogo } from './icons/kibana.svg';
@@ -19,19 +20,23 @@ type LazyImageComponent = React.LazyExoticComponent<
   React.ComponentType<{ width: number; height: number }>
 > & {
   _payload: {
-    _result: () => Promise<{ default: React.ComponentType<{ width: number; height: number }> }>;
+    _result:
+      | (() => Promise<{ default: React.ComponentType<{ width: number; height: number }> }>)
+      | Promise<{ default: React.ComponentType<{ width: number; height: number }> }>
+      | { default: React.ComponentType<{ width: number; height: number }> };
   };
 };
 
 function isLazyExoticComponent(component: unknown): component is LazyImageComponent {
   const comp = component as unknown as LazyImageComponent;
-  return typeof comp?._payload?._result === 'function';
+  return comp?.$$typeof === Symbol.for('react.lazy') && comp?._payload?._result !== undefined;
 }
 
 async function resolveLazyComponent(
   lazyComponent: LazyImageComponent
 ): Promise<React.ComponentType<{ width: number; height: number }>> {
-  const module = await lazyComponent._payload._result();
+  const result = lazyComponent._payload._result;
+  const module = typeof result === 'function' ? await result() : await result;
   return module.default;
 }
 
@@ -152,6 +157,10 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
     const hardcodedIcon = HardcodedIcons[actionTypeId];
     if (hardcodedIcon) {
       return hardcodedIcon;
+    }
+    const connectorSpecIcon = getConnectorSpecIcon(actionTypeId);
+    if (connectorSpecIcon) {
+      return resolveIconToDataUrl(connectorSpecIcon, defaultFallbackForStep(params));
     }
     if (icon) {
       return resolveIconToDataUrl(icon, defaultFallbackForStep(params));

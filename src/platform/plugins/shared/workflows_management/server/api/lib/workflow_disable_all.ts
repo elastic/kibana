@@ -90,7 +90,7 @@ export const disableAllWorkflows = async (params: {
 
         if (pageDisabledIds.length > 0) {
           disabledIds.push(...pageDisabledIds);
-          await unscheduleWorkflowTasks(pageDisabledIds, taskScheduler, logger);
+          await unscheduleWorkflowTasks(pageDisabledIds, taskScheduler);
         }
       } catch (error) {
         bulkOperations.forEach((op) => {

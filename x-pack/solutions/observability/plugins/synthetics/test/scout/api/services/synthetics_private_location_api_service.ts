@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { KbnClient, ApiServicesFixture } from '@kbn/scout-oblt';
+import { PUBLIC_API_VERSION, SYNTHETICS_API_URLS } from '../fixtures/constants';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
@@ -36,7 +39,7 @@ export interface SyntheticsPrivateLocationApi {
     testFleetPolicyIds: string[],
     spaceId?: string | string[]
   ): Promise<ScoutPrivateLocation[]>;
-  addTestPrivateLocation(spaceId?: string): Promise<ScoutPrivateLocation>;
+  addTestPrivateLocation(spaceId?: string | string[]): Promise<ScoutPrivateLocation>;
   getSharedPrivateLocation(): Promise<ScoutPrivateLocation>;
   resetSharedPrivateLocation(): void;
   cleanUpPrivateLocationsAndPolicies(): Promise<void>;
@@ -54,6 +57,24 @@ export function createSyntheticsPrivateLocationApi(
     return data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   };
 
+  // The synthetics Fleet package install is a *global* operation: every Scout
+  // worker shares the same Kibana/Fleet install. The previous implementation
+  // ran `DELETE synthetics` + reinstall on the first call per worker, but with
+  // many spec files the workers run those `beforeAll` hooks concurrently, so
+  // one worker's DELETE wiped the package out from under another worker's
+  // in-flight monitor save — yielding intermittent 400s on the first save of a
+  // spec (see the FTR `PrivateLocationTestService` notes on this exact flake).
+  // We now install idempotently: never DELETE, short-circuit when the package
+  // is already present at the target version, and tolerate concurrent installs
+  // from sibling workers.
+  interface FleetPackageItem {
+    status?: string;
+    version?: string;
+    installationInfo?: { version?: string };
+  }
+  const isInstalledAt = (item: FleetPackageItem | undefined, wanted: string): boolean =>
+    item?.status === 'installed' && (item?.installationInfo?.version ?? item?.version) === wanted;
+
   const installSyntheticsPackage = async ({ version }: { version?: string } = {}) => {
     const resolvedVersion = version ?? (await fetchSyntheticsPackageVersion());
 
@@ -61,22 +82,32 @@ export function createSyntheticsPrivateLocationApi(
       return;
     }
 
-    await fleetApi.internal.setup();
-
-    try {
-      await fleetApi.integration.delete('synthetics');
-    } catch {
-      // Ignore — package may not be installed yet
+    const { data: current } = await fleetApi.integration.getPackage('synthetics');
+    if (isInstalledAt(current?.item, resolvedVersion)) {
+      cachedInstalledVersion = resolvedVersion;
+      return;
     }
 
-    await fleetApi.integration.installPackage('synthetics', resolvedVersion);
+    await fleetApi.internal.setup();
 
-    const { data } = await fleetApi.integration.getPackage('synthetics');
-    const installedVersion = data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
-    if (installedVersion !== resolvedVersion) {
-      throw new Error(
-        `Package version mismatch after install: expected ${resolvedVersion} but got ${installedVersion}`
-      );
+    const maxAttempts = 60;
+    let installed = false;
+    for (let attempt = 0; attempt < maxAttempts && !installed; attempt++) {
+      try {
+        await fleetApi.integration.installPackage('synthetics', resolvedVersion);
+      } catch {
+        // A sibling worker may be installing the same package concurrently;
+        // re-check the install state below before retrying.
+      }
+      const { data } = await fleetApi.integration.getPackage('synthetics');
+      installed = isInstalledAt(data?.item, resolvedVersion);
+      if (!installed) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+
+    if (!installed) {
+      throw new Error(`Synthetics package failed to install at version ${resolvedVersion}`);
     }
 
     cachedInstalledVersion = resolvedVersion;
@@ -100,6 +131,78 @@ export function createSyntheticsPrivateLocationApi(
     return { id: data.item.id };
   };
 
+  // After the private-location saved object and its Fleet agent policy are
+  // created, the monitor-save validation reads both via *search*: a
+  // point-in-time finder for the location SO and `agentPolicyService.list` for
+  // the agent policy. Both are subject to the Elasticsearch refresh interval,
+  // so the very first monitor save immediately after setup can deterministically
+  // 400 ("Invalid private location") before the agent policy becomes
+  // search-visible — at which point the location is reported with
+  // `isInvalid: true`. The public `GET private_locations/{id}` route combines
+  // the exact same SO + agent-policy reads, so we gate setup on it until the
+  // location is both found and `isInvalid: false`.
+  interface PrivateLocationContract {
+    id?: string;
+    label?: string;
+    isInvalid?: boolean;
+  }
+  // Single probe of the public `GET private_locations/{id}` route, which combines
+  // the same private-location SO + agent-policy reads that the monitor-save
+  // validation performs. A location is "ready" only when it is found and
+  // `isInvalid:false`.
+  const probePrivateLocation = async (
+    locationId: string,
+    urlSpaceId: string
+  ): Promise<{ ready: boolean; detail: string }> => {
+    try {
+      const { data, status } = await kbnClient.request<PrivateLocationContract>({
+        method: 'GET',
+        path: `/s/${urlSpaceId}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
+        headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+        ignoreErrors: [404],
+        retries: 1,
+      });
+      if (status === 200 && data?.id === locationId && data?.isInvalid === false) {
+        return { ready: true, detail: 'ready' };
+      }
+      return { ready: false, detail: `status=${status} body=${JSON.stringify(data)}` };
+    } catch (error) {
+      return { ready: false, detail: error instanceof Error ? error.message : String(error) };
+    }
+  };
+
+  const waitForPrivateLocationsReady = async (
+    locationIds: string[],
+    urlSpaceId: string
+  ): Promise<void> => {
+    const timeoutMs = 60_000;
+    const deadline = Date.now() + timeoutMs;
+    const pending = new Set(locationIds);
+    let lastSeen = 'no response yet';
+
+    while (pending.size > 0 && Date.now() < deadline) {
+      for (const locationId of [...pending]) {
+        const { ready, detail } = await probePrivateLocation(locationId, urlSpaceId);
+        if (ready) {
+          pending.delete(locationId);
+        } else {
+          lastSeen = detail;
+        }
+      }
+      if (pending.size > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1_000));
+      }
+    }
+
+    if (pending.size > 0) {
+      throw new Error(
+        `Private location(s) [${[...pending].join(
+          ', '
+        )}] not ready (isInvalid:false) after ${timeoutMs}ms. Last seen: ${lastSeen}`
+      );
+    }
+  };
+
   const setTestLocations = async (
     testFleetPolicyIds: string[],
     spaceId?: string | string[]
@@ -111,12 +214,17 @@ export function createSyntheticsPrivateLocationApi(
       geo: { lat: 0, lon: 0 },
       isServiceManaged: false,
     }));
-    const urlSpaceId = spaceId ? (Array.isArray(spaceId) ? spaceId[0] : spaceId) : 'default';
     const initialNamespaces = spaceId
       ? Array.isArray(spaceId)
         ? spaceId
         : [spaceId]
       : ['default'];
+    // `*` (ALL_SPACES_ID) is not a valid URL space prefix — issue the
+    // bulk_create from the default space and rely on `initialNamespaces` to
+    // share the saved object to all spaces (mirrors the FTR service).
+    const firstNamespace = initialNamespaces[0];
+    const urlSpaceId =
+      !firstNamespace || firstNamespace === ALL_SPACES_ID ? 'default' : firstNamespace;
 
     await kbnClient.request({
       path: `/s/${urlSpaceId}/api/saved_objects/_bulk_create`,
@@ -128,21 +236,39 @@ export function createSyntheticsPrivateLocationApi(
         initialNamespaces,
       })),
     });
+
+    await waitForPrivateLocationsReady(
+      locations.map((location) => location.id),
+      urlSpaceId
+    );
+
     return locations;
   };
 
   const addTestPrivateLocation = async (
-    spaceId: string = 'default'
+    spaceId: string | string[] = 'default'
   ): Promise<ScoutPrivateLocation> => {
     await installSyntheticsPackage();
-    const { id: policyId } = await addFleetPolicy(`Scout test policy ${Date.now()}`, [spaceId]);
+    const spaceIds = Array.isArray(spaceId) ? spaceId : [spaceId];
+    const { id: policyId } = await addFleetPolicy(`Scout test policy ${uuidv4()}`, spaceIds);
     const [location] = await setTestLocations([policyId], spaceId);
     return location;
   };
 
   const getSharedPrivateLocation = async (): Promise<ScoutPrivateLocation> => {
     if (cachedSharedLocation) {
-      return cachedSharedLocation;
+      // The shared location is cached per worker, but its saved object (and Fleet
+      // agent policy) live in the shared, default space and are globally removed
+      // by sibling specs that clean `synthetics-private-location` /
+      // `ingest-agent-policies` directly (bypassing `resetSharedPrivateLocation`).
+      // Reusing a stale location id makes the first monitor save of the consuming
+      // spec throw `InvalidLocationError` -> 400. Re-validate before reuse and
+      // recreate the location when it is no longer present/valid.
+      const { ready } = await probePrivateLocation(cachedSharedLocation.id, 'default');
+      if (ready) {
+        return cachedSharedLocation;
+      }
+      cachedSharedLocation = null;
     }
     cachedSharedLocation = await addTestPrivateLocation();
     return cachedSharedLocation;

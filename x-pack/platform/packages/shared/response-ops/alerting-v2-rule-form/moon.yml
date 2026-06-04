@@ -43,6 +43,8 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/code-editor'
   - '@kbn/esql-language'
+  - '@kbn/core-http-browser'
+  - '@kbn/ui-actions-plugin'
 tags:
   - shared-browser
   - package

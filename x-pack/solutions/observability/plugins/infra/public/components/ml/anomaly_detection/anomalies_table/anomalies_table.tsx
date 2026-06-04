@@ -14,19 +14,20 @@ import type {
   Criteria,
 } from '@elastic/eui';
 import {
-  EuiSuperDatePicker,
-  useEuiTheme,
-  EuiFlexItem,
-  EuiFieldSearch,
   EuiBasicTable,
-  EuiFlexGroup,
-  EuiContextMenuItem,
-  EuiComboBox,
   EuiButtonIcon,
-  EuiPopover,
+  EuiComboBox,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
-  type OnTimeChangeProps,
   EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSuperDatePicker,
+  EuiToolTip,
+  type OnTimeChangeProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -228,14 +229,21 @@ const AnomalyActionMenu = ({
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
-        <EuiButtonIcon
-          data-test-subj="infraAnomalyActionMenuButton"
-          iconType="boxesVertical"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+        <EuiToolTip
+          content={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
             defaultMessage: 'Open',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="infraAnomalyActionMenuButton"
+            iconType="boxesVertical"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={close}

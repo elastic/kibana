@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { EuiButtonIcon, EuiInMemoryTable, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonIcon, EuiInMemoryTable, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { FieldTypeIcon } from '../common/components/field_type_icon';
 import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
@@ -98,18 +98,25 @@ export const DataDriftOverviewTable = ({
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
         return (
-          <EuiButtonIcon
-            data-test-subj={`dataDriftToggleDetails-${
-              itemIdToExpandedRowMapValues[item.featureName] ? 'expanded' : 'collapsed'
-            }`}
-            onClick={() => toggleDetails(item)}
-            aria-label={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
-            iconType={
-              itemIdToExpandedRowMapValues[item.featureName]
-                ? 'chevronSingleDown'
-                : 'chevronSingleRight'
-            }
-          />
+          <EuiToolTip
+            content={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`dataDriftToggleDetails-${
+                itemIdToExpandedRowMapValues[item.featureName] ? 'expanded' : 'collapsed'
+              }`}
+              onClick={() => toggleDetails(item)}
+              aria-label={
+                itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW
+              }
+              iconType={
+                itemIdToExpandedRowMapValues[item.featureName]
+                  ? 'chevronSingleDown'
+                  : 'chevronSingleRight'
+              }
+            />
+          </EuiToolTip>
         );
       },
     },

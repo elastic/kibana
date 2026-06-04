@@ -13,6 +13,7 @@ import {
   EuiSuperSelect,
   EuiSwitch,
   EuiText,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -172,9 +173,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                 `}
               >
                 <EuiText size="s">
-                  <p className="eui-textTruncate" title={name}>
-                    {name}
-                  </p>
+                  <EuiTextTruncate text={name} />
                 </EuiText>
               </EuiFlexItem>
               {switchProps.show && (

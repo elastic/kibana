@@ -77,7 +77,7 @@ export const RuleGroupTitle = (props: Props) => {
       data-test-subj="ruleGroupTitle"
     >
       {props.rule.getDisplayTitle()}
-      {readOnly === false && <EuiIcon type="chevronSingleDown" />}
+      {readOnly === false && <EuiIcon type="chevronSingleDown" aria-hidden={true} />}
     </EuiLink>
   );
 

@@ -1,0 +1,22 @@
+{
+  "slug": "detection-rule-management",
+  "name": "Detection Rule Management",
+  "owners": ["@elastic/security-detection-rule-management"],
+  "paths": [
+    "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_schema/**",
+    "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/**",
+    "x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management/**",
+    "x-pack/solutions/security/plugins/security_solution/common/detection_engine/mitre/**",
+    "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/**",
+    "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/**",
+    "x-pack/solutions/security/plugins/security_solution/public/detections/mitre/**",
+    "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/**",
+    "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_schema/**"
+  ],
+  "files": [
+    {
+      "path": "detection-rule-management.md",
+      "description": "Primary domain knowledge"
+    }
+  ]
+}

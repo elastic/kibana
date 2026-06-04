@@ -282,8 +282,20 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
   }
 }
 
+// Keep enriched marker messages readable: `steps` is a discriminated union of
+// every connector registered in Kibana (~200 options).
+const MAX_UNION_OPTIONS_RENDERED = 10;
+
 function analyzeUnionSchema(unionSchema: z.ZodUnion<any>): string[] {
-  return unionSchema.def.options.map((option: z.ZodType) => analyzeUnionOption(option));
+  const { options } = unionSchema;
+  const rendered = options
+    .slice(0, MAX_UNION_OPTIONS_RENDERED)
+    .map((option: z.ZodType) => analyzeUnionOption(option));
+  const remaining = options.length - MAX_UNION_OPTIONS_RENDERED;
+  if (remaining > 0) {
+    rendered.push(`... and ${remaining} more`);
+  }
+  return rendered;
 }
 
 function analyzeUnionOption(option: z.ZodType): string {
@@ -419,6 +431,10 @@ function unwrapSchema(schema: z.ZodType): z.ZodType {
     } else if (current instanceof z.ZodNullable) {
       current = current.unwrap() as z.ZodType;
     } else if (current instanceof z.ZodDefault) {
+      current = current.unwrap() as z.ZodType;
+    } else if (current instanceof z.ZodLazy) {
+      // So that `z.array(z.lazy(stepUnion))` resolves to the union branch in
+      // `generateArrayErrorMessage` / `generateSchemaErrorMessage`.
       current = current.unwrap() as z.ZodType;
     } else {
       break;

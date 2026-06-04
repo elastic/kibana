@@ -17,6 +17,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type {
   BaseIndexPatternColumn,
+  ColumnBuildHints,
   DateRange,
   FormBasedLayer,
   GenericIndexPatternColumn,
@@ -478,7 +479,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: P
   ) => C;
@@ -519,7 +520,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: P & {
       shift?: string;
@@ -617,7 +618,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       referenceIds: string[];
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       shift?: string;
@@ -645,7 +646,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: GenericIndexPatternColumn;
+      previousColumn?: ColumnBuildHints;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] &
       FilterParams & { reducedTimeRange?: string },

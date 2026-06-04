@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { renderAttachmentTagParser, resolveAttachmentVersion } from './render_attachment_plugin';
+import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import {
+  createRenderAttachmentRenderer,
+  renderAttachmentTagParser,
+  resolveAttachmentVersion,
+} from './render_attachment_plugin';
+import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
+import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 
 const createMockAttachment = (
@@ -156,6 +164,91 @@ describe('resolveAttachmentVersion', () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe('createRenderAttachmentRenderer', () => {
+  const attachmentId = 'attachment-1';
+  const conversationId = 'conversation-1';
+  const attachmentsService = {
+    getAttachmentUiDefinition: jest.fn(),
+    updateOrigin: jest.fn(),
+  } as unknown as AttachmentsService;
+
+  const baseAttachment = createMockAttachment(attachmentId, [
+    { version: 1, created_at: '2024-01-01T10:00:00Z' },
+    { version: 2, created_at: '2024-01-02T10:00:00Z' },
+  ]);
+
+  it('renders a skeleton when isStreaming is true, even if the attachment is in the cache', () => {
+    const renderer = createRenderAttachmentRenderer({
+      attachmentsService,
+      conversationAttachments: [baseAttachment],
+      attachmentRefs: undefined,
+      conversationId,
+      isSidebar: false,
+      isStreaming: true,
+    });
+
+    const element = renderer({ attachmentId });
+    expect(element).not.toBeNull();
+    expect((element as ReactElement).type).toBe(AttachmentLoadingSkeleton);
+  });
+
+  it('renders a skeleton when isStreaming is true and the attachment is missing from the cache', () => {
+    const renderer = createRenderAttachmentRenderer({
+      attachmentsService,
+      conversationAttachments: [],
+      attachmentRefs: undefined,
+      conversationId,
+      isSidebar: false,
+      isStreaming: true,
+    });
+
+    const element = renderer({ attachmentId });
+    expect((element as ReactElement).type).toBe(AttachmentLoadingSkeleton);
+  });
+
+  it('renders the inline attachment card when isStreaming is false and the attachment is in the cache', () => {
+    const renderer = createRenderAttachmentRenderer({
+      attachmentsService,
+      conversationAttachments: [baseAttachment],
+      attachmentRefs: undefined,
+      conversationId,
+      isSidebar: false,
+      isStreaming: false,
+    });
+
+    const element = renderer({ attachmentId });
+    expect((element as ReactElement).type).toBe(InlineAttachmentWithActions);
+  });
+
+  it('still falls back to a skeleton when not streaming but the attachment is missing from the cache', () => {
+    const renderer = createRenderAttachmentRenderer({
+      attachmentsService,
+      conversationAttachments: [],
+      attachmentRefs: undefined,
+      conversationId,
+      isSidebar: false,
+      isStreaming: false,
+    });
+
+    const element = renderer({ attachmentId });
+    expect((element as ReactElement).type).toBe(AttachmentLoadingSkeleton);
+  });
+
+  it('returns null when attachmentId or conversationId is missing (regardless of streaming)', () => {
+    const renderer = createRenderAttachmentRenderer({
+      attachmentsService,
+      conversationAttachments: [baseAttachment],
+      attachmentRefs: undefined,
+      conversationId: undefined,
+      isSidebar: false,
+      isStreaming: true,
+    });
+
+    expect(renderer({ attachmentId })).toBeNull();
+    expect(renderer({ attachmentId: undefined })).toBeNull();
   });
 });
 

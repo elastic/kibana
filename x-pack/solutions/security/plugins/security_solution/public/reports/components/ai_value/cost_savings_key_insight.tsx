@@ -18,13 +18,13 @@ import {
 import { css } from '@emotion/react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { MessageRole } from '@kbn/inference-common';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
-import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
@@ -35,7 +35,12 @@ interface Props {
 const CostSavingsKeyInsightLoader: React.FC<Props> = ({ isLoading, lensResponse }) => {
   const { http, notifications, inference } = useKibana().services;
   const [insightResult, setInsightResult] = useState<string>('');
-  const { defaultConnectorId } = useDefaultAIConnectorId();
+  const { data: aiConnectors } = useLoadConnectors({
+    http,
+    featureId: 'ai_value_report',
+    toasts: notifications.toasts,
+  });
+  const defaultConnectorId = aiConnectors?.[0]?.id;
   const exportContext = useAIValueExportContext();
   const setInsightForExportContext = exportContext?.setInsight;
 
@@ -134,7 +139,12 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
           ref={containerRef}
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElastic" size="m" data-test-subj="alertProcessingKeyInsightsLogo" />
+            <EuiIcon
+              type="logoElastic"
+              size="m"
+              data-test-subj="alertProcessingKeyInsightsLogo"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">

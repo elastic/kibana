@@ -17,6 +17,7 @@
       "vectordb"
     ],
     "requiredPlugins": [
+      "dataViews",
       "serverless",
       "share",
       "agentBuilder"

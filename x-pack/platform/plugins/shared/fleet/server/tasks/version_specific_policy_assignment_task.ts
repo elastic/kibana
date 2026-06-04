@@ -19,6 +19,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { coerce } from 'semver';
 import pMap from 'p-map';
 
@@ -295,12 +296,14 @@ export class VersionSpecificPolicyAssignmentTask {
     ).toISOString();
 
     // Query 1: Agents on parent policy (newly enrolled or need initial assignment)
-    const parentPolicyKuery = `policy_id:"${agentPolicyId}"`;
+    const parentPolicyKuery = `policy_id:"${escapeQuotes(agentPolicyId)}"`;
 
     // Query 2: Agents on any versioned policy derived from this parent that:
     //   - Were recently upgraded (version might have changed)
     //   - May need to move to a different versioned policy
-    const versionedPolicyKuery = `policy_id:${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}* AND upgraded_at >= "${recentlyUpgradedTime}"`;
+    const versionedPolicyKuery = `policy_id:${escapeKuery(
+      agentPolicyId
+    )}${AGENT_POLICY_VERSION_SEPARATOR}* AND upgraded_at >= "${recentlyUpgradedTime}"`;
 
     // Note: We intentionally do NOT query for agents with outdated policy revisions.
     // Agents already on the correct versioned policy will receive updated revisions

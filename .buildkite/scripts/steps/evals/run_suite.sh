@@ -18,10 +18,10 @@ fi
 # The value should be the platform-level `pluginId` use-case identifier.
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
 
-# Set a base run id from the Buildkite build. The evaluator fixture appends the
-# connector id to produce a unique run_id per model (e.g. bk-<build>-<connector>).
-# Correlation across models in the same build uses ci.buildkite.build_id which
-# is populated automatically from BUILDKITE_BUILD_ID in score_repository.ts.
+# Set a base build run ID from the Buildkite build. This is used as a seed for
+# generating deterministic per-task experiment IDs (not as the experiment_id itself).
+# Suite-run grouping in the UI uses metadata.ci.build_id which is populated
+# automatically from BUILDKITE_BUILD_ID in the Buildkite metadata.
 if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi

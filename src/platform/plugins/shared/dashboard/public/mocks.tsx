@@ -12,7 +12,7 @@ import type { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 import type { DashboardReadResponseBody } from '../server';
-import { DEFAULT_DASHBOARD_STATE } from './dashboard_api/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../common/default_dashboard_state';
 
 export type Start = jest.Mocked<DashboardStart>;
 

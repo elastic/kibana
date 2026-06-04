@@ -142,7 +142,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.integrations.settings.namespaceCustomization.description"
-          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent settings and mappings per namespace. {learnMoreLink}"
+          defaultMessage="Select which namespaces use dedicated index templates for this integration. This enables independent settings and mappings per namespace. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docLinks.links.fleet.datastreams} external={true} target="_blank">
@@ -160,7 +160,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
         isInvalid={hasValidationError}
         error={validationErrors}
         label={i18n.translate('xpack.fleet.integrations.settings.namespaceCustomization.label', {
-          defaultMessage: 'Namespaces with a dedicated index template',
+          defaultMessage: 'Namespaces with dedicated index templates',
         })}
         helpText={
           allowedNamespacePrefixes.length > 0 && (
@@ -202,7 +202,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
                     id="xpack.fleet.integrations.settings.namespaceCustomization.applying"
-                    defaultMessage="Applying namespace index template changes…"
+                    defaultMessage="Applying changes to namespace index templates…"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

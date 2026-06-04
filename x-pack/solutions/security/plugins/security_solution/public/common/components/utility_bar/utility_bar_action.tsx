@@ -24,6 +24,7 @@ const LoadingButtonEmpty = styled(EuiButtonEmpty)`
 
 const Popover = React.memo<UtilityBarActionProps>(
   ({
+    ariaLabel,
     children,
     color,
     iconSide,
@@ -47,6 +48,7 @@ const Popover = React.memo<UtilityBarActionProps>(
 
     return (
       <EuiPopover
+        aria-label={ariaLabel}
         ownFocus={ownFocus}
         panelPaddingSize={popoverPanelPaddingSize}
         button={

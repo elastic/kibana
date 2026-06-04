@@ -36,6 +36,7 @@ export type StepParentActor = Omit<AnyActorRef, 'send'> & {
 
 export interface StepContext {
   parentRef: StepParentActor;
+  originalStep: StreamlangStepWithUIAttributes;
   previousStep: StreamlangStepWithUIAttributes;
   step: StreamlangStepWithUIAttributes;
   isNew: boolean;

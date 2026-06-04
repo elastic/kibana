@@ -6,11 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { TaskResult } from '@kbn/streams-schema';
 import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
-import { EMPTY_TOKENS } from '@kbn/streams-ai';
 import { notFound } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -34,27 +33,35 @@ import {
   type MemoryConsolidationTaskParams,
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
-import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
-import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import type { MemoryGenerationResult } from '../../../lib/sig_events/memory_generation';
-import { generateMemory } from '../../../lib/sig_events/memory_generation';
+import {
+  MEMORY_GENERATION_TASK_TYPE,
+  type MemoryGenerationTaskParams,
+} from '../../../lib/tasks/task_definitions/memory_generation';
+import { isSignificantEventsMemoryEnabled } from '../../../lib/memory/is_significant_events_memory_enabled';
+import { FeatureNotEnabledError } from '../../../lib/streams/errors/feature_not_enabled_error';
 
-const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
-  const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+const assertMemoryEnabled = async ({
+  server,
+  licensing,
+  uiSettingsClient,
+}: {
+  server: StreamsServer;
+  licensing: LicensingPluginStart;
+  uiSettingsClient: IUiSettingsClient;
+}) => {
+  await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+  const useMemory = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
   if (!useMemory) {
-    throw new Error(
-      'Memory is disabled. Enable the Streams memory advanced setting (observability:streamsEnableMemory).'
+    throw new FeatureNotEnabledError(
+      'Memory is disabled. Enable the streams.significantEventsMemoryEnabled feature flag.'
     );
   }
 };
 
-const getMemoryService = (server: StreamsServer, logger: Logger) => {
-  return new MemoryServiceImpl({
-    logger,
-    esClient: server.core.elasticsearch.client.asInternalUser,
-  });
-};
+const createMemoryService = (esClient: ElasticsearchClient, logger: Logger) =>
+  new MemoryServiceImpl({ logger, esClient });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
@@ -78,9 +85,11 @@ const createEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -110,9 +119,11 @@ const getEntryRoute = createServerRoute({
     path: z.object({ id: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.get({ id: params.path.id });
   },
@@ -133,9 +144,11 @@ const getEntryByNameRoute = createServerRoute({
     query: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
@@ -169,9 +182,11 @@ const updateEntryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -206,9 +221,11 @@ const deleteEntryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ deleted: boolean }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -234,9 +251,11 @@ const renameEntryRoute = createServerRoute({
     body: z.object({ new_name: z.string() }),
   }),
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -276,9 +295,11 @@ const searchRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ results: MemorySearchResult[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const results = await memory.search({
       query: params.body.query,
@@ -309,9 +330,11 @@ const getCategoryTreeRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ tree: MemoryCategoryNode[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const tree = await memory.getCategoryTree();
     return { tree };
@@ -345,9 +368,11 @@ const getHistoryRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ history: MemoryVersionRecord[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const history = await memory.getHistory({
       entryId: params.path.id,
@@ -381,9 +406,11 @@ const getVersionRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<MemoryVersionRecord> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     return memory.getVersion({
       entryId: params.path.id,
@@ -418,9 +445,11 @@ const recentChangesRoute = createServerRoute({
     logger,
     getScopedClients,
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
-    const { uiSettingsClient } = await getScopedClients({ request });
-    await assertMemoryEnabled(uiSettingsClient);
-    const memory = getMemoryService(server, logger);
+    const { licensing, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const changes = await memory.getRecentChanges({
       size: params.query?.size,
@@ -450,9 +479,10 @@ const scrapeConversationsRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    server,
   }): Promise<TaskResult<ConversationScraperTaskResult>> => {
-    const { taskClient, uiSettingsClient: scraperUiSettings } = await getScopedClients({ request });
-    await assertMemoryEnabled(scraperUiSettings);
+    const { taskClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
     const { body } = params;
 
@@ -495,11 +525,12 @@ const consolidateMemoryRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    server,
   }): Promise<TaskResult<MemoryConsolidationTaskResult>> => {
-    const { taskClient, uiSettingsClient: consolidateUiSettings } = await getScopedClients({
+    const { taskClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
-    await assertMemoryEnabled(consolidateUiSettings);
+    await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
     const { body } = params;
 
@@ -524,6 +555,11 @@ const consolidateMemoryRoute = createServerRoute({
   },
 });
 
+// Schedules a singleton memory generation task (same fixed task ID as the
+// onboarding task uses). Concurrent calls replace rather than queue, which is
+// fine because memory generation is idempotent and best-effort.
+// TODO: Replace this endpoint with a managed workflow once memory generation
+// is migrated to the workflow engine.
 const generateMemoryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/memory/_generate',
   params: z.object({
@@ -537,8 +573,7 @@ const generateMemoryRoute = createServerRoute({
     access: 'internal',
     summary: 'Generate memory from discovery indicators',
     description:
-      'Runs the memory generation reasoning agent to synthesize features and queries into memory pages.',
-    timeout: { idleSocket: 600_000 },
+      'Schedules a background task to synthesize features and queries into memory pages.',
   },
   security: {
     authz: {
@@ -550,19 +585,15 @@ const generateMemoryRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
-  }): Promise<
-    MemoryGenerationResult & { skipped?: boolean; reason?: string; connectorId?: string }
-  > => {
-    const { inferenceClient, uiSettingsClient, licensing } = await getScopedClients({ request });
+  }): Promise<{ acknowledged: boolean; skipped?: boolean; reason?: string }> => {
+    const { uiSettingsClient, licensing, taskClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const memoryEnabled = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    const memoryEnabled = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
     if (!memoryEnabled) {
       return {
-        streamsProcessed: 0,
-        tokensUsed: EMPTY_TOKENS,
+        acknowledged: false,
         skipped: true,
         reason: 'memory_disabled',
       };
@@ -574,23 +605,17 @@ const generateMemoryRoute = createServerRoute({
     const features = rawFeatures?.filter((f) => f.stream_name === streamName);
     const queries = rawQueries?.map((query) => ({ streamName, query }));
 
-    const connectorId = await resolveConnectorForSignificantEventsDiscovery({
-      searchInferenceEndpoints: server.searchInferenceEndpoints,
+    await taskClient.schedule<MemoryGenerationTaskParams>({
+      task: {
+        type: MEMORY_GENERATION_TASK_TYPE,
+        id: MEMORY_GENERATION_TASK_TYPE,
+        space: '*',
+      },
+      params: { features, queries },
       request,
     });
 
-    const result = await generateMemory(
-      { features, queries },
-      {
-        inferenceClient,
-        connectorId,
-        esClient: server.core.elasticsearch.client.asInternalUser,
-        logger: logger.get('memory_generation'),
-        signal: getRequestAbortSignal(request),
-      }
-    );
-
-    return { ...result, connectorId };
+    return { acknowledged: true };
   },
 });
 

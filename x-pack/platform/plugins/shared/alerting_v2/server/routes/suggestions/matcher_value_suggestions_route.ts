@@ -31,8 +31,8 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [
-        ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
         ALERTING_V2_API_PRIVILEGES.rules.read,
+        ALERTING_V2_API_PRIVILEGES.alerts.read,
       ],
     },
   };

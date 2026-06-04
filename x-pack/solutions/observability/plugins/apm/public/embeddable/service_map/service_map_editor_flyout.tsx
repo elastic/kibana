@@ -239,6 +239,15 @@ export function ServiceMapEditorFlyout({
     setSelectedEnvironmentOption([ENVIRONMENT_ALL]);
   };
 
+  const onServiceNameCreateOption = (searchValue: string) => {
+    const value = searchValue.trim();
+    if (!value) {
+      return;
+    }
+
+    onServiceNameSelect([{ value, label: value }]);
+  };
+
   const onEnvironmentSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     if (changedOptions.length === 1 && changedOptions[0].value) {
       setEnvironment(changedOptions[0].value as Environment);
@@ -304,9 +313,18 @@ export function ServiceMapEditorFlyout({
               options={serviceNameOptions}
               selectedOptions={selectedServiceOption}
               onChange={onServiceNameSelect}
+              onCreateOption={onServiceNameCreateOption}
               onSearchChange={onServiceNameSearchChange}
+              customOptionText={i18n.translate(
+                'xpack.apm.serviceMapEditor.serviceNameComboBox.customServiceNameFilterOptionLabel',
+                {
+                  defaultMessage: `Filter by service name '{searchValue}'`,
+                }
+              )}
               isLoading={isLoadingServiceNames}
-              data-test-subj="apmServiceMapEditorServiceNameComboBox"
+              data-test-subj={`apmServiceMapEditorServiceNameComboBox${
+                isLoadingServiceNames ? 'Loading' : ''
+              }`}
             />
           </EuiFormRow>
 
@@ -336,7 +354,9 @@ export function ServiceMapEditorFlyout({
               onChange={onEnvironmentSelect}
               onSearchChange={onEnvironmentSearchChange}
               isLoading={isLoadingEnvironments}
-              data-test-subj="apmServiceMapEditorEnvironmentComboBox"
+              data-test-subj={`apmServiceMapEditorEnvironmentComboBox${
+                isLoadingEnvironments ? 'Loading' : ''
+              }`}
             />
           </EuiFormRow>
 

@@ -6,20 +6,16 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect, useHistory } from 'react-router-dom';
 import { useKibana } from '../services';
 import { ONBOARDING_TUTORIAL_ID } from '../tutorials/tutorial_data';
 import { markTutorialComplete } from '../tutorials/use_tutorial_progress';
 import { ApiStep } from './api_step';
-import { getSearchSnippets } from './language_snippets';
-import { getSearchSnippet } from './snippets';
+import { getStepContent } from './step_content';
 import { StepLayout } from './step_layout';
-import { pathQuery, useWizardPath } from './use_wizard_path';
+import { pathQuery, useWizardPath } from '../hooks/use_wizard_path';
 
-export const SearchStep: React.FC = () => {
+export const SearchStep = () => {
   const history = useHistory();
   const path = useWizardPath();
   const {
@@ -28,64 +24,34 @@ export const SearchStep: React.FC = () => {
 
   if (!path) return <Redirect to="/onboarding" />;
 
-  const isGenerate = path === 'generate-vectors';
-  const docsHref = isGenerate
-    ? docLinks.links.enterpriseSearch.semanticSearch
-    : docLinks.links.enterpriseSearch.knnSearch;
+  const contentKey = path === 'generate-vectors' ? 'generate' : 'have_vectors';
+  const { title, description, docsLabel, docsHref, api, infoPanel } =
+    getStepContent(docLinks)[contentKey].search;
+  const step = 'search';
 
   return (
     <StepLayout
-      currentStep={3}
-      title={
-        isGenerate
-          ? i18n.translate('vectordbOnboarding.search.generate.title', {
-              defaultMessage: 'Search with natural language',
-            })
-          : i18n.translate('vectordbOnboarding.search.have.title', {
-              defaultMessage: 'Run a kNN query',
-            })
-      }
-      docsLabel={i18n.translate('vectordbOnboarding.search.docsLabel', {
-        defaultMessage: 'Search docs',
-      })}
+      currentStep={2}
+      path={path}
+      step={step}
+      title={title}
+      description={description}
+      docsLabel={docsLabel}
       docsHref={docsHref}
-      onSkip={() => history.push('/')}
       onBack={() => history.push(`/onboarding/ingest${pathQuery(path)}`)}
-      onNext={() => {
+      onComplete={() => {
         markTutorialComplete(ONBOARDING_TUTORIAL_ID);
         history.push('/');
       }}
-      nextLabel={i18n.translate('vectordbOnboarding.search.done', {
-        defaultMessage: 'Done',
-      })}
     >
-      {!isGenerate ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="primary"
-            size="s"
-            title={
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="vectordbOnboarding.search.have.callout"
-                  defaultMessage="Tune {numCandidates} to trade off speed against accuracy."
-                  values={{
-                    numCandidates: (
-                      <>
-                        <EuiCode>num_candidates</EuiCode>
-                      </>
-                    ),
-                  }}
-                />
-              </EuiText>
-            }
-          />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-
-      <ApiStep snippets={getSearchSnippets(path)} consoleRequest={getSearchSnippet(path)} />
+      <ApiStep
+        snippets={api.snippets}
+        consoleRequest={api.request}
+        consoleComment={api.consoleComment}
+        infoPanel={infoPanel}
+        step={step}
+        path={path}
+      />
     </StepLayout>
   );
 };

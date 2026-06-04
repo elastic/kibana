@@ -34,6 +34,7 @@ describe('dataAggregateStepDefinition', () => {
       getContext: jest.fn(),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn(),
+      callKibanaApi: jest.fn(),
     },
     logger: {
       debug: jest.fn(),

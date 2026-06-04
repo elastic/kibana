@@ -607,7 +607,12 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
+          ...pick(this.config.rules, [
+            'minimumScheduleInterval',
+            'maxScheduledPerMinute',
+            'run',
+            'apiKeyType',
+          ]),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },

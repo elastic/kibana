@@ -20,7 +20,7 @@ export const mockIndexPattern = {
     if (field === 'records') return undefined;
     return { name: field, displayName: field };
   },
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
 } as unknown as IndexPattern;
 
 export const mockIndexPatternWithoutTimeField = {
@@ -29,7 +29,7 @@ export const mockIndexPatternWithoutTimeField = {
     if (field === 'records') return undefined;
     return { name: field, displayName: field };
   },
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
 } as unknown as IndexPattern;
 
 export const mockDateRange = {

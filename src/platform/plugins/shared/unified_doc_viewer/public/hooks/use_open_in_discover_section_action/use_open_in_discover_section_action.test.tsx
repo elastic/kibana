@@ -12,6 +12,8 @@ import { renderHook } from '@testing-library/react';
 import {
   OPEN_IN_DISCOVER_LABEL,
   OPEN_IN_DISCOVER_ARIA_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
 import {
   TRACES_DOC_VIEWER_EBT_ELEMENTS,
@@ -110,9 +112,9 @@ describe('useOpenInDiscoverSectionAction', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
-        icon: 'discoverApp',
+        label: OPEN_IN_A_DISCOVER_TAB_LABEL,
+        ariaLabel: OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
+        icon: 'productDiscover',
         dataTestSubj,
         onClick: expect.any(Function),
       })
@@ -151,9 +153,9 @@ describe('useOpenInDiscoverSectionAction', () => {
     expect(result.current).toEqual(
       expect.objectContaining({
         href,
-        label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
-        icon: 'discoverApp',
+        label: OPEN_IN_A_DISCOVER_TAB_LABEL,
+        ariaLabel: OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
+        icon: 'productDiscover',
         dataTestSubj,
         onClick: expect.any(Function),
       })

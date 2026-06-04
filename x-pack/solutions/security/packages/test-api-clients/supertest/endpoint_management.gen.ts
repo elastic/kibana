@@ -335,7 +335,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
    */
   runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/endpoint/action/runscript', kibanaSpace))
+      .post(getRouteUrlForSpace('/api/endpoint/action/run_script', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

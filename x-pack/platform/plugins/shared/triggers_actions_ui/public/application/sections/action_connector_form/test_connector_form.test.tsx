@@ -14,7 +14,6 @@ import { ActionConnectorMode } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { screen } from '@testing-library/react';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({
@@ -57,7 +56,6 @@ const actionType = {
   },
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,
-  source: ACTION_TYPE_SOURCES.stack,
 };
 const actionTypeRegistry = actionTypeRegistryMock.create();
 actionTypeRegistry.get.mockReturnValue(actionType);
@@ -127,7 +125,6 @@ describe('test_connector_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFieldsExecutionMode,
-      source: ACTION_TYPE_SOURCES.stack,
     };
     const actionTypeRegistryExecutionMode = actionTypeRegistryMock.create();
     actionTypeRegistryExecutionMode.get.mockReturnValue(actionTypeExecutionMode);

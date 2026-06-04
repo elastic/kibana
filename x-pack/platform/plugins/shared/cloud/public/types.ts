@@ -34,6 +34,12 @@ export interface CloudBasicUrls {
    */
   deploymentUrl?: string;
   /**
+   * This is the path to the Cloud deployment creation page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/deployments/create`
+   */
+  createDeploymentUrl?: string;
+  /**
    * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
    */
   profileUrl?: string;
@@ -49,6 +55,12 @@ export interface CloudBasicUrls {
    * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
    */
   projectsUrl?: string;
+  /**
+   * This is the path to the Cloud project creation page. The value is already prepended with `baseUrl`.
+   *
+   * @example `{baseUrl}/projects/create`
+   */
+  createProjectUrl?: string;
   /**
    * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
    *

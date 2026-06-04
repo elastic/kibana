@@ -8,7 +8,7 @@
  */
 
 import { lazy, useMemo } from 'react';
-import { ACTION_TYPE_SOURCES, type ActionType } from '@kbn/actions-types';
+import type { ActionType } from '@kbn/actions-types';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -16,7 +16,6 @@ import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserializ
 import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
-import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type {
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
@@ -85,7 +84,6 @@ export function transformSpecToActionTypeModel(
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
-    source: ACTION_TYPE_SOURCES.spec,
     selectMessage: spec.metadata.description,
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
@@ -93,6 +91,9 @@ export function transformSpecToActionTypeModel(
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
+      const { generateFormFields } = await import(
+        /* webpackPrefetch: true */ '@kbn/response-ops-form-generator'
+      );
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
@@ -113,9 +114,7 @@ export function transformSpecToActionTypeModel(
       }
       return { default: SpecConnectorFormFields };
     }),
-    // Spec-based connectors don't have custom action params UI
     actionParamsFields: lazy(async () => ({ default: () => null })),
-    // Validation is handled server-side via the Zod schema
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
       serializer: createConnectorFormSerializer() as unknown as NonNullable<

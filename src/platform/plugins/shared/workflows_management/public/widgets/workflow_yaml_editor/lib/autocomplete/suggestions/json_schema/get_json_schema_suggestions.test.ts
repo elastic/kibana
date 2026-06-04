@@ -46,6 +46,9 @@ describe('getJsonSchemaSuggestions', () => {
       isInScheduledTriggerWithBlock: false,
       isInStepsContext: false,
       isInWorkflowInputsContext: false,
+      isInEsqlQueryField: false,
+      esqlRegion: null,
+      esqlOffsetInQuery: null,
       dynamicConnectorTypes: null,
       workflows: {
         workflows: {},
@@ -53,6 +56,7 @@ describe('getJsonSchemaSuggestions', () => {
       },
       workflowDefinition: null,
       currentWorkflowId: null,
+      isCurrentWorkflowManaged: false,
       model: {} as any,
       position: {
         lineNumber: 1,

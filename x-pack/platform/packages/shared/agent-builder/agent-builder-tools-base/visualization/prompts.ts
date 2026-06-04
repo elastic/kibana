@@ -29,6 +29,7 @@ export const createGenerateConfigPrompt = ({
 }): BaseMessageLike[] => {
   const chartTypeConfigPromptContent = getChartTypeConfigPromptContent(chartType);
   const colorPalettesPromptContent = getColorPalettesPromptContent(chartType);
+  const esqlQueryJson = JSON.stringify(esqlQuery);
 
   return [
     [
@@ -51,7 +52,7 @@ ${
 }
 
 DATASET RULES:
-1. The 'dataset' field must contain: { type: "esql", query: "${esqlQuery}" }
+1. The 'dataset' field must contain: { type: "esql", query: ${esqlQueryJson} }
 2. For ES|QL column bindings use { column: '<esql column name>', ...other options }
 3. All field names must match those available in the ES|QL query result
 4. Follow the schema definition strictly

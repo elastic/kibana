@@ -23,6 +23,7 @@ describe('dataStringifyJsonStepDefinition', () => {
       getFakeRequest: jest.fn(),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn((val) => val),
+      callKibanaApi: jest.fn(),
     },
     logger: {
       debug: jest.fn(),

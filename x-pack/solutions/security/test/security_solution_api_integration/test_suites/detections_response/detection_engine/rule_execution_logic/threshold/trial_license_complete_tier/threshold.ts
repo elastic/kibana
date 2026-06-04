@@ -435,7 +435,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
-      it('should be enriched with host risk score', async () => {
+      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['auditbeat-*']),
           threshold: {
@@ -466,7 +466,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('should be enriched alert with criticality_level', async () => {
+      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['auditbeat-*']),
           threshold: {

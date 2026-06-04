@@ -46,7 +46,6 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
       {
         queryClient: deps.queryClient,
         kibanaServices: {
-          http: deps.http,
           notifications: deps.notifications,
           userProfile: deps.userProfile,
           docLinks: deps.docLinks,

@@ -255,6 +255,7 @@ const FieldEditorFlyoutContentComponent = ({
               </EuiText>
               {dataView.managed && (
                 <EuiCallOut
+                  announceOnMount={false}
                   title={i18nTexts.disabledSaveCalloutMessage}
                   color="primary"
                   iconType="info"

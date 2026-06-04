@@ -43,16 +43,23 @@ export const DetailPanelCopy = ({
         }}
       >
         {(copy) => (
-          <EuiButtonIcon
-            css={styles.copyButton}
-            onClick={copy}
-            display="base"
-            iconType="copy"
-            size="xs"
-            aria-label={i18n.translate('xpack.sessionView.detailPanelCopy.copyButton', {
+          <EuiToolTip
+            content={i18n.translate('xpack.sessionView.detailPanelCopy.copyButton', {
               defaultMessage: 'Copy',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              css={styles.copyButton}
+              onClick={copy}
+              display="base"
+              iconType="copy"
+              size="xs"
+              aria-label={i18n.translate('xpack.sessionView.detailPanelCopy.copyButton', {
+                defaultMessage: 'Copy',
+              })}
+            />
+          </EuiToolTip>
         )}
       </EuiCopy>
     ),

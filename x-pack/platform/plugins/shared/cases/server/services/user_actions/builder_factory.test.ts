@@ -17,14 +17,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
-  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
-  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -34,9 +32,7 @@ describe('UserActionBuilder', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry,
-    });
+    builderFactory = new BuilderFactory();
   });
 
   beforeAll(() => {
@@ -353,11 +349,6 @@ describe('UserActionBuilder', () => {
               "id": "test-id",
               "name": "associated-cases-comments",
               "type": "cases-comments",
-            },
-            Object {
-              "id": "testRef",
-              "name": "myTestReference",
-              "type": "test-so",
             },
           ],
         }

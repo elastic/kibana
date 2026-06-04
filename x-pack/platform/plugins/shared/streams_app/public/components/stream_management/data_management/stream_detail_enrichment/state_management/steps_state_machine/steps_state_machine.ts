@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import type { ActorRefFrom, SnapshotFrom } from 'xstate';
 import { and, assign, forwardTo, sendTo, setup } from 'xstate';
 import type {
@@ -17,6 +18,15 @@ import type { StepContext, StepEvent, StepInput } from './types';
 
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
 export type StepActorSnapshot = SnapshotFrom<typeof stepMachine>;
+
+// Strips customIdentifier and undefined values from a step
+const sanitiseStep = ({ customIdentifier, ...restOfStep }: StreamlangStepWithUIAttributes) =>
+  omitBy(restOfStep, isUndefined);
+
+const isStepUpdated = (
+  step: StreamlangStepWithUIAttributes,
+  originalStep: StreamlangStepWithUIAttributes
+): boolean => !isEqual(sanitiseStep(step), sanitiseStep(originalStep));
 
 export const stepMachine = setup({
   types: {
@@ -73,7 +83,7 @@ export const stepMachine = setup({
       return {
         step: updatedStep,
         previousStep: updatedStep,
-        isUpdated: true,
+        isUpdated: isStepUpdated(updatedStep, context.originalStep),
       };
     }),
     changeParent: assign(
@@ -90,7 +100,7 @@ export const stepMachine = setup({
         return {
           step: updatedStep,
           previousStep: updatedStep,
-          isUpdated: true,
+          isUpdated: isStepUpdated(updatedStep, context.originalStep),
         };
       }
     ),
@@ -99,7 +109,7 @@ export const stepMachine = setup({
     })),
     markAsUpdated: assign(({ context }) => ({
       previousStep: context.step,
-      isUpdated: true,
+      isUpdated: isStepUpdated(context.step, context.originalStep),
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
     notifyStepSave: sendTo(
@@ -172,6 +182,7 @@ export const stepMachine = setup({
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
+    originalStep: input.step,
     previousStep: input.step,
     step: input.step,
     isNew: input.isNew ?? false,

@@ -1,0 +1,94 @@
+{
+  "sha1": "7f8ebe49ef61bc4f17e512a54445e0c4b0ed04a9",
+  "tests": [
+    {
+      "id": "8fe9df63e0d68b2-2d457382a48710c",
+      "title": "Ingest logstash_functional data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/global.setup.ts",
+        "line": 13,
+        "column": 16
+      }
+    },
+    {
+      "id": "0a167f2a73e2a6d-853cdd70f0d4047",
+      "title": "Saved query menu — CRUD (Discover) save, load, update, save-as-new, delete via the popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_crud.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "ca7b455fbd31da3-6502775e689be35",
+      "title": "Saved query menu — capabilities matrix (Discover v2) discover_v2:all + sqm:all renders the saved-query section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "ca7b455fbd31da3-7376b775d251617",
+      "title": "Saved query menu — capabilities matrix (Discover v2) discover_v2:all + sqm:read renders the section with save disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "ca7b455fbd31da3-c090a752376443b",
+      "title": "Saved query menu — capabilities matrix (Discover v2) discover_v2:all + sqm:none hides the entire saved-query section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_privileges_matrix.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "9559d1c91815d20-203532c119c1f03",
+      "title": "Saved query menu — read-only (Discover) hides save/update/delete and allows load/clear",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_readonly.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "aae973915fc3f77-cadb25eac71d87c",
+      "title": "Saved query menu — cross-app smoke popover renders in dashboard, maps and visualize",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_smoke.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    }
+  ]
+}

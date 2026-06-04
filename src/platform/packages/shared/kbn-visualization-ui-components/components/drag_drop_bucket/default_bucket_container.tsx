@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { TooltipWrapper } from '@kbn/visualization-utils';
@@ -88,15 +89,17 @@ export const DefaultBucketContainer = ({
             )}
             condition={isNotRemovable ?? false}
           >
-            <EuiButtonIcon
-              iconSize="s"
-              iconType="trash"
-              color="danger"
-              onClick={onRemoveClick}
-              aria-label={removeTitle}
-              disabled={isNotRemovable}
-              data-test-subj={`${dataTestSubj}-remove-${idx}`}
-            />
+            <EuiToolTip content={removeTitle} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="trash"
+                color="danger"
+                onClick={onRemoveClick}
+                aria-label={removeTitle}
+                disabled={isNotRemovable}
+                data-test-subj={`${dataTestSubj}-remove-${idx}`}
+              />
+            </EuiToolTip>
           </TooltipWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>

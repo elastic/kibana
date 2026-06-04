@@ -75,6 +75,7 @@ describe('CcsLogsExtractionClient', () => {
     maxLogsPerPage: DEFAULT_MAX_LOGS_PER_PAGE,
     lookbackPeriod: '3h',
     delay: '1m',
+    frequency: '1m',
     entityDefinition: getEntityDefinition('host', 'default'),
     // Use a very large cap so existing tests remain a single sub-window. The sub-window cap
     // behavior is exercised by the dedicated tests at the end of this describe block.
@@ -131,6 +132,7 @@ describe('CcsLogsExtractionClient', () => {
       logger: mockLogger,
       fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
       transformDocument: expect.any(Function),
+      refresh: false,
     });
     const transformDocument = mockIngestEntities.mock.calls[0][0].transformDocument!;
     const doc1 = transformDocument({
@@ -345,7 +347,8 @@ describe('CcsLogsExtractionClient', () => {
   });
 
   it('should resume from mid entity-page recovery state (paginationRecoveryId set)', async () => {
-    const recoveryTimestamp = '2024-06-15T10:00:00.000Z';
+    // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
+    const recoveryTimestamp = '2026-01-01T08:00:00.000Z';
     const recoveryId = 'host:h2';
     mockCcsStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: recoveryTimestamp,
@@ -358,11 +361,11 @@ describe('CcsLogsExtractionClient', () => {
         { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
         { name: 'entity.id', type: 'keyword' },
       ],
-      values: [['2024-06-15T11:00:00.000Z', '2024-06-15T10:00:00.000Z', 'host:h3']],
+      values: [['2026-01-01T09:00:00.000Z', '2026-01-01T08:00:00.000Z', 'host:h3']],
     };
 
     mockExecuteEsqlQuery
-      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 1))
+      .mockResolvedValueOnce(makeProbeResponse('2026-01-01T09:00:00.000Z', 1))
       .mockResolvedValueOnce(entityPageResponse);
 
     const result = await client.extractToUpdates(defaultExtractParams);
@@ -378,7 +381,8 @@ describe('CcsLogsExtractionClient', () => {
   });
 
   it('should resume from slice-boundary recovery state (checkpointTimestamp set, paginationRecoveryId null)', async () => {
-    const sliceBoundaryTimestamp = '2024-06-15T10:00:00.000Z';
+    // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
+    const sliceBoundaryTimestamp = '2026-01-01T08:00:00.000Z';
     mockCcsStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: sliceBoundaryTimestamp,
       paginationRecoveryId: null,
@@ -390,11 +394,11 @@ describe('CcsLogsExtractionClient', () => {
         { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
         { name: 'entity.id', type: 'keyword' },
       ],
-      values: [['2024-06-15T11:00:00.000Z', '2024-06-15T10:30:00.000Z', 'host:h4']],
+      values: [['2026-01-01T09:00:00.000Z', '2026-01-01T08:30:00.000Z', 'host:h4']],
     };
 
     mockExecuteEsqlQuery
-      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 1))
+      .mockResolvedValueOnce(makeProbeResponse('2026-01-01T09:00:00.000Z', 1))
       .mockResolvedValueOnce(entityPageResponse);
 
     const result = await client.extractToUpdates(defaultExtractParams);
@@ -420,7 +424,8 @@ describe('CcsLogsExtractionClient', () => {
   });
 
   it('should use checkpointTimestamp as fromDateISO on normal continuation', async () => {
-    const checkpoint = '2025-12-01T06:00:00.000Z';
+    // Use a recent checkpoint (within 4.5h of FIXED_NOW) so the lag cutoff does not fire.
+    const checkpoint = '2026-01-01T08:00:00.000Z';
     mockCcsStateClient.findOrInit.mockResolvedValue({
       checkpointTimestamp: checkpoint,
       paginationRecoveryId: null,

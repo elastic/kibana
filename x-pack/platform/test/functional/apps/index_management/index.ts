@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management app', function () {
-    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./enrich_policies_tab'));
     loadTestFile(require.resolve('./create_enrich_policy'));
     loadTestFile(require.resolve('./data_streams_tab'));

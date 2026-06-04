@@ -38,65 +38,90 @@ steps:
   - group: "API MKI - Defend Workflows"
     key: api_test_defend_workflows
     steps:
-#      - label: "API MKI - edr_workflows:artifacts:qa:serverless"
-#        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:artifacts:qa:serverless
-#        key: edr_workflows:artifacts:qa:serverless
-#        agents:
-#          image: family/kibana-ubuntu-2404
-#          imageProject: elastic-images-prod
-#          provider: gcp
-#          enableNestedVirtualization: true
-#          machineType: n2-standard-4
-#        timeout_in_minutes: 120
-#        retry:
-#          automatic:
-#            - exit_status: "1"
-#              limit: 1
-#
-#      - label: "API MKI - edr_workflows:authentication:qa:serverless"
-#        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:authentication:qa:serverless
-#        key: edr_workflows:authentication:qa:serverless
-#        agents:
-#          image: family/kibana-ubuntu-2404
-#          imageProject: elastic-images-prod
-#          provider: gcp
-#          enableNestedVirtualization: true
-#          machineType: n2-standard-4
-#        timeout_in_minutes: 120
-#        retry:
-#          automatic:
-#            - exit_status: "1"
-#              limit: 1
-#
-#      - label: "API MKI - edr_workflows:metadata:qa:serverless"
-#        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:metadata:qa:serverless
-#        key: edr_workflows:metadata:qa:serverless
-#        agents:
-#          image: family/kibana-ubuntu-2404
-#          imageProject: elastic-images-prod
-#          provider: gcp
-#          enableNestedVirtualization: true
-#          machineType: n2-standard-4
-#        timeout_in_minutes: 120
-#        retry:
-#          automatic:
-#            - exit_status: "1"
-#              limit: 1
-#
-#      - label: "API MKI - edr_workflows:package:qa:serverless"
-#        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:package:qa:serverless
-#        key: edr_workflows:package:qa:serverless
-#        agents:
-#          image: family/kibana-ubuntu-2404
-#          imageProject: elastic-images-prod
-#          provider: gcp
-#          enableNestedVirtualization: true
-#          machineType: n2-standard-4
-#        timeout_in_minutes: 120
-#        retry:
-#          automatic:
-#            - exit_status: "1"
-#              limit: 1
+      - label: "API MKI - edr_workflows:artifacts:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:artifacts:qa:serverless
+        key: edr_workflows:artifacts:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:authentication:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:authentication:qa:serverless
+        key: edr_workflows:authentication:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:metadata:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:metadata:qa:serverless
+        key: edr_workflows:metadata:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:package:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:package:qa:serverless
+        key: edr_workflows:package:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:policy:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy:qa:serverless
+        key: edr_workflows:policy:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: "API MKI - edr_workflows:policy_response:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy_response:qa:serverless
@@ -111,7 +136,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 1
+              limit: 2
         soft_fail:
           - exit_status: 101
 
@@ -128,7 +153,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 1
+              limit: 2
         soft_fail:
           - exit_status: 101
 
@@ -145,6 +170,57 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 1
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:role_migrations:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:role_migrations:qa:serverless
+        key: edr_workflows:role_migrations:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:scripts_library:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:scripts_library:qa:serverless
+        key: edr_workflows:scripts_library:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: "API MKI - edr_workflows:spaces:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:spaces:qa:serverless
+        key: edr_workflows:spaces:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
         soft_fail:
           - exit_status: 101

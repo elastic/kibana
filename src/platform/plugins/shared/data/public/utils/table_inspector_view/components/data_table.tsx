@@ -167,7 +167,7 @@ class DataTableFormatClass extends Component<
         field: dataColumn.id,
         sortable: true,
         render: (value: any) => {
-          const formattedValue = fieldFormatter.convert(value);
+          const formattedValue = fieldFormatter.convertToText(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
           return DataTableFormatClass.renderCell({

@@ -6,90 +6,54 @@
  */
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
 import { APP_ID } from '../constants';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import {
+  ALERTING_V2_API_PRIVILEGES,
+  ALERTING_V2_FEATURES,
+  type AlertingV2FeatureDefinition,
+} from '../../../common/feature_privileges';
 
-const ALERTS_FEATURE_ID = 'alerting_v2_alerts';
-const RULES_FEATURE_ID = 'alerting_v2_rules';
-const CATEGORY_ID = 'alerting';
-
-export const ALERTING_V2_API_PRIVILEGES = {
-  rules: {
-    read: 'read-alerting-v2-rules',
-    write: 'write-alerting-v2-rules',
-  },
-  alerts: {
-    read: 'read-alerting-v2-alerts',
-    write: 'write-alerting-v2-alerts',
-  },
-  actionPolicies: {
-    read: 'read-alerting-v2-action-policies',
-    write: 'write-alerting-v2-action-policies',
-  },
-} as const;
-
-const ALERTING_V2_SAVED_OBJECT_TYPES = [
-  RULE_SAVED_OBJECT_TYPE,
-  ACTION_POLICY_SAVED_OBJECT_TYPE,
-] as const;
-
-const getPrivileges = () => ({
-  all: {
-    app: [APP_ID],
-    savedObject: {
-      all: [...ALERTING_V2_SAVED_OBJECT_TYPES],
-      read: [],
-    },
-    ui: [],
-    api: [
-      ALERTING_V2_API_PRIVILEGES.rules.read,
-      ALERTING_V2_API_PRIVILEGES.rules.write,
-      ALERTING_V2_API_PRIVILEGES.alerts.read,
-      ALERTING_V2_API_PRIVILEGES.alerts.write,
-      ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
-      ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
-    ],
-  },
-  read: {
-    app: [APP_ID],
-    savedObject: {
-      all: [],
-      read: [...ALERTING_V2_SAVED_OBJECT_TYPES],
-    },
-    ui: [],
-    api: [
-      ALERTING_V2_API_PRIVILEGES.rules.read,
-      ALERTING_V2_API_PRIVILEGES.alerts.read,
-      ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
-    ],
-  },
-});
+export { ALERTING_V2_API_PRIVILEGES };
 
 const category: AppCategory = {
-  id: CATEGORY_ID,
+  id: 'alerting',
   label: 'Alerting',
   order: 1000,
   euiIconType: 'watchesApp',
 };
 
-const alertsFeature = {
-  id: ALERTS_FEATURE_ID,
-  name: 'Alerts',
+const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => ({
+  id: feature.id,
+  name: feature.name,
   category,
   app: [APP_ID],
-  privileges: getPrivileges(),
-};
-
-const rulesFeature = {
-  id: RULES_FEATURE_ID,
-  name: 'Rules',
-  category,
-  app: [APP_ID],
-  privileges: getPrivileges(),
-};
+  privileges: {
+    all: {
+      app: [APP_ID],
+      savedObject: {
+        all: [...feature.privileges.all.savedObject.all],
+        read: [...feature.privileges.all.savedObject.read],
+      },
+      api: [...feature.privileges.all.api],
+      ui: [...feature.privileges.all.ui],
+    },
+    read: {
+      app: [APP_ID],
+      savedObject: {
+        all: [...feature.privileges.read.savedObject.all],
+        read: [...feature.privileges.read.savedObject.read],
+      },
+      api: [...feature.privileges.read.api],
+      ui: [...feature.privileges.read.ui],
+    },
+  },
+  ...(feature.subFeatures.length > 0 ? { subFeatures: [...feature.subFeatures] } : {}),
+});
 
 export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
-  features.registerKibanaFeature(alertsFeature);
-  features.registerKibanaFeature(rulesFeature);
+  Object.values(ALERTING_V2_FEATURES).forEach((feature) => {
+    features.registerKibanaFeature(buildKibanaFeature(feature));
+  });
 };

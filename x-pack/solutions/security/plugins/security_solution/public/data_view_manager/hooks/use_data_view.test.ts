@@ -7,11 +7,8 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../constants';
 import { useDataView } from './use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelector } from 'react-redux';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
@@ -24,7 +21,6 @@ jest.mock('react-redux', () => ({
 
 const mockGet = jest.fn();
 const mockToastsDanger = jest.fn();
-const mockLogger = loggingSystemMock.createLogger();
 
 const mockNotifications = {
   toasts: {
@@ -49,7 +45,6 @@ jest.mock('../../common/lib/kibana', () => {
       services: {
         dataViews: mockDataViews,
         notifications: mockNotifications,
-        logger: mockLogger,
       },
     }),
   };
@@ -58,7 +53,6 @@ jest.mock('../../common/lib/kibana', () => {
 describe('useDataView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
     jest
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
@@ -109,16 +103,6 @@ describe('useDataView', () => {
     await waitFor(() => {
       expect(result.current.status).toEqual('loading');
     });
-  });
-
-  it('should not call get if newDataViewPickerEnabled is false', async () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
-
-    const { result, rerender } = renderHook(() => useDataView(PageScope.default));
-
-    await act(async () => rerender(PageScope.default));
-    expect(mockGet).not.toHaveBeenCalled();
-    expect(result.current.status).toBe('pristine');
   });
 
   it('should not call get if dataViewId is missing', async () => {

@@ -93,6 +93,11 @@ export interface CasesUiConfigType {
   templates: {
     enabled: boolean;
   };
+  casesRedesign: {
+    list: boolean;
+    details: boolean;
+    settings: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;

@@ -71,7 +71,14 @@ export function createPlaywrightEvalsConfig({
   const experimentRepetitions =
     parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
 
-  const setupProjects = projects?.filter((project) => project.name === 'setup-local') ?? [];
+  // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
+  // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
+  // project would leave a dangling reference and Playwright fails with "Project 'setup-local'
+  // has unknown teardown project 'teardown-local'".
+  const hookProjects =
+    projects?.filter(
+      (project) => project.name === 'setup-local' || project.name === 'teardown-local'
+    ) ?? [];
 
   // get just the 'local' project (for now)
   const nextProjects = connectors.flatMap((connector) => {
@@ -104,7 +111,7 @@ export function createPlaywrightEvalsConfig({
     use: {
       serversConfigDir: (use as ScoutTestOptions).serversConfigDir,
     },
-    projects: [...setupProjects, ...nextProjects],
+    projects: [...hookProjects, ...nextProjects],
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,

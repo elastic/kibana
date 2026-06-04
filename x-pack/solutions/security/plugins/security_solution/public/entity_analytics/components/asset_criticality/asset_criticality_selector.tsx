@@ -86,7 +86,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
         <EuiFlexGroup
           direction="row"
           alignItems="center"
-          justifyContent="spaceBetween"
+          justifyContent={compressed ? 'flexStart' : 'spaceBetween'}
           data-test-subj="asset-criticality-selector"
           wrap={false}
           gutterSize={'xs'}
@@ -102,19 +102,29 @@ const AssetCriticalitySelectorComponent: React.FC<{
             />
           </EuiFlexItem>
           {compressed && criticality.privileges.data?.has_write_permissions && (
-            <EuiFlexItem>
-              <EuiButtonIcon
-                data-test-subj="asset-criticality-change-btn"
-                iconSize="s"
-                iconType={'pencil'}
-                aria-label={i18n.translate(
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
                   {
                     defaultMessage: 'Change asset criticality',
                   }
                 )}
-                onClick={() => toggleModal(true)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="asset-criticality-change-btn"
+                  iconSize="s"
+                  iconType={'pencil'}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
+                    {
+                      defaultMessage: 'Change asset criticality',
+                    }
+                  )}
+                  onClick={() => toggleModal(true)}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
 

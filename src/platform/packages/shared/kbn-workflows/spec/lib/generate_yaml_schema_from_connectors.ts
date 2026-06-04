@@ -76,15 +76,40 @@ export function generateYamlSchemaFromConnectors(
   });
 }
 
+/**
+ * Generates a schema for trusted workflow definitions that need the shared workflow envelope
+ * validation without materializing the connector-expanded step union.
+ */
+export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+  // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
+  // not materialize connector or step-definition schemas.
+  const triggerSchema = getTriggerSchema(triggers);
+  const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
+    triggers: z.array(triggerSchema).min(1),
+  });
+
+  return workflowBaseWithTriggers.extend({
+    // WorkflowSchemaBase validates settings with step-aware fallback schemas. Keep the
+    // trusted startup path step-agnostic so it does not duplicate the step schema SOT.
+    settings: z.unknown().optional(),
+    steps: z.array(z.unknown()).min(1),
+  });
+}
+
 function createRecursiveStepSchema(
   connectors: ConnectorContractUnion[],
   loose: boolean = false
 ): z.ZodType {
-  // Use a simpler approach to avoid infinite recursion during validation
-  // Create the step schema with limited recursion depth
+  // Build the discriminated union exactly once: Zod calls the lazy getter on
+  // every traversal (z.toJSONSchema, .safeParse, monaco-yaml's AJV walk), and
+  // each connector references stepSchema again via `on-failure.fallback`, so
+  // without the cache the 200+ entry union would be rebuilt on every visit.
+  let cachedUnion: z.ZodType | undefined;
   const stepSchema: z.ZodType = z.lazy(() => {
-    // Create step schemas with the recursive reference
-    // Use the same stepSchema reference to maintain consistency
+    if (cachedUnion) {
+      return cachedUnion;
+    }
+
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
@@ -96,13 +121,11 @@ function createRecursiveStepSchema(
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
-    // Generate alias schemas for backward compatibility
-    // These allow old type names to still validate, but they won't appear in autocomplete
+    // Alias schemas keep old type names parseable, but they're not surfaced in
+    // autocomplete.
     const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
 
-    // Return discriminated union with all step types
-    // This creates proper JSON schema validation that Monaco YAML can handle
-    return z.discriminatedUnion('type', [
+    cachedUnion = z.discriminatedUnion('type', [
       forEachSchema,
       whileSchema,
       ifSchema,
@@ -121,6 +144,7 @@ function createRecursiveStepSchema(
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
+    return cachedUnion;
   });
 
   return stepSchema;

@@ -99,5 +99,5 @@ export const NAME_TOO_SHORT = i18n.translate('xpack.automaticImport.forms.nameTo
 });
 
 export const NAME_TOO_LONG = i18n.translate('xpack.automaticImport.forms.nameTooLong', {
-  defaultMessage: 'Name cannot exceed 256 characters',
+  defaultMessage: 'Name cannot exceed 150 characters',
 });

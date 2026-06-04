@@ -134,7 +134,6 @@ const DiscoverAppLink: FunctionComponent<Omit<Props, 'showInfoParagraph'>> = ({
       {content}
     </EuiButton>
   ) : (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={discoveryUrl} onClick={handleClick} data-test-subj="viewDiscoverLogs">
       <EuiText> {content}</EuiText>
     </EuiLink>

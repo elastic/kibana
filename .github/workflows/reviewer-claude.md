@@ -110,6 +110,7 @@ steps:
       path: /tmp/gh-aw/agent
 safe-outputs:
   footer: true
+  report-failure-as-issue: false
   noop:
     report-as-issue: false
   create-pull-request-review-comment:
@@ -119,6 +120,7 @@ safe-outputs:
     max: 1
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
+    footer: if-body
   add-comment:
     max: 1
     target: ${{ env.PR_NUMBER }}
@@ -126,6 +128,8 @@ safe-outputs:
   reply-to-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
+  resolve-pull-request-review-thread:
+    max: 10
 ---
 
 # Claude PR Reviewer
@@ -133,3 +137,4 @@ safe-outputs:
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
+- This reviewer's own gh-aw workflow id is `reviewer-claude`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.

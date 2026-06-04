@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('discover esql controls', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/271826
+  describe.skip('discover esql controls', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',

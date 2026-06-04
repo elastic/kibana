@@ -42,7 +42,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      technicalPreview: true,
+      experimental: true,
       requiresPageReload: false,
       readonly: false,
     },

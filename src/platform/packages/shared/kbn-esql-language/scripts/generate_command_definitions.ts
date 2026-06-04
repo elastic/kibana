@@ -11,20 +11,18 @@
 
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import type { ElasticsearchCommandDefinition } from '../src/commands/definitions/types';
-import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
 const GENERATED_COMMANDS_BASE_PATH = '../src/commands/definitions/generated/commands';
-const ELASTICSEARCH_COMMANDS_PATH =
-  '/docs/reference/query-languages/esql/kibana/definition/commands';
 
 async function generateElasticsearchCommandDefinitions(): Promise<void> {
   const pathToElasticsearch = process.argv[2];
 
   const esCommandDefinitions = readElasticsearchDefinitions<ElasticsearchCommandDefinition>({
     pathToElasticsearch,
-    definitionsPath: ELASTICSEARCH_COMMANDS_PATH,
-    definitionType: 'Commands',
+    keywordType: 'commands',
+    language: 'esql',
   });
 
   const outputCommandsDir = join(__dirname, GENERATED_COMMANDS_BASE_PATH);

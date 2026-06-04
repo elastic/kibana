@@ -30,9 +30,8 @@ import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyz
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { ANALYZER_PREVIEW_BANNER } from '../../../../resolver/view/resolver_without_providers';
 
 jest.mock('react-router-dom', () => {
@@ -45,7 +44,6 @@ jest.mock('../../shared/hooks/use_which_flyout');
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
-jest.mock('../../../../sourcerer/containers');
 
 const mockUiSettingsGet = jest.fn();
 let mockServerless: unknown;
@@ -88,7 +86,6 @@ const NO_ANALYZER_MESSAGE =
 const dataView: DataView = createStubDataView({
   spec: { title: '.alerts-security.alerts-default' },
 });
-const dataViewSpec: DataViewSpec = createStubDataView({ spec: {} }).toSpec();
 
 const searchHit = {
   _id: 'eventId',
@@ -120,7 +117,6 @@ describe('<AnalyzeGraph />', () => {
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockExperimentalFeatureFlags({
-      newDataViewPickerEnabled: true,
       newFlyoutSystemEnabled: false,
     });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
@@ -134,231 +130,151 @@ describe('<AnalyzeGraph />', () => {
     });
   });
 
-  describe('newDataViewPickerEnabled true', () => {
-    beforeEach(() => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({});
-    });
+  it('renders analyzer graph correctly', () => {
+    const wrapper = renderAnalyzer();
 
-    it('renders analyzer graph correctly', () => {
-      const wrapper = renderAnalyzer();
-
-      expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should render excluded cold/frozen tiers callout when setting is enabled', () => {
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
-        'Some data excluded'
-      );
-      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
-        'Cold and frozen tiers are excluded to improve performance.'
-      );
-    });
-
-    it('should render included cold/frozen tiers callout when setting is disabled', () => {
-      mockUiSettingsGet.mockReturnValue(false);
-
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
-        'Performance optimization'
-      );
-      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
-        'This view loads more slowly because cold and frozen tiers are included.'
-      );
-    });
-
-    it('should hide cold/frozen tiers callout in serverless', () => {
-      mockServerless = {};
-
-      const { queryByTestId } = renderAnalyzer();
-
-      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('should keep callout hidden in same tab session after dismissing and opening another alert flyout', () => {
-      const { getByTestId, queryByTestId, unmount } = renderAnalyzer();
-
-      fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
-      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
-
-      unmount();
-
-      const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = renderAnalyzer({
-        eventId: 'eventId-2',
-        scopeId: TableId.test,
-        searchHit: {
-          ...searchHit,
-          _id: 'eventId-2',
-        } as unknown as DocumentDetailsContext['searchHit'],
-      } as unknown as DocumentDetailsContext);
-
-      expect(
-        queryByTestIdAfterOpeningAnotherFlyout(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
-      ).not.toBeInTheDocument();
-    });
-
-    it('should show callout again after page refresh', () => {
-      const { getByTestId, queryByTestId } = renderAnalyzer();
-
-      fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
-      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
-
-      resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
-      const { getByTestId: getByTestIdAfterRefresh } = renderAnalyzer();
-
-      expect(
-        getByTestIdAfterRefresh(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
-      ).toBeInTheDocument();
-    });
-
-    it('should render no data message when analyzer is not enabled', () => {
-      (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
-
-      const contextValue = {
-        eventId: 'eventId',
-        scopeId: TableId.test,
-        searchHit,
-      } as unknown as DocumentDetailsContext;
-
-      const { container } = renderAnalyzer(contextValue);
-
-      expect(container).toHaveTextContent(NO_ANALYZER_MESSAGE);
-    });
-
-    it('should show loading spinner while data view is loading', () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        status: 'loading',
-      });
-
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should show loading spinner while data view is pristine', () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        status: 'pristine',
-      });
-
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
-    });
-
-    it('should show error message if data view is error', () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        status: 'error',
-      });
-
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view for analyzer'
-      );
-    });
-
-    it('should show error message if data view is ready but no matched indices', () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        status: 'ready',
-        dataView: {
-          ...dataView,
-          hasMatchedIndices: jest.fn().mockReturnValue(false),
-        },
-      });
-
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view for analyzer'
-      );
-    });
-
-    it('should open details panel in preview when clicking on view button', () => {
-      const wrapper = renderAnalyzer();
-
-      expect(wrapper.getByTestId('resolver:graph-controls:show-panel-button')).toBeInTheDocument();
-      wrapper.getByTestId('resolver:graph-controls:show-panel-button').click();
-      expect(mockFlyoutApi.openPreviewPanel).toBeCalledWith({
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${FLYOUT_KEY}-${TableId.test}`,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      });
-    });
+    expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
   });
 
-  describe('newDataViewPickerEnabled false', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+  it('should render excluded cold/frozen tiers callout when setting is enabled', () => {
+    const { getByTestId } = renderAnalyzer();
 
-      mockExperimentalFeatureFlags({
-        newDataViewPickerEnabled: false,
-        newFlyoutSystemEnabled: false,
-      });
+    expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+      'Some data excluded'
+    );
+    expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+      'Cold and frozen tiers are excluded to improve performance.'
+    );
+  });
+
+  it('should render included cold/frozen tiers callout when setting is disabled', () => {
+    mockUiSettingsGet.mockReturnValue(false);
+
+    const { getByTestId } = renderAnalyzer();
+
+    expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+      'Performance optimization'
+    );
+    expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+      'This view loads more slowly because cold and frozen tiers are included.'
+    );
+  });
+
+  it('should hide cold/frozen tiers callout in serverless', () => {
+    mockServerless = {};
+
+    const { queryByTestId } = renderAnalyzer();
+
+    expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should keep callout hidden in same tab session after dismissing and opening another alert flyout', () => {
+    const { getByTestId, queryByTestId, unmount } = renderAnalyzer();
+
+    fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
+    expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+
+    unmount();
+
+    const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = renderAnalyzer({
+      eventId: 'eventId-2',
+      scopeId: TableId.test,
+      searchHit: {
+        ...searchHit,
+        _id: 'eventId-2',
+      } as unknown as DocumentDetailsContext['searchHit'],
+    } as unknown as DocumentDetailsContext);
+
+    expect(
+      queryByTestIdAfterOpeningAnotherFlyout(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should show callout again after page refresh', () => {
+    const { getByTestId, queryByTestId } = renderAnalyzer();
+
+    fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
+    expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+
+    resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
+    const { getByTestId: getByTestIdAfterRefresh } = renderAnalyzer();
+
+    expect(getByTestIdAfterRefresh(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render no data message when analyzer is not enabled', () => {
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
+
+    const contextValue = {
+      eventId: 'eventId',
+      scopeId: TableId.test,
+      searchHit,
+    } as unknown as DocumentDetailsContext;
+
+    const { container } = renderAnalyzer(contextValue);
+
+    expect(container).toHaveTextContent(NO_ANALYZER_MESSAGE);
+  });
+
+  it('should show loading spinner while data view is loading', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'loading',
     });
 
-    it('should show loading spinner while sourcerer data view is loading', () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        loading: true,
-        sourcererDataView: dataViewSpec,
-      });
+    const { getByTestId } = renderAnalyzer();
 
-      const { getByTestId } = renderAnalyzer();
+    expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
 
-      expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  it('should show loading spinner while data view is pristine', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'pristine',
     });
 
-    it('should render an error if the dataViewSpec is undefined', () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        loading: false,
-        sourcererDataView: undefined,
-      });
+    const { getByTestId } = renderAnalyzer();
 
-      const { getByTestId } = renderAnalyzer();
+    expect(getByTestId(DATA_VIEW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
 
-      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view for analyzer'
-      );
+  it('should show error message if data view is error', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'error',
     });
 
-    it('should render an error if the dataViewSpec is invalid because id is undefined', () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        loading: false,
-        sourcererDataView: { ...dataViewSpec, id: undefined, title: 'title' },
-      });
+    const { getByTestId } = renderAnalyzer();
 
-      const { getByTestId } = renderAnalyzer();
+    expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to retrieve the data view for analyzer'
+    );
+  });
 
-      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view for analyzer'
-      );
+  it('should show error message if data view is ready but no matched indices', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: {
+        ...dataView,
+        hasMatchedIndices: jest.fn().mockReturnValue(false),
+      },
     });
 
-    it('should render an error if the dataViewSpec is invalid because title is empty', () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        loading: false,
-        sourcererDataView: { ...dataViewSpec, id: 'id', title: '' },
-      });
+    const { getByTestId } = renderAnalyzer();
 
-      const { getByTestId } = renderAnalyzer();
+    expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to retrieve the data view for analyzer'
+    );
+  });
 
-      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view for analyzer'
-      );
-    });
+  it('should open details panel in preview when clicking on view button', () => {
+    const wrapper = renderAnalyzer();
 
-    it('should render the content', () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        loading: false,
-        sourcererDataView: { ...dataViewSpec, id: 'id', title: 'title' },
-      });
-
-      const { getByTestId } = renderAnalyzer();
-
-      expect(getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId('resolver:graph-controls:show-panel-button')).toBeInTheDocument();
+    wrapper.getByTestId('resolver:graph-controls:show-panel-button').click();
+    expect(mockFlyoutApi.openPreviewPanel).toBeCalledWith({
+      id: DocumentDetailsAnalyzerPanelKey,
+      params: {
+        resolverComponentInstanceID: `${FLYOUT_KEY}-${TableId.test}`,
+        banner: ANALYZER_PREVIEW_BANNER,
+      },
     });
   });
 });

@@ -105,6 +105,11 @@ dependsOn:
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
   - '@kbn/management-settings-ids'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/react-query'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/core-user-profile-common'
 tags:
   - plugin
   - prod

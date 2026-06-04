@@ -8,14 +8,14 @@ Some Kibana features are gated behind feature flags or experimental configuratio
 
 ## When to use runtime versus server-level flags [scout-feature-flags-when-to-use]
 
-|  | Runtime flags | Custom server configs |
-|---|---|---|
-| **API** | `apiServices.core.settings()` | `ScoutServerConfig` config set |
-| **Restart required** | No — applied while running | Yes — must be present at boot |
-| **Elastic Cloud (QA)** | Supported | Not supported — local only |
-| **CI cost** | Low — shares default servers | Higher — dedicated server instance |
-| **Toggle per suite** | Yes | No — fixed at server start |
-| **When to use** | **Preferred** for most flags | Settings required at boot (e.g., route registration) |
+|                        | Runtime flags                 | Custom server configs                                |
+| ---------------------- | ----------------------------- | ---------------------------------------------------- |
+| **API**                | `apiServices.core.settings()` | `ScoutServerConfig` config set                       |
+| **Restart required**   | No — applied while running    | Yes — must be present at boot                        |
+| **Elastic Cloud (QA)** | Supported                     | Not supported — local only                           |
+| **CI cost**            | Low — shares default servers  | Higher — dedicated server instance                   |
+| **Toggle per suite**   | Yes                           | No — fixed at server start                           |
+| **When to use**        | **Preferred** for most flags  | Settings required at boot (e.g., route registration) |
 
 For custom server configs, reach out to the AppEx QA team before creating one (see [below](#scout-feature-flags-custom-servers)).
 
@@ -89,7 +89,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
 When using `feature_flags.overrides`, the keys must match the feature flag IDs registered by the owning plugin. Overrides bypass variation and type validation, so ensure the values match what the consuming code expects.
 
-## Custom server configs (reach out to AppEx QA first) [scout-feature-flags-custom-servers]
+## Custom server configs [scout-feature-flags-custom-servers]
 
 Some settings — such as those used during the plugin `setup` lifecycle (e.g., HTTP route registration) — cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
 

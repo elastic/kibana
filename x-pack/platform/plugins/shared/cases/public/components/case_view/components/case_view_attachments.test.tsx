@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import { alertCommentWithIndices, eventComment, basicCase } from '../../../containers/mock';
+import { basicCase, alertComment } from '../../../containers/mock';
 import type { CaseUI } from '../../../../common';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewAttachments } from './case_view_attachments';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { screen, waitFor } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
+import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import userEvent from '@testing-library/user-event';
-import { useCaseViewNavigation } from '../../../common/navigation';
-import * as similarCasesHook from '../../../containers/use_get_similar_cases';
-import { useCaseObservables } from '../use_case_observables';
 
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
@@ -26,12 +23,42 @@ jest.mock('../use_case_observables', () => ({
 }));
 
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
-const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
-const useGetCaseObservablesMock = useCaseObservables as jest.Mock;
 
-const caseData: CaseUI = {
-  ...basicCase,
-  comments: [...basicCase.comments, alertCommentWithIndices],
+const caseData: CaseUI = basicCase;
+
+const buildRegistry = () => {
+  const registry = new UnifiedAttachmentTypeRegistry();
+  registry.register({
+    id: 'security.alert',
+    displayName: 'Alert',
+    icon: 'bell',
+    getAttachmentViewObject: () => ({ event: 'added an alert' }),
+    getAttachmentTabViewObject: () => ({
+      children: () => <div data-test-subj="test-alerts-table">{'Alerts table'}</div>,
+    }),
+    schemaValidator: () => {},
+  });
+  registry.register({
+    id: 'security.event',
+    displayName: 'Event',
+    icon: 'bell',
+    getAttachmentViewObject: () => ({ event: 'added an event' }),
+    getAttachmentTabViewObject: () => ({
+      children: () => <div data-test-subj="test-events-table">{'Events table'}</div>,
+    }),
+    schemaValidator: () => {},
+  });
+  registry.register({
+    id: 'file',
+    displayName: 'File',
+    icon: 'document',
+    getAttachmentViewObject: () => ({ event: 'added a file' }),
+    getAttachmentTabViewObject: () => ({
+      children: () => <div data-test-subj="test-files-table">{'Files table'}</div>,
+    }),
+    schemaValidator: () => {},
+  });
+  return registry;
 };
 
 const basicLicense = licensingMock.createLicense({
@@ -44,6 +71,7 @@ const platinumLicense = licensingMock.createLicense({
 
 const fileStatsData = { total: 3 };
 const onSearchMock = jest.fn();
+const onUpdateFieldMock = jest.fn();
 
 describe('Case View Attachments tab', () => {
   beforeEach(() => {
@@ -54,12 +82,12 @@ describe('Case View Attachments tab', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the case view attachments tab', async () => {
+  it('renders the tabs and the search field', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />
     );
 
@@ -67,12 +95,12 @@ describe('Case View Attachments tab', () => {
     expect(screen.getByTestId('cases-files-search')).toBeInTheDocument();
   });
 
-  it('should call the onSearch callback when the search field is changed', async () => {
+  it('calls the onSearch callback when the search field is changed', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />
     );
 
@@ -83,422 +111,232 @@ describe('Case View Attachments tab', () => {
     });
   });
 
-  it('shows the files tab as active', async () => {
+  it('shows the update button as "needs update" when input differs from the applied search', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.FILES}
         onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
+        searchTerm=""
+        onUpdateField={onUpdateFieldMock}
+      />
     );
 
-    expect(await screen.findByTestId('case-view-tab-title-files')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    // When the input matches the applied search term, the button renders the
+    // "Refresh" label. Once the input diverges, EuiSuperUpdateButton switches
+    // to a filled success "Update" label.
+    expect(screen.getByTestId('cases-attachments-update-button')).toHaveTextContent('Refresh');
+
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'foo');
+
+    expect(screen.getByTestId('cases-attachments-update-button')).toHaveTextContent('Update');
   });
 
-  it('shows the events tab as active', async () => {
+  it('calls onSearch with the typed value when clicking the update button while dirty', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.EVENTS}
         onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-      }
+        searchTerm=""
+        onUpdateField={onUpdateFieldMock}
+      />
     );
 
-    expect(await screen.findByTestId('case-view-tab-title-events')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'bar');
+    await userEvent.click(screen.getByTestId('cases-attachments-update-button'));
+
+    await waitFor(() => {
+      expect(onSearchMock).toHaveBeenCalledWith('bar');
+    });
   });
 
-  it('shows the files tab with the correct count', async () => {
+  it('does not render an observables accordion when license is basic', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.FILES}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    const badge = await screen.findByTestId('case-view-files-stats-badge');
-
-    expect(badge).toHaveTextContent('3');
-  });
-
-  it('do not show count on the files tab if the call isLoading', async () => {
-    useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data: fileStatsData });
-
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.FILES}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
-  });
-
-  it('shows the alerts tab based on totalAlerts when search is not applied', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={{ ...caseData, totalAlerts: 3 }}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
-
-    expect(badge).toHaveTextContent('3');
-  });
-
-  it('shows the alerts tab based on alert comment count when search is applied', async () => {
-    const alerts = Array.from({ length: 3 }, (_, i) => ({
-      ...alertCommentWithIndices,
-      id: `alert-${i}`,
-    }));
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={{ ...caseData, totalAlerts: 5, comments: alerts }}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-        searchTerm="search"
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
-
-    expect(badge).toHaveTextContent('3');
-  });
-
-  it('the alerts tab count has a different color if the tab is not active', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={{ ...caseData, totalAlerts: 3 }}
-        activeTab={CASE_VIEW_PAGE_TABS.FILES}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
+      { wrapperProps: { license: basicLicense } }
     );
 
     expect(
-      (await screen.findByTestId('case-view-alerts-stats-badge')).getAttribute('class')
-    ).not.toMatch(/accent/);
-  });
-
-  it('navigates to the alerts tab when the alerts tab is clicked', async () => {
-    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
-
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-      });
-    });
-  });
-
-  it('navigates to the files tab when the files tab is clicked', async () => {
-    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
-
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.FILES,
-      });
-    });
-  });
-
-  it('navigates to the events tab when the events tab is clicked', async () => {
-    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-      }
-    );
-
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-events'));
-
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.EVENTS,
-      });
-    });
-  });
-
-  it('should display the alerts tab when the feature is enabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { enabled: true } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-  });
-
-  it('should not display the alerts tab when the feature is disabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { enabled: false } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
-  });
-
-  it('should not show the experimental badge on the alerts table', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { isExperimental: false } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('case-view-alerts-table-experimental-badge')
+      screen.queryByTestId('case-view-attachment-accordion-observables')
     ).not.toBeInTheDocument();
   });
 
-  it('should show the experimental badge on the alerts table', async () => {
+  it('renders an observables accordion when the license is platinum', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { isExperimental: true } } },
-      }
+      { wrapperProps: { license: platinumLicense } }
     );
 
     expect(
-      await screen.findByTestId('case-view-alerts-table-experimental-badge')
+      await screen.findByTestId('case-view-attachment-accordion-observables')
     ).toBeInTheDocument();
   });
 
-  it('should display the events tab based on totalEvents when the feature is enabled and search is not applied', async () => {
+  it('renders an accordion only for registered types that have a tab view and at least one attachment of that type', () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithAlert: CaseUI = { ...basicCase, comments: [alertComment] };
+
     renderWithTestingProviders(
       <CaseViewAttachments
-        caseData={{ ...caseData, totalEvents: 4 }}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
+        caseData={caseWithAlert}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-      }
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
     );
 
-    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
-
-    const badge = await screen.findByTestId('case-view-events-stats-badge');
-    expect(badge).toHaveTextContent('4');
+    expect(screen.getByTestId('case-view-attachment-accordion-security.alert')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-view-attachment-accordion-security.event')
+    ).not.toBeInTheDocument();
   });
 
-  it('should display the events tab with correct count when the feature is enabled', async () => {
-    const events = Array.from({ length: 2 }, (_, i) => ({
-      ...eventComment,
-      id: `event-${i}`,
-    }));
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={{ ...caseData, totalEvents: 4, comments: events }}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-        searchTerm="search"
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
-
-    const badge = await screen.findByTestId('case-view-events-stats-badge');
-    expect(badge).toHaveTextContent('2');
-  });
-
-  it('should not display the events tab when the feature is disabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: false } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-events')).not.toBeInTheDocument();
-  });
-
-  it('should not show observable tabs in non-platinum tiers', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
-  });
-
-  it('should not show observable tabs if the observables feature is not enabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.ALERTS}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: {
-          license: basicLicense,
-          features: { observables: { enabled: false, autoExtract: false } },
-        },
-      }
-    );
-
-    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
-  });
-
-  it('should show observable tabs in platinum+ tiers', async () => {
-    const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
+  it('hides the files accordion when fileStats reports 0 files', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
 
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />,
-      {
-        wrapperProps: { license: platinumLicense },
-      }
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
     );
 
-    // NOTE: ensure we are calling the hook but the fetching is enabled (based on the license)
-    expect(spyOnUseGetSimilarCases).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: true })
-    );
+    expect(screen.queryByTestId('case-view-attachment-accordion-file')).not.toBeInTheDocument();
   });
 
-  it('should show the observables tab', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: platinumLicense },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
-  });
-  it('shows the observables tab with the correct count', async () => {
-    renderWithTestingProviders(
-      <CaseViewAttachments
-        caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
-        onSearch={onSearchMock}
-      />,
-      {
-        wrapperProps: { license: platinumLicense },
-      }
-    );
-
-    const badge = await screen.findByTestId('case-view-observables-stats-badge');
-
-    expect(badge).toHaveTextContent('0');
-  });
-
-  it('do not show count on the observables tab if the call isLoading', async () => {
-    useGetCaseObservablesMock.mockReturnValue({ isLoading: true, observables: [] });
+  it('shows the file count from fileStats on the files badge', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 2 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
 
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
-        activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES}
         onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
       />,
-      {
-        wrapperProps: { license: platinumLicense },
-      }
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
     );
 
-    expect(screen.queryByTestId('case-view-observables-stats-badge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-view-attachment-badge-file')).toHaveTextContent('2');
+  });
+
+  it('badge counts bulk-added alerts by id length, not by comment/SO count', () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    // One alert SO wrapping three alert ids. The badge should read "3", not "1".
+    const bulkAlertComment = {
+      ...alertComment,
+      alertId: ['a-1', 'a-2', 'a-3'],
+      index: ['i-1', 'i-2', 'i-3'],
+    };
+    const caseWithBulkAlerts: CaseUI = { ...basicCase, comments: [bulkAlertComment] };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithBulkAlerts}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
+    );
+
+    expect(screen.getByTestId('case-view-attachment-badge-security.alert')).toHaveTextContent('3');
+  });
+
+  it('renders a "no results found" empty state when searching and nothing matches', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        searchTerm="foobar"
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    const emptyPrompt = screen.getByTestId('case-view-attachments-no-search-results');
+    expect(emptyPrompt).toBeInTheDocument();
+    expect(emptyPrompt).toHaveTextContent('No results match your search criteria');
+    expect(emptyPrompt).toHaveTextContent('Try modifying your search.');
+    expect(screen.queryByTestId('case-view-attachment-accordion-file')).not.toBeInTheDocument();
+  });
+
+  it('does not render the empty state when there is no search term, even if everything is empty', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    expect(screen.queryByTestId('case-view-attachments-no-search-results')).not.toBeInTheDocument();
+  });
+
+  it('does not render the empty state when search matches at least one section', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 1 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        searchTerm="elastic"
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    expect(screen.queryByTestId('case-view-attachments-no-search-results')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-view-attachment-accordion-file')).toBeInTheDocument();
+  });
+
+  it('renders accordions in alphabetical order by display name', () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    // 2 alerts + 1 event so all three registry-driven accordions render
+    // (Alert, Event, File via fileStats).
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [
+        alertComment,
+        { ...alertComment, id: 'alert-2' },
+        { ...alertComment, id: 'evt-1', type: 'event' as never },
+      ],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
+    );
+
+    const ids = screen
+      .getAllByTestId(/^case-view-attachment-accordion-(security\.alert|security\.event|file)$/)
+      .map((el) => el.getAttribute('data-test-subj'));
+
+    expect(ids).toEqual([
+      'case-view-attachment-accordion-security.alert', // Alert
+      'case-view-attachment-accordion-security.event', // Event
+      'case-view-attachment-accordion-file', // File
+    ]);
   });
 });

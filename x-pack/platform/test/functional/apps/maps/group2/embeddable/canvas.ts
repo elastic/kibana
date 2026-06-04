@@ -8,6 +8,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Canvas embeddable smoke test
+ *
+ * Migration: Remove test. There should be one canvas smoke test making sure lens embeddable loads
+ * but we don't need a smoke test for each embeddable type.
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { canvas, maps } = getPageObjects(['canvas', 'maps']);
   const retry = getService('retry');

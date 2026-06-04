@@ -260,7 +260,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         concurrency,
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({ messages: [{ message: input.question }] });

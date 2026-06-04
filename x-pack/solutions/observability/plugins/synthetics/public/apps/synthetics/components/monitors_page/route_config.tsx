@@ -10,13 +10,14 @@ import React from 'react';
 import type { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ErrorsTab } from './errors/errors_tab';
 import { RefreshButton } from '../common/components/refresh_button';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
 import { MonitorManagementPage } from './monitors_page';
 import type { RouteProps } from '../../routes';
-import { MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants';
+import { ERRORS_ROUTE, MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants';
 
 export const getMonitorsRoute = (
   history: ReturnType<typeof useHistory>,
@@ -55,12 +56,25 @@ export const getMonitorsRoute = (
         tabs: getMonitorsTabs(syntheticsPath, 'management', location),
       },
     },
+    {
+      title: i18n.translate('xpack.synthetics.errorRoute.title', {
+        defaultMessage: 'Errors | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: ERRORS_ROUTE,
+      component: ErrorsTab,
+      dataTestSubj: 'syntheticsErrorPage',
+      pageHeader: {
+        ...sharedProps,
+        tabs: getMonitorsTabs(syntheticsPath, 'errors', location),
+      },
+    },
   ];
 };
 
 const getMonitorsTabs = (
   syntheticsPath: string,
-  selected: 'overview' | 'management',
+  selected: 'overview' | 'management' | 'errors',
   location: ReturnType<typeof useLocation>
 ) => {
   return [
@@ -85,6 +99,17 @@ const getMonitorsTabs = (
       href: `${syntheticsPath}${MONITORS_ROUTE}${location.search}`,
       isSelected: selected === 'management',
       'data-test-subj': 'syntheticsMonitorManagementTab',
+    },
+    {
+      label: (
+        <FormattedMessage
+          id="xpack.synthetics.monitorManagement.errorsTab.title"
+          defaultMessage="Errors"
+        />
+      ),
+      href: `${syntheticsPath}${ERRORS_ROUTE}${location.search}`,
+      isSelected: selected === 'errors',
+      'data-test-subj': 'syntheticsMonitorErrorsTab',
     },
   ];
 };

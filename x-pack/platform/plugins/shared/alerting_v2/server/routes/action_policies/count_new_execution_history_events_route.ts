@@ -43,7 +43,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => countPolicyExecutionEventsResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the count of new execution history events.',
       },
       400: {
         body: () => errorResponseSchema,

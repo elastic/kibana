@@ -11,12 +11,9 @@ tags: ['kibana','dev', 'contributor', 'api docs']
 
 ## How does automatic review assignment work when SO types are changed?
 
-PRs modifying / adding / deleting any SO type registration will be flagged by the integration
-test located at `src/core/server/integration_tests/saved_objects/migrations/check_registered_types.test.ts`.
+PRs that modify Saved Object type registrations are validated by the **Check changes in Saved Objects** CI step (`node scripts/check_saved_objects`). The check compares the current type registry against a GCS baseline snapshot and posts actionable feedback on the pull request when Saved Object types are added, updated, or removed.
 
-This test will fail any time a change is performed on an SO type registration that could risk having an impact on
-upgrades/migrations, and will force the PR's author to update the test's snapshot, which will trigger a review
-from the Core team.
+When the check detects migration-related changes, it fails CI and summarizes which types were affected, including reminders about two-step releases when applicable.
 
 ## What and how to review?
 

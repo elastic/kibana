@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -50,6 +50,7 @@ export const StatusPopoverButton = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+    const statusTitleId = useGeneratedHtmlId();
 
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
 
@@ -122,13 +123,14 @@ export const StatusPopoverButton = memo(
     return (
       <>
         <EuiPopover
+          aria-labelledby={statusTitleId}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
           data-test-subj={STATUS_POPOVER_TEST_ID}
         >
-          <EuiPopoverTitle paddingSize="m">
+          <EuiPopoverTitle id={statusTitleId} paddingSize="m">
             {i18n.translate(
               'xpack.securitySolution.attackDetailsFlyout.header.popover.changeAttackStatus',
               {

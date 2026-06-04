@@ -19,6 +19,7 @@ import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-se
 import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
@@ -93,16 +94,11 @@ describe('SearchEmbeddableGridComponent', () => {
     jest.clearAllMocks();
   });
 
-  const renderComponent = ({
-    isEsql,
-    onRefreshData,
-  }: {
-    isEsql: boolean;
-    onRefreshData?: () => void;
-  }) => {
+  const renderComponent = ({ isEsql }: { isEsql: boolean }) => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch);
     const stateManager = createStateManager();
+    const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
 
@@ -112,7 +108,6 @@ describe('SearchEmbeddableGridComponent', () => {
           api={api}
           dataView={dataViewMock}
           stateManager={stateManager}
-          onRefreshData={onRefreshData}
           enableDocumentViewer={true}
           inlineEditing={{
             isActive: false,
@@ -120,6 +115,9 @@ describe('SearchEmbeddableGridComponent', () => {
             onApply: jest.fn(),
             onCancel: jest.fn(),
           }}
+          docViewerRef={docViewerRef}
+          expandedDoc={undefined}
+          initialDocViewerTabId={undefined}
         />
       </DiscoverTestProvider>
     );
@@ -147,20 +145,6 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
-    });
-  });
-
-  describe('refresh action wiring', () => {
-    it('passes onRefreshData to DiscoverGridEmbeddable', async () => {
-      const onRefreshData = jest.fn();
-      renderComponent({ isEsql: false, onRefreshData });
-
-      await waitFor(() => {
-        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
-      });
-
-      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
-      expect(lastCallProps?.onRefreshData).toBe(onRefreshData);
     });
   });
 });

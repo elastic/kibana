@@ -21,6 +21,7 @@ import {
   visualizationTimePickerContainerClassName,
   visualizationHeaderStyles,
 } from './styles';
+import { DEFAULT_VISUALIZATION_HEIGHT } from './get_visualization_dimensions';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useVisPreviewUnifiedSearch } from './use_vis_preview_unified_search';
 
@@ -46,8 +47,6 @@ const viewConfigurationLabel = i18n.translate(
   }
 );
 
-const VISUALIZATION_HEIGHT = 240;
-
 interface BaseVisualizationProps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -55,6 +54,7 @@ interface BaseVisualizationProps {
   setLensInput: (input: TypedLensByValueInput) => void;
   isLoading: boolean;
   registerActionButtons: InlineRenderCallbacks['registerActionButtons'];
+  height?: number;
 }
 
 export function BaseVisualization({
@@ -64,6 +64,7 @@ export function BaseVisualization({
   setLensInput,
   isLoading,
   registerActionButtons,
+  height = DEFAULT_VISUALIZATION_HEIGHT,
 }: BaseVisualizationProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
@@ -163,7 +164,7 @@ export function BaseVisualization({
         <SearchBar {...searchBarProps} />
       </div>
 
-      <div css={visualizationEmbeddableStyles(VISUALIZATION_HEIGHT)}>
+      <div css={visualizationEmbeddableStyles(height)}>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (

@@ -12,12 +12,14 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import { isSignificantEventsMemoryEnabled } from '../../../../lib/memory/is_significant_events_memory_enabled';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
+import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import {
   getSignificantEventsResponse,
   previewSignificantEventsRequest,
@@ -47,7 +49,10 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({
       from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
       to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
-      bucketSize: z.string().describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
     }),
     body: z.object({
       query: z.object({
@@ -130,7 +135,10 @@ const readStreamSignificantEventsRoute = createServerRoute({
     query: z.object({
       from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
       to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
-      bucketSize: z.string().describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
       query: z
         .string()
         .optional()
@@ -180,16 +188,26 @@ const readStreamSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      streamsClient,
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
     const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
@@ -199,6 +217,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );
@@ -285,7 +304,7 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    const useMemory = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
     const memoryTools = useMemory
       ? createMemoryDiscoveryTools({
           memoryService: new MemoryServiceImpl({

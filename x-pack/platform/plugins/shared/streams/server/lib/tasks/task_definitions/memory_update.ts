@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -49,18 +49,13 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
                 `Starting memory update task for trigger "${triggerId}" (task ${runContext.taskInstance.id})`
               );
 
-              const {
-                taskClient,
-                inferenceClient,
-                uiSettingsClient,
-                insightClient,
-                scopedClusterClient,
-              } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
-              });
+              const { taskClient, inferenceClient, insightClient, scopedClusterClient } =
+                await taskContext.getScopedClients({
+                  request: runContext.fakeRequest,
+                });
 
-              const useMemory = await uiSettingsClient.get<boolean>(
-                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              const useMemory = await isSignificantEventsMemoryEnabled(
+                taskContext.server.core.featureFlags
               );
               if (!useMemory) {
                 taskLogger.info('Memory is disabled, skipping memory update');
@@ -85,7 +80,7 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),
-                esClient: taskContext.getInternalEsClient(),
+                esClient: scopedClusterClient.asCurrentUser,
               });
 
               // Create a local trigger registry for this task execution

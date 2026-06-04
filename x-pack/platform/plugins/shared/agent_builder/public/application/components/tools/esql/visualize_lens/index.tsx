@@ -10,6 +10,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   type ActionButton,
@@ -20,6 +21,7 @@ import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 import { FallbackVisualizationActions } from '../shared/visualization_actions';
 import { visualizationWrapperStyles } from '../shared/styles';
+import { getVisualizationDimensionsFromLensConfig } from '../shared/get_visualization_dimensions';
 
 export function VisualizeLens({
   lens,
@@ -42,6 +44,10 @@ export function VisualizeLens({
     lensConfig,
     timeRange,
   });
+  const { height, width } = getVisualizationDimensionsFromLensConfig(
+    lensConfig as Record<string, unknown>
+  );
+
   const [localActionButtons, setLocalActionButtons] = useState<ActionButton[]>([]);
   const registerLocalActionButtons = useCallback((buttons: ActionButton[]) => {
     setLocalActionButtons(buttons);
@@ -65,7 +71,10 @@ export function VisualizeLens({
   }
 
   return (
-    <div data-test-subj="lensVisualization" css={visualizationWrapperStyles}>
+    <div
+      data-test-subj="lensVisualization"
+      css={[visualizationWrapperStyles, width !== undefined ? css({ maxWidth: width }) : undefined]}
+    >
       {shouldRenderLocalActionButtons && (
         <FallbackVisualizationActions buttons={localActionButtons} />
       )}
@@ -76,6 +85,7 @@ export function VisualizeLens({
         setLensInput={setLensInput}
         isLoading={isLoading}
         registerActionButtons={registerActionButtons ?? registerLocalActionButtons}
+        height={height}
       />
     </div>
   );

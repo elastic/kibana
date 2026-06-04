@@ -304,7 +304,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const createdAction = await createJsmConnector(connectorName);
         objectRemover.add(createdAction.id, 'connector', 'actions');
 
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
       });
 
       beforeEach(async () => {

@@ -30,6 +30,7 @@ jest.mock('./context/build_autocomplete_context', () => ({
     path: ['triggers', 0, 'type'],
     linePrefix: '  - type:',
     lineSuffix: '',
+    isInEsqlQueryField: false,
   })),
 }));
 
@@ -80,7 +81,19 @@ describe('getCompletionItemProvider', () => {
 
     it('should have correct trigger characters', () => {
       const provider = getCompletionItemProvider(getState);
-      expect(provider.triggerCharacters).toEqual(['@', '.', ' ', '"', "'", '(', ':', '|', '{']);
+      expect(provider.triggerCharacters).toEqual([
+        '@',
+        '.',
+        ' ',
+        '"',
+        "'",
+        '(',
+        ':',
+        '|',
+        '{',
+        '[',
+        '?',
+      ]);
     });
   });
 
@@ -464,6 +477,7 @@ describe('getCompletionItemProvider', () => {
         lineUpToCursor: '',
         lineParseResult: { matchType: 'liquid-block-keyword', fullKey: '', match: null },
         isInLiquidBlock: false,
+        isInEsqlQueryField: false,
         focusedStepInfo: null,
       });
 
@@ -507,6 +521,7 @@ describe('getCompletionItemProvider', () => {
         lineUpToCursor: '  assign',
         lineParseResult: { matchType: 'liquid-block-keyword', fullKey: 'assign', match: null },
         isInLiquidBlock: true,
+        isInEsqlQueryField: false,
         focusedStepInfo: null,
       });
 

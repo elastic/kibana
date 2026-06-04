@@ -1,0 +1,89 @@
+{
+  "sha1": "22c65fb9e93eaa5ae91623982f8ab718841db21f",
+  "tests": [
+    {
+      "id": "2f88d785c412e06-9e9bcc234fbcf5f",
+      "title": "Onboarding connect step static keys path — form enables Next when credentials are filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f88d785c412e06-6f25f6af6aac93b",
+      "title": "Onboarding connect step identity federation create — New Identity tab active when no connectors exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f88d785c412e06-252523a854117d9",
+      "title": "Onboarding connect step temporary keys path — form enables Next when access key and secret are filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f88d785c412e06-71f5ed0a35a0c8f",
+      "title": "Onboarding connect step identity federation reuse — shows connector selector on Existing Identity tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 107,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b1c88bbca05585-cc5ebedbcad32a7",
+      "title": "Onboarding app — FF enabled renders the onboarding shell and navigates between steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "0836a168fb1781f-96980b8d0419b2c",
+      "title": "Onboarding app — FF disabled (default) redirects away when onboarding feature flag is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    }
+  ]
+}

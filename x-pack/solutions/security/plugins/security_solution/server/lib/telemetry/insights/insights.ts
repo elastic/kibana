@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
-import { sha256 } from 'js-sha256';
+import { createHash } from 'crypto';
 
 interface AlertContext {
   alert_id: string;
@@ -52,8 +52,7 @@ export function getSessionIDfromKibanaRequest(clusterId: string, request: Kibana
 
 function getClusterHashSalt(clusterId: string, toHash: string): string {
   const concatValue = toHash + clusterId;
-  const sha = sha256.create().update(concatValue).hex();
-  return sha;
+  return createHash('sha256').update(concatValue).digest('hex');
 }
 
 export function createAlertStatusPayloads(

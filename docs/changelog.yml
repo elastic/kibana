@@ -331,4 +331,4 @@ bundle:
       output: "security/{version}.yaml"
     serverless-release:
       output_products: "cloud-serverless {version} {lifecycle}"
-      output: "cloud-serverless/{version}.yaml"
+      output: "cloud-serverless/kibana-{version}.yaml"

@@ -1,0 +1,47 @@
+{
+  "sha1": "5c453d3a64669d5e1ee6bb34fa4c8c5a55765e47",
+  "tests": [
+    {
+      "id": "97a24bbce8410c2-d711d2dd8bcbcae",
+      "title": "sample data API returns 404 for an unknown dataset ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/api/tests/sample_data.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "97a24bbce8410c2-46a8dc63c017e84",
+      "title": "sample data API default space: list, install, verify timestamps and counts, uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/api/tests/sample_data.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "97a24bbce8410c2-6d4a5398c4c27cb",
+      "title": "sample data API non-default space: install and uninstall work correctly; saved object IDs are preserved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/api/tests/sample_data.spec.ts",
+        "line": 149,
+        "column": 10
+      }
+    }
+  ]
+}

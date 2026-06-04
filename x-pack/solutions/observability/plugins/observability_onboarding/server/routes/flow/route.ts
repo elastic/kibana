@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import type { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
 import { generateAgentConfigTar } from './generate_agent_config';
 import { createWiredStreamsRoutingProcessor } from './inject_wired_streams_routing';
@@ -508,7 +508,7 @@ async function ensureInstalledIntegrations(
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
         title: pkgName,
-        config: dump({
+        config: stringify({
           inputs: [
             {
               id: `filestream-${pkgName}`,

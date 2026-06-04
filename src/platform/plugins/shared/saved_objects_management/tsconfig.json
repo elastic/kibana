@@ -31,7 +31,8 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
     "@kbn/content-management-plugin",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/repo-info"
   ],
   "exclude": [
     "target/**/*",

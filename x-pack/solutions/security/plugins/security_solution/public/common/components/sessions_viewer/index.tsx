@@ -158,7 +158,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={PageScope.default}
+        pageScope={PageScope.default}
         start={startDate}
         unit={unit}
       />

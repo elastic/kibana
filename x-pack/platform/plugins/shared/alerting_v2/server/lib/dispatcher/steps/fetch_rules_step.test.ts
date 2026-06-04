@@ -45,7 +45,6 @@ describe('FetchRulesStep', () => {
     expect(result.data?.rules?.size).toBe(1);
     expect(result.data?.rules?.get('r1')?.name).toBe('Rule 1');
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
-    expect(result.data?.rules?.get('r1')?.kind).toBe('alert');
     expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
   });
 
@@ -89,8 +88,6 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.size).toBe(2);
-    expect(result.data?.rules?.get('r1')?.kind).toBe('alert');
-    expect(result.data?.rules?.get('r2')?.kind).toBe('alert');
     expect(mockFindByIds).toHaveBeenCalledWith(['r1', 'r2']);
   });
 
@@ -113,7 +110,6 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('my-space');
-    expect(result.data?.rules?.get('r1')?.kind).toBe('alert');
   });
 
   it('defaults spaceId to default when namespaces is undefined', async () => {
@@ -134,6 +130,5 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
-    expect(result.data?.rules?.get('r1')?.kind).toBe('alert');
   });
 });

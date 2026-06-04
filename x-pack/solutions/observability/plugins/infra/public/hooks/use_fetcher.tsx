@@ -33,7 +33,9 @@ export interface FetcherOptions {
   reloadRequestTimeUpdateEnabled?: boolean;
 }
 
-type InferApiCallReturnType<Fn> = Fn extends (callApi: ApiCallClient) => Promise<infer R>
+type InferApiCallReturnType<Fn> = Fn extends (
+  callApi: ApiCallClient
+) => Promise<infer R> | undefined
   ? R
   : never;
 
@@ -118,7 +120,12 @@ function createInfraApiClient(
   }) as ApiCallClient;
 }
 
-export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Promise<TReturn>>(
+// The callback may synchronously return `undefined` to signal "do not fetch
+// yet", letting consumers gate on async prerequisites (see `useHostsPageReady`).
+export function useFetcher<
+  TReturn,
+  Fn extends (apiClient: ApiCallClient) => Promise<TReturn> | undefined
+>(
   fn: Fn,
   fnDeps: DependencyList = [],
   options: FetcherOptions = {}

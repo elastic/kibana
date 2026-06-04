@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/evals-plugin'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod

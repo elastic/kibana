@@ -6,3 +6,6 @@
  */
 
 export { UptimeAppPage } from './uptime_app';
+export { UptimeOverviewPage } from './uptime_overview';
+export { MonitorDetailsPage } from './monitor_details';
+export { UptimeSettingsPage } from './uptime_settings';

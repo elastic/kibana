@@ -184,6 +184,17 @@ describe('JinaReaderConnector', () => {
       ).rejects.toThrow('Network error');
     });
 
+    it('should preserve transport errors without a response', async () => {
+      const error = new Error('maxContentLength size of 5120 exceeded');
+      mockClient.post.mockRejectedValue(error);
+
+      await expect(
+        JinaReaderConnector.actions.browse.handler(mockContext, {
+          url: 'https://example.com',
+        })
+      ).rejects.toBe(error);
+    });
+
     it('should handle errors with code by returning error response', async () => {
       const error: HttpError = new Error('API error');
       error.response = {

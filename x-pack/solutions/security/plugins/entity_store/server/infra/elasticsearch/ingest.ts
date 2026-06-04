@@ -62,6 +62,8 @@ interface IngestEntitiesParams {
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
+  /** Use `false` when downstream consumers tolerate the 1 s natural refresh window (e.g. CCS updates data stream). Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index). */
+  refresh: boolean | 'wait_for';
 }
 
 /**
@@ -86,6 +88,7 @@ export async function ingestEntities({
   abortController,
   fieldsToIgnore,
   transformDocument,
+  refresh,
 }: IngestEntitiesParams) {
   const options: TransportRequestOptions = {};
   if (abortController?.signal) {
@@ -143,7 +146,7 @@ export async function ingestEntities({
     {
       datasource: documentGenerator(),
       index: targetIndex,
-      refresh: true,
+      refresh,
       flushBytes: BATCH_SIZE,
       concurrency: 1,
       retries: 2,

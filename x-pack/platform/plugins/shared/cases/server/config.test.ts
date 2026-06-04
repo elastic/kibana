@@ -20,6 +20,11 @@ describe('config validation', () => {
           "attachments": Object {
             "enabled": false,
           },
+          "casesRedesign": Object {
+            "details": false,
+            "list": false,
+            "settings": false,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [

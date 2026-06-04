@@ -465,7 +465,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               if (!xAxisColumn) return false;
               if (formattedTable.formattedColumns[xAxisColumn.id]) {
                 // stringify the value to compare with the chart value
-                return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                return xValuesFormatter.convertToText(r[xAxisColumn.id]) === x;
               }
               return r[xAxisColumn.id] === x;
             }),
@@ -479,7 +479,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   row: table.rows.findIndex((r) => {
                     if (formattedTable.formattedColumns[yAxisColumn.id]) {
                       // stringify the value to compare with the chart value
-                      return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                      return yValuesFormatter.convertToText(r[yAxisColumn.id]) === y;
                     }
                     return r[yAxisColumn.id] === y;
                   }),
@@ -554,7 +554,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[yAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return yValuesFormatter.convert(r[yAxisColumn.id]) === v;
+                    return yValuesFormatter.convertToText(r[yAxisColumn.id]) === v;
                   }
                   return r[yAxisColumn.id] === v;
                 }),
@@ -569,7 +569,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[xAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return xValuesFormatter.convert(r[xAxisColumn.id]) === v;
+                    return xValuesFormatter.convertToText(r[xAxisColumn.id]) === v;
                   }
                   return r[xAxisColumn.id] === v;
                 }),
@@ -640,7 +640,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
         value = parseInt(percentageNumber.toString(), 10) / 100;
       }
-      return `${metricFormatter.convert(value) ?? ''}`;
+      return `${metricFormatter.convertToText(value) ?? ''}`;
     };
 
     const { colors, ranges } = computeColorRanges(
@@ -780,7 +780,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   if (!xAxisColumn) return false;
                   if (formattedTable.formattedColumns[xAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                    return xValuesFormatter.convertToText(r[xAxisColumn.id]) === x;
                   }
                   return r[xAxisColumn.id] === x;
                 }),
@@ -794,7 +794,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[yAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                    return yValuesFormatter.convertToText(r[yAxisColumn.id]) === y;
                   }
                   return r[yAxisColumn.id] === y;
                 }),
@@ -929,7 +929,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 `${
                   xAccessor && formattedTable.formattedColumns[xAccessor]
                     ? v
-                    : xValuesFormatter.convert(v)
+                    : xValuesFormatter.convertToText(v)
                 }`
               }
               yAxisLabelFormatter={
@@ -938,7 +938,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                       `${
                         yAccessor && formattedTable.formattedColumns[yAccessor]
                           ? v
-                          : yValuesFormatter.convert(v) ?? ''
+                          : yValuesFormatter.convertToText(v) ?? ''
                       }`
                   : undefined
               }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type {
   StepExecutionField,
   StepExecutionRepository,
@@ -56,6 +57,28 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     _stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return this.searchStepExecutionsByExecutionId(workflowExecutionId);
+  }
+
+  public async markNonTerminalStepsFailed(
+    workflowExecutionId: string,
+    error: SerializedError
+  ): Promise<void> {
+    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
+
+    if (nonTerminalSteps.length === 0) {
+      return;
+    }
+
+    const finishedAt = new Date().toISOString();
+    await this.bulkUpsert(
+      nonTerminalSteps.map((step) => ({
+        id: step.id,
+        status: ExecutionStatus.FAILED,
+        error,
+        finishedAt,
+      }))
+    );
   }
 
   public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {

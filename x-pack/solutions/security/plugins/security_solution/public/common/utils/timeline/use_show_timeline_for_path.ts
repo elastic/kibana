@@ -8,7 +8,6 @@
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-
 import { ARTIFACT_MANAGEMENT_TAB_ROUTING_PATHS } from '../../../management/common/constants';
 import type { NormalizedLink } from '../../links';
 import { useNormalizedAppLinks } from '../../links/links_hooks';
@@ -17,7 +16,7 @@ import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
-  const hiddenTimelineRoutes = useMemo(
+  return useMemo(
     () =>
       Object.values(normalizedLinks).reduce((acc: string[], link: NormalizedLink) => {
         if (link.hideTimeline) {
@@ -31,7 +30,6 @@ const useHiddenTimelineRoutes = () => {
       }, []),
     [normalizedLinks]
   );
-  return hiddenTimelineRoutes;
 };
 
 export const useShowTimelineForGivenPath = () => {

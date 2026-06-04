@@ -71,7 +71,7 @@ export class FieldFormatsRegistry {
    *
    * @param  {KBN_FIELD_TYPES} fieldType - the field type
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {FieldType}
+   * @return {FieldFormatConfig}
    */
   getDefaultConfig = (
     fieldType: KBN_FIELD_TYPES,

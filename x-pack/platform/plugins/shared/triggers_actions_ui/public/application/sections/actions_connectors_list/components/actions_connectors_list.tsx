@@ -32,6 +32,7 @@ import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { isEarsExperimentalConnector } from '@kbn/connector-specs';
 import {
   DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
   DEPRECATED_LABEL,
@@ -105,7 +106,7 @@ const ActionsConnectorsList = ({
     setBreadcrumbs,
     chrome,
     docLinks,
-    actions: { isEarsEnabled },
+    actions: { isEarsEnabled, isEarsExperimentalEnabled },
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -115,11 +116,15 @@ const ActionsConnectorsList = ({
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
   const isDisabledEarsConnector = useCallback(
-    (item: ActionConnectorTableItem | ActionConnector) =>
-      !isEarsEnabled &&
-      'config' in item &&
-      (item.config as Record<string, unknown>)?.authType === 'ears',
-    [isEarsEnabled]
+    (item: ActionConnectorTableItem | ActionConnector) => {
+      if (!('config' in item) || (item.config as Record<string, unknown>)?.authType !== 'ears') {
+        return false;
+      }
+      if (!isEarsEnabled) return true;
+      if (isEarsExperimentalConnector(item.actionTypeId) && !isEarsExperimentalEnabled) return true;
+      return false;
+    },
+    [isEarsEnabled, isEarsExperimentalEnabled]
   );
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);

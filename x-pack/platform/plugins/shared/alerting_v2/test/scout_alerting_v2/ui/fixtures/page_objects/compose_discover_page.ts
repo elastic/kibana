@@ -33,6 +33,9 @@ export class ComposeDiscoverPage {
   public readonly sandboxApplyButton: Locator;
   public readonly sandboxTimeFieldSelector: Locator;
   public readonly ruleNameInput: Locator;
+  public readonly addRunbookButton: Locator;
+  public readonly relatedDashboardsSelector: Locator;
+  public readonly relatedDashboardsInput: Locator;
   public readonly createRulePopoverButton: Locator;
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
@@ -56,6 +59,11 @@ export class ComposeDiscoverPage {
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
+    this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
+    this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
+    this.relatedDashboardsInput = this.flyout.locator(
+      'input[placeholder="Link related dashboards for investigation"]'
+    );
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
@@ -104,5 +112,13 @@ export class ComposeDiscoverPage {
 
   async setRuleName(name: string) {
     await this.ruleNameInput.fill(name);
+  }
+
+  async addRunbook(text: string) {
+    await this.addRunbookButton.click();
+
+    const runbookModal = this.page.getByRole('dialog', { name: 'Add Runbook' });
+    await runbookModal.getByLabel('Runbook').fill(text);
+    await runbookModal.getByRole('button', { name: 'Add Runbook' }).click();
   }
 }

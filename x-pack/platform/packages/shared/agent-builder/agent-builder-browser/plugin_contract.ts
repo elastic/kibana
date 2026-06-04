@@ -6,7 +6,11 @@
  */
 
 import type { ComponentType } from 'react';
-import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentInput,
+  ConversationAttachment,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
@@ -72,7 +76,7 @@ export interface EmbeddableConversationProps {
    * Content will be fetched when starting a new conversation round.
    * It will be appended only if it has changed since previous conversation round.
    */
-  attachments?: AttachmentInput[];
+  attachments?: ConversationAttachment[];
 
   /**
    * Browser API tools that the agent can use to interact with the page.

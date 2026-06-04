@@ -45,7 +45,8 @@ export const getPrebuiltRuleBaseVersionHandler = async (
       throw new Error(`Cannot find rule with id: ${id}`);
     }
 
-    const [baseRule] = await ruleAssetsClient.fetchAssetsByVersion([currentRule]);
+    const { assets } = await ruleAssetsClient.fetchAssetsByVersion([currentRule]);
+    const [baseRule] = assets;
 
     if (!baseRule) {
       return siemResponse.error({

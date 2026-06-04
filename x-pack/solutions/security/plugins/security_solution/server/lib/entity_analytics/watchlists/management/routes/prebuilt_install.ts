@@ -47,6 +47,7 @@ export const installPrebuiltWatchlistsRoute = (
             namespace,
             soClient,
             esClient: core.elasticsearch.client.asCurrentUser,
+            internalEsClient: core.elasticsearch.client.asInternalUser,
             logger,
           });
 

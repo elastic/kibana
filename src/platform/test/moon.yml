@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/data-grid-in-table-search'
   - '@kbn/scout-info'
-  - '@kbn/esql-utils'
   - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/controls-constants'
@@ -73,6 +72,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/deeplinks-analytics'
 tags:
   - test-helper
   - package

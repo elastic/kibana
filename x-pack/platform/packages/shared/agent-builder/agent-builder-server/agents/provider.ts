@@ -42,6 +42,7 @@ import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
+import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -217,6 +218,16 @@ export interface AgentHandlerContext {
    * Sub-agent executor for spawning child agent executions.
    */
   subAgentExecutor: SubAgentExecutor;
+  /**
+   * Optional analytics surface for emitting agent-runtime events such as
+   * SkillInvoked. Provided by the plugin when telemetry is wired.
+   */
+  analyticsService?: AgentBuilderAnalytics;
+  /**
+   * Optional tracking surface for emitting agent-runtime counters such as
+   * skill-invocation counts. Provided by the plugin when telemetry is wired.
+   */
+  trackingService?: AgentBuilderTracking;
 }
 
 /**

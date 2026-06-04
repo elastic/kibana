@@ -21,12 +21,20 @@ import {
 } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
-import { isRelativeToNow, resolveInitialFocus } from './utils';
+import {
+  findCorrespondingInputPart,
+  getInputScrollLeftToCenter,
+  isRelativeToNow,
+  resolveInitialFocus,
+} from './utils';
 import { DateRangePickerAutoRefreshButton } from './date_range_picker_auto_refresh_button';
 import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
 import { inputControlTexts } from './translations';
+import { DateRangeValueDisplay } from './date_range_value_display';
+import type { RangePart } from './parse/parse_range_parts';
+import { parseDisplayParts, parseInputParts } from './parse/parse_range_parts';
 
 /**
  * The control portion of the DateRangePicker: displays a button when idle
@@ -67,6 +75,7 @@ export function DateRangePickerControl() {
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
   const wasClearedRef = useRef(false);
+  const clickedDisplayPartRef = useRef<RangePart | null>(null);
 
   /** Focus the button when transitioning from editing to idle. */
   useEffect(() => {
@@ -100,6 +109,35 @@ export function DateRangePickerControl() {
   const onButtonClick = () => {
     setIsEditing(true);
   };
+
+  const handleDisplayPartClick = (part: RangePart) => {
+    clickedDisplayPartRef.current = part;
+  };
+
+  /** Handle selecting specific parts when focusing the input */
+  useEffect(() => {
+    if (!isEditing || !inputRef.current) return;
+
+    const clickedPart = clickedDisplayPartRef.current;
+    clickedDisplayPartRef.current = null;
+
+    if (!clickedPart) return;
+
+    const inputParts = parseInputParts(text).filter((part) => part.navigable);
+    const displayParts = parseDisplayParts(displayText);
+    const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
+
+    if (target) {
+      const input = inputRef.current;
+      // Optimistic `setSelectionRange` call, might remove after testing is not needed
+      input.setSelectionRange(target.start, target.end);
+      const requestId = requestAnimationFrame(() => {
+        input.setSelectionRange(target.start, target.end);
+        input.scrollLeft = getInputScrollLeftToCenter(input, target.start, target.end);
+      });
+      return () => cancelAnimationFrame(requestId);
+    }
+  }, [displayText, inputRef, isEditing, text]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
@@ -170,6 +208,12 @@ export function DateRangePickerControl() {
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
+  const inputStyles = css`
+    &::selection {
+      color: ${euiTheme.colors.textPrimary};
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
+  `;
 
   return (
     <div
@@ -222,6 +266,7 @@ export function DateRangePickerControl() {
             onKeyDown={onInputKeyDown}
             compressed={compressed}
             placeholder={`${hintTextPrefix} "${hintText}"`}
+            css={inputStyles}
           />
         ) : (
           <EuiToolTip
@@ -235,16 +280,34 @@ export function DateRangePickerControl() {
             offset={euiTheme.base * 0.75}
           >
             <EuiFormControlButton
+              css={css`
+                /* TODO super fragile selector, we need to find out why
+                   is this <span> there at all in EuiFormControlButton */
+                .euiButtonEmpty__content > span {
+                  display: flex;
+                  flex-grow: 1;
+                  align-items: center;
+                  justify-content: space-between;
+                  gap: ${euiTheme.size.s};
+                  max-inline-size: 100%;
+                }
+              `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
               aria-label={collapsed ? displayText : undefined}
-              value={collapsed ? undefined : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
               disabled={disabled}
               compressed={compressed}
             >
+              {!collapsed && (
+                <DateRangeValueDisplay
+                  displayText={displayText}
+                  onPartClick={handleDisplayPartClick}
+                  disabled={disabled}
+                />
+              )}
               {!hideBadge && (
                 <EuiBadge data-test-subj="dateRangePickerDurationBadge">
                   {displayShortDuration ?? '--'}

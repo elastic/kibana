@@ -25,7 +25,7 @@ export {
   getBodyCompletionItems,
   shouldTriggerSuggestions,
 } from './autocomplete_utils';
-export { getLineTokens, containsUrlParams } from './tokens_utils';
+export { getLineTokens, containsUrlParams, isRequestLineStart } from './tokens_utils';
 export { getStatusCodeDecorations } from './status_code_decoration_utils';
 export {
   isMapboxVectorTile,

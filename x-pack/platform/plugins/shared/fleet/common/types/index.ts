@@ -73,6 +73,9 @@ export interface FleetConfigType {
     maxConcurrentPackageOperations?: number;
     packageUpgradeBatchSize?: number;
   };
+  packageInstallation?: {
+    maxConcurrentDatastreamOperations?: number;
+  };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
@@ -128,6 +131,7 @@ export interface FleetConfigType {
   };
   unenrollInactiveAgents?: {
     taskInterval?: string;
+    gracePeriodMs?: number;
   };
 }
 

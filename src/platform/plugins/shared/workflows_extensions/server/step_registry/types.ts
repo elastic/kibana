@@ -174,6 +174,36 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
 }
 
 /**
+ * Parameters for {@link ContextManager.callKibanaApi}.
+ *
+ * Intentionally narrow so the underlying transport (currently network `fetch`) can be swapped
+ * to an in-process implementation later without changing observable behavior or the caller API.
+ */
+export interface CallKibanaApiParams {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  /** Route path starting with `/`, e.g. `/api/cases`. Space prefix is added automatically. */
+  path: string;
+  body?: unknown;
+  query?: Record<string, string | number | boolean | undefined>;
+  /**
+   * Caller-supplied headers. Cross-cutting headers (Authorization, internal-origin marker,
+   * event-chain headers, Content-Type) are managed by the engine and cannot be overridden.
+   */
+  headers?: Record<string, string>;
+}
+
+/**
+ * Result returned by {@link ContextManager.callKibanaApi}.
+ * `body` is parsed JSON for JSON content types, a `string` for non-JSON text bodies,
+ * and a `Buffer` for binary content types. 204/304 responses yield `body: {}`.
+ */
+export interface CallKibanaApiResult<T = unknown> {
+  status: number;
+  headers: Record<string, string>;
+  body: T;
+}
+
+/**
  * Context manager for accessing step execution runtime services
  */
 export interface ContextManager {
@@ -198,6 +228,17 @@ export interface ContextManager {
    * Returns the fake request
    */
   getFakeRequest(): KibanaRequest;
+
+  /**
+   * Calls a Kibana API route on the running Kibana instance, using the workflow's fake
+   * request for authentication. Throws on non-2xx responses with an error of the form
+   * `HTTP <status>: <body>`. The implementation may evolve (e.g. move to an in-process
+   * call) but the API surface stays stable.
+   *
+   * Not supported: multipart/form-data, streaming/SSE responses, custom fetcher/TLS
+   * options. For those, use the `kibana.request` YAML step.
+   */
+  callKibanaApi<T = unknown>(params: CallKibanaApiParams): Promise<CallKibanaApiResult<T>>;
 }
 
 /**

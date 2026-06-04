@@ -81,4 +81,101 @@ describe('useAutoplayHelper', () => {
 
     expect(context.nextPage).toHaveBeenCalled();
   });
+
+  test('calls updated nextPage when page count increases before the timer fires', () => {
+    const originalNextPage = jest.fn();
+    const context = getMockedContext({
+      isFullscreen: true,
+      autoplayInterval: 1000,
+      nextPage: originalNextPage,
+    });
+
+    const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
+
+    jest.advanceTimersByTime(600);
+
+    // Simulate page addition: React re-renders, nextPageRef.current is updated synchronously
+    const updatedNextPage = jest.fn();
+    context.nextPage = updatedNextPage;
+    rerender();
+
+    // Timer does NOT restart — only 400ms remain from the original interval
+    jest.advanceTimersByTime(399);
+    expect(originalNextPage).not.toHaveBeenCalled();
+    expect(updatedNextPage).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(1); // reaches the original 1000ms mark
+    expect(originalNextPage).not.toHaveBeenCalled();
+    expect(updatedNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  test('calls updated nextPage when page count decreases before the timer fires', () => {
+    const originalNextPage = jest.fn();
+    const context = getMockedContext({
+      isFullscreen: true,
+      autoplayInterval: 1000,
+      nextPage: originalNextPage,
+    });
+
+    const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
+
+    jest.advanceTimersByTime(600);
+
+    // Simulate page removal: React re-renders, nextPageRef.current is updated synchronously
+    const updatedNextPage = jest.fn();
+    context.nextPage = updatedNextPage;
+    rerender();
+
+    // Timer does NOT restart — only 400ms remain from the original interval
+    jest.advanceTimersByTime(399);
+    expect(originalNextPage).not.toHaveBeenCalled();
+    expect(updatedNextPage).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(1); // reaches the original 1000ms mark
+    expect(originalNextPage).not.toHaveBeenCalled();
+    expect(updatedNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not call nextPage after page count changes when not in fullscreen', () => {
+    const context = getMockedContext({
+      isFullscreen: false,
+      autoplayInterval: 1000,
+    });
+
+    const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
+
+    // Simulate page added: nextPage is recreated
+    const updatedNextPage = jest.fn();
+    context.nextPage = updatedNextPage;
+    rerender();
+
+    jest.runAllTimers();
+
+    expect(updatedNextPage).not.toHaveBeenCalled();
+  });
+
+  test('starts timer with correct nextPage after entering fullscreen following page addition', () => {
+    const context = getMockedContext({
+      isFullscreen: false,
+      autoplayInterval: 1000,
+    });
+
+    const { rerender } = renderHook(useAutoplayHelper, { wrapper: getContextWrapper(context) });
+
+    // Simulate page added while not in fullscreen
+    const updatedNextPage = jest.fn();
+    context.nextPage = updatedNextPage;
+    rerender();
+
+    jest.runAllTimers();
+    expect(updatedNextPage).not.toHaveBeenCalled();
+
+    // User enters fullscreen — timer should now start with the post-addition nextPage
+    context.isFullscreen = true;
+    rerender();
+
+    jest.runAllTimers();
+
+    expect(updatedNextPage).toHaveBeenCalledTimes(1);
+  });
 });

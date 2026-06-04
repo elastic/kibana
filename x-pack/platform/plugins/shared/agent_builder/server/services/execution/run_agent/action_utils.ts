@@ -9,7 +9,6 @@ import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/m
 import { isToolMessage } from '@langchain/core/messages';
 import {
   extractTextContent,
-  extractToolCalls,
   extractToolCallsWithReasoning,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -22,7 +21,6 @@ import type {
   AgentErrorAction,
   ExecuteToolAction,
   ToolPromptAction,
-  AnswerAction,
   StructuredAnswerAction,
 } from './actions';
 import {
@@ -30,7 +28,6 @@ import {
   handoverAction,
   executeToolAction,
   toolPromptAction,
-  answerAction,
   errorAction,
   structuredAnswerAction,
 } from './actions';
@@ -121,56 +118,20 @@ export const processToolNodeResponse = (
   return actions;
 };
 
-export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | AgentErrorAction => {
-  // The answering agent should not call tools. Some models/providers can still emit tool calls
-  // unexpectedly, so we treat that as a recoverable error and retry with an explicit tool-result
-  // error message in the prompt history.
-  if (message.tool_calls?.length) {
-    const [firstToolCall] = extractToolCalls(message);
-    const toolName = firstToolCall?.toolName ?? 'unknown';
-    const toolArgs = firstToolCall?.args ?? {};
-
+export const processStructuredAnswerResponse = (
+  response: unknown
+): StructuredAnswerAction | AgentErrorAction => {
+  try {
+    if (response && typeof response === 'object') {
+      return structuredAnswerAction(response);
+    }
     return errorAction(
       createAgentExecutionError(
-        `Answer agent attempted to call tool "${toolName}"`,
-        AgentExecutionErrorCode.toolNotFound,
-        { toolName, toolArgs }
-      )
-    );
-  }
-
-  const textContent = extractTextContent(message);
-  if (textContent) {
-    return answerAction(extractTextContent(message));
-  } else {
-    return errorAction(
-      createAgentExecutionError(
-        'agent returned an empty response',
+        'agent returned an invalid structured response',
         AgentExecutionErrorCode.emptyResponse,
         {}
       )
     );
-  }
-};
-
-export const processStructuredAnswerResponse = (
-  response: unknown
-): StructuredAnswerAction | AnswerAction | AgentErrorAction => {
-  try {
-    if (response && typeof response === 'object') {
-      const action = structuredAnswerAction(response);
-      return action;
-    } else if (typeof response === 'string') {
-      return answerAction(response);
-    } else {
-      return errorAction(
-        createAgentExecutionError(
-          'agent returned an invalid structured response',
-          AgentExecutionErrorCode.emptyResponse,
-          {}
-        )
-      );
-    }
   } catch (error) {
     return errorAction(
       createAgentExecutionError(

@@ -9,6 +9,7 @@ import type { RenameFieldsAndRemoveAction } from '../utils';
 import type {
   GrokProcessor,
   DissectProcessor,
+  UriPartsProcessor,
   DateProcessor,
   RenameProcessor,
   SetProcessor,
@@ -47,6 +48,12 @@ export type IngestPipelineGrokProcessor = RenameFieldsAndRemoveAction<
 export type IngestPipelineDissectProcessor = RenameFieldsAndRemoveAction<
   DissectProcessor,
   { from: 'field'; where: 'if' }
+>;
+
+// URI parts
+export type IngestPipelineUriPartsProcessor = RenameFieldsAndRemoveAction<
+  UriPartsProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
 // Date
@@ -192,6 +199,7 @@ export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveA
 export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
+  | IngestPipelineUriPartsProcessor
   | IngestPipelineDateProcessor
   | IngestPipelineDropProcessor
   | IngestPipelineMathProcessor

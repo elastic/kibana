@@ -18,6 +18,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
+import { createEntitySourcesService } from '../../../entity_sources/entity_sources_service';
 import {
   WatchlistEntitySourceClient,
   getStreamPatternFor,
@@ -77,6 +78,27 @@ export const createEntitySourceRoute = (
               esClient: core.elasticsearch.client.asCurrentUser,
             });
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
+
+            // Fire-and-forget sync after new source is linked
+            void (async () => {
+              try {
+                const entitySourcesService = createEntitySourcesService({
+                  esClient: core.elasticsearch.client.asCurrentUser,
+                  soClient: getRequestSavedObjectClient(core),
+                  logger,
+                  namespace,
+                });
+                await entitySourcesService.syncWatchlist(request.params.watchlist_id);
+                logger.info(
+                  `[WatchlistEntitySourceCreate] Background sync completed for watchlist ${request.params.watchlist_id}`
+                );
+              } catch (syncError) {
+                const errorMsg = syncError instanceof Error ? syncError.message : String(syncError);
+                logger.warn(
+                  `[WatchlistEntitySourceCreate] Background sync failed for watchlist ${request.params.watchlist_id}: ${errorMsg}`
+                );
+              }
+            })();
 
             return response.ok({ body });
           } catch (e) {

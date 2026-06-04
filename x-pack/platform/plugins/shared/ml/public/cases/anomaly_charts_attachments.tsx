@@ -14,12 +14,13 @@ import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { transformTimeRangeOut } from '@kbn/presentation-publishing';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList, htmlIdGenerator } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { AnomalyChartsAttachmentData } from '../../common/util/cases_utils';
 import { LazyAnomalyChartsContainer } from '../embeddables/anomaly_charts/lazy_anomaly_charts_container';
 import { initializeAnomalyChartsControls } from '../embeddables/anomaly_charts/initialize_anomaly_charts_controls';
 import type {
@@ -27,6 +28,8 @@ import type {
   AnomalyChartsAttachmentState,
   AnomalyChartsAttachmentApi,
 } from '../embeddables';
+
+type AnomalyChartsViewProps = UnifiedValueAttachmentViewProps<AnomalyChartsAttachmentData>;
 
 interface AnomalyChartsCaseAttachmentProps extends AnomalyChartsAttachmentState {
   services: AnomalyChartsEmbeddableServices;
@@ -96,8 +99,8 @@ function isValidTimeRange(arg: unknown): arg is TimeRange {
 export const initializeAnomalyChartsAttachment = memoize(
   (fieldFormats: FieldFormatsStart, services: AnomalyChartsEmbeddableServices) => {
     return React.memo(
-      (props: UnifiedValueAttachmentViewProps) => {
-        const attachmentState = props.data.state as Record<string, unknown>;
+      (props: AnomalyChartsViewProps) => {
+        const attachmentState = props.data.state;
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
@@ -128,9 +131,9 @@ export const initializeAnomalyChartsAttachment = memoize(
                   defaultMessage="Time range"
                 />
               ),
-              description: `${dataFormatter.convert(
+              description: `${dataFormatter.convertToText(
                 inputProps.time_range.from
-              )} - ${dataFormatter.convert(inputProps.time_range.to)}`,
+              )} - ${dataFormatter.convertToText(inputProps.time_range.to)}`,
             });
           }
 

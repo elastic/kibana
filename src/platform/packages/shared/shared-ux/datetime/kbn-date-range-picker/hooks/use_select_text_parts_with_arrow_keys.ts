@@ -10,6 +10,8 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { keys } from '@elastic/eui';
 
+import { getInputScrollLeftToCenter } from '../utils';
+
 // Matches text parts separated by spaces, commas, or colons
 // e.g. "Dec 29, 14:30 to now" => ["Dec", "29", "14", "30", "to", "now"]
 const TEXT_PARTS_REGEX = /[^\s,:]+/g;
@@ -100,7 +102,7 @@ export function useSelectTextPartsWithArrowKeys({
 
       inputEl.focus();
       inputEl.setSelectionRange(part.start, part.end);
-      inputEl.scrollLeft = getInputScrollPositionFromStart(inputEl, part.start);
+      inputEl.scrollLeft = getInputScrollLeftToCenter(inputEl, part.start);
     };
 
     const modifyPart = (action: 'increase' | 'decrease') => {
@@ -214,25 +216,4 @@ function getTextParts(value: string): TextPart[] {
     start: match.index,
     end: match.index + match[0].length,
   }));
-}
-
-/**
- * Computes the scroll position needed to center a given caret position within a text input.
- * Uses Canvas text measurement to avoid DOM manipulation and layout thrashing.
- * @param input - The input element to measure
- * @param start - The character index to center on
- * @returns The `scrollLeft` value to apply, or `0` if the input is not scrollable
- */
-function getInputScrollPositionFromStart(input: HTMLInputElement, start: number): number {
-  if (input.scrollWidth <= input.clientWidth) return 0;
-
-  const textBeforeCaret = input.value.substring(0, start);
-  const style = window.getComputedStyle(input);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d')!;
-  ctx.font = style.font;
-  const textWidth = ctx.measureText(textBeforeCaret).width;
-  const offset = parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
-
-  return textWidth + offset - input.clientWidth / 2;
 }

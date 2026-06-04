@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/263863
+test.describe.skip(
   'Infrastructure Inventory - Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

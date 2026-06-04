@@ -83,8 +83,9 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
-  const { supports } = useContentListConfig();
+  const { features, supports } = useContentListConfig();
   const { tags: hasTags, starred: hasStarred, userProfiles: hasCreatedBy } = supports;
+  const toolbarFilters = features.toolbarFilters;
 
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
@@ -94,8 +95,27 @@ export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
     const parts = parseFilterParts(children);
     const context: FilterContext = { hasSorting, hasTags, hasStarred, hasCreatedBy };
 
-    return parts
-      .map((part) => filter.resolve(part, context))
-      .filter((f): f is SearchFilterConfig => f !== undefined);
-  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy]);
+    const resolvedParts = parts
+      .map((part) => ({ part, filterConfig: filter.resolve(part, context) }))
+      .filter(
+        (entry): entry is { part: ParsedPart; filterConfig: SearchFilterConfig } =>
+          entry.filterConfig !== undefined
+      );
+    // `toolbarFilters` is typed `Record<string, unknown>` in the base provider
+    // package to keep `@elastic/eui` out of its public types; the client
+    // provider always populates entries as {@link SearchFilterConfig}, so we
+    // narrow them at the consumption site.
+    const customFilters = Object.values(toolbarFilters ?? {}) as SearchFilterConfig[];
+    if (parts === DEFAULT_PARTS) {
+      const sortIndex = resolvedParts.findIndex((entry) => entry.part.preset === 'sort');
+      if (sortIndex >= 0) {
+        return [
+          ...resolvedParts.slice(0, sortIndex).map(({ filterConfig }) => filterConfig),
+          ...customFilters,
+          ...resolvedParts.slice(sortIndex).map(({ filterConfig }) => filterConfig),
+        ];
+      }
+    }
+    return [...resolvedParts.map(({ filterConfig }) => filterConfig), ...customFilters];
+  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy, toolbarFilters]);
 };

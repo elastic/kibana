@@ -355,6 +355,7 @@ export const schema = Joi.object()
           })
           .default(['superuser']),
         disableTestUser: Joi.boolean(),
+        cookieLogin: Joi.boolean().default(true),
       })
       .default(),
 

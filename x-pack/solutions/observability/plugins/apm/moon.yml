@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-presentation-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
+  - '@kbn/synthtrace'
   - '@kbn/apm-embeddable-common'
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -165,6 +166,7 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/ebt-click'
   - '@kbn/apm-types-shared'
+  - '@kbn/apm-common'
   - '@kbn/storybook'
 tags:
   - plugin
@@ -182,6 +184,7 @@ fileGroups:
     - jest.config.js
     - public/**/*.json
     - server/**/*.json
+    - test/scenarios/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

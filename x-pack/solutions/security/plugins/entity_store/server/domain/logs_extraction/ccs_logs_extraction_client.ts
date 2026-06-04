@@ -35,7 +35,11 @@ import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
-import { capExtractionWindowEnd, resolveCcsExtractionWindow } from './extraction_window';
+import {
+  applyMaxLagCutoff,
+  capExtractionWindowEnd,
+  resolveCcsExtractionWindow,
+} from './extraction_window';
 import { capAtMaxLogsPerWindow } from './effective_page_limits';
 
 interface CcsExtractToUpdatesParams {
@@ -45,6 +49,7 @@ interface CcsExtractToUpdatesParams {
   maxLogsPerPage: number;
   lookbackPeriod: string;
   delay: string;
+  frequency: string;
   entityDefinition: ManagedEntityDefinition;
   abortController?: AbortController;
   /** Explicit time window override (API calls). When set, the internal checkpoint is not updated. */
@@ -94,6 +99,7 @@ export class CcsLogsExtractionClient {
     maxLogsPerPage,
     lookbackPeriod,
     delay,
+    frequency,
     entityDefinition,
     abortController,
     windowOverride,
@@ -106,13 +112,27 @@ export class CcsLogsExtractionClient {
         ? { checkpointTimestamp: null, paginationRecoveryId: null }
         : await this.ccsStateClient.findOrInit(type);
 
-    const { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
-      resolveCcsExtractionWindow({
-        config: { lookbackPeriod, delay },
-        ccsState,
-        windowOverride,
-        logger: this.logger,
-      });
+    const {
+      effectiveFromDateISO: resolvedFromDateISO,
+      effectiveWindowEnd,
+      recoveryId,
+      isWindowOverride,
+    } = resolveCcsExtractionWindow({
+      config: { lookbackPeriod, delay },
+      ccsState,
+      windowOverride,
+      logger: this.logger,
+    });
+
+    const effectiveFromDateISO = isWindowOverride
+      ? resolvedFromDateISO
+      : applyMaxLagCutoff({
+          fromDateISO: resolvedFromDateISO,
+          effectiveWindowEnd,
+          lookbackPeriod,
+          frequency,
+          logger: this.logger,
+        });
 
     if (effectiveFromDateISO >= effectiveWindowEnd) {
       this.logger.error(
@@ -381,16 +401,14 @@ export class CcsLogsExtractionClient {
     maxLogsPerPage: number;
     abortController?: AbortController;
   }): Promise<LogPaginationCursor> {
-    const probeQuery =
-      `SET unmapped_fields="nullify";\n` +
-      buildLogPaginationCursorProbeEsql({
-        indexPatterns: remoteIndexPatterns,
-        type,
-        fromDateISO,
-        toDateISO,
-        logsPageCursorStart: sliceStart,
-        maxLogsPerPage,
-      });
+    const probeQuery = buildLogPaginationCursorProbeEsql({
+      indexPatterns: remoteIndexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart: sliceStart,
+      maxLogsPerPage,
+    });
 
     this.logger.info(
       `CCS probe: from=${fromDateISO} to=${toDateISO}${
@@ -498,6 +516,7 @@ export class CcsLogsExtractionClient {
           abortController,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
           transformDocument: this.buildTransformDocument(type),
+          refresh: false,
         });
       }
 

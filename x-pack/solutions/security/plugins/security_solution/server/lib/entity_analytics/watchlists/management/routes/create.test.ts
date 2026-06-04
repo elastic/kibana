@@ -19,6 +19,7 @@ import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 const mockWatchlistCreate = jest.fn();
 const mockWatchlistDelete = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
+const mockSyncWatchlist = jest.fn();
 
 jest.mock('../watchlist_config', () => ({
   WatchlistConfigClient: jest.fn().mockImplementation(() => ({
@@ -31,6 +32,11 @@ jest.mock('../watchlist_config', () => ({
 jest.mock('../../entity_sources/infra/entity_source_client');
 jest.mock('../../shared/utils', () => ({
   getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
+}));
+jest.mock('../../entity_sources/entity_sources_service', () => ({
+  createEntitySourcesService: jest.fn(() => ({
+    syncWatchlist: mockSyncWatchlist,
+  })),
 }));
 
 const { mockCreateEntitySource } = jest.requireMock(
@@ -59,6 +65,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     mockWatchlistDelete.mockReset();
     mockAddEntitySourceReference.mockReset();
     mockCreateEntitySource.mockReset();
+    mockSyncWatchlist.mockReset();
 
     reportEBT = jest.fn();
     telemetrySenderMock = {
@@ -299,6 +306,65 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
           error: 'Watchlist creation succeeded but no ID was returned',
         })
       );
+    });
+
+    it('triggers background sync when entity sources are created', async () => {
+      const watchlistResult = {
+        id: 'wl-1',
+        name: 'test-watchlist',
+        description: 'A test watchlist',
+        riskModifier: 10,
+      };
+      const entitySourceResult = { id: 'es-1', ...entitySourceInputA };
+
+      mockWatchlistCreate.mockResolvedValue(watchlistResult);
+      mockCreateEntitySource.mockResolvedValue(entitySourceResult);
+      mockAddEntitySourceReference.mockResolvedValue(undefined);
+      mockSyncWatchlist.mockResolvedValue(undefined);
+
+      const request = buildRequest({ entitySources: [entitySourceInputA] });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(mockSyncWatchlist).toHaveBeenCalledWith('wl-1');
+    });
+
+    it('logs warning when background sync fails', async () => {
+      const watchlistResult = {
+        id: 'wl-1',
+        name: 'test-watchlist',
+        description: 'A test watchlist',
+        riskModifier: 10,
+      };
+      const entitySourceResult = { id: 'es-1', ...entitySourceInputA };
+
+      mockWatchlistCreate.mockResolvedValue(watchlistResult);
+      mockCreateEntitySource.mockResolvedValue(entitySourceResult);
+      mockAddEntitySourceReference.mockResolvedValue(undefined);
+      mockSyncWatchlist.mockRejectedValue(new Error('sync failed'));
+
+      const request = buildRequest({ entitySources: [entitySourceInputA] });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(mockSyncWatchlist).toHaveBeenCalledWith('wl-1');
+    });
+
+    it('does not trigger sync when no entity sources created', async () => {
+      const watchlistResult = {
+        id: 'wl-1',
+        name: 'test-watchlist',
+        description: 'A test watchlist',
+        riskModifier: 10,
+      };
+
+      mockWatchlistCreate.mockResolvedValue(watchlistResult);
+
+      const request = buildRequest();
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(mockSyncWatchlist).not.toHaveBeenCalled();
     });
   });
 

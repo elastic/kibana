@@ -137,6 +137,7 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
       uiActions,
       fieldFormats,
       fileUpload,
+      kql,
     });
 
     const variablesService = new EsqlVariablesService();

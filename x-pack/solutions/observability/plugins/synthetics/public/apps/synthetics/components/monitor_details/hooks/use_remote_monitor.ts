@@ -7,7 +7,7 @@
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import {
   ConfigKey,
   type MonitorTypeEnum,
@@ -85,7 +85,7 @@ export const useRemoteMonitor = ({
 
   // Empty index short-circuits useEsSearch internally (its useFetcher guards on
   // params.index truthiness), so the query is only issued when remoteName is set.
-  const index = remoteName ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : '';
+  const index = remoteName ? getSyntheticsCcsIndex(remoteName) : '';
 
   const { data, loading, error } = useEsSearch(
     {

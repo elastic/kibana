@@ -1434,6 +1434,36 @@ Object {
       },
       "type": "object",
     },
+    "form_data": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "content": Object {
+            "type": "string",
+          },
+          "content_type": Object {
+            "type": "string",
+          },
+          "encoding": Object {
+            "enum": Array [
+              "utf8",
+              "base64",
+            ],
+            "type": "string",
+          },
+          "filename": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "content",
+        ],
+        "type": "object",
+      },
+      "propertyNames": Object {
+        "type": "string",
+      },
+      "type": "object",
+    },
     "headers": Object {
       "additionalProperties": Object {
         "type": "string",
@@ -1531,6 +1561,36 @@ Object {
         "skip_ssl_verification": Object {
           "type": "boolean",
         },
+      },
+      "type": "object",
+    },
+    "form_data": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "content": Object {
+            "type": "string",
+          },
+          "content_type": Object {
+            "type": "string",
+          },
+          "encoding": Object {
+            "enum": Array [
+              "utf8",
+              "base64",
+            ],
+            "type": "string",
+          },
+          "filename": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "content",
+        ],
+        "type": "object",
+      },
+      "propertyNames": Object {
+        "type": "string",
       },
       "type": "object",
     },

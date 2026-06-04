@@ -6,10 +6,13 @@
  */
 
 import { alertComment, eventComment, basicCase, basicComment } from '../../../containers/mock';
-import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { getManualAlertIds } from '../../../../common/utils/attachments/manual_alert_ids';
-import { filterCaseAttachmentsBySearchTerm } from './helpers';
+import { filterCaseAttachmentsBySearchTerm, getAttachmentItemCount } from './helpers';
 
 const comment = {
   ...alertComment,
@@ -43,6 +46,61 @@ const unifiedAlertComment = {
 };
 
 describe('Case view helpers', () => {
+  describe('getAttachmentItemCount', () => {
+    it('counts a legacy alert with a single id as 1', () => {
+      expect(getAttachmentItemCount(alertComment)).toBe(1);
+    });
+
+    it('counts a legacy alert with an array of ids by length', () => {
+      const bulk = {
+        ...alertComment,
+        alertId: ['a-1', 'a-2', 'a-3'],
+        index: ['i-1', 'i-2', 'i-3'],
+      };
+      expect(getAttachmentItemCount(bulk)).toBe(3);
+    });
+
+    it('counts a legacy event with a single id as 1', () => {
+      expect(getAttachmentItemCount(eventComment)).toBe(1);
+    });
+
+    it('counts a legacy event with an array of ids by length', () => {
+      const bulk = { ...eventComment, eventId: ['e-1', 'e-2'], index: ['i-1', 'i-2'] };
+      expect(getAttachmentItemCount(bulk)).toBe(2);
+    });
+
+    it('counts a unified alert with a single attachmentId as 1', () => {
+      expect(getAttachmentItemCount(unifiedAlertComment as unknown as AttachmentUIV2)).toBe(1);
+    });
+
+    it('counts a unified alert with an array of attachmentIds by length', () => {
+      const bulk = { ...unifiedAlertComment, attachmentId: ['ua-1', 'ua-2', 'ua-3', 'ua-4'] };
+      expect(getAttachmentItemCount(bulk as unknown as AttachmentUIV2)).toBe(4);
+    });
+
+    it('counts a unified event with an array of attachmentIds by length', () => {
+      const unifiedEvent = {
+        ...unifiedAlertComment,
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        attachmentId: ['ue-1', 'ue-2'],
+      };
+      expect(getAttachmentItemCount(unifiedEvent as unknown as AttachmentUIV2)).toBe(2);
+    });
+
+    it('counts other unified reference attachments (e.g. files) as the length of attachmentId', () => {
+      const fileComment = {
+        ...unifiedAlertComment,
+        type: 'file',
+        attachmentId: 'file-so-1',
+      };
+      expect(getAttachmentItemCount(fileComment as unknown as AttachmentUIV2)).toBe(1);
+    });
+
+    it('counts a basic user comment as 1', () => {
+      expect(getAttachmentItemCount(basicComment as unknown as AttachmentUIV2)).toBe(1);
+    });
+  });
+
   describe('getManualAlertIds', () => {
     it('returns the alert ids', () => {
       const result = getManualAlertIds([comment, comment2]);

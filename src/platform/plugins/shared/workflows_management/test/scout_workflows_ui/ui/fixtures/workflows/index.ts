@@ -12,6 +12,7 @@ export { getCreateGetUpdateCaseWorkflowYaml } from './create_get_update_case';
 export {
   getListTestWorkflowYaml,
   getTestRunWorkflowYaml,
+  getTestRunEventTabWorkflowYaml,
   getWorkflowWithLoopYaml,
   getIterationLoopWorkflowYaml,
   getManyIterationsWorkflowYaml,

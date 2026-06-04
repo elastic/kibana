@@ -11,7 +11,7 @@ import type { IconType } from '@elastic/eui';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
+
 import { useMemo } from 'react';
 
 export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
@@ -19,10 +19,7 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
     container: CanAddNewPanel,
     savedObject: SavedObjectCommon<TSavedObjectAttributes>
   ) => void;
-  savedObjectMetaData: SavedObjectMetaData & {
-    /* If the saved object is not in content management, provide a getter for it */
-    getSavedObjects?: (search?: SearchQuery) => Promise<SavedObjectCommon<FinderAttributes>[]>;
-  };
+  savedObjectMetaData: SavedObjectMetaData;
 };
 
 const registry: Map<string, RegistryItem<any>> = new Map();
@@ -38,7 +35,6 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   getIconForSavedObject,
   getSavedObjectSubType,
   getTooltipForSavedObject,
-  getSavedObjects,
 }: {
   onAdd: RegistryItem['onAdd'];
   savedObjectType: string;
@@ -46,7 +42,6 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   getIconForSavedObject: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => IconType;
   getSavedObjectSubType?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
   getTooltipForSavedObject?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
-  getSavedObjects?: RegistryItem['savedObjectMetaData']['getSavedObjects'];
 }) => {
   if (registry.has(savedObjectType)) {
     throw new Error(
@@ -57,7 +52,6 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   registry.set(savedObjectType, {
     onAdd,
     savedObjectMetaData: {
-      getSavedObjects,
       name: savedObjectName,
       type: savedObjectType,
       getIconForSavedObject,

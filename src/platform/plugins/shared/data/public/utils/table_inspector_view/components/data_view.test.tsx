@@ -28,7 +28,7 @@ describe('Inspector Data View', () => {
       uiActions: {} as any,
       uiSettings: { get: (key: string, value: string) => value } as any,
       fieldFormats: {
-        deserialize: jest.fn().mockReturnValue({ convert: (v: string) => v }),
+        deserialize: jest.fn().mockReturnValue({ convertToText: (v: string) => v }),
       } as any,
       isFilterable: jest.fn(),
     }));

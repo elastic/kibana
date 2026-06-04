@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetCompositeSLOResponse } from '@kbn/slo-schema';
+import type { CompositeSLOSummaryResponse } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { sloKeys } from './query_key_factory';
@@ -30,10 +30,10 @@ export function useFetchCompositeSloDetails(ids: string[]) {
   });
 
   const detailsById = useMemo(() => {
-    const map = new Map<string, GetCompositeSLOResponse>();
+    const map = new Map<string, CompositeSLOSummaryResponse>();
     if (data) {
       for (const item of data) {
-        map.set(item.id, item as GetCompositeSLOResponse);
+        map.set(item.id, item as CompositeSLOSummaryResponse);
       }
     }
     return map;

@@ -25,3 +25,9 @@ export {
 } from './repositories/step_execution_repository';
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
+
+export type {
+  GetManagedWorkflowStatusOptions,
+  ManagedWorkflowStatus,
+  ManagedWorkflowStatusReport,
+} from './types';

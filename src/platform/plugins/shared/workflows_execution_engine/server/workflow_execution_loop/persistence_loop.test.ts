@@ -69,6 +69,22 @@ describe('persistenceLoop', () => {
     await expect(loopPromise).resolves.toBeUndefined();
   });
 
+  it('passes the task abort signal to workflow log flushes', async () => {
+    const abortController = new AbortController();
+    const params = makeParams({ status: ExecutionStatus.RUNNING });
+
+    const loopPromise = persistenceLoop(params, abortController.signal);
+
+    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+      signal: params.taskAbortController.signal,
+    });
+
+    abortController.abort();
+    jest.advanceTimersByTime(500);
+
+    await expect(loopPromise).resolves.toBeUndefined();
+  });
+
   it('does not cause an unhandled rejection when abort fires during flushState', async () => {
     // This is the core regression test for the crash:
     // If persistenceAbortController.abort() fires while `await flushState()` is running

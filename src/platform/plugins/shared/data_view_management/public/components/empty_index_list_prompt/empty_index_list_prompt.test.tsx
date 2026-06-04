@@ -34,6 +34,22 @@ describe('EmptyIndexListPrompt', () => {
     expect(refreshButton).toBeInTheDocument();
   });
 
+  it('hides create anyway link when canSaveIndexPattern is false', () => {
+    render(
+      <I18nProvider>
+        <EmptyIndexListPrompt
+          onRefresh={jest.fn()}
+          createAnyway={jest.fn()}
+          addDataUrl={'http://elastic.co'}
+          navigateToApp={jest.fn()}
+          canSaveIndexPattern={false}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('createAnyway')).not.toBeInTheDocument();
+  });
+
   it('calls onRefresh when refresh button is clicked', async () => {
     const onRefresh = jest.fn();
     render(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
@@ -22,7 +22,7 @@ export interface EditTemplatePageProps {}
 
 export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { templateId } = useTemplateViewParams();
-  const { data: template, isLoading } = useGetTemplate(templateId);
+  const { data: template } = useGetTemplate(templateId);
   const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
@@ -41,16 +41,6 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
     },
   });
 
-  useEffect(() => {
-    if (!template) {
-      return;
-    }
-
-    form.reset({
-      definition: template.definitionString.trimEnd(),
-    });
-  }, [form, template]);
-
   const handleSave = useCallback(
     async (data: YamlEditorFormValues, isEnabled: boolean) => {
       if (!templateId) {
@@ -68,7 +58,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
     [mutateAsync, navigateToCasesTemplates, templateId]
   );
 
-  if (isLoading && !template) {
+  if (!template) {
     return null;
   }
 

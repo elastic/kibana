@@ -16,6 +16,8 @@ import {
   type StreamQuery,
 } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
+import type { Discovery } from '../../sig_events/discoveries';
+import type { SigEvent } from '../../sig_events/events';
 
 /**
  * SignificantEvents Get Response
@@ -123,6 +125,20 @@ type SignificantEventsQueriesGenerationTaskResult =
       status: TaskStatus.Completed | TaskStatus.Acknowledged;
     } & SignificantEventsQueriesGenerationResult);
 
+interface LifecycleDetection {
+  detection_id: string;
+  rule_name?: string;
+  stream_name?: string;
+  change_point_type?: string;
+  detected_at: string;
+}
+
+interface EventLifecycleResponse {
+  detections: LifecycleDetection[];
+  discoveries: Discovery[];
+  events: SigEvent[];
+}
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
@@ -131,4 +147,6 @@ export type {
   SignificantEventsGenerateResponse,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 };

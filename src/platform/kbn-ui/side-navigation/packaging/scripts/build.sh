@@ -3,6 +3,7 @@
 # Build script for @kbn/ui-side-navigation standalone package.
 #
 # Steps:
+#   0. Build kbn-ui dependencies if their targets are missing.
 #   1. Validate types (packaging types match source types).
 #   2. Bundle via webpack (source + aliases -> single JS file).
 #   3. Generate TypeScript declarations from the standalone types.
@@ -21,6 +22,26 @@ KIBANA_ROOT="$(cd "$KBN_UI_ROOT/../../.." && pwd)"
 TOOLING_DIR="$KBN_UI_ROOT/_tooling"
 TARGET_DIR="${BUILD_OUTPUT_DIR:-$NAV_ROOT/target}"
 KBN_BIN="$KIBANA_ROOT/node_modules/.bin"
+
+echo "==> Step 0: Dependencies"
+if [[ ! -f "$KBN_UI_ROOT/chrome-layout-constants/target/index.js" ]]; then
+  echo "    Building @kbn/ui-chrome-layout-constants (missing target)..."
+  bash "$KBN_UI_ROOT/chrome-layout-constants/packaging/scripts/build.sh"
+else
+  echo "    @kbn/ui-chrome-layout-constants target OK"
+fi
+if [[ ! -f "$KBN_UI_ROOT/chrome-layout-utils/target/index.js" ]]; then
+  echo "    Building @kbn/ui-chrome-layout-utils (missing target)..."
+  bash "$KBN_UI_ROOT/chrome-layout-utils/packaging/scripts/build.sh"
+else
+  echo "    @kbn/ui-chrome-layout-utils target OK"
+fi
+if [[ ! -f "$KBN_UI_ROOT/chrome-layout/target/index.js" ]]; then
+  echo "    Building @kbn/ui-chrome-layout (missing target)..."
+  bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
+else
+  echo "    @kbn/ui-chrome-layout target OK"
+fi
 
 echo "==> Step 1: Type validation"
 "$KBN_BIN/tsc" --project "$PACKAGING_DIR/tsconfig.json" --noEmit

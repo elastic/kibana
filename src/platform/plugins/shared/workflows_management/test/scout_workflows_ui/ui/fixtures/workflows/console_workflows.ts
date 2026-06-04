@@ -54,6 +54,22 @@ steps:
 `;
 
 /**
+ * Workflow with an event-driven trigger so the Run/Test modal shows the Event tab.
+ */
+export const getTestRunEventTabWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: false
+description: Workflow with workflows.failed trigger for Event tab scout test
+triggers:
+  - type: workflows.failed
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "Test run: {{ execution.isTestRun }}"
+`;
+
+/**
  * Workflow with a foreach loop (4 items) and a nested console step.
  * Used for individual step run and context override tests.
  */

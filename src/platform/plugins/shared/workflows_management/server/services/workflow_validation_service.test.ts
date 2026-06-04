@@ -33,6 +33,27 @@ const makeDeps = (
 };
 
 describe('WorkflowValidationService', () => {
+  describe('getRegisteredCustomTriggerDefinitions', () => {
+    it('returns triggers from workflows extensions', () => {
+      const { deps } = makeDeps([{ id: 'cases.caseUpdated' }]);
+      const service = new WorkflowValidationService(deps);
+
+      expect(service.getRegisteredCustomTriggerDefinitions()).toEqual([
+        { id: 'cases.caseUpdated' },
+      ]);
+    });
+
+    it('returns an empty array when workflows extensions is not available', () => {
+      const { deps } = makeDeps();
+      const service = new WorkflowValidationService({
+        ...deps,
+        workflowsExtensions: undefined,
+      });
+
+      expect(service.getRegisteredCustomTriggerDefinitions()).toEqual([]);
+    });
+  });
+
   describe('getAvailableConnectors', () => {
     it('delegates to the library helper with the plumbed clients and spaceId', async () => {
       const { deps, actionsClient, actionsClientWithRequest } = makeDeps();

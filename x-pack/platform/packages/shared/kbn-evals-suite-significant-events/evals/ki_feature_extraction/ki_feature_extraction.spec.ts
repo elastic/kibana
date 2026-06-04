@@ -118,19 +118,21 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
           await executorClient.runExperiment(
             {
-              dataset: {
-                name: `sigevents: KI feature extraction (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction across scenarios`,
-                examples: collectedExamples.map(({ scenario }) => ({
-                  id: scenario.input.scenario_id,
-                  input: {
-                    ...scenario.input,
-                    snapshot_source: scenario.snapshot_source,
-                  },
-                  output: scenario.output,
-                  metadata: scenario.metadata,
-                })),
-              },
+              datasets: [
+                {
+                  name: `sigevents: KI feature extraction (${dataset.id})`,
+                  description: `[${dataset.id}] KI feature extraction across scenarios`,
+                  examples: collectedExamples.map(({ scenario }) => ({
+                    id: scenario.input.scenario_id,
+                    input: {
+                      ...scenario.input,
+                      snapshot_source: scenario.snapshot_source,
+                    },
+                    output: scenario.output,
+                    metadata: scenario.metadata,
+                  })),
+                },
+              ],
               concurrency: 1,
               trustUpstreamDataset: TRUST_UPSTREAM,
               task: async ({ input }: { input: KIFeatureExtractionScenario['input'] }) => {

@@ -578,6 +578,7 @@ export const interactiveModeMachine = setup({
             'step.change': {
               actions: [
                 { type: 'reassignSteps' },
+                { type: 'syncToDSL' },
                 { type: 'sendStepsToSimulator', params: ({ event }) => event },
               ],
             },

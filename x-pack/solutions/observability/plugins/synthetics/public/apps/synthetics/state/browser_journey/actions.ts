@@ -11,8 +11,16 @@ import type { SyntheticsJourneyApiResponse } from '../../../../../common/runtime
 import { createAsyncAction } from '../utils/actions';
 import type { PutBlocksPayload } from './models';
 
-// This action denotes a set of blocks is required
-export const fetchBlocksAction = createAction<string[]>('[BROWSER JOURNEY] FETCH BLOCKS');
+// This action denotes a set of blocks is required. `remoteName` is the CCS
+// cluster alias of the monitor whose screenshot we're composing, when set the
+// saga will request blocks from `${remoteName}:synthetics-*`.
+export interface FetchBlocksActionPayload {
+  hashes: string[];
+  remoteName?: string;
+}
+export const fetchBlocksAction = createAction<FetchBlocksActionPayload>(
+  '[BROWSER JOURNEY] FETCH BLOCKS'
+);
 
 // This action denotes a request for a set of blocks is in flight
 export const setBlockLoadingAction = createAction<string[]>(

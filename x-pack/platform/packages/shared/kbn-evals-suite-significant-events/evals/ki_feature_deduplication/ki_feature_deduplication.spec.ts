@@ -137,18 +137,20 @@ evaluate.describe(
 
             await executorClient.runExperiment(
               {
-                dataset: {
-                  name: `sigevents: KI feature deduplication (${dataset.id})`,
-                  description: `[${dataset.id}] KI feature deduplication across scenarios`,
-                  examples: availableScenarios.map(({ scenario }) => ({
-                    id: scenario.input.scenario_id,
-                    input: {
-                      scenario_id: scenario.input.scenario_id,
-                      stream_name: MANAGED_STREAM_NAME,
-                      iterations: scenario.input.iterations,
-                    },
-                  })),
-                },
+                datasets: [
+                  {
+                    name: `sigevents: KI feature deduplication (${dataset.id})`,
+                    description: `[${dataset.id}] KI feature deduplication across scenarios`,
+                    examples: availableScenarios.map(({ scenario }) => ({
+                      id: scenario.input.scenario_id,
+                      input: {
+                        scenario_id: scenario.input.scenario_id,
+                        stream_name: MANAGED_STREAM_NAME,
+                        iterations: scenario.input.iterations,
+                      },
+                    })),
+                  },
+                ],
                 concurrency: 1,
                 task: async ({
                   input,

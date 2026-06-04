@@ -10,6 +10,7 @@ import type { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SampleDocument } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
@@ -46,6 +47,7 @@ export interface DataSourceContext {
   data: SampleDocument[];
   simulationMode: DataSourceSimulationMode;
   isDraft?: boolean;
+  isFetchingMore: boolean;
 }
 
 export type DataSourceEvent =
@@ -53,4 +55,5 @@ export type DataSourceEvent =
   | { type: 'dataSource.delete' }
   | { type: 'dataSource.refresh' }
   | { type: 'dataSource.enable' }
-  | { type: 'dataSource.disable' };
+  | { type: 'dataSource.disable' }
+  | { type: 'dataSource.fetchMore'; conditionEsql: string; processingSteps: StreamlangDSL };

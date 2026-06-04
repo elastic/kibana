@@ -118,10 +118,8 @@ export function isFormBasedLayer(
   return 'columnOrder' in layer;
 }
 
-export function isTextBasedLayer(
-  layer: LensApiConfig | DataSourceStateLayer
-): layer is TextBasedLayer {
-  return 'index' in layer && 'query' in layer;
+export function isTextBasedLayer(layer: DataSourceStateLayer): layer is TextBasedLayer {
+  return 'columns' in layer && Array.isArray(layer.columns) && 'query' in layer;
 }
 
 function sha256Sync(str: string): string {
@@ -147,7 +145,7 @@ export function generateAdHocDataViewId(
   return base;
 }
 
-function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
+export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),

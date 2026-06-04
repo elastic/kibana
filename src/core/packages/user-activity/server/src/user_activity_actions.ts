@@ -40,6 +40,36 @@ export const userActivityActions = {
     groupName: 'Authentication',
     versionAddedAt: '9.4',
   },
+  dashboard_create: {
+    description: 'User created a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_update: {
+    description: 'User updated a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_delete: {
+    description: 'User deleted a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_view: {
+    description: 'User viewed a dashboard.',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
+  dashboard_refresh: {
+    description: 'The dashboard was refreshed (either by the user or auto-refresh interval).',
+    ownerTeam: '@elastic/kibana-presentation',
+    groupName: 'Dashboard',
+    versionAddedAt: '9.5',
+  },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 
 /** Closed union derived from the keys of {@link userActivityActions}. @public */

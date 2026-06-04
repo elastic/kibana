@@ -35,7 +35,7 @@ import * as secondaryMetricInfoModule from './secondary_metric_info';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
-  return { getConverterFor: () => convertFn };
+  return { convertToText: convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);

@@ -50,6 +50,8 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
   AppMenuBar: () => <div>App menu!</div>,
   Sidebar: () => <div>Sidebar!</div>,
   useHasAppMenu: () => false,
+  useHasInlineAppHeader: () => false,
+  useHasChromeAppHeaderContent: () => false,
 }));
 
 const mockChromeVisible$ = new BehaviorSubject(false);

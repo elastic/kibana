@@ -68,6 +68,7 @@ const createStartContract = (): Start => {
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getLegacyURLTransform: jest.fn(),
     hasLegacyURLTransform: jest.fn(),
+    getSavedObjects: jest.fn(),
   };
   return startContract;
 };

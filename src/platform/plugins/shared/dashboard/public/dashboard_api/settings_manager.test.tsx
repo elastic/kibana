@@ -12,7 +12,7 @@ import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeSettingsManager } from './settings_manager';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 
 describe('initializeSettingsManager', () => {
   describe('setSettings', () => {

@@ -35,7 +35,11 @@ jest.mock('./feature_section', () => ({
   ),
 }));
 jest.mock('./default_model_section', () => ({
-  DefaultModelSection: () => <div data-test-subj="defaultModelSection">DefaultModelSection</div>,
+  DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
+    <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
+      DefaultModelSection
+    </div>
+  ),
 }));
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
@@ -124,7 +128,10 @@ describe('ModelSettings', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToUrl: mockNavigateToUrl },
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: { advancedSettings: { save: true } },
+        },
         http: { basePath: mockBasePath },
       },
     });
@@ -621,6 +628,71 @@ describe('ModelSettings', () => {
       );
 
       expect(screen.queryByTestId('featureSection-Search')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Advanced Settings permission', () => {
+    it('does not show the permission callout when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('noAdvancedSettingsPermissionCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the permission callout when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('noAdvancedSettingsPermissionCallout')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('noAdvancedSettingsPermissionCalloutDescription')
+      ).toHaveTextContent(/Advanced Settings: All privilege/);
+    });
+
+    it('passes disabled={true} to DefaultModelSection when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'true');
+    });
+
+    it('passes disabled={false} to DefaultModelSection when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'false');
     });
   });
 });

@@ -32,7 +32,6 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
@@ -41,7 +40,6 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
 import {
   filterAlertsFromIndexPatterns,
@@ -58,23 +56,10 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const {
-    indicesExist: oldIndicesExist,
-    sourcererDataView: oldSourcererDataViewSpec,
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView();
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView();
+  const selectedPatterns = useSelectedPatterns();
+  const indicesExist = !!dataView.matchedIndices?.length;
 
   // Keep-list: patterns from the data view with alert-backing indices stripped
   // out. Used by `EventCounts` to scope the Host/Network REST queries to event
@@ -114,7 +99,7 @@ const OverviewComponent = () => {
   const { hasAlertsRead } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -127,11 +112,7 @@ const OverviewComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar
-              dataView={experimentalDataView}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -162,8 +143,7 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      dataViewSpec={oldSourcererDataViewSpec}
-                      dataView={experimentalDataView}
+                      dataView={dataView}
                       excludedPatterns={alertIndexPatterns}
                       query={query}
                       queryType="overview"
@@ -176,8 +156,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexNames={eventIndexPatterns}
-                      dataViewSpec={oldSourcererDataViewSpec}
-                      dataView={experimentalDataView}
+                      dataView={dataView}
                       query={query}
                       setQuery={setQuery}
                       to={to}

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { transformDashboardOut } from './api/transforms';
 import type { DashboardState } from './api';
+import type { getDashboardStateSchema } from './api/dashboard_state_schemas';
 
 /**
  * The result of scanning dashboards.
@@ -33,12 +34,12 @@ export interface ScanDashboardsResult {
 }
 
 export async function scanDashboards(
-  ctx: RequestHandlerContext,
+  savedObjectsClient: SavedObjectsClientContract,
   page: number,
-  perPage: number
+  perPage: number,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): Promise<ScanDashboardsResult> {
-  const { core } = await ctx.resolve(['core']);
-  const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
+  const soResponse = await savedObjectsClient.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     fields: ['description', 'title', 'panelsJSON', 'sections'],
     perPage,
@@ -52,15 +53,16 @@ export async function scanDashboards(
       } = transformDashboardOut(
         so.attributes,
         so.references,
-        true // temporary fix to return old Lens SO panel format
+        true, // temporary fix to return old Lens SO panel format,
+        strictValidationSchema
       );
 
       return {
         id: so.id,
         references: so.references,
-        description,
+        ...(description?.length && { description }),
         panels: panels ?? [],
-        tags,
+        ...(tags?.length && { tags }),
         title: title ?? '',
       };
     }),

@@ -22,16 +22,15 @@ import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
-import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
 
-const removeSourceNameQuotes = (sourceName: string) =>
+export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
 
 // Function to clean a single index string from failure stores
-const cleanIndex = (inputIndex: string): string => {
+export const cleanIndex = (inputIndex: string): string => {
   let cleaned = inputIndex.trim();
 
   // Remove '::data' suffix
@@ -221,10 +220,7 @@ export function getSourcesFromCommands(
 ) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  // the marker gets added in queries like "FROM "
-  return args.filter(
-    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
-  );
+  return args.filter((arg) => arg.sourceType === sourceType && arg.name !== '');
 }
 
 /**

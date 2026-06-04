@@ -25,6 +25,9 @@ dependsOn:
   - '@kbn/feedback-registry'
   - '@kbn/feedback-components'
   - '@kbn/core-http-router-server-mocks'
+  - '@kbn/core-chrome-feature-flags'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

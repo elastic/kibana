@@ -11,10 +11,11 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
+import type { ESDocsKeywordType } from '@kbn/esql-scripts';
+import { listDocDefinitionFiles, readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import { functions } from '../src/sections/generated/scalar_functions';
 import { getLicenseInfoForFunctions } from '../src/utils/get_license_info';
 import type { FunctionDefinition, MultipleLicenseInfo } from '../src/types';
-import { loadElasticDefinitions } from '../src/utils/load_elastic_definitions';
 
 interface DocsSectionContent {
   description: string;
@@ -43,57 +44,41 @@ interface DocsSectionContent {
   // Process each function type
   functionTypes.forEach(({ fnType, outputFile }) => {
     const functionDocs = loadFunctionDocs({
-      pathToDefs: getPathToDefs(pathToElasticsearch, fnType),
-      pathToDocs: getPathToDocs(pathToElasticsearch, fnType),
+      pathToElasticsearch,
       fnType,
+      keywordType: fnType === 'operator' ? 'operators' : 'functions',
     });
 
     writeFunctionDocs(functionDocs, path.join(__dirname, outputFile));
   });
 })();
 
-/**
- * Constructs the path to the definitions directory.
- */
-function getPathToDefs(basePath: string, fnType: string): string {
-  return path.join(
-    basePath,
-    `/docs/reference/query-languages/esql/kibana/definition/${
-      fnType === 'operator' ? 'operator' : 'function'
-    }s`
-  );
-}
-
-/**
- * Constructs the path to the documentation directory.
- */
-function getPathToDocs(basePath: string, fnType: string): string {
-  return path.join(
-    basePath,
-    `/docs/reference/query-languages/esql/kibana/docs/${
-      fnType === 'operator' ? 'operator' : 'function'
-    }s`
-  );
-}
-
 function loadFunctionDocs({
-  pathToDefs,
-  pathToDocs,
+  pathToElasticsearch,
   fnType,
+  keywordType,
 }: {
-  pathToDefs: string;
-  pathToDocs: string;
+  pathToElasticsearch: string;
   fnType: string;
+  keywordType: ESDocsKeywordType;
 }) {
-  // Read the directory
-  const docsFiles = fs.readdirSync(pathToDocs);
-
-  const fnDefinitionsMap = loadElasticDefinitions<FunctionDefinition>(pathToDefs);
+  const fnDefinitions = readElasticsearchDefinitions<FunctionDefinition>({
+    pathToElasticsearch,
+    keywordType,
+    language: 'esql',
+  });
+  const fnDefinitionsMap = new Map(fnDefinitions.map((fn) => [fn.name, fn]));
   const ESFunctionDefinitions = Array.from(fnDefinitionsMap.values());
 
   const docs = new Map<string, DocsSectionContent>();
+  const docsFiles = listDocDefinitionFiles({
+    pathToElasticsearch,
+    keywordType,
+    language: 'esql',
+    fileType: 'docs',
+  });
 
-  // Iterate over each file in the directory
+  // Iterate over each file in the directories
   for (const file of docsFiles) {
     // Ensure we only process .md files
     if (path.extname(file) === '.md') {
@@ -110,7 +95,7 @@ function loadFunctionDocs({
       }
 
       // Read the file content
-      const content = fs.readFileSync(path.join(pathToDocs, file), 'utf-8');
+      const content = fs.readFileSync(file, 'utf-8');
       const baseFunctionName = path.basename(file, '.md');
 
       // Get the function name from the file name by removing the .md extension

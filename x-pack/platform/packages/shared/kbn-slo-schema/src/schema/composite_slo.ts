@@ -36,6 +36,18 @@ const compositeSloMemberSchema = z.object({
   instanceId: z.string().optional(),
 });
 
+const compositeSloMembersSchema = z
+  .array(compositeSloMemberSchema)
+  .min(COMPOSITE_SLO_MIN_MEMBERS)
+  .max(COMPOSITE_SLO_MAX_MEMBERS)
+  .refine(
+    (members) => {
+      const keys = members.map(({ sloId, instanceId }) => `${sloId}:${instanceId ?? ''}`);
+      return new Set(keys).size === keys.length;
+    },
+    { message: 'Composite SLO members must be unique by sloId and instanceId' }
+  );
+
 const compositeMethodSchema = z.literal('weightedAverage');
 
 const compositeErrorBudgetSchema = z.object({
@@ -101,12 +113,24 @@ const compositeSloSummarySchema = z.object({
   oneDayBurnRate: z.number(),
 });
 
-type CompositeSLOMember = z.infer<typeof compositeSloMemberSchema>;
-type CompositeMethod = z.infer<typeof compositeMethodSchema>;
+const compositeSloDefinitionResponseSchema = compositeSloDefinitionSchema;
+
+const compositeSloSummaryResponseSchema = compositeSloBaseDefinitionSchema.extend({
+  summary: compositeSloSummarySchema,
+  members: z.array(compositeSloMemberSummarySchema),
+});
+
 type CompositeSLOMemberSummary = z.infer<typeof compositeSloMemberSummarySchema>;
 type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
+type CompositeSLODefinitionResponse = z.infer<typeof compositeSloDefinitionResponseSchema>;
+type CompositeSLOSummaryResponse = z.infer<typeof compositeSloSummaryResponseSchema>;
 
-export type { CompositeSLOMember, CompositeMethod, CompositeSLOMemberSummary, CompositeSLOSummary };
+export type {
+  CompositeSLOMemberSummary,
+  CompositeSLOSummary,
+  CompositeSLODefinitionResponse,
+  CompositeSLOSummaryResponse,
+};
 
 export {
   COMPOSITE_SLO_MIN_MEMBERS,
@@ -117,6 +141,7 @@ export {
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
   compositeErrorBudgetSchema,
   compositeStatusSchema,
@@ -125,4 +150,6 @@ export {
   storedCompositeSloDefinitionSchema,
   compositeSloMemberSummarySchema,
   compositeSloSummarySchema,
+  compositeSloDefinitionResponseSchema,
+  compositeSloSummaryResponseSchema,
 };

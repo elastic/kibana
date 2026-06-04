@@ -30,8 +30,7 @@ test('Kubernetes EA', async ({
   const fileName = 'code_snippet_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
-  await onboardingHomePage.selectKubernetesUseCase();
-  await onboardingHomePage.selectKubernetesQuickstart();
+  await onboardingHomePage.gotoKubernetesElasticAgentFlow();
 
   if (useWiredStreams) {
     await wiredStreamsSelector.selectWiredStreamsMode();

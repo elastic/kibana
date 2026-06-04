@@ -11,11 +11,8 @@ import {
   compositeTargetSchema,
   compositeOccurrencesBudgetingMethodSchema,
   compositeRollingTimeWindowSchema,
-  compositeSloMemberSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeSloDefinitionSchema,
-  COMPOSITE_SLO_MIN_MEMBERS,
-  COMPOSITE_SLO_MAX_MEMBERS,
 } from '../../../schema/composite_slo';
 
 const updateCompositeSLOParamsSchema = z.object({
@@ -25,11 +22,7 @@ const updateCompositeSLOParamsSchema = z.object({
   body: z.object({
     name: z.string().optional(),
     description: z.string().optional(),
-    members: z
-      .array(compositeSloMemberSchema)
-      .min(COMPOSITE_SLO_MIN_MEMBERS)
-      .max(COMPOSITE_SLO_MAX_MEMBERS)
-      .optional(),
+    members: compositeSloMembersSchema.optional(),
     compositeMethod: compositeMethodSchema.optional(),
     timeWindow: compositeRollingTimeWindowSchema.optional(),
     budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
@@ -39,10 +32,7 @@ const updateCompositeSLOParamsSchema = z.object({
   }),
 });
 
-const updateCompositeSLOResponseSchema = compositeSloDefinitionSchema;
-
 type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOParamsSchema.shape.body>;
-type UpdateCompositeSLOResponse = z.infer<typeof updateCompositeSLOResponseSchema>;
 
-export { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema };
-export type { UpdateCompositeSLOInput, UpdateCompositeSLOResponse };
+export { updateCompositeSLOParamsSchema };
+export type { UpdateCompositeSLOInput };

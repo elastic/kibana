@@ -29,20 +29,6 @@ export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate('xpack.cases.caseView.mov
   defaultMessage: 'Highlight the referenced comment',
 });
 
-export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
-  defaultMessage: 'submitted isolate request on host',
-});
-
-export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
-  defaultMessage: 'submitted release request on host',
-});
-
-export const OTHER_ENDPOINTS = (endpoints: number): string =>
-  i18n.translate('xpack.cases.caseView.otherEndpoints', {
-    values: { endpoints },
-    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
-  });
-
 export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
   defaultMessage: 'Cancel',
 });

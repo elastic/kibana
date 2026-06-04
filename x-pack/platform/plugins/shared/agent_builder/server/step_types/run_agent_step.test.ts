@@ -25,6 +25,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         getContext: jest.fn(),
         getScopedEsClient: jest.fn(),
         renderInputTemplate: jest.fn(),
+        callKibanaApi: jest.fn(),
       },
       logger: {
         debug: jest.fn(),

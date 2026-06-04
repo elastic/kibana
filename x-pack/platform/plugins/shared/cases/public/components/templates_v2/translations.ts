@@ -705,3 +705,58 @@ export const CONFIRM_FIELD_EDIT = i18n.translate('xpack.cases.templates.confirmF
 export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFieldEdit', {
   defaultMessage: 'Cancel field edit',
 });
+
+export const FIELD_TYPE_TITLE_INPUT_TEXT = i18n.translate(
+  'xpack.cases.templates.fieldType.inputText',
+  { defaultMessage: 'Text Input' }
+);
+
+export const FIELD_TYPE_TITLE_INPUT_NUMBER = i18n.translate(
+  'xpack.cases.templates.fieldType.inputNumber',
+  { defaultMessage: 'Number Input' }
+);
+
+export const FIELD_TYPE_TITLE_SELECT_BASIC = i18n.translate(
+  'xpack.cases.templates.fieldType.selectBasic',
+  { defaultMessage: 'Select' }
+);
+
+export const FIELD_TYPE_TITLE_TEXTAREA = i18n.translate(
+  'xpack.cases.templates.fieldType.textarea',
+  { defaultMessage: 'Textarea' }
+);
+
+export const FIELD_TYPE_TITLE_DATE_PICKER = i18n.translate(
+  'xpack.cases.templates.fieldType.datePicker',
+  { defaultMessage: 'Date Picker' }
+);
+
+export const FIELD_TYPE_TITLE_CHECKBOX_GROUP = i18n.translate(
+  'xpack.cases.templates.fieldType.checkboxGroup',
+  { defaultMessage: 'Checkbox Group' }
+);
+
+export const FIELD_TYPE_TITLE_RADIO_GROUP = i18n.translate(
+  'xpack.cases.templates.fieldType.radioGroup',
+  { defaultMessage: 'Radio Group' }
+);
+
+export const FIELD_TYPE_TITLE_USER_PICKER = i18n.translate(
+  'xpack.cases.templates.fieldType.userPicker',
+  { defaultMessage: 'User Picker' }
+);
+
+export const TEMPLATE_DEFINITION_EMPTY = i18n.translate(
+  'xpack.cases.templates.templateDefinitionEmpty',
+  { defaultMessage: 'Template definition is empty' }
+);
+
+export const INVALID_YAML_NON_OBJECT = i18n.translate(
+  'xpack.cases.templates.invalidYamlNonObject',
+  { defaultMessage: 'Invalid YAML: parsed to null or non-object' }
+);
+
+export const INVALID_YAML_DEFINITION = i18n.translate(
+  'xpack.cases.templates.invalidYamlDefinition',
+  { defaultMessage: 'Invalid YAML definition' }
+);

@@ -14,7 +14,6 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import type { AlertsTableComponentProps } from './alerts_grouping';
 import { GroupedAlertsTable } from './alerts_grouping';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -30,7 +29,6 @@ import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('test-uuid'),
@@ -143,14 +141,7 @@ jest.mock('../../../common/lib/kuery', () => ({
 jest.mock('../../../common/components/popover_items', () => ({
   PopoverItems: () => null,
 }));
-const sourcererDataView = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: {
-    fields: [],
-  },
-  browserFields: {},
-};
+
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
 const dataView: DataView = getMockDataViewWithMatchedIndices(['test']);
@@ -167,7 +158,6 @@ const testProps: AlertsTableComponentProps = {
     aggregations: defaultGroupStatsAggregations,
     renderer: simpleGroupStatsRenderer,
   },
-  dataViewSpec: dataView.toSpec(),
   dataView,
   defaultFilters: [],
   defaultGroupingOptions,
@@ -245,11 +235,6 @@ describe('GroupedAlertsTable', () => {
       groups: {
         [testProps.tableId]: { options: mockOptions, activeGroups: ['kibana.alert.rule.name'] },
       },
-    });
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      ...sourcererDataView,
-      selectedPatterns: ['myFakebeat-*'],
-      sourcererDataView: {},
     });
 
     jest.mocked(useDataView).mockReturnValue({

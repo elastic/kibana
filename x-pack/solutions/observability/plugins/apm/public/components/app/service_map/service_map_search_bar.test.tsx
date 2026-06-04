@@ -15,6 +15,7 @@ let mockSetEsQuery: jest.Mock;
 let mockOnFiltersChange: (filters: Filter[]) => void;
 let mockHistoryReplace: jest.Mock;
 let mockLocationSearch: string;
+let mockInitialAppFilters: Filter[];
 const filterUpdates$ = new Subject<void>();
 
 jest.mock('../../../hooks/use_apm_params', () => ({
@@ -55,6 +56,7 @@ jest.mock('./service_map_search_context', () => ({
 
 jest.mock('./use_filter_url_sync', () => ({
   useFilterUrlSync: () => ({
+    initialAppFilters: mockInitialAppFilters,
     persistControlSelections: jest.fn(),
     getRestoredControlSelections: () => undefined,
   }),
@@ -66,7 +68,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockFilterManager = {
-  getFilters: jest.fn().mockReturnValue([]),
+  getAppFilters: jest.fn().mockReturnValue([]),
+  getGlobalFilters: jest.fn().mockReturnValue([]),
   getUpdates$: () => filterUpdates$.asObservable(),
 };
 
@@ -132,6 +135,9 @@ describe('ServiceMapSearchBar', () => {
     mockSetEsQuery = jest.fn();
     mockHistoryReplace = jest.fn();
     mockLocationSearch = '?environment=production&kuery=service.name%3A%22opbeans-go%22';
+    mockInitialAppFilters = [];
+    mockFilterManager.getAppFilters.mockReturnValue([]);
+    mockFilterManager.getGlobalFilters.mockReturnValue([]);
   });
 
   it('builds esQuery WITHOUT the kuery (server handles it separately)', async () => {
@@ -145,6 +151,68 @@ describe('ServiceMapSearchBar', () => {
     // buildEsQuery was called with [{ query: '', language: 'kuery' }] so the mock
     // only includes filters, not the kuery content.
     expect(esQuery.bool.filter).toEqual([]);
+  });
+
+  it('does not include inherited app filters from another app on initial render', async () => {
+    mockFilterManager.getAppFilters.mockReturnValue([
+      {
+        meta: { key: 'dashboard.only', negate: false, disabled: false },
+        query: { match_phrase: { 'dashboard.only': 'value' } },
+      } as unknown as Filter,
+    ]);
+
+    render(<ServiceMapSearchBar />);
+
+    await waitFor(() => {
+      expect(mockSetEsQuery).toHaveBeenCalled();
+    });
+
+    const esQuery = mockSetEsQuery.mock.calls[0][0];
+    expect(esQuery.bool.filter).toEqual([]);
+  });
+
+  it('includes restored Service Map app filters on initial render', async () => {
+    mockInitialAppFilters = [
+      {
+        meta: { key: 'transaction.type', negate: false, disabled: false },
+        query: { match_phrase: { 'transaction.type': 'request' } },
+      } as unknown as Filter,
+    ];
+
+    render(<ServiceMapSearchBar />);
+
+    await waitFor(() => {
+      expect(mockSetEsQuery).toHaveBeenCalled();
+    });
+
+    const esQuery = mockSetEsQuery.mock.calls[0][0];
+    expect(esQuery.bool.filter).toEqual([
+      {
+        match_phrase: { 'transaction.type': 'value' },
+      },
+    ]);
+  });
+
+  it('preserves global filters on initial render', async () => {
+    mockFilterManager.getGlobalFilters.mockReturnValue([
+      {
+        meta: { key: 'host.name', negate: false, disabled: false },
+        query: { match_phrase: { 'host.name': 'host-1' } },
+      } as unknown as Filter,
+    ]);
+
+    render(<ServiceMapSearchBar />);
+
+    await waitFor(() => {
+      expect(mockSetEsQuery).toHaveBeenCalled();
+    });
+
+    const esQuery = mockSetEsQuery.mock.calls[0][0];
+    expect(esQuery.bool.filter).toEqual([
+      {
+        match_phrase: { 'host.name': 'value' },
+      },
+    ]);
   });
 
   it('excludes environment filter from esQuery when Controls fire', async () => {

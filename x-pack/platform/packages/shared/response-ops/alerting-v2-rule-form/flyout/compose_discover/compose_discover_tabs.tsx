@@ -39,20 +39,21 @@ interface ComposeDiscoverTabsProps {
 const LOCKED_EDITOR_STYLES: React.CSSProperties = {
   opacity: 0.55,
   pointerEvents: 'none',
-  borderBottom: '1px solid var(--euiColorLightShade)',
 };
 
 interface LockedBaseEditorProps {
   query: string;
 }
 
+const LOCKED_FONT_SIZE = 13;
+const LOCKED_LINE_HEIGHT = 18;
+
 const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
   const lineCount = query.split('\n').length;
-  // 19px per line plus a small buffer so the last line isn't clipped
-  const height = lineCount * 19 + 8;
+  const height = lineCount * LOCKED_LINE_HEIGHT + 4;
 
   return (
-    <div style={LOCKED_EDITOR_STYLES}>
+    <div style={{ ...LOCKED_EDITOR_STYLES, height }}>
       <CodeEditor
         languageId={ESQL_LANG_ID}
         value={query}
@@ -62,9 +63,12 @@ const LockedBaseEditor: React.FC<LockedBaseEditorProps> = ({ query }) => {
           domReadOnly: true,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
+          scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
           renderLineHighlight: 'none',
           overviewRulerLanes: 0,
-          fontSize: 13,
+          fontSize: LOCKED_FONT_SIZE,
+          lineHeight: LOCKED_LINE_HEIGHT,
+          automaticLayout: true,
         }}
       />
     </div>

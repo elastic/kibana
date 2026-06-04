@@ -6,8 +6,9 @@
  */
 
 import { createKiIdentificationStartTool } from './tool';
-import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
-import { OnboardingStep } from '@kbn/streams-schema';
+import { createMockToolContext } from '../../utils/test_helpers';
+import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('createKiIdentificationStartTool', () => {
   const telemetry = {
@@ -15,42 +16,52 @@ describe('createKiIdentificationStartTool', () => {
   };
 
   const setup = () => {
-    const { getScopedClients, taskClient } = createMockGetScopedClients();
+    const managementApi = {
+      getWorkflow: jest.fn().mockResolvedValue({
+        id: 'system-streams-ki-onboarding',
+        name: 'onboarding',
+        enabled: true,
+        definition: {},
+        yaml: '',
+      }),
+      runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
+    };
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: managementApi as never,
+    });
+
     const tool = createKiIdentificationStartTool({
-      getScopedClients,
       telemetry: telemetry as never,
+      streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
 
-    return { tool, context, taskClient };
+    return { tool, context, managementApi };
   };
 
-  it('schedules onboarding and returns immediately by default', async () => {
-    const { tool, context, taskClient } = setup();
+  it('triggers onboarding workflow and returns immediately by default', async () => {
+    const { tool, context, managementApi } = setup();
 
     const result = await tool.handler(
       {
         stream_name: 'logs.nginx',
-        steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+        steps: [
+          StreamsKIsOnboardingStep.FeaturesIdentification,
+          StreamsKIsOnboardingStep.QueriesGeneration,
+        ],
       },
       context
     );
 
-    expect(taskClient.schedule).toHaveBeenCalledWith(
+    expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
+      'default',
       expect.objectContaining({
-        task: {
-          type: 'streams_onboarding',
-          id: 'streams_onboarding_logs.nginx',
-          space: '*',
-        },
-        params: expect.objectContaining({
-          streamName: 'logs.nginx',
-          steps: ['features_identification', 'queries_generation'],
-          from: expect.any(Number),
-          to: expect.any(Number),
-        }),
-        request: context.request,
-      })
+        streamName: 'logs.nginx',
+        skipFeatures: false,
+        skipQueries: false,
+      }),
+      context.request
     );
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
@@ -60,14 +71,17 @@ describe('createKiIdentificationStartTool', () => {
     }
   });
 
-  it('returns error result when scheduling fails', async () => {
-    const { tool, context, taskClient } = setup();
-    taskClient.schedule.mockRejectedValueOnce(new Error('version conflict'));
+  it('returns error result when workflow trigger fails', async () => {
+    const { tool, context, managementApi } = setup();
+    managementApi.runWorkflow.mockRejectedValueOnce(new Error('version conflict'));
 
     const result = await tool.handler(
       {
         stream_name: 'logs.nginx',
-        steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+        steps: [
+          StreamsKIsOnboardingStep.FeaturesIdentification,
+          StreamsKIsOnboardingStep.QueriesGeneration,
+        ],
       },
       context
     );

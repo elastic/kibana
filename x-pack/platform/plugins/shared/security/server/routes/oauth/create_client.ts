@@ -15,6 +15,7 @@ export function defineCreateOAuthClientRoute({
   router,
   config,
   getAuthenticationService,
+  serverlessProjectId,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -53,7 +54,23 @@ export function defineCreateOAuthClientRoute({
             });
           }
 
-          const result = await oauth.createClient(request, { ...request.body, resource });
+          // UIAM requires the project the client belongs to. It is always available on serverless
+          // (where OAuth client management is offered), so a missing value indicates a
+          // deployment where this feature is not available.
+          if (!serverlessProjectId) {
+            return response.notFound({
+              body: {
+                message:
+                  'OAuth management is not available: serverless project id is not configured',
+              },
+            });
+          }
+
+          const result = await oauth.createClient(request, {
+            ...request.body,
+            resource,
+            project_id: serverlessProjectId,
+          });
           if (!result) {
             return response.notFound({
               body: {

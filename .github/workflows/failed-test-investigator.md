@@ -27,6 +27,8 @@ concurrency:
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+  # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
+  BUILDKITE_ORGANIZATION_SLUG: elastic
 
 engine:
   id: claude
@@ -53,6 +55,7 @@ network:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
+    - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
@@ -60,6 +63,28 @@ network:
     - elastic.litellm-prod.ai
 sandbox:
   agent: awf # Migrated from deprecated network setting
+steps:
+  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+    env:
+      BK_VERSION: 3.44.0
+      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
+      tmp="$(mktemp -d)"
+      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
+      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
+      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
+      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
+      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
+      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
+      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
+        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
+        exit 1
+      fi
+      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
+
 safe-outputs:
   noop:
     report-as-issue: false
@@ -87,20 +112,9 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 - **`issues` trigger**: use the triggering issue (non-PR, labeled `failed-test`).
 - **`workflow_dispatch`**: use issue `${{ github.event.inputs.issue_number }}`. Fetch it explicitly before analysis, and post the final comment there.
 
-## Where did the test run?
-
-The test's **target** (e.g. `local-stateful-classic`, `cloud-serverless-security_complete`) tells you where it ran:
-
-- **`cloud-*`** — ran against a real Elastic Cloud project (serverless) or deployment (stateful). Pipeline names: `appex-qa-{serverless|stateful}-kibana-{ftr|scout}-tests`.
-- **`local-*`** — ran on the agent's local machine. `kibana-on-merge` and `kibana-pull-request` are local (no Elastic Cloud API calls), so the environment is more stable and less prone to network/env flakiness.
-
 ## Investigate
 
-1. Read the issue title, body, labels, and all comments.
-2. Parse test metadata if present: location (test file path), config path, code owners, target.
-3. Look at all the failures reported in the issue. The very same test could have been failing with different error messages, for different reasons, on different pipelines, and on different branches.
-4. Inspect the relevant test file and nearby helpers/fixtures. For Scout, start from the reported location; otherwise infer from the title.
-5. Check recent git history and blame on the test file and related product code.
+Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -150,53 +164,42 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment with two main parts:
+Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure. **Use `####` for all subsections** (e.g., `#### Proposed Fix`, `#### Root Cause`).
 
-- **Visible section**: a very concise summary that would inform a developer with a quick glance. Highlight main findings. Keep it high-signal and to the point.
-- **Collapsed `<details>` section**: full long-form context for the downstream auto-fix agent (and any human who wants to audit the call).
+Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value. Do not also mention why the `ai:auto-flaky-fix` isn't added.
 
-The visible section is a _distillation_ of the collapsed one. Do not repeat content verbatim across both: the visible bullets summarize, the collapsed block holds the full evidence the summary was derived from.
+### 1. The TL;DR (Required)
 
-### Visible (top), in this order:
-
-1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `classification` but not templated. Example: `**Likely test-design fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
-
-2. **A 3–5 sentence prose paragraph** (no headings, no bullets) covering: what broke and where (name the test file/name), the most likely root cause, and any evidence-backed author attribution with `@username` so they get notified on first read.
-
-3. **One-line action hint**: the proposed fix, recommended action, or missing evidence. Skip if the paragraph already covers it.
-
-4. **Findings bullets** — exactly these four, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
-
-   - `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-   - `confidence`: `high` | `medium` | `low`
-   - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-   - `test.file`: repo-relative path, or `unknown`
-
-5. **Suspected root cause** — 2–4 short bullets, each tied to a specific piece of evidence. Skip the section entirely when `classification` is `external` or `inconclusive` and there is nothing concrete to assert.
-
-6. **Key references** — at most 3 Markdown links: the failing test file, the failing CI run, and the implicated commit (when one exists). Skip any of the three that are not applicable; skip the section entirely when none apply.
-
-### Collapsed (`<details>`):
-
-This section is the full context for agents and humans to dive deep into the findings. Verify all information. Wrap it in a single `<details>` block. The blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+Start with a clear heading, essential metadata, and a brief summary of the failure, followed by a horizontal rule.
 
 ```
-<details>
-<summary>See full details</summary>
+## {Classification}: {One-line description of what broke}
 
-#### Full root-cause analysis
+## **Classification:** {type} | **Confidence:** {level} | **Introduced by:** {commit/PR if known}
 
-The long-form version of the visible "Suspected root cause" bullets. Walk through the evidence chain step by step. Cite the specific log lines, stack frames, blame results, or related PRs that led to the conclusion.
-
-#### Evidence used
-
-A complete list of the evidence consulted: issue comments, file paths, commits, CI runs, blame output, related PRs. Each item should be a Markdown link, not a bare path or SHA.
-
-#### Suggested patch
-
-Only when justified by the evidence: a small diff-style snippet showing the suggested edit. Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior to change. Omit this section entirely when no defensible patch can be proposed.
-
-</details>
+**Summary:** One or two sentences explaining the exact failure point.
 ```
 
-Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure. Any of the three subsections may be omitted when there is nothing meaningful to put in it.
+### 2. Proposed fix (required)
+
+Provide the most direct path to resolution immediately after the summary.
+
+- **Single file:** lead directly with the suggested code diff or specific action.
+- **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
+- **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
+
+### 3. Root Cause & Evidence (required)
+
+Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
+
+- Use concise paragraphs with inline Markdown links pointing to specific code lines, commits, or files.
+- Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
+- Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
+
+### 4. Additional context (optional)
+
+Include the following only if they provide high-value, actionable signal:
+
+- **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
+- **Verification:** specific steps to reproduce the failure or confirm the fix.
+- **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).

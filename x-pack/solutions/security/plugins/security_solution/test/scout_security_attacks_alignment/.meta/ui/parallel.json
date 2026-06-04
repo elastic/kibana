@@ -1,5 +1,5 @@
 {
-  "sha1": "74acf6f6733efdc6b4665ae8b5292122e1b413bb",
+  "sha1": "0b5daed328ba43f4a1abe43089a707b43100dea3",
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -24,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 47,
+        "line": 48,
         "column": 14
       }
     },
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 14
       }
     },
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_page_smoke.spec.ts",
-        "line": 33,
+        "line": 38,
         "column": 14
       }
     },
@@ -104,7 +104,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
-        "line": 34,
+        "line": 39,
+        "column": 14
+      }
+    },
+    {
+      "id": "f6efc9f182744e4-47742f95ac597e4",
+      "title": "Attacks schedule flyout opens the schedule details flyout from the attack table row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_schedule.spec.ts",
+        "line": 51,
         "column": 14
       }
     },

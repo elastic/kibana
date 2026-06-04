@@ -232,16 +232,26 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       };
     }
 
+    // Use the local implementation to handle all requests including multipart and fetcher options.
     const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);
 
     if (debug) {
-      return {
-        ...result,
-        _debug: {
-          fullUrl: this.buildFullUrl(kibanaUrl, requestConfig.path, requestConfig.query),
-          method: requestConfig.method,
-        },
-      };
+      // _debug is only meaningful for object responses (JSON). For Buffers / strings / null
+      // it is intentionally skipped to preserve the existing body shape.
+      if (
+        result &&
+        typeof result === 'object' &&
+        !Buffer.isBuffer(result) &&
+        !Array.isArray(result)
+      ) {
+        return {
+          ...result,
+          _debug: {
+            fullUrl: this.buildFullUrl(kibanaUrl, requestConfig.path, requestConfig.query),
+            method: requestConfig.method,
+          },
+        };
+      }
     }
 
     return result;
