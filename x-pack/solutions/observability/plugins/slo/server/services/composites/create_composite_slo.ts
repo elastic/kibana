@@ -46,13 +46,12 @@ export async function createCompositeSlo(
 
   const created = await compositeRepository.create(compositeSlo);
 
-  await persistCompositeSummaryDoc({
+  await persistCompositeSummaryDoc(created, {
     esClient,
     summaryClient,
     repository,
     logger,
     spaceId,
-    compositeSlo: created,
   });
 
   return created;

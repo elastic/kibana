@@ -82,13 +82,12 @@ export function buildCompositeSummaryDoc(
   };
 }
 
-interface PersistCompositeSummaryDocParams {
+interface Dependencies {
   esClient: ElasticsearchClient;
   summaryClient: SummaryClient;
   repository: SLODefinitionRepository;
   logger: Logger;
   spaceId: string;
-  compositeSlo: CompositeSLODefinition;
 }
 
 /**
@@ -97,14 +96,10 @@ interface PersistCompositeSummaryDocParams {
  * or updated composites without waiting for the next background task run.
  * TODO: this does not only persist - to refactor to not be misleading
  */
-export async function persistCompositeSummaryDoc({
-  esClient,
-  summaryClient,
-  repository,
-  logger,
-  spaceId,
-  compositeSlo,
-}: PersistCompositeSummaryDocParams): Promise<void> {
+export async function persistCompositeSummaryDoc(
+  compositeSlo: CompositeSLODefinition,
+  { esClient, summaryClient, repository, logger, spaceId }: Dependencies
+): Promise<void> {
   const memberSloIds = compositeSlo.members.map((m) => m.sloId);
   const memberDefinitions = await repository.findAllByIds(memberSloIds);
   const memberDefinitionMap = new Map(memberDefinitions.map((slo) => [slo.id, slo]));

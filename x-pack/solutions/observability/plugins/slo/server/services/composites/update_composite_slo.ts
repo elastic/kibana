@@ -34,13 +34,12 @@ export async function updateCompositeSlo(
     updatedBy: userId,
   });
 
-  await persistCompositeSummaryDoc({
+  await persistCompositeSummaryDoc(updated, {
     esClient,
     summaryClient,
     repository,
     logger,
     spaceId,
-    compositeSlo: updated,
   });
 
   return updated;
