@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { asCodeMetaSchema, ID_MAX_LENGTH } from '@kbn/as-code-shared-schemas';
 import { markdownLibraryItemSchema } from '../schema';
 
 export const createRequestBodySchema = markdownLibraryItemSchema;
@@ -19,6 +19,7 @@ export const createResponseBodySchema = schema.object({
       description:
         'The unique ID of the markdown library item, as returned by the create or search endpoints.',
     },
+    maxLength: ID_MAX_LENGTH,
   }),
   data: markdownLibraryItemSchema,
   meta: asCodeMetaSchema,
