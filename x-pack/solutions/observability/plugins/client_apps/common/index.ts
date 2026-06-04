@@ -10,3 +10,5 @@ export const PLUGIN_ID = 'clientApps';
 export const ANDROID_RETRACE_API_PATH = '/internal/client_apps/android/retrace';
 
 export const JS_SOURCEMAP_API_PATH = '/internal/client_apps/javascript/sourcemap';
+
+export const DEFAULT_CRASH_INDEX = 'logs-generic.otel*';
