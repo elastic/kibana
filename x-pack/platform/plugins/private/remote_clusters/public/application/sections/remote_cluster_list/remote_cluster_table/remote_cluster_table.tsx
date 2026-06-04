@@ -358,16 +358,15 @@ export class RemoteClusterTable extends Component<Props, State> {
                 <EuiToolTip content={label}>
                   <RemoveClusterButtonProvider clusterNames={[name]}>
                     {(removeCluster) => (
-                      <EuiToolTip content={label} disableScreenReaderOutput>
-                        <EuiButtonIcon
-                          data-test-subj="remoteClusterTableRowRemoveButton"
-                          aria-label={label}
-                          iconType="trash"
-                          color="danger"
-                          isDisabled={isConfiguredByNode}
-                          onClick={removeCluster}
-                        />
-                      </EuiToolTip>
+                      // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- button is already wrapped with `EuiToolTip` above
+                      <EuiButtonIcon
+                        data-test-subj="remoteClusterTableRowRemoveButton"
+                        aria-label={label}
+                        iconType="trash"
+                        color="danger"
+                        isDisabled={isConfiguredByNode}
+                        onClick={removeCluster}
+                      />
                     )}
                   </RemoveClusterButtonProvider>
                 </EuiToolTip>

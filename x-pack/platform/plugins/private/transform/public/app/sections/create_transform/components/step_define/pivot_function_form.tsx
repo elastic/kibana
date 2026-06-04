@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -74,16 +73,12 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                     tooltipProps={{ disableScreenReaderOutput: true }}
                   >
                     {(copy: () => void) => (
-                      <EuiToolTip
-                        content={copyToClipboardPivotDescription}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          onClick={copy}
-                          iconType="copy"
-                          aria-label={copyToClipboardPivotDescription}
-                        />
-                      </EuiToolTip>
+                      // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- `EuiCopy` already provides its own tooltip with `beforeMessage`
+                      <EuiButtonIcon
+                        onClick={copy}
+                        iconType="copy"
+                        aria-label={copyToClipboardPivotDescription}
+                      />
                     )}
                   </EuiCopy>
                 </EuiFlexItem>
