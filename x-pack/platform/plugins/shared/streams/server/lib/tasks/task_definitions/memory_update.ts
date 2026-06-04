@@ -80,7 +80,7 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),
-                esClient: taskContext.getInternalEsClient(),
+                esClient: scopedClusterClient.asCurrentUser,
               });
 
               // Create a local trigger registry for this task execution
