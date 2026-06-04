@@ -395,7 +395,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       let rule: any;
 
       before(async () => {
-        await pageObjects.common.navigateToApp('rules');
+        await pageObjects.common.navigateToApp('management', {
+          path: 'insightsAndAlerting/triggersActions',
+        });
 
         const connectorName = generateUniqueKey();
         const createdConnector = await createSlackConnector({ name: connectorName, getService });

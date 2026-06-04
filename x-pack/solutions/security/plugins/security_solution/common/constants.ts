@@ -55,6 +55,7 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults' as const;
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults' as const;
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const ALERTS_BATCH_MAX_SIZE = 20 as const;
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
@@ -336,6 +337,18 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Detection Engine attacks routes (public)
+ */
+export const DETECTION_ENGINE_ATTACKS_URL = `${DETECTION_ENGINE_URL}/attacks` as const;
+export const DETECTION_ENGINE_ATTACKS_SEARCH_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/search` as const;
+export const DETECTION_ENGINE_ATTACKS_STATUS_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/status` as const;
+export const DETECTION_ENGINE_ATTACKS_TAGS_URL = `${DETECTION_ENGINE_ATTACKS_URL}/tags` as const;
+export const DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_ATTACKS_URL}/assignees` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
@@ -472,11 +485,7 @@ export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
 /**
- * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
- * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
- * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
- * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
- * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ * Max number of rules to display on UI in table (one page of results).
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 
@@ -712,6 +721,7 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
+  alerts = 'security.alerts',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',

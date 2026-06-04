@@ -233,7 +233,11 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
-    const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
+    const sourceField = column.sourceField ? column.sourceField : indexPattern.timeFieldName ?? '';
+    const { usedField, timeZone, interval } = getTimeZoneAndInterval(
+      { ...column, sourceField },
+      indexPattern
+    );
     const dropPartials = Boolean(
       column.params?.dropPartials &&
         // set to false when detached from time picker
@@ -244,7 +248,7 @@ export const dateHistogramOperation: OperationDefinition<
       id: columnId,
       enabled: true,
       schema: 'segment',
-      field: column.sourceField,
+      field: sourceField,
       time_zone: timeZone,
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
       interval,

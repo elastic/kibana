@@ -7,7 +7,7 @@
 
 import type { Output, FullAgentPolicyInput, TemplateAgentPolicyInput } from '../../types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 
 import { generateOtelcolConfig } from './otel_collector';
 
@@ -598,6 +598,162 @@ describe('generateOtelcolConfig', () => {
         },
       },
     });
+  });
+
+  it('should suffix service.extensions and auth.authenticator references to match suffixed extension keys (bearertokenauth regression)', () => {
+    const inputId = 'otlp-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const otelInputWithExtension: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            bearertokenauth: { token: 'secret' },
+          },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  endpoint: '0.0.0.0:4317',
+                  auth: { authenticator: 'bearertokenauth' },
+                },
+                http: {
+                  endpoint: '0.0.0.0:4318',
+                  auth: { authenticator: 'bearertokenauth' },
+                },
+              },
+            },
+          },
+          service: {
+            extensions: ['bearertokenauth'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputWithExtension],
+      dataOutput: defaultOutput,
+    });
+
+    // The extension key must be suffixed
+    expect(result.extensions?.[`bearertokenauth/${expectedSuffix}`]).toEqual({ token: 'secret' });
+    expect(result.extensions?.bearertokenauth).toBeUndefined();
+
+    // The service.extensions reference must also be suffixed to match
+    expect(result.service?.extensions).toContain(`bearertokenauth/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('bearertokenauth');
+
+    // auth.authenticator references inside receiver bodies must be suffixed
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.protocols?.grpc?.auth?.authenticator).toBe(
+      `bearertokenauth/${expectedSuffix}`
+    );
+    expect(suffixedReceiver?.protocols?.http?.auth?.authenticator).toBe(
+      `bearertokenauth/${expectedSuffix}`
+    );
+
+    // Pipeline component references must still be suffixed
+    expect(result.service?.pipelines?.[`logs/${expectedSuffix}`]?.receivers).toContain(
+      `otlp/${expectedSuffix}`
+    );
+  });
+
+  it('should leave auth.authenticator untouched when it does not reference a stream-declared extension', () => {
+    const inputId = 'otlp-input-2';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    // The receiver references an externally-managed authenticator (e.g. injected by output path)
+    // that was NOT declared in stream.extensions — it must not be rewritten.
+    const otelInputExternalAuth: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy2',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  auth: { authenticator: 'beatsauth/default' },
+                },
+              },
+            },
+          },
+          service: {
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputExternalAuth],
+      dataOutput: defaultOutput,
+    });
+
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.protocols?.grpc?.auth?.authenticator).toBe('beatsauth/default');
+  });
+
+  it('should suffix only locally-declared extensions in service.extensions, leaving external references untouched', () => {
+    const inputId = 'otlp-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            bearertokenauth: { token: 'secret' },
+          },
+          service: {
+            extensions: ['bearertokenauth', 'beatsauth/default'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    expect(result.service?.extensions).toContain(`bearertokenauth/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('bearertokenauth');
+    expect(result.service?.extensions).toContain('beatsauth/default');
+    expect(result.service?.extensions).not.toContain(`beatsauth/default/${expectedSuffix}`);
   });
 
   it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
@@ -2236,6 +2392,108 @@ describe('generateOtelcolConfig', () => {
       };
 
       expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).toThrow();
+    });
+  });
+
+  describe('remote_elasticsearch output', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+    const remoteOutput: Output = {
+      ...defaultOutput,
+      id: 'remote-output',
+      name: 'remote-output',
+      is_default: false,
+      type: outputType.RemoteElasticsearch,
+      hosts: ['https://remote-es.example.com:9200'],
+    };
+
+    it('should generate an elasticsearch exporter keyed by the remote output id', () => {
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
+
+      expect(result.exporters).toHaveProperty('elasticsearch/remote-output');
+      expect(result.exporters).not.toHaveProperty('elasticsearch/default');
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should include beatsauth extension with ssl fields when remote output has ssl config', () => {
+      const remoteOutputWithSSL: Output = {
+        ...remoteOutput,
+        ca_trusted_fingerprint: 'remote-fingerprint',
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+          verification_mode: 'full',
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputWithSSL });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toEqual({
+        ssl: {
+          ca_trusted_fingerprint: 'remote-fingerprint',
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+          verification_mode: 'full',
+        },
+      });
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        auth: { authenticator: 'beatsauth/remote-output' },
+      });
+      expect(result.service?.extensions).toContain('beatsauth/remote-output');
+    });
+
+    it('should omit beatsauth when remote output has no ssl or proxy', () => {
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/remote-output']).not.toHaveProperty('auth');
+      expect(result.service?.extensions ?? []).not.toContain('beatsauth/remote-output');
+    });
+
+    it('should include proxy fields in beatsauth for remote output', () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        is_preconfigured: false,
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput, proxy });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toEqual({
+        proxy_url: 'http://proxy.example.com:3128',
+      });
+      expect(result.service?.extensions).toContain('beatsauth/remote-output');
+    });
+
+    it('should omit beatsauth and include only endpoints when otel_disable_beatsauth is true on remote output', () => {
+      const remoteOutputDisabled: Output = {
+        ...remoteOutput,
+        otel_disable_beatsauth: true,
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputDisabled });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/remote-output']).toEqual({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should merge otel_exporter_config_yaml into exporter for remote output', () => {
+      const remoteOutputWithYaml: Output = {
+        ...remoteOutput,
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputWithYaml });
+
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        flush_interval: '10s',
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
     });
   });
 

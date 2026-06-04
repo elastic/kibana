@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/data-view-editor-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/data-visualizer-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-ml'
   - '@kbn/embeddable-plugin'
@@ -113,6 +114,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-utility'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/std'
   - '@kbn/task-manager-plugin'
   - '@kbn/test-jest-helpers'
@@ -149,6 +151,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/scout'
   - '@kbn/core-http-common'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

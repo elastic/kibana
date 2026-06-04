@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as reduxHooks from 'react-redux';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
@@ -16,6 +17,7 @@ import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_loca
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { getMonitorAction } from '../../../../state';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -124,6 +126,57 @@ describe('Monitor Detail Flyout', () => {
     getByText(testErrorText, { exact: false });
   });
 
+  it('hides the fetch-error callout when overview heartbeat data is available (cross-space)', () => {
+    const testErrorText = 'This is a test error';
+
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        configId="cross-space-config-id"
+        id="cross-space-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: null,
+            syntheticsMonitorLoading: false,
+            syntheticsMonitorError: {
+              body: { statusCode: 404, error: 'Not Found', message: testErrorText },
+            },
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                'cross-space-config-id-us-east': {
+                  monitorQueryId: 'cross-space-id',
+                  configId: 'cross-space-config-id',
+                  name: 'Cross-space monitor',
+                  type: 'http',
+                  schedule: '1',
+                  tags: [],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'up',
+                  spaces: ['team-a'],
+                  locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
+                },
+              },
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    expect(queryByText(testErrorText, { exact: false })).toBeNull();
+  });
+
   it('renders loading state while fetching', () => {
     const { getByRole, getByText } = render(
       <MonitorDetailFlyout
@@ -149,6 +202,49 @@ describe('Monitor Detail Flyout', () => {
     expect(getByText('Overview')).toBeInTheDocument();
     expect(getByText('Performance')).toBeInTheDocument();
     expect(getByText('Details')).toBeInTheDocument();
+  });
+
+  it('does not dispatch getMonitorAction before the active space resolves', () => {
+    // Simulate `useKibanaSpace` (which is the only `useFetcher` consumer in
+    // this component) still loading — `space` is undefined across renders.
+    // Previously the flyout would dispatch `getMonitorAction.get` without
+    // `spaceId`, hit the active space, and 404 for cross-space monitors.
+    // The retry that fires once `space` resolves was then silently dropped
+    // by the `takeLeading` saga while the first call was still in flight,
+    // leaving the 404 in Redux state forever.
+    const previousFetcherImpl = useFetcherMock.getMockImplementation();
+    useFetcherMock.mockReturnValue({
+      data: undefined,
+      loading: true,
+      refetch: jest.fn(),
+    });
+
+    const mockDispatch = jest.fn();
+    jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="cross-space-monitor"
+          id="cross-space-monitor"
+          location="US East"
+          locationId="us-east"
+          spaces={['team-a']}
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(0);
+    } finally {
+      if (previousFetcherImpl) {
+        useFetcherMock.mockImplementation(previousFetcherImpl);
+      }
+    }
   });
 
   it('renders details for fetch success', () => {
@@ -258,7 +354,13 @@ describe('Monitor Detail Flyout', () => {
       expect(queryByRole('progressbar')).not.toBeInTheDocument();
     });
 
-    it('renders "View on remote cluster" button instead of "Go to monitor"', () => {
+    it('renders both "View on remote cluster" and a CCS-aware "Go to monitor" button', () => {
+      const detailLinkSpy = jest
+        .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
+        .mockReturnValue(
+          '/app/synthetics/monitor/remote-config-id?locationId=europe-west3-a&remoteName=remote-cluster-1'
+        );
+
       const { getByText, queryByText } = render(
         <MonitorDetailFlyout
           configId="remote-config-id"
@@ -304,8 +406,81 @@ describe('Monitor Detail Flyout', () => {
       );
 
       expect(getByText('View on remote cluster')).toBeInTheDocument();
-      expect(queryByText('Go to monitor')).not.toBeInTheDocument();
+      // The local monitor detail page is now CCS-aware, so the "Go to monitor"
+      // button is shown for remote monitors and links to the local detail page
+      // with the `remoteName` URL param.
+      expect(getByText('Go to monitor')).toBeInTheDocument();
+      expect(detailLinkSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ remoteName: 'remote-cluster-1' })
+      );
+      // Editing is still not supported for remote monitors.
       expect(queryByText('Edit monitor')).not.toBeInTheDocument();
+    });
+
+    it('enables "View on remote cluster" using the latest ping kibanaUrl when overview metadata lacks it', () => {
+      // Overview-status metadata can omit `remote.kibanaUrl` (the `top_metrics`
+      // aggregation drops `text`-mapped fields), so the deep link must fall back
+      // to the `kibanaUrl` read straight from the latest ping's `_source`.
+      jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
+        data: {
+          docId: 'docId',
+          kibanaUrl: 'https://ping-kibana.example.com',
+          monitor: {
+            name: 'Remote HTTPS Monitor',
+            id: 'remote-monitor-id',
+            status: 'up',
+            type: 'http',
+          },
+          '@timestamp': '2013-03-01 12:54:23',
+        } as any,
+      });
+
+      const { getByTestId } = render(
+        <MonitorDetailFlyout
+          configId="remote-config-id"
+          id="remote-monitor-id"
+          location="europe-west3-a"
+          locationId="europe-west3-a"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+            },
+            overviewStatus: {
+              status: {
+                upConfigs: {
+                  'remote-config-id-europe-west3-a': {
+                    monitorQueryId: 'remote-monitor-id',
+                    configId: 'remote-config-id',
+                    name: 'Remote HTTPS Monitor',
+                    type: 'http',
+                    schedule: '10',
+                    tags: [],
+                    isEnabled: true,
+                    isStatusAlertEnabled: false,
+                    overallStatus: 'up',
+                    // Note: no `kibanaUrl` on the overview metadata.
+                    remote: {
+                      remoteName: 'remote-cluster-1',
+                    },
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
+                  },
+                },
+                downConfigs: {},
+                pendingConfigs: {},
+                disabledConfigs: {},
+              },
+            },
+          },
+        }
+      );
+
+      const viewRemoteButton = getByTestId('syntheticsMonitorDetailFlyoutViewRemoteButton');
+      expect(viewRemoteButton.getAttribute('href')).toContain('https://ping-kibana.example.com');
     });
   });
 

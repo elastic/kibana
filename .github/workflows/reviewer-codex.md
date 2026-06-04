@@ -110,6 +110,7 @@ steps:
       path: /tmp/gh-aw/agent
 safe-outputs:
   footer: true
+  report-failure-as-issue: false
   noop:
     report-as-issue: false
   dispatch-workflow:
@@ -123,6 +124,7 @@ safe-outputs:
     max: 1
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
+    footer: if-body
   add-comment:
     max: 1
     target: ${{ env.PR_NUMBER }}
@@ -130,6 +132,8 @@ safe-outputs:
   reply-to-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
+  resolve-pull-request-review-thread:
+    max: 10
 # Codex engine does not expose workflow env vars like PR_NUMBER and REVIEWER_COMMENT_ID to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
 
@@ -138,6 +142,7 @@ safe-outputs:
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
+- This reviewer's own gh-aw workflow id is `reviewer-codex`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
 
 For dispatched follow-up runs, use this context:
 - PR number: `${{ github.event.inputs.pr_number }}`

@@ -101,7 +101,10 @@ export const useGroupedCascadeData = ({
                     if (!columnTypes.has(identifier)) {
                       columnTypes.set(identifier, 'array');
                     }
-                    const valuesArray = currentValue.map(String);
+
+                    const valuesArray = currentValue.map((value) =>
+                      typeof value === 'number' ? value : String(value)
+                    );
 
                     if (Array.isArray(existingValue)) {
                       allValues[identifier] = [...existingValue, ...valuesArray];

@@ -9,6 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
+import { actionPolicyOperationSchema } from './operations';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
@@ -179,6 +180,66 @@ describe('manageActionPolicyTool', () => {
       );
 
       expect(ctx.attachments.add).toHaveBeenCalled();
+    });
+  });
+
+  describe('set_type operation', () => {
+    it('creates a single_rule policy with type and ruleId in the result', async () => {
+      const deps = createDeps();
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Single Rule Policy', description: 'desc' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+            { operation: 'set_type', type: 'single_rule', ruleId: 'rule-abc' },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: {
+            actionPolicyAttachment?: {
+              type?: string;
+              ruleId?: string;
+              name?: string;
+            };
+          };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.actionPolicyAttachment?.type).toBe('single_rule');
+      expect(results[0].data?.actionPolicyAttachment?.ruleId).toBe('rule-abc');
+      expect(results[0].data?.actionPolicyAttachment?.name).toBe('Single Rule Policy');
+    });
+
+    it('rejects set_type global with a ruleId at schema level', () => {
+      const result = actionPolicyOperationSchema.safeParse({
+        operation: 'set_type',
+        type: 'global',
+        ruleId: 'rule-abc',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error!.issues[0].message).toContain('ruleId is only allowed');
+    });
+
+    it('rejects set_type single_rule without ruleId at schema level', () => {
+      const result = actionPolicyOperationSchema.safeParse({
+        operation: 'set_type',
+        type: 'single_rule',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error!.issues[0].message).toContain('ruleId is required');
     });
   });
 

@@ -25,6 +25,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { usePlugin } from '../../../hooks/plugins/use_plugin';
 import { useSkill } from '../../../hooks/skills/use_skills';
@@ -81,7 +83,17 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
           isAuto ? (
             <EuiBadge color="hollow">{labels.agentPlugins.autoIncludedBadgeLabel}</EuiBadge>
           ) : (
-            <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+            <EuiButtonEmpty
+              iconType="cross"
+              size="xs"
+              color="danger"
+              onClick={openConfirmRemove}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+                detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              })}
+            >
               {labels.agentPlugins.removePluginButtonLabel}
             </EuiButtonEmpty>
           )

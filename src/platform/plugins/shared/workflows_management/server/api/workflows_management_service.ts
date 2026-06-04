@@ -26,6 +26,7 @@ import type {
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
@@ -37,7 +38,10 @@ import type {
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallOptions,
+  ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type {
   ChildWorkflowExecutionItem,
@@ -52,7 +56,10 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import type { StepExecutionListResult } from './lib/search_step_executions';
@@ -60,6 +67,7 @@ import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   DeleteWorkflowsResponse,
   GetStepExecutionParams,
+  GetWorkflowAggsOptions,
   GetWorkflowsParams,
   SearchStepExecutionsParams,
 } from './workflows_management_api';
@@ -75,7 +83,7 @@ import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 export interface SearchWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -83,10 +91,15 @@ export interface SearchWorkflowExecutionsParams {
   omitStepRuns?: boolean;
   finishedAfter?: string;
   finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
   sortField?: WorkflowExecutionSortField;
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 export class WorkflowsService {
@@ -304,9 +317,15 @@ export class WorkflowsService {
     return this.searchService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  public async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     await this.ensureInitialized();
-    return this.searchService.getWorkflowAggs(fields, spaceId);
+    return options
+      ? this.searchService.getWorkflowAggs(fields, spaceId, options)
+      : this.searchService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getWorkflowExecution(
@@ -389,6 +408,11 @@ export class WorkflowsService {
     return this.validationService.getAvailableConnectors(spaceId, request);
   }
 
+  public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
+    await this.ensureInitialized();
+    return this.validationService.getRegisteredCustomTriggerDefinitions();
+  }
+
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
@@ -409,7 +433,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowServiceInstallOptions,
     registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
@@ -423,6 +447,15 @@ export class WorkflowsService {
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
+  }
+
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.getManagedWorkflowStatus(id, options, registeredPluginId);
   }
 
   public async executeManagedWorkflow(
