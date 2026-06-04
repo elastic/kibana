@@ -314,24 +314,26 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         width: '10%',
         sortable: true,
         render: (kind: string) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={kind === 'alert' ? 'bell' : 'securitySignalResolved'}
-                size="m"
-                aria-hidden={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.rulesList.modeTooltip', {
+              defaultMessage: 'Mode can be changed in the rule edit form',
+            })}
+          >
+            <EuiBadge
+              color="hollow"
+              iconType={kind === 'alert' ? 'bell' : 'radar'}
+              iconSide="left"
+              tabIndex={0}
+            >
               {kind === 'alert'
-                ? i18n.translate('xpack.alertingV2.rulesList.modeAlerting', {
-                    defaultMessage: 'Alerting',
+                ? i18n.translate('xpack.alertingV2.rulesList.modeAlert', {
+                    defaultMessage: 'Alert',
                   })
-                : i18n.translate('xpack.alertingV2.rulesList.modeDetectOnly', {
-                    defaultMessage: 'Detect only',
+                : i18n.translate('xpack.alertingV2.rulesList.modeSignal', {
+                    defaultMessage: 'Signal',
                   })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </EuiBadge>
+          </EuiToolTip>
         ),
       },
       {

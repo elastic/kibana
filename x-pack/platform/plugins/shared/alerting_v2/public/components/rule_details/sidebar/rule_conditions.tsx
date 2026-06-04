@@ -17,10 +17,10 @@ import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
-    defaultMessage: 'Detect only',
+    defaultMessage: 'Signal',
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alerting',
+    defaultMessage: 'Alert',
   }),
 };
 

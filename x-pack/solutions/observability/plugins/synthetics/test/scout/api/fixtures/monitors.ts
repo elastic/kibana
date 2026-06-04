@@ -5,9 +5,25 @@
  * 2.0.
  */
 
+import { omit, omitBy } from 'lodash';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
+import {
+  removeMonitorEmptyValues,
+  transformPublicKeys,
+} from '../../../../server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { PUBLIC_API_VERSION } from './constants';
+
+/** Gateway statuses the FTR monitor delete helper treats as retryable. */
+const TRANSIENT_DELETE_STATUSES = [502, 503, 504];
+
+const monitorsPath = (spaceId?: string) =>
+  spaceId ? `s/${spaceId}/api/synthetics/monitors` : 'api/synthetics/monitors';
+
+const withPublicApiVersion = (headers: Record<string, string>) => ({
+  ...headers,
+  'elastic-api-version': PUBLIC_API_VERSION,
+});
 
 /**
  * Thin wrapper around `POST /api/synthetics/monitors` for Scout API specs.
@@ -38,5 +54,294 @@ export async function addMonitor(
     responseType: 'json',
   });
   expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * Thin wrapper around `PUT /api/synthetics/monitors/{id}` for Scout API specs.
+ *
+ * Mirrors the FTR `editMonitorAPIHelper` from the `edit_monitor_public_api*`
+ * suites. The caller supplies the auth headers (typically API key + internal
+ * origin) and the expected `statusCode`.
+ */
+export async function editMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  monitor: unknown,
+  opts: { statusCode?: number } = {}
+) {
+  const { statusCode = 200 } = opts;
+  const res = await apiClient.put(`api/synthetics/monitors/${monitorId}`, {
+    headers: { ...headers, 'elastic-api-version': PUBLIC_API_VERSION },
+    body: monitor,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * Keys removed from the *expected* monitor input before comparing it against a
+ * create/edit response. Ported verbatim from the FTR `create_monitor.ts`
+ * `keyToOmitList`.
+ */
+export const keyToOmitList = [
+  'created_at',
+  'updated_at',
+  'id',
+  'config_id',
+  'form_monitor_type',
+  'spaceId',
+  'private_locations',
+];
+
+/**
+ * Normalizes an *expected* monitor input the same way the public API
+ * serializes a monitor saved object: applies the public-key transform, drops
+ * server-generated keys, then strips empty values. Mirrors `omitMonitorKeys`
+ * from the FTR `create_monitor.ts` so migrated specs can assert deep equality.
+ */
+export const omitMonitorKeys = (monitor: Record<string, unknown>) =>
+  omitBy(
+    omit(transformPublicKeys(monitor as Parameters<typeof transformPublicKeys>[0]), keyToOmitList),
+    removeMonitorEmptyValues
+  );
+
+const RESPONSE_OMIT_KEYS = ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type'];
+
+/**
+ * Strips the server-generated fields from a create/edit response body so it
+ * can be compared against `omitMonitorKeys(expectedInput)`. Mirrors the
+ * response-side `omit(...)` in the FTR add/edit helpers.
+ */
+export const parseMonitorResponse = (body: Record<string, unknown>) =>
+  omit(body, RESPONSE_OMIT_KEYS);
+
+/** Drops only the server-generated timestamps. Ported from FTR `helpers/monitor.ts`. */
+export const omitResponseTimestamps = (monitor: object) =>
+  omit(monitor, ['created_at', 'updated_at']);
+
+/**
+ * Drops timestamps and re-adds `url` last so empty-vs-present `url` ordering
+ * matches the create/edit response shape. Ported from FTR `helpers/monitor.ts`.
+ */
+export const omitEmptyValues = (monitor: object) => {
+  const { url, ...rest } = omit(monitor, ['created_at', 'updated_at']) as Record<string, unknown>;
+  return {
+    ...rest,
+    ...(url ? { url } : {}),
+  };
+};
+
+/**
+ * `POST /api/synthetics/monitors?internal=true` — saves a monitor and returns
+ * the internal (UI-shaped) representation. Mirrors the `saveMonitor` helpers in
+ * the FTR `edit_monitor*` / `get_monitor` suites.
+ */
+export async function saveMonitorInternal(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitor: Record<string, unknown>,
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const res = await apiClient.post(`${monitorsPath(spaceId)}?internal=true`, {
+    headers: withPublicApiVersion(headers),
+    body: monitor,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `PUT /api/synthetics/monitors/{id}?internal=true` — edits a monitor and
+ * returns the internal representation. Mirrors the FTR `editMonitor` helper.
+ */
+export async function editMonitorInternal(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  monitor: Record<string, unknown> | unknown,
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const res = await apiClient.put(`${monitorsPath(spaceId)}/${monitorId}?internal=true`, {
+    headers: withPublicApiVersion(headers),
+    body: monitor,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `GET /api/synthetics/monitors/{id}` — fetches a single monitor. For a 200
+ * response, validates the server-generated fields and returns both the raw
+ * body and a `body` with those fields stripped, mirroring the FTR
+ * `SyntheticsMonitorTestService.getMonitor` contract.
+ */
+export async function getMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  opts: { space?: string; internal?: boolean; statusCode?: number } = {}
+) {
+  const { space, internal, statusCode = 200 } = opts;
+  const path = `${monitorsPath(space)}/${monitorId}${internal ? '?internal=true' : ''}`;
+  const res = await apiClient.get(path, {
+    headers: withPublicApiVersion(headers),
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+
+  if (statusCode !== 200) {
+    return { rawBody: res.body, body: res.body };
+  }
+
+  const body = res.body as Record<string, unknown>;
+  expect(Boolean(body.id)).toBe(true);
+  expect(Boolean(body.config_id)).toBe(true);
+  expect(Boolean(body.spaceId)).toBe(true);
+  expect(Number.isNaN(new Date(body.created_at as string).getTime())).toBe(false);
+  expect(Number.isNaN(new Date(body.updated_at as string).getTime())).toBe(false);
+
+  return {
+    rawBody: omit(body, ['spaceId']),
+    body: omit(body, [
+      'created_at',
+      'updated_at',
+      'id',
+      'config_id',
+      'form_monitor_type',
+      'spaceId',
+    ]),
+  };
+}
+
+/**
+ * `GET /api/synthetics/monitors?<query>` — lists monitors. Used by the
+ * `get_monitor` paging/filtering specs.
+ */
+export async function listMonitors(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  query: string = '',
+  opts: { spaceId?: string } = {}
+) {
+  const { spaceId } = opts;
+  const res = await apiClient.get(`${monitorsPath(spaceId)}${query ? `?${query}` : ''}`, {
+    headers: withPublicApiVersion(headers),
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  return res;
+}
+
+/**
+ * `DELETE /api/synthetics/monitors` with `{ ids }` body. For the 200 path it
+ * retries transient gateway failures (mirrors the FTR 60s `retry.tryForTime`).
+ */
+export async function deleteMonitors(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  ids: string[],
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const path = monitorsPath(spaceId);
+  const send = () =>
+    apiClient.delete(path, {
+      headers: withPublicApiVersion(headers),
+      body: { ids },
+      responseType: 'json',
+    });
+
+  if (statusCode !== 200) {
+    const res = await send();
+    expect(res).toHaveStatusCode(statusCode);
+    return res;
+  }
+
+  const deadline = Date.now() + 60_000;
+  let res = await send();
+  while (TRANSIENT_DELETE_STATUSES.includes(res.statusCode) && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    res = await send();
+  }
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `DELETE /api/synthetics/monitors/{id}` (id via path param). Same transient
+ * retry semantics as {@link deleteMonitors}.
+ */
+export async function deleteMonitorByIdParam(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const path = `${monitorsPath(spaceId)}/${monitorId}`;
+  const send = () =>
+    apiClient.delete(path, {
+      headers: withPublicApiVersion(headers),
+      responseType: 'json',
+    });
+
+  if (statusCode !== 200) {
+    const res = await send();
+    expect(res).toHaveStatusCode(statusCode);
+    return res;
+  }
+
+  const deadline = Date.now() + 60_000;
+  let res = await send();
+  while (TRANSIENT_DELETE_STATUSES.includes(res.statusCode) && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    res = await send();
+  }
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `POST /api/synthetics/monitor/test/{id}` — triggers a manual test run.
+ * Mirrors the FTR `testNowMonitor` helper.
+ */
+export async function testNowMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const base = spaceId ? `s/${spaceId}/api/synthetics/monitor/test` : 'api/synthetics/monitor/test';
+  const res = await apiClient.post(`${base}/${monitorId}`, {
+    headers: withPublicApiVersion(headers),
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `PUT /internal/synthetics/service/enablement` — enables synthetics. Internal
+ * route, so no `elastic-api-version` header (matching the FTR enablement call).
+ */
+export async function enableSynthetics(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  opts: { spaceId?: string } = {}
+) {
+  const { spaceId } = opts;
+  const base = spaceId
+    ? `s/${spaceId}/internal/synthetics/service/enablement`
+    : 'internal/synthetics/service/enablement';
+  const res = await apiClient.put(base, { headers, responseType: 'json' });
+  expect(res).toHaveStatusCode(200);
   return res;
 }

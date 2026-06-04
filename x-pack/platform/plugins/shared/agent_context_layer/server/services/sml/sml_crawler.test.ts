@@ -72,6 +72,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
 
 const mockIndexer = {
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  deleteChunks: jest.fn().mockResolvedValue(undefined),
 };
 
 const createMockLogger = () => {
@@ -96,6 +97,9 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> => {
   return {
     indices,
     count: jest.fn().mockResolvedValue({ count: 0 }),
+    // findManualOriginIds (in sml_crawler.ts) calls search on the SML data index.
+    // Default: no manual entries for any origin id.
+    search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
   } as unknown as jest.Mocked<ElasticsearchClient>;
 };
 
@@ -454,6 +458,150 @@ describe('SmlCrawlerImpl', () => {
 
       expect(logger.warn).toHaveBeenCalledWith('SML crawler: skipping hit without _id');
       expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
+    });
+
+    it('skips create/update for origin_ids that already have a manual entry and ACKs them', async () => {
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(
+          yieldPages([
+            { id: 'manual-origin', updatedAt: '2024-01-01', spaces: ['default'] },
+            { id: 'normal-origin', updatedAt: '2024-01-01', spaces: ['default'] },
+          ])
+        ),
+      });
+      mockStateClient.search
+        // countStateDocs returns 0
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } })
+        // batchLookupState returns empty for new items
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        // sweepStaleState returns empty
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        // processQueue finds both pending create actions
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'test-type:manual-origin',
+                sort: ['manual-origin'],
+                _source: {
+                  origin_id: 'manual-origin',
+                  type_id: 'test-type',
+                  spaces: ['default'],
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-01',
+                  update_action: 'create',
+                  last_crawled_at: '2024-01-01',
+                },
+              },
+              {
+                _id: 'test-type:normal-origin',
+                sort: ['normal-origin'],
+                _source: {
+                  origin_id: 'normal-origin',
+                  type_id: 'test-type',
+                  spaces: ['default'],
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-01',
+                  update_action: 'create',
+                  last_crawled_at: '2024-01-01',
+                },
+              },
+            ],
+          },
+        })
+        .mockResolvedValue({ hits: { hits: [] } });
+
+      // findManualOriginIds returns one of the candidates as manual
+      (esClient.search as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [{ _source: { origin_id: 'manual-origin' } }],
+        },
+      });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      // Indexer must only be called for non-manual origin
+      expect(mockIndexer.indexAttachment).toHaveBeenCalledTimes(1);
+      expect(mockIndexer.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'normal-origin' })
+      );
+
+      // Both items should have been ACKed (update_action cleared)
+      const ackOps = mockStateClient.bulk.mock.calls
+        .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
+        .filter(
+          (op: { index?: { _id?: string; document?: { update_action?: unknown } } }) =>
+            op.index?.document !== undefined && op.index.document.update_action === undefined
+        );
+      const ackedIds = ackOps.map((op: { index?: { _id?: string } }) => op.index?._id);
+      expect(ackedIds).toEqual(
+        expect.arrayContaining(['test-type:manual-origin', 'test-type:normal-origin'])
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining("skipping 'create' for origin 'manual-origin'")
+      );
+    });
+
+    it('manual-origin protection does NOT apply to delete actions', async () => {
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages()),
+      });
+      mockStateClient.search
+        // countStateDocs returns 1
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        // sweepStaleState marks one stale doc for deletion
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'test-type:manual-origin',
+                sort: ['manual-origin'],
+                _source: {
+                  origin_id: 'manual-origin',
+                  type_id: 'test-type',
+                  spaces: ['default'],
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-01',
+                  update_action: undefined,
+                  last_crawled_at: '2023-12-01',
+                },
+              },
+            ],
+          },
+        })
+        // processQueue picks up the delete action
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'test-type:manual-origin',
+                sort: ['manual-origin'],
+                _source: {
+                  origin_id: 'manual-origin',
+                  type_id: 'test-type',
+                  spaces: ['default'],
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-01',
+                  update_action: 'delete',
+                  last_crawled_at: '2024-01-01',
+                },
+              },
+            ],
+          },
+        })
+        .mockResolvedValue({ hits: { hits: [] } });
+
+      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      // findManualOriginIds is not queried for delete-only batches
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(mockIndexer.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'manual-origin', action: 'delete' })
+      );
     });
   });
 
