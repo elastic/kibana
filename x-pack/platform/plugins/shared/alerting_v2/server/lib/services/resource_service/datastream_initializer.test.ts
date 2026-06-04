@@ -29,22 +29,7 @@ describe('DatastreamInitializer', () => {
         '@timestamp': { type: 'date' },
       },
     },
-    ilmPolicy: {
-      name: '.alerting-test-ilm-policy',
-      policy: {
-        _meta: { managed: true },
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_age: '30d',
-                max_primary_shard_size: '50gb',
-              },
-            },
-          },
-        },
-      },
-    },
+    lifecycle: {},
   };
 
   beforeEach(() => {
@@ -52,25 +37,27 @@ describe('DatastreamInitializer', () => {
     mockLogger = loggerMock.create();
     // data streams uses the esClient internally
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.ilm.putLifecycle.mockResolvedValue({ acknowledged: true });
     esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] });
     esClient.indices.getIndexTemplate.mockResolvedValue({ index_templates: [] });
     esClient.indices.putIndexTemplate.mockResolvedValue({ acknowledged: true });
     esClient.indices.createDataStream.mockResolvedValue({ acknowledged: true });
   });
 
-  it('installs ILM policy, index template, then creates the data stream', async () => {
+  it('installs the index template with DSL lifecycle, then creates the data stream', async () => {
     const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
 
     await initializer.initialize();
 
-    expect(esClient.ilm.putLifecycle).toHaveBeenCalledWith({
-      name: resourceDefinition.ilmPolicy.name,
-      policy: resourceDefinition.ilmPolicy.policy,
-    });
+    // No `_ilm` API call — incompatible with serverless. DSL is configured
+    // entirely through the index template's `lifecycle` field.
+    expect(esClient.ilm.putLifecycle).not.toHaveBeenCalled();
+
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: resourceDefinition.dataStreamName,
+        template: expect.objectContaining({
+          lifecycle: resourceDefinition.lifecycle,
+        }),
       })
     );
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
