@@ -63,6 +63,40 @@ Useful env vars (full list: `node scripts/evals env`):
 - `hard_cases.ts` — edge cases (the `very-hard` ones are filtered out of CI for cost/time).
 - `negative_pairs.ts` — prompts the model should refuse; scored by the `Rejection` evaluator.
 
+Domains covered across the datasets include:
+
+- **Collection**: File encryption with WinRAR/7z
+- **Credential Access**: LSASS access, Mimikatz usage
+- **Defense Evasion**: Windows Defender tampering, event log clearing, UAC bypass
+- **Command & Control**: Remote file copy, network connections
+- **Privilege Escalation**: UAC bypass, IAM role grants
+- **Cloud Security**: AWS S3 policy changes, Azure AD, GCP IAM, O365 audit
+- **Execution**: Container creation, npm scripts, GitHub Actions runner tampering
+
+### Adding more rules
+
+To expand the dataset, add entries to the appropriate file in `datasets/`:
+
+```typescript
+export const sampleRules: ReferenceRule[] = [
+  // ... existing rules
+  {
+    id: 'your-rule-id',
+    name: 'Your New Rule',
+    prompt: 'Describe the detection...\n\nAvailable data: logs-endpoint.events.*',
+    description: 'Detects XYZ behavior',
+    query: 'process where ...', // reference query (EQL or ES|QL)
+    threat: [{ technique: 'T1234', tactic: 'TA0001' }],
+    severity: 'high',
+    tags: ['Domain: Endpoint', 'OS: Windows'],
+    riskScore: 73,
+    from: 'now-9m',
+    category: 'execution',
+    esqlQuery: 'FROM logs-endpoint.events.* ...', // optional: ES|QL translation for non-ES|QL rules
+  },
+];
+```
+
 ## Seeding data
 
 The rule-creation tool discovers a target index from the cluster using `indexExplorer`
@@ -170,42 +204,6 @@ where a comparison is not meaningful:
 - `skipAgentErrors` — N/A when the agent call itself errored.
 - `skipNonEsqlReferences` — applied to the ES|QL equivalence evaluator to avoid meaningless
   comparisons when no ES|QL ground truth exists.
-
-## Datasets reference
-
-Domains covered across the datasets include:
-
-- **Collection**: File encryption with WinRAR/7z
-- **Credential Access**: LSASS access, Mimikatz usage
-- **Defense Evasion**: Windows Defender tampering, event log clearing, UAC bypass
-- **Command & Control**: Remote file copy, network connections
-- **Privilege Escalation**: UAC bypass, IAM role grants
-- **Cloud Security**: AWS S3 policy changes, Azure AD, GCP IAM, O365 audit
-- **Execution**: Container creation, npm scripts, GitHub Actions runner tampering
-
-### Adding more rules
-
-To expand the dataset, add entries to the appropriate file in `datasets/`:
-
-```typescript
-export const sampleRules: ReferenceRule[] = [
-  // ... existing rules
-  {
-    id: 'your-rule-id',
-    name: 'Your New Rule',
-    prompt: 'Describe the detection...\n\nAvailable data: logs-endpoint.events.*',
-    description: 'Detects XYZ behavior',
-    query: 'process where ...', // reference query (EQL or ES|QL)
-    threat: [{ technique: 'T1234', tactic: 'TA0001' }],
-    severity: 'high',
-    tags: ['Domain: Endpoint', 'OS: Windows'],
-    riskScore: 73,
-    from: 'now-9m',
-    category: 'execution',
-    esqlQuery: 'FROM logs-endpoint.events.* ...', // optional: ES|QL translation for non-ES|QL rules
-  },
-];
-```
 
 ## Troubleshooting
 
