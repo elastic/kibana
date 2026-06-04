@@ -40,38 +40,43 @@ export const getContinuity = async ({
       })
     );
 
-  // silence findings
-  pipelines
-    .filter((p) => p.isSilent)
-    .forEach((p) =>
+  // silence and volume-drop findings — merged when both apply to the same pipeline
+  pipelines.forEach((p) => {
+    const hasSilence = p.isSilent;
+    const hasVolumeDrop = p.volumeDropPct !== null && p.volumeDropPct !== undefined;
+    const isVolumeCritical = hasVolumeDrop && p.volumeDropPct! >= VOLUME_DROP_CRITICAL_PCT;
+    const isVolumeWarning =
+      hasVolumeDrop && !isVolumeCritical && p.volumeDropPct! >= VOLUME_DROP_WARNING_PCT;
+
+    if (hasSilence) {
+      // Silence is the primary signal. Include volume context when a baseline exists
+      // so the operator sees both facts in one finding rather than two separate bullets.
+      const volumeContext =
+        hasVolumeDrop && p.baseline7dAvg != null
+          ? ` (${p.volumeDropPct}% volume drop vs ~${Math.round(p.baseline7dAvg)} docs/day baseline)`
+          : '';
+      actionableFindings.push({
+        severity: 'CRITICAL' as const,
+        type: 'silence' as const,
+        message: `Data stream serving pipeline ${p.name} has gone silent${volumeContext}`,
+        resource: p.name,
+      });
+    } else if (isVolumeCritical) {
+      actionableFindings.push({
+        severity: 'CRITICAL' as const,
+        type: 'volume_drop_critical' as const,
+        message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
+        resource: p.name,
+      });
+    } else if (isVolumeWarning) {
       actionableFindings.push({
         severity: 'WARNING' as const,
-        type: 'silence' as const,
-        message: `Data stream serving pipeline ${p.name} has gone silent`,
+        type: 'volume_drop_warning' as const,
+        message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
         resource: p.name,
-      })
-    );
-
-  // volume-drop findings
-  pipelines
-    .filter((p) => p.volumeDropPct !== null && p.volumeDropPct !== undefined)
-    .forEach((p) => {
-      if (p.volumeDropPct! >= VOLUME_DROP_CRITICAL_PCT) {
-        actionableFindings.push({
-          severity: 'CRITICAL' as const,
-          type: 'volume_drop_critical' as const,
-          message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline`,
-          resource: p.name,
-        });
-      } else if (p.volumeDropPct! >= VOLUME_DROP_WARNING_PCT) {
-        actionableFindings.push({
-          severity: 'WARNING' as const,
-          type: 'volume_drop_warning' as const,
-          message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline`,
-          resource: p.name,
-        });
-      }
-    });
+      });
+    }
+  });
 
   const status =
     pipelines.length === 0
@@ -80,7 +85,7 @@ export const getContinuity = async ({
       ? ('actionsRequired' as const)
       : ('healthy' as const);
 
-  const summary = buildContinuitySummary(status, pipelines.length, actionableFindings.length);
+  const summary = buildContinuitySummary(status, pipelines.length, actionableFindings);
 
   return { status, summary, items: pipelines, actionableFindings };
 };
@@ -88,11 +93,21 @@ export const getContinuity = async ({
 const buildContinuitySummary = (
   status: string,
   pipelineCount: number,
-  criticalCount: number
+  findings: ActionableFinding[]
 ): string => {
   if (status === 'noData') return 'No active ingest pipelines found.';
-  if (criticalCount > 0) {
-    return `${criticalCount} of ${pipelineCount} pipelines have critical failure rates and require immediate attention.`;
-  }
-  return `All ${pipelineCount} active ingest pipelines are healthy.`;
+  if (findings.length === 0) return `All ${pipelineCount} active ingest pipelines are healthy.`;
+
+  const silentCount = findings.filter((f) => f.type === 'silence').length;
+  const dropCritical = findings.filter((f) => f.type === 'volume_drop_critical').length;
+  const dropWarning = findings.filter((f) => f.type === 'volume_drop_warning').length;
+  const failureCount = findings.filter((f) => f.type === 'pipeline_failure').length;
+
+  const parts: string[] = [];
+  if (silentCount) parts.push(`${silentCount} silent`);
+  if (dropCritical) parts.push(`${dropCritical} critical volume drop`);
+  if (dropWarning) parts.push(`${dropWarning} volume drop warning`);
+  if (failureCount) parts.push(`${failureCount} pipeline failure`);
+
+  return `${parts.join(', ')} across ${pipelineCount} active pipelines.`;
 };

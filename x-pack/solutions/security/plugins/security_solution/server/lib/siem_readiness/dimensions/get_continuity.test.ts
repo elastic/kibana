@@ -98,7 +98,7 @@ describe('getContinuity', () => {
       expect(result.actionableFindings[0].message).toContain('10');
     });
 
-    it('emits a silence WARNING finding for a pipeline where isSilent is true', async () => {
+    it('emits a silence CRITICAL finding for a pipeline where isSilent is true', async () => {
       mockFetchPipelines.mockResolvedValueOnce([
         makePipeline({
           name: 'silent-pipeline',
@@ -111,9 +111,34 @@ describe('getContinuity', () => {
       const result = await getContinuity({ esClient, isServerless: false, logger });
       const silenceFinding = result.actionableFindings.find((f) => f.type === 'silence');
       expect(silenceFinding).toBeDefined();
-      expect(silenceFinding?.severity).toBe('WARNING');
+      expect(silenceFinding?.severity).toBe('CRITICAL');
       expect(silenceFinding?.resource).toBe('silent-pipeline');
       expect(silenceFinding?.message).toContain('silent-pipeline');
+    });
+
+    it('merges silence and volume-drop into ONE finding when both apply to the same pipeline', async () => {
+      mockFetchPipelines.mockResolvedValueOnce([
+        makePipeline({
+          name: 'silent-and-dropped-pipeline',
+          docsCount: 1000,
+          failedDocsCount: 0,
+          isSilent: true,
+          silenceMs: 2 * 60 * 60 * 1000,
+          volumeDropPct: 100,
+          last24hDocs: 0,
+          baseline7dAvg: 50,
+        }),
+      ]);
+      const result = await getContinuity({ esClient, isServerless: false, logger });
+      // Must emit exactly one finding — not one for silence + one for volume drop
+      expect(result.actionableFindings).toHaveLength(1);
+      const finding = result.actionableFindings[0];
+      expect(finding.type).toBe('silence');
+      expect(finding.severity).toBe('CRITICAL');
+      // Message must contain both the silence fact and the volume context
+      expect(finding.message).toContain('silent-and-dropped-pipeline');
+      expect(finding.message).toContain('100%');
+      expect(finding.message).toContain('50');
     });
 
     it('emits a volume_drop_warning finding when volumeDropPct >= 50 and < 90', async () => {
