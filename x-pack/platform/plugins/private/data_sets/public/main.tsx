@@ -250,7 +250,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     () => [
       {
         id: 'sets',
-        name: mainTranslations.tabs.sets(dataSetItems.length),
+        name: mainTranslations.tabs.sets,
         content: (
           <>
             <EuiSpacer size="m" />
@@ -322,7 +322,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
       },
       {
         id: 'sources',
-        name: mainTranslations.tabs.sources(items.length),
+        name: mainTranslations.tabs.sources,
         content: (
           <>
             <EuiSpacer size="m" />
