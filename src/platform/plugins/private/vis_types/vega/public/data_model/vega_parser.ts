@@ -739,10 +739,10 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     const labelColor = getVegaThemeColors(this.theme, 'label');
     const axisColor = getVegaThemeColors(this.theme, 'grid');
 
-    this._setDefaultValue(labelColor, 'config', 'style', 'guide-label', 'fill');
-    this._setDefaultValue(titleColor, 'config', 'style', 'guide-title', 'fill');
-    this._setDefaultValue(titleColor, 'config', 'style', 'group-title', 'fill');
-    this._setDefaultValue(titleColor, 'config', 'style', 'group-subtitle', 'fill');
+    this._setDefaultValue(labelColor, 'config', 'style', 'guide-label', 'fill'); // style for axis, legend, and header labels
+    this._setDefaultValue(titleColor, 'config', 'style', 'guide-title', 'fill'); // style for axis, legend, and header titles
+    this._setDefaultValue(titleColor, 'config', 'style', 'group-title', 'fill'); // styles for chart titles
+    this._setDefaultValue(titleColor, 'config', 'style', 'group-subtitle', 'fill'); // styles for chart sub-titles
     this._setDefaultValue(axisColor, 'config', 'axis', 'tickColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'domainColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
