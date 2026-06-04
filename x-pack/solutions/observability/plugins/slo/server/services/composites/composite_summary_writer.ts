@@ -95,6 +95,7 @@ interface PersistCompositeSummaryDocParams {
  * Computes a composite SLO summary live and writes it to the summary index with refresh: true.
  * Used by create/update routes to ensure the find route can immediately surface newly created
  * or updated composites without waiting for the next background task run.
+ * TODO: this does not only persist - to refactor to not be misleading
  */
 export async function persistCompositeSummaryDoc({
   esClient,
