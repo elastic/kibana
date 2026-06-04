@@ -147,9 +147,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
-
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
@@ -235,6 +232,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
    */
   pciComplianceAgentBuilder: true,
+
+  /**
+   * Enables the find-security-rules Agent Builder skill.
+   * Part of the DEX AI skills family (`dexAiSkill*`).
+   */
+  dexAiSkillFindRules: false,
 
   /**
    * Enables the new flyout using the EUI flyout system
