@@ -34,13 +34,11 @@ export class DatastreamInitializer implements IResourceInitializer {
         aliases: {},
         priority: 500,
         mappings: this.resourceDefinition.mappings,
-        // Data Stream Lifecycle (DSL) instead of ILM so this works on both
-        // stateful and serverless. `DataStreamClient` handles both initial
-        // template install and lifecycle migrations on version bumps.
         lifecycle: this.resourceDefinition.lifecycle,
         settings: {
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          'index.lifecycle.prefer_ilm': false,
         },
         _meta: {
           managed: true,

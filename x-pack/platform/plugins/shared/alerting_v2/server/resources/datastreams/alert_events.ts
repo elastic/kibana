@@ -10,8 +10,6 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-// Version bumped from 3 to 4 to swap the ILM policy (incompatible with
-// serverless `_ilm` APIs) for a Data Stream Lifecycle (DSL) configuration.
 export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
@@ -91,8 +89,5 @@ export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   dataStreamName: ALERT_EVENTS_DATA_STREAM,
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
-  // Empty lifecycle enables DSL with cluster defaults: automatic rollover,
-  // no document retention (data is kept indefinitely, matching the previous
-  // ILM policy which only declared a `hot` rollover phase).
   lifecycle: {},
 });

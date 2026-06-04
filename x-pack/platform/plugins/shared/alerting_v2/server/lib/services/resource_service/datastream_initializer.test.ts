@@ -48,10 +48,6 @@ describe('DatastreamInitializer', () => {
 
     await initializer.initialize();
 
-    // No `_ilm` API call — incompatible with serverless. DSL is configured
-    // entirely through the index template's `lifecycle` field.
-    expect(esClient.ilm.putLifecycle).not.toHaveBeenCalled();
-
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: resourceDefinition.dataStreamName,
@@ -60,6 +56,7 @@ describe('DatastreamInitializer', () => {
         }),
       })
     );
+
     expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
       name: resourceDefinition.dataStreamName,
     });

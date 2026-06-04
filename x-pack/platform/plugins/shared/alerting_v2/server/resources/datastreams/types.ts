@@ -13,15 +13,5 @@ export interface ResourceDefinition {
   dataStreamName: string;
   version: number;
   mappings: MappingsDefinition;
-  /**
-   * Data Stream Lifecycle (DSL) configuration applied to the data stream's
-   * index template. Use DSL instead of ILM so the same definition works on
-   * both stateful and serverless deployments (`_ilm` APIs are not available
-   * on serverless).
-   *
-   * An empty object enables DSL with cluster defaults (rollover only,
-   * no retention). Set `data_retention` to auto-delete documents after
-   * a duration.
-   */
   lifecycle: IndicesDataStreamLifecycleWithRollover;
 }
