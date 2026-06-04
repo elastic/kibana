@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_SPACE_ID } from './src/common/constants';
-export { addSpaceIdToPath, getSpaceIdFromPath } from './src/common/spaces_url_parser';
+export type { SpaceId } from './src/space_id';
+export { asSpaceId, DEFAULT_SPACE_ID, getSpaceUrlPrefix } from './src/space_id';
+export { addSpaceIdToPath, getSpaceIdFromPath } from './src/spaces_url_parser';

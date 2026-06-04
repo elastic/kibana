@@ -39,7 +39,7 @@ interface TrialUsageBadgeProps {
   cloud: CloudStart;
 }
 
-export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
+export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
@@ -59,7 +59,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
   const daysUsed = Math.min(Math.max(0, TRIAL_TOTAL_DAYS - trialDaysLeft), TRIAL_TOTAL_DAYS);
   const hasPopoverContent = trialDaysLeft > 0 || billingUrl;
 
-  const trialLabel = i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
+  const trialLabel = i18n.translate('xpack.sharedComponents.trialUsageBadge.trialLabel', {
     defaultMessage: 'TRIAL',
   });
 
@@ -75,7 +75,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
     <EuiBadge
       color={euiTheme.colors.primary}
       onClick={() => setIsPopoverOpen((prev) => !prev)}
-      onClickAriaLabel={i18n.translate('xpack.searchSharedUI.trialUsageBadge.toggleAriaLabel', {
+      onClickAriaLabel={i18n.translate('xpack.sharedComponents.trialUsageBadge.toggleAriaLabel', {
         defaultMessage: 'Toggle trial usage details',
       })}
       iconType="arrowDown"
@@ -92,7 +92,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
-      aria-label={i18n.translate('xpack.searchSharedUI.trialUsageBadge.popoverAriaLabel', {
+      aria-label={i18n.translate('xpack.sharedComponents.trialUsageBadge.popoverAriaLabel', {
         defaultMessage: 'Trial usage details',
       })}
       data-test-subj="trialUsagePopover"
@@ -109,10 +109,10 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
         <EuiTitle size="xxs">
           <h4>
             {cloud.isServerlessEnabled
-              ? i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
+              ? i18n.translate('xpack.sharedComponents.trialUsageBadge.serverlessTitle', {
                   defaultMessage: 'Elastic Cloud Serverless',
                 })
-              : i18n.translate('xpack.searchSharedUI.trialUsageBadge.cloudHostedTitle', {
+              : i18n.translate('xpack.sharedComponents.trialUsageBadge.cloudHostedTitle', {
                   defaultMessage: 'Elastic Cloud Hosted',
                 })}
           </h4>
@@ -133,9 +133,12 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">
                         <strong>
-                          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialPeriodLabel', {
-                            defaultMessage: 'Trial period',
-                          })}
+                          {i18n.translate(
+                            'xpack.sharedComponents.trialUsageBadge.trialPeriodLabel',
+                            {
+                              defaultMessage: 'Trial period',
+                            }
+                          )}
                         </strong>
                       </EuiText>
                     </EuiFlexItem>
@@ -144,7 +147,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
                         type="info"
                         iconProps={{ size: 's', color: 'subdued' }}
                         content={i18n.translate(
-                          'xpack.searchSharedUI.trialUsageBadge.trialPeriodTooltip',
+                          'xpack.sharedComponents.trialUsageBadge.trialPeriodTooltip',
                           {
                             defaultMessage:
                               'Your free trial period. After it expires, you will need to subscribe to continue using the service.',
@@ -156,7 +159,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
-                    {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysLeft', {
+                    {i18n.translate('xpack.sharedComponents.trialUsageBadge.daysLeft', {
                       defaultMessage: '{days} {days, plural, one {day} other {days}} left',
                       values: { days: trialDaysLeft },
                     })}
@@ -172,7 +175,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
               />
 
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysUsed', {
+                {i18n.translate('xpack.sharedComponents.trialUsageBadge.daysUsed', {
                   defaultMessage: '{used} / {total} days',
                   values: { used: daysUsed, total: TRIAL_TOTAL_DAYS },
                 })}
@@ -202,7 +205,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
             iconType="popout"
             iconSide="right"
           >
-            {i18n.translate('xpack.searchSharedUI.trialUsageBadge.manageSubscription', {
+            {i18n.translate('xpack.sharedComponents.trialUsageBadge.manageSubscription', {
               defaultMessage: 'Manage subscription',
             })}
           </EuiButton>

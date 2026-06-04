@@ -8,10 +8,9 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
-    "target/**/*"
-  ],
-  "kbn_references": []
+    "target/**/*",
+  ]
 }
