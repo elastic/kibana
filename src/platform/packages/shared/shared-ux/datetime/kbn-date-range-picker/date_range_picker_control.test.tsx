@@ -78,6 +78,36 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it('selects clicked no-year absolute display parts in the input', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-06-04T12:00:00.000Z'));
+
+      try {
+        renderWithEuiTheme(
+          <DateRangePicker
+            {...defaultProps}
+            defaultValue="-4d to Jun 4, 2026, 00:00"
+            onChange={() => {}}
+          />
+        );
+        jest.useRealTimers();
+
+        const displayPart = screen.getAllByText('00')[0];
+        fireEvent.mouseDown(displayPart);
+        fireEvent.click(displayPart);
+
+        const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
+        await waitFor(() => {
+          expect(input).toHaveFocus();
+          expect(input.value.slice(input.selectionStart ?? 0, input.selectionEnd ?? 0)).toBe('00');
+        });
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        await waitForPopoverClose();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('keeps the clicked display part visible when the input is scrolled', async () => {
       const animationFrameCallbacks: FrameRequestCallback[] = [];
       const requestAnimationFrameSpy = jest

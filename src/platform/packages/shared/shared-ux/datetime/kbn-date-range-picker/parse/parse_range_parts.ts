@@ -70,6 +70,8 @@ const INPUT_ABSOLUTE_FORMATS = [
   'MMM D, YYYY @ HH',
   'MMM D, YYYY',
   'MMM D YYYY',
+  'MMM D, HH:mm:ss.SSS',
+  'MMM D, HH:mm:ss',
   'MMM D, HH:mm',
   'MMM D',
   'YYYY-MM-DD H:mm',

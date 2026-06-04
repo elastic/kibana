@@ -201,6 +201,38 @@ describe('parse range parts', () => {
       ]);
     });
 
+    it('classifies no-year display parts with seconds', () => {
+      expect(parseDisplayParts('4 days ago → Jun 4, 00:00:00')).toEqual([
+        expect.objectContaining({ text: '4', kind: 'relative-value', rangeIndex: 0 }),
+        expect.objectContaining({ text: 'days', kind: 'relative-unit', rangeIndex: 0 }),
+        expect.objectContaining({ text: 'ago', kind: 'literal', navigable: false }),
+        expect.objectContaining({ text: '→', kind: 'separator', navigable: false }),
+        expect.objectContaining({ text: 'Jun', kind: 'month', rangeIndex: 1 }),
+        expect.objectContaining({ text: '4', kind: 'day', rangeIndex: 1 }),
+        expect.objectContaining({ text: '00', kind: 'hour', rangeIndex: 1 }),
+        expect.objectContaining({ text: '00', kind: 'minute', rangeIndex: 1 }),
+        expect.objectContaining({ text: '00', kind: 'second', rangeIndex: 1 }),
+      ]);
+    });
+
+    it('classifies no-year display parts with milliseconds', () => {
+      expect(parseDisplayParts('May 31, 00:00:00.000 → Jun 4, 00:00:00.000')).toEqual([
+        expect.objectContaining({ text: 'May', kind: 'month', rangeIndex: 0 }),
+        expect.objectContaining({ text: '31', kind: 'day', rangeIndex: 0 }),
+        expect.objectContaining({ text: '00', kind: 'hour', rangeIndex: 0 }),
+        expect.objectContaining({ text: '00', kind: 'minute', rangeIndex: 0 }),
+        expect.objectContaining({ text: '00', kind: 'second', rangeIndex: 0 }),
+        expect.objectContaining({ text: '000', kind: 'millisecond', rangeIndex: 0 }),
+        expect.objectContaining({ text: '→', kind: 'separator', navigable: false }),
+        expect.objectContaining({ text: 'Jun', kind: 'month', rangeIndex: 1 }),
+        expect.objectContaining({ text: '4', kind: 'day', rangeIndex: 1 }),
+        expect.objectContaining({ text: '00', kind: 'hour', rangeIndex: 1 }),
+        expect.objectContaining({ text: '00', kind: 'minute', rangeIndex: 1 }),
+        expect.objectContaining({ text: '00', kind: 'second', rangeIndex: 1 }),
+        expect.objectContaining({ text: '000', kind: 'millisecond', rangeIndex: 1 }),
+      ]);
+    });
+
     it('classifies time-only end display parts as hour and minute', () => {
       expect(parseDisplayParts('May 5, 00:00 → 23:59')).toEqual([
         expect.objectContaining({ text: 'May', kind: 'month', rangeIndex: 0 }),
