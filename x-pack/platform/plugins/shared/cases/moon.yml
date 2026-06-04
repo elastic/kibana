@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-ui-settings-browser'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

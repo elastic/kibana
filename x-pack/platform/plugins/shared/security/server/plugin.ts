@@ -447,6 +447,7 @@ export class SecurityPlugin
         ? new UiamService(this.logger.get('uiam'), config.uiam, {
             kibanaServerResourceURL,
             elasticsearchUrl: this.elasticsearchUrl,
+            kibanaVersion: this.initializerContext.env.packageInfo.version,
           })
         : undefined,
       applicationName: this.authorizationSetup!.applicationName,
@@ -466,7 +467,6 @@ export class SecurityPlugin
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
       clusterClient,
-      basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
 
