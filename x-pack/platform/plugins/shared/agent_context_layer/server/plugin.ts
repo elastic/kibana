@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
@@ -43,6 +44,7 @@ export class AgentContextLayerPlugin
   private startContract?: AgentContextLayerPluginStart;
   private spaces?: AgentContextLayerStartDependencies['spaces'];
   private security?: AgentContextLayerStartDependencies['security'];
+  private coreStart?: CoreStart;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -106,6 +108,19 @@ export class AgentContextLayerPlugin
         },
         getSpaces: () => this.spaces,
         getSecurity: () => this.security,
+        isFeatureEnabled: async (request) => {
+          // Mirrors `withSmlFeatureFlag` (HTTP routes) and the per-run
+          // check inside the SML crawler task. Request-scoped so per-space
+          // overrides of the experimental setting are honored.
+          if (!this.coreStart) {
+            throw new Error(
+              'Agent Context Layer feature-flag check called before plugin start'
+            );
+          }
+          const soClient = this.coreStart.savedObjects.getScopedClient(request);
+          const uiSettingsClient = this.coreStart.uiSettings.asScopedToClient(soClient);
+          return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+        },
       });
     }
 
@@ -126,6 +141,7 @@ export class AgentContextLayerPlugin
     });
     this.spaces = spaces;
     this.security = security;
+    this.coreStart = coreStart;
 
     const smlService = this.smlService;
 

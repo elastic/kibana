@@ -27,8 +27,8 @@ export interface AgentContextLayerPublicPluginStart {}
  *
  * Currently only used to surface workflow step editor metadata (label,
  * description, icon, schemas) to the Workflows Extensions registry so the
- * `agentContextLayer.smlIndexAttachment` step can be added from the workflow
- * editor. The runtime handler lives on the server.
+ * `contextEngine.addEntry` step can be added from the workflow editor. The
+ * runtime handler lives on the server.
  */
 export class AgentContextLayerPublicPlugin
   implements

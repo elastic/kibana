@@ -6,10 +6,10 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { smlIndexAttachmentStepDefinition } from './sml_index_attachment_step';
+import { contextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
 
 export const registerAgentContextLayerWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ) => {
-  workflowsExtensions.registerStepDefinition(smlIndexAttachmentStepDefinition);
+  workflowsExtensions.registerStepDefinition(contextEngineAddEntryStepDefinition);
 };

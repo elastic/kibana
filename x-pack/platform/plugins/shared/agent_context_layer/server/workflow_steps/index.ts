@@ -5,24 +5,32 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { AgentContextLayerPluginStart } from '../types';
-import { createSmlIndexAttachmentStepDefinition } from './sml_index_attachment_step';
+import { createContextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
 
 export const registerAgentContextLayerWorkflowSteps = ({
   workflowsExtensions,
   getStartContract,
   getSpaces,
   getSecurity,
+  isFeatureEnabled,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getStartContract: () => AgentContextLayerPluginStart;
   getSpaces: () => SpacesPluginStart | undefined;
   getSecurity: () => SecurityPluginStart | undefined;
+  isFeatureEnabled: (request: KibanaRequest) => Promise<boolean>;
 }) => {
   workflowsExtensions.registerStepDefinition(
-    createSmlIndexAttachmentStepDefinition({ getStartContract, getSpaces, getSecurity })
+    createContextEngineAddEntryStepDefinition({
+      getStartContract,
+      getSpaces,
+      getSecurity,
+      isFeatureEnabled,
+    })
   );
 };

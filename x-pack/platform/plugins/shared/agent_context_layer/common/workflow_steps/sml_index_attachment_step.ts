@@ -11,16 +11,21 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
- * Workflow step type id for the SML "index attachment" step.
+ * Workflow step type id for the "Add Context Engine entry" step.
+ *
+ * The id is product-named (`contextEngine.*`) rather than plugin-named
+ * (`agentContextLayer.*`) because "Context Engine" is the user-facing brand
+ * for this surface — workflow authors should not have to know about the
+ * implementing plugin.
  *
  * We deliberately avoid the `kibana.*` prefix: the workflow execution engine
  * routes any `kibana.*` step type through the HTTP-based Kibana action
  * resolver, which expects a registered Kibana API connector. This step
  * dispatches in-process to the Agent Context Layer start contract instead,
- * so it uses a plugin-scoped namespace (`agentContextLayer.*`), matching the
- * convention used by other extension steps (e.g. cases plugin: `cases.getCase`).
+ * matching the namespace convention used by other extension steps that ship
+ * their own dispatcher (e.g. cases plugin: `cases.getCase`).
  */
-export const SmlIndexAttachmentStepTypeId = 'agentContextLayer.smlIndexAttachment';
+export const ContextEngineAddEntryStepTypeId = 'contextEngine.addEntry';
 
 // Per-field upper bounds. Values are conservative: identifier-like fields
 // stay well below the 32 KB Elasticsearch keyword limit, and `content` /
@@ -99,7 +104,7 @@ export const SmlIndexAttachmentInputSchema = z.discriminatedUnion('action', [
       .string()
       .min(1)
       .max(MAX_SML_IDENTIFIER_LENGTH)
-      .describe('SML attachment type id (chunk namespace).'),
+      .describe('Context Engine entry type id (chunk namespace).'),
     action: z.literal('upsert'),
     chunks: z.array(ChunkSchema).min(1).max(100),
   }),
@@ -129,35 +134,38 @@ export const SmlIndexAttachmentOutputSchema = z.object({
 export type SmlIndexAttachmentStepInputSchema = typeof SmlIndexAttachmentInputSchema;
 export type SmlIndexAttachmentStepOutputSchema = typeof SmlIndexAttachmentOutputSchema;
 
-export const smlIndexAttachmentStepCommonDefinition: CommonStepDefinition<
+export const contextEngineAddEntryStepCommonDefinition: CommonStepDefinition<
   SmlIndexAttachmentStepInputSchema,
   SmlIndexAttachmentStepOutputSchema
 > = {
-  id: SmlIndexAttachmentStepTypeId,
+  id: ContextEngineAddEntryStepTypeId,
   category: StepCategory.Kibana,
-  label: i18n.translate('xpack.agentContextLayer.workflowSteps.smlIndexAttachment.label', {
-    defaultMessage: 'Index SML attachment',
+  // Marks this step as Technical Preview in the workflow UI / step list so
+  // workflow authors know the contract may change before GA.
+  stability: 'tech_preview',
+  label: i18n.translate('xpack.agentContextLayer.workflowSteps.contextEngineAddEntry.label', {
+    defaultMessage: 'Add Context Engine entry',
   }),
   description: i18n.translate(
-    'xpack.agentContextLayer.workflowSteps.smlIndexAttachment.description',
+    'xpack.agentContextLayer.workflowSteps.contextEngineAddEntry.description',
     {
       defaultMessage:
-        'Index or remove an attachment in the Agent Context Layer (Semantic Metadata Layer) using caller-supplied chunks.',
+        'Add or remove an entry in the Context Engine (Agent Context Layer) using caller-supplied chunks.',
     }
   ),
   documentation: {
     details: i18n.translate(
-      'xpack.agentContextLayer.workflowSteps.smlIndexAttachment.documentation.details',
+      'xpack.agentContextLayer.workflowSteps.contextEngineAddEntry.documentation.details',
       {
         defaultMessage:
           "Writes chunks directly (the registered type\u2019s `getSmlData` hook is not invoked). `upsert` writes the supplied `chunks` tagged `ingestion_method: 'manual'`, replacing any prior chunks for the `origin_id` (idempotent — no fail-if-exists / fail-if-not-found distinction). `delete` wipes every chunk for the `origin_id` regardless of how it was produced.",
       }
     ),
     examples: [
-      `## Index a custom summary
+      `## Add a custom summary entry
 \`\`\`yaml
-- name: index_summary
-  type: ${SmlIndexAttachmentStepTypeId}
+- name: add_summary_entry
+  type: ${ContextEngineAddEntryStepTypeId}
   with:
     originId: "doc-42"
     attachmentType: "custom"
@@ -169,10 +177,10 @@ export const smlIndexAttachmentStepCommonDefinition: CommonStepDefinition<
         description: "Auto-generated quarterly summary"
 \`\`\``,
 
-      `## Remove a previously indexed attachment
+      `## Remove a previously added entry
 \`\`\`yaml
-- name: remove_from_sml
-  type: ${SmlIndexAttachmentStepTypeId}
+- name: remove_entry
+  type: ${ContextEngineAddEntryStepTypeId}
   with:
     originId: "doc-42"
     attachmentType: "custom"

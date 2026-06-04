@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { smlIndexAttachmentStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
+import { contextEngineAddEntryStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
 import type { SmlChunk } from '../services/sml/types';
 import type { AgentContextLayerPluginStart } from '../types';
@@ -32,14 +33,22 @@ import type { AgentContextLayerPluginStart } from '../types';
  * `indexAttachment`'s delete, which keeps curated manuals around so
  * crawler / event-driven CRUD callers don't clobber pinned content.
  *
- * Both branches are gated by an `agentContextLayer:write` Kibana privilege
- * check against the workflow's fake request. The HTTP upsert/delete routes
- * already enforce the same privilege via route security; the workflow step
- * is a second entrypoint into the indexer and must mirror that gate or it
- * becomes a privilege-escalation surface for any user who can author or
- * trigger a workflow. When the security plugin is absent (e.g. dev/test
- * with security disabled) we follow the standard "no security plugin →
- * open access" convention used by the SML read path.
+ * Both branches are gated by two checks before the contract is invoked:
+ *
+ * 1. The `agentBuilder:enableExperimentalFeatures` UI setting (the same
+ *    feature flag that gates every HTTP route via `withSmlFeatureFlag` and
+ *    the SML crawler task). When disabled the step returns an error
+ *    result without touching the indexer — keeping the workflow step in
+ *    lockstep with the rest of the AGL surface so a deployment with the
+ *    flag off cannot silently mutate the SML index via a workflow.
+ * 2. The `agentContextLayer:write` Kibana privilege against the workflow's
+ *    fake request. The HTTP upsert/delete routes already enforce the same
+ *    privilege via route security; the workflow step is a second
+ *    entrypoint into the indexer and must mirror that gate or it becomes
+ *    a privilege-escalation surface for any user who can author or
+ *    trigger a workflow. When the security plugin is absent (e.g.
+ *    dev/test with security disabled) we follow the standard "no security
+ *    plugin → open access" convention used by the SML read path.
  *
  * The `getTypeDefinition` guard intentionally only fires on the `upsert`
  * branch: writes against an unregistered type are nonsensical (no
@@ -52,22 +61,39 @@ import type { AgentContextLayerPluginStart } from '../types';
  * time so the step can be registered during plugin `setup()` and still
  * call into the service after `start()` has run.
  */
-export const createSmlIndexAttachmentStepDefinition = ({
+export const createContextEngineAddEntryStepDefinition = ({
   getStartContract,
   getSpaces,
   getSecurity,
+  isFeatureEnabled,
 }: {
   getStartContract: () => AgentContextLayerPluginStart;
   getSpaces: () => SpacesPluginStart | undefined;
   getSecurity: () => SecurityPluginStart | undefined;
+  /**
+   * Resolves whether the AGL/SML experimental UI setting is enabled for
+   * the calling request's space. Mirrors the gate applied to every HTTP
+   * route via `withSmlFeatureFlag` and to the SML crawler task. The check
+   * is request-scoped so per-space overrides of the setting are honored.
+   */
+  isFeatureEnabled: (request: KibanaRequest) => Promise<boolean>;
 }) =>
   createServerStepDefinition({
-    ...smlIndexAttachmentStepCommonDefinition,
+    ...contextEngineAddEntryStepCommonDefinition,
     handler: async (context) => {
       try {
         const input = context.input;
         const { originId, attachmentType, action } = input;
         const request = context.contextManager.getFakeRequest();
+
+        const featureEnabled = await isFeatureEnabled(request);
+        if (!featureEnabled) {
+          return {
+            error: new Error(
+              `Agent Context Layer experimental features are disabled — cannot ${action} Context Engine entry '${originId}'.`
+            ),
+          };
+        }
 
         const startContract = getStartContract();
 
@@ -81,7 +107,7 @@ export const createSmlIndexAttachmentStepDefinition = ({
           if (!hasAllRequested) {
             return {
               error: new Error(
-                `Unauthorized: workflow caller is missing required privilege '${apiPrivileges.writeAgentContextLayer}' to ${action} SML attachment '${originId}'.`
+                `Unauthorized: workflow caller is missing required privilege '${apiPrivileges.writeAgentContextLayer}' to ${action} Context Engine entry '${originId}'.`
               ),
             };
           }
@@ -110,7 +136,7 @@ export const createSmlIndexAttachmentStepDefinition = ({
         } else {
           if (!startContract.getTypeDefinition(attachmentType)) {
             return {
-              error: new Error(`Unknown SML attachment type: '${attachmentType}'`),
+              error: new Error(`Unknown Context Engine entry type: '${attachmentType}'`),
             };
           }
 
@@ -156,12 +182,12 @@ export const createSmlIndexAttachmentStepDefinition = ({
         };
       } catch (error) {
         context.logger.error(
-          'SML index_attachment workflow step failed',
+          'contextEngine.addEntry workflow step failed',
           error instanceof Error ? error : new Error(String(error))
         );
         return {
           error: new Error(
-            error instanceof Error ? error.message : 'Failed to index SML attachment'
+            error instanceof Error ? error.message : 'Failed to add Context Engine entry'
           ),
         };
       }

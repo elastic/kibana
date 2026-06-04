@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { smlIndexAttachmentStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
+import { contextEngineAddEntryStepCommonDefinition } from '../../common/workflow_steps/sml_index_attachment_step';
 
-export const smlIndexAttachmentStepDefinition = createPublicStepDefinition({
-  ...smlIndexAttachmentStepCommonDefinition,
+export const contextEngineAddEntryStepDefinition = createPublicStepDefinition({
+  ...contextEngineAddEntryStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/memory').then(({ icon }) => ({ default: icon }))
   ),

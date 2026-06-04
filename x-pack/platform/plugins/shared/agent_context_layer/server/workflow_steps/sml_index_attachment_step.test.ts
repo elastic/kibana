@@ -12,7 +12,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SmlIndexAttachmentInputSchema } from '../../common/workflow_steps/sml_index_attachment_step';
 import { apiPrivileges } from '../../common/features';
 import type { AgentContextLayerPluginStart } from '../types';
-import { createSmlIndexAttachmentStepDefinition } from './sml_index_attachment_step';
+import { createContextEngineAddEntryStepDefinition } from './sml_index_attachment_step';
 
 const buildStartContract = (): jest.Mocked<AgentContextLayerPluginStart> => ({
   search: jest.fn(),
@@ -80,21 +80,23 @@ const buildHandlerContext = (input: StepInput, request = httpServerMock.createKi
   },
   abortSignal: new AbortController().signal,
   stepId: 'test-step',
-  stepType: 'agentContextLayer.smlIndexAttachment',
+  stepType: 'contextEngine.addEntry',
 });
 
 // Minimal `spaces` mock — only `spacesService.getSpaceId` is consumed. The
 // `Pick` makes the partial-mock intent explicit so we don't cast to `any`.
 type MockedSpaces = Pick<SpacesPluginStart, 'spacesService'>;
 
-describe('createSmlIndexAttachmentStepDefinition', () => {
-  it('exposes the expected step type id and schemas', () => {
-    const definition = createSmlIndexAttachmentStepDefinition({
+describe('createContextEngineAddEntryStepDefinition', () => {
+  it('exposes the expected step type id, schemas, and tech-preview stability', () => {
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => buildStartContract(),
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
-    expect(definition.id).toBe('agentContextLayer.smlIndexAttachment');
+    expect(definition.id).toBe('contextEngine.addEntry');
+    expect(definition.stability).toBe('tech_preview');
     expect(definition.inputSchema).toBeDefined();
     expect(definition.outputSchema).toBeDefined();
     expect(typeof definition.handler).toBe('function');
@@ -105,10 +107,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const spaces: MockedSpaces = {
       spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } as any,
     };
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => spaces as SpacesPluginStart,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const request = httpServerMock.createKibanaRequest();
@@ -162,10 +165,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
   it('strips optional chunk fields when not provided', async () => {
     const startContract = buildStartContract();
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -183,10 +187,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
   it('preserves optional chunk fields when provided', async () => {
     const startContract = buildStartContract();
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -221,10 +226,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
   it('handles delete by calling deleteAttachment with ingestionMethod="all" and reports requestedChunkCount = 0', async () => {
     const startContract = buildStartContract();
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -261,10 +267,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
   it('allows delete to proceed when the attachment type is not registered', async () => {
     const startContract = buildStartContract();
     startContract.getTypeDefinition.mockReturnValue(undefined);
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     // Cleanup must remain functional after the plugin that registered the
@@ -293,10 +300,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
   it('returns an error result when upsert targets an unregistered attachment type', async () => {
     const startContract = buildStartContract();
     startContract.getTypeDefinition.mockReturnValueOnce(undefined);
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -309,17 +317,18 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     const result = await definition.handler(context as any);
     expect(result.output).toBeUndefined();
     expect(result.error).toBeInstanceOf(Error);
-    expect((result.error as Error).message).toBe("Unknown SML attachment type: 'unknown'");
+    expect((result.error as Error).message).toBe("Unknown Context Engine entry type: 'unknown'");
     expect(startContract.indexAttachment).not.toHaveBeenCalled();
   });
 
   it('returns an error result and logs when indexAttachment throws', async () => {
     const startContract = buildStartContract();
     startContract.indexAttachment.mockRejectedValueOnce(new Error('ES write failed'));
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -334,18 +343,19 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     expect(result.error).toBeInstanceOf(Error);
     expect((result.error as Error).message).toBe('ES write failed');
     expect(context.logger.error).toHaveBeenCalledWith(
-      'SML index_attachment workflow step failed',
+      'contextEngine.addEntry workflow step failed',
       expect.any(Error)
     );
   });
 
   it('returns an error when the start contract is not yet available', async () => {
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => {
         throw new Error('start contract not ready');
       },
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -362,10 +372,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
   it('falls back to "default" space when spaces service is unavailable', async () => {
     const startContract = buildStartContract();
-    const definition = createSmlIndexAttachmentStepDefinition({
+    const definition = createContextEngineAddEntryStepDefinition({
       getStartContract: () => startContract,
       getSpaces: () => undefined,
       getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+      isFeatureEnabled: async () => true,
     });
 
     const context = buildHandlerContext({
@@ -383,10 +394,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     it('checks the privilege against the workflow fake request and dispatches the write when authorized', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: true });
-      const definition = createSmlIndexAttachmentStepDefinition({
+      const definition = createContextEngineAddEntryStepDefinition({
         getStartContract: () => startContract,
         getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
       });
 
       const request = httpServerMock.createKibanaRequest();
@@ -421,10 +433,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     it('rejects upsert with an error and never calls indexAttachment when the caller lacks the privilege', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: false });
-      const definition = createSmlIndexAttachmentStepDefinition({
+      const definition = createContextEngineAddEntryStepDefinition({
         getStartContract: () => startContract,
         getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -449,10 +462,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
     it('rejects delete with an error and never calls deleteAttachment when the caller lacks the privilege', async () => {
       const startContract = buildStartContract();
       const security = buildSecurity({ authorized: false });
-      const definition = createSmlIndexAttachmentStepDefinition({
+      const definition = createContextEngineAddEntryStepDefinition({
         getStartContract: () => startContract,
         getSpaces: () => undefined,
         getSecurity: () => security as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -472,10 +486,11 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
 
     it('skips the privilege check and proceeds when the security plugin is absent', async () => {
       const startContract = buildStartContract();
-      const definition = createSmlIndexAttachmentStepDefinition({
+      const definition = createContextEngineAddEntryStepDefinition({
         getStartContract: () => startContract,
         getSpaces: () => undefined,
         getSecurity: () => undefined,
+        isFeatureEnabled: async () => true,
       });
 
       const context = buildHandlerContext({
@@ -492,6 +507,92 @@ describe('createSmlIndexAttachmentStepDefinition', () => {
       expect(context.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('security plugin is not available')
       );
+    });
+  });
+
+  describe('experimental feature-flag check', () => {
+    it('calls isFeatureEnabled with the workflow fake request and proceeds when enabled', async () => {
+      const startContract = buildStartContract();
+      const isFeatureEnabled = jest.fn().mockResolvedValue(true);
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => buildSecurity() as unknown as SecurityPluginStart,
+        isFeatureEnabled,
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      const context = buildHandlerContext(
+        {
+          originId: 'doc-1',
+          attachmentType: 'custom',
+          action: 'upsert',
+          chunks: [{ type: 'custom', title: 't', content: 'c' }],
+        },
+        request
+      );
+
+      const result = await definition.handler(context as any);
+
+      expect(isFeatureEnabled).toHaveBeenCalledWith(request);
+      expect(result.error).toBeUndefined();
+      expect(startContract.indexAttachment).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects upsert with an error and never calls indexAttachment when the feature flag is disabled', async () => {
+      const startContract = buildStartContract();
+      const security = buildSecurity({ authorized: true });
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => security as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => false,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'upsert',
+        chunks: [{ type: 'custom', title: 't', content: 'c' }],
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.output).toBeUndefined();
+      expect(result.error).toBeInstanceOf(Error);
+      expect((result.error as Error).message).toContain('experimental features are disabled');
+      expect((result.error as Error).message).toContain('upsert');
+      expect(startContract.indexAttachment).not.toHaveBeenCalled();
+      // Privilege check must be skipped — the feature-flag gate is an
+      // earlier short-circuit and should prevent any work, including a
+      // network round-trip to the security plugin.
+      expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
+    });
+
+    it('rejects delete with an error and never calls deleteAttachment when the feature flag is disabled', async () => {
+      const startContract = buildStartContract();
+      const security = buildSecurity({ authorized: true });
+      const definition = createContextEngineAddEntryStepDefinition({
+        getStartContract: () => startContract,
+        getSpaces: () => undefined,
+        getSecurity: () => security as unknown as SecurityPluginStart,
+        isFeatureEnabled: async () => false,
+      });
+
+      const context = buildHandlerContext({
+        originId: 'doc-1',
+        attachmentType: 'custom',
+        action: 'delete',
+      });
+
+      const result = await definition.handler(context as any);
+
+      expect(result.output).toBeUndefined();
+      expect(result.error).toBeInstanceOf(Error);
+      expect((result.error as Error).message).toContain('experimental features are disabled');
+      expect((result.error as Error).message).toContain('delete');
+      expect(startContract.deleteAttachment).not.toHaveBeenCalled();
+      expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
     });
   });
 });
