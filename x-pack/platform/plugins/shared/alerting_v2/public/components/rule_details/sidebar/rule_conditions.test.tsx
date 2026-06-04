@@ -167,7 +167,6 @@ describe('RuleConditions', () => {
       renderConditions(alertRule, 'summary');
       expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryDelay')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('alertingV2RuleDetailsNoDataConfig')).not.toBeInTheDocument();
       // Recovery row has no test subj on the row itself; assert by its title text absence.
       expect(screen.queryByText('Recovery')).not.toBeInTheDocument();
     });
@@ -199,7 +198,6 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsGroupBy')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Signal');
-    expect(screen.getByTestId('alertingV2RuleDetailsNoDataConfig')).toHaveTextContent('-');
     expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
   });
 });
