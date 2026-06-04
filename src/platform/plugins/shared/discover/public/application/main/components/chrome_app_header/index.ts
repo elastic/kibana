@@ -12,5 +12,5 @@ export { useIsChromeNextProjectHeader } from './use_is_chrome_next_project_heade
 export {
   getChromeHeaderBack,
   getChromeHeaderTitle,
-  isEmbeddableEdition as isChromeHeaderDashboardEdition,
+  isExistingEmbeddable as isChromeHeaderDashboardEdition,
 } from './utils';

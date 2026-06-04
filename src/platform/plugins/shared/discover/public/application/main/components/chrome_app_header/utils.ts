@@ -15,10 +15,10 @@ import {
 } from '../../../../plugin_imports/embeddable_editor_service';
 
 /**
- * Returns true if the session is being edited from an embeddable.
+ * Returns true if the session is being edited from an existing embeddable.
  * (Do not confuse with Discover displayMode: 'embedded')
  */
-export const isEmbeddableEdition = (embeddableEditor: EmbeddableEditorService): boolean =>
+export const isExistingEmbeddable = (embeddableEditor: EmbeddableEditorService): boolean =>
   embeddableEditor.isEmbeddedEditor() && Boolean(embeddableEditor.getEmbeddableId());
 
 /**
@@ -27,7 +27,7 @@ export const isEmbeddableEdition = (embeddableEditor: EmbeddableEditorService): 
 export const getChromeHeaderBack = (
   embeddableEditor: EmbeddableEditorService
 ): AppHeaderBack | undefined => {
-  if (!isEmbeddableEdition(embeddableEditor)) {
+  if (!isExistingEmbeddable(embeddableEditor)) {
     return undefined;
   }
 
@@ -52,13 +52,15 @@ export const getChromeHeaderTitle = ({
   embeddableEditor: EmbeddableEditorService;
   sessionTitle?: string;
 }): string => {
-  // When editting a session from an ambeddable.
-  if (isEmbeddableEdition(embeddableEditor)) {
+  // When editting a session from an embeddable.
+  if (isExistingEmbeddable(embeddableEditor)) {
     const title =
-      embeddableEditor.getByValueTab()?.label || // Session persisted by value inside a dashboard.
-      sessionTitle || // Session eddited by reference: it exists outise a particular dashboard.
+      // Session persisted by value inside a dashboard.
+      embeddableEditor.getByValueTab()?.label ||
+      // Session eddited by reference: it exists outise a particular dashboard.
+      sessionTitle ||
+      // Default, I.E: editting a by-value session that has no name.
       i18n.translate('discover.DiscoverSessionTitle', {
-        // I.E: editting a by-value session that has no name.
         defaultMessage: 'Discover session',
       });
 
