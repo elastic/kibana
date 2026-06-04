@@ -21,6 +21,30 @@ SAVE_SNAPSHOT_FLAG=""
 if [ "${BUILDKITE_PIPELINE_SLUG:-}" = "kibana-code-quality-fallow" ] || [ "${FALLOW_SAVE_SNAPSHOT:-}" = "true" ]; then
   mkdir -p "$SNAPSHOT_DIR"
   SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
+
+  # Download previous snapshot from last successful build for trend comparison
+  if [ -n "${BUILDKITE_TOKEN:-}" ] && [ -n "${BUILDKITE_PIPELINE_SLUG:-}" ]; then
+    echo "Fetching previous snapshot for trend analysis..."
+    PREV_BUILD=$(curl -sf \
+      -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
+      "https://api.buildkite.com/v2/organizations/elastic/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?state=passed&per_page=5" \
+      | node -e "
+        let d='';
+        process.stdin.on('data',c=>d+=c);
+        process.stdin.on('end',()=>{
+          const cur='${BUILDKITE_BUILD_ID:-}';
+          const prev=JSON.parse(d).find(b=>b.id!==cur);
+          process.stdout.write(prev?.id||'');
+        });" 2>/dev/null || true)
+    if [ -n "$PREV_BUILD" ]; then
+      buildkite-agent artifact download "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" . \
+        --build "$PREV_BUILD" 2>/dev/null \
+        && echo "Previous snapshot loaded from build ${PREV_BUILD}" \
+        || echo "No previous snapshot found in build ${PREV_BUILD}"
+    else
+      echo "No previous successful build found — first run without trend"
+    fi
+  fi
 fi
 
 # Use --trend if a previous snapshot exists
