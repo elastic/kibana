@@ -20,8 +20,11 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
+      // Only tear down the significant events sub-feature. The global streams
+      // feature is enabled once in global.setup.ts and shared across every spec
+      // in this serial lane, so disabling it here would break the streams specs
+      // that run afterwards (they rely on the global setup and never re-enable).
       await apiServices.streamsTest.disableSignificantEvents();
-      await apiServices.streamsTest.disable();
     });
 
     apiTest('POST _execute (trigger) returns an executionId', async ({ apiClient, samlAuth }) => {
