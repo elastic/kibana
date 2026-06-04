@@ -1,5 +1,5 @@
 {
-  "sha1": "09149f5dafff317839f3b76f6b4edb982e766397",
+  "sha1": "2da7fa23c23ff4648ee18103c9a5b0ce26a4a21a",
   "tests": [
     {
       "id": "9b2dcf397b5bf4d-f3183219f13c400",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_deletion.spec.ts",
-        "line": 106,
+        "line": 108,
         "column": 7
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
-        "line": 85,
+        "line": 79,
         "column": 7
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
-        "line": 96,
+        "line": 88,
         "column": 7
       }
     },
@@ -109,7 +109,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
-        "line": 136,
+        "line": 128,
+        "column": 7
+      }
+    },
+    {
+      "id": "3727cd43770f0ac-e62c321150177d3",
+      "title": "Slack connector saves a rule with a Slack API connector as its action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
+        "line": 168,
         "column": 7
       }
     },
@@ -151,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 204,
+        "line": 216,
         "column": 7
       }
     },
@@ -165,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 243,
+        "line": 255,
         "column": 7
       }
     },
@@ -179,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 274,
+        "line": 286,
         "column": 7
       }
     },
@@ -193,7 +207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 293,
+        "line": 301,
         "column": 7
       }
     },
@@ -207,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 310,
+        "line": 318,
         "column": 7
       }
     },
@@ -221,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 323,
+        "line": 331,
         "column": 7
       }
     },
@@ -235,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 351,
+        "line": 358,
         "column": 7
       }
     },
@@ -249,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 372,
+        "line": 379,
         "column": 7
       }
     },
@@ -422,6 +436,20 @@
       }
     },
     {
+      "id": "e3c419a0049fd78-26ee1dab0262b36",
+      "title": "Rule snooze scheduler legacy theme independence keeps the scheduler stable without legacy theme CSS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_snooze_scheduler_legacy_theme.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
       "id": "bae6b7d04612518-73fc6642f1d9bb6",
       "title": "Rules create flow opens the rule type modal and the rule form when a rule type is selected",
       "expectedStatus": "passed",
@@ -431,7 +459,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 7
       }
     },
@@ -459,7 +487,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 7
       }
     },
@@ -725,7 +753,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
-        "line": 50,
+        "line": 46,
         "column": 7
       }
     },
@@ -739,7 +767,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
-        "line": 65,
+        "line": 61,
         "column": 7
       }
     },
@@ -753,7 +781,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
-        "line": 83,
+        "line": 80,
         "column": 7
       }
     },
