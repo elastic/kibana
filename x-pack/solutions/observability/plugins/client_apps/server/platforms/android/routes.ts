@@ -12,7 +12,7 @@ import {
   ANDROID_RETRACE_API_PATH,
   DEFAULT_CRASH_INDEX,
 } from '../../../common';
-import { retrace } from './retrace';
+import { MappingNotFoundError, retrace } from './retrace';
 import { handleRouteError } from '../../lib/handle_route_error';
 
 export function registerAndroidRoutes({ router, logger }: { router: IRouter; logger: Logger }) {
@@ -113,6 +113,9 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
           body: { original: stacktrace, resolved },
         });
       } catch (error) {
+        if (error instanceof MappingNotFoundError) {
+          return response.notFound({ body: { message: (error as Error).message } });
+        }
         return handleRouteError({ error, logger, response, message: 'Android retrace failed' });
       }
     }

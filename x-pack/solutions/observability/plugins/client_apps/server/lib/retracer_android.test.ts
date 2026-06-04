@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 import type { AndroidClassMap } from './retracer_android';
 import { RetracerAndroid } from './retracer_android';
-import type { Logger } from './retracer';
 import { androidMapFixtures } from './__fixtures__/android_maps';
 
 async function retraceWith(
@@ -24,11 +25,6 @@ async function retraceWith(
     { logger }
   );
   return retracer.retrace();
-}
-
-function recordingLogger(): { logger: Logger; warnings: string[] } {
-  const warnings: string[] = [];
-  return { logger: { warn: (msg) => warnings.push(msg) }, warnings };
 }
 
 describe('RetracerAndroid', () => {
@@ -170,14 +166,18 @@ describe('RetracerAndroid', () => {
       };
       const stacktrace = '\tat a.m(SourceFile:1)';
 
-      const { logger, warnings } = recordingLogger();
+      const logger = loggingSystemMock.createLogger();
       const result = await retraceWith(stacktrace, [map], logger);
 
       expect(result).toBe('\tat com.example.Foo.foo(Foo.kt:42)');
-      expect(warnings).toHaveLength(1);
-      expect(warnings[0]).toMatch(/\[stack-reframe\] R8 map_version mismatch/);
-      expect(warnings[0]).toMatch(/9\.9/);
-      expect(warnings[0]).toMatch(/MAX_KNOWN_MAP_VERSION \(2\.2\)/);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/\[stack-reframe\] R8 map_version mismatch/)
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/9\.9/));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/MAX_KNOWN_MAP_VERSION \(2\.2\)/)
+      );
     });
 
     it('the warning is emitted once per retrace, listing every distinct unknown version', async () => {
@@ -203,12 +203,12 @@ describe('RetracerAndroid', () => {
       };
       const stacktrace = ['\tat a.m(SourceFile:1)', '\tat b.m(SourceFile:1)'].join('\n');
 
-      const { logger, warnings } = recordingLogger();
+      const logger = loggingSystemMock.createLogger();
       await retraceWith(stacktrace, [docA, docB], logger);
 
-      expect(warnings).toHaveLength(1);
-      expect(warnings[0]).toMatch(/2 document\(s\)/);
-      expect(warnings[0]).toMatch(/9\.9, 10\.0/);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/2 document\(s\)/));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/9\.9, 10\.0/));
     });
 
     it('documents whose map_version equals the retracer max are accepted with no warning', async () => {
@@ -222,11 +222,11 @@ describe('RetracerAndroid', () => {
           m: { mappings: [{ obf_range: [1, 1], orig_range: [42, 42], method: 'foo' }] },
         },
       };
-      const { logger, warnings } = recordingLogger();
+      const logger = loggingSystemMock.createLogger();
       const result = await retraceWith('\tat a.m(SourceFile:1)', [map], logger);
 
       expect(result).toBe('\tat com.example.Foo.foo(Foo.kt:42)');
-      expect(warnings).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('documents without map_version are accepted with no warning (legacy R8)', async () => {
@@ -239,11 +239,11 @@ describe('RetracerAndroid', () => {
           m: { mappings: [{ obf_range: [1, 1], orig_range: [42, 42], method: 'foo' }] },
         },
       };
-      const { logger, warnings } = recordingLogger();
+      const logger = loggingSystemMock.createLogger();
       const result = await retraceWith('\tat a.m(SourceFile:1)', [map], logger);
 
       expect(result).toBe('\tat com.example.Foo.foo(Foo.kt:42)');
-      expect(warnings).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('documents with a malformed map_version are retraced best-effort with a warning', async () => {
@@ -257,12 +257,12 @@ describe('RetracerAndroid', () => {
           m: { mappings: [{ obf_range: [1, 1], orig_range: [42, 42], method: 'foo' }] },
         },
       };
-      const { logger, warnings } = recordingLogger();
+      const logger = loggingSystemMock.createLogger();
       const result = await retraceWith('\tat a.m(SourceFile:1)', [map], logger);
 
       expect(result).toBe('\tat com.example.Foo.foo(Foo.kt:42)');
-      expect(warnings).toHaveLength(1);
-      expect(warnings[0]).toMatch(/experimental-build/);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/experimental-build/));
     });
   });
 
