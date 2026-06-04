@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 import type { ClientAppsConfig } from '.';
 import { registerAndroidRoutes } from './platforms/android/routes';
-import { registerJavascriptRoutes } from './platforms/javascript/routes';
 
 export class ClientAppsPlugin implements Plugin {
   private readonly logger: Logger;
@@ -36,7 +35,6 @@ export class ClientAppsPlugin implements Plugin {
     const params = { router, logger: this.logger };
 
     registerAndroidRoutes(params);
-    registerJavascriptRoutes(params);
 
     this.logger.info('Client Apps plugin routes registered');
     return {};
