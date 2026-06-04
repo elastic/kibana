@@ -14,6 +14,10 @@ import { search } from './search';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig } from '../constants';
 
+export const LINKS_SEARCH_DESCRIPTION =
+  `Returns a paginated list of links library items. Each result includes title, description, and metadata, but not the content. ` +
+  `Use \`GET ${LINKS_API_PATH}/{id}\` to retrieve the complete state.`;
+
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const searchRoute = router.get({
     path: LINKS_API_PATH,

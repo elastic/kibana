@@ -17,15 +17,18 @@ import { commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 
+export const LINKS_UPDATE_DESCRIPTION =
+  `Replaces the full state of a links library item. Partial updates are not supported.
+To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+If no item exists with the specified ID, a new one is created.` as const;
+
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Upsert links library item`,
     ...commonRouteConfig,
-    description: `Replaces the full state of a links library item. Partial updates are not supported.
-To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
-
-If no item exists with the specified ID, a new one is created.`,
+    description: LINKS_UPDATE_DESCRIPTION,
   });
 
   updateRoute.addVersion(

@@ -15,12 +15,15 @@ import { readResponseBodySchema } from './schemas';
 import { read } from './read';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 
+export const LINKS_READ_DESCRIPTION =
+  'Returns the complete state of a links library item by ID.' as const;
+
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
     path: `${LINKS_API_PATH}/{id}`,
     summary: `Get a links library item by ID`,
     ...commonRouteConfig,
-    description: 'Returns the complete state of a links library item by ID.',
+    description: LINKS_READ_DESCRIPTION,
   });
 
   readRoute.addVersion(

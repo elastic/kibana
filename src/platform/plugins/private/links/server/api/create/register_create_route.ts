@@ -10,10 +10,14 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
-import { commonRouteConfig } from '../constants';
-import { createRequestBodySchema, createResponseBodySchema } from './schemas';
-import { create } from './create';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
+import { commonRouteConfig } from '../constants';
+import { createLinksOASOperationObject } from '../oas_examples';
+import { create } from './create';
+import { createRequestBodySchema, createResponseBodySchema } from './schemas';
+
+export const LINKS_CREATE_DESCRIPTION =
+  'Creates a new links library item and returns its ID, full state, and metadata.' as const;
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
@@ -26,6 +30,9 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
   createRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: () => createLinksOASOperationObject,
+      },
       validate: {
         request: {
           body: createRequestBodySchema,
