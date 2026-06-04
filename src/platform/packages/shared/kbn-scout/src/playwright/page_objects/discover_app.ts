@@ -279,7 +279,7 @@ export class DiscoverApp {
    */
   async getHistogramHeight(): Promise<number> {
     const histogram = this.page.testSubj.locator('unifiedHistogramResizablePanelFixed');
-    await expect(histogram).toBeVisible();
+    await histogram.waitFor();
     const box = await histogram.boundingBox();
     if (!box) {
       throw new Error('Could not read the histogram panel bounding box');
@@ -296,7 +296,7 @@ export class DiscoverApp {
    */
   async resizeHistogramBy(distance: number) {
     const resizeButton = this.page.testSubj.locator('unifiedHistogramResizableButton');
-    await expect(resizeButton).toBeVisible();
+    await resizeButton.waitFor();
     const box = await resizeButton.boundingBox();
     if (!box) {
       throw new Error('Could not read the histogram resize handle bounding box');
