@@ -23,7 +23,9 @@ export const SECURITY_RUN_RULE_PREVIEW_TOOL_ID = securityTool('run_rule_preview'
 
 const DEFAULT_TIMEFRAME_START = 'now-1h';
 const DEFAULT_TIMEFRAME_END = 'now';
-const DEFAULT_INTERVAL = '5m';
+const DEFAULT_INTERVAL = '1h';
+const DEFAULT_RULE_FROM = 'now-1h';
+const DEFAULT_RULE_TO = 'now';
 
 /**
  * Ask the user to confirm before running a preview with more than this many
@@ -48,16 +50,42 @@ const RULE_PREVIEW_RULE_DEFAULTS = {
 
 /**
  * Minimal subset of `EsqlRuleCreateProps` the agent needs to supply to run a preview.
- * Derived from the full type via `.pick` so field shapes/descriptions stay in sync.
+ * Derived from the full type via `.pick` so field shapes/validation stay in sync, then
+ * `.extend`ed to add per-field descriptions and defaults for the optional schedule fields.
+ * Each override references the picked `.shape` so the underlying validation (e.g. `from`'s
+ * datemath check) is preserved.
  */
-const previewRuleSchema = EsqlRuleCreateProps.pick({
+const previewRuleBaseSchema = EsqlRuleCreateProps.pick({
   query: true,
   interval: true,
   from: true,
   to: true,
-}).describe(
-  'The ES|QL detection rule to preview, e.g. the rule produced by the create_detection_rule tool. Only the ES|QL `query` is required; `interval`, `from`, and `to` control the rule schedule/look-back. The rule is evaluated but never saved.'
-);
+});
+
+const previewRuleSchema = previewRuleBaseSchema
+  .extend({
+    query: previewRuleBaseSchema.shape.query.describe(
+      'The ES|QL query for the detection rule to preview (for example the query produced by the create_detection_rule tool).'
+    ),
+    interval: previewRuleBaseSchema.shape.interval
+      .default(DEFAULT_INTERVAL)
+      .describe(
+        `How often the rule would run, as a duration (e.g. "5m", "1h"). Determines how many times the rule is evaluated across the preview time range. Defaults to "${DEFAULT_INTERVAL}".`
+      ),
+    from: previewRuleBaseSchema.shape.from
+      .default(DEFAULT_RULE_FROM)
+      .describe(
+        `Start of each run's look-back window relative to the run time, as datemath (e.g. "now-6m"). Defaults to "${DEFAULT_RULE_FROM}".`
+      ),
+    to: previewRuleBaseSchema.shape.to
+      .default(DEFAULT_RULE_TO)
+      .describe(
+        `End of each run's look-back window, as datemath (e.g. "now"). Defaults to "${DEFAULT_RULE_TO}".`
+      ),
+  })
+  .describe(
+    'The ES|QL detection rule to preview, e.g. the rule produced by the create_detection_rule tool. Only the ES|QL `query` is required; `interval`, `from`, and `to` control the rule schedule/look-back and default if omitted. The rule is evaluated but never saved.'
+  );
 
 const runRulePreviewSchema = z.object({
   rule: previewRuleSchema,
