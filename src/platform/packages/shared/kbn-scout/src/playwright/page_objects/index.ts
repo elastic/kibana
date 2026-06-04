@@ -22,11 +22,8 @@ import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { QueryBar } from './query_bar';
 import { RenderablePage } from './renderable_page';
-<<<<<<< HEAD
 import { SavedObjectsManagementPage } from './saved_objects_management_page';
-=======
 import { SavedQueryManagementMenu } from './saved_query_management_menu';
->>>>>>> 3072218e7925 ([saved_query_management] migrate ftr tests to scout/jest (#270648))
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
@@ -56,12 +53,9 @@ export interface PageObjects {
   maps: MapsPage;
   queryBar: QueryBar;
   renderable: RenderablePage;
-<<<<<<< HEAD
   savedObjectsManagement: SavedObjectsManagementPage;
   copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
-=======
   savedQueryManagementMenu: SavedQueryManagementMenu;
->>>>>>> 3072218e7925 ([saved_query_management] migrate ftr tests to scout/jest (#270648))
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   inspector: Inspector;
@@ -89,7 +83,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
-<<<<<<< HEAD
     savedObjectsManagement: createLazyPageObject(
       SavedObjectsManagementPage,
       fixtures.page,
@@ -99,9 +92,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
       CopySavedObjectsToSpaceFlyout,
       fixtures.page
     ),
-=======
     savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
->>>>>>> 3072218e7925 ([saved_query_management] migrate ftr tests to scout/jest (#270648))
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
