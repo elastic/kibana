@@ -14,7 +14,6 @@ import { SuggestionCategory } from './types';
 import { detectCategory } from './utils/category_rules';
 
 const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
-  [SuggestionCategory.NEW_LINE]: -1, // Always first, ahead of every other category
   [SuggestionCategory.CUSTOM_ACTION]: 0,
   [SuggestionCategory.PROMQL_METRIC_QUALIFIER]: 50,
   [SuggestionCategory.LANGUAGE_KEYWORD]: 50, // BY, WHERE, ON, WITH

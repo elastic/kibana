@@ -61,10 +61,6 @@ function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
 
 const orderingEngine = new SuggestionOrderingEngine();
 
-/**
- * Prepends the "New line" affordance so it is ranked first by the ordering engine. Applied to
- * every popover that shows suggestions.
- */
 const withNewLineFirst = (suggestions: ISuggestionItem[]): ISuggestionItem[] => [
   getNewLineSuggestion(),
   ...suggestions,
@@ -163,7 +159,7 @@ export async function suggest(
 
     if (!astContext.astForContext.commands.length) {
       if (isStartingSubquery) {
-        return orderingEngine.sort(withNewLineFirst(suggestions), { command: '' });
+        return withNewLineFirst(orderingEngine.sort(suggestions, { command: '' }));
       }
 
       // Root level empty state: show source commands + recommended queries
@@ -208,21 +204,20 @@ export async function suggest(
         offset,
       });
 
-      return orderingEngine.sort(
-        withNewLineFirst([...headerCommandsSuggestions, ...rootLevelQuerySuggestions]),
-        {
+      return withNewLineFirst(
+        orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
           command: '',
-        }
+        })
       );
     }
 
-    return orderingEngine.sort(
-      withNewLineFirst(
+    return withNewLineFirst(
+      orderingEngine.sort(
         suggestions.filter(
           (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
-        )
-      ),
-      { command: '' }
+        ),
+        { command: '' }
+      )
     );
   }
 
@@ -243,7 +238,7 @@ export async function suggest(
       false
     );
 
-    return orderingEngine.sort(withNewLineFirst(controlSuggestions), { command: '' });
+    return withNewLineFirst(orderingEngine.sort(controlSuggestions, { command: '' }));
   }
 
   if (astContext.type === 'expression') {
@@ -377,10 +372,12 @@ async function getSuggestionsWithinCommandExpression(
   );
 
   // Apply context-aware ordering
-  const orderedSuggestions = orderingEngine.sort(withNewLineFirst(suggestions), {
-    command: astContext.command.name.toUpperCase(),
-    location: astContext.option?.name.toUpperCase(),
-  });
+  const orderedSuggestions = withNewLineFirst(
+    orderingEngine.sort(suggestions, {
+      command: astContext.command.name.toUpperCase(),
+      location: astContext.option?.name.toUpperCase(),
+    })
+  );
 
   return orderedSuggestions;
 }

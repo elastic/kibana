@@ -42,7 +42,7 @@ describe('autocomplete.suggest', () => {
             title: 'Click to create',
           },
           category: SuggestionCategory.CUSTOM_ACTION,
-          sortText: '0001',
+          sortText: '0000',
         })
       );
 
@@ -53,7 +53,7 @@ describe('autocomplete.suggest', () => {
           kind: 'Constant',
           detail: 'Named parameter',
           category: 'user_defined_column',
-          sortText: '0002',
+          sortText: '0001',
         })
       );
     });
@@ -82,7 +82,7 @@ describe('autocomplete.suggest', () => {
             title: 'Click to create',
           },
           category: SuggestionCategory.CUSTOM_ACTION,
-          sortText: '0001',
+          sortText: '0000',
         })
       );
     });
@@ -112,7 +112,7 @@ describe('autocomplete.suggest', () => {
           kind: 'Constant',
           detail: 'Named parameter',
           category: 'user_defined_column',
-          sortText: '0002',
+          sortText: '0001',
         })
       );
     });
@@ -141,7 +141,7 @@ describe('autocomplete.suggest', () => {
             title: 'Click to create',
           },
           category: SuggestionCategory.CUSTOM_ACTION,
-          sortText: '0003',
+          sortText: '0002',
         })
       );
     });
@@ -171,7 +171,7 @@ describe('autocomplete.suggest', () => {
           kind: 'Constant',
           detail: 'Named parameter',
           category: 'user_defined_column',
-          sortText: '0001',
+          sortText: '0000',
         })
       );
     });
@@ -201,7 +201,7 @@ describe('autocomplete.suggest', () => {
           kind: 'Constant',
           detail: 'Named parameter',
           category: 'user_defined_column',
-          sortText: '0001',
+          sortText: '0000',
         })
       );
     });
@@ -236,7 +236,7 @@ describe('autocomplete.suggest', () => {
           kind: 'Constant',
           detail: 'Named parameter',
           category: 'user_defined_column',
-          sortText: '0005',
+          sortText: '0004',
         })
       );
     });
@@ -265,7 +265,7 @@ describe('autocomplete.suggest', () => {
             title: 'Click to create',
           },
           category: SuggestionCategory.CUSTOM_ACTION,
-          sortText: '0001',
+          sortText: '0000',
         })
       );
     });
@@ -294,7 +294,7 @@ describe('autocomplete.suggest', () => {
             title: 'Click to create',
           },
           category: SuggestionCategory.CUSTOM_ACTION,
-          sortText: '0001',
+          sortText: '0000',
         })
       );
     });
@@ -324,7 +324,7 @@ describe('autocomplete.suggest', () => {
           kind: 'Constant',
           detail: 'Named parameter',
           category: 'user_defined_column',
-          sortText: '0002',
+          sortText: '0001',
         })
       );
     });
@@ -353,7 +353,7 @@ describe('autocomplete.suggest', () => {
             title: 'Click to create',
           },
           category: SuggestionCategory.CUSTOM_ACTION,
-          sortText: '0001',
+          sortText: '0000',
         })
       );
     });

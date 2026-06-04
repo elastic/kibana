@@ -47,6 +47,8 @@ function buildCharCompleteItem(
   return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
 }
 
+export const NEW_LINE_SORT_TEXT = ' ';
+
 /** "New line" affordance prepended to every popover so users can break to a new line via Enter. */
 export function getNewLineSuggestion(): ISuggestionItem {
   const title = i18n.translate('kbn-esql-language.esql.autocomplete.newLineLabel', {
@@ -58,7 +60,7 @@ export function getNewLineSuggestion(): ISuggestionItem {
     filterText: title,
     text: '',
     kind: 'Issue',
-    category: SuggestionCategory.NEW_LINE,
+    sortText: NEW_LINE_SORT_TEXT,
     command: {
       id: ESQL_NEW_LINE_COMMAND,
       title,
