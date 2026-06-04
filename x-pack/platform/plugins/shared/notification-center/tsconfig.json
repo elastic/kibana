@@ -8,7 +8,5 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
-    "@kbn/logging",
-    "@kbn/core-feature-flags-server"
   ]
 }
