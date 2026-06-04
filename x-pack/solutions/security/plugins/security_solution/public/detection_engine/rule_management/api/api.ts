@@ -45,6 +45,7 @@ import {
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import type {
+  BirthdaysTodayResponse,
   BulkActionEditPayload,
   BulkActionsDryRunErrCode,
   BulkActionType,
@@ -57,6 +58,7 @@ import type {
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
+  RULE_MANAGEMENT_BIRTHDAYS_TODAY_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   RULE_MANAGEMENT_FILTERS_URL,
   RULE_MANAGEMENT_RULES_URL_SEARCH,
@@ -631,6 +633,28 @@ export const fetchRuleManagementFilters = async ({
   KibanaServices.get().http.fetch<GetRuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     version: '1',
+    signal,
+  });
+
+/**
+ * Fetch detection rules celebrating their creation anniversary today.
+ *
+ * @param birthdayDate optional target birthday date in YYYY-MM-DD format
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchBirthdaysToday = async ({
+  birthdayDate,
+  signal,
+}: {
+  birthdayDate?: string;
+  signal?: AbortSignal;
+}): Promise<BirthdaysTodayResponse> =>
+  KibanaServices.get().http.fetch<BirthdaysTodayResponse>(RULE_MANAGEMENT_BIRTHDAYS_TODAY_URL, {
+    method: 'GET',
+    version: '1',
+    query: birthdayDate ? { birthdayDate } : undefined,
     signal,
   });
 

@@ -276,7 +276,17 @@ export type ThrottleForBulkActionsEnum = typeof ThrottleForBulkActions.enum;
 export const ThrottleForBulkActionsEnum = ThrottleForBulkActions.enum;
 
 export const BulkActionType = lazySchema(() =>
-  z.enum(['enable', 'disable', 'export', 'delete', 'duplicate', 'edit', 'run', 'fill_gaps'])
+  z.enum([
+    'enable',
+    'disable',
+    'export',
+    'delete',
+    'duplicate',
+    'edit',
+    'run',
+    'fill_gaps',
+    'birthday_celebrate',
+  ])
 );
 export type BulkActionType = z.infer<typeof BulkActionType>;
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
@@ -512,6 +522,15 @@ export const BulkEditRules = lazySchema(() =>
 );
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
 
+export const BulkBirthdayCelebrate = lazySchema(() =>
+  BulkActionBase.merge(
+    z.object({
+      action: z.literal('birthday_celebrate'),
+    })
+  )
+);
+export type BulkBirthdayCelebrate = z.infer<typeof BulkBirthdayCelebrate>;
+
 export const PerformRulesBulkActionRequestQuery = lazySchema(() =>
   z.object({
     /**
@@ -542,6 +561,7 @@ export const PerformRulesBulkActionRequestBody = lazySchema(() =>
     BulkManualRuleRun,
     BulkManualRuleFillGaps,
     BulkEditRules,
+    BulkBirthdayCelebrate,
   ])
 );
 export type PerformRulesBulkActionRequestBody = z.infer<typeof PerformRulesBulkActionRequestBody>;

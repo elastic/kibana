@@ -6,6 +6,7 @@
  */
 
 export type * from './bulk_actions/bulk_actions_types';
+export * from './birthdays_today/birthdays_today_route.gen';
 export * from './bulk_actions/bulk_actions_route.gen';
 export * from './coverage_overview/coverage_overview_route';
 export * from './crud/create_rule/create_rule_route.gen';

@@ -1514,6 +1514,44 @@ export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: numbe
   );
 
 /**
+ * Bulk Birthday Celebrate
+ */
+
+export const RULES_BULK_BIRTHDAY_CELEBRATE_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.birthdayCelebrate.successToastTitle',
+  {
+    defaultMessage: '🎂 Birthday tags added',
+  }
+);
+
+export const RULES_BULK_BIRTHDAY_CELEBRATE_SUCCESS_DESCRIPTION = (succeededRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.birthdayCelebrate.successToastDescription',
+    {
+      values: { succeededRulesCount },
+      defaultMessage:
+        '{succeededRulesCount, plural, =0 {} =1 {Celebrated # rule} other {Celebrated # rules}}.',
+    }
+  );
+
+export const RULES_BULK_BIRTHDAY_CELEBRATE_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.birthdayCelebrate.errorToastTitle',
+  {
+    defaultMessage: 'Error celebrating rule birthdays',
+  }
+);
+
+export const RULES_BULK_BIRTHDAY_CELEBRATE_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.birthdayCelebrate.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        'Unable to celebrate {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
+    }
+  );
+
+/**
  * Bulk Edit
  */
 

@@ -10,6 +10,7 @@ import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
+import { birthdaysTodayRoute } from './rules/birthdays_today/route';
 import { performBulkActionRoute } from './rules/bulk_actions/route';
 import { createRuleRoute } from './rules/create_rule/route';
 import { deleteRuleRoute } from './rules/delete_rule/route';
@@ -48,6 +49,9 @@ export const registerRuleManagementRoutes = (
   // Rules search
   findRulesRoute(router, logger);
   searchRulesRoute(router, logger);
+
+  // Rule Birthdays 🎂 (demo)
+  birthdaysTodayRoute(router, logger);
 
   // Rule tags
   readTagsRoute(router);

@@ -470,6 +470,34 @@ export const performBulkActionRoute = (
               break;
             }
 
+            case BulkActionTypeEnum.birthday_celebrate: {
+              if (isDryRun) {
+                updated = rules;
+                break;
+              }
+              const bulkActionOutcome = await initPromisePool({
+                concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+                items: rules,
+                executor: async (rule) => {
+                  const ageYears =
+                    new Date().getUTCFullYear() - new Date(rule.createdAt).getUTCFullYear();
+                  const result = await rulesClient.bulkEdit({
+                    ids: [rule.id],
+                    operations: [
+                      { operation: 'add', field: 'tags', value: [`🎂 birthday-${ageYears}`] },
+                    ],
+                  });
+                  return (result.rules?.[0] as RuleAlertType | undefined) ?? rule;
+                },
+                abortSignal: abortController.signal,
+              });
+              errors.push(...bulkActionOutcome.errors);
+              updated = bulkActionOutcome.results
+                .map(({ result }) => result)
+                .filter((rule): rule is RuleAlertType => rule !== null);
+              break;
+            }
+
             case BulkActionTypeEnum.fill_gaps: {
               const uiSettingsClient = ctx.core.uiSettings.client;
               const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(

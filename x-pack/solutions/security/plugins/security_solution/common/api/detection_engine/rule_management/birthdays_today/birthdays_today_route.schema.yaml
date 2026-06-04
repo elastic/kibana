@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Birthdays Today API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/rules/birthdays_today:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: BirthdaysToday
+      summary: List detection rules celebrating their creation anniversary today
+      description: |
+        Returns detection rules whose `created_at` month/day matches a target date (defaults to today),
+        plus age-in-years and a celebratory birthday message for each rule.
+      tags:
+        - Rules API
+      parameters:
+        - name: 'birthdayDate'
+          in: query
+          required: false
+          description: Target birthday date in YYYY-MM-DD format. Defaults to today.
+          schema:
+            type: string
+        - name: 'birthdayYear'
+          in: query
+          required: false
+          description: Restrict celebrating rules to those whose creation year equals this value.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  celebrating_rule_ids:
+                    type: array
+                    items:
+                      type: string
+                  celebrating_rules_details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        alertTypeId:
+                          type: string
+                        createdBy:
+                          type: string
+                        createdAt:
+                          type: string
+                        lastRun:
+                          type: string
+                        name:
+                          type: string
+                        ageYears:
+                          type: integer
+                        birthdayMessage:
+                          type: string
+                      required:
+                        - id
+                        - alertTypeId
+                        - createdBy
+                        - createdAt
+                        - name
+                        - ageYears
+                        - birthdayMessage
+                  total:
+                    type: integer
+                  today_message:
+                    type: string
+                required:
+                  - celebrating_rule_ids
+                  - celebrating_rules_details
+                  - total
+                  - today_message

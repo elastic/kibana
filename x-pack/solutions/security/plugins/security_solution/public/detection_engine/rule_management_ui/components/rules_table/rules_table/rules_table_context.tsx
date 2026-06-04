@@ -153,6 +153,7 @@ export type LoadingRuleAction =
   | 'edit'
   | 'run'
   | 'fill_gaps'
+  | 'birthday_celebrate'
   | null;
 
 export interface LoadingRules {

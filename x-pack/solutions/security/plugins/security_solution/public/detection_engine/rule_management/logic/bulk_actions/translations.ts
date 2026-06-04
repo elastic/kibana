@@ -45,6 +45,9 @@ export function summarizeBulkSuccess(action: BulkActionType, summary: BulkAction
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_SUCCESS;
+
+    case BulkActionTypeEnum.birthday_celebrate:
+      return i18n.RULES_BULK_BIRTHDAY_CELEBRATE_SUCCESS;
   }
 }
 
@@ -76,6 +79,9 @@ export function explainBulkSuccess(
         return i18n.RULES_BULK_FILL_GAPS_SUCCESS_ALL_RULES_SKIPPED_DESCRIPTION;
       }
       return i18n.RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
+
+    case BulkActionTypeEnum.birthday_celebrate:
+      return i18n.RULES_BULK_BIRTHDAY_CELEBRATE_SUCCESS_DESCRIPTION(summary.succeeded);
   }
 }
 
@@ -127,6 +133,9 @@ export function summarizeBulkError(action: BulkActionType): string {
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE;
+
+    case BulkActionTypeEnum.birthday_celebrate:
+      return i18n.RULES_BULK_BIRTHDAY_CELEBRATE_FAILURE;
   }
 }
 
@@ -162,6 +171,9 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed, summary.skipped);
+
+    case BulkActionTypeEnum.birthday_celebrate:
+      return i18n.RULES_BULK_BIRTHDAY_CELEBRATE_FAILURE_DESCRIPTION(summary.failed);
   }
 }
 

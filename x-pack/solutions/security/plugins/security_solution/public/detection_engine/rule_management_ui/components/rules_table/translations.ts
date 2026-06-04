@@ -36,6 +36,61 @@ export const INSTALLED_RULES_TAB = i18n.translate(
   }
 );
 
+export const BIRTHDAYS_CARD_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.birthdaysCard.title',
+  {
+    defaultMessage: `🎂 Today's Rule Birthdays`,
+  }
+);
+
+export const BIRTHDAYS_CARD_NONE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.birthdaysCard.none',
+  {
+    defaultMessage: 'No detection rules are celebrating their birthday today.',
+  }
+);
+
+export const birthdaysCardSummary = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.birthdaysCard.summary',
+    {
+      defaultMessage:
+        '{count, plural, one {# detection rule is} other {# detection rules are}} celebrating today.',
+      values: { count },
+    }
+  );
+
+export const birthdaysCardRuleLine = ({
+  name,
+  ageYears,
+  alertTypeId,
+  createdBy,
+  createdDate,
+}: {
+  name: string;
+  ageYears: number;
+  alertTypeId: string;
+  createdBy: string;
+  createdDate: string;
+}) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.birthdaysCard.ruleLine',
+    {
+      defaultMessage:
+        '🎂 {name} — {ageYears} year(s) old · {alertTypeId} · created by {createdBy} on {createdDate}',
+      values: { name, ageYears, alertTypeId, createdBy, createdDate },
+    }
+  );
+
+export const birthdaysCardMoreLine = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.birthdaysCard.moreLine',
+    {
+      defaultMessage: '… and {count} more',
+      values: { count },
+    }
+  );
+
 export const RULE_MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.monitoring',
   {

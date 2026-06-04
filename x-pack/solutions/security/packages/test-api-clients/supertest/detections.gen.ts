@@ -24,6 +24,7 @@ import {
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
+import type { BirthdaysTodayRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/birthdays_today/birthdays_today_route.gen';
 import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
 import type { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
@@ -89,6 +90,19 @@ to the relevant index, causing it to be deleted after 30 days, and removes other
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
+  },
+  /**
+      * Returns detection rules whose `created_at` month/day matches a target date (defaults to today),
+plus age-in-years and a celebratory birthday message for each rule.
+
+      */
+  birthdaysToday(props: BirthdaysTodayProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/detection_engine/rules/birthdays_today', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
   },
   /**
       * Creates an index for Elastic Security alerts. Calling this API is not
@@ -705,6 +719,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
+}
+export interface BirthdaysTodayProps {
+  query: BirthdaysTodayRequestQueryInput;
 }
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;

@@ -47,6 +47,7 @@ paths:
                 - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
+                - $ref: '#/components/schemas/BulkBirthdayCelebrate'
             examples:
               example01:
                 summary: Enable - Enable all rules with the test tag
@@ -1369,6 +1370,7 @@ components:
         - edit
         - run
         - fill_gaps
+        - birthday_celebrate
 
     BulkActionEditType:
       type: string
@@ -1630,3 +1632,14 @@ components:
           required:
             - action
             - edit
+
+    BulkBirthdayCelebrate:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [birthday_celebrate]
+          required:
+            - action

@@ -27,6 +27,7 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { redirectToDetections } from '../../../common/helpers';
 import * as i18n from '../../../common/translations';
 import { AllRules } from '../../components/rules_table';
+import { BirthdaysCard } from '../../components/rules_table/birthdays_card';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
@@ -173,6 +174,7 @@ const RulesPageContent = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
+          <BirthdaysCard />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

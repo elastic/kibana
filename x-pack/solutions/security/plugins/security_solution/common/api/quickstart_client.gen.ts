@@ -47,6 +47,10 @@ import type {
   ReviewRuleUpgradeResponse,
 } from './detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
+  BirthdaysTodayRequestQueryInput,
+  BirthdaysTodayResponse,
+} from './detection_engine/rule_management/birthdays_today/birthdays_today_route.gen';
+import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
   PerformRulesBulkActionResponse,
@@ -673,6 +677,25 @@ is added to its existing source labels instead.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Returns detection rules whose `created_at` month/day matches a target date (defaults to today),
+plus age-in-years and a celebratory birthday message for each rule.
+
+    */
+  async birthdaysToday(props: BirthdaysTodayProps) {
+    this.log.info(`${new Date().toISOString()} Calling API BirthdaysToday`);
+    return this.kbnClient
+      .request<BirthdaysTodayResponse>({
+        path: '/internal/detection_engine/rules/birthdays_today',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3849,6 +3872,9 @@ export interface AlertsMigrationCleanupProps {
 export interface AssignWatchlistEntitiesProps {
   params: AssignWatchlistEntitiesRequestParamsInput;
   body: AssignWatchlistEntitiesRequestBodyInput;
+}
+export interface BirthdaysTodayProps {
+  query: BirthdaysTodayRequestQueryInput;
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
