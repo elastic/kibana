@@ -57,10 +57,7 @@ spaceTest.describe(
         await expect(flyout).toBeVisible({ timeout: 10_000 });
 
         // In serverless, the flyout may default to "Log overview" tab; switch to "Table" if needed
-        const tableTab = flyout.locator('[data-test-subj="docViewerTab-table"]');
-        if (await tableTab.isVisible().catch(() => false)) {
-          await tableTab.click();
-        }
+        await flyout.locator('[data-test-subj="docViewerTab-doc_view_table"]').click();
 
         const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
         await searchInput.fill(TEST_ANCHOR_FILTER_FIELD);
@@ -134,10 +131,7 @@ spaceTest.describe(
         await expect(flyout).toBeVisible({ timeout: 10_000 });
 
         // In serverless, the flyout may default to "Log overview" tab; switch to "Table" if needed
-        const tableTab = flyout.locator('[data-test-subj="docViewerTab-table"]');
-        if (await tableTab.isVisible().catch(() => false)) {
-          await tableTab.click();
-        }
+        await flyout.locator('[data-test-subj="docViewerTab-doc_view_table"]').click();
 
         const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
         await searchInput.fill(TEST_ANCHOR_FILTER_FIELD);
