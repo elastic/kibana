@@ -30,6 +30,32 @@ const modify = (
   return applyPartModification(text, part, action, parts);
 };
 
+const absolutePart = (
+  text: string,
+  start: number,
+  kind: RangePart['kind'],
+  format: string
+): RangePart => ({
+  text,
+  start,
+  end: start + text.length,
+  kind,
+  navigable: true,
+  rangeIndex: 0,
+  format,
+});
+
+const defaultAbsoluteParts = (text = 'May 31, 2026, 23:59') => {
+  const format = 'MMM D, YYYY, HH:mm';
+  return [
+    absolutePart('May', text.indexOf('May'), 'month', format),
+    absolutePart('31', text.indexOf('31'), 'day', format),
+    absolutePart('2026', text.indexOf('2026'), 'year', format),
+    absolutePart('23', text.indexOf('23'), 'hour', format),
+    absolutePart('59', text.indexOf('59'), 'minute', format),
+  ];
+};
+
 describe('applyPartModification', () => {
   describe('relative-value', () => {
     it('increments and decrements values', () => {
@@ -95,8 +121,64 @@ describe('applyPartModification', () => {
     });
   });
 
-  describe('unsupported parts', () => {
-    it('returns undefined for absolute-date parts until absolute modification is enabled', () => {
+  describe('absolute dates', () => {
+    it('cascades sub-day overflow using moment semantics', () => {
+      const text = 'May 31, 2026, 23:59';
+      const parts = defaultAbsoluteParts(text);
+      const minute = parts.find((part) => part.kind === 'minute');
+      if (!minute) throw new Error('Minute part not found');
+
+      expect(applyPartModification(text, minute, 'increase', parts)).toBe('Jun 1, 2026, 00:00');
+    });
+
+    it('clamps month overflow', () => {
+      const text = 'Jan 31, 2026, 00:00:00.000';
+      const format = 'MMM D, YYYY, HH:mm:ss.SSS';
+      const parts = [
+        absolutePart('Jan', 0, 'month', format),
+        absolutePart('31', 4, 'day', format),
+        absolutePart('2026', 8, 'year', format),
+        absolutePart('00', 14, 'hour', format),
+        absolutePart('00', 17, 'minute', format),
+        absolutePart('00', 20, 'second', format),
+        absolutePart('000', 23, 'millisecond', format),
+      ];
+
+      expect(applyPartModification(text, parts[0], 'increase', parts)).toBe(
+        'Feb 28, 2026, 00:00:00.000'
+      );
+    });
+
+    it('clamps year overflow for leap days', () => {
+      const text = 'Feb 29, 2024, 00:00';
+      const format = 'MMM D, YYYY, HH:mm';
+      const parts = [
+        absolutePart('Feb', 0, 'month', format),
+        absolutePart('29', 4, 'day', format),
+        absolutePart('2024', 8, 'year', format),
+        absolutePart('00', 14, 'hour', format),
+        absolutePart('00', 17, 'minute', format),
+      ];
+      const year = parts[2];
+
+      expect(applyPartModification(text, year, 'increase', parts)).toBe('Feb 28, 2025, 00:00');
+    });
+
+    it('preserves the matched format when serializing', () => {
+      const text = 'May 5, 2026, 00:00';
+      const format = 'MMM D, YYYY, HH:mm';
+      const parts = [
+        absolutePart('May', 0, 'month', format),
+        absolutePart('5', 4, 'day', format),
+        absolutePart('2026', 7, 'year', format),
+        absolutePart('00', 13, 'hour', format),
+        absolutePart('00', 16, 'minute', format),
+      ];
+
+      expect(applyPartModification(text, parts[1], 'increase', parts)).toBe('May 6, 2026, 00:00');
+    });
+
+    it('returns undefined when the selected part has no format', () => {
       const part: RangePart = {
         text: '5',
         start: 4,

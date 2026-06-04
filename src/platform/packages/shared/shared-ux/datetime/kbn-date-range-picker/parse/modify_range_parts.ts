@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RangePart } from './parse_range_parts';
+import moment from 'moment';
+
+import type { DateUnit, RangePart } from './parse_range_parts';
 
 type ModificationAction = 'increase' | 'decrease';
 type RelativeUnit = (typeof RELATIVE_UNIT_CYCLE)[number];
@@ -64,6 +66,15 @@ const RELATIVE_UNIT_WORDS: Readonly<Record<RelativeUnit, { singular: string; plu
   w: { singular: 'week', plural: 'weeks' },
   M: { singular: 'month', plural: 'months' },
   y: { singular: 'year', plural: 'years' },
+};
+const ABSOLUTE_DATE_UNITS: Readonly<Record<DateUnit, moment.unitOfTime.DurationConstructor>> = {
+  year: 'years',
+  month: 'months',
+  day: 'days',
+  hour: 'hours',
+  minute: 'minutes',
+  second: 'seconds',
+  millisecond: 'milliseconds',
 };
 
 const splicePart = (text: string, part: RangePart, replacement: string): string | undefined => {
@@ -174,6 +185,38 @@ const modifyRoundingUnit = (
   return splicePart(text, part, nextUnit);
 };
 
+const isAbsoluteDateKind = (kind: RangePart['kind']): kind is DateUnit =>
+  kind in ABSOLUTE_DATE_UNITS;
+
+const modifyAbsoluteDate = (
+  text: string,
+  part: RangePart,
+  action: ModificationAction,
+  parts: RangePart[]
+): string | undefined => {
+  if (!isAbsoluteDateKind(part.kind) || !part.format) return undefined;
+
+  const sideParts = parts.filter(
+    (candidate) =>
+      candidate.rangeIndex === part.rangeIndex &&
+      candidate.kind !== 'separator' &&
+      candidate.kind !== 'literal'
+  );
+  if (sideParts.length === 0) return undefined;
+
+  const sideStart = Math.min(...sideParts.map((candidate) => candidate.start));
+  const sideEnd = Math.max(...sideParts.map((candidate) => candidate.end));
+  const sideText = text.slice(sideStart, sideEnd);
+  const parsed = moment(sideText, part.format, true);
+  if (!parsed.isValid()) return undefined;
+
+  const amount = action === 'increase' ? 1 : -1;
+  const nextSideText = parsed.add(amount, ABSOLUTE_DATE_UNITS[part.kind]).format(part.format);
+  if (nextSideText === sideText) return undefined;
+
+  return `${text.slice(0, sideStart)}${nextSideText}${text.slice(sideEnd)}`;
+};
+
 /**
  * Applies an arrow-key modification to a selected range part.
  */
@@ -192,6 +235,14 @@ export function applyPartModification(
       return modifyRelativeUnit(text, part, action, parts);
     case 'rounding-unit':
       return modifyRoundingUnit(text, part, action);
+    case 'month':
+    case 'day':
+    case 'year':
+    case 'hour':
+    case 'minute':
+    case 'second':
+    case 'millisecond':
+      return modifyAbsoluteDate(text, part, action, parts);
     default:
       return undefined;
   }

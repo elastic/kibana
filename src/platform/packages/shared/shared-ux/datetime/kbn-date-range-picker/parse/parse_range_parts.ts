@@ -29,6 +29,7 @@ export interface RangePart {
   kind: PartKind;
   navigable: boolean;
   rangeIndex: 0 | 1 | null;
+  format?: string;
 }
 
 interface DelimiterSplit {
