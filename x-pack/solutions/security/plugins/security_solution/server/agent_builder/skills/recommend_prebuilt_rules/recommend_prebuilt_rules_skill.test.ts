@@ -60,12 +60,62 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
   });
 
-  it('placeholder content names the tools, read-only constraint, and sibling routing', () => {
+  it('content names all four tools', () => {
     const { getStartServices, logger } = createDeps();
     const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
-    expect(skill.content).toContain('security.find_prebuilt_rules');
-    expect(skill.content).toContain('security.get_installable_catalog_overview');
+    expect(skill.content).toContain(FIND_PREBUILT_RULES_INLINE_TOOL_ID);
+    expect(skill.content).toContain(GET_USER_DATA_INVENTORY_INLINE_TOOL_ID);
+    expect(skill.content).toContain(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID);
+    expect(skill.content).toContain(GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID);
+  });
+
+  it('content states the read-only constraint and routes to sibling skills', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
     expect(skill.content).toMatch(/Read-Only/i);
     expect(skill.content).toContain('find-security-rules');
+    expect(skill.content).toContain('detection-rule-edit');
+    expect(skill.content).toContain('alert-analysis');
+    expect(skill.content).toContain('threat-hunting');
+    expect(skill.content).toContain('rule-creation');
+    expect(skill.content).toContain('find-security-ml-jobs');
+  });
+
+  it('content carries the mandatory discovery-before-tag-filter rule in bold', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toMatch(
+      /\*\*Before any `security\.find_prebuilt_rules` call that uses a `tags` filter[\s\S]*?get_installable_catalog_overview[\s\S]*?\*\*/
+    );
+  });
+
+  it('content includes the canonical 14 MITRE tactics', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    const tacticIds = [
+      'TA0001',
+      'TA0002',
+      'TA0003',
+      'TA0004',
+      'TA0005',
+      'TA0006',
+      'TA0007',
+      'TA0008',
+      'TA0009',
+      'TA0010',
+      'TA0011',
+      'TA0040',
+      'TA0042',
+      'TA0043',
+    ];
+    tacticIds.forEach((id) => expect(skill.content).toContain(id));
+  });
+
+  it('content covers data-source categories and runnability inference', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toMatch(/endpoint, identity, cloud, network/i);
+    expect(skill.content).toMatch(/runnab/i);
+    expect(skill.content).toMatch(/related_integrations\.package/);
   });
 });
