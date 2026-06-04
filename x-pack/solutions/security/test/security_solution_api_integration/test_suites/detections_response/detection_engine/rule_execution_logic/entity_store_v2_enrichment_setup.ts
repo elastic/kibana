@@ -13,8 +13,18 @@ const PUBLIC_API_HEADERS: ReadonlyArray<[string, string]> = [
   ['elastic-api-version', '2023-10-31'],
 ];
 
+// The entity maintainers API is an internal route that requires api-version '2'.
+const INTERNAL_API_HEADERS: ReadonlyArray<[string, string]> = [
+  ['kbn-xsrf', 'true'],
+  ['x-elastic-internal-origin', 'Kibana'],
+  ['elastic-api-version', '2'],
+];
+
 const withHeaders = <T extends { set: (key: string, value: string) => T }>(req: T): T =>
   PUBLIC_API_HEADERS.reduce((acc, [k, v]) => acc.set(k, v), req);
+
+const withInternalHeaders = <T extends { set: (key: string, value: string) => T }>(req: T): T =>
+  INTERNAL_API_HEADERS.reduce((acc, [k, v]) => acc.set(k, v), req);
 
 export interface HostEntityConfig {
   host: Record<string, unknown>;
@@ -55,11 +65,11 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
    * privilege when the `security/complete` product tier is not configured). This is a hard
    * failure — the environment is misconfigured and the caller should not suppress it.
    *
-   * Returns `false` if the initial maintainer scan does not complete within 5 minutes.
-   * This is a soft failure caused by CI timing variability, not a code bug. Callers should
-   * call `this.skip()` when `false` is returned. Enrichment describe blocks must be tagged
-   * `@skipInServerless` to prevent this function being called in environments where the
-   * install API returns 403 (missing product-tier privilege).
+   * Returns `false` if the risk-score maintainer does not complete its first run within
+   * 5 minutes. This is a soft failure caused by CI timing variability, not a code bug.
+   * Callers should call `this.skip()` when `false` is returned. Enrichment describe blocks
+   * must be tagged `@skipInServerless` to prevent this function being called in environments
+   * where the install API returns 403 (missing product-tier privilege).
    */
   const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<boolean> => {
     const entityTypes: string[] = [];
@@ -82,22 +92,24 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       );
     }
 
-    // Wait until the initial entity store maintainer scan completes (`stopped`) before seeding
-    // test entities. Seeding during a `running` scan risks having the engine overwrite the test
-    // data before the detection rule runs. If the scan does not complete within the timeout
-    // the caller should skip the suite (CI timing issue, not a code bug).
+    // Wait until the risk-score maintainer has completed its first run (taskStatus === 'stopped'
+    // and runs > 0). This ensures the maintainer has finished its initial setup pass and will not
+    // overwrite CRUD-seeded test entities before the detection rule executes.
+    // The entity store status API always returns 'running' once install is done, so we poll the
+    // entity maintainers API instead.
     const scanCompleted = await retry
-      .waitForWithTimeout('Entity Store V2 initial scan to complete', 300_000, async () => {
-        const res = await withHeaders(supertest.get('/api/security/entity_store/status'));
-        if (res.body.status === 'error') {
-          throw new Error(`Entity Store V2 install errored: ${JSON.stringify(res.body)}`);
-        }
-        return res.body.status === 'stopped';
+      .waitForWithTimeout('risk-score maintainer initial run to complete', 300_000, async () => {
+        const res = await withInternalHeaders(
+          supertest.get('/internal/security/entity_store/entity_maintainers?ids=risk-score')
+        );
+        const maintainer = res.body?.maintainers?.[0];
+        if (!maintainer) return false;
+        return maintainer.taskStatus === 'stopped' && maintainer.runs > 0;
       })
       .then(() => true)
       .catch((err: Error) => {
         log.warning(
-          `Entity Store V2 initial scan did not complete within the timeout — skipping enrichment tests. ` +
+          `risk-score maintainer did not complete its first run within the timeout — skipping enrichment tests. ` +
             `This is a CI timing issue, not a code bug. Error: ${err.message}`
         );
         return false;
