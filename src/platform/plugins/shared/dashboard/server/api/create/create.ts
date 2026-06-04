@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestTiming } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
