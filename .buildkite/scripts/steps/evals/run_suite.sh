@@ -367,6 +367,7 @@ done
 
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
+# If EVAL_GREP is set, pass Playwright --grep to filter tests by name/pattern.
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
 EVAL_RUN_ARGS=()
 if [[ -n "${EVAL_GREP:-}" ]]; then
