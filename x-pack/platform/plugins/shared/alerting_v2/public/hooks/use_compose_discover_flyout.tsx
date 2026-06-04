@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   SingleStepWorkflowForm,
   type SingleStepWorkflowFormValue,
@@ -54,6 +55,11 @@ export const useComposeDiscoverFlyout = ({
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
   const uiActions = useService(PluginStart('uiActions')) as UiActionsStart;
+  // `dashboard` is an optional plugin dependency; resolve it leniently so the
+  // flyout still mounts in environments where the dashboard plugin is disabled.
+  const dashboard = useService(PluginStart('dashboard'), { optional: true }) as
+    | DashboardStart
+    | undefined;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -81,8 +87,9 @@ export const useComposeDiscoverFlyout = ({
         },
       },
       uiActions,
+      dashboard,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions]
+    [http, data, dataViews, notifications, application, lens, uiActions, dashboard]
   );
 
   const closeFlyout = useCallback(() => {
