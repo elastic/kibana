@@ -137,13 +137,14 @@ const fetchSyntheticsPackagePolicies = async (
 const waitForMonitorPackagePolicy = async (
   kbnClient: KbnClient,
   monitorId: string,
+  locId: string,
   spaceId?: string
 ): Promise<PackagePolicy> => {
   const deadline = Date.now() + 30_000;
   let lastMatch: PackagePolicy | undefined;
   while (Date.now() < deadline) {
     const items = await fetchSyntheticsPackagePolicies(kbnClient, spaceId);
-    const match = items.find((p) => typeof p.id === 'string' && p.id.startsWith(`${monitorId}-`));
+    const match = items.find((p) => p.id === `${monitorId}-${locId}`);
     if (match && parseMaintenanceWindowsVar(match)) {
       return match;
     }
@@ -204,7 +205,11 @@ apiTest.describe(
           });
           const monitorId = (res.body as { id: string }).id;
 
-          const pkgPolicy = await waitForMonitorPackagePolicy(kbnClient, monitorId);
+          const pkgPolicy = await waitForMonitorPackagePolicy(
+            kbnClient,
+            monitorId,
+            privateLocation.id
+          );
           expectSyncedMaintenanceWindow(pkgPolicy, mw);
         } finally {
           await deleteMaintenanceWindow(kbnClient, mw.id);
@@ -214,7 +219,7 @@ apiTest.describe(
 
     apiTest(
       'applies the maintenance window to a package policy in a non-default space',
-      async ({ apiClient, kbnClient, apiServices }) => {
+      async ({ apiClient, kbnClient, apiServices, log }) => {
         const spaceId = `mw-space-${uuidv4()}`;
         await kbnClient.spaces.create({ id: spaceId, name: spaceId });
 
@@ -237,10 +242,19 @@ apiTest.describe(
           );
           const monitorId = (res.body as { id: string }).id;
 
-          const pkgPolicy = await waitForMonitorPackagePolicy(kbnClient, monitorId, spaceId);
+          const pkgPolicy = await waitForMonitorPackagePolicy(
+            kbnClient,
+            monitorId,
+            privateLocation.id,
+            spaceId
+          );
           expectSyncedMaintenanceWindow(pkgPolicy, mw);
         } finally {
-          await kbnClient.spaces.delete(spaceId).catch(() => {});
+          await kbnClient.spaces
+            .delete(spaceId)
+            .catch((err) =>
+              log.warning(`Failed to delete test space ${spaceId}: ${err?.message ?? err}`)
+            );
         }
       }
     );

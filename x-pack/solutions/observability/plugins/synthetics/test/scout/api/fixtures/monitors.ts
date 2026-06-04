@@ -53,8 +53,7 @@ export async function addMonitor(
   if (gettingStarted) qs.push('gettingStarted=true');
   if (savedObjectType) qs.push(`savedObjectType=${savedObjectType}`);
   if (id) qs.push(`id=${id}`);
-  const prefix = spaceId && spaceId !== 'default' ? `s/${spaceId}/` : '';
-  const path = `${prefix}api/synthetics/monitors${qs.length ? `?${qs.join('&')}` : ''}`;
+  const path = `${monitorsPath(spaceId)}${qs.length ? `?${qs.join('&')}` : ''}`;
 
   const res = await apiClient.post(path, {
     headers: { ...headers, 'elastic-api-version': PUBLIC_API_VERSION },
