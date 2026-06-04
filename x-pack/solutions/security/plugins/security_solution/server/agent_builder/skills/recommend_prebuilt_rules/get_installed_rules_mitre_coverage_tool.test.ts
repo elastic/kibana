@@ -17,10 +17,9 @@ import {
 } from './get_installed_rules_mitre_coverage_tool';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
-jest.mock(
-  '../../../lib/detection_engine/rule_management/logic/search/find_rules',
-  () => ({ findRules: jest.fn() })
-);
+jest.mock('../../../lib/detection_engine/rule_management/logic/search/find_rules', () => ({
+  findRules: jest.fn(),
+}));
 
 const mockFindRules = jest.mocked(findRules);
 
@@ -74,7 +73,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
   describe('tool definition', () => {
     it('has the correct id and type', () => {
       const { getStartServices, mockLogger } = createMockDeps();
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
 
       expect(tool.id).toBe(GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID);
       expect(tool.type).toBe(ToolType.builtin);
@@ -115,7 +117,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         },
       } as never);
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -165,14 +170,18 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         },
       } as never);
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
       expect('results' in result).toBe(true);
       if ('results' in result) {
-        const technique = (result.results[0].data as { techniques: Array<{ subtechniques?: unknown }> })
-          .techniques[0];
+        const technique = (
+          result.results[0].data as { techniques: Array<{ subtechniques?: unknown }> }
+        ).techniques[0];
         expect('subtechniques' in technique).toBe(false);
       }
     });
@@ -193,15 +202,18 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         },
       } as never);
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
       expect('results' in result).toBe(true);
       if ('results' in result) {
-        expect((result.results[0].data as { tactics: Array<{ name: string }> }).tactics[0].name).toBe(
-          'TA0001'
-        );
+        expect(
+          (result.results[0].data as { tactics: Array<{ name: string }> }).tactics[0].name
+        ).toBe('TA0001');
       }
     });
 
@@ -219,7 +231,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         },
       } as never);
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       await tool.handler({}, context);
 
@@ -261,7 +276,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         },
       } as never);
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -288,7 +306,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
         data: [],
       } as never);
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -310,7 +331,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       const { getStartServices, mockLogger, mockRequest } = createMockDeps();
       mockFindRules.mockRejectedValue(new Error('ES cluster unavailable'));
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -330,7 +354,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       const { getStartServices, mockLogger, mockRequest } = createMockDeps();
       mockFindRules.mockRejectedValue('string error');
 
-      const tool = createGetInstalledRulesMitreCoverageTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstalledRulesMitreCoverageTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
