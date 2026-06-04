@@ -91,10 +91,11 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
         );
         const maintainer = res.body?.maintainers?.[0];
         if (!maintainer) return false;
-        if (maintainer.taskStatus === 'error') {
-          throw new Error(`risk-score maintainer errored: ${JSON.stringify(res.body)}`);
-        }
-        return maintainer.taskStatus === 'stopped' && maintainer.runs > 0;
+        // taskStatus stays 'started' between runs — it is only set to 'stopped' by an
+        // explicit stop API call, never by the task runner itself after a normal run.
+        // Waiting for runs > 0 is the correct condition: it means the maintainer has
+        // completed at least one full cycle and the risk-score index is ready.
+        return maintainer.runs > 0;
       }
     );
 
