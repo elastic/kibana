@@ -69,16 +69,18 @@ export class WorkflowExecutionService {
     executionSpaceId,
     inputs,
     request,
+    notFoundMessage,
   }: {
     workflowId: string;
     executionSpaceId: string;
     inputs: Record<string, unknown>;
     request: KibanaRequest;
+    notFoundMessage?: string;
   }): Promise<string> {
     const workflow = await this.managementApi.getWorkflow(workflowId, GLOBAL_WORKFLOW_SPACE_ID);
 
     if (!workflow || !workflow.definition) {
-      throw new Error(`Workflow ${workflowId} not found`);
+      throw new Error(notFoundMessage ?? `Workflow ${workflowId} not found`);
     }
 
     return this.managementApi.runWorkflow(

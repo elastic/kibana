@@ -248,6 +248,7 @@ export class StreamsKIsOnboardingClient {
       executionSpaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       inputs: toWorkflowInputPayload(inputs) as unknown as Record<string, unknown>,
       request,
+      notFoundMessage: `Onboarding workflow ${STREAMS_KI_ONBOARDING_WORKFLOW_ID} not found`,
     });
   }
 

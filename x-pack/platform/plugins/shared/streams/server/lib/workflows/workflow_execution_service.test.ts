@@ -127,6 +127,20 @@ describe('WorkflowExecutionService', () => {
         })
       ).rejects.toThrow(/Workflow wf-1 not found/);
     });
+
+    it('throws the caller-supplied message when the workflow is not found', async () => {
+      const { service } = createService({ getWorkflow: jest.fn().mockResolvedValue(null) });
+
+      await expect(
+        service.execute({
+          workflowId: 'wf-1',
+          executionSpaceId: 'space-a',
+          inputs: {},
+          request: httpServerMock.createKibanaRequest(),
+          notFoundMessage: 'Onboarding workflow wf-1 not found',
+        })
+      ).rejects.toThrow(/Onboarding workflow wf-1 not found/);
+    });
   });
 
   describe('cancelLatest', () => {

@@ -81,7 +81,7 @@ apiTest.describe(
         );
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('executionId');
+        expect('executionId' in body).toBe(true);
         expect(body.executionId === null || typeof body.executionId === 'string').toBe(true);
       }
     );

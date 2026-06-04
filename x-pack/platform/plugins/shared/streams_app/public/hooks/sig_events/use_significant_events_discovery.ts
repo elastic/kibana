@@ -178,7 +178,8 @@ export const useSignificantEventsDiscovery = ({
   const handleRun = useCallback(() => {
     queryClient.removeQueries({ queryKey: SIGNIFICANT_EVENT_DISCOVERY_NOTIFIED });
 
-    // Reset until the trigger resolves with the new id (see optimisticRunPending).    triggeredExecutionIdRef.current = null;
+    // Reset until the trigger resolves with the new id (see optimisticRunPending).
+    triggeredExecutionIdRef.current = null;
     previousStatusRef.current = WorkflowStatus.InProgress;
     setSignificantEventsDiscoveryStatus(WorkflowStatus.InProgress);
     triggerMutate();

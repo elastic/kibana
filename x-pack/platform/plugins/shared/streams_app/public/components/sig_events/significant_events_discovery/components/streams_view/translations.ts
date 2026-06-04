@@ -100,8 +100,14 @@ export const ONBOARDING_FAILURE_TITLE = i18n.translate(
   }
 );
 
+export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
+  {
+    defaultMessage: 'Discover Insights',
+  }
+);
 export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.findSignificantEventsConfigAriaLabel',
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsConfigAriaLabel',
   {
     defaultMessage: 'Configure discovery model',
   }
