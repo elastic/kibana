@@ -314,7 +314,7 @@ describe('RelatedDashboardsClient', () => {
 
     it('should fetch referenced panels when fetching dashboards', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_EMBEDDABLE_TYPE = LENS_EMBEDDABLE_TYPE; 
+      const PANEL_EMBEDDABLE_TYPE = LENS_EMBEDDABLE_TYPE;
       const PANEL_SO_TYPE = 'lens'; // saved object content type for Lens
       const PANEL_UID = 'panelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
@@ -348,7 +348,7 @@ describe('RelatedDashboardsClient', () => {
 
     it('should not refetch a referenced panel if it was fetched before', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_EMBEDDABLE_TYPE = LENS_EMBEDDABLE_TYPE; 
+      const PANEL_EMBEDDABLE_TYPE = LENS_EMBEDDABLE_TYPE;
       const PANEL_SO_TYPE = 'lens'; // saved object content type for Lens
       const PANEL_UID = 'panelUid';
       const OTHER_PANEL_UID = 'otherPanelUid';
