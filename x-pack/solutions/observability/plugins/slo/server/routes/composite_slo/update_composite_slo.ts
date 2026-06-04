@@ -28,7 +28,7 @@ export const updateCompositeSLORoute = createCompositeSloServerRoute({
       });
 
     const core = await context.core;
-    const userId = core.security.authc.getCurrentUser()?.username;
+    const userId = core.security.authc.getCurrentUser()?.username ?? '';
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
