@@ -29,7 +29,6 @@ function createStartContract(
     aggs: searchAggsStartMock(),
     search: jest.fn(),
     dsl: jest.fn(),
-    dslPaginated: jest.fn(),
     esql: jest.fn(),
     eql: jest.fn(),
     sql: jest.fn(),

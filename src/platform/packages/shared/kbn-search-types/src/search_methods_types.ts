@@ -12,7 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import type { SanitizedConnectionRequestParams } from './types';
+import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
 /**
  * Base options shared across all typed search methods
@@ -37,6 +37,16 @@ export interface IBaseSearchOptions {
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
+
+  /**
+   * Inspector integration options for tracking requests
+   */
+  inspector?: {
+    adapter?: RequestAdapter;
+    title: string;
+    description?: string;
+    id?: string;
+  };
 }
 
 // ============================================================================
@@ -106,25 +116,11 @@ export interface IDslSearchOptions extends IBaseSearchOptions {
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
-}
-
-export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
-
-export type IDslPaginatedSearchOptions = Omit<IDslSearchOptions, 'trackTotalHits'>;
-
-/**
- * Pagination helpers for DSL search results
- */
-export interface IDslPagination {
-  /**
-   * Whether more results are available
-   */
-  hasNextPage: boolean;
 
   /**
-   * Fetch the next page of results using search_after
+   * Callback to provide pre-request metadata stats (e.g., index pattern name)
    */
-  nextPage: () => Promise<IDslPaginatedSearchResult | null>;
+  getRequestMetadata?: () => RequestStatistics;
 }
 
 /**
@@ -135,28 +131,6 @@ export interface IDslSearchResult {
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
-}
-
-/**
- * Result from a paginated DSL search
- */
-export interface IDslPaginatedSearchResult {
-  /**
-   * Raw Elasticsearch search response
-   */
-  rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
-  /**
-   * Pagination helpers for navigating through result pages
-   */
-  pagination: IDslPagination;
 }
 
 // ============================================================================
@@ -216,10 +190,6 @@ export interface IEsqlSearchResult {
    * Raw Elasticsearch ES|QL async query response
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -279,6 +249,11 @@ export interface IEqlSearchOptions extends IBaseSearchOptions {
    * Field to use for tiebreaking
    */
   tiebreakerField?: string;
+
+  /**
+   * Callback to provide pre-request metadata stats (e.g., index pattern name)
+   */
+  getRequestMetadata?: () => RequestStatistics;
 }
 
 /**
@@ -289,10 +264,6 @@ export interface IEqlSearchResult {
    * Raw Elasticsearch EQL search response
    */
   rawResponse: estypes.EqlSearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -347,11 +318,6 @@ export interface ISqlSearchResult {
    * Time in milliseconds the search took to execute
    */
   took: number;
-
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -372,14 +338,6 @@ export interface ISearchMethods {
    * Execute a DSL (Elasticsearch Query DSL) search
    */
   dsl: (params: IDslSearchParams, options?: IDslSearchOptions) => Promise<IDslSearchResult>;
-
-  /**
-   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
-   */
-  dslPaginated: (
-    params: IDslPaginatedSearchParams,
-    options?: IDslPaginatedSearchOptions
-  ) => Promise<IDslPaginatedSearchResult>;
 
   /**
    * Execute an EQL (Event Query Language) search

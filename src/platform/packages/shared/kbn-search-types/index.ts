@@ -29,8 +29,6 @@ export type {
   IDslSearchParams,
   IDslSearchOptions,
   IDslSearchResult,
-  IDslPaginatedSearchResult,
-  IDslPagination,
   IEsqlSearchParams,
   IEsqlSearchOptions,
   IEsqlSearchResult,
