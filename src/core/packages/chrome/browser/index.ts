@@ -69,6 +69,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  SlotDataSources,
+  NavExtensionActionEvent,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,

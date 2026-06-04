@@ -30,7 +30,8 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-side-navigation"
   ],
   "exclude": [
     "target/**/*",

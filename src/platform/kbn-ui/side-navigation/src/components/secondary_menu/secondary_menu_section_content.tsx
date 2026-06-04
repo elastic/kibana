@@ -9,8 +9,12 @@
 
 import React, { type ReactNode } from 'react';
 
-import type { MenuItem, SecondaryMenuItem, SecondaryMenuSection } from '../../../types';
-import type { SecondaryNavExtensionPointContext } from './extension_point_renderer';
+import type {
+  MenuItem,
+  SecondaryMenuItem,
+  SecondaryMenuSection,
+  NavExtensionRenderContext as SecondaryNavExtensionPointContext,
+} from '../../../types';
 import { SideNav } from '../side_nav';
 
 type SecondaryMenuSurface = SecondaryNavExtensionPointContext['surface'];
@@ -19,7 +23,6 @@ export interface RenderSecondaryMenuSectionParams {
   section: SecondaryMenuSection;
   sectionIndex: number;
   primaryItem: MenuItem;
-  solutionId?: string;
   surface: SecondaryMenuSurface;
   activeItemId?: string;
   visuallyActiveSubpageId?: string;
@@ -31,7 +34,8 @@ export interface RenderSecondaryMenuSectionParams {
   onItemClick?: (item: SecondaryMenuItem) => void;
   onSecondaryItemClick?: (item: SecondaryMenuItem) => void;
   renderExtensionPoint?: (
-    extensionPointId: string,
+    slotId: string,
+    extensionId: string,
     context: SecondaryNavExtensionPointContext
   ) => ReactNode;
 }
@@ -40,7 +44,6 @@ export const renderSecondaryMenuSection = ({
   section,
   sectionIndex,
   primaryItem,
-  solutionId,
   surface,
   activeItemId,
   visuallyActiveSubpageId,
@@ -53,14 +56,12 @@ export const renderSecondaryMenuSection = ({
   onSecondaryItemClick,
   renderExtensionPoint,
 }: RenderSecondaryMenuSectionParams) => {
-  if (section?.extensionPointId) {
-    if (!renderExtensionPoint || !solutionId) {
+  if (section?.slotId && section?.extensionId) {
+    if (!renderExtensionPoint) {
       return null;
     }
 
-    const content = renderExtensionPoint(section.extensionPointId, {
-      extensionPointId: section.extensionPointId,
-      solutionId,
+    const content = renderExtensionPoint(section.slotId, section.extensionId, {
       primaryItemId: primaryItem.id,
       sectionId: section.id,
       surface,
@@ -123,7 +124,8 @@ export interface RenderNestedSecondaryMenuSectionParams {
   onItemClick?: (item: SecondaryMenuItem) => void;
   onSecondaryItemClick?: (item: SecondaryMenuItem) => void;
   renderExtensionPoint?: (
-    extensionPointId: string,
+    slotId: string,
+    extensionId: string,
     context: SecondaryNavExtensionPointContext
   ) => ReactNode;
 }
@@ -139,14 +141,12 @@ export const renderNestedSecondaryMenuSection = ({
   onSecondaryItemClick,
   renderExtensionPoint,
 }: RenderNestedSecondaryMenuSectionParams) => {
-  if (section.extensionPointId) {
+  if (section.slotId && section.extensionId) {
     if (!renderExtensionPoint || !solutionId) {
       return null;
     }
 
-    const content = renderExtensionPoint(section.extensionPointId, {
-      extensionPointId: section.extensionPointId,
-      solutionId,
+    const content = renderExtensionPoint(section.slotId, section.extensionId, {
       primaryItemId: primaryItem.id,
       sectionId: section.id,
       surface: 'overflow',

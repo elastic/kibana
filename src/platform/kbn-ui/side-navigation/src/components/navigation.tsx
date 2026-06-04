@@ -35,7 +35,7 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
-import type { SecondaryNavExtensionPointContext } from './secondary_menu/extension_point_renderer';
+import type { NavExtensionRenderContext as SecondaryNavExtensionPointContext } from '../../types';
 
 const navigationWrapperStyles = css`
   display: flex;
@@ -87,14 +87,12 @@ export interface NavigationProps {
    */
   'data-test-subj'?: string;
   /**
-   * (optional) Active solution id, passed to extension point renderers.
-   */
-  solutionId?: string;
-  /**
-   * (optional) Renders a lazy extension point section by id and surface context.
+   * (optional) Renders an extension slot. The framework resolves the extension
+   * definition (by `extensionId`) and its data source (by `slotId`).
    */
   renderExtensionPoint?: (
-    extensionPointId: string,
+    slotId: string,
+    extensionId: string,
     context: SecondaryNavExtensionPointContext
   ) => ReactNode;
 }
@@ -109,7 +107,6 @@ export const Navigation = ({
   setWidth,
   showTopSeparator = false,
   sidePanelFooter,
-  solutionId,
   renderExtensionPoint,
   ...rest
 }: NavigationProps) => {
@@ -226,7 +223,6 @@ export const Navigation = ({
                             section,
                             sectionIndex,
                             primaryItem: item,
-                            solutionId,
                             surface: 'popover',
                             activeItemId: actualActiveItemId,
                             visuallyActiveSubpageId,
@@ -339,7 +335,6 @@ export const Navigation = ({
                                 renderNestedSecondaryMenuSection({
                                   section,
                                   primaryItem: item,
-                                  solutionId,
                                   activeItemId: actualActiveItemId,
                                   visuallyActiveSubpageId,
                                   getIsNewSecondary,
@@ -409,7 +404,6 @@ export const Navigation = ({
                             section,
                             sectionIndex,
                             primaryItem: item,
-                            solutionId,
                             surface: 'popover',
                             activeItemId: actualActiveItemId,
                             visuallyActiveSubpageId,
@@ -454,7 +448,6 @@ export const Navigation = ({
                     section,
                     sectionIndex,
                     primaryItem: openerNode,
-                    solutionId,
                     surface: 'sidePanel',
                     activeItemId: actualActiveItemId,
                     visuallyActiveSubpageId,

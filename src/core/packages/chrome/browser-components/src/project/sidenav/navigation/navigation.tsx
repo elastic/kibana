@@ -9,11 +9,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { map } from 'rxjs';
+import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import {
-  Navigation as NavigationComponent,
-  ExtensionPointRenderer,
-  type SecondaryNavExtensionPointContext,
-} from '@kbn/ui-side-navigation';
+  NavExtensionTemplateHost,
+  type NavExtensionPointContext as SecondaryNavExtensionPointContext,
+} from '@kbn/shared-ux-navigation-extension-templates';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
@@ -35,21 +35,30 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
   const isNextChrome = useIsNextChrome();
   const chrome = useChromeService();
-  const extensionPointRenderers = useObservable(
-    chrome.project.getActiveExtensionPointRenderers$(),
-    undefined
-  );
+  const extensionRegistry = useObservable(chrome.project.getExtensionRegistry$(), undefined);
+  const slotDataSources = useObservable(chrome.project.getActiveSlotDataSources$(), undefined);
 
   const renderExtensionPoint = useCallback(
-    (extensionPointId: string, context: SecondaryNavExtensionPointContext) => {
-      const LazyComponent = extensionPointRenderers?.[extensionPointId];
-      if (!LazyComponent) {
+    (slotId: string, extensionId: string, context: SecondaryNavExtensionPointContext) => {
+      const definition = extensionRegistry?.[extensionId];
+      const data$ = slotDataSources?.[slotId];
+
+      if (!definition || !data$) {
         return null;
       }
 
-      return <ExtensionPointRenderer LazyComponent={LazyComponent} context={context} />;
+      return (
+        <NavExtensionTemplateHost
+          definition={definition}
+          data$={data$}
+          context={context}
+          onAction={(actionId, itemId) =>
+            chrome.project.dispatchExtensionAction({ slotId, extensionId, actionId, itemId })
+          }
+        />
+      );
     },
-    [extensionPointRenderers]
+    [extensionRegistry, slotDataSources, chrome.project]
   );
 
   if (!state) {
@@ -68,7 +77,6 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
         showTopSeparator={isNextChrome}
-        solutionId={solutionId}
         renderExtensionPoint={renderExtensionPoint}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />

@@ -70,10 +70,10 @@ export function createChromeApi({
   const project: InternalChromeStart['project'] = {
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
-    initNavigation: (id, navigationTree$, extensionPointRenderers) => {
+    initNavigation: (id, navigationTree$, slotDataSources) => {
       validateProjectStyle();
-      if (extensionPointRenderers) {
-        projectNavigation.setExtensionPointRenderers(id, extensionPointRenderers);
+      if (slotDataSources) {
+        projectNavigation.setSlotDataSources(id, slotDataSources);
       }
       projectNavigation.initNavigation(id, navigationTree$);
     },
@@ -82,7 +82,11 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
-    getActiveExtensionPointRenderers$: () => projectNavigation.getActiveExtensionPointRenderers$(),
+    getActiveSlotDataSources$: () => projectNavigation.getActiveSlotDataSources$(),
+    setExtensionRegistry: (registry) => projectNavigation.setExtensionRegistry(registry),
+    getExtensionRegistry$: () => projectNavigation.getExtensionRegistry$(),
+    dispatchExtensionAction: (event) => projectNavigation.dispatchExtensionAction(event),
+    getExtensionActions$: () => projectNavigation.getExtensionActions$(),
   };
 
   let appHeaderRegistrationId = 0;

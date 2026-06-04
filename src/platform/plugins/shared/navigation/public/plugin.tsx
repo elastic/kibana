@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
+import { of, ReplaySubject, take, map, switchMap, filter } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -20,6 +20,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type {
+  NavExtensionDefinition,
+  NavExtensionDefinitionMap,
+  NavExtensionId,
+} from '@kbn/ui-side-navigation';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -43,6 +48,7 @@ export class NavigationPublicPlugin
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
   private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
+  private readonly navExtensions: NavExtensionDefinitionMap = {};
   private chrome?: InternalChromeStart;
   private activeSolutionId: SolutionId | null = null;
   private isSolutionNavEnabled = false;
@@ -50,10 +56,17 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
+    const registerNavigationExtension = <Id extends NavExtensionId>(
+      definition: NavExtensionDefinition<Id>
+    ) => {
+      this.navExtensions[definition.id as string] = definition;
+    };
+
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
       ),
+      registerNavigationExtension,
     };
   }
 
@@ -65,6 +78,9 @@ export class NavigationPublicPlugin
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     this.chrome = chrome;
+
+    // Publish the global, declarative extension-definition registry into core chrome.
+    chrome.project.setExtensionRegistry(this.navExtensions);
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
@@ -108,8 +124,8 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    const getActiveExtensionPointRenderers$ = () =>
-      chrome.project.getActiveExtensionPointRenderers$();
+    const getExtensionSlotActions$ = (slotId: string) =>
+      chrome.project.getExtensionActions$().pipe(filter((action) => action.slotId === slotId));
 
     return {
       ui: {
@@ -140,7 +156,7 @@ export class NavigationPublicPlugin
           );
         })
       ),
-      getActiveExtensionPointRenderers$,
+      getExtensionSlotActions$,
     };
   }
 
@@ -160,7 +176,7 @@ export class NavigationPublicPlugin
     this.chrome.project.initNavigation(
       this.activeSolutionId,
       def.navigationTree$,
-      def.extensionPointRenderers
+      def.slotDataSources
     );
   }
 

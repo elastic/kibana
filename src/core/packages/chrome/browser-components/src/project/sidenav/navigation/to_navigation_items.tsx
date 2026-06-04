@@ -182,9 +182,9 @@ export const toNavigationItems = (
     const createExtensionPointSection = (
       child: ChromeProjectNavigationNode
     ): SecondaryMenuSection | null => {
-      if (!child.extensionPointId) {
+      if (!child.slotId || !child.extensionId) {
         warnOnce(
-          `Extension point node "${child.id}" is missing extensionPointId. Ignoring this section.`
+          `Extension node "${child.id}" is missing slotId/extensionId. Ignoring this section.`
         );
         return null;
       }
@@ -192,7 +192,8 @@ export const toNavigationItems = (
       return {
         id: child.id,
         label: child.title ? toSentenceCase(child.title) : undefined,
-        extensionPointId: child.extensionPointId,
+        slotId: child.slotId,
+        extensionId: child.extensionId,
         popoverOnly: child.popoverOnly,
       };
     };
@@ -202,7 +203,7 @@ export const toNavigationItems = (
     ): SecondaryMenuSection | null => {
       if (child.sideNavStatus === 'hidden') return null;
 
-      if (child.renderAs === 'extensionPoint') {
+      if (child.renderAs === 'extension') {
         return createExtensionPointSection(child);
       }
 
@@ -232,7 +233,7 @@ export const toNavigationItems = (
     };
 
     const sectionHasContent = (section: SecondaryMenuSection) =>
-      !!section.extensionPointId || !!(section.items && section.items.length > 0);
+      !!section.slotId || !!(section.items && section.items.length > 0);
 
     if (navNode.renderAs === 'panelOpener') {
       if (!navNode.children?.length) {
@@ -241,10 +242,10 @@ export const toNavigationItems = (
       }
 
       const noSubSections = navNode.children.every(
-        (child) => child.renderAs === 'extensionPoint' || child.href
+        (child) => child.renderAs === 'extension' || child.href
       );
 
-      if (noSubSections && navNode.children.some((child) => child.renderAs !== 'extensionPoint')) {
+      if (noSubSections && navNode.children.some((child) => child.renderAs !== 'extension')) {
         warnOnce(
           `Panel opener node "${
             navNode.id
@@ -253,13 +254,13 @@ export const toNavigationItems = (
             .join(', ')}" into secondary items and creating a placeholder section for these links.`
         );
 
-        // If all children have hrefs (and/or extension points), flatten direct links
+        // If all children have hrefs (and/or extension slots), flatten direct links
         const validChildren = filterValidSecondaryChildren(
-          navNode.children.filter((child) => child.renderAs !== 'extensionPoint' && child.href)
+          navNode.children.filter((child) => child.renderAs !== 'extension' && child.href)
         );
         const extensionPointSections = filterEmpty(
           navNode.children
-            .filter((child) => child.renderAs === 'extensionPoint')
+            .filter((child) => child.renderAs === 'extension')
             .map(createExtensionPointSection)
         );
 

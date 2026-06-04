@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-internal-types'
   - '@kbn/use-observable'
   - '@kbn/react-kibana-context-env'
+  - '@kbn/ui-side-navigation'
 tags:
   - shared-browser
   - package

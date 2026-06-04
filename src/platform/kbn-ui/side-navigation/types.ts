@@ -8,7 +8,6 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { ComponentType, LazyExoticComponent } from 'react';
 
 export type BadgeType = 'beta' | 'techPreview' | 'new';
 
@@ -59,16 +58,23 @@ export type SecondaryMenuSection = {
 } & (
   | {
       /**
-       * Static secondary menu items. Mutually exclusive with `extensionPointId`.
+       * Static secondary menu items. Mutually exclusive with an extension slot.
        */
       items?: SecondaryMenuItem[];
-      extensionPointId?: never;
+      slotId?: never;
+      extensionId?: never;
     }
   | {
       /**
-       * Named extension point rendered by a lazy component. Mutually exclusive with `items`.
+       * Per-placement slot id (owned by the solution tree). The framework resolves the powering
+       * `data$` from the active solution's slot data-source map using this id.
+       * Mutually exclusive with `items`.
        */
-      extensionPointId?: string;
+      slotId?: string;
+      /**
+       * Id of the plugin-published extension definition that fills this slot (template + config).
+       */
+      extensionId?: string;
       items?: never;
     }
 );
@@ -166,32 +172,156 @@ export interface SideNavLogo {
   'data-test-subj'?: string;
 }
 
+// /**
+//  * Context passed to extension templates when they render in a secondary menu slot.
+//  */
+// export interface SecondaryNavExtensionPointContext {
+//   /** Per-placement slot id owned by the solution tree. */
+//   slotId: string;
+//   /** Id of the plugin-published extension definition filling the slot. */
+//   extensionId: string;
+//   primaryItemId: string;
+//   sectionId: string;
+//   surface: 'popover' | 'sidePanel' | 'overflow';
+//   activeItemId?: string;
+// }
+
+// /** Closed set of template ids the framework knows how to render. */
+// export type NavTemplateId = 'link' | 'list';
+
+// /** Declarative config for the `link` template. */
+// export interface LinkTemplateConfig {
+//   /** Field on the data row to read the label from. Defaults to `label`. */
+//   labelField?: string;
+//   /** Field on the data row to read the href from. Defaults to `href`. */
+//   hrefField?: string;
+// }
+
+// /** A declarative action descriptor rendered by the `list` template. */
+// export interface NavTemplateActionConfig {
+//   id: string;
+//   label: string;
+//   icon?: string;
+//   /** When provided the action navigates directly; otherwise `onAction` is invoked. */
+//   href?: string;
+// }
+
+// /** Declarative config for the `list` template. */
+// export interface ListTemplateConfig {
+//   /** Field name mappings used to read each row's properties. */
+//   item: {
+//     idField: string;
+//     labelField: string;
+//     hrefField: string;
+//     iconField?: string;
+//     badgeField?: string;
+//   };
+//   /** Optional client-side search box. */
+//   search?: { enabled: boolean; placeholder?: string };
+//   /** Optional section-level actions. */
+//   actions?: NavTemplateActionConfig[];
+//   /** Message shown when the data source emits no rows. */
+//   emptyMessage?: string;
+//   /** Cap the number of rows rendered. */
+//   max?: number;
+// }
+
+// /** Union of all template configs. */
+// export type NavTemplateConfig = LinkTemplateConfig | ListTemplateConfig;
+
+// /** Props every template receives from the framework. */
+// export interface NavTemplateProps<Data = unknown> {
+//   /** Latest value emitted by the slot's `data$`. */
+//   data: Data;
+//   /** Declarative variant config from the extension definition. */
+//   config: NavTemplateConfig;
+//   /** Rendering context (surface, active item, slot/extension ids). */
+//   context: SecondaryNavExtensionPointContext;
+//   /**
+//    * Invoked for non-link actions. Link-style actions (with `href`) navigate
+//    * directly and do not call this.
+//    */
+//   onAction: (actionId: string, itemId: string) => void;
+// }
+
 /**
- * Context passed to lazy extension point renderers.
+ * Context passed to extension templates when rendering a secondary menu slot.
  */
-export interface SecondaryNavExtensionPointContext {
-  extensionPointId: string;
-  solutionId: string;
+export interface NavExtensionRenderContext {
+  /** The unique identifier of the primary menu item. */
   primaryItemId: string;
+  /** The unique identifier of the secondary menu section. */
   sectionId: string;
+  /** The surface on which the extension is rendering. */
   surface: 'popover' | 'sidePanel' | 'overflow';
   activeItemId?: string;
 }
 
 /**
- * Lazy component for an extension point renderer.
+ * The extension registry is a type-level construct that allows plugins to
+ * declare the extensions they publish. It is used to type the `extensionId`
+ * in the navigation tree.
+ *
+ * @example
+ * ```ts
+ * declare module '@kbn/ui-side-navigation' {
+ *   interface NavExtensionRegistry {
+ *     recentItems: NavExtensionEntry<RecentItemRow>;
+ *   }
+ * }
+ * ```
  */
-export type SecondaryNavExtensionPointLazy = LazyExoticComponent<
-  ComponentType<SecondaryNavExtensionPointContext>
->;
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
+export interface NavExtensionRegistry {}
 
-/**
- * Props for an extension point renderer.
- */
-export interface ExtensionPointRendererProps {
-  LazyComponent: SecondaryNavExtensionPointLazy;
-  context: SecondaryNavExtensionPointContext;
+/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
+export interface NavTemplateConfig {}
+
+/** A registry entry: which template the extension uses + the row-data contract it emits. */
+export interface NavExtensionEntry<Data = unknown, NavTemplateId = string> {
+  templateId: NavTemplateId;
+  /** Element type the slot's `data$` must emit. */
+  data: Data;
 }
 
-/** @internal */
-export type ExtensionPointRenderersMap = Record<string, SecondaryNavExtensionPointLazy>;
+/**
+ * Union of all registered extension ids. Falls back to `string` when no publisher is
+ * in the current compilation (dependency-scoped visibility): you get the precise union
+ * wherever the publishing module is in your TS graph, and a permissive `string` (rather
+ * than a spurious `never`) in shared modules that legitimately reference an id without
+ * depending on its publisher.
+ */
+export type NavExtensionId = [keyof NavExtensionRegistry] extends [never]
+  ? string
+  : keyof NavExtensionRegistry;
+
+/** The data contract (element type the slot's `data$` emits) for a given extension id. */
+export type NavExtensionData<Id extends NavExtensionId> = Id extends keyof NavExtensionRegistry
+  ? NavExtensionRegistry[Id] extends NavExtensionEntry<infer Data>
+    ? Data
+    : unknown
+  : unknown;
+
+/** The template id for a given extension id. */
+export type NavExtensionTemplateId<
+  Id extends NavExtensionId,
+  NavTemplateId extends string = string
+> = Id extends keyof NavExtensionRegistry
+  ? NavExtensionRegistry[Id] extends NavExtensionEntry
+    ? NavExtensionRegistry[Id]['templateId']
+    : NavTemplateId
+  : NavTemplateId;
+
+/**
+ * Runtime definition registered by a publisher plugin. Keyed by the same typed id;
+ * `templateId` must match the augmented registry entry.
+ */
+export interface NavExtensionDefinition<Id extends NavExtensionId = string> {
+  id: Id;
+  templateId: NavExtensionTemplateId<Id>;
+  /** Declarative, serializable config consumed by the template. */
+  config: NavTemplateConfig;
+}
+
+/** Runtime map of all registered extension definitions, keyed by extension id. */
+export type NavExtensionDefinitionMap = Partial<Record<string, NavExtensionDefinition>>;

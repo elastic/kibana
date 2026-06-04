@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
@@ -117,8 +117,11 @@ const createStartContractMock = () => {
       getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
-      setExtensionPointRenderers: jest.fn(),
-      getActiveExtensionPointRenderers$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      getActiveSlotDataSources$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      setExtensionRegistry: jest.fn(),
+      getExtensionRegistry$: jest.fn().mockReturnValue(new BehaviorSubject({})),
+      dispatchExtensionAction: jest.fn(),
+      getExtensionActions$: jest.fn().mockReturnValue(new Subject()),
     }),
     next: lazyObject({
       isEnabled: false,

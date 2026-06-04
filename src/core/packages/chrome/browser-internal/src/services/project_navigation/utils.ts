@@ -334,7 +334,7 @@ export const parseNavigationTree = (
       index,
     });
 
-    if (navNode && node.children && navNode.renderAs !== 'extensionPoint') {
+    if (navNode && node.children && navNode.renderAs !== 'extension') {
       (navNode as ChromeStandardNavigationNode).children = node.children
         .map((child, i) =>
           initNodeAndChildren(child, {

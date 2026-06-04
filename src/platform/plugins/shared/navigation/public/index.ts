@@ -22,12 +22,7 @@ export type {
   AddSolutionNavigationArg,
 } from './types';
 
-export {
-  recentDashboardsNavExtension,
-  defineExtensionPointRenderers,
-  type ExtensionPointRenderersFor,
-  type ExtractExtensionPointIds,
-} from './extension_points';
+export { defineSlotDataSources } from './extension_points';
 
 export { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '../common';
 

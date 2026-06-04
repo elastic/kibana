@@ -19,10 +19,13 @@ import type {
   NavigationTreeDefinitionUI,
   CloudLinks,
   SolutionId,
+  SlotDataSources,
+  NavExtensionActionEvent,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
   Observable,
+  Subject,
   combineLatest,
   map,
   takeUntil,
@@ -40,7 +43,7 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
+import type { NavExtensionDefinitionMap } from '@kbn/ui-side-navigation';
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -80,7 +83,9 @@ export class ProjectNavigationService {
       id: SolutionId;
       navTreeDefinition$: Observable<NavigationTreeDefinition>;
     } | null>(null);
-    const extensionPointRenderersBySolutionId = new Map<SolutionId, ExtensionPointRenderersMap>();
+    const slotDataSourcesBySolutionId = new Map<SolutionId, SlotDataSources>();
+    const extensionRegistry$ = new BehaviorSubject<NavExtensionDefinitionMap>({});
+    const extensionActions$ = new Subject<NavExtensionActionEvent>();
     const kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
     const cloudLinks$ = new BehaviorSubject<CloudLinks>({});
     const projectBreadcrumbs$ = new BehaviorSubject<{
@@ -198,17 +203,22 @@ export class ProjectNavigationService {
           navTreeDefinition$: navTreeDefinition$ as Observable<NavigationTreeDefinition>,
         });
       },
-      setExtensionPointRenderers: (
-        id: SolutionId,
-        extensionPointRenderers: ExtensionPointRenderersMap
-      ) => {
-        extensionPointRenderersBySolutionId.set(id, extensionPointRenderers);
+      setSlotDataSources: (id: SolutionId, slotDataSources: SlotDataSources) => {
+        slotDataSourcesBySolutionId.set(id, slotDataSources);
       },
-      getActiveExtensionPointRenderers$: () => {
+      getActiveSlotDataSources$: () => {
         return activeSolutionNavId$.pipe(
-          map((id) => (id ? extensionPointRenderersBySolutionId.get(id) : undefined))
+          map((id) => (id ? slotDataSourcesBySolutionId.get(id) : undefined))
         );
       },
+      setExtensionRegistry: (registry: NavExtensionDefinitionMap) => {
+        extensionRegistry$.next(registry);
+      },
+      getExtensionRegistry$: () => extensionRegistry$.asObservable(),
+      dispatchExtensionAction: (event: NavExtensionActionEvent) => {
+        extensionActions$.next(event);
+      },
+      getExtensionActions$: () => extensionActions$.asObservable(),
       getNavigation$: () => navigation$,
       setProjectBreadcrumbs: (
         breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],

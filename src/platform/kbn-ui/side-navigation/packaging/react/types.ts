@@ -54,18 +54,20 @@ export interface SecondaryMenuSection {
   items?: SecondaryMenuItem[];
   /** Optional section header label (omit for unlabeled sections). */
   label?: string;
-  /** Named extension point rendered by a lazy component. */
-  extensionPointId?: string;
+  /** Per-placement slot id (owned by the solution tree) used to resolve the data source. */
+  slotId?: string;
+  /** Id of the plugin-published extension definition that fills this slot. */
+  extensionId?: string;
   /** When true, the section is only shown in the hover popover. */
   popoverOnly?: boolean;
 }
 
 /**
- * Context passed to lazy extension point renderers.
+ * Context passed to extension templates when rendering a secondary menu slot.
  */
 export interface SecondaryNavExtensionPointContext {
-  extensionPointId: string;
-  solutionId: string;
+  slotId: string;
+  extensionId: string;
   primaryItemId: string;
   sectionId: string;
   surface: 'popover' | 'sidePanel' | 'overflow';
@@ -144,11 +146,10 @@ export interface NavigationProps {
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */
   'data-test-subj'?: string;
-  /** Active solution id, passed to extension point renderers. */
-  solutionId?: string;
-  /** Renders a lazy extension point section by id and surface context. */
+  /** Renders an extension slot by slot id, extension id, and surface context. */
   renderExtensionPoint?: (
-    extensionPointId: string,
+    slotId: string,
+    extensionId: string,
     context: SecondaryNavExtensionPointContext
   ) => ReactNode;
 }

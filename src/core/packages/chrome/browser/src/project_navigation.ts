@@ -39,7 +39,7 @@ import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vec
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
-import type { BadgeType } from '@kbn/ui-side-navigation';
+import type { BadgeType, NavExtensionId } from '@kbn/ui-side-navigation';
 
 import type { ChromeNavLink } from './nav_links';
 
@@ -111,7 +111,7 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'home' | 'panelOpener';
 
-export type ExtensionPointRenderAs = 'extensionPoint';
+export type ExtensionPointRenderAs = 'extension';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -160,11 +160,18 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
   badgeType?: BadgeType;
 }
 
-/** Leaf section rendered by a lazy extension point renderer. Valid only under `panelOpener.children`. */
+/**
+ * Leaf section rendered by a framework template (an "extension slot").
+ * Valid only under `panelOpener.children`. The node is plain serializable data:
+ * `slotId` is the per-placement key (owned by the solution), `extensionId` references
+ * the plugin-published extension definition. The powering `data$` is supplied separately
+ * in the slot data-source map at registration.
+ */
 export interface ExtensionPointNodeDefinition<Id extends string = string>
   extends NodeDefinitionCommon<AppDeepLinkId, Id> {
   renderAs: ExtensionPointRenderAs;
-  extensionPointId: string;
+  slotId: string;
+  extensionId: NavExtensionId;
   popoverOnly?: boolean;
   link?: never;
   cloudLink?: never;
@@ -178,7 +185,8 @@ export type StandardNodeDefinition<
   ChildrenId extends string = Id
 > = NodeDefinitionCommon<LinkId, Id> & {
   renderAs?: RenderAs;
-  extensionPointId?: never;
+  slotId?: never;
+  extensionId?: never;
   popoverOnly?: never;
   children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
 };
@@ -189,7 +197,8 @@ export type PanelOpenerChildDefinition<LinkId extends AppDeepLinkId, Id extends 
   | StandardNodeDefinition<LinkId, Id, Id>
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs?: never;
-      extensionPointId?: never;
+      slotId?: never;
+      extensionId?: never;
       popoverOnly?: never;
       link?: LinkId;
       href?: string;
@@ -204,19 +213,22 @@ export type RootNodeDefinition<
 > =
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs: 'home';
-      extensionPointId?: never;
+      slotId?: never;
+      extensionId?: never;
       popoverOnly?: never;
       children?: never;
     })
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs: 'panelOpener';
-      extensionPointId?: never;
+      slotId?: never;
+      extensionId?: never;
       popoverOnly?: never;
       children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
     })
   | (NodeDefinitionCommon<LinkId, Id> & {
       renderAs?: never;
-      extensionPointId?: never;
+      slotId?: never;
+      extensionId?: never;
       popoverOnly?: never;
       children?: Array<StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>>;
     });
@@ -238,7 +250,8 @@ interface ChromeNavigationNodeCommon {
 /** @public */
 export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNodeCommon {
   renderAs: ExtensionPointRenderAs;
-  extensionPointId: string;
+  slotId: string;
+  extensionId: string;
   popoverOnly?: boolean;
   children?: never;
 }
@@ -246,7 +259,8 @@ export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNode
 /** @public */
 export interface ChromeStandardNavigationNode extends ChromeNavigationNodeCommon {
   renderAs?: RenderAs;
-  extensionPointId?: never;
+  slotId?: never;
+  extensionId?: never;
   popoverOnly?: never;
   children?: ChromeProjectNavigationNode[];
 }
@@ -347,6 +361,20 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
 export type SolutionNavigationDefinitions = {
   [id in SolutionId]?: SolutionNavigationDefinition;
 };
+
+/**
+ * Runtime data sources powering extension slots, keyed by `slotId`. Supplied by a
+ * solution at registration; the serializable tree only references slots by id.
+ */
+export type SlotDataSources = Record<string, Observable<unknown>>;
+
+/** Event emitted when an extension template fires a non-link (callback) action. */
+export interface NavExtensionActionEvent {
+  slotId: string;
+  extensionId: string;
+  actionId: string;
+  itemId: string;
+}
 
 /**
  * Temporary helper interface while we have to maintain both the legacy side navigation

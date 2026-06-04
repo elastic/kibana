@@ -72,6 +72,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  SlotDataSources,
+  NavExtensionActionEvent,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';

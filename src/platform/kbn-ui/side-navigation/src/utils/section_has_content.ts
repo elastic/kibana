@@ -9,9 +9,9 @@
 
 import type { SecondaryMenuSection } from '../../types';
 
-/** Returns true when a section has static items or a dynamic extension point. */
+/** Returns true when a section has static items or a dynamic extension slot. */
 export const sectionHasContent = (section: SecondaryMenuSection): boolean => {
-  return !!section.extensionPointId || !!(section.items && section.items.length > 0);
+  return !!section.slotId || !!(section.items && section.items.length > 0);
 };
 
 /** Returns true when a section should render in the persistent side panel. */

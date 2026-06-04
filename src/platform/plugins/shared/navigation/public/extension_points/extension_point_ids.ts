@@ -7,33 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type {
   NavigationTreeDefinition,
   RootNodeDefinition,
   ExtensionPointNodeDefinition,
 } from '@kbn/core-chrome-browser';
+import type { NavExtensionData, NavExtensionId } from '@kbn/ui-side-navigation';
 
-type ExtractFromPanelOpenerChild<Node> = Node extends ExtensionPointNodeDefinition
-  ? Node['extensionPointId']
+/** A `{ slotId, extensionId }` placement pair extracted from an extension node. */
+interface SlotPair {
+  slotId: string;
+  extensionId: NavExtensionId;
+}
+
+type SlotPairFromChild<Node> = Node extends ExtensionPointNodeDefinition
+  ? Node extends { slotId: infer S; extensionId: infer E }
+    ? S extends string
+      ? E extends NavExtensionId
+        ? { slotId: S; extensionId: E }
+        : never
+      : never
+    : never
   : never;
 
-type ExtractExtensionPointIdsFromPanelOpenerChildren<Children extends readonly unknown[]> =
-  ExtractFromPanelOpenerChild<Children[number]>;
+type SlotPairsFromPanelOpenerChildren<Children extends readonly unknown[]> = SlotPairFromChild<
+  Children[number]
+>;
 
-type ExtractFromRoot<Node> = Node extends Extract<
+type SlotPairsFromRoot<Node> = Node extends Extract<
   RootNodeDefinition,
   { renderAs: 'panelOpener'; children: infer Children }
 >
-  ? ExtractExtensionPointIdsFromPanelOpenerChildren<Children>
+  ? Children extends readonly unknown[]
+    ? SlotPairsFromPanelOpenerChildren<Children>
+    : never
   : never;
 
-type ExtractExtensionPointIdsFromNodes<Nodes extends readonly unknown[]> = ExtractFromRoot<
-  Nodes[number]
->;
+type SlotPairsFromNodes<Nodes extends readonly unknown[]> = SlotPairsFromRoot<Nodes[number]>;
 
-/** Collects literal extensionPointId values from panelOpener children in a navigation tree. */
-export type ExtractExtensionPointIds<T extends NavigationTreeDefinition> =
-  | ExtractExtensionPointIdsFromNodes<T['body']>
-  | (T['footer'] extends readonly unknown[]
-      ? ExtractExtensionPointIdsFromNodes<T['footer']>
-      : never);
+/** Union of every `{ slotId, extensionId }` placement used in a navigation tree. */
+export type ExtractSlots<T extends NavigationTreeDefinition> =
+  | SlotPairsFromNodes<T['body']>
+  | (T['footer'] extends readonly unknown[] ? SlotPairsFromNodes<T['footer']> : never);
+
+/**
+ * The slot data-source map a solution must supply at registration: keyed by every
+ * `slotId` placed in the tree, each value an `Observable` emitting exactly the row
+ * type the referenced extension declared in `NavExtensionRegistry`.
+ */
+export type SlotDataSourcesFor<T extends NavigationTreeDefinition> = {
+  [P in Extract<ExtractSlots<T>, SlotPair> as P['slotId']]: Observable<
+    NavExtensionData<P['extensionId']>
+  >;
+};

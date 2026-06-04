@@ -30,8 +30,10 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  SlotDataSources,
+  NavExtensionActionEvent,
 } from '@kbn/core-chrome-browser';
-import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
+import type { NavExtensionDefinitionMap } from '@kbn/ui-side-navigation';
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
@@ -101,7 +103,7 @@ export interface InternalChromeStart extends ChromeStart {
     >(
       id: SolutionId,
       navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      extensionPointRenderers?: ExtensionPointRenderersMap
+      slotDataSources?: SlotDataSources
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
@@ -127,8 +129,20 @@ export interface InternalChromeStart extends ChromeStart {
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
 
-    /** Get lazy extension point renderers for the active solution navigation. */
-    getActiveExtensionPointRenderers$(): Observable<ExtensionPointRenderersMap | undefined>;
+    /** Get the per-solution slot data-source map (keyed by `slotId`) for the active navigation. */
+    getActiveSlotDataSources$(): Observable<SlotDataSources | undefined>;
+
+    /** Push the global, declarative extension-definition registry (keyed by `extensionId`). */
+    setExtensionRegistry(registry: NavExtensionDefinitionMap): void;
+
+    /** Get the global extension-definition registry. */
+    getExtensionRegistry$(): Observable<NavExtensionDefinitionMap>;
+
+    /** Dispatch a non-link extension action so the registering plugin can handle it. */
+    dispatchExtensionAction(event: NavExtensionActionEvent): void;
+
+    /** Stream of non-link extension actions fired by templates. */
+    getExtensionActions$(): Observable<NavExtensionActionEvent>;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

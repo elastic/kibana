@@ -13,8 +13,9 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinition,
+  NavExtensionActionEvent,
 } from '@kbn/core-chrome-browser';
-import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
+import type { NavExtensionDefinition, NavExtensionId } from '@kbn/ui-side-navigation';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -23,18 +24,30 @@ import type {
   createTopNav,
 } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import type { ExtensionPointRenderersFor } from './extension_points';
+import type { SlotDataSourcesFor } from './extension_points';
 export interface NavigationPublicSetup {
   /**
    * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
    */
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
+  /**
+   * Publish a navigation extension definition (template id + declarative config).
+   * The `Id` must be a key registered in `NavExtensionRegistry` via declaration merging.
+   */
+  registerNavigationExtension: <Id extends NavExtensionId>(
+    definition: NavExtensionDefinition<Id>
+  ) => void;
 }
 
 export interface SolutionNavigation<T extends NavigationTreeDefinition = NavigationTreeDefinition>
   extends Omit<SolutionNavigationDefinition, 'navigationTree$'> {
   navigationTree$: Observable<NavigationTreeDefinition>;
-  extensionPointRenderers?: ExtensionPointRenderersFor<T>;
+  /**
+   * Observable data sources powering the tree's extension slots, keyed by `slotId`.
+   * Typed from the tree so every placed slot must supply a `data$` emitting exactly
+   * the row type the referenced extension declared in `NavExtensionRegistry`.
+   */
+  slotDataSources?: SlotDataSourcesFor<T>;
 }
 
 export type AddSolutionNavigationArg<
@@ -65,8 +78,11 @@ export interface NavigationPublicStart {
   ) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
-  /** Lazy extension point renderers for the active solution navigation. */
-  getActiveExtensionPointRenderers$: () => Observable<ExtensionPointRenderersMap | undefined>;
+  /**
+   * Stream of non-link extension slot actions fired by templates. Registering plugins
+   * subscribe to handle behavior, using `slotId` to disambiguate placements.
+   */
+  getExtensionSlotActions$: (slotId: string) => Observable<NavExtensionActionEvent>;
 }
 
 export interface NavigationPublicSetupDependencies {
