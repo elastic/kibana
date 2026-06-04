@@ -182,6 +182,44 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       // Caret at start, no selection
       expect(selection(input)).toEqual([0, 0]);
     });
+
+    it('stays in native caret mode after navigating past the last part', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      pressKey(input, 'ArrowRight');
+      pressKey(input, 'ArrowRight');
+      pressKey(input, 'ArrowRight');
+      expect(selection(input)).toEqual([11, 11]);
+
+      pressKey(input, 'ArrowLeft');
+      expect(selection(input)).toEqual([11, 11]);
+    });
+
+    it('stays in native caret mode after input mouse down', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      input.setSelectionRange(5, 5);
+      input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      pressKey(input, 'ArrowLeft');
+
+      expect(selection(input)).toEqual([5, 5]);
+    });
   });
 
   describe('onModifyPart', () => {
@@ -286,6 +324,51 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       expect(input.value).toBe('Jan 1, 2026');
       // "1" is still selected at [4, 5]
       expect(selection(input)).toEqual([4, 5]);
+    });
+
+    it('stops propagation when selected part modification returns undefined', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      const onModifyPart = jest.fn().mockReturnValue(undefined);
+      const propagated = jest.fn();
+      document.body.addEventListener('keydown', propagated);
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+          onModifyPart,
+        })
+      );
+
+      pressKey(input, 'ArrowDown');
+
+      document.body.removeEventListener('keydown', propagated);
+      expect(onModifyPart).toHaveBeenCalled();
+      expect(propagated).not.toHaveBeenCalled();
+    });
+
+    it('allows ArrowUp and ArrowDown to propagate from caret mode', () => {
+      const input = createInput('Jan 1, 2026');
+      input.setSelectionRange(5, 5);
+      const ref = { current: input };
+      const onModifyPart = jest.fn();
+      const propagated = jest.fn();
+      document.body.addEventListener('keydown', propagated);
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'none',
+          onModifyPart,
+        })
+      );
+
+      pressKey(input, 'ArrowDown');
+
+      document.body.removeEventListener('keydown', propagated);
+      expect(onModifyPart).not.toHaveBeenCalled();
+      expect(propagated).toHaveBeenCalledTimes(1);
     });
   });
 });

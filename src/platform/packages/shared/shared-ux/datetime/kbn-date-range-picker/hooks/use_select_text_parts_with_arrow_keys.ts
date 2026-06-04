@@ -61,6 +61,7 @@ export function useSelectTextPartsWithArrowKeys({
     if (!isActive) return;
 
     let currentIndex = -1; // -1 means no part is selected (caret mode)
+    let inCaretMode = false;
 
     const getPartsAndSyncIndex = () => {
       const inputEl = inputRef.current;
@@ -82,17 +83,20 @@ export function useSelectTextPartsWithArrowKeys({
       // If navigating past the ends, go to caret mode
       if (index < 0) {
         currentIndex = -1;
+        inCaretMode = true;
         inputEl.setSelectionRange(0, 0);
         inputEl.scrollLeft = 0;
         return;
       }
       if (index >= parts.length) {
         currentIndex = -1;
+        inCaretMode = true;
         inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
         inputEl.scrollLeft = inputEl.scrollWidth - inputEl.clientWidth;
         return;
       }
 
+      inCaretMode = false;
       currentIndex = index;
       const part = parts[currentIndex];
 
@@ -129,16 +133,17 @@ export function useSelectTextPartsWithArrowKeys({
       const inputEl = inputRef.current;
       if (!inputEl) return;
 
+      if (inCaretMode) return;
+
       if (event.key.startsWith('Arrow')) {
         // Always refresh parts and sync index on arrow key press
         const parts = getPartsAndSyncIndex();
 
         if (parts.length === 0) return;
 
-        event.preventDefault();
-
         switch (event.key) {
           case keys.ARROW_RIGHT:
+            event.preventDefault();
             // If in caret mode, select the first part to the right of caret
             if (currentIndex === -1) {
               const caretPos = inputEl.selectionStart ?? 0;
@@ -149,6 +154,7 @@ export function useSelectTextPartsWithArrowKeys({
             }
             return;
           case keys.ARROW_LEFT:
+            event.preventDefault();
             // If in caret mode, select the first part to the left of caret
             if (currentIndex === -1) {
               const caretPos = inputEl.selectionStart ?? 0;
@@ -159,24 +165,32 @@ export function useSelectTextPartsWithArrowKeys({
             }
             return;
           case keys.ARROW_UP: {
-            const modifiedUp = modifyPart('increase');
-            // Allow propagation if no modification was made
-            if (modifiedUp) event.stopImmediatePropagation();
+            if (currentIndex < 0) return;
+            event.preventDefault();
+            modifyPart('increase');
+            event.stopImmediatePropagation();
             return;
           }
           case keys.ARROW_DOWN: {
-            const modifiedDown = modifyPart('decrease');
-            // Allow propagation if no modification was made
-            if (modifiedDown) event.stopImmediatePropagation();
+            if (currentIndex < 0) return;
+            event.preventDefault();
+            modifyPart('decrease');
+            event.stopImmediatePropagation();
             return;
           }
         }
       }
     };
 
+    const mouseDownHandler = () => {
+      inCaretMode = true;
+      currentIndex = -1;
+    };
+
     const inputEl = inputRef.current;
 
     inputEl?.addEventListener('keydown', keydownHandler);
+    inputEl?.addEventListener('mousedown', mouseDownHandler);
 
     if (inputEl) {
       switch (initialSelection) {
@@ -196,6 +210,7 @@ export function useSelectTextPartsWithArrowKeys({
 
     return () => {
       inputEl?.removeEventListener('keydown', keydownHandler);
+      inputEl?.removeEventListener('mousedown', mouseDownHandler);
     };
   }, [inputRef, isActive, initialSelection, rangeType]);
 }
