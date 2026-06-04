@@ -21,7 +21,7 @@ import { compile, version as vegaLiteVersion } from 'vega-lite';
 import type { CoreTheme } from '@kbn/core/public';
 import { EsQueryParser } from './es_query_parser';
 import { EsqlQueryParser } from './esql_query_parser';
-import { Utils, getVegaThemeColors, VEGA_FONT_FAMILY } from './utils';
+import { Utils, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import type { SearchAPI } from './search_api';
@@ -746,54 +746,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'tickColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'domainColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
-
-    // Font family — Inter to match Borealis/EUI
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'axis', 'labelFont');
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'axis', 'titleFont');
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'legend', 'labelFont');
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'legend', 'titleFont');
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'header', 'labelFont');
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'header', 'titleFont');
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'title', 'font');
-
-    // Font sizes — aligned with Elastic Charts defaults
-    this._setDefaultValue(11, 'config', 'axis', 'labelFontSize');
-    this._setDefaultValue(12, 'config', 'axis', 'titleFontSize');
-    this._setDefaultValue(11, 'config', 'legend', 'labelFontSize');
-    this._setDefaultValue(12, 'config', 'legend', 'titleFontSize');
-
-    // Font weights
-    this._setDefaultValue(400, 'config', 'axis', 'labelFontWeight');
     this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
-    this._setDefaultValue(500, 'config', 'legend', 'titleFontWeight');
 
-    // Hide tick marks (matches Elastic Charts tickLine.visible: false)
     this._setDefaultValue(0, 'config', 'axis', 'tickSize');
-
-    // 1px lines for grid, domain, and axis line
-    this._setDefaultValue(1, 'config', 'axis', 'gridWidth');
-    this._setDefaultValue(1, 'config', 'axis', 'domainWidth');
-
-    // Spacing between tick position and label
-    this._setDefaultValue(4, 'config', 'axis', 'labelPadding');
-
-    // Area fill opacity — matches Elastic Charts (fully opaque is too heavy)
     this._setDefaultValue(0.2, 'config', 'area', 'fillOpacity');
-
-    // Arc (pie/donut) — remove inter-segment stroke
     this._setDefaultValue(null, 'config', 'arc', 'stroke');
-
-    // Text marks font
-    this._setDefaultValue(VEGA_FONT_FAMILY, 'config', 'text', 'font');
-    this._setDefaultValue(11, 'config', 'text', 'fontSize');
-
-    // Legend spacing and symbol sizing
-    this._setDefaultValue(8, 'config', 'legend', 'padding');
-    this._setDefaultValue(4, 'config', 'legend', 'rowPadding');
-    this._setDefaultValue(80, 'config', 'legend', 'symbolSize');
-    this._setDefaultValue(1.5, 'config', 'legend', 'symbolStrokeWidth');
-
-    // Remove the chart frame border (Elastic Charts has no outer frame)
     this._setDefaultValue(null, 'config', 'view', 'stroke');
 
     this._setDefaultValue('transparent', 'config', 'background');

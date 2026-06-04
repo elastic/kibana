@@ -44,9 +44,6 @@ export class Utils {
 const borealisDark = getEuiThemeVars({ name: 'borealis', darkMode: true });
 const borealisLight = getEuiThemeVars({ name: 'borealis', darkMode: false });
 
-export const VEGA_FONT_FAMILY =
-  'Inter, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
-
 export const VegaThemeColors = {
   borealis: {
     dark: {
