@@ -236,6 +236,22 @@ export class DiscoverApp {
   }
 
   /**
+   * Returns the number of fields shown in the sidebar "Available fields" group.
+   */
+  async getSidebarAvailableFieldCount(): Promise<number> {
+    await this.waitUntilFieldListHasCountOfFields();
+    const count = await this.page.testSubj.innerText('fieldListGroupedAvailableFields-count');
+    return Number(count);
+  }
+
+  /**
+   * Filters the sidebar field list by the given search term.
+   */
+  async searchFieldInSidebar(name: string) {
+    await this.page.testSubj.fill('fieldListFiltersFieldSearch', name);
+  }
+
+  /**
    * Assert that the "Selected fields" sidebar group contains exactly the
    * fields named in `expected` — no more, no less. Useful for verifying ES|QL
    * `KEEP` clauses or any explicit column-selection flow.
@@ -255,6 +271,42 @@ export class DiscoverApp {
 
   async waitForHistogramRendered() {
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
+  }
+
+  /**
+   * Returns the rendered height (rounded to whole pixels) of the fixed histogram panel
+   * Rounding avoids sub-pixel noise so callers can assert exact resize deltas.
+   */
+  async getHistogramHeight(): Promise<number> {
+    const histogram = this.page.testSubj.locator('unifiedHistogramResizablePanelFixed');
+    await expect(histogram).toBeVisible();
+    const box = await histogram.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram panel bounding box');
+    }
+    return Math.round(box.height);
+  }
+
+  /**
+   * Drags the histogram resize handle vertically by `distance` pixels (positive
+   * grows the histogram).
+   * Neither Scout nor Playwright has a drag-by-offset helper (Scout's
+   * `testSubj.dragTo` only drags element-to-element), so we drive the mouse
+   * manually.
+   */
+  async resizeHistogramBy(distance: number) {
+    const resizeButton = this.page.testSubj.locator('unifiedHistogramResizableButton');
+    await expect(resizeButton).toBeVisible();
+    const box = await resizeButton.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram resize handle bounding box');
+    }
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX, startY + distance, { steps: 10 });
+    await this.page.mouse.up();
   }
 
   async getCurrentQueryName(): Promise<string> {
@@ -497,6 +549,14 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
       state: 'hidden',
     });
+  }
+
+  /**
+   * Returns the label currently shown on the histogram breakdown selector button
+   * (e.g. `"Breakdown by geo.src"` or `"No breakdown"`.
+   */
+  async getBreakdownFieldValue(): Promise<string> {
+    return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
@@ -745,12 +805,11 @@ export class DiscoverApp {
   }
 
   /**
-   * Duplicates the currently active Discover tab via its tab menu.
-   * The duplicated tab becomes the active one; this helper waits for the
-   * active-tab marker to move to a different test subject before returning.
+   * Opens the tab menu for the tab identified by its full
+   * `unifiedTabs_selectTabBtn_<id>` test subject, clicks "Duplicate", and waits
+   * for a new active tab (a different test subject) to appear.
    */
-  async duplicateActiveTab() {
-    const originalTestSubj = await this.getActiveTabTestSubj();
+  private async duplicateTabByTestSubj(originalTestSubj: string) {
     const tabId = originalTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
 
     await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
@@ -761,6 +820,36 @@ export class DiscoverApp {
         `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]:not([data-test-subj="${originalTestSubj}"])`
       )
       .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Duplicates the currently active Discover tab via its tab menu.
+   * The duplicated tab becomes the active one; this helper waits for the
+   * active-tab marker to move to a different test subject before returning.
+   */
+  async duplicateActiveTab() {
+    await this.duplicateTabByTestSubj(await this.getActiveTabTestSubj());
+  }
+
+  /**
+   * Duplicates the Discover tab at the given 0-based index via its tab menu.
+   * The duplicated tab becomes the active one.
+   */
+  async duplicateTab(index: number) {
+    const tabs = await this.getTabs().all();
+    if (index < 0 || index >= tabs.length) {
+      throw new Error(`Tab index ${index} is out of bounds (found ${tabs.length} tabs)`);
+    }
+
+    const tab = tabs[index];
+    const originalTestSubj = await tab.getAttribute('data-test-subj');
+    if (!originalTestSubj) {
+      throw new Error(`Discover tab at index ${index} is missing a data-test-subj attribute`);
+    }
+
+    // The per-tab menu button is only revealed on hover for non-active tabs.
+    await tab.hover();
+    await this.duplicateTabByTestSubj(originalTestSubj);
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
