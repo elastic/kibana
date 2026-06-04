@@ -9,8 +9,6 @@ export const PLUGIN_ID = 'clientApps';
 
 export const ANDROID_RETRACE_API_PATH = '/internal/client_apps/android/retrace';
 
-export const JS_SOURCEMAP_API_PATH = '/internal/client_apps/javascript/sourcemap';
-
 /** Fetches an Android crash document from Elasticsearch by _id. */
 export const ANDROID_CRASH_DOCUMENT_API_PATH = '/internal/client_apps/android/crash_document';
 

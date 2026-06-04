@@ -11,14 +11,12 @@ import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { RetraceView } from './platforms/android/retrace_view';
-import { SourcemapView } from './platforms/javascript/sourcemap_view';
 
 export function renderApp(core: CoreStart, { element, history }: AppMountParameters) {
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <Router history={history}>
         <Route path="/android/retrace" render={() => <RetraceView core={core} />} />
-        <Route path="/javascript/sourcemap" render={() => <SourcemapView core={core} />} />
       </Router>
     </KibanaRenderContextProvider>,
     element
