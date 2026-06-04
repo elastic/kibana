@@ -329,6 +329,7 @@ export class StreamsPlugin
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
         getScopedClients: this.streamsGetScopedClients,
+        agentContextLayer: plugins.agentContextLayer,
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,

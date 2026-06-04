@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -15,6 +16,8 @@ import { MemoryServiceImpl } from '../lib/memory';
 import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerAgentBuilderAttachments } from './attachments/register_attachments';
+import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
 export const createMemoryToolsOptions = ({
@@ -43,6 +46,7 @@ export const createMemoryToolsOptions = ({
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
+  agentContextLayer,
   getScopedClients,
   server,
   logger,
@@ -50,12 +54,16 @@ export const registerStreamsAgentBuilder = async ({
   streamsKIsOnboardingClient,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }): Promise<void> => {
+}) => {
+  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
+  registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
   registerSignificantEventsDiscoveryAgents(agentBuilder);
