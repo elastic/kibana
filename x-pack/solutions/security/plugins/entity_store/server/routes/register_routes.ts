@@ -29,7 +29,6 @@ import {
   registerResolutionGroup,
   registerUpdate,
   registerCheckPrivileges,
-  registerListRelationships,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -57,5 +56,4 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerGetMaintainers(router);
   registerInitMaintainers(router);
   registerRunMaintainer(router);
-  registerListRelationships(router);
 }

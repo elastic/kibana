@@ -60,7 +60,6 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
-    LIST_ENTITY_RELATIONSHIPS: `${PUBLIC_BASE_ROUTE}/entities/{entityId}/relationships`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
@@ -132,5 +131,3 @@ export type {
   RelationshipMetadataMaintainer,
   RelationshipRecord,
 } from './domain/entity_metadata/relationship_metadata';
-export { ListEntityRelationshipsRequestQuery } from './domain/entity_metadata/list_entity_relationships.gen';
-export type { ListEntityRelationshipsRequestQueryInput } from './domain/entity_metadata/list_entity_relationships.gen';
