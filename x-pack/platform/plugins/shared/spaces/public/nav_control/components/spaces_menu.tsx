@@ -36,6 +36,21 @@ import type { EventTracker } from '../../analytics';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
 
+/**
+ * sessionStorage key consumed by Kibana's bootstrap template
+ * (`src/core/packages/rendering/server-internal/src/bootstrap/render_template.ts`)
+ * to override the default "Loading Elastic" copy on the next boot
+ * AND upgrade the static logo to EUI's animated `<EuiLoadingElastic />`
+ * (the `@keyframes kbnLoadingElasticOverride` is injected when the
+ * key is present).
+ *
+ * Kept in sync with the constant in `solution_mode_switch.tsx`; this
+ * file intentionally duplicates the literal rather than importing it
+ * so the spaces menu doesn't pull the mode-switch module into its
+ * bundle.
+ */
+const LOADING_MESSAGE_OVERRIDE_KEY = 'kbn:loadingMessageOverride';
+
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
 );
@@ -201,10 +216,28 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
     if (!!selectedSpaceItem) {
       const spaceId = selectedSpaceItem.key; // the key is the unique space id
 
+      /*
+       * Per-solution landing override. By default we send the user to
+       * `ENTER_SPACE_PATH` and let the server-side `onPostAuth`
+       * interceptor redirect to whichever app the space's solution
+       * resolves to. For Elasticsearch / Search projects (`solution
+       * === 'es'`) we shortcut that round-trip and land directly on
+       * the search homepage — keeps the URL deterministic
+       * (`/app/elasticsearch/home`) and avoids the brief flash of the
+       * default landing app while the redirect lands.
+       *
+       * Add a new case here for any other solution that should bypass
+       * the default landing — keep the table tight, otherwise the
+       * server-side interceptor remains the single source of truth.
+       */
+      const nextSpaceForLanding = spaceId ? this.getSpaceDetails(spaceId) : undefined;
+      const solutionLandingPath =
+        nextSpaceForLanding?.solution === 'es' ? '/app/elasticsearch/home' : ENTER_SPACE_PATH;
+
       const urlToSelectedSpace = addSpaceIdToPath(
         this.props.serverBasePath,
         spaceId,
-        ENTER_SPACE_PATH
+        solutionLandingPath
       );
 
       let middleClick = false;
@@ -230,6 +263,35 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           trackSpaceChange(spaceId);
           const flushAnalyticsEvents = window.__kbnAnalytics?.flush ?? (() => Promise.resolve());
           await flushAnalyticsEvents();
+          /*
+           * Upgrade the next boot's loading screen to the animated
+           * `<EuiLoadingElastic />` variant (animated logo + custom
+           * copy, default progress bar hidden). The bootstrap script
+           * in `render_template.ts` consumes
+           * `kbn:loadingMessageOverride` and injects the keyframe
+           * animation when the key is present. We don't set
+           * `kbn:loadingMode` here — that key gates Nightshift-only
+           * decorations (the aurora waves), which shouldn't render
+           * for a regular space change. Same-tab navigation only:
+           * new-window paths (shift / ctrl / middle-click) above
+           * navigate a fresh browser context that wouldn't see our
+           * sessionStorage write anyway.
+           */
+          try {
+            const nextSpace = spaceId ? this.getSpaceDetails(spaceId) : undefined;
+            const loadingMessage = nextSpace
+              ? i18n.translate('xpack.spaces.navControl.spacesMenu.switchingToSpaceMessage', {
+                  defaultMessage: 'Switching to {spaceName} space\u2026',
+                  values: { spaceName: nextSpace.name },
+                })
+              : i18n.translate('xpack.spaces.navControl.spacesMenu.switchingSpaceMessage', {
+                  defaultMessage: 'Switching space\u2026',
+                });
+            window.sessionStorage.setItem(LOADING_MESSAGE_OVERRIDE_KEY, loadingMessage);
+          } catch {
+            // sessionStorage can be unavailable (private mode,
+            // sandboxed iframes); ignore — we still navigate.
+          }
           this.props.navigateToUrl(urlToSelectedSpace);
         }
       }

@@ -5,99 +5,78 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-  type EuiThemeComputed,
-  type IconType,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiIcon, useEuiTheme, type IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useCanvasContext } from './round_response/attachments/canvas_context';
+import {
+  getAttachmentPreviewKey,
+  useCanvasContext,
+} from './round_response/attachments/canvas_context';
 
-const USER_ATTACHMENT_PADDING_PX = 12;
-const NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE = 'nightshift.significantEvent';
+/* ----------------------------------------------------------------------- *
+ * Compact attachment pill rendered inside the "Show attachments" row
+ * under a user message.
+ *
+ * Mirrors the visual recipe used by the message editor's command-badge
+ * (see
+ * `conversation_input/message_editor/message_editor.tsx` — the
+ * `commandBadgeStyles` block): `inline-flex`, primary-tinted
+ * background (`backgroundLightPrimary`), primary text colour, small
+ * border-radius, tight horizontal padding. Two intentional
+ * differences:
+ *  - this pill is *clickable* (the whole surface opens the canvas
+ *    for the attachment), so we render it as a `<button>` with hover
+ *    + focus rings, whereas the command badge is read-only;
+ *  - we lead with the attachment-type icon (from
+ *    `AttachmentUIDefinition.getIcon`) so the type is scannable at a
+ *    glance — same role the leading icon tile plays on the larger
+ *    inline cards (`InlineAttachmentWithActions`).
+ *
+ * Parent (`RoundAttachmentReferences`) lays these pills out in a
+ * wrapping flex row so they read like `@mention` chips: as many fit
+ * per line as the row's width allows, the rest flow to the next line.
+ * ----------------------------------------------------------------------- */
 
-const expandAriaLabel = i18n.translate('xpack.agentBuilder.roundUserAttachmentItem.expand', {
-  defaultMessage: 'Expand attachment',
-});
+const PILL_MAX_WIDTH_CH = 28;
 
-const getNightshiftLeadingIconTile = (
-  severity: string | undefined,
-  theme: EuiThemeComputed
-): { background: string; iconColor: string } => {
-  switch (severity) {
-    case 'critical':
-      return {
-        background: theme.colors.backgroundBaseDanger,
-        iconColor: theme.colors.textDanger,
-      };
-    case 'medium':
-      return {
-        background: theme.colors.backgroundBaseWarning,
-        iconColor: theme.colors.textWarning,
-      };
-    case 'low':
-    default:
-      return {
-        background: theme.colors.borderBaseSubdued,
-        iconColor: theme.colors.textSubdued,
-      };
-  }
-};
-
-const getLeadingIconTile = (
-  attachment: UnknownAttachment,
-  iconType: IconType,
-  theme: EuiThemeComputed
-): { background: string; iconColor: string } => {
-  if (attachment.type === NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE) {
-    const data = attachment.data as { severity?: string };
-    return getNightshiftLeadingIconTile(data.severity, theme);
-  }
-
-  return {
-    background: theme.colors.backgroundBasePrimary,
-    iconColor: theme.colors.primary,
-  };
-};
+const expandAriaLabel = (title: string) =>
+  i18n.translate('xpack.agentBuilder.roundUserAttachmentItem.openAttachment', {
+    defaultMessage: 'Open attachment {title}',
+    values: { title },
+  });
 
 export interface RoundUserAttachmentItemProps {
   attachment: UnknownAttachment;
   version: number;
 }
 
-/**
- * Compact attachment row for user-message attachment lists. Icon, single-line
- * title, and expand-only action — separate from {@link InlineAttachmentWithActions}
- * used under agent responses.
- */
 export const RoundUserAttachmentItem: React.FC<RoundUserAttachmentItemProps> = ({
   attachment,
   version,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { attachmentsService } = useAgentBuilderServices();
-  const { openCanvas } = useCanvasContext();
+  const { openCanvas, previewedAttachmentKey } = useCanvasContext();
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type;
-  const iconType = uiDefinition?.getIcon?.() ?? 'document';
-  const iconTile = useMemo(
-    () => getLeadingIconTile(attachment, iconType, euiTheme),
-    [attachment, iconType, euiTheme]
-  );
+  const iconType: IconType = uiDefinition?.getIcon?.() ?? 'document';
 
-  const onExpand = useCallback(() => {
+  /*
+   * `previewedAttachmentKey` is set by `openCanvas` to
+   * `${attachmentId}:${version}` (see `canvas_context.tsx`). When it
+   * matches this pill's key, the canvas flyout is currently showing
+   * the same attachment — apply a stronger primary background +
+   * inset ring so the pill reads as "this is what's open".
+   */
+  const isSelected =
+    previewedAttachmentKey === getAttachmentPreviewKey(attachment.id, version);
+
+  const onClick = useCallback(() => {
     openCanvas(attachment, false, version);
   }, [attachment, openCanvas, version]);
 
@@ -105,60 +84,77 @@ export const RoundUserAttachmentItem: React.FC<RoundUserAttachmentItemProps> = (
     return null;
   }
 
+  const pillStyles = css`
+    /* Match the command-badge visual recipe from the message editor
+     * so attachment pills and the in-prompt @mention / slash-command
+     * badges read as the same family. */
+    display: inline-flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+    /* No border + transparent default — the primary-tinted background
+     * provides the affordance, and removing the outline keeps the
+     * pill flush against neighbours on the same row. */
+    border: 0;
+    appearance: none;
+    color: ${euiTheme.colors.textPrimary};
+    background-color: ${isSelected
+      ? euiTheme.colors.backgroundBasePrimary
+      : euiTheme.colors.backgroundLightPrimary};
+    border-radius: ${euiTheme.border.radius.small};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+    line-height: 1.4286rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    font-weight: ${isSelected
+      ? euiTheme.font.weight.semiBold
+      : euiTheme.font.weight.regular};
+    cursor: pointer;
+    max-width: ${PILL_MAX_WIDTH_CH}ch;
+    min-width: 0;
+    /*
+     * Selected pill draws an inset primary ring so the affordance
+     * remains visible even on the deeper background — outside
+     * (`outline`) would clip against neighbour pills on the same
+     * row, inset ring keeps the layout intact.
+     */
+    box-shadow: ${isSelected
+      ? `inset 0 0 0 1px ${euiTheme.colors.primary}`
+      : 'none'};
+    transition:
+      background-color 120ms ease-in-out,
+      box-shadow 120ms ease-in-out;
+
+    &:hover {
+      background-color: ${isSelected
+        ? euiTheme.colors.backgroundBasePrimary
+        : euiTheme.colors.backgroundBasePrimary};
+    }
+    &:focus-visible {
+      outline: 2px solid ${euiTheme.colors.primary};
+      outline-offset: 1px;
+    }
+  `;
+
+  const labelStyles = css`
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+  `;
+
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      paddingSize="none"
-      color="plain"
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={expandAriaLabel(title)}
+      aria-pressed={isSelected}
+      title={title}
       data-test-subj={`agentBuilderRoundUserAttachment-${attachment.id}`}
-      css={css`
-        width: 100%;
-        max-height: 100%;
-        padding: ${USER_ATTACHMENT_PADDING_PX}px;
-      `}
+      data-selected={isSelected ? 'true' : 'false'}
+      css={pillStyles}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <div
-            aria-hidden
-            css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: ${euiTheme.size.xl};
-              height: ${euiTheme.size.xl};
-              flex-shrink: 0;
-              border-radius: ${euiTheme.border.radius.small};
-              background: ${iconTile.background};
-            `}
-          >
-            <EuiIcon type={iconType} size="m" color={iconTile.iconColor} />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem grow style={{ minWidth: 0 }}>
-          <EuiText
-            size="s"
-            css={css`
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            `}
-          >
-            {title}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="expand"
-            color="text"
-            size="s"
-            aria-label={expandAriaLabel}
-            data-test-subj={`agentBuilderRoundUserAttachmentExpand-${attachment.id}`}
-            onClick={onExpand}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiIcon type={iconType} size="s" color={euiTheme.colors.primary} aria-hidden />
+      <span css={labelStyles}>{title}</span>
+    </button>
   );
 };

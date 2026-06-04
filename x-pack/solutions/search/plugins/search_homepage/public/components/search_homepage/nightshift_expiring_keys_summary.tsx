@@ -428,6 +428,7 @@ export const NightshiftExpiringKeysSummary: React.FC<NightshiftExpiringKeysSumma
           }
         )}
         css={css`
+          margin: 0 0 8px 0;
           .euiAccordion__button {
             font-weight: ${euiTheme.font.weight.semiBold};
             padding-left: 0;

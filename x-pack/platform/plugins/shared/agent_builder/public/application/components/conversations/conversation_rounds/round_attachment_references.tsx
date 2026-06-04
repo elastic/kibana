@@ -82,6 +82,19 @@ const attachmentsBlockStyles = css`
   }
 `;
 
+/**
+ * Wrapper styles for the accordion itself — gives the whole
+ * "Show attachments / Hide attachments" block 8px breathing room
+ * before the round content below it (agent thinking row, agent
+ * response, …) so the pills row never sits flush against the next
+ * piece of UI.
+ */
+const accordionWrapperStyles = css`
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 8px;
+`;
+
 const attachmentListItemStyles = css`
   width: 100%;
   max-width: 100%;
@@ -279,6 +292,19 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     ${isRightAligned ? 'justify-content: flex-end;' : ''}
   `;
 
+  /*
+   * Compact variant (user-message attachments) lays the items out as a
+   * wrapping row of pills — so attachments flow like @mentions, with
+   * as many fitting per line as the row's width allows. Standard
+   * variant (agent / system references) keeps the original stacked
+   * column of full inline-attachment cards.
+   */
+  const isCompact = variant === 'compact';
+  const listDirection = isCompact ? 'row' : 'column';
+  const listGutter = isCompact ? 'xs' : 's';
+  const listWrap = isCompact;
+  const listAlignItems = isCompact ? 'center' : 'stretch';
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -297,7 +323,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
           forceState={isExpanded ? 'open' : 'closed'}
           onToggle={setIsExpanded}
           data-test-subj="agentBuilderRoundAttachmentReferencesAccordion"
-          css={attachmentsBlockStyles}
+          css={accordionWrapperStyles}
           buttonContent={
             <EuiText color="subdued" size="s">
               <p css={accordionButtonStyles}>
@@ -308,9 +334,11 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
           }
         >
           <EuiFlexGroup
-            gutterSize="s"
-            direction="column"
+            gutterSize={listGutter}
+            direction={listDirection}
             responsive={false}
+            wrap={listWrap}
+            alignItems={listAlignItems}
             css={attachmentsBlockStyles}
             role="list"
             aria-label={labels.attachments}
@@ -320,7 +348,11 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
               <EuiFlexItem
                 grow={false}
                 key={`${resolvedReference.attachment.id}-v${resolvedReference.version}-${resolvedReference.actor}-${resolvedReference.operation}`}
-                css={attachmentListItemStyles}
+                /*
+                 * Standard cards span the row's full width; pills
+                 * size to their content so the wrapping flow works.
+                 */
+                css={isCompact ? undefined : attachmentListItemStyles}
               >
                 <RoundAttachmentReferenceItem
                   resolvedReference={resolvedReference}

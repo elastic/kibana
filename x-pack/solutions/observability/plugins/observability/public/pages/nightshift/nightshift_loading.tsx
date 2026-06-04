@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -376,7 +375,22 @@ const WorkflowExecutionPanel: React.FC<WorkflowExecutionPanelProps> = ({ workflo
       data-test-subj={`nightshiftWorkflowExecution-${workflow.id}`}
       css={css`
         max-height: ${EXECUTION_SCROLL_MAX_HEIGHT_PX}px;
-        overflow-y: auto;
+        /*
+         * Always reserve the scrollbar gutter so toggling between
+         * "no overflow" and "has overflow" doesn't shift the row
+         * content horizontally by a few pixels. 'overflow-y: scroll'
+         * keeps the track painted at all times — the thumb only
+         * appears when there's actually content to scroll, so the
+         * panel still feels quiet when not overflowing.
+         *
+         * 'scrollbar-gutter: stable' is the modern, idiomatic way to
+         * reserve the gutter without painting the track — kept here
+         * as a belt-and-braces alongside 'overflow-y: scroll' so
+         * Firefox / Safari (which honour 'scrollbar-gutter') don't
+         * double-allocate space.
+         */
+        overflow-y: scroll;
+        scrollbar-gutter: stable;
         background: ${euiTheme.colors.backgroundBasePlain};
         border-top: ${euiTheme.border.thin};
         /* Thin, themed scrollbar so the panel doesn't show a chunky
@@ -385,6 +399,11 @@ const WorkflowExecutionPanel: React.FC<WorkflowExecutionPanelProps> = ({ workflo
         scrollbar-color: ${euiTheme.colors.borderBaseSubdued} transparent;
         &::-webkit-scrollbar {
           width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+          /* Transparent track so the reserved gutter reads as the
+           * panel background, not as a separate visual lane. */
+          background: transparent;
         }
         &::-webkit-scrollbar-thumb {
           background-color: ${euiTheme.colors.borderBaseSubdued};
@@ -761,10 +780,27 @@ export const NightshiftLoading: React.FC = () => {
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
+                          {/*
+                           * Single chevron that rotates between
+                           * pointing-right (collapsed) and pointing-
+                           * down (expanded). Matches the smooth
+                           * rotation `EuiAccordion` uses for its
+                           * built-in arrow (same easing + duration as
+                           * the height transition below) so the
+                           * whole expand/collapse feels in sync.
+                           */}
                           <EuiIcon
-                            type={isExpanded ? 'arrowDown' : 'chevronSingleRight'}
+                            type="arrowDown"
                             size="s"
                             color="subdued"
+                            css={css`
+                              transition: transform 175ms
+                                cubic-bezier(0.694, 0.0482, 0.335, 1);
+                              transform: rotate(${isExpanded ? 0 : -90}deg);
+                              @media (prefers-reduced-motion: reduce) {
+                                transition: none;
+                              }
+                            `}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -817,16 +853,40 @@ export const NightshiftLoading: React.FC = () => {
                   </EuiFlexGroup>
                 </button>
 
-                {/* Expanded execution-step panel — scrollable */}
-                {isExpanded && (
-                  <div
-                    id={panelId}
-                    role="region"
-                    aria-labelledby={headerId}
-                  >
-                    <WorkflowExecutionPanel workflow={workflow} />
-                  </div>
-                )}
+                {/*
+                 * Execution-step panel — always mounted so the
+                 * expand/collapse transition can animate `max-height`
+                 * smoothly (CSS can't transition to/from `auto`).
+                 *
+                 * Easing + duration mirror `EuiAccordion`'s own
+                 * `--accordion-padding-vertical` transition so the
+                 * workflow rows feel like the rest of the prototype's
+                 * accordions (e.g. the "Fixed significant events"
+                 * accordion in the obs Morning state) — no drastic
+                 * snap when toggling.
+                 *
+                 * The wrapper's `overflow: hidden` clips the inner
+                 * panel (which has its own `max-height` +
+                 * `overflow-y: auto`) during the transition, so the
+                 * step rows never spill into the parent layout while
+                 * the box is mid-animation.
+                 */}
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={headerId}
+                  aria-hidden={!isExpanded}
+                  css={css`
+                    max-height: ${isExpanded ? EXECUTION_SCROLL_MAX_HEIGHT_PX : 0}px;
+                    overflow: hidden;
+                    transition: max-height 175ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+                    @media (prefers-reduced-motion: reduce) {
+                      transition: none;
+                    }
+                  `}
+                >
+                  <WorkflowExecutionPanel workflow={workflow} />
+                </div>
               </div>
             );
           })}
