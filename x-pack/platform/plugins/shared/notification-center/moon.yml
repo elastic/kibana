@@ -19,8 +19,6 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
-  - '@kbn/logging'
-  - '@kbn/core-feature-flags-server'
 tags:
   - plugin
   - prod
