@@ -15,8 +15,8 @@ import {
 
 export const rRuleRequestSchema = schema.object(
   {
-    dtstart: schema.string({ validate: validateStartDateV1 }),
-    tzid: schema.string({ validate: validateTimezone }),
+    dtstart: schema.string({ validate: validateStartDateV1, maxLength: 64 }),
+    tzid: schema.string({ validate: validateTimezone, maxLength: 64 }),
     freq: schema.maybe(
       schema.oneOf([
         schema.literal(0),
@@ -34,9 +34,10 @@ export const rRuleRequestSchema = schema.object(
           }
         },
         min: 1,
+        max: 1000,
       })
     ),
-    until: schema.maybe(schema.string({ validate: validateEndDateV1 })),
+    until: schema.maybe(schema.string({ validate: validateEndDateV1, maxLength: 64 })),
     count: schema.maybe(
       schema.number({
         validate: (count: number) => {
@@ -45,16 +46,22 @@ export const rRuleRequestSchema = schema.object(
           }
         },
         min: 1,
+        max: 1000,
       })
     ),
     byweekday: schema.maybe(
-      schema.arrayOf(schema.string(), {
+      schema.arrayOf(schema.string({ maxLength: 4 }), {
         minSize: 1,
+        maxSize: 35,
         validate: validateRecurrenceByWeekdayV1,
       })
     ),
-    bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })),
-    bymonth: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1 })),
+    bymonthday: schema.maybe(
+      schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1, maxSize: 31 })
+    ),
+    bymonth: schema.maybe(
+      schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1, maxSize: 12 })
+    ),
   },
   { meta: { id: 'maintenance_window_r_rule_request' } }
 );
