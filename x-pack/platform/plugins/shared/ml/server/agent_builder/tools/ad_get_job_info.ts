@@ -104,65 +104,20 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'get_available_metadata': {
-          const response = await ml.getJobs({});
-          const jobs = response.jobs ?? [];
-          const metadata = {
-            job_count: jobs.length,
-            job_ids: jobs.map((j: any) => j.job_id),
-            functions: [
-              ...new Set(
-                jobs.flatMap(
-                  (j: any) => j.analysis_config?.detectors?.map((d: any) => d.function) ?? []
-                )
-              ),
-            ],
-            fields: [
-              ...new Set(
-                jobs.flatMap(
-                  (j: any) =>
-                    j.analysis_config?.detectors?.map((d: any) => d.field_name).filter(Boolean) ??
-                    []
-                )
-              ),
-            ],
-            by_fields: [
-              ...new Set(
-                jobs.flatMap(
-                  (j: any) =>
-                    j.analysis_config?.detectors
-                      ?.map((d: any) => d.by_field_name)
-                      .filter(Boolean) ?? []
-                )
-              ),
-            ],
-            over_fields: [
-              ...new Set(
-                jobs.flatMap(
-                  (j: any) =>
-                    j.analysis_config?.detectors
-                      ?.map((d: any) => d.over_field_name)
-                      .filter(Boolean) ?? []
-                )
-              ),
-            ],
-            partition_fields: [
-              ...new Set(
-                jobs.flatMap(
-                  (j: any) =>
-                    j.analysis_config?.detectors
-                      ?.map((d: any) => d.partition_field_name)
-                      .filter(Boolean) ?? []
-                )
-              ),
-            ],
-            influencers: [
-              ...new Set(jobs.flatMap((j: any) => j.analysis_config?.influencers ?? [])),
-            ],
-            bucket_spans: [
-              ...new Set(jobs.map((j: any) => j.analysis_config?.bucket_span).filter(Boolean)),
-            ],
-          };
-          return { results: [{ type: ToolResultType.json, data: metadata }] };
+          const response = await esClient.asCurrentUser.esql.query({
+            query: `FROM .ml-config
+| WHERE job_type == "anomaly_detector"
+| STATS job_count = COUNT(*),
+        job_ids = VALUES(job_id),
+        functions = VALUES(\`analysis_config.detectors.function\`),
+        fields = VALUES(\`analysis_config.detectors.field_name\`),
+        by_fields = VALUES(\`analysis_config.detectors.by_field_name\`),
+        over_fields = VALUES(\`analysis_config.detectors.over_field_name\`),
+        partition_fields = VALUES(\`analysis_config.detectors.partition_field_name\`),
+        influencers = VALUES(\`analysis_config.influencers\`),
+        bucket_spans = VALUES(\`analysis_config.bucket_span\`)`,
+          });
+          return { results: [{ type: ToolResultType.json, data: response }] };
         }
 
         case 'validate_permissions': {
