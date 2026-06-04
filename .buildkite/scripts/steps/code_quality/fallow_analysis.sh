@@ -66,13 +66,30 @@ fi
 
 if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
-  if [ -z "${SLACK_BOT_TOKEN:-}" ]; then
-    echo "Skipping: SLACK_BOT_TOKEN is not set"
-  else
-    # shellcheck disable=SC2086
-    node "$SLACK_SCRIPT" "$FALLOW_JSON" \
-      --owners $FALLOW_OWNERS \
-      --channel "${SLACK_NOTIFICATIONS_CHANNEL:-#search-code-quality-check-test}" \
-      --build-url "${BUILDKITE_BUILD_URL:-}"
+  CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-#search-code-quality-check-test}"
+  BUILD_URL="${BUILDKITE_BUILD_URL:-}"
+
+  # Build plain-text message from annotation (strip markdown **)
+  SLACK_TEXT=$(printf '%s' "$ANNOTATION" | sed 's/\*\*//g; /^$/d')
+  if [ -n "$BUILD_URL" ]; then
+    SLACK_TEXT="${SLACK_TEXT}
+Build: ${BUILD_URL}"
   fi
+
+  # Dynamically upload a pipeline notify step — no bot token needed,
+  # Buildkite handles Slack delivery via its built-in org-level integration.
+  NOTIFY_YML="$(mktemp /tmp/fallow_notify_XXXXXX.yml)"
+  {
+    echo "notify:"
+    echo "  - slack:"
+    echo "      channels:"
+    echo "        - \"${CHANNEL}\""
+    echo "      message: |"
+    while IFS= read -r line; do
+      echo "        ${line}"
+    done <<< "$SLACK_TEXT"
+  } > "$NOTIFY_YML"
+
+  buildkite-agent pipeline upload "$NOTIFY_YML"
+  rm -f "$NOTIFY_YML"
 fi
