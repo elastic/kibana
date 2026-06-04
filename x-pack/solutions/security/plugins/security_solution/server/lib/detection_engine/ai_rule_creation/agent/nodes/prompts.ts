@@ -131,19 +131,27 @@ export const SEVERITY_INFERENCE_PROMPT = ChatPromptTemplate.fromMessages([
     'system',
     `Your role is to analyze a security detection scenario and determine the appropriate severity level and risk score for an Elastic Detection rule.
 
-Severity Levels:
-- critical: Direct malware execution, ransomware activity, credential dumping, rootkit installation, or any active exploitation leading to immediate compromise. Risk score: 99.
-- high: Privilege escalation attempts, lateral movement, defense evasion techniques, code injection, or unauthorized access to sensitive systems. Risk score: 73.
-- medium: Suspicious behavior that may indicate attack staging, persistence mechanisms, policy violations, or anomalous activity requiring investigation. Risk score: 47.
-- low: Information gathering, reconnaissance, benign-looking but noteworthy events, or minor policy violations with limited security impact. Risk score: 21.
+Severity Levels and Risk Scores:
+- critical (99): Active exploitation of a vulnerability, remote code execution, authentication bypass, or immediate system compromise.
+- high (73): Credential access attempts, OAuth phishing, stolen session usage, threat intel indicator matches, or multi-datasource correlation of compromise.
+- medium (47): Privilege escalation (UAC bypass), persistence mechanisms, defense evasion (log deletion, sink deletion), ransomware activity, email route hijacking, container escapes, suspicious network traffic, or policy violations requiring investigation.
+- low (21): Script obfuscation, reconnaissance, ML anomaly detection, buffer overflow/segfault detection, benign account creation events, or audit events with limited immediate security impact.
 
-Guidelines:
-- Base your assessment on the user's intent, the attack technique described, and the potential business impact.
-- Consider whether the detected activity indicates an active attack (higher severity) versus preparatory or suspicious behavior (lower severity).
-- Privilege escalation and UAC bypass are typically medium to high.
-- Data exfiltration, credential access, and execution of malicious payloads are typically high to critical.
-- Audit log tampering and indicator removal are typically medium to high.
-- Anomalous but non-malicious behavior is typically low to medium.
+EXACT MAPPING RULES — apply these in order:
+1. If the request involves credential dumping, credential access, or theft of credentials → severity: high, riskScore: 73
+2. If the request involves OAuth phishing, device registration abuse, or stolen sessions → severity: high, riskScore: 73
+3. If the request involves threat intel indicator matching or multi-datasource alert correlation → severity: high, riskScore: 73
+4. If the request involves active exploitation, RCE, or authentication bypass (CVE exploitation) → severity: critical, riskScore: 99
+5. If the request involves UAC bypass, privilege escalation attempts, or container escapes → severity: medium, riskScore: 47
+6. If the request involves persistence (plist modification, login hooks, scheduled tasks) → severity: medium, riskScore: 47
+7. If the request involves defense evasion (log deletion, sink deletion, DNS config deletion) → severity: medium, riskScore: 47
+8. If the request involves ransomware, email route hijacking, or data collection abuse → severity: medium, riskScore: 47
+9. If the request involves suspicious network traffic (VNC, C2, unusual ports) → severity: medium, riskScore: 47
+10. If the request involves multiple sessions, unusual user behavior, or policy violations → severity: medium, riskScore: 47
+11. If the request involves script obfuscation, PowerShell encoding, or payload concealment → severity: low, riskScore: 21
+12. If the request involves ML anomaly detection, reconnaissance, or benign audit events → severity: low, riskScore: 21
+13. If the request involves account creation (service principals, users) without explicit compromise → severity: low, riskScore: 21
+14. If the request involves crash/segfault detection or vulnerability scanning → severity: low, riskScore: 21
 
 Respond with ONLY a JSON object in this exact format:
 {{
