@@ -27,12 +27,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./synthetics_api_security'));
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./add_monitor'));
-    loadTestFile(require.resolve('./add_monitor_project'));
+    // add_monitor_project covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts
     loadTestFile(require.resolve('./add_monitor_private_location'));
-    loadTestFile(require.resolve('./edit_monitor'));
+    // edit_monitor had no active tests (only an it.skip); covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/edit_monitor.spec.ts
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./sync_global_params_spaces'));
-    loadTestFile(require.resolve('./add_edit_params'));
+    // add_edit_params covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts
     loadTestFile(require.resolve('./private_location_apis'));
     loadTestFile(require.resolve('./list_monitors'));
     loadTestFile(require.resolve('./sync_maintenance_windows'));
