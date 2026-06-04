@@ -24,7 +24,7 @@ import {
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
-import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
+import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
 import {
   ConnectStep,
@@ -33,8 +33,6 @@ import {
   DeploymentStep,
   SeeDataStep,
 } from './step_components';
-
-const SERVICE_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));
 const CONNECT_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'connect');
 
 interface StepComponentProps {
@@ -82,7 +80,7 @@ export function OnboardingShell() {
       selectedServiceIds.length === 0 ||
       selectedServiceIds.some(
         (id) =>
-          SERVICE_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
+          AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
       ),
     [selectedServiceIds]
   );

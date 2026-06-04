@@ -11,7 +11,7 @@
 
 export type SignalType = 'logs' | 'metrics';
 
-export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose';
+export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
 
 export type AuthType = 'identity_federation' | 'api_key';
 
@@ -329,7 +329,7 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deliveryMethods: [{ method: 'agent_based', preferred: true }],
     inputs: ['aws/metrics'],
     requiredConfig: ['regions'],
     packageName: 'aws',
@@ -831,3 +831,5 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 ];
+
+export const AWS_SERVICES_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));

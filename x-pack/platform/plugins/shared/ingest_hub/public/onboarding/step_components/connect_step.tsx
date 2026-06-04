@@ -12,10 +12,8 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
-import { AWS_SERVICES_MATRIX } from '../aws_service_matrix';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
-
-const SERVICE_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));
 
 interface ConnectStepProps {
   onNext: () => void;
@@ -30,7 +28,7 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
   const showIdentityFederation = useMemo(() => {
     if (selectedServiceIds.length === 0) return true;
     return selectedServiceIds.every(
-      (id) => SERVICE_MAP.get(id)?.identityFederationSupported === true
+      (id) => AWS_SERVICES_MAP.get(id)?.identityFederationSupported === true
     );
   }, [selectedServiceIds]);
 

@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,10 +67,11 @@ const CATEGORY_ORDER: ServiceCategory[] = [
   'Containers',
 ];
 
+const CATEGORY_COLORS = euiPaletteColorBlind({ rotations: 2 });
+
 function categoryColor(category: string): string {
   const index = CATEGORY_ORDER.indexOf(category as ServiceCategory);
-  const hue = Math.round((Math.max(0, index) * 137.508) % 360);
-  return `hsl(${hue}, 60%, 42%)`;
+  return CATEGORY_COLORS[Math.max(0, index)];
 }
 
 export function ServicesStep({ onNext }: ServicesStepProps) {
