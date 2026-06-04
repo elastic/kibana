@@ -75,7 +75,7 @@ export class UiamProvisioningFeatureFlagScheduler {
           try {
             await taskScheduling.runSoon(TASK_ID);
           } catch (e) {
-            this.logger.debug(
+            this.logger.error(
               `Could not trigger an immediate run of ${TASK_TYPE}, received ${
                 (e as Error).message
               }`,

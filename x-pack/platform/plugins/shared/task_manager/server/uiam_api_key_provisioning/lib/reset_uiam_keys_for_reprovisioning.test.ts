@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { TASK_MANAGER_INDEX } from '../../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 import {
@@ -14,12 +18,6 @@ import {
   resetUiamKeysForReprovisioning,
   stripUiamKeysFromProvisionedTasks,
 } from './reset_uiam_keys_for_reprovisioning';
-
-const createSoClientMock = () =>
-  ({
-    find: jest.fn(),
-    bulkDelete: jest.fn().mockResolvedValue({ statuses: [] }),
-  } as unknown as jest.Mocked<ISavedObjectsRepository>);
 
 const findResult = (ids: string[]) => ({
   saved_objects: ids.map((id) => ({
@@ -76,7 +74,7 @@ describe('reset_uiam_keys_for_reprovisioning', () => {
 
   describe('flushTaskProvisioningStatus', () => {
     it('fetches and bulk-deletes all task status docs in a single pass', async () => {
-      const soClient = createSoClientMock();
+      const soClient = savedObjectsRepositoryMock.create();
       soClient.find.mockResolvedValue(findResult(['a', 'b']) as never);
 
       const deleted = await flushTaskProvisioningStatus(soClient, logger);
@@ -97,7 +95,7 @@ describe('reset_uiam_keys_for_reprovisioning', () => {
     });
 
     it('does nothing when there are no status docs', async () => {
-      const soClient = createSoClientMock();
+      const soClient = savedObjectsRepositoryMock.create();
       soClient.find.mockResolvedValue(findResult([]) as never);
 
       const deleted = await flushTaskProvisioningStatus(soClient, logger);
@@ -107,7 +105,7 @@ describe('reset_uiam_keys_for_reprovisioning', () => {
     });
 
     it('warns when more status docs exist than were returned in the single pass', async () => {
-      const soClient = createSoClientMock();
+      const soClient = savedObjectsRepositoryMock.create();
       soClient.find.mockResolvedValue({ ...findResult(['a']), total: 5 } as never);
 
       const deleted = await flushTaskProvisioningStatus(soClient, logger);
@@ -124,7 +122,7 @@ describe('reset_uiam_keys_for_reprovisioning', () => {
     it('strips keys and flushes status, returning both counts', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       (esClient.updateByQuery as unknown as jest.Mock).mockResolvedValue({ updated: 5 });
-      const soClient = createSoClientMock();
+      const soClient = savedObjectsRepositoryMock.create();
       soClient.find.mockResolvedValue(findResult(['x']) as never);
 
       const result = await resetUiamKeysForReprovisioning(

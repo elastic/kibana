@@ -20,6 +20,8 @@ const makeLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
   } as unknown as jest.Mocked<Logger>);
 
+const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
+
 describe('UiamProvisioningFeatureFlagScheduler', () => {
   const logger = makeLogger();
 
@@ -53,7 +55,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     flag$.next(true);
     flag$.next(false);
     flag$.next(false);
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(removeIfExists).toHaveBeenCalledTimes(1);
@@ -74,7 +76,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
       schedule: { interval: '1d' },
     });
 
-    await new Promise<void>((resolve) => setImmediate(resolve));
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).not.toHaveBeenCalled();
     expect(taskScheduling.runSoon).not.toHaveBeenCalled();
@@ -100,9 +102,9 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     });
 
     flag$.next(true);
-    await Promise.resolve();
+    await flushPromises();
     flag$.next(false);
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(removeIfExists).toHaveBeenCalledTimes(1);
@@ -126,8 +128,7 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     });
 
     flag$.next(true);
-    await Promise.resolve();
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(taskScheduling.runSoon).toHaveBeenCalledTimes(1);
@@ -150,15 +151,14 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     });
 
     flag$.next(true);
-    await Promise.resolve();
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.ensureScheduled).toHaveBeenCalledTimes(1);
     expect(taskScheduling.runSoon).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
-  it('swallows runSoon failures without surfacing an error', async () => {
+  it('logs an error but does not throw when runSoon fails', async () => {
     const flag$ = new Subject<boolean>();
     const scheduler = new UiamProvisioningFeatureFlagScheduler(logger);
     const taskScheduling = {
@@ -175,11 +175,9 @@ describe('UiamProvisioningFeatureFlagScheduler', () => {
     });
 
     flag$.next(true);
-    await Promise.resolve();
-    await Promise.resolve();
+    await flushPromises();
 
     expect(taskScheduling.runSoon).toHaveBeenCalledTimes(1);
-    expect(logger.error).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
   });
 });
