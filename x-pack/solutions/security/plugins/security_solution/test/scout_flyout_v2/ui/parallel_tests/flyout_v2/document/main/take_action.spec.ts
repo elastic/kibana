@@ -1,0 +1,178 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * Scout UI tests for the "Take action" menu inside the flyout_v2 document flyout.
+ */
+
+import {
+  spaceTest,
+  tags,
+  CUSTOM_QUERY_RULE,
+  AlertWorkflowStatus,
+  ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
+  ClosingReasonOption,
+  ADD_TO_NEW_CASE_TEST_SUBJ,
+  ADD_TO_EXISTING_CASE_TEST_SUBJ,
+  CREATE_CASE_DIALOG_TITLE,
+  ALL_CASES_MODAL_TEST_SUBJ,
+  ALERT_TAGS_MENU_ITEM_TEST_SUBJ,
+  ALERT_TAGS_SELECTABLE_TEST_SUBJ,
+  ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ,
+  ALERT_ASSIGNEES_SELECTABLE_TEST_SUBJ,
+  RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ,
+  ALERT_WORKFLOW_PANEL_TEST_SUBJ,
+  INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
+  TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ,
+} from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
+
+spaceTest.describe(
+  'Document flyout v2 — Take action menu',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    let ruleName: string;
+
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
+      await apiServices.detectionRule.createCustomQueryRule({
+        ...CUSTOM_QUERY_RULE,
+        name: ruleName,
+      });
+      await browserAuth.loginAsPlatformEngineer();
+    });
+
+    spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.detectionRule.deleteAll();
+      await apiServices.detectionAlerts.deleteAll();
+    });
+
+    spaceTest(
+      'status change: mark alert as closed with a closing reason',
+      async ({ pageObjects }) => {
+        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+        await pageObjects.documentFlyoutV2.openTakeActionMenu();
+        await pageObjects.documentFlyoutV2.clickTakeActionItem(ALERT_CLOSE_MENU_ITEM_TEST_SUBJ);
+
+        // Closing reason sub-panel opens inside the context menu
+        await pageObjects.documentFlyoutV2.selectClosingReason(
+          ClosingReasonOption.FALSE_POSITIVE.label
+        );
+        await pageObjects.documentFlyoutV2.submitClosingReason();
+
+        await expect(pageObjects.documentFlyoutV2.statusBadge).toContainText(
+          AlertWorkflowStatus.CLOSED,
+          { timeout: 15_000 }
+        );
+      }
+    );
+
+    spaceTest(
+      'apply alert tags — opens tag management sub-panel',
+      async ({ pageObjects, page }) => {
+        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+        await pageObjects.documentFlyoutV2.openTakeActionMenu();
+        await pageObjects.documentFlyoutV2.clickTakeActionItem(ALERT_TAGS_MENU_ITEM_TEST_SUBJ);
+
+        // Tag management sub-panel should appear inside the context menu
+        await expect(page.getByTestId(ALERT_TAGS_SELECTABLE_TEST_SUBJ)).toBeVisible({
+          timeout: 10_000,
+        });
+      }
+    );
+
+    spaceTest('assign alert — opens assignees sub-panel', async ({ pageObjects, page }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+      await pageObjects.documentFlyoutV2.openTakeActionMenu();
+      await pageObjects.documentFlyoutV2.clickTakeActionItem(ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ);
+
+      // Assignees sub-panel should appear inside the context menu
+      await expect(page.getByTestId(ALERT_ASSIGNEES_SELECTABLE_TEST_SUBJ)).toBeVisible({
+        timeout: 10_000,
+      });
+    });
+
+    spaceTest('add to new case — opens case creation modal', async ({ pageObjects, page }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+      await pageObjects.documentFlyoutV2.openTakeActionMenu();
+      await pageObjects.documentFlyoutV2.clickTakeActionItem(ADD_TO_NEW_CASE_TEST_SUBJ);
+
+      // Target the heading specifically to avoid matching the submit button label
+      await expect(
+        page.getByRole('dialog').getByRole('heading', { name: CREATE_CASE_DIALOG_TITLE })
+      ).toBeVisible({ timeout: 10_000 });
+    });
+
+    spaceTest('add to existing case — opens case selector modal', async ({ pageObjects, page }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+      await pageObjects.documentFlyoutV2.openTakeActionMenu();
+      await pageObjects.documentFlyoutV2.clickTakeActionItem(ADD_TO_EXISTING_CASE_TEST_SUBJ);
+
+      // Case selector (or empty-state) should appear
+      await expect(page.getByTestId(ALL_CASES_MODAL_TEST_SUBJ)).toBeVisible({ timeout: 10_000 });
+    });
+
+    spaceTest('run alert workflow — opens workflow picker panel', async ({ pageObjects }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+      await pageObjects.documentFlyoutV2.openTakeActionMenu();
+      await pageObjects.documentFlyoutV2.clickTakeActionItem(
+        RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ
+      );
+
+      // Workflow sub-panel should open in the context menu
+      await expect(
+        pageObjects.documentFlyoutV2.takeActionMenu.locator(
+          `[data-test-subj="${ALERT_WORKFLOW_PANEL_TEST_SUBJ}"]`
+        )
+      ).toBeVisible({ timeout: 10_000 });
+    });
+
+    spaceTest(
+      'investigate in timeline — opens Timeline with document',
+      async ({ pageObjects, page }) => {
+        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+        await pageObjects.documentFlyoutV2.openTakeActionMenu();
+        await pageObjects.documentFlyoutV2.clickTakeActionItem(
+          INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ
+        );
+
+        // Timeline should open (bottom bar becomes visible)
+        await expect(page.getByTestId(TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ)).toBeVisible({
+          timeout: 15_000,
+        });
+      }
+    );
+  }
+);
