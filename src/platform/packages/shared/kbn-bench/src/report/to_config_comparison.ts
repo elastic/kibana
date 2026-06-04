@@ -47,9 +47,7 @@ export function toConfigComparison(left: ConfigResult, right: ConfigResult): Con
       const leftBenchmarkResult = maybe(leftBenchmarkResultsByName[name]);
       const rightBenchmarkResult = maybe(rightBenchmarkResultsByName[name]);
 
-      const leftSummary = leftBenchmarkResult
-        ? toBenchmarkSummary(leftBenchmarkResult)
-        : undefined;
+      const leftSummary = leftBenchmarkResult ? toBenchmarkSummary(leftBenchmarkResult) : undefined;
       const rightSummary = rightBenchmarkResult
         ? toBenchmarkSummary(rightBenchmarkResult)
         : undefined;

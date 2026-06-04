@@ -61,25 +61,25 @@ export const getWarmStartMemoryRegressionReportPath = (): string => {
   return process.env[WARM_START_MEMORY_REPORT_PATH_ENV] ?? DEFAULT_WARM_START_MEMORY_REPORT_PATH;
 };
 
-export const getWarmStartMemoryRegressionReportContextFromEnv =
-  (): WarmStartMemoryRegressionReportContext | undefined => {
-    const context: WarmStartMemoryRegressionReportContext = {
-      baselineCommit:
-        process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_COMMIT ??
-        process.env.GITHUB_PR_MERGE_BASE,
-      targetCommit:
-        process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_COMMIT ?? process.env.BUILDKITE_COMMIT,
-      baselineBuildId: process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_BUILD_ID,
-      targetBuildId:
-        process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_BUILD_ID ?? process.env.BUILDKITE_BUILD_ID,
-    };
-
-    const definedContext = Object.fromEntries(
-      Object.entries(context).filter(([, value]) => value !== undefined && value !== '')
-    ) as WarmStartMemoryRegressionReportContext;
-
-    return Object.keys(definedContext).length > 0 ? definedContext : undefined;
+export const getWarmStartMemoryRegressionReportContextFromEnv = ():
+  | WarmStartMemoryRegressionReportContext
+  | undefined => {
+  const context: WarmStartMemoryRegressionReportContext = {
+    baselineCommit:
+      process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_COMMIT ?? process.env.GITHUB_PR_MERGE_BASE,
+    targetCommit:
+      process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_COMMIT ?? process.env.BUILDKITE_COMMIT,
+    baselineBuildId: process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_BUILD_ID,
+    targetBuildId:
+      process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_BUILD_ID ?? process.env.BUILDKITE_BUILD_ID,
   };
+
+  const definedContext = Object.fromEntries(
+    Object.entries(context).filter(([, value]) => value !== undefined && value !== '')
+  ) as WarmStartMemoryRegressionReportContext;
+
+  return Object.keys(definedContext).length > 0 ? definedContext : undefined;
+};
 
 export const writeWarmStartMemoryRegressionReport = async (
   report: WarmStartMemoryRegressionReport,

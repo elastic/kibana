@@ -35,10 +35,7 @@ export interface BaselineBuildkiteClient {
     pipelineSlug: string,
     commitSha: string
   ) => Promise<BaselineBuildkiteBuild | null>;
-  getArtifacts: (
-    pipelineSlug: string,
-    buildNumber: number
-  ) => Promise<BaselineBuildkiteArtifact[]>;
+  getArtifacts: (pipelineSlug: string, buildNumber: number) => Promise<BaselineBuildkiteArtifact[]>;
 }
 
 export interface ResolveBaselineBuildAttempt {

@@ -44,10 +44,7 @@ describe('isMemoryRegression', () => {
     const allowedDeltaBytes = getAllowedRegressionDeltaBytes(baselineMedianRssBytes);
 
     expect(
-      isMemoryRegression(
-        baselineMedianRssBytes,
-        baselineMedianRssBytes + allowedDeltaBytes + 1
-      )
+      isMemoryRegression(baselineMedianRssBytes, baselineMedianRssBytes + allowedDeltaBytes + 1)
     ).toBe(true);
   });
 });
