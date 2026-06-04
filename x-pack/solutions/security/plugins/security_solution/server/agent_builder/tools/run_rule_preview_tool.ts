@@ -175,7 +175,17 @@ The tool returns the generated previewId and the attachment metadata. Use the re
             results: [
               {
                 type: ToolResultType.error,
-                data: { message: 'Rule preview cancelled.' },
+                data: {
+                  message: [
+                    'The user explicitly rejected this rule preview — it was not run.',
+                    'Tell the user the preview did not run because they cancelled it.',
+                    'If they still want to run it, they can confirm the preview with:',
+                    `  timeframeStart: ${timeframeStart}`,
+                    `  timeframeEnd: ${timeframeEnd}`,
+                    `  interval: ${rule.interval ?? DEFAULT_INTERVAL}`,
+                    `  query: ${rule.query}`,
+                  ].join('\n'),
+                },
               },
             ],
           };

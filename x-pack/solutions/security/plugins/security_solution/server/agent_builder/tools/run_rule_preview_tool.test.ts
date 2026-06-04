@@ -256,7 +256,13 @@ describe('runRulePreviewTool', () => {
       const result = await tool.handler(highInvocationParams, context);
 
       expect(runRulePreviewMock).not.toHaveBeenCalled();
-      expect(getResults(result)[0].type).toBe(ToolResultType.error);
+      const [firstResult] = getResults(result);
+      expect(firstResult.type).toBe(ToolResultType.error);
+      const errorData = (firstResult as { type: string; data: { message: string } }).data;
+      expect(errorData.message).toContain('explicitly rejected');
+      expect(errorData.message).toContain(highInvocationParams.rule.query);
+      expect(errorData.message).toContain(highInvocationParams.timeframeStart);
+      expect(errorData.message).toContain(highInvocationParams.timeframeEnd);
     });
 
     it('does not prompt when invocationCount is within the threshold', async () => {
