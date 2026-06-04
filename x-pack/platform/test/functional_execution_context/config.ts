@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     security: {
       ...functionalConfig.get('security'),
       cookieLogin: false,
+    },
     junit: {
       reportName: 'Execution Context Functional Tests',
     },
