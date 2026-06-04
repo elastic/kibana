@@ -203,11 +203,14 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       pressKey(input, 'ArrowRight');
 
       pressKey(input, 'ArrowUp');
-      expect(onModifyPart).toHaveBeenCalledWith({
-        text: 'Jan 1, 2026',
-        part: { text: '1', start: 4, end: 5 },
-        action: 'increase',
-      });
+      expect(onModifyPart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Jan 1, 2026',
+          part: expect.objectContaining({ text: '1', start: 4, end: 5 }),
+          parts: expect.arrayContaining([expect.objectContaining({ text: '1', start: 4, end: 5 })]),
+          action: 'increase',
+        })
+      );
     });
 
     it('is called with correct args on ArrowDown', () => {
@@ -229,11 +232,16 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       pressKey(input, 'ArrowRight');
 
       pressKey(input, 'ArrowDown');
-      expect(onModifyPart).toHaveBeenCalledWith({
-        text: 'Jan 1, 2026',
-        part: { text: '2026', start: 7, end: 11 },
-        action: 'decrease',
-      });
+      expect(onModifyPart).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Jan 1, 2026',
+          part: expect.objectContaining({ text: '2026', start: 7, end: 11 }),
+          parts: expect.arrayContaining([
+            expect.objectContaining({ text: '2026', start: 7, end: 11 }),
+          ]),
+          action: 'decrease',
+        })
+      );
     });
 
     it('updates the input value when callback returns a new string', () => {

@@ -10,17 +10,9 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { keys } from '@elastic/eui';
 
+import type { DateType } from '../types';
+import { parseInputParts, type RangePart } from '../parse/parse_range_parts';
 import { getInputScrollLeftToCenter } from '../utils';
-
-// Matches text parts separated by spaces, commas, or colons
-// e.g. "Dec 29, 14:30 to now" => ["Dec", "29", "14", "30", "to", "now"]
-const TEXT_PARTS_REGEX = /[^\s,:]+/g;
-
-export interface TextPart {
-  text: string;
-  start: number;
-  end: number;
-}
 
 interface UseSelectTextPartsOptions {
   /** Ref to the input element */
@@ -35,13 +27,16 @@ interface UseSelectTextPartsOptions {
    * @default 'all'
    */
   initialSelection?: 'none' | 'first' | 'all';
+  /** The start and end types used to assign collapsed inputs to the correct side. */
+  rangeType?: [DateType, DateType];
   /**
    * Called when ArrowUp/ArrowDown is pressed on a selected part.
    * Return the new full input text, or `undefined` to skip the modification.
    */
   onModifyPart?: (params: {
     text: string;
-    part: TextPart;
+    part: RangePart;
+    parts: RangePart[];
     action: 'increase' | 'decrease';
   }) => string | undefined;
 }
@@ -54,6 +49,7 @@ export function useSelectTextPartsWithArrowKeys({
   inputRef,
   isActive,
   initialSelection = 'all',
+  rangeType,
   onModifyPart,
 }: UseSelectTextPartsOptions) {
   // Stored in a ref so the effect doesn't re-run
@@ -70,7 +66,7 @@ export function useSelectTextPartsWithArrowKeys({
       const inputEl = inputRef.current;
       if (!inputEl) return [];
 
-      const parts = getTextParts(inputEl.value);
+      const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
       const matchingPartIndex = parts.findIndex(
         (part) => part.start === inputEl.selectionStart && part.end === inputEl.selectionEnd
       );
@@ -79,7 +75,7 @@ export function useSelectTextPartsWithArrowKeys({
       return parts;
     };
 
-    const selectPart = (index: number, parts: TextPart[]) => {
+    const selectPart = (index: number, parts: RangePart[]) => {
       const inputEl = inputRef.current;
       if (!inputEl) return;
 
@@ -115,11 +111,11 @@ export function useSelectTextPartsWithArrowKeys({
       if (currentIndex < 0 || currentIndex >= parts.length) return;
 
       const part = parts[currentIndex];
-      const newText = onModifyPartRef.current({ text: inputEl.value, part, action });
+      const newText = onModifyPartRef.current({ text: inputEl.value, part, parts, action });
 
       if (newText !== undefined) {
         inputEl.value = newText;
-        const updatedParts = getTextParts(newText);
+        const updatedParts = parseInputParts(newText, rangeType).filter((p) => p.navigable);
         selectPart(currentIndex, updatedParts);
       }
 
@@ -187,7 +183,7 @@ export function useSelectTextPartsWithArrowKeys({
         case 'none':
           break;
         case 'first': {
-          const parts = getTextParts(inputEl.value);
+          const parts = parseInputParts(inputEl.value, rangeType).filter((part) => part.navigable);
           if (parts.length > 0) selectPart(0, parts);
           break;
         }
@@ -201,19 +197,5 @@ export function useSelectTextPartsWithArrowKeys({
     return () => {
       inputEl?.removeEventListener('keydown', keydownHandler);
     };
-  }, [inputRef, isActive, initialSelection]);
-}
-
-/**
- * Splits a string into parts separated by spaces, commas, or colons,
- * and returns each part with its text and position indices.
- * @param value - The string to split
- * @returns Array of parts with their text and start/end positions
- */
-function getTextParts(value: string): TextPart[] {
-  return Array.from(value.matchAll(TEXT_PARTS_REGEX), (match) => ({
-    text: match[0],
-    start: match.index,
-    end: match.index + match[0].length,
-  }));
+  }, [inputRef, isActive, initialSelection, rangeType]);
 }

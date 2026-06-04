@@ -90,6 +90,7 @@ export function DateRangePickerControl() {
     inputRef,
     isActive: isEditing && !wasClearedRef.current,
     initialSelection: 'none',
+    rangeType: timeRange.type,
     // TODO this is simply increasing/decreasing integers,
     // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
     onModifyPart: ({ text: currentText, part, action }) => {
@@ -123,7 +124,7 @@ export function DateRangePickerControl() {
 
     if (!clickedPart) return;
 
-    const inputParts = parseInputParts(text).filter((part) => part.navigable);
+    const inputParts = parseInputParts(text, timeRange.type).filter((part) => part.navigable);
     const displayParts = parseDisplayParts(displayText);
     const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
 
@@ -137,7 +138,7 @@ export function DateRangePickerControl() {
       });
       return () => cancelAnimationFrame(requestId);
     }
-  }, [displayText, inputRef, isEditing, text]);
+  }, [displayText, inputRef, isEditing, text, timeRange.type]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
