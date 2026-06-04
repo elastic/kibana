@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Features identification is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError, type InferenceConnector } from '@kbn/inference-common';
 import {

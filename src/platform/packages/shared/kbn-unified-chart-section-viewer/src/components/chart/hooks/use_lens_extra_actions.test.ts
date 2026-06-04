@@ -106,7 +106,7 @@ describe('useLensExtraActions', () => {
         })
       );
 
-      expect(action.getIconType({} as ActionExecutionContext)).toBe('discoverApp');
+      expect(action.getIconType({} as ActionExecutionContext)).toBe('productDiscover');
     });
 
     it('should call onClick when execute is invoked', async () => {
