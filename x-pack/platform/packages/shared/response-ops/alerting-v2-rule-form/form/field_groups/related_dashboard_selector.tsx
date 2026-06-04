@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -192,8 +193,8 @@ const MissingDashboardsCallout = ({
         />
       </p>
       <EuiFlexGroup direction="column" gutterSize="xs">
-        {missing.map((dashboard) => (
-          <EuiFlexItem key={dashboard.id} grow={false}>
+        {missing.map((missingDashboard) => (
+          <EuiFlexItem key={missingDashboard.id} grow={false}>
             <EuiFlexGroup
               alignItems="center"
               gutterSize="s"
@@ -202,7 +203,7 @@ const MissingDashboardsCallout = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning" iconType="warning">
-                  {dashboard.notFound
+                  {missingDashboard.notFound
                     ? i18n.translate('xpack.alertingV2.ruleForm.missingDashboardDeletedBadge', {
                         defaultMessage: 'Dashboard deleted',
                       })
@@ -213,7 +214,7 @@ const MissingDashboardsCallout = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  <EuiCode>{dashboard.id}</EuiCode>
+                  <EuiCode>{missingDashboard.id}</EuiCode>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -222,7 +223,7 @@ const MissingDashboardsCallout = ({
                     'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
                     {
                       defaultMessage: 'Remove unavailable dashboard {dashboardId}',
-                      values: { dashboardId: dashboard.id },
+                      values: { dashboardId: missingDashboard.id },
                     }
                   )}
                   disableScreenReaderOutput
@@ -235,10 +236,10 @@ const MissingDashboardsCallout = ({
                       'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
                       {
                         defaultMessage: 'Remove unavailable dashboard {dashboardId}',
-                        values: { dashboardId: dashboard.id },
+                        values: { dashboardId: missingDashboard.id },
                       }
                     )}
-                    onClick={() => onRemove(dashboard.id)}
+                    onClick={() => onRemove(missingDashboard.id)}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
