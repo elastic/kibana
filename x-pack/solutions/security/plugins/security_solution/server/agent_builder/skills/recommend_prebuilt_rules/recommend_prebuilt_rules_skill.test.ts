@@ -111,11 +111,35 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     tacticIds.forEach((id) => expect(skill.content).toContain(id));
   });
 
-  it('content covers data-source categories and runnability inference', () => {
+  it('content instructs the model to build install-flyout links', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toContain('## Rule Links');
+    expect(skill.content).toContain('/app/security/rules/add_rules/<rule_id>');
+    expect(skill.content).toContain('space_url_prefix');
+  });
+
+  it('content covers data-source categories and integration coverage', () => {
     const { getStartServices, logger } = createDeps();
     const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
     expect(skill.content).toMatch(/endpoint, identity, cloud, network/i);
-    expect(skill.content).toMatch(/runnab/i);
+    expect(skill.content).toContain('## Integration Coverage');
     expect(skill.content).toMatch(/related_integrations\.package/);
+  });
+
+  it('caps list length (10 for a flat list, 5 per category)', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toMatch(/\*\*at most 10\*\*/i);
+    expect(skill.content).toMatch(/\*\*at most 5 per category\*\*/i);
+  });
+
+  it('frames integration presence as a likelihood, not a runnability guarantee', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    // The reframed coverage section must hedge: integration installed is a signal, not a promise.
+    expect(skill.content).toMatch(/not a guarantee/i);
+    // And it should not assert flat, unqualified runnability to the user.
+    expect(skill.content).not.toMatch(/\brunnable on your (current )?data\b/i);
   });
 });
