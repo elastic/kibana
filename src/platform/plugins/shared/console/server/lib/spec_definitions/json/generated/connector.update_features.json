@@ -6,6 +6,27 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "features": {
+        "document_level_security": {
+          "enabled": "__flag__"
+        },
+        "incremental_sync": {
+          "enabled": "__flag__"
+        },
+        "native_connector_api_keys": {
+          "enabled": "__flag__"
+        },
+        "sync_rules": {
+          "advanced": {
+            "enabled": "__flag__"
+          },
+          "basic": {
+            "enabled": "__flag__"
+          }
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

@@ -13,6 +13,10 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "labels": {},
+      "data": {}
+    },
     "methods": [
       "PUT",
       "POST"

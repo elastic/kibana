@@ -6,6 +6,22 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "scheduling": {
+        "access_control": {
+          "enabled": "__flag__",
+          "interval": ""
+        },
+        "full": {
+          "enabled": "__flag__",
+          "interval": ""
+        },
+        "incremental": {
+          "enabled": "__flag__",
+          "interval": ""
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

@@ -26,6 +26,45 @@
       ],
       "write_index_only": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "date_detection": "__flag__",
+      "dynamic": {
+        "__one_of": [
+          "strict",
+          "runtime",
+          "true",
+          "false"
+        ]
+      },
+      "dynamic_date_formats": [],
+      "dynamic_templates": [
+        {}
+      ],
+      "_field_names": {
+        "enabled": "__flag__"
+      },
+      "_meta": {},
+      "numeric_detection": "__flag__",
+      "properties": {},
+      "_routing": {
+        "required": "__flag__"
+      },
+      "_source": {
+        "compress": "__flag__",
+        "compress_threshold": "",
+        "enabled": "__flag__",
+        "excludes": [],
+        "includes": [],
+        "mode": {
+          "__one_of": [
+            "disabled",
+            "stored",
+            "synthetic"
+          ]
+        }
+      },
+      "runtime": {}
+    },
     "methods": [
       "PUT",
       "POST"

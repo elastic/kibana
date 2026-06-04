@@ -17,6 +17,12 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "index": "",
+      "shard": "",
+      "primary": "__flag__",
+      "current_node": ""
+    },
     "methods": [
       "GET",
       "POST"

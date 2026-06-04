@@ -11,6 +11,136 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "docs": [
+        {}
+      ],
+      "inference_config": {
+        "regression": {
+          "results_field": "",
+          "num_top_feature_importance_values": ""
+        },
+        "classification": {
+          "num_top_classes": "",
+          "num_top_feature_importance_values": "",
+          "prediction_field_type": "",
+          "results_field": "",
+          "top_classes_results_field": ""
+        },
+        "text_classification": {
+          "num_top_classes": "",
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": "",
+          "classification_labels": []
+        },
+        "zero_shot_classification": {
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": "",
+          "multi_label": "__flag__",
+          "labels": []
+        },
+        "fill_mask": {
+          "num_top_classes": "",
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": ""
+        },
+        "ner": {
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": ""
+        },
+        "pass_through": {
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": ""
+        },
+        "text_embedding": {
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": ""
+        },
+        "text_expansion": {
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": ""
+        },
+        "question_answering": {
+          "question": "",
+          "num_top_classes": "",
+          "tokenization": {
+            "truncate": {
+              "__one_of": [
+                "first",
+                "second",
+                "none"
+              ]
+            },
+            "span": ""
+          },
+          "results_field": "",
+          "max_answer_length": ""
+        }
+      }
+    },
     "methods": [
       "POST"
     ],

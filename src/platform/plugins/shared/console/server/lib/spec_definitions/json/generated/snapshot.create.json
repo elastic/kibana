@@ -12,6 +12,23 @@
       ],
       "wait_for_completion": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "expand_wildcards": {
+        "__one_of": [
+          "all",
+          "open",
+          "closed",
+          "hidden",
+          "none"
+        ]
+      },
+      "feature_states": [],
+      "ignore_unavailable": "__flag__",
+      "include_global_state": "__flag__",
+      "indices": "",
+      "metadata": {},
+      "partial": "__flag__"
+    },
     "methods": [
       "PUT",
       "POST"

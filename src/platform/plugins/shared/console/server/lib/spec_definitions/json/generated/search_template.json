@@ -31,6 +31,14 @@
       "rest_total_hits_as_int": "__flag__",
       "typed_keys": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "explain": "__flag__",
+      "id": "",
+      "params": {},
+      "profile": "__flag__",
+      "source": "",
+      "project_routing": ""
+    },
     "methods": [
       "GET",
       "POST"

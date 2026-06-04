@@ -6,6 +6,30 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "access": {
+        "replication": [
+          {
+            "names": "",
+            "allow_restricted_indices": "__flag__"
+          }
+        ],
+        "search": [
+          {
+            "field_security": {
+              "except": "",
+              "grant": ""
+            },
+            "names": "",
+            "query": "",
+            "allow_restricted_indices": "__flag__"
+          }
+        ]
+      },
+      "expiration": "",
+      "metadata": {},
+      "certificate_identity": ""
+    },
     "methods": [
       "PUT"
     ],

@@ -17,6 +17,30 @@
         "false"
       ]
     },
+    "data_autocomplete_rules": {
+      "docs": [
+        {
+          "_id": "",
+          "_index": "",
+          "routing": "",
+          "_source": {
+            "exclude_vectors": "__flag__",
+            "excludes": "",
+            "includes": ""
+          },
+          "stored_fields": "",
+          "version": "",
+          "version_type": {
+            "__one_of": [
+              "internal",
+              "external",
+              "external_gte"
+            ]
+          }
+        }
+      ],
+      "ids": ""
+    },
     "methods": [
       "GET",
       "POST"

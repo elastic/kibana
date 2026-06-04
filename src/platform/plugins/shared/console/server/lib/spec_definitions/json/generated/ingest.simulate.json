@@ -7,6 +7,823 @@
       "pretty": "__flag__",
       "verbose": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "docs": [
+        {
+          "_id": "",
+          "_index": "",
+          "_source": ""
+        }
+      ],
+      "pipeline": {
+        "description": "",
+        "on_failure": [
+          {
+            "append": {
+              "field": "",
+              "value": "",
+              "media_type": "",
+              "copy_from": "",
+              "allow_duplicates": "__flag__",
+              "ignore_empty_values": "__flag__"
+            },
+            "attachment": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "indexed_chars": "",
+              "indexed_chars_field": "",
+              "max_field_bytes": "",
+              "properties": [],
+              "target_field": "",
+              "remove_binary": "__flag__",
+              "resource_name": ""
+            },
+            "bytes": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "cef": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": "",
+              "ignore_empty_values": "__flag__",
+              "timezone": ""
+            },
+            "circle": {
+              "error_distance": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "shape_type": {
+                "__one_of": [
+                  "geo_shape",
+                  "shape"
+                ]
+              },
+              "target_field": ""
+            },
+            "community_id": {
+              "source_ip": "",
+              "source_port": "",
+              "destination_ip": "",
+              "destination_port": "",
+              "iana_number": "",
+              "icmp_type": "",
+              "icmp_code": "",
+              "transport": "",
+              "target_field": "",
+              "seed": "",
+              "ignore_missing": "__flag__"
+            },
+            "convert": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": "",
+              "type": {
+                "__one_of": [
+                  "integer",
+                  "long",
+                  "double",
+                  "float",
+                  "boolean",
+                  "ip",
+                  "string",
+                  "auto"
+                ]
+              }
+            },
+            "csv": {
+              "empty_value": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "quote": "",
+              "separator": "",
+              "target_fields": "",
+              "trim": "__flag__"
+            },
+            "date": {
+              "field": "",
+              "formats": [],
+              "locale": "",
+              "target_field": "",
+              "timezone": "",
+              "output_format": ""
+            },
+            "date_index_name": {
+              "date_formats": [],
+              "date_rounding": "",
+              "field": "",
+              "index_name_format": "",
+              "index_name_prefix": "",
+              "locale": "",
+              "timezone": ""
+            },
+            "dissect": {
+              "append_separator": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "pattern": ""
+            },
+            "dot_expander": {
+              "field": "",
+              "override": "__flag__",
+              "path": ""
+            },
+            "drop": {},
+            "enrich": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "max_matches": "",
+              "override": "__flag__",
+              "policy_name": "",
+              "shape_relation": {
+                "__one_of": [
+                  "intersects",
+                  "disjoint",
+                  "within",
+                  "contains"
+                ]
+              },
+              "target_field": ""
+            },
+            "fail": {
+              "message": ""
+            },
+            "fingerprint": {
+              "fields": "",
+              "target_field": "",
+              "salt": "",
+              "method": {
+                "__one_of": [
+                  "MD5",
+                  "SHA-1",
+                  "SHA-256",
+                  "SHA-512",
+                  "MurmurHash3"
+                ]
+              },
+              "ignore_missing": "__flag__"
+            },
+            "foreach": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "processor": {}
+            },
+            "ip_location": {
+              "database_file": "",
+              "field": "",
+              "first_only": "__flag__",
+              "ignore_missing": "__flag__",
+              "properties": [],
+              "target_field": "",
+              "download_database_on_pipeline_creation": "__flag__"
+            },
+            "geo_grid": {
+              "field": "",
+              "tile_type": {
+                "__one_of": [
+                  "geotile",
+                  "geohex",
+                  "geohash"
+                ]
+              },
+              "target_field": "",
+              "parent_field": "",
+              "children_field": "",
+              "non_children_field": "",
+              "precision_field": "",
+              "ignore_missing": "__flag__",
+              "target_format": {
+                "__one_of": [
+                  "geojson",
+                  "wkt"
+                ]
+              }
+            },
+            "geoip": {
+              "database_file": "",
+              "field": "",
+              "first_only": "__flag__",
+              "ignore_missing": "__flag__",
+              "properties": [],
+              "target_field": "",
+              "download_database_on_pipeline_creation": "__flag__"
+            },
+            "grok": {
+              "ecs_compatibility": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "pattern_definitions": {},
+              "patterns": [],
+              "trace_match": "__flag__",
+              "validate_only": "__flag__"
+            },
+            "gsub": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "pattern": "",
+              "replacement": "",
+              "target_field": ""
+            },
+            "html_strip": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "inference": {
+              "model_id": "",
+              "target_field": "",
+              "field_map": {},
+              "inference_config": {
+                "regression": {
+                  "results_field": "",
+                  "num_top_feature_importance_values": ""
+                },
+                "classification": {
+                  "num_top_classes": "",
+                  "num_top_feature_importance_values": "",
+                  "results_field": "",
+                  "top_classes_results_field": "",
+                  "prediction_field_type": ""
+                }
+              },
+              "input_output": {
+                "input_field": "",
+                "output_field": ""
+              },
+              "ignore_missing": "__flag__"
+            },
+            "join": {
+              "field": "",
+              "separator": "",
+              "target_field": ""
+            },
+            "json": {
+              "add_to_root": "__flag__",
+              "add_to_root_conflict_strategy": {
+                "__one_of": [
+                  "replace",
+                  "merge"
+                ]
+              },
+              "allow_duplicate_keys": "__flag__",
+              "field": "",
+              "target_field": ""
+            },
+            "kv": {
+              "exclude_keys": [],
+              "field": "",
+              "field_split": "",
+              "ignore_missing": "__flag__",
+              "include_keys": [],
+              "prefix": "",
+              "strip_brackets": "__flag__",
+              "target_field": "",
+              "trim_key": "",
+              "trim_value": "",
+              "value_split": ""
+            },
+            "lowercase": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "network_direction": {
+              "source_ip": "",
+              "destination_ip": "",
+              "target_field": "",
+              "internal_networks": [],
+              "internal_networks_field": "",
+              "ignore_missing": "__flag__"
+            },
+            "pipeline": {
+              "name": "",
+              "ignore_missing_pipeline": "__flag__"
+            },
+            "redact": {
+              "field": "",
+              "patterns": [],
+              "pattern_definitions": {},
+              "prefix": "",
+              "suffix": "",
+              "ignore_missing": "__flag__",
+              "skip_if_unlicensed": "__flag__",
+              "trace_redact": "__flag__"
+            },
+            "registered_domain": {
+              "field": "",
+              "target_field": "",
+              "ignore_missing": "__flag__"
+            },
+            "remove": {
+              "field": "",
+              "keep": "",
+              "ignore_missing": "__flag__"
+            },
+            "rename": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "reroute": {
+              "destination": "",
+              "dataset": "",
+              "namespace": ""
+            },
+            "script": {
+              "id": "",
+              "lang": {
+                "__one_of": [
+                  "painless",
+                  "expression",
+                  "mustache",
+                  "java"
+                ]
+              },
+              "params": {},
+              "source": ""
+            },
+            "set": {
+              "copy_from": "",
+              "field": "",
+              "ignore_empty_value": "__flag__",
+              "media_type": "",
+              "override": "__flag__",
+              "value": ""
+            },
+            "set_security_user": {
+              "field": "",
+              "properties": []
+            },
+            "sort": {
+              "field": "",
+              "order": {
+                "__one_of": [
+                  "asc",
+                  "desc"
+                ]
+              },
+              "target_field": ""
+            },
+            "split": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "preserve_trailing": "__flag__",
+              "separator": "",
+              "target_field": ""
+            },
+            "terminate": {},
+            "trim": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "uppercase": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "urldecode": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "uri_parts": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "keep_original": "__flag__",
+              "remove_if_successful": "__flag__",
+              "target_field": ""
+            },
+            "user_agent": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "regex_file": "",
+              "target_field": "",
+              "properties": {
+                "__any_of": [
+                  "name",
+                  "os",
+                  "device",
+                  "original",
+                  "version"
+                ]
+              },
+              "extract_device_type": "__flag__"
+            }
+          }
+        ],
+        "processors": [
+          {
+            "append": {
+              "field": "",
+              "value": "",
+              "media_type": "",
+              "copy_from": "",
+              "allow_duplicates": "__flag__",
+              "ignore_empty_values": "__flag__"
+            },
+            "attachment": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "indexed_chars": "",
+              "indexed_chars_field": "",
+              "max_field_bytes": "",
+              "properties": [],
+              "target_field": "",
+              "remove_binary": "__flag__",
+              "resource_name": ""
+            },
+            "bytes": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "cef": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": "",
+              "ignore_empty_values": "__flag__",
+              "timezone": ""
+            },
+            "circle": {
+              "error_distance": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "shape_type": {
+                "__one_of": [
+                  "geo_shape",
+                  "shape"
+                ]
+              },
+              "target_field": ""
+            },
+            "community_id": {
+              "source_ip": "",
+              "source_port": "",
+              "destination_ip": "",
+              "destination_port": "",
+              "iana_number": "",
+              "icmp_type": "",
+              "icmp_code": "",
+              "transport": "",
+              "target_field": "",
+              "seed": "",
+              "ignore_missing": "__flag__"
+            },
+            "convert": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": "",
+              "type": {
+                "__one_of": [
+                  "integer",
+                  "long",
+                  "double",
+                  "float",
+                  "boolean",
+                  "ip",
+                  "string",
+                  "auto"
+                ]
+              }
+            },
+            "csv": {
+              "empty_value": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "quote": "",
+              "separator": "",
+              "target_fields": "",
+              "trim": "__flag__"
+            },
+            "date": {
+              "field": "",
+              "formats": [],
+              "locale": "",
+              "target_field": "",
+              "timezone": "",
+              "output_format": ""
+            },
+            "date_index_name": {
+              "date_formats": [],
+              "date_rounding": "",
+              "field": "",
+              "index_name_format": "",
+              "index_name_prefix": "",
+              "locale": "",
+              "timezone": ""
+            },
+            "dissect": {
+              "append_separator": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "pattern": ""
+            },
+            "dot_expander": {
+              "field": "",
+              "override": "__flag__",
+              "path": ""
+            },
+            "drop": {},
+            "enrich": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "max_matches": "",
+              "override": "__flag__",
+              "policy_name": "",
+              "shape_relation": {
+                "__one_of": [
+                  "intersects",
+                  "disjoint",
+                  "within",
+                  "contains"
+                ]
+              },
+              "target_field": ""
+            },
+            "fail": {
+              "message": ""
+            },
+            "fingerprint": {
+              "fields": "",
+              "target_field": "",
+              "salt": "",
+              "method": {
+                "__one_of": [
+                  "MD5",
+                  "SHA-1",
+                  "SHA-256",
+                  "SHA-512",
+                  "MurmurHash3"
+                ]
+              },
+              "ignore_missing": "__flag__"
+            },
+            "foreach": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "processor": {}
+            },
+            "ip_location": {
+              "database_file": "",
+              "field": "",
+              "first_only": "__flag__",
+              "ignore_missing": "__flag__",
+              "properties": [],
+              "target_field": "",
+              "download_database_on_pipeline_creation": "__flag__"
+            },
+            "geo_grid": {
+              "field": "",
+              "tile_type": {
+                "__one_of": [
+                  "geotile",
+                  "geohex",
+                  "geohash"
+                ]
+              },
+              "target_field": "",
+              "parent_field": "",
+              "children_field": "",
+              "non_children_field": "",
+              "precision_field": "",
+              "ignore_missing": "__flag__",
+              "target_format": {
+                "__one_of": [
+                  "geojson",
+                  "wkt"
+                ]
+              }
+            },
+            "geoip": {
+              "database_file": "",
+              "field": "",
+              "first_only": "__flag__",
+              "ignore_missing": "__flag__",
+              "properties": [],
+              "target_field": "",
+              "download_database_on_pipeline_creation": "__flag__"
+            },
+            "grok": {
+              "ecs_compatibility": "",
+              "field": "",
+              "ignore_missing": "__flag__",
+              "pattern_definitions": {},
+              "patterns": [],
+              "trace_match": "__flag__",
+              "validate_only": "__flag__"
+            },
+            "gsub": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "pattern": "",
+              "replacement": "",
+              "target_field": ""
+            },
+            "html_strip": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "inference": {
+              "model_id": "",
+              "target_field": "",
+              "field_map": {},
+              "inference_config": {
+                "regression": {
+                  "results_field": "",
+                  "num_top_feature_importance_values": ""
+                },
+                "classification": {
+                  "num_top_classes": "",
+                  "num_top_feature_importance_values": "",
+                  "results_field": "",
+                  "top_classes_results_field": "",
+                  "prediction_field_type": ""
+                }
+              },
+              "input_output": {
+                "input_field": "",
+                "output_field": ""
+              },
+              "ignore_missing": "__flag__"
+            },
+            "join": {
+              "field": "",
+              "separator": "",
+              "target_field": ""
+            },
+            "json": {
+              "add_to_root": "__flag__",
+              "add_to_root_conflict_strategy": {
+                "__one_of": [
+                  "replace",
+                  "merge"
+                ]
+              },
+              "allow_duplicate_keys": "__flag__",
+              "field": "",
+              "target_field": ""
+            },
+            "kv": {
+              "exclude_keys": [],
+              "field": "",
+              "field_split": "",
+              "ignore_missing": "__flag__",
+              "include_keys": [],
+              "prefix": "",
+              "strip_brackets": "__flag__",
+              "target_field": "",
+              "trim_key": "",
+              "trim_value": "",
+              "value_split": ""
+            },
+            "lowercase": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "network_direction": {
+              "source_ip": "",
+              "destination_ip": "",
+              "target_field": "",
+              "internal_networks": [],
+              "internal_networks_field": "",
+              "ignore_missing": "__flag__"
+            },
+            "pipeline": {
+              "name": "",
+              "ignore_missing_pipeline": "__flag__"
+            },
+            "redact": {
+              "field": "",
+              "patterns": [],
+              "pattern_definitions": {},
+              "prefix": "",
+              "suffix": "",
+              "ignore_missing": "__flag__",
+              "skip_if_unlicensed": "__flag__",
+              "trace_redact": "__flag__"
+            },
+            "registered_domain": {
+              "field": "",
+              "target_field": "",
+              "ignore_missing": "__flag__"
+            },
+            "remove": {
+              "field": "",
+              "keep": "",
+              "ignore_missing": "__flag__"
+            },
+            "rename": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "reroute": {
+              "destination": "",
+              "dataset": "",
+              "namespace": ""
+            },
+            "script": {
+              "id": "",
+              "lang": {
+                "__one_of": [
+                  "painless",
+                  "expression",
+                  "mustache",
+                  "java"
+                ]
+              },
+              "params": {},
+              "source": ""
+            },
+            "set": {
+              "copy_from": "",
+              "field": "",
+              "ignore_empty_value": "__flag__",
+              "media_type": "",
+              "override": "__flag__",
+              "value": ""
+            },
+            "set_security_user": {
+              "field": "",
+              "properties": []
+            },
+            "sort": {
+              "field": "",
+              "order": {
+                "__one_of": [
+                  "asc",
+                  "desc"
+                ]
+              },
+              "target_field": ""
+            },
+            "split": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "preserve_trailing": "__flag__",
+              "separator": "",
+              "target_field": ""
+            },
+            "terminate": {},
+            "trim": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "uppercase": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "urldecode": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "target_field": ""
+            },
+            "uri_parts": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "keep_original": "__flag__",
+              "remove_if_successful": "__flag__",
+              "target_field": ""
+            },
+            "user_agent": {
+              "field": "",
+              "ignore_missing": "__flag__",
+              "regex_file": "",
+              "target_field": "",
+              "properties": {
+                "__any_of": [
+                  "name",
+                  "os",
+                  "device",
+                  "original",
+                  "version"
+                ]
+              },
+              "extract_device_type": "__flag__"
+            }
+          }
+        ],
+        "version": "",
+        "deprecated": "__flag__",
+        "_meta": {},
+        "created_date": "",
+        "created_date_millis": "",
+        "modified_date": "",
+        "modified_date_millis": "",
+        "field_access_pattern": {
+          "__one_of": [
+            "classic",
+            "flexible"
+          ]
+        }
+      }
+    },
     "methods": [
       "GET",
       "POST"

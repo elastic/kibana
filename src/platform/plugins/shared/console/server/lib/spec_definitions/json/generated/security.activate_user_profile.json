@@ -6,6 +6,17 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "access_token": "",
+      "grant_type": {
+        "__one_of": [
+          "password",
+          "access_token"
+        ]
+      },
+      "password": "",
+      "username": ""
+    },
     "methods": [
       "POST"
     ],

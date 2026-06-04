@@ -14,6 +14,40 @@
         "completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "custom"
+        ]
+      },
+      "service_settings": {
+        "batch_size": "",
+        "headers": {},
+        "input_type": {},
+        "query_parameters": [
+          []
+        ],
+        "request": {
+          "content": ""
+        },
+        "response": {
+          "json_parser": {}
+        },
+        "secret_parameters": {},
+        "url": ""
+      },
+      "task_settings": {
+        "parameters": {}
+      }
+    },
     "methods": [
       "PUT"
     ],

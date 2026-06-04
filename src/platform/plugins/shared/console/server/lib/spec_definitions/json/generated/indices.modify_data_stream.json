@@ -6,6 +6,20 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "actions": [
+        {
+          "add_backing_index": {
+            "data_stream": "",
+            "index": ""
+          },
+          "remove_backing_index": {
+            "data_stream": "",
+            "index": ""
+          }
+        }
+      ]
+    },
     "methods": [
       "POST"
     ],

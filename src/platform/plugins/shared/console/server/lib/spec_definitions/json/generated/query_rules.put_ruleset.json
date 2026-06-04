@@ -6,6 +6,46 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "rules": {
+        "rule_id": "",
+        "type": {
+          "__one_of": [
+            "pinned",
+            "exclude"
+          ]
+        },
+        "criteria": {
+          "type": {
+            "__one_of": [
+              "global",
+              "exact",
+              "fuzzy",
+              "prefix",
+              "suffix",
+              "contains",
+              "lt",
+              "lte",
+              "gt",
+              "gte",
+              "always"
+            ]
+          },
+          "metadata": "",
+          "values": []
+        },
+        "actions": {
+          "ids": [],
+          "docs": [
+            {
+              "_id": "",
+              "_index": ""
+            }
+          ]
+        },
+        "priority": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

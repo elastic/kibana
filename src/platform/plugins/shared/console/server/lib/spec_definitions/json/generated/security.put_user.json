@@ -11,6 +11,16 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "username": "",
+      "email": "",
+      "full_name": "",
+      "metadata": {},
+      "password": "",
+      "password_hash": "",
+      "roles": [],
+      "enabled": "__flag__"
+    },
     "methods": [
       "PUT",
       "POST"

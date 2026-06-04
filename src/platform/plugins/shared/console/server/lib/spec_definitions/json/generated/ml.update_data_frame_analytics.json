@@ -6,6 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "description": "",
+      "model_memory_limit": "",
+      "max_num_threads": "",
+      "allow_lazy_start": "__flag__"
+    },
     "methods": [
       "POST"
     ],

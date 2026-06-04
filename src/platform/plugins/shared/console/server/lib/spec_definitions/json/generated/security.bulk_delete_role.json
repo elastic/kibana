@@ -11,6 +11,9 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "names": []
+    },
     "methods": [
       "DELETE"
     ],

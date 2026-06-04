@@ -22,6 +22,40 @@
         "external_gte"
       ]
     },
+    "data_autocomplete_rules": {
+      "docs": [
+        {
+          "_id": "",
+          "_index": "",
+          "doc": "",
+          "fields": "",
+          "field_statistics": "__flag__",
+          "filter": {
+            "max_doc_freq": "",
+            "max_num_terms": "",
+            "max_term_freq": "",
+            "max_word_length": "",
+            "min_doc_freq": "",
+            "min_term_freq": "",
+            "min_word_length": ""
+          },
+          "offsets": "__flag__",
+          "payloads": "__flag__",
+          "positions": "__flag__",
+          "routing": "",
+          "term_statistics": "__flag__",
+          "version": "",
+          "version_type": {
+            "__one_of": [
+              "internal",
+              "external",
+              "external_gte"
+            ]
+          }
+        }
+      ],
+      "ids": []
+    },
     "methods": [
       "GET",
       "POST"

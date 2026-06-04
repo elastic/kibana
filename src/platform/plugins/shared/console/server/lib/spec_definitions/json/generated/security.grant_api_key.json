@@ -11,6 +11,24 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "api_key": {
+        "name": "",
+        "expiration": "",
+        "role_descriptors": {},
+        "metadata": {}
+      },
+      "grant_type": {
+        "__one_of": [
+          "access_token",
+          "password"
+        ]
+      },
+      "access_token": "",
+      "username": "",
+      "password": "",
+      "run_as": ""
+    },
     "methods": [
       "POST"
     ],

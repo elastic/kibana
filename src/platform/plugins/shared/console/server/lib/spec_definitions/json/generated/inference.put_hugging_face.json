@@ -19,6 +19,33 @@
         "text_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "hugging_face"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        },
+        "url": "",
+        "model_id": ""
+      },
+      "task_settings": {
+        "return_documents": "__flag__",
+        "top_n": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

@@ -33,6 +33,32 @@
       "_source_excludes": [],
       "_source_includes": []
     },
+    "data_autocomplete_rules": {
+      "detect_noop": "__flag__",
+      "doc": "",
+      "doc_as_upsert": "__flag__",
+      "script": {
+        "source": "",
+        "id": "",
+        "params": {},
+        "lang": {
+          "__one_of": [
+            "painless",
+            "expression",
+            "mustache",
+            "java"
+          ]
+        },
+        "options": {}
+      },
+      "scripted_upsert": "__flag__",
+      "_source": {
+        "exclude_vectors": "__flag__",
+        "excludes": "",
+        "includes": ""
+      },
+      "upsert": ""
+    },
     "methods": [
       "POST"
     ],

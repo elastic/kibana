@@ -8,6 +8,11 @@
       "allow_no_match": "__flag__",
       "force": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "id": "",
+      "allow_no_match": "__flag__",
+      "force": "__flag__"
+    },
     "methods": [
       "POST"
     ],

@@ -20,6 +20,41 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "commands": [
+        {
+          "cancel": {
+            "index": "",
+            "shard": "",
+            "node": "",
+            "allow_primary": "__flag__"
+          },
+          "move": {
+            "index": "",
+            "shard": "",
+            "from_node": "",
+            "to_node": ""
+          },
+          "allocate_replica": {
+            "index": "",
+            "shard": "",
+            "node": ""
+          },
+          "allocate_stale_primary": {
+            "index": "",
+            "shard": "",
+            "node": "",
+            "accept_data_loss": "__flag__"
+          },
+          "allocate_empty_primary": {
+            "index": "",
+            "shard": "",
+            "node": "",
+            "accept_data_loss": "__flag__"
+          }
+        }
+      ]
+    },
     "methods": [
       "POST"
     ],

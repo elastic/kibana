@@ -18,6 +18,15 @@
         "1"
       ]
     },
+    "data_autocomplete_rules": {
+      "allow_no_match": "__flag__",
+      "bucket_span": "",
+      "end": "",
+      "exclude_interim": "__flag__",
+      "overall_score": "",
+      "start": "",
+      "top_n": ""
+    },
     "methods": [
       "GET",
       "POST"

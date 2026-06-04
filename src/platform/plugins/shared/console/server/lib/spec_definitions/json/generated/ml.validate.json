@@ -6,6 +6,95 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "job_id": "",
+      "analysis_config": {
+        "bucket_span": "",
+        "categorization_analyzer": "",
+        "categorization_field_name": "",
+        "categorization_filters": [],
+        "detectors": [
+          {
+            "by_field_name": "",
+            "custom_rules": [
+              {
+                "actions": {
+                  "__any_of": [
+                    "skip_result",
+                    "skip_model_update"
+                  ]
+                },
+                "conditions": [
+                  {
+                    "applies_to": {
+                      "__one_of": [
+                        "actual",
+                        "typical",
+                        "diff_from_typical",
+                        "time"
+                      ]
+                    },
+                    "operator": {
+                      "__one_of": [
+                        "gt",
+                        "gte",
+                        "lt",
+                        "lte"
+                      ]
+                    },
+                    "value": ""
+                  }
+                ],
+                "scope": {}
+              }
+            ],
+            "detector_description": "",
+            "detector_index": "",
+            "exclude_frequent": {
+              "__one_of": [
+                "all",
+                "none",
+                "by",
+                "over"
+              ]
+            },
+            "field_name": "",
+            "function": "",
+            "over_field_name": "",
+            "partition_field_name": "",
+            "use_null": "__flag__"
+          }
+        ],
+        "influencers": [],
+        "latency": "",
+        "model_prune_window": "",
+        "multivariate_by_fields": "__flag__",
+        "per_partition_categorization": {
+          "enabled": "__flag__",
+          "stop_on_warn": "__flag__"
+        },
+        "summary_count_field_name": ""
+      },
+      "analysis_limits": {
+        "categorization_examples_limit": "",
+        "model_memory_limit": ""
+      },
+      "data_description": {
+        "format": "",
+        "time_field": "",
+        "time_format": "",
+        "field_delimiter": ""
+      },
+      "description": "",
+      "model_plot": {
+        "annotations_enabled": "__flag__",
+        "enabled": "__flag__",
+        "terms": ""
+      },
+      "model_snapshot_id": "",
+      "model_snapshot_retention_days": "",
+      "results_index_name": ""
+    },
     "methods": [
       "POST"
     ],

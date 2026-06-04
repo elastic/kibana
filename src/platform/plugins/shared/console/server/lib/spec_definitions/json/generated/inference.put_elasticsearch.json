@@ -18,6 +18,37 @@
         "text_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "elasticsearch"
+        ]
+      },
+      "service_settings": {
+        "adaptive_allocations": {
+          "enabled": "__flag__",
+          "max_number_of_allocations": "",
+          "min_number_of_allocations": ""
+        },
+        "deployment_id": "",
+        "model_id": "",
+        "num_allocations": "",
+        "num_threads": "",
+        "long_document_strategy": "",
+        "max_chunks_per_doc": ""
+      },
+      "task_settings": {
+        "return_documents": "__flag__"
+      }
+    },
     "methods": [
       "PUT"
     ],

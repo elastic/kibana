@@ -11,6 +11,13 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "query": "",
+      "input": [],
+      "return_documents": "__flag__",
+      "top_n": "",
+      "task_settings": ""
+    },
     "methods": [
       "POST"
     ],

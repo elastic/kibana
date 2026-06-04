@@ -19,6 +19,11 @@
         "20mb"
       ]
     },
+    "data_autocomplete_rules": {
+      "duration": "",
+      "expires_in": "",
+      "max_model_memory": ""
+    },
     "methods": [
       "POST"
     ],

@@ -9,6 +9,14 @@
         "1"
       ]
     },
+    "data_autocomplete_rules": {
+      "number_of_allocations": "",
+      "adaptive_allocations": {
+        "enabled": "__flag__",
+        "min_number_of_allocations": "",
+        "max_number_of_allocations": ""
+      }
+    },
     "methods": [
       "POST"
     ],

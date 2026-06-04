@@ -11,6 +11,86 @@
         "template"
       ]
     },
+    "data_autocomplete_rules": {
+      "docs": [
+        {
+          "_id": "",
+          "_index": "",
+          "_source": ""
+        }
+      ],
+      "component_template_substitutions": {},
+      "index_template_substitutions": {},
+      "mapping_addition": {
+        "all_field": {
+          "analyzer": "",
+          "enabled": "__flag__",
+          "omit_norms": "__flag__",
+          "search_analyzer": "",
+          "similarity": "",
+          "store": "__flag__",
+          "store_term_vector_offsets": "__flag__",
+          "store_term_vector_payloads": "__flag__",
+          "store_term_vector_positions": "__flag__",
+          "store_term_vectors": "__flag__"
+        },
+        "date_detection": "__flag__",
+        "dynamic": {
+          "__one_of": [
+            "strict",
+            "runtime",
+            "true",
+            "false"
+          ]
+        },
+        "dynamic_date_formats": [],
+        "dynamic_templates": [
+          {}
+        ],
+        "_field_names": {
+          "enabled": "__flag__"
+        },
+        "index_field": {
+          "enabled": "__flag__"
+        },
+        "_meta": {},
+        "numeric_detection": "__flag__",
+        "properties": {},
+        "_routing": {
+          "required": "__flag__"
+        },
+        "_size": {
+          "enabled": "__flag__"
+        },
+        "_source": {
+          "compress": "__flag__",
+          "compress_threshold": "",
+          "enabled": "__flag__",
+          "excludes": [],
+          "includes": [],
+          "mode": {
+            "__one_of": [
+              "disabled",
+              "stored",
+              "synthetic"
+            ]
+          }
+        },
+        "runtime": {},
+        "enabled": "__flag__",
+        "subobjects": {
+          "__one_of": [
+            "true",
+            "false",
+            "auto"
+          ]
+        },
+        "_data_stream_timestamp": {
+          "enabled": "__flag__"
+        }
+      },
+      "pipeline_substitutions": {}
+    },
     "methods": [
       "GET",
       "POST"

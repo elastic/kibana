@@ -17,6 +17,58 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "license": {
+        "expiry_date_in_millis": "",
+        "issue_date_in_millis": "",
+        "start_date_in_millis": "",
+        "issued_to": "",
+        "issuer": "",
+        "max_nodes": "",
+        "max_resource_units": "",
+        "signature": "",
+        "type": {
+          "__one_of": [
+            "missing",
+            "trial",
+            "basic",
+            "standard",
+            "dev",
+            "silver",
+            "gold",
+            "platinum",
+            "enterprise"
+          ]
+        },
+        "uid": ""
+      },
+      "licenses": [
+        {
+          "expiry_date_in_millis": "",
+          "issue_date_in_millis": "",
+          "start_date_in_millis": "",
+          "issued_to": "",
+          "issuer": "",
+          "max_nodes": "",
+          "max_resource_units": "",
+          "signature": "",
+          "type": {
+            "__one_of": [
+              "missing",
+              "trial",
+              "basic",
+              "standard",
+              "dev",
+              "silver",
+              "gold",
+              "platinum",
+              "enterprise"
+            ]
+          },
+          "uid": ""
+        }
+      ]
+    },
     "methods": [
       "PUT",
       "POST"

@@ -11,6 +11,12 @@
         "wait_for"
       ]
     },
+    "data_autocomplete_rules": {
+      "expiration": "",
+      "name": "",
+      "role_descriptors": {},
+      "metadata": {}
+    },
     "methods": [
       "PUT",
       "POST"
