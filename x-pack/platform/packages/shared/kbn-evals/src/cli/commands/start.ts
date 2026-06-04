@@ -13,24 +13,15 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites } from '../suites';
+import { promptForSuite, isTTY, getAllAvailableConnectors } from '../prompts';
 import {
-  promptForSuite,
-  promptForConnector,
-  promptForProject,
-  isTTY,
-  getAllAvailableConnectors,
-} from '../prompts';
-import { readCachedEisConnectors } from '../eis_connectors_cache';
-import {
-  defaultExportProfile,
-  envFromDatasetsProfile,
-  envFromExportProfile,
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
   isDevVaultProfile,
   resolveVaultConfigPath,
 } from '../profiles';
+import { resolveRunContext } from '../run_context';
 import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } from './init';
 import { ensureEvalStack, isEisConnectorId } from '../ensure_eval_stack';
 
@@ -194,32 +185,12 @@ export const startCmd: Command<void> = {
       ? suite.absoluteConfigPath
       : Path.resolve(repoRoot, configPath as string);
 
-    // --- Resolve connector ---
-    let evaluationConnectorId =
-      flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
-
-    if (!evaluationConnectorId) {
-      if (isTTY()) {
-        evaluationConnectorId = await promptForConnector(repoRoot, log);
-      } else {
-        throw createFlagError(
-          'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-        );
-      }
-    }
-
-    // --- Resolve project (which model(s) to evaluate) ---
-    let projects: string[] = [];
-    const projectFlag = flagsReader.string('project');
-
-    if (projectFlag) {
-      projects = projectFlag.split(',').map((p) => p.trim());
-    } else {
-      const allConnectors = getAllAvailableConnectors(repoRoot);
-      if (allConnectors.length > 1 && isTTY()) {
-        projects = await promptForProject(repoRoot, log);
-      }
-    }
+    const {
+      evaluationConnectorId,
+      projects,
+      profileEnvOverrides,
+      exportProfile,
+    } = await resolveRunContext(repoRoot, log, flagsReader, { baseProfile: profile });
 
     const skipServer = flagsReader.boolean('skip-server');
     const requiresEisCcm =
@@ -227,28 +198,6 @@ export const startCmd: Command<void> = {
       (projects.length > 0
         ? projects.some(isEisConnectorId)
         : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
-
-    if (requiresEisCcm && !process.env.KIBANA_TESTING_AI_CONNECTORS) {
-      const cached = readCachedEisConnectors();
-      if (cached) {
-        process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(JSON.stringify(cached)).toString(
-          'base64'
-        );
-        log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
-      }
-    }
-
-    const baseProfile = profile;
-    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
-    const exportProfile =
-      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
-
-    const profileEnvOverrides: Record<string, string> = {
-      ...envFromDatasetsProfile(repoRoot, datasetsProfile),
-      ...envFromExportProfile(repoRoot, exportProfile, {
-        defaultTracingExporters: exportProfile === 'local',
-      }),
-    };
 
     // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
     // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
@@ -285,7 +234,7 @@ export const startCmd: Command<void> = {
       log.info(`Config:    ${suite.serverConfigSet}`);
     }
     log.info(
-      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
+      `Profiles:  datasets=${(flagsReader.string('datasets-profile') ?? profile) ?? 'config'} export=${exportProfile ?? 'none'}`
     );
     log.info('');
 

@@ -9,10 +9,10 @@ import { spawn } from 'child_process';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { resolveEvalSuites } from '../suites';
-import { promptForConnector, promptForProject, isTTY, getAllAvailableConnectors } from '../prompts';
+import { getAllAvailableConnectors } from '../prompts';
 import { getAvailableModules } from '../../red_team/modules';
-import { defaultExportProfile, envFromDatasetsProfile, envFromExportProfile } from '../profiles';
 import { ensureEvalStack, isEisConnectorId } from '../ensure_eval_stack';
+import { resolveRunContext } from '../run_context';
 
 const DIFFICULTIES = ['basic', 'moderate', 'advanced'] as const;
 const SEVERITIES = ['critical', 'high', 'medium', 'low'] as const;
@@ -123,49 +123,19 @@ export const redTeamCmd: Command<void> = {
       envOverrides.RED_TEAM_TEMPLATES_ONLY = 'true';
     }
 
-    // Connection params (same pattern as run command)
-    let evaluationConnectorId =
-      flagsReader.string('evaluation-connector-id') ?? process.env.EVALUATION_CONNECTOR_ID;
-
-    if (!evaluationConnectorId) {
-      if (isTTY()) {
-        evaluationConnectorId = await promptForConnector(repoRoot, log);
-      } else {
-        throw createFlagError(
-          'EVALUATION_CONNECTOR_ID is required. Set --evaluation-connector-id or env.'
-        );
-      }
-    }
+    const {
+      evaluationConnectorId,
+      projects,
+      profileEnvOverrides,
+    } = await resolveRunContext(repoRoot, log, flagsReader);
 
     envOverrides.EVALUATION_CONNECTOR_ID = evaluationConnectorId;
-
-    // Profile handling (same as run command)
-    const baseProfile = flagsReader.string('profile') ?? undefined;
-    const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
-    const exportProfile =
-      flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);
-
-    const profileEnvOverrides: Record<string, string> = {
-      ...envFromDatasetsProfile(repoRoot, datasetsProfile),
-      ...envFromExportProfile(repoRoot, exportProfile, {
-        defaultTracingExporters: exportProfile === 'local',
-      }),
-    };
     Object.assign(envOverrides, profileEnvOverrides);
 
     log.info(`Red-team testing suite: ${suiteId}`);
     log.info(`  Modules: ${moduleName?.replace(/-/g, '_') ?? getAvailableModules().join(', ')}`);
     log.info(`  Strategy: ${strategyName ?? 'direct'}`);
     log.info(`  Count: ${count} | Difficulty: ${difficulty} | Templates only: ${templatesOnly}`);
-
-    // Resolve model/project selection (same pattern as start command)
-    let projects: string[] = [];
-    const project = flagsReader.string('project');
-    if (project) {
-      projects = project.split(',').map((p) => p.trim());
-    } else if (isTTY()) {
-      projects = await promptForProject(repoRoot, log);
-    }
 
     // Spawn Playwright targeting the suite's red-team spec files. With a
     // dedicated config the testDir already points at the red-team specs;
