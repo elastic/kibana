@@ -436,6 +436,7 @@ export const config: PluginConfigDescriptor = {
       unenrollInactiveAgents: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+          gracePeriodMs: schema.maybe(schema.number()),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
