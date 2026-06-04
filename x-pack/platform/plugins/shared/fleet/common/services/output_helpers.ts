@@ -24,6 +24,9 @@ import {
 
 import { packagePolicyHasOtelInputs } from './otelcol_helpers';
 
+const agentPolicyHasOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean =>
+  (agentPolicy.package_policies ?? []).some((pp) => packagePolicyHasOtelInputs(pp.inputs));
+
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -48,6 +51,10 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
 
   if (agentPolicy.supports_agentless) {
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
+  if (agentPolicyHasOtelInputs(agentPolicy)) {
+    return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
 
   return Object.values(outputType);

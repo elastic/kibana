@@ -8,7 +8,7 @@
 import { parse } from 'yaml';
 
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
-import { outputType } from '../constants/output';
+import { outputType, OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT } from '../constants/output';
 
 import {
   getAllowedOutputTypesForAgentPolicy,
@@ -70,6 +70,55 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
 
     expect(res).toEqual([outputType.Elasticsearch]);
   });
+
+  it('should return only OTel-supported output types when any package policy has an enabled OTel input', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'nginx' },
+          inputs: [{ type: 'log', enabled: true }],
+        },
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
+  });
+
+  it('should not restrict outputs when OTel input is disabled', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: false }],
+        },
+      ],
+    } as any);
+
+    expect(res).toHaveLength(4);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+  });
+
+  it('should still return only elasticsearch for fleet server even when an OTel input is also present', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'fleet_server' },
+          inputs: [],
+        },
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual([outputType.Elasticsearch]);
+  });
 });
 
 describe('getAllowedOutputTypesForPackagePolicy', () => {
@@ -95,16 +144,16 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
     expect(res).toEqual([outputType.Elasticsearch]);
   });
 
-  it('should return only elasticsearch when any input is an OTel input', () => {
+  it('should return only OTel-supported output types when any input is an OTel input', () => {
     const res = getAllowedOutputTypesForPackagePolicy({
       supports_agentless: false,
       inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true }],
     } as any);
 
-    expect(res).toEqual([outputType.Elasticsearch]);
+    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
   });
 
-  it('should return only elasticsearch when mixed inputs contain an OTel input', () => {
+  it('should return only OTel-supported output types when mixed inputs contain an OTel input', () => {
     const res = getAllowedOutputTypesForPackagePolicy({
       supports_agentless: false,
       inputs: [
@@ -113,7 +162,7 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
       ],
     } as any);
 
-    expect(res).toEqual([outputType.Elasticsearch]);
+    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
   });
 
   it('should return AGENTLESS_ALLOWED_OUTPUT_TYPES (not OTel list) when agentless even with OTel input', () => {

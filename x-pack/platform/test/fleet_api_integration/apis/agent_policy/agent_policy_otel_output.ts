@@ -313,5 +313,51 @@ export default function (providerContext: FtrProviderContext) {
         await deleteOutput(outputId);
       }
     });
+
+    // -----------------------------------------------------------------------
+    // Test 7: updating a policy data output to Logstash when the policy already
+    //         has an OTel integration is rejected
+    // -----------------------------------------------------------------------
+    it('rejects updating a policy data output to Logstash when the policy has an OTel integration', async () => {
+      const { body: logstashBody } = await supertest
+        .post('/api/fleet/outputs')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `logstash-output-${uuidv4()}`,
+          type: 'logstash',
+          hosts: ['logstash.example.com:5044'],
+          is_default: false,
+          is_default_monitoring: false,
+        })
+        .expect(200);
+      const logstashOutputId = logstashBody.item.id;
+
+      const {
+        body: {
+          item: { id: agentPolicyId },
+        },
+      } = await supertest
+        .post('/api/fleet/agent_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ name: `otel-logstash-test-${uuidv4()}`, namespace: 'default' })
+        .expect(200);
+
+      try {
+        await addOtelPackagePolicy(agentPolicyId);
+
+        await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-logstash-test-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: logstashOutputId,
+          })
+          .expect(400);
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+        await deleteOutput(logstashOutputId);
+      }
+    });
   });
 }
