@@ -8155,6 +8155,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/otel-workshop-plugin@link:examples/otel_workshop":
+  version "0.0.0"
+  uid ""
+
 "@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
   version "0.0.0"
   uid ""

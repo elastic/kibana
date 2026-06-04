@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/otel-workshop-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Hands-on workshop exercise: a fake coffee-shop order pipeline for practising OpenTelemetry metric and trace instrumentation the Kibana way.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "otelWorkshop",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
+}

@@ -920,6 +920,7 @@
     "@kbn/osquery-plugin": "link:x-pack/platform/plugins/shared/osquery",
     "@kbn/otel-semantic-conventions": "link:src/platform/packages/shared/kbn-otel-semantic-conventions",
     "@kbn/otel-telemetry-collection-plugin": "link:x-pack/platform/plugins/private/otel_telemetry_collection",
+    "@kbn/otel-workshop-plugin": "link:examples/otel_workshop",
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
     "@kbn/painless-lab-plugin": "link:x-pack/platform/plugins/private/painless_lab",
     "@kbn/palettes": "link:src/platform/packages/shared/kbn-palettes",
