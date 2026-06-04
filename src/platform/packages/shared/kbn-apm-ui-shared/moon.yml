@@ -24,6 +24,9 @@ dependsOn:
   - '@kbn/custom-icons'
   - '@kbn/ebt-click'
   - '@kbn/apm-types'
+  - '@kbn/core-http-browser'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/share-plugin'
 tags:
   - shared-browser
   - package
