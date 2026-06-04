@@ -13,6 +13,7 @@ import {
   type ContextSwitcherSpacesConfig,
 } from '@kbn/context-switcher-components';
 import type { CoreStart } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import {
@@ -21,7 +22,7 @@ import {
   useManagementActions,
   useSpaceItems,
 } from './hooks';
-import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../common';
+import { ENTER_SPACE_PATH } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
 
