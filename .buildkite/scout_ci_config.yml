@@ -8,6 +8,8 @@ plugins:
     - dashboard
     - discover_enhanced
     - exploratory_view
+    - graph
+    - home
     - index_management
     - infra
     - lens
