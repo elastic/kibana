@@ -76,7 +76,6 @@ dependsOn:
   - '@kbn/response-ops-recurring-schedule-form'
   - '@kbn/core-mount-utils-browser-internal'
   - '@kbn/core-user-profile-browser'
-  - '@kbn/core-capabilities-common'
   - '@kbn/core-ui-settings-common'
   - '@kbn/licensing-types'
   - '@kbn/react-query'

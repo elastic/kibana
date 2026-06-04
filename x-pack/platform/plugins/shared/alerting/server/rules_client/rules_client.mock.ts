@@ -59,6 +59,7 @@ const create = () => {
     getAuthenticationAPIKey: jest.fn(),
     cloneAPIKey: jest.fn(),
     cloneApiKeysOnCreate: false,
+    invalidateApiKeyNow: jest.fn(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     backfillClient,
