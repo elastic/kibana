@@ -143,6 +143,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'recommend-rules-to-install',
+  'recommend-prebuilt-rules',
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
