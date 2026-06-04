@@ -1668,7 +1668,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/accessibility/ @elastic/observability-ui
 /x-pack/solutions/observability/test/api_integration/config.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/api_integration/ftr_provider_context.d.ts @elastic/observability-ui
-/x-pack/solutions/observability/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/ @elastic/observability-ui
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/config.base.ts @elastic/observability-ui
@@ -1921,11 +1920,9 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/solutions/observability/test/observability_functional @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/common/utils/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/ensemble @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/incident_management/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/actionable-obs-team
 /x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/actionable-obs-team
@@ -1981,7 +1978,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/alerting_api_integration/observability/index.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/actionable-obs-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
@@ -2434,6 +2430,7 @@ x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
 
 # Kibana Platform Security
 packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-security
+/src/platform/packages/shared/kbn-test/src/jest/setup/disallow_code_generation.js @elastic/kibana-security
 /src/setup_node_env/harden @elastic/kibana-security
 
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
@@ -2539,7 +2536,6 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
 /x-pack/solutions/observability/test/serverless/functional/page_objects/svl_oblt_overview_page.ts @elastic/response-ops
 /x-pack/platform/test/alerting_api_integration/ @elastic/response-ops
-/x-pack/solutions/observability/test/alerting_api_integration/observability @elastic/actionable-obs-team
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/platform/test/plugin_api_integration/test_suites/event_log/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
@@ -3185,6 +3181,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/unified_alerts @elastic/security-detection-engine @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/attacks @elastic/security-detection-engine @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 /x-pack/solutions/security/test/fixtures/es_archives/asset_criticality @elastic/security-detection-engine
@@ -3281,6 +3278,7 @@ x-pack/solutions/security/plugins/security_solution/public/entity_analytics/comp
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
