@@ -14,6 +14,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ValidationError } from '@kbn/config-schema';
 import { TransformPanelsInError } from './transforms/in/transform_panels_in_error';
 import { logRequest } from './log_request';
 
@@ -26,6 +27,11 @@ export function writeErrorHandler(
   if (error.isBoom && error.output.statusCode === 403) {
     logRequest(logger, req, 'debug', error.message);
     return response.forbidden({ body: { message: error.message } });
+  }
+
+  if (error instanceof ValidationError) {
+    logRequest(logger, req, 'warn', error.message);
+    return response.badRequest({ body: { message: error.message } });
   }
 
   if (error instanceof TransformPanelsInError) {
