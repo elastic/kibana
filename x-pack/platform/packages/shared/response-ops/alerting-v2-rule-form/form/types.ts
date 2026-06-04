@@ -7,6 +7,7 @@
 
 // Import and re-export RuleKind and RecoveryPolicyType from schema
 import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { ActionFormValue } from '../actions_form';
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -55,8 +56,6 @@ export interface RuleArtifact {
   type: string;
   value: string;
 }
-
-import type { ActionFormValue } from '../actions_form';
 
 export interface RuleNotificationsValue {
   workflows: ActionFormValue;
