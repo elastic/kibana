@@ -70,7 +70,6 @@ const deleteMw = async (kbnClient: KbnClient, id: string) => {
 
 // ── Page helpers ─────────────────────────────────────────────────────────────
 
-// Use the stable data-test-subj on the EuiFieldSearch input (set in the component).
 const searchMws = async (page: ScoutPage, text: string) => {
   const searchBox = page.testSubj.locator('maintenance-window-search');
   await searchBox.fill(text);
@@ -103,7 +102,7 @@ const dismissToasts = async (page: ScoutPage) => {
 };
 
 // Opens the actions popover for the first visible row if the action button is
-// not already visible (same logic as FTR's clickTableAction).
+// not already visible.
 const clickTableAction = async (page: ScoutPage, action: string) => {
   if (!(await page.testSubj.locator(action).isVisible())) {
     await page.testSubj.click('table-actions-popover');
@@ -152,6 +151,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
+    expect(statuses).toHaveLength(1);
     expect(statuses[0]).not.toBe('Running');
   });
 
