@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
-import { BehaviorSubject, of } from 'rxjs';
+import { omit, pick } from 'lodash';
+import { BehaviorSubject, of, skip } from 'rxjs';
 
+import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
@@ -27,9 +28,17 @@ import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
+import type { DashboardLayout } from './types';
+import { deserializeLayout } from './deserialize_layout';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
+}));
+
+// disable distinctUntilChanged for the sake of testing
+jest.mock('rxjs', () => ({
+  ...jest.requireActual('rxjs'),
+  distinctUntilChanged: () => (v: any) => v, // pass through the value without filtering
 }));
 
 const trackPanelMock = {
@@ -496,6 +505,147 @@ describe('layout manager', () => {
       );
       expect(layoutManager.api.panelIsPinned('control1')).toBe(true);
       expect(layoutManager.api.panelIsPinned('control2')).toBe(false);
+    });
+  });
+
+  describe('childrenLoading$', () => {
+    test('all children load when no sections', async () => {
+      const loadingStates: boolean[] = [];
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        undefined,
+        [panel1],
+        pinnedControls,
+        trackPanelMock
+      );
+      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        loadingStates.push(loading);
+      });
+
+      // delay registering children to mock loading
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      layoutManager.api.registerChildApi(panel1Api);
+      layoutManager.api.registerChildApi({
+        uuid: pinnedControls[0].id,
+      } as DefaultEmbeddableApi);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      layoutManager.api.registerChildApi({
+        uuid: pinnedControls[1].id,
+      } as DefaultEmbeddableApi);
+
+      expect(loadingStates.filter((loading) => !loading).length).toEqual(1); // loading done is only triggered once
+      expect(loadingStates.at(-1)).toEqual(false); // last element is signaling loading is done
+    });
+
+    test('all children load when in non-collapsed sections', async () => {
+      const loadingStates: boolean[] = [];
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        undefined,
+        [section1],
+        pinnedControls,
+        trackPanelMock
+      );
+      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        loadingStates.push(loading);
+      });
+
+      // delay registering children to mock loading
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      layoutManager.api.registerChildApi({
+        uuid: pinnedControls[1].id,
+      } as DefaultEmbeddableApi);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      layoutManager.api.registerChildApi({
+        uuid: pinnedControls[0].id,
+      } as DefaultEmbeddableApi);
+      layoutManager.api.registerChildApi(panel1Api);
+
+      expect(loadingStates.filter((loading) => !loading).length).toEqual(1);
+      expect(loadingStates.at(-1)).toEqual(false);
+    });
+
+    test('ignores children in collapsed sections until the section is expanded', async () => {
+      const loadingStates: boolean[] = [];
+      const panel2 = { id: 'panel2', config: {}, grid: { w: 1, h: 1, x: 0, y: 0 }, type: 'type' };
+      const { layout } = deserializeLayout([panel2, section1], pinnedControls);
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        undefined,
+        [panel2, { ...section1, collapsed: true }],
+        pinnedControls,
+        trackPanelMock
+      );
+      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        loadingStates.push(loading);
+      });
+
+      // waits until all children APIs are registered to trigger done loading
+      expect(loadingStates.at(-1)).toEqual(true);
+      layoutManager.api.registerChildApi({
+        uuid: pinnedControls[1].id,
+      } as DefaultEmbeddableApi);
+      expect(loadingStates.at(-1)).toEqual(true);
+      layoutManager.api.registerChildApi({
+        uuid: pinnedControls[0].id,
+      } as DefaultEmbeddableApi);
+      expect(loadingStates.at(-1)).toEqual(true);
+      layoutManager.api.registerChildApi({
+        uuid: 'panel2',
+      } as DefaultEmbeddableApi);
+      expect(loadingStates.at(-1)).toEqual(false);
+
+      // expand section **after** children APIs are already registered causes loading
+      layoutManager.api.layout$.next({
+        ...layout,
+        sections: { section1: { ...layout.sections.section1, collapsed: false } },
+      });
+      expect(loadingStates.at(-1)).toEqual(true);
+
+      // once the new API is ready, loading is false again
+      layoutManager.api.registerChildApi(panel1Api);
+      expect(loadingStates.filter((loading) => !loading).length).toEqual(2);
+      expect(loadingStates.at(-1)).toEqual(false);
+    });
+
+    test('toggling a collapsible section does not trigger loading when children APIs are available', async () => {
+      const loadingStates: boolean[] = [];
+      const panel2 = { id: 'panel2', config: {}, grid: { w: 1, h: 1, x: 0, y: 0 }, type: 'type' };
+      const { layout } = deserializeLayout([panel2, section1], []);
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        undefined,
+        [panel2, section1],
+        [],
+        trackPanelMock
+      );
+
+      layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
+        loadingStates.push(loading);
+      });
+      layoutManager.api.registerChildApi(panel1Api);
+      layoutManager.api.registerChildApi({
+        uuid: 'panel2',
+      } as DefaultEmbeddableApi);
+
+      // collapse section **after** children APIs are already registered
+      layoutManager.api.layout$.next({
+        ...layout,
+        sections: { section1: { ...layout.sections.section1, collapsed: true } },
+      });
+
+      // last two loading states should be `false` - collapsing section doesn't trigger loading
+      expect(loadingStates.filter((loading) => !loading).length).toEqual(2);
+      expect(loadingStates.at(-1)).toEqual(false);
+      expect(loadingStates.at(-2)).toEqual(false);
+
+      // re-opening the collapsed section should also not trigger loading, since the children API are available
+      layoutManager.api.layout$.next({
+        ...layout,
+        sections: { section1: { ...layout.sections.section1, collapsed: false } },
+      });
+      expect(loadingStates.filter((loading) => !loading).length).toEqual(3);
+      expect(loadingStates.at(-3)).toEqual(false);
     });
   });
 });
