@@ -36,7 +36,11 @@ const mockCreatePrebuiltRuleAssetsClient = jest.mocked(createPrebuiltRuleAssetsC
 const mockCreatePrebuiltRuleObjectsClient = jest.mocked(createPrebuiltRuleObjectsClient);
 const mockGetInstallableRuleVersions = jest.mocked(getInstallableRuleVersions);
 
-const makeVersion = (ruleId: string, version = 1) => ({ rule_id: ruleId, version, type: 'query' as const });
+const makeVersion = (ruleId: string, version = 1) => ({
+  rule_id: ruleId,
+  version,
+  type: 'query' as const,
+});
 
 const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -90,7 +94,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
   describe('tool definition', () => {
     it('has the correct id and type', () => {
       const { getStartServices, mockLogger } = createMockDeps();
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
 
       expect(tool.id).toBe(GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID);
       expect(tool.type).toBe(ToolType.builtin);
@@ -124,7 +131,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
         },
       });
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -151,7 +161,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
         aggregations: { facet_tags: { buckets: [] } },
       });
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       await tool.handler({}, context);
 
@@ -176,7 +189,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
         aggregations: { facet_tags: { buckets: [] } },
       });
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -194,7 +210,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
       mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
       mockRuleAssetsClient.fetchAssetsByVersion.mockResolvedValue({ assets: [] });
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -213,7 +232,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
       const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
       mockGetInstallableRuleVersions.mockResolvedValue([]);
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -234,7 +256,10 @@ describe('createGetInstallableCatalogOverviewTool', () => {
       const { getStartServices, mockLogger, mockRequest } = createMockDeps();
       mockGetInstallableRuleVersions.mockRejectedValue(new Error('ES is down'));
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
@@ -249,18 +274,21 @@ describe('createGetInstallableCatalogOverviewTool', () => {
     it('returns ToolResultType.error when fetchAssetsByVersion throws', async () => {
       const { getStartServices, mockLogger, mockRequest, mockRuleAssetsClient } = createMockDeps();
       mockGetInstallableRuleVersions.mockResolvedValue([makeVersion('rule-1')]);
-      mockRuleAssetsClient.fetchAssetsByVersion.mockRejectedValue(
-        new Error('SO search failed')
-      );
+      mockRuleAssetsClient.fetchAssetsByVersion.mockRejectedValue(new Error('SO search failed'));
 
-      const tool = createGetInstallableCatalogOverviewTool({ getStartServices, logger: mockLogger });
+      const tool = createGetInstallableCatalogOverviewTool({
+        getStartServices,
+        logger: mockLogger,
+      });
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
       expect('results' in result).toBe(true);
       if ('results' in result) {
         expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0].data as { message: string }).message).toContain('SO search failed');
+        expect((result.results[0].data as { message: string }).message).toContain(
+          'SO search failed'
+        );
       }
     });
   });
