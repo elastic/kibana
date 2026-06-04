@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -51,6 +52,9 @@ export const TopValuesPopover = React.memo(() => {
       repositionOnScroll
       ownFocus
       attachToAnchor={false}
+      aria-label={i18n.translate('xpack.securitySolution.topValuesPopover.ariaLabel', {
+        defaultMessage: 'Top values',
+      })}
     >
       <StatefulTopN
         field={data.fieldName}

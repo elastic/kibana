@@ -401,16 +401,14 @@ export class CcsLogsExtractionClient {
     maxLogsPerPage: number;
     abortController?: AbortController;
   }): Promise<LogPaginationCursor> {
-    const probeQuery =
-      `SET unmapped_fields="nullify";\n` +
-      buildLogPaginationCursorProbeEsql({
-        indexPatterns: remoteIndexPatterns,
-        type,
-        fromDateISO,
-        toDateISO,
-        logsPageCursorStart: sliceStart,
-        maxLogsPerPage,
-      });
+    const probeQuery = buildLogPaginationCursorProbeEsql({
+      indexPatterns: remoteIndexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart: sliceStart,
+      maxLogsPerPage,
+    });
 
     this.logger.info(
       `CCS probe: from=${fromDateISO} to=${toDateISO}${
