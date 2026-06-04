@@ -24,6 +24,7 @@ import {
 import { withAutoSuggest } from '../../../commands/definitions/utils/autocomplete/helpers';
 import { getSafeInsertText } from '../../../commands/definitions/utils';
 import type { Location, ISuggestionItem } from '../../../commands/registry/types';
+import { ESQL_NEW_LINE_COMMAND } from '../../../commands/registry/constants';
 import { aggFunctionDefinitions } from '../../../commands/definitions/generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../../../commands/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../../../commands/definitions/generated/grouping_functions';
@@ -431,11 +432,18 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  const suggest: SuggestFn = async (query, opts = {}) => {
+  // Get raw suggestions including the new line command.
+  const suggestRaw: SuggestFn = async (query, opts = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
     return await autocomplete.suggest(querySansCaret, pos, opts.callbacks ?? callbacks);
+  };
+
+  // Get suggestions filtered to exclude the new line command.
+  const suggest: SuggestFn = async (query, opts = {}) => {
+    const result = await suggestRaw(query, opts);
+    return result.filter((suggestion) => suggestion.command?.id !== ESQL_NEW_LINE_COMMAND);
   };
 
   const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
@@ -467,6 +475,7 @@ export const setup = async (caret = '/') => {
   return {
     callbacks,
     suggest,
+    suggestRaw,
     assertSuggestions,
   };
 };
