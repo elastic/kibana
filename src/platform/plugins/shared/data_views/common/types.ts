@@ -572,6 +572,13 @@ export type DataViewSpec = {
    * Whether the data view is managed by the application.
    */
   managed?: boolean;
+  /**
+   *
+   */
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

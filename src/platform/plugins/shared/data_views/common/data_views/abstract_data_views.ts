@@ -132,6 +132,11 @@ export abstract class AbstractDataView {
    */
   public managed: boolean = false;
 
+  public createdAt?: string;
+  public createdBy?: string;
+  public updatedAt?: string;
+  public updatedBy?: string;
+
   protected scriptedFieldsMap: DataViewFieldBaseSpecMap;
 
   private allowHidden: boolean = false;
@@ -201,6 +206,10 @@ export abstract class AbstractDataView {
     this.name = spec.name || '';
     this.allowHidden = spec.allowHidden || false;
     this.managed = spec.managed || false;
+    this.createdAt = spec.createdAt;
+    this.createdBy = spec.createdBy;
+    this.updatedAt = spec.updatedAt;
+    this.updatedBy = spec.updatedBy;
   }
 
   getAllowHidden = () => this.allowHidden;
