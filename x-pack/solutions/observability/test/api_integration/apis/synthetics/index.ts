@@ -24,7 +24,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await privateLocationService.installSyntheticsPackage();
     });
 
-    loadTestFile(require.resolve('./synthetics_api_security'));
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./add_monitor'));
     // add_monitor_project covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_project.spec.ts
@@ -33,8 +32,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./sync_global_params_spaces'));
     // add_edit_params covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_update_delete_params.spec.ts
-    loadTestFile(require.resolve('./private_location_apis'));
-    loadTestFile(require.resolve('./list_monitors'));
+    // list_monitors covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts
+    // private_location_apis covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts
+    // synthetics_api_security covered by Scout: x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_api_security.spec.ts
     // sync_maintenance_windows + sync_maintenance_windows_non_default_space migrated to Scout:
     // x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/maintenance_windows.spec.ts
   });

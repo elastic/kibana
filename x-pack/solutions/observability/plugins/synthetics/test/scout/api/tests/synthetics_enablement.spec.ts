@@ -68,6 +68,21 @@ const ENABLED_RESPONSE_EDITOR = {
   isValidApiKey: true,
 };
 
+/** Index privileges granted to the synthetics service writer role (`getServiceApiKeyPrivileges(false).indices`). */
+const SYNTHETICS_SERVICE_WRITER_INDICES = [
+  {
+    names: ['synthetics-*'],
+    privileges: ['view_index_metadata', 'create_doc', 'auto_configure', 'read'],
+  },
+];
+/** Cluster privileges of the synthetics service writer role on stateful (`getServiceApiKeyPrivileges(false).cluster`). */
+const SYNTHETICS_SERVICE_WRITER_CLUSTER = ['monitor', 'read_pipeline', 'read_ilm'];
+/** Saved object that stores the synthetics service api key — from `server/saved_objects/service_api_key.ts`. */
+const SYNTHETICS_API_KEY_SO_ID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
+const SYNTHETICS_API_KEY_SO_TYPE = 'uptime-synthetics-api-key';
+/** Name the synthetics service uses for its managed api key; the api-key query filters on it. */
+const SYNTHETICS_API_KEY_NAME = 'synthetics-api-key (required for Synthetics App)';
+
 apiTest.describe(
   'SyntheticsEnablement',
   {
@@ -233,6 +248,85 @@ apiTest.describe(
         const res = await putEnablement(apiClient, editorHeaders);
         expect(res).toHaveStatusCode(200);
         expect(res.body).toMatchObject(DISABLED_RESPONSE_EDITOR);
+      }
+    );
+
+    // A user with `uptime: all` plus any one of the api-key management cluster
+    // privileges can *manage* api keys (`canManageApiKeys: true`) but still
+    // cannot *enable* synthetics — that requires the full synthetics-writer
+    // cluster privileges. These cases use a per-test custom role + cookie
+    // session because the FTR original ran them as bespoke ES users.
+    (['manage_security', 'manage_api_key', 'manage_own_api_key'] as const).forEach((privilege) => {
+      apiTest(
+        `[PUT] returns response when user can manage api keys via ${privilege}`,
+        async ({ apiClient, samlAuth }) => {
+          const { cookieHeader } = await samlAuth.asInteractiveUser({
+            elasticsearch: {
+              cluster: [privilege],
+              indices: SYNTHETICS_SERVICE_WRITER_INDICES,
+            },
+            kibana: [{ base: [], feature: { uptime: ['all'] }, spaces: ['*'] }],
+          });
+          const res = await putEnablement(apiClient, { ...KIBANA_HEADERS, ...cookieHeader });
+          expect(res).toHaveStatusCode(200);
+          expect(res.body).toMatchObject({
+            areApiKeysEnabled: true,
+            canManageApiKeys: true,
+            canEnable: false,
+            isEnabled: false,
+            isValidApiKey: false,
+          });
+        }
+      );
+    });
+
+    apiTest(
+      '[PUT] auto re-enables the api key when the existing key has invalid permissions',
+      async ({ apiClient, esClient, kbnClient }) => {
+        // Seed an existing service api key with *incomplete* index privileges
+        // (missing `read`), simulating a key created before privileges changed,
+        // and point the service saved object at it.
+        const invalidKey = await esClient.security.createApiKey({
+          name: SYNTHETICS_API_KEY_NAME,
+          expiration: '1d',
+          role_descriptors: {
+            'role-a': {
+              cluster: SYNTHETICS_SERVICE_WRITER_CLUSTER,
+              indices: [
+                {
+                  names: ['synthetics-*'],
+                  privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
+                },
+              ],
+            },
+          },
+        });
+        await kbnClient.savedObjects.create({
+          id: SYNTHETICS_API_KEY_SO_ID,
+          type: SYNTHETICS_API_KEY_SO_TYPE,
+          overwrite: true,
+          attributes: {
+            id: invalidKey.id,
+            name: SYNTHETICS_API_KEY_NAME,
+            apiKey: invalidKey.api_key,
+          },
+        });
+
+        const before = await getApiKeys(apiClient);
+        expect(before).toHaveLength(1);
+        expect(
+          (before[0].role_descriptors as Record<string, unknown>).synthetics_writer
+        ).toBeUndefined();
+
+        const res = await putEnablement(apiClient, adminHeaders);
+        expect(res).toHaveStatusCode(200);
+        expect(res.body).toMatchObject(ENABLED_RESPONSE_ADMIN);
+
+        // The invalid key is invalidated and a fresh key with the correct
+        // synthetics-writer privileges is created in its place.
+        const after = await getApiKeys(apiClient);
+        expect(after).toHaveLength(1);
+        expectSyntheticsWriterPrivileges(after[0]);
       }
     );
 
