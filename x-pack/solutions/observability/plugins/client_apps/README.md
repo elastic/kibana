@@ -1,9 +1,9 @@
 # Client Apps Plugin
 
 Kibana plugin for resolving obfuscated or minified client application stacktraces back to
-human-readable source code references. Supports multiple client platforms (Android, JavaScript,
-and future iOS) within a single plugin, with each platform defining its own backend services
-and UI independently.
+human-readable source code references. Currently supports Android (R8), and is designed to
+accommodate additional platforms (JavaScript, iOS, and others) within the same plugin, with
+each platform defining its own backend services and UI independently.
 
 ## Plugin structure
 
@@ -39,11 +39,11 @@ Two things must be in place before the plugin can retrace a stacktrace:
    Elasticsearch index accessible by Kibana before retracing can succeed. When and how this
    upload happens is platform-specific — refer to each platform's upload tooling for details.
 
-2. **`app.build_id` present in the log event.** Each crash or error document must carry a
-   `build_id` field (at `attributes.app.build_id`) that the plugin uses to locate the correct
-   mapping index. The platform's agent or SDK is responsible for populating this field at
-   runtime. Without it the plugin cannot determine which mapping to use and will return an
-   error.
+2. **Build identifier present in the log event.** Each crash or error document must carry a
+   platform-specific build identifier field that the plugin uses to locate the correct mapping
+   index (for Android this is `attributes.app.build_id`). The platform's agent or SDK is
+   responsible for populating this field at runtime. Without it the plugin cannot determine
+   which mapping to use and will return an error.
 
 ## Adding a new platform
 
@@ -95,6 +95,13 @@ Users reach platform views via URL drilldowns configured on dashboard panels:
 
 ```
 {{kibanaUrl}}/app/clientApps/<platform>/<action>?doc_id={{event._id}}
+```
+
+`{{event._id}}` is the Elasticsearch document `_id` of the log event in the clicked row.
+For example, an Android crash dashboard drills down to:
+
+```
+{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event._id}}
 ```
 
 ## Running tests
