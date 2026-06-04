@@ -42,7 +42,9 @@ export function registerSearchExecutionsRoute({ router, service, spaces }: Route
           request: {
             body: schema.object({
               query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-              sort: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+              sort: schema.maybe(
+                schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: 10 })
+              ),
               from: schema.maybe(schema.number({ min: 0 })),
               size: schema.maybe(schema.number({ min: 1, max: 1000 })),
               trackTotalHits: schema.maybe(schema.boolean()),

@@ -16,7 +16,7 @@ import type {
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
 import type { RouteDependencies } from '../types';
-import { INTERNAL_API_VERSION } from '../utils/route_constants';
+import { INTERNAL_API_VERSION, MAX_EXECUTION_FIELD_NAME_LENGTH } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -75,12 +75,12 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
             body: schema.object(
               {
                 size: schema.number(),
-                fieldName: schema.string(),
+                fieldName: schema.string({ maxLength: MAX_EXECUTION_FIELD_NAME_LENGTH }),
                 sort: schema.maybe(schema.any()),
                 filters: schema.maybe(schema.any()),
                 fieldSpec: schema.maybe(schema.any()),
                 ignoreValidations: schema.maybe(schema.boolean()),
-                searchString: schema.maybe(schema.string()),
+                searchString: schema.maybe(schema.string({ maxLength: 1024 })),
                 searchTechnique: schema.maybe(
                   schema.oneOf([
                     schema.literal('exact'),
@@ -89,7 +89,10 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
                   ])
                 ),
                 selectedOptions: schema.maybe(
-                  schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(schema.number())])
+                  schema.oneOf([
+                    schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10_000 }),
+                    schema.arrayOf(schema.number(), { maxSize: 10_000 }),
+                  ])
                 ),
               },
               { unknowns: 'allow' }

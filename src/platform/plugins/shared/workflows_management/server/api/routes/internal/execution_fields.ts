@@ -11,10 +11,12 @@ import { schema } from '@kbn/config-schema';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
 import type { RouteDependencies } from '../types';
-import { INTERNAL_API_VERSION } from '../utils/route_constants';
+import { INTERNAL_API_VERSION, MAX_EXECUTION_FIELD_NAME_LENGTH } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
+
+const fieldNameSchema = schema.string({ maxLength: MAX_EXECUTION_FIELD_NAME_LENGTH });
 
 const parseFields = (value: string | string[] | undefined): string[] => {
   if (!value) {
@@ -40,18 +42,27 @@ export function registerExecutionFieldsRoute({ router }: RouteDependencies) {
           request: {
             query: schema.object(
               {
-                meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-                  defaultValue: [],
-                }),
+                meta_fields: schema.oneOf(
+                  [fieldNameSchema, schema.arrayOf(fieldNameSchema, { maxSize: 100 })],
+                  {
+                    defaultValue: [],
+                  }
+                ),
                 allow_no_index: schema.maybe(schema.boolean()),
                 include_unmapped: schema.maybe(schema.boolean()),
                 fields: schema.maybe(
-                  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                  schema.oneOf([
+                    fieldNameSchema,
+                    schema.arrayOf(fieldNameSchema, { maxSize: 50_000 }),
+                  ])
                 ),
                 field_types: schema.maybe(
-                  schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-                    defaultValue: [],
-                  })
+                  schema.oneOf(
+                    [fieldNameSchema, schema.arrayOf(fieldNameSchema, { maxSize: 60 })],
+                    {
+                      defaultValue: [],
+                    }
+                  )
                 ),
                 allow_hidden: schema.maybe(schema.boolean()),
               },
