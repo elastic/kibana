@@ -101,6 +101,30 @@ const INTEGRATION_SOURCES: SourceDef[] = [
     cloneCount: 80,
     index: 'logs-aws.cloudtrail-default',
   },
+  {
+    pkg: 'google_workspace',
+    stream: 'admin',
+    cloneCount: 80,
+    index: 'logs-google_workspace.admin-default',
+  },
+  {
+    pkg: 'okta',
+    stream: 'system',
+    cloneCount: 80,
+    index: 'logs-okta.system-default',
+  },
+  {
+    pkg: 'windows',
+    stream: 'powershell_operational',
+    cloneCount: 80,
+    index: 'logs-windows.powershell_operational-default',
+  },
+  {
+    pkg: 'network_traffic',
+    stream: 'flow',
+    cloneCount: 80,
+    index: 'logs-network_traffic.flow-default',
+  },
 ];
 
 /**

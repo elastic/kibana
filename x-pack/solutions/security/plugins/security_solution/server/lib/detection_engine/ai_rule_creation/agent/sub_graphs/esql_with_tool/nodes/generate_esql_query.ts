@@ -52,7 +52,8 @@ Guidelines for ES|QL query generation:
 - Do not use any date range filters in the query (like WHERE @timestamp > NOW() - 5 minutes) or bucket aggregation limited by time (COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), unless explicitly told to include them in query. The system will handle time range filtering separately.
 - Never include bucket aggregation limited by time (like this example COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), to avoid clash with scheduling of the detection rule.
 - If you use KEEP command, after METADATA operator, make sure to include _id field.
-- If there is no relevant data in provided index patterns context to fulfil user request, use the best effort to create query based on your knowledge of ES|QL and security detection use cases.
+- If there is no relevant data in provided index patterns context to fulfil user request, or if the user explicitly requests a detection that cannot be supported by the available data source (e.g., asking for PowerShell execution using only network flow data, or Okta authentication events using only endpoint telemetry), do not generate a query. Instead, explain that the requested detection is not possible with the available data sources and return an error.
+- Keep queries concise. Do not include unnecessary fields in KEEP or METADATA. Only select fields that are actually used in WHERE, EVAL, STATS, or SORT. If a query would require selecting a large number of fields, use KEEP with explicit field names rather than METADATA _id, _index, _version on aggregations.
 - Ensure the query is syntactically correct and adheres to ES|QL standards.
 - Do not include any explanations, only provide the ES|QL query string.
 - When referring to fields take into account their data types as well. For example, do not use text field in arithmetic operations.

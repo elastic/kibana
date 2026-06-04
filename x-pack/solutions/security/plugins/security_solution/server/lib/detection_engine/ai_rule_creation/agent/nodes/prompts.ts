@@ -126,6 +126,41 @@ Based on the above, provide the schedule in the following JSON format:
   ],
 ]);
 
+export const SEVERITY_INFERENCE_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `Your role is to analyze a security detection scenario and determine the appropriate severity level and risk score for an Elastic Detection rule.
+
+Severity Levels:
+- critical: Direct malware execution, ransomware activity, credential dumping, rootkit installation, or any active exploitation leading to immediate compromise. Risk score: 99.
+- high: Privilege escalation attempts, lateral movement, defense evasion techniques, code injection, or unauthorized access to sensitive systems. Risk score: 73.
+- medium: Suspicious behavior that may indicate attack staging, persistence mechanisms, policy violations, or anomalous activity requiring investigation. Risk score: 47.
+- low: Information gathering, reconnaissance, benign-looking but noteworthy events, or minor policy violations with limited security impact. Risk score: 21.
+
+Guidelines:
+- Base your assessment on the user's intent, the attack technique described, and the potential business impact.
+- Consider whether the detected activity indicates an active attack (higher severity) versus preparatory or suspicious behavior (lower severity).
+- Privilege escalation and UAC bypass are typically medium to high.
+- Data exfiltration, credential access, and execution of malicious payloads are typically high to critical.
+- Audit log tampering and indicator removal are typically medium to high.
+- Anomalous but non-malicious behavior is typically low to medium.
+
+Respond with ONLY a JSON object in this exact format:
+{{
+  "severity": "medium",
+  "riskScore": 47
+}}`,
+  ],
+  [
+    'human',
+    `
+    <query>
+      User request: {user_request}
+      ES|QL query: {esql_query}
+    </query>`,
+  ],
+]);
+
 export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
@@ -147,6 +182,28 @@ Guidelines:
 - Use the provided tags to better understand the security context and threat landscape
 - Only select tactics and techniques that are directly relevant to what the rule detects
 - Use your knowledge of MITRE ATT&CK to select appropriate IDs
+- NEVER invent technique IDs. Only use valid MITRE IDs from the framework.
+
+Examples:
+User query: UAC bypass via Windows Firewall snap-in hijack
+ES|QL query: FROM logs-endpoint.events.* | WHERE process.parent.name == "mmc.exe" AND process.parent.args == "WF.msc"
+Expected output: {{
+  "tactics": ["TA0004", "TA0005"],
+  "techniques": [
+    {{"id": "T1548", "subtechnique": ["T1548.002"]}},
+    {{"id": "T1218"}}
+  ]
+}}
+
+User query: AWS API call from an unusual user context indicating compromised credentials
+ES|QL query: FROM logs-aws.cloudtrail* | WHERE event.action LIKE "*" AND user.name != user.name_history
+Expected output: {{
+  "tactics": ["TA0004"],
+  "techniques": [
+    {{"id": "T1078", "subtechnique": ["T1078.004"]}},
+    {{"id": "T1550"}}
+  ]
+}}
 
 Respond with a JSON object containing only the IDs:
 - "tactics": array of tactic IDs (strings like "TA0001", "TA0002")
