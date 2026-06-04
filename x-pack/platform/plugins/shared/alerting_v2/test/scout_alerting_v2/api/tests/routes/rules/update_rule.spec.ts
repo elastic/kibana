@@ -123,6 +123,27 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'update: should return 409 when the request body version is stale',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-stale-version' } })
+      );
+      const firstUpdate = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { name: 'first-rename' } },
+      });
+      expect(firstUpdate).toHaveStatusCode(200);
+      expect(firstUpdate.body.version).not.toBe(created.version);
+
+      const staleUpdate = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { version: created.version, metadata: { name: 'second-rename' } },
+      });
+      expect(staleUpdate).toHaveStatusCode(409);
+    }
+  );
+
+  apiTest(
     'update: should clear an optional field when set to null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(

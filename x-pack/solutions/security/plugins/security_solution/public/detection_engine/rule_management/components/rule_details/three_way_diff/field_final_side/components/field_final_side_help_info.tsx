@@ -34,7 +34,12 @@ export function FieldFinalSideHelpInfo(): JSX.Element {
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={togglePopover}
+      aria-label={i18n.FINAL_UPDATE_HELP_ARIA_LABEL}
+    >
       <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"

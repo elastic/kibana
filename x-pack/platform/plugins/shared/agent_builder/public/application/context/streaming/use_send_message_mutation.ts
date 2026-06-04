@@ -20,11 +20,12 @@ import type {
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type {
   Attachment,
-  AttachmentInput,
+  ConversationAttachment,
   ScreenContextAttachmentData,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { flattenAttachments } from '../conversation/flatten_attachments';
 import { queryKeys } from '../../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
@@ -51,15 +52,13 @@ export interface SendMessageVars {
   conversationId: string;
   agentId: string;
   connectorId?: string;
-  attachments?: AttachmentInput[];
+  attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
-  lastRoundSteps?: ConversationRoundStep[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
 }
 
 export interface SendMessageMutationBindings {
-  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setPendingMessage: (conversationId: string, message: string) => void;
   clearPendingMessage: (conversationId: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
@@ -135,7 +134,6 @@ const withScreenContextAttachment = async ({
  * to the right cache regardless of where the user has navigated.
  */
 export const useSendMessageMutation = ({
-  updateActiveReasoning,
   setPendingMessage,
   clearPendingMessage,
   setError,
@@ -194,7 +192,7 @@ export const useSendMessageMutation = ({
         });
         await streamActions.addOptimisticRound({
           userMessage: vars.message,
-          attachments: vars.attachments ?? [],
+          attachments: flattenAttachments(vars.attachments ?? []),
           agentId: vars.agentId,
         });
       }
@@ -218,7 +216,7 @@ export const useSendMessageMutation = ({
               agentId: vars.agentId,
               connectorId: vars.connectorId,
               attachments: [
-                ...(vars.attachments ?? []),
+                ...flattenAttachments(vars.attachments ?? []),
                 ...(await withScreenContextAttachment({
                   services,
                   conversationAttachments: vars.conversationAttachments,
@@ -233,7 +231,6 @@ export const useSendMessageMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
 
         if (!isRegenerate) {
@@ -242,7 +239,15 @@ export const useSendMessageMutation = ({
         }
         succeeded = true;
       } catch (err) {
-        setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
+        // Snapshot the failing round's accumulated steps from the cache BEFORE
+        // we tear down the optimistic round below. Without this, the in-progress
+        // steps (reasoning + any successful tool calls before the failure) are
+        // lost and the error panel renders with no context.
+        const cached = queryClient.getQueryData<Conversation>(
+          queryKeys.conversations.byId(vars.conversationId)
+        );
+        const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
+        setError(vars.conversationId, err, inProgressSteps);
         if (!isRegenerate) {
           // Remove the optimistic round immediately so the error round and the optimistic
           // round are not both visible.

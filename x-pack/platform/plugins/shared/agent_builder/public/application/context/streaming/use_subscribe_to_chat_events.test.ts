@@ -85,7 +85,6 @@ describe('subscribeToChatEvents — roundComplete', () => {
       events$,
       conversationActions,
       isAborted: () => false,
-      setAgentReasoning: jest.fn(),
     });
 
     events$.next({
@@ -113,7 +112,6 @@ describe('subscribeToChatEvents — roundComplete', () => {
       events$,
       conversationActions,
       isAborted: () => false,
-      setAgentReasoning: jest.fn(),
     });
 
     events$.next({

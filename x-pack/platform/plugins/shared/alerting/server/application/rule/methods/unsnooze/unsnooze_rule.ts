@@ -7,9 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import type { RawRule } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -99,7 +97,13 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   });
 
   await logRuleChanges({
-    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+    ruleSOs: [
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleUnsnooze,

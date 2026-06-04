@@ -66,13 +66,8 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
   return {
     id: 'rule-1',
     spaceId: 'default',
-    kind: 'alert',
     name: 'Test rule',
-    description: '',
     tags: [],
-    enabled: true,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
   };
 }
@@ -127,6 +122,7 @@ export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionG
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
     episodes: [createAlertEpisode()],
+    rules: {},
     ...overrides,
   };
 }

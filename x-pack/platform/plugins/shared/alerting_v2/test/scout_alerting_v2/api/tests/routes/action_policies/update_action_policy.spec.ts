@@ -7,11 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import {
-  ACTION_POLICY_VERSION_MAX_LENGTH,
-  ID_MAX_LENGTH,
-  MAX_NAME_LENGTH,
-} from '@kbn/alerting-v2-schemas';
+import { VERSION_MAX_LENGTH, ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
@@ -432,7 +428,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           name: 'long-version-update',
-          version: 'a'.repeat(ACTION_POLICY_VERSION_MAX_LENGTH + 1),
+          version: 'a'.repeat(VERSION_MAX_LENGTH + 1),
         },
       });
 
