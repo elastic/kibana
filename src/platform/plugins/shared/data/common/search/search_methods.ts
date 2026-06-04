@@ -14,6 +14,8 @@ import type {
   IDslSearchParams,
   IDslSearchOptions,
   IDslSearchResult,
+  IDslPaginatedSearchResult,
+  IDslPagination,
   IEsqlSearchParams,
   IEsqlSearchOptions,
   IEsqlSearchResult,
@@ -50,7 +52,7 @@ import {
  * a generic search function that converts Observable-based searches to Promise-based
  * searches and adds pagination helpers for DSL searches using search_after.
  */
-export class SearchMethodsService implements Omit<ISearchMethods, 'dslPaginated'> {
+export class SearchMethodsService implements ISearchMethods {
   constructor(private readonly search: ISearchGeneric) {}
 
   /**
@@ -69,6 +71,7 @@ export class SearchMethodsService implements Omit<ISearchMethods, 'dslPaginated'
     );
     return {
       rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
     };
   }
 
@@ -90,6 +93,34 @@ export class SearchMethodsService implements Omit<ISearchMethods, 'dslPaginated'
     );
     return {
       rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
+    };
+  }
+
+  /**
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
+   */
+  async dslPaginated(
+    params: IDslSearchParams,
+    _options?: Omit<IDslSearchOptions, 'trackTotalHits'>
+  ): Promise<IDslPaginatedSearchResult> {
+    const options = {
+      ..._options,
+      // trackTotalHits is required for pagination to determine if there are more pages
+      trackTotalHits: true,
+    };
+    const request = this.buildDslRequest(params, options);
+    const response = await this.executeSearch(
+      request,
+      this.mapDslOptions(options, params),
+      undefined,
+      undefined
+    );
+
+    return {
+      rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
+      pagination: this.buildDslPagination(response.rawResponse, params, options),
     };
   }
 
@@ -110,6 +141,7 @@ export class SearchMethodsService implements Omit<ISearchMethods, 'dslPaginated'
     );
     return {
       rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
     };
   }
 
@@ -154,6 +186,7 @@ export class SearchMethodsService implements Omit<ISearchMethods, 'dslPaginated'
     return {
       rawResponse: response.rawResponse,
       took: response.took,
+      requestParams: response.requestParams,
     };
   }
 
@@ -262,6 +295,53 @@ export class SearchMethodsService implements Omit<ISearchMethods, 'dslPaginated'
       ...this.mapBaseOptions(options),
       strategy: 'ese' as typeof ENHANCED_ES_SEARCH_STRATEGY,
       indexPattern: typeof params?.index === 'object' ? params.index : undefined,
+    };
+  }
+
+  private buildDslPagination(
+    rawResponse: any,
+    originalParams: IDslSearchParams,
+    options?: IDslSearchOptions
+  ): IDslPagination {
+    const self = this;
+    const lastHit = rawResponse.hits?.hits?.at?.(-1);
+    const currentCount = rawResponse.hits?.hits?.length ?? 0;
+    const totalValue =
+      typeof rawResponse.hits?.total === 'number'
+        ? rawResponse.hits.total
+        : rawResponse.hits?.total?.value ?? 0;
+    const hasNextPage = Boolean(lastHit?.sort) && totalValue > currentCount;
+
+    return {
+      hasNextPage,
+      nextPage: async (): Promise<IDslPaginatedSearchResult | null> => {
+        if (!hasNextPage || !lastHit?.sort) {
+          return null;
+        }
+
+        // Build next search with search_after
+        const nextParams: IDslSearchParams = {
+          ...originalParams,
+        };
+
+        const request = self.buildDslRequest(nextParams, options);
+        if (request.params && typeof request.params !== 'string') {
+          (request.params as any).body.search_after = lastHit.sort;
+        }
+
+        const nextResponse = await self.executeSearch(
+          request,
+          self.mapDslOptions(options),
+          undefined,
+          undefined
+        );
+
+        return {
+          rawResponse: nextResponse.rawResponse,
+          requestParams: nextResponse.requestParams,
+          pagination: self.buildDslPagination(nextResponse.rawResponse, nextParams, options),
+        };
+      },
     };
   }
 

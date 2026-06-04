@@ -326,6 +326,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       search,
       dsl: (params, options) => this.searchMethodsService.dsl(params, options),
+      dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
       esql: (params, options) => this.searchMethodsService.esql(params, options),
       eql: (params, options) => this.searchMethodsService.eql(params, options),
       sql: (params, options) => this.searchMethodsService.sql(params, options),

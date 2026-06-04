@@ -491,4 +491,172 @@ describe('SearchMethodsService', () => {
       });
     });
   });
+
+  describe('dslPaginated', () => {
+    it('returns pagination object', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({
+              track_total_hits: true,
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+
+      expect(result.pagination).toBeDefined();
+      expect(result.pagination.hasNextPage).toBeDefined();
+      expect(result.pagination.nextPage).toBeDefined();
+    });
+
+    it('hasNextPage is true when hits remain', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      expect(result.pagination.hasNextPage).toBe(true);
+    });
+
+    it('hasNextPage is false when no more results', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 2 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      expect(result.pagination.hasNextPage).toBe(false);
+    });
+
+    it('hasNextPage is false when no sort values', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' } },
+            { _id: '2', _source: { message: 'test2' } },
+          ],
+          total: { value: 100 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+      });
+
+      expect(result.pagination.hasNextPage).toBe(false);
+    });
+
+    it('nextPage() uses search_after from last hit sort', async () => {
+      const firstPageResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+
+      const secondPageResponse = {
+        hits: {
+          hits: [
+            { _id: '3', _source: { message: 'test3' }, sort: [3000] },
+            { _id: '4', _source: { message: 'test4' }, sort: [4000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(firstPageResponse))
+        .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      await result.pagination.nextPage();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      expect(mockSearch).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({
+              search_after: [2000],
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('nextPage() returns null when no more pages', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 2 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.dslPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      const nextPage = await result.pagination.nextPage();
+
+      expect(nextPage).toBeNull();
+    });
+  });
 });

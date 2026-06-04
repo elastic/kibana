@@ -578,6 +578,7 @@ export class SearchService {
       return {
         search,
         dsl: (params, options) => searchMethodsService.dsl(params, options),
+        dslPaginated: (params, options) => searchMethodsService.dslPaginated(params, options),
         esql: (params, options) => searchMethodsService.esql(params, options),
         eql: (params, options) => searchMethodsService.eql(params, options),
         sql: (params, options) => searchMethodsService.sql(params, options),
