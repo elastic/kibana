@@ -13,13 +13,7 @@ import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiPageTemplate } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
-import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
-import type {
-  ChromeBadge,
-  ChromeBreadcrumbsBadge,
-  ChromeHelpExtension,
-} from '@kbn/core-chrome-browser';
-import { BehaviorSubject } from 'rxjs';
+import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
 import { AppHeaderView } from '../app_header';
 
 interface AppHeaderEditableTitleStoryProps {
@@ -33,20 +27,6 @@ interface AppHeaderEditableTitleStoryProps {
   asyncSave?: boolean;
 }
 
-const createChromeStoryService = (): InternalChromeStart =>
-  ({
-    componentDeps: {
-      basePath: {
-        get: () => '',
-        prepend: (path: string) => path,
-      },
-      legacyActionMenu$: new BehaviorSubject(undefined),
-    },
-    getBadge$: () => new BehaviorSubject<ChromeBadge | undefined>(undefined),
-    getBreadcrumbsBadges$: () => new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]),
-    getHelpExtension$: () => new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
-  } as unknown as InternalChromeStart);
-
 // Single source of truth: every story renders the title inside the full app header
 // (back navigation, badges, metadata, favorite) so its alignment and spacing are shown
 // in the context it actually ships in. Args toggle the title's state.
@@ -59,7 +39,7 @@ const HeaderWithTitle = ({
   asyncSave,
 }: AppHeaderEditableTitleStoryProps) => {
   const [title, setTitle] = useState(initialTitle);
-  const chrome = useMemo(() => createChromeStoryService(), []);
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
 
   const editableTitle = {
     text: title,
