@@ -36,8 +36,8 @@ describe('KindField', () => {
 
     await user.click(screen.getByTestId('kindField'));
 
-    expect(screen.getByText(/Groups rule firings into episodes/)).toBeInTheDocument();
-    expect(screen.getByText(/Detection mode/)).toBeInTheDocument();
+    expect(screen.getByText(/Tracks a problem across state changes/)).toBeInTheDocument();
+    expect(screen.getByText(/Records each match as a data point/)).toBeInTheDocument();
   });
 
   it('changes kind from alert to signal when Signal is selected', async () => {

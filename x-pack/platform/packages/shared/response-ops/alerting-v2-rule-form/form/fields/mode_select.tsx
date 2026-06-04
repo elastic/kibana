@@ -30,17 +30,16 @@ const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.
   defaultMessage: 'Signal',
 });
 
-// TODO: finalize description copy with @nastasha-solomon before shipping (see rna-program#530).
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
-    'Groups rule firings into episodes with a lifecycle (pending → active → recovering → inactive). Supports action policies and notifications on state changes.',
+    'Tracks a problem across state changes and can notify your team or trigger automated actions when the state changes. Choose this to monitor ongoing issues.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.modeField.signal.description',
   {
     defaultMessage:
-      'Detection mode: generates one rule event per match, no episodes or lifecycle. Does not trigger action policies or notifications.',
+      'Records each match as a data point without lifecycle tracking or notifications. Choose this to capture activity for querying and investigation.',
   }
 );
 

@@ -12,10 +12,9 @@ import { ModeSelect } from './mode_select';
 
 interface KindFieldProps {
   disabled?: boolean;
-  compressed?: boolean;
 }
 
-export const KindField = ({ disabled = false, compressed = false }: KindFieldProps) => {
+export const KindField = ({ disabled = false }: KindFieldProps) => {
   const { control } = useFormContext<FormValues>();
 
   return (
@@ -27,7 +26,7 @@ export const KindField = ({ disabled = false, compressed = false }: KindFieldPro
           value={value}
           onChange={onChange}
           disabled={disabled}
-          compressed={compressed}
+          compressed={true}
           data-test-subj="kindField"
         />
       )}
