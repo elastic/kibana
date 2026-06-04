@@ -6,12 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import type {
-  RoleApiCredentials,
-  RequestAuthFixture,
-  KibanaRole,
-  ElasticsearchRoleDescriptor,
-} from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '@kbn/alerting-v2-constants';
 import {
   ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
@@ -28,28 +23,22 @@ apiTest.describe(
   'Count new action policy execution events API',
   { tag: '@local-stateful-classic' },
   () => {
-    let executionHistoryReaderHeaders: Record<string, string>;
-    let executionHistoryWriterHeaders: Record<string, string>;
-    let noAccessHeaders: Record<string, string>;
-
-    const getCredentials = async (
-      requestAuth: RequestAuthFixture,
-      role: KibanaRole | ElasticsearchRoleDescriptor
-    ): Promise<Record<string, string>> => {
-      const credentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(role);
-      return { ...credentials.apiKeyHeader };
-    };
+    let readerCredentials: RoleApiCredentials;
+    let readerHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      executionHistoryReaderHeaders = await getCredentials(
-        requestAuth,
+      readerCredentials = await requestAuth.getApiKeyForCustomRole(
         ALERTING_V2_EXECUTION_HISTORY_READ_ROLE
       );
-      executionHistoryWriterHeaders = await getCredentials(
-        requestAuth,
-        ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
+      readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
+    });
+
+    apiTest('validation: rejects missing since', async ({ apiClient }) => {
+      const response = await apiClient.get(
+        ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+        { headers: readerHeaders }
       );
-      noAccessHeaders = await getCredentials(requestAuth, NO_ACCESS_ROLE);
+      expect(response).toHaveStatusCode(400);
     });
 
     apiTest(
@@ -57,7 +46,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const response = await apiClient.get(
           getCountNewExecutionHistoryEventsUrl({ since: SINCE_ISO }),
-          { headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders } }
+          { headers: readerHeaders }
         );
         expect(response).toHaveStatusCode(200);
         expect(typeof response.body.count).toBe('number');
@@ -66,29 +55,28 @@ apiTest.describe(
 
     apiTest(
       'authorization: 200 with alerting_v2_execution_history all privilege',
-      async ({ apiClient }) => {
+      async ({ apiClient, requestAuth }) => {
+        const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+          ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
+        );
         const response = await apiClient.get(
           getCountNewExecutionHistoryEventsUrl({ since: SINCE_ISO }),
-          { headers: { ...testData.COMMON_HEADERS, ...executionHistoryWriterHeaders } }
+          { headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader } }
         );
         expect(response).toHaveStatusCode(200);
       }
     );
 
-    apiTest('authorization: 403 without any alerting_v2 privileges', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        getCountNewExecutionHistoryEventsUrl({ since: SINCE_ISO }),
-        { headers: { ...testData.COMMON_HEADERS, ...noAccessHeaders } }
-      );
-      expect(response).toHaveStatusCode(403);
-    });
-
-    apiTest('validation: rejects missing since', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
-        { headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders } }
-      );
-      expect(response).toHaveStatusCode(400);
-    });
+    apiTest(
+      'authorization: 403 without any alerting_v2 privileges',
+      async ({ apiClient, requestAuth }) => {
+        const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+        const response = await apiClient.get(
+          getCountNewExecutionHistoryEventsUrl({ since: SINCE_ISO }),
+          { headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader } }
+        );
+        expect(response).toHaveStatusCode(403);
+      }
+    );
   }
 );
