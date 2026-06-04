@@ -62,6 +62,24 @@ describe('DatastreamInitializer', () => {
     });
   });
 
+  it('installs the expected index template settings', async () => {
+    const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+    await initializer.initialize();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({
+            'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            'index.lifecycle.prefer_ilm': false,
+          }),
+        }),
+      })
+    );
+  });
+
   it('ignores 409 errors when creating the data stream', async () => {
     esClient.indices.createDataStream.mockRejectedValueOnce(
       new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
