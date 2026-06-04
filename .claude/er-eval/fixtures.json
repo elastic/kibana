@@ -1,0 +1,152 @@
+{
+  "entities": [
+    { "entityId": "er-1-okta-user",  "namespace": "okta",             "type": "user", "fields": { "user.email": "er-1@example.com" } },
+    { "entityId": "er-1-entra-user", "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-1@example.com" } },
+
+    { "entityId": "er-2-ad-user",    "namespace": "active_directory", "type": "user", "fields": { "user.email": "er-2@example.com" } },
+    { "entityId": "er-2-okta-user",  "namespace": "okta",             "type": "user", "fields": { "user.email": "er-2@example.com" } },
+    { "entityId": "er-2-entra-user", "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-2@example.com" } },
+
+    { "entityId": "er-3-a-user",     "namespace": "slack",            "type": "user", "fields": { "user.email": "er-3@example.com" } },
+    { "entityId": "er-3-b-user",     "namespace": "github",           "type": "user", "fields": { "user.email": "er-3@example.com" } },
+
+    { "entityId": "er-4-target",     "namespace": "okta",             "type": "user", "fields": { "user.email": "er-4@example.com" } },
+    { "entityId": "er-4-alias",      "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-4@example.com" } },
+    { "entityId": "er-4-new",        "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-4@example.com" } },
+
+    { "entityId": "er-5-a1",         "namespace": "okta",             "type": "user", "fields": { "user.email": "er-5-a@example.com" } },
+    { "entityId": "er-5-a2",         "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-5-a@example.com" } },
+    { "entityId": "er-5-b1",         "namespace": "okta",             "type": "user", "fields": { "user.email": "er-5-b@example.com" } },
+    { "entityId": "er-5-b2",         "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-5-b@example.com" } },
+
+    { "entityId": "er-6-multi",      "namespace": "okta",             "type": "user", "fields": { "user.email": ["er-6@example.com", "er-6-other@example.com"] } },
+    { "entityId": "er-6-single-a",   "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-6@example.com" } },
+    { "entityId": "er-6-single-b",   "namespace": "active_directory", "type": "user", "fields": { "user.email": "er-6@example.com" } },
+
+    { "entityId": "er-7-t1",         "namespace": "okta",             "type": "user", "fields": { "user.email": "er-7@example.com" } },
+    { "entityId": "er-7-e1",         "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-7@example.com" } },
+    { "entityId": "er-7-t2",         "namespace": "active_directory", "type": "user", "fields": { "user.email": "er-7@example.com" } },
+    { "entityId": "er-7-e2",         "namespace": "github",           "type": "user", "fields": { "user.email": "er-7@example.com" } },
+    { "entityId": "er-7-stray",      "namespace": "slack",            "type": "user", "fields": { "user.email": "er-7@example.com" } },
+
+    { "entityId": "er-8-no-email",   "namespace": "okta",             "type": "user", "fields": {} },
+
+    { "entityId": "er-9-user",       "namespace": "okta",             "type": "user", "fields": { "user.email": "er-9@example.com" } },
+    { "entityId": "er-9-host",       "namespace": "unknown",          "type": "host", "fields": { "host.name": "er-9-host" } },
+
+    { "entityId": "er-10-host",      "namespace": "unknown",          "type": "host",    "fields": { "host.name": "er-10-host" } },
+    { "entityId": "er-10-svc",       "namespace": "unknown",          "type": "service", "fields": { "service.name": "er-10-svc" } },
+
+    { "entityId": "er-11-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "er-11@example.com" } },
+    { "entityId": "er-11-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-11@example.com" } },
+
+    { "entityId": "er-12-ad",        "namespace": "active_directory", "type": "user", "fields": { "user.email": "er-12@example.com", "user.full_name": "Aria Whitfield", "user.group.name": "admin", "host.name": "host991" } },
+    { "entityId": "er-12-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "er-12@example.com" } },
+
+    { "entityId": "er-13-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "Alice@Corp.com" } },
+    { "entityId": "er-13-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "alice@corp.com" } },
+
+    { "entityId": "er-14-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "bob+work@corp.com" } },
+    { "entityId": "er-14-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "bob@corp.com" } },
+
+    { "entityId": "er-15-svc-1",     "namespace": "okta",             "type": "user", "fields": { "user.email": "noreply@corp.com", "user.full_name": "Backup Service" } },
+    { "entityId": "er-15-svc-2",     "namespace": "okta",             "type": "user", "fields": { "user.email": "noreply@corp.com", "user.full_name": "CI Pipeline" } },
+    { "entityId": "er-15-svc-3",     "namespace": "okta",             "type": "user", "fields": { "user.email": "noreply@corp.com", "user.full_name": "Monitoring Bot" } },
+    { "entityId": "er-15-admin",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "noreply@corp.com", "user.full_name": "Helpdesk Admin" } },
+
+    { "entityId": "er-16-ad",        "namespace": "active_directory", "type": "user", "fields": { "user.email": "er-16@example.com" } },
+    { "entityId": "er-16-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "er-16@example.com" } },
+    { "entityId": "er-16-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-16@example.com" } },
+    { "entityId": "er-16-slack",     "namespace": "slack",            "type": "user", "fields": { "user.email": "er-16@example.com" } },
+    { "entityId": "er-16-github",    "namespace": "github",           "type": "user", "fields": { "user.email": "er-16@example.com" } },
+    { "entityId": "er-16-m365",      "namespace": "microsoft_365",    "type": "user", "fields": { "user.email": "er-16@example.com" } },
+
+    { "entityId": "er-17-m365",      "namespace": "microsoft_365",    "type": "user", "fields": { "user.email": "er-17@example.com" } },
+    { "entityId": "er-17-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "er-17@example.com" } },
+    { "entityId": "er-17-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "er-17@example.com" } },
+
+    { "entityId": "er-18-a",         "namespace": "active_directory", "type": "user", "fields": { "user.full_name": "Diego Marchetti", "user.group.name": "admin", "host.name": "host991" } },
+    { "entityId": "er-18-b",         "namespace": "okta",             "type": "user", "fields": { "user.full_name": "Diego Marchetti", "user.group.name": "admin", "host.name": "host322" } },
+
+    { "entityId": "er-19-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "nora.paterson@company.com", "user.full_name": "Nora Paterson", "user.name": "nora.paterson" } },
+    { "entityId": "er-19-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.name": "nora.patterson1" } },
+    { "entityId": "er-19-ad",        "namespace": "active_directory", "type": "user", "fields": { "user.name": "npatterson" } },
+    { "entityId": "er-19-slack",     "namespace": "slack",            "type": "user", "fields": { "user.name": "norapatterson" } },
+    { "entityId": "er-19-github",    "namespace": "github",           "type": "user", "fields": { "user.name": "n.patterson" } },
+
+    { "entityId": "er-20-okta",      "namespace": "okta",             "type": "user", "fields": { "user.email": "soren.kessler@corp.com", "user.full_name": "Soren Kessler", "user.name": "soren.kessler" } },
+    { "entityId": "er-20-entra",     "namespace": "entra_id",         "type": "user", "fields": { "user.email": "soren.kesler@corp.com", "user.full_name": "Soren Kesler", "user.name": "soren.kesler" } },
+
+    { "entityId": "er-21-nora",      "namespace": "active_directory", "type": "user", "fields": { "user.email": "bianca.moreau@company.com", "user.full_name": "Bianca Moreau", "user.name": "bianca.moreau" } },
+    { "entityId": "er-21-levi-1",    "namespace": "okta",             "type": "user", "fields": { "user.email": "bruno.moreno@company.com", "user.full_name": "Bruno Moreno", "user.name": "bruno.moreno" } },
+    { "entityId": "er-21-levi-2",    "namespace": "entra_id",         "type": "user", "fields": { "user.email": "b.moreno@company.com",     "user.full_name": "B. Moreno",    "user.name": "b.moreno" } },
+
+    { "entityId": "er-22-display",   "namespace": "okta",             "type": "user", "fields": { "user.full_name": "Marcus Liu" } },
+    { "entityId": "er-22-user",      "namespace": "entra_id",         "type": "user", "fields": { "user.name": "marcus.liu" } },
+
+    { "entityId": "er-23-initial",   "namespace": "okta",             "type": "user", "fields": { "user.full_name": "C. Okonkwo",     "user.name": "c.okonkwo" } },
+    { "entityId": "er-23-full",      "namespace": "entra_id",         "type": "user", "fields": { "user.full_name": "Chidi Okonkwo", "user.name": "chidi.okonkwo" } },
+
+    { "entityId": "er-24-corp",      "namespace": "okta",             "type": "user", "fields": { "user.email": "john.smith@corp.com",        "user.full_name": "John Smith", "user.name": "john.smith" } },
+    { "entityId": "er-24-acme",      "namespace": "entra_id",         "type": "user", "fields": { "user.email": "john.smith@acme.io",         "user.full_name": "John Smith", "user.name": "john.smith" } },
+    { "entityId": "er-24-family",    "namespace": "active_directory", "type": "user", "fields": { "user.email": "john.smith@smithfamily.org", "user.full_name": "John Smith", "user.name": "john.smith" } },
+
+    { "entityId": "er-25-accent",    "namespace": "okta",             "type": "user", "fields": { "user.full_name": "José García", "user.name": "jose.garcia" } },
+    { "entityId": "er-25-ascii",     "namespace": "entra_id",         "type": "user", "fields": { "user.full_name": "Jose Garcia", "user.name": "jose.garcia" } },
+
+    { "entityId": "er-26-western",   "namespace": "okta",             "type": "user", "fields": { "user.full_name": "Wei Chen", "user.name": "wei.chen" } },
+    { "entityId": "er-26-eastern",   "namespace": "entra_id",         "type": "user", "fields": { "user.full_name": "Chen Wei", "user.name": "chen.wei" } },
+
+    { "entityId": "er-27-maiden",    "namespace": "okta",             "type": "user", "fields": { "user.full_name": "Hana Okafor",       "user.name": "hana.okafor" } },
+    { "entityId": "er-27-married",   "namespace": "entra_id",         "type": "user", "fields": { "user.full_name": "Hana Okafor-Bello", "user.name": "hana.okafor-bello" } }
+  ],
+
+  "clusters": [
+    { "id": "#1-basic",        "members": ["er-1-okta-user", "er-1-entra-user"],                 "target": "er-1-okta-user",  "resolvableBy": "rule",      "expectedSize": 2, "note": "okta + entra_id, same email" },
+    { "id": "#2-ns-priority",  "members": ["er-2-ad-user", "er-2-okta-user", "er-2-entra-user"], "target": "er-2-ad-user",    "resolvableBy": "rule",      "expectedSize": 3, "note": "AD wins over okta/entra" },
+    { "id": "#3-alphabetical", "members": ["er-3-a-user", "er-3-b-user"],                        "target": "er-3-a-user",     "resolvableBy": "rule",      "expectedSize": 2, "note": "neither ns in priority list; alphabetical entity.id" },
+    { "id": "#4-extend",       "members": ["er-4-target", "er-4-alias", "er-4-new"],             "target": "er-4-target",     "resolvableBy": "manual",    "expectedSize": 3, "note": "manual link alias->target, then er-4-new joins via rule" },
+    { "id": "#5-incr-a",       "members": ["er-5-a1", "er-5-a2"],                                "target": "er-5-a1",         "resolvableBy": "rule",      "expectedSize": 2, "note": "incremental batch A" },
+    { "id": "#5-incr-b",       "members": ["er-5-b1", "er-5-b2"],                                "target": "er-5-b1",         "resolvableBy": "rule",      "expectedSize": 2, "note": "incremental batch B (later watermark)" },
+    { "id": "#6-single-pair",  "members": ["er-6-single-a", "er-6-single-b"],                    "target": "er-6-single-b",   "resolvableBy": "rule",      "expectedSize": 2, "note": "AD wins; er-6-multi excluded (multi-value email)" },
+    { "id": "#7-group-1",      "members": ["er-7-t1", "er-7-e1"],                                "target": "er-7-t1",         "resolvableBy": "manual",    "expectedSize": 2, "note": "manual link e1->t1" },
+    { "id": "#7-group-2",      "members": ["er-7-t2", "er-7-e2"],                                "target": "er-7-t2",         "resolvableBy": "manual",    "expectedSize": 2, "note": "manual link e2->t2" },
+    { "id": "#11-sparse",      "members": ["er-11-okta", "er-11-entra"],                         "target": "er-11-okta",      "resolvableBy": "rule",      "expectedSize": 2, "note": "email-only, both sparse" },
+    { "id": "#12-asymmetric",  "members": ["er-12-ad", "er-12-okta"],                            "target": "er-12-ad",        "resolvableBy": "rule",      "expectedSize": 2, "note": "AD rich, okta sparse; same email" },
+    { "id": "#13-case",        "members": ["er-13-okta", "er-13-entra"],                         "target": "er-13-okta",      "resolvableBy": "embedding", "expectedSize": 2, "note": "Alice@Corp.com vs alice@corp.com; rule keyword-case-sensitive (silent), embedding lowercases" },
+    { "id": "#14-plus-alias",  "members": ["er-14-okta", "er-14-entra"],                         "target": "er-14-okta",      "resolvableBy": "embedding", "expectedSize": 2, "note": "bob+work@ vs bob@ (same mailbox); rule silent; embedding may catch (hard)" },
+    { "id": "#16-six-way",     "members": ["er-16-ad", "er-16-okta", "er-16-entra", "er-16-slack", "er-16-github", "er-16-m365"], "target": "er-16-ad", "resolvableBy": "rule", "expectedSize": 6, "note": "six-way collision, AD wins" },
+    { "id": "#17-m365",        "members": ["er-17-m365", "er-17-okta", "er-17-entra"],           "target": "er-17-okta",      "resolvableBy": "rule",      "expectedSize": 3, "note": "M365 mapped but not in NAMESPACE_PRIORITY; okta wins" },
+    { "id": "#18-name-only",   "members": ["er-18-a", "er-18-b"],                                "target": "er-18-a",         "resolvableBy": "embedding", "expectedSize": 2, "note": "same full_name, no email; rule silent; embedding aspirational (name field is synthetic id, noisy)" },
+    { "id": "#19-variants",    "members": ["er-19-okta", "er-19-entra", "er-19-ad", "er-19-slack", "er-19-github"], "target": "er-19-okta", "resolvableBy": "embedding", "expectedSize": 5, "note": "one canonical Nora Paterson + 4 username variants, no shared email" },
+    { "id": "#20-typo",        "members": ["er-20-okta", "er-20-entra"],                         "target": "er-20-okta",      "resolvableBy": "embedding", "expectedSize": 2, "note": "Kessler vs Kesler spelling drift; rules silent (diff email keyword)" },
+    { "id": "#21-levi",        "members": ["er-21-levi-1", "er-21-levi-2"],                      "target": "er-21-levi-1",    "resolvableBy": "embedding", "expectedSize": 2, "note": "two Bruno Moreno accounts = same human" },
+    { "id": "#22-cross-field", "members": ["er-22-display", "er-22-user"],                       "target": "er-22-display",   "resolvableBy": "embedding", "expectedSize": 2, "note": "full_name 'Marcus Liu' vs user.name 'marcus.liu'; each missing the other's field" },
+    { "id": "#23-initial",     "members": ["er-23-initial", "er-23-full"],                       "target": "er-23-initial",   "resolvableBy": "embedding", "expectedSize": 2, "note": "C. Okonkwo vs Chidi Okonkwo" },
+    { "id": "#25-accent",      "members": ["er-25-accent", "er-25-ascii"],                       "target": "er-25-accent",    "resolvableBy": "embedding", "expectedSize": 2, "note": "José García vs Jose Garcia" },
+    { "id": "#26-name-order",  "members": ["er-26-western", "er-26-eastern"],                    "target": "er-26-western",   "resolvableBy": "embedding", "expectedSize": 2, "note": "Wei Chen vs Chen Wei" },
+    { "id": "#27-married",     "members": ["er-27-maiden", "er-27-married"],                     "target": "er-27-maiden",    "resolvableBy": "embedding", "expectedSize": 2, "note": "Hana Okafor vs Hana Okafor-Bello" }
+  ],
+
+  "negatives": [
+    { "id": "#6-multi",       "challenges": ["rule"],               "pairs": [["er-6-multi", "er-6-single-a"], ["er-6-multi", "er-6-single-b"]], "note": "multi-value email excluded from matching" },
+    { "id": "#7-stray",       "challenges": ["rule"],               "pairs": [["er-7-stray", "er-7-t1"], ["er-7-stray", "er-7-t2"]],             "note": "ambiguous bucket; stray stays unresolved" },
+    { "id": "#8-no-email",    "challenges": ["rule"],               "pairs": [],                                                                  "note": "single entity, no email; must stay unresolved (no pair to assert, checked via unresolved set)" },
+    { "id": "#9-mixed-type",  "challenges": ["rule"],               "pairs": [["er-9-user", "er-9-host"]],                                        "note": "user vs host; never link across types" },
+    { "id": "#10-non-user",   "challenges": ["rule"],               "pairs": [["er-10-host", "er-10-svc"]],                                       "note": "host vs service; no automated path" },
+    { "id": "#15-role-acct",  "challenges": ["rule", "embedding"],  "pairs": [["er-15-svc-1", "er-15-svc-2"], ["er-15-svc-1", "er-15-svc-3"], ["er-15-svc-1", "er-15-admin"], ["er-15-svc-2", "er-15-svc-3"], ["er-15-svc-2", "er-15-admin"], ["er-15-svc-3", "er-15-admin"]], "note": "3 service accounts + 1 admin share noreply@; DIFFERENT identities. Rule wrongly links all 4; embedding role-account guard should skip" },
+    { "id": "#21-distractor", "challenges": ["embedding"],          "pairs": [["er-21-nora", "er-21-levi-1"], ["er-21-nora", "er-21-levi-2"]],     "note": "Bianca Moreau must NOT link to Bruno Moreno despite shared domain + similar surname tail" },
+    { "id": "#24-homonyms",   "challenges": ["embedding"],          "pairs": [["er-24-corp", "er-24-acme"], ["er-24-corp", "er-24-family"], ["er-24-acme", "er-24-family"]], "note": "three different John Smiths on different domains; embedding over-link risk" }
+  ],
+
+  "manualLinks": [
+    { "targetId": "er-4-target", "entityIds": ["er-4-alias"] },
+    { "targetId": "er-7-t1",     "entityIds": ["er-7-e1"] },
+    { "targetId": "er-7-t2",     "entityIds": ["er-7-e2"] }
+  ],
+
+  "incrementalBatches": {
+    "_comment": "Entities seeded AFTER the first maintainer run to exercise the watermark. er-4-new joins #4's group; er-5-b* form #5-incr-b. Maintainer mode seeds these in a second batch with a later timestamp.",
+    "afterFirstRun": ["er-4-new", "er-5-b1", "er-5-b2"]
+  }
+}
