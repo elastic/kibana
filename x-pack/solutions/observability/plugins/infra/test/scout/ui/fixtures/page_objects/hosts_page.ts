@@ -40,7 +40,8 @@ export class HostsPage {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
     this.tableLoading = this.page.getByTestId('hostsView-table-loading');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');
-    this.tableNoData = this.page.getByTestId('hostsViewTableNoData');
+    // EuiBasicTable renders noItemsMessage in both caption (a11y) and body cell; scope to cell.
+    this.tableNoData = this.page.getByRole('cell').getByTestId('hostsViewTableNoData');
     this.searchBar = this.page.getByTestId('queryInput');
     this.querySubmitButton = this.page.getByTestId('querySubmitButton');
     this.errorCallout = this.page.getByTestId('hostsViewErrorCallout');
@@ -209,7 +210,7 @@ export class HostsPage {
 
   private async waitForHostKPIValueTitleToBeSet(metric: string, timeout?: number) {
     await this.getHostKPIChartValueLocator(metric).waitFor({ state: 'attached', timeout });
-    const kpiPanelTestId = `infraAssetDetailsKPI${metric}`;
+    const kpiPanelTestId = `hostsViewKPI-${metric}`;
     const selector = `[data-test-subj="hostsViewKPIGrid"] ${this.getHostKPIValueSelector(
       kpiPanelTestId
     )}`;
@@ -230,23 +231,12 @@ export class HostsPage {
   }
 
   /**
-   * Value locator for the shared host KPI tiles (`cpuUsage`, `normalizedLoad1m`,
-   * `memoryUsage`, `diskUsage`) rendered via `HostKpiCharts`. They use the
-   * `infraAssetDetailsKPI*` prefix in both the hosts page grid and the flyout;
-   * scoping to the hosts page `kpiGrid` disambiguates when both are on screen.
+   * Value locator for the host KPI tiles (`cpuUsage`, `normalizedLoad1m`,
+   * `memoryUsage`, `diskUsage`) rendered on the hosts page grid via the
+   * `MetricChartWrapper` (`hostsViewKPI-*` test subjects).
    */
   public getHostKPIChartValueLocator(metric: string) {
-    return this.kpiGrid
-      .getByTestId(`infraAssetDetailsKPI${metric}`)
-      .locator('.echMetricText__value');
-  }
-
-  /**
-   * Lens embeddable error panel shown when a KPI fails to render.
-   * `data-test-subj="embeddableError"` is defined by the shared embeddable panel error component.
-   */
-  public getHostKPIEmbeddableError(metric: string) {
-    return this.kpiGrid.getByTestId(`infraAssetDetailsKPI${metric}`).getByTestId('embeddableError');
+    return this.kpiGrid.getByTestId(`hostsViewKPI-${metric}`).locator('.echMetricText__value');
   }
 
   /**
@@ -262,16 +252,16 @@ export class HostsPage {
   }
 
   /**
-   * Waits for the KPI loading spinner to disappear. Complements
-   * `waitForHostKPIChartsToLoad` (which waits for the value element to appear)
-   * and is useful in `beforeEach` blocks that just need the page-ready signal
-   * before assertions begin, without waiting on every individual chart value.
+   * Waits for the KPI grid to settle on its first render: the CPU tile swaps its
+   * loading placeholder for the rendered `Metric` value element. Useful in
+   * `beforeEach` blocks that just need the page-ready signal before assertions
+   * begin, without waiting on every individual chart value.
    */
   public async waitForKPILoadingToFinish(timeout?: number) {
     await this.kpiGrid
-      .getByTestId('infraAssetDetailsKPIcpuUsage')
-      .getByRole('progressbar', { name: 'Loading' })
-      .waitFor({ state: 'hidden', timeout });
+      .getByTestId('hostsViewKPI-cpuUsage')
+      .locator('.echMetricText__value')
+      .waitFor({ state: 'attached', timeout });
   }
 
   // Metrics tab
