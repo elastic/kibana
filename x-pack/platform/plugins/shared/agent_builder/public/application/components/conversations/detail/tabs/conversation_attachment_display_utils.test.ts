@@ -13,6 +13,7 @@ import {
 import {
   buildAttachmentSubtitle,
   buildConversationAttachmentDisplayModel,
+  getDisplayableConversationAttachments,
   resolveAddedByLabel,
 } from './conversation_attachment_display_utils';
 
@@ -34,6 +35,20 @@ const makeAttachment = (overrides: Partial<VersionedAttachment> = {}): Versioned
     },
   ],
   ...overrides,
+});
+
+describe('getDisplayableConversationAttachments', () => {
+  it('excludes hidden and inactive attachments', () => {
+    const attachments = [
+      makeAttachment({ id: 'visible' }),
+      makeAttachment({ id: 'hidden', hidden: true }),
+      makeAttachment({ id: 'deleted', active: false }),
+    ];
+
+    expect(getDisplayableConversationAttachments(attachments).map((a) => a.id)).toEqual([
+      'visible',
+    ]);
+  });
 });
 
 describe('buildAttachmentSubtitle', () => {

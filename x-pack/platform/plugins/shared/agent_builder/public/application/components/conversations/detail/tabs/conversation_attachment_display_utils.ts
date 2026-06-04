@@ -239,6 +239,14 @@ export const buildConversationAttachmentDisplayModel = ({
   };
 };
 
+export const isDisplayableConversationAttachment = (
+  attachment: VersionedAttachment
+): boolean => !attachment.hidden && attachment.active !== false;
+
+export const getDisplayableConversationAttachments = (
+  attachments: VersionedAttachment[] = []
+): VersionedAttachment[] => attachments.filter(isDisplayableConversationAttachment);
+
 export const buildAttachmentDisplayModels = ({
   attachments,
   getUiDefinition,
@@ -250,9 +258,7 @@ export const buildAttachmentDisplayModels = ({
 }): ConversationAttachmentDisplayModel[] => {
   const ownerName = conversation?.user.name ?? conversation?.user.username;
 
-  return attachments
-    .filter((attachment) => !attachment.hidden && attachment.active !== false)
-    .map((attachment) =>
+  return getDisplayableConversationAttachments(attachments).map((attachment) =>
       buildConversationAttachmentDisplayModel({
         attachment,
         uiDefinition: getUiDefinition(attachment.type),

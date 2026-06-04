@@ -16,6 +16,7 @@ import { ConversationDetailHeader } from './conversation_detail_header';
 import { ConversationDetailSidebar } from './conversation_detail_sidebar';
 import { isCollaborativeTemplateConversation } from './template_conversation_utils';
 import { ConversationDetailAttachmentsTab } from './tabs/conversation_detail_attachments_tab';
+import { getDisplayableConversationAttachments } from './tabs/conversation_attachment_display_utils';
 import { ConversationDetailPlaceholderTab } from './tabs/conversation_detail_placeholder_tab';
 
 enum ConversationDetailTab {
@@ -70,7 +71,7 @@ export const ConversationDetailShell: React.FC<ConversationDetailShellProps> = (
   );
   const tabsId = useGeneratedHtmlId({ prefix: 'conversationDetailTabs' });
 
-  const attachmentCount = conversation?.attachments?.length ?? 0;
+  const attachmentCount = getDisplayableConversationAttachments(conversation?.attachments).length;
   const isCollaborative = isCollaborativeTemplateConversation(conversation);
   const showDetailsTab = isEmbeddedContext;
 

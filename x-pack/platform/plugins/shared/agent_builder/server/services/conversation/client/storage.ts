@@ -42,8 +42,9 @@ const storageSettings = {
       template_snapshot: types.object({ dynamic: false, properties: {} }),
       /** Denormalized from template_snapshot for list queries (collaborative ⇒ team-visible). */
       chat_mode: types.keyword({}),
-      custom_fields: types.object({ dynamic: true, properties: {} }),
-      events: types.object({ dynamic: true, properties: {} }),
+      // Stored as opaque JSON in _source; dynamic mapping would hit ES total_fields limit.
+      custom_fields: types.object({ dynamic: false, properties: {} }),
+      events: types.object({ dynamic: false, properties: {} }),
       conversation_mode: types.keyword({}),
       status: types.keyword({}),
       read: types.boolean({}),
