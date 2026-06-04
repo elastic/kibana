@@ -57,6 +57,10 @@ export class NotificationCenterPlugin
 
   public stop() {}
 
+  /**
+   * Provide visibility to the resolved feature flags values for debugging purposes
+   * @param featureFlags
+   */
   private async logResolvedFeatureFlags(featureFlags: CoreStart['featureFlags']): Promise<void> {
     try {
       const uiEnabled = await featureFlags.getBooleanValue(

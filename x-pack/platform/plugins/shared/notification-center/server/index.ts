@@ -16,16 +16,6 @@ import type {
 
 export type { NotificationCenterPluginSetup, NotificationCenterPluginStart } from './types';
 
-/**
- * Notification Center feature flags are managed via GitOps: their authoritative
- * definitions (variations, default variation per environment, and segmentation
- * rules) live as YAML in the external `elastic/kibana-feature-flags` repository,
- * which transpiles them to Terraform and applies them to LaunchDarkly.
- *
- * Kibana only references the flag keys (see `common/feature_flags.ts`) and
- * evaluates them with a `false` fallback. There is no in-repo flag-definition
- * registration step — adding or changing a flag is a YAML PR against that repo.
- */
 export const config: PluginConfigDescriptor<NotificationCenterConfig> = {
   schema: configSchema,
 };

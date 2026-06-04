@@ -8,14 +8,10 @@
 /**
  * Public server-side setup contract.
  *
- * Empty while the plugin is a bare shell. The external `submit(draft)`
- * API that consumers call to push notifications will be added here
+ * The external `submit(draft)` API that consumers call to push notifications will be added here
  */
 export type NotificationCenterPluginSetup = Record<string, never>;
 
-/**
- * Public server-side start contract. Empty for now (see {@link NotificationCenterPluginSetup}).
- */
 export type NotificationCenterPluginStart = Record<string, never>;
 
 export type NotificationCenterSetupDependencies = Record<string, never>;
