@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs/promises';
 import Path from 'path';
 import type { Script, ScriptBenchmark, ScriptCommand } from '../config/types';
+import { getKibanaBuildDir } from '../filesystem/get_kibana_build_dir';
 import type { BenchmarkRunContext, BenchmarkRunnable } from './types';
 
 const ENSURE_CHROME_FOR_TESTING_SCRIPT = `${__dirname}/scripts/ensure_chrome_for_testing.js`;
@@ -71,31 +71,6 @@ async function ensureBrowser(context: BenchmarkRunContext): Promise<Record<strin
   return { TEST_BROWSER_BINARY_PATH: stdout.trim() };
 }
 
-async function resolveKibanaBuildDir(context: BenchmarkRunContext): Promise<string> {
-  const buildDir = Path.join(context.workspace.getDir(), 'build/default');
-  const entries = await Fs.readdir(buildDir, { withFileTypes: true });
-  const kibanaBuildDirs = entries
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith('kibana-'))
-    .map((entry) => Path.join(buildDir, entry.name));
-
-  if (kibanaBuildDirs.length === 0) {
-    throw new Error(`No Kibana build directory found in ${buildDir}`);
-  }
-
-  if (kibanaBuildDirs.length === 1) {
-    return kibanaBuildDirs[0];
-  }
-
-  const dirsWithStats = await Promise.all(
-    kibanaBuildDirs.map(async (dir) => ({
-      dir,
-      stats: await Fs.stat(dir),
-    }))
-  );
-
-  return dirsWithStats.sort((a, b) => b.stats.mtimeMs - a.stats.mtimeMs)[0].dir;
-}
-
 export function fromScriptBenchmark(benchmark: ScriptBenchmark): BenchmarkRunnable {
   let env: Record<string, string> | undefined;
   let kibanaBuildDir: string | undefined;
@@ -111,7 +86,8 @@ export function fromScriptBenchmark(benchmark: ScriptBenchmark): BenchmarkRunnab
       }
       if (benchmark.ensure?.build) {
         await context.workspace.ensureBuild();
-        kibanaBuildDir = await resolveKibanaBuildDir(context);
+        const buildRootDir = Path.join(context.workspace.getDir(), 'build/default');
+        kibanaBuildDir = await getKibanaBuildDir(buildRootDir);
       }
       if (benchmark.ensure?.browser && !process.env.CI) {
         env = {

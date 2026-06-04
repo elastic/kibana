@@ -10,4 +10,5 @@
 export type { ModuleBenchmark, ScriptBenchmark, InitialBenchConfig } from './src/config/types';
 export type { BenchmarkRunContext, BenchmarkRunnable } from './src/runner/types';
 
+export { getKibanaBuildDir } from './src/filesystem/get_kibana_build_dir';
 export { cli } from './src/cli';

@@ -10,8 +10,8 @@
 import Path from 'path';
 import Fs from 'fs/promises';
 import execa, { type ExecaChildProcess } from 'execa';
+import { getKibanaBuildDir } from '@kbn/bench';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getBuildDir } from './get_build_dir';
 
 const execaEnv = { UNSAFE_DISABLE_NODE_VERSION_VALIDATION: '1' }; // mirror @kbn/workspaces
 
@@ -138,7 +138,7 @@ async function startKibana({
 
   const defaultBuildRoot = Path.join(cwd, 'build', 'default');
 
-  const distDir = await getBuildDir(defaultBuildRoot);
+  const distDir = await getKibanaBuildDir(defaultBuildRoot);
 
   const binFile = Path.join(distDir, 'bin', 'kibana');
 
