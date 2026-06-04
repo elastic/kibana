@@ -36,8 +36,8 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ConditionFieldGroup: () => <div data-test-subj="mockConditionFieldGroup" />,
   RuleExecutionFieldGroup: () => <div data-test-subj="mockRuleExecutionFieldGroup" />,
   AlertConditionsFieldGroup: () => <div data-test-subj="mockAlertConditionsFieldGroup" />,
-  KindField: ({ disabled, compact }: { disabled?: boolean; compact?: boolean }) => (
-    <div data-test-subj="mockKindField" data-disabled={disabled} data-compact={compact} />
+  KindField: ({ disabled, compressed }: { disabled?: boolean; compressed?: boolean }) => (
+    <div data-test-subj="mockKindField" data-disabled={disabled} data-compressed={compressed} />
   ),
   mapRuleResponseToFormValues: (rule: unknown) => ({
     kind: 'alert',
@@ -104,12 +104,12 @@ describe('QuickEditRuleFlyout', () => {
     expect(screen.getByTestId('mockAlertConditionsFieldGroup')).toBeInTheDocument();
   });
 
-  it('renders KindField as disabled and compact', () => {
+  it('renders KindField as disabled and compressed', () => {
     renderFlyout();
 
     const kindField = screen.getByTestId('mockKindField');
     expect(kindField).toHaveAttribute('data-disabled', 'true');
-    expect(kindField).toHaveAttribute('data-compact', 'true');
+    expect(kindField).toHaveAttribute('data-compressed', 'true');
   });
 
   it('calls onClose when the close button is clicked', () => {
