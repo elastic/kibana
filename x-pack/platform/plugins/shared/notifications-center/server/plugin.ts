@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import {
+  NOTIFICATION_TYPE_FLAGS,
   NOTIFICATIONS_CENTER_UI_ENABLED_DEFAULT,
   NOTIFICATIONS_CENTER_UI_ENABLED_FLAG,
 } from '../common';
@@ -42,20 +43,15 @@ export class NotificationsCenterPlugin
   public setup(
     _core: CoreSetup<NotificationsCenterStartDependencies, NotificationsCenterPluginStart>
   ): NotificationsCenterPluginSetup {
-    // Nothing user-visible yet. The plugin only reaches `setup` when
-    // `xpack.notificationsCenter.enabled` is not explicitly `false`; the
-    // feature flags then keep everything dark by default.
+    // Gated by `xpack.notificationsCenter.enabled` in kibana config
     this.logger.debug('Setting up Notifications Center plugin');
     return {};
   }
 
   public start(core: CoreStart): NotificationsCenterPluginStart {
-    // Evaluate the off-by-default UI flag once at startup. This exercises the
-    // flag registration and surfaces the resolved value in debug logs during
-    // local development. Per the feature-flags service contract, evaluation
-    // must never gate setup-time wiring (route/app registration) — it is
-    // purely observational here.
-    void this.logResolvedFeatureFlags(core.featureFlags);
+    // Per the feature-flags service contract, evaluation
+    // must never gate plugin setup — it is purely observational here.
+    this.logResolvedFeatureFlags(core.featureFlags);
     return {};
   }
 
@@ -67,8 +63,16 @@ export class NotificationsCenterPlugin
         NOTIFICATIONS_CENTER_UI_ENABLED_FLAG,
         NOTIFICATIONS_CENTER_UI_ENABLED_DEFAULT
       );
+      const notificationTypeFlags = await Promise.all(
+        Object.values(NOTIFICATION_TYPE_FLAGS).map((flag) =>
+          featureFlags.getBooleanValue(flag, false)
+        )
+      );
       this.logger.debug(
-        `Notifications Center feature flags resolved: ${NOTIFICATIONS_CENTER_UI_ENABLED_FLAG}=${uiEnabled}`
+        `Notifications Center feature flags resolved: ${JSON.stringify({
+          uiEnabled,
+          notificationTypeFlags,
+        })}`
       );
     } catch (error) {
       this.logger.warn(`Failed to resolve Notifications Center feature flags: ${String(error)}`);

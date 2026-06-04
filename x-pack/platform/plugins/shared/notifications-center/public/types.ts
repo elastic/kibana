@@ -6,13 +6,8 @@
  */
 
 /**
- * Public browser-side setup contract. Empty while the plugin is a bare shell;
- * the user-visible UI (gated on `notificationsCenter.uiEnabled`) lands in a
- * later issue.
+ * UI plugin setup is gated on `notificationsCenter.uiEnabled` feature flag
  */
 export type NotificationsCenterPublicSetup = Record<string, never>;
 
-/**
- * Public browser-side start contract. Empty for now.
- */
 export type NotificationsCenterPublicStart = Record<string, never>;

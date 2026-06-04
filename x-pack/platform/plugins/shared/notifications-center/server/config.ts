@@ -9,11 +9,8 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   /**
-   * Static enablement switch. Defaults to `false` while the Notifications
-   * Center is incubating, so the plugin is opt-in: core skips it entirely —
-   * neither the server nor the browser plugin is instantiated — until a
-   * deployment sets `xpack.notificationsCenter.enabled: true`. Once enabled,
-   * the feature flags govern dynamic, per-deployment rollout.
+   * Plugin enablement switch. Defaults to `false`.
+   * Controlled by `xpack.notificationsCenter.enabled: <boolean>` in kibana.yml
    */
   enabled: schema.boolean({ defaultValue: false }),
 });

@@ -7,7 +7,7 @@
 
 import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
 import type { PluginConfigDescriptor, PluginInitializer } from '@kbn/core/server';
-import { NOTIFICATIONS_CENTER_UI_ENABLED_FLAG } from '../common';
+import { NOTIFICATION_TYPE_FLAGS, NOTIFICATIONS_CENTER_UI_ENABLED_FLAG } from '../common';
 import { configSchema, type NotificationsCenterConfig } from './config';
 import type {
   NotificationsCenterPluginSetup,
@@ -19,15 +19,12 @@ import type {
 export type { NotificationsCenterPluginSetup, NotificationsCenterPluginStart } from './types';
 
 /**
- * In-repo declaration of the Notifications Center feature flags. Defaults to
- * the OFF variation; the active default per environment is set by the
- * segmentation rules in the external `elastic/kibana-feature-flags` repo.
+ * Notifications Center related feature flags for use with core feature flags service.
+ * This includes the plugin visibility flag and per-notification-type flags.
  *
- * Per-notification-type flags are declared here too as concrete types land:
- * append a static definition whose `key` is the literal from
- * `NOTIFICATION_TYPE_FLAGS` (in `common/feature_flags.ts`). Keys are never
- * generated at runtime so the full set stays statically discoverable. See the
- * per-type strategy in `common/feature_flags.ts`.
+ * Notification type flags are declared in `common/feature_flags.ts`.
+ * To allow more granular control of releasing different notification types,
+ * each notification type has its own flag and is registered here by consumers.
  */
 export const featureFlags: FeatureFlagDefinitions = [
   {
@@ -39,6 +36,17 @@ export const featureFlags: FeatureFlagDefinitions = [
     variations: [
       { name: 'Disabled', description: 'UI is hidden (default)', value: false },
       { name: 'Enabled', description: 'UI is shown', value: true },
+    ],
+  },
+  {
+    key: NOTIFICATION_TYPE_FLAGS.modelStatus,
+    name: 'Model Status',
+    description: 'Enables the Model Status notification type.',
+    tags: ['notifications-center', 'search-kibana', 'inference'],
+    variationType: 'boolean',
+    variations: [
+      { name: 'Disabled', description: 'Model Status is hidden (default)', value: false },
+      { name: 'Enabled', description: 'Model Status is shown', value: true },
     ],
   },
 ];

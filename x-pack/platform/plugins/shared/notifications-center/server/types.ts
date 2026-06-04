@@ -8,9 +8,8 @@
 /**
  * Public server-side setup contract.
  *
- * Empty while the plugin is a bare shell. The producer-facing `submit(draft)`
- * API that consumers call to push notifications is added in a later issue
- * (lifecycle / schema work); it will be surfaced here.
+ * Empty while the plugin is a bare shell. The external `submit(draft)`
+ * API that consumers call to push notifications will be added here
  */
 export type NotificationsCenterPluginSetup = Record<string, never>;
 

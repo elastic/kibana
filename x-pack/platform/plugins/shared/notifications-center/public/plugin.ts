@@ -12,9 +12,7 @@ export class NotificationsCenterPlugin
   implements Plugin<NotificationsCenterPublicSetup, NotificationsCenterPublicStart>
 {
   public setup(_core: CoreSetup): NotificationsCenterPublicSetup {
-    // Intentionally registers no application. The user-visible UI is gated on
-    // the `notificationsCenter.uiEnabled` feature flag and is introduced in a
-    // later issue, so this shell stays dark.
+    // Gated by `notificationsCenter.uiEnabled` feature flag
     return {};
   }
 
