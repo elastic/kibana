@@ -328,6 +328,22 @@ describe('convert', () => {
     });
   });
 
+  test('includes null in enum when converting schema.nullable oneOf literals', () => {
+    expect(
+      convert(
+        schema.nullable(schema.oneOf([schema.literal(1), schema.literal(2), schema.literal(3)]))
+      )
+    ).toEqual({
+      schema: {
+        default: null,
+        enum: [1, 2, 3, null],
+        nullable: true,
+        type: 'integer',
+      },
+      shared: {},
+    });
+  });
+
   test('materializes function defaults once for referenced schemas', () => {
     const defaultValue = jest.fn(() => ({ b: 'default' }));
     const objectWithFunctionDefaultSchema = schema.object(

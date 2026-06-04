@@ -9,6 +9,7 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import { isReferenceObject } from '../../../common';
+import { ensureNullableEnumIncludesNull } from './utils';
 
 /** Identify special case output of schema.nullable() */
 const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => {
@@ -87,7 +88,9 @@ const prettifyEnum = (schema: OpenAPIV3.SchemaObject) => {
 
 export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   if (!schema.anyOf) return;
-  if (processNullableOutput(schema)) return;
-  replaceNullableOutputWithNullable(schema);
-  prettifyEnum(schema);
+  if (!processNullableOutput(schema)) {
+    replaceNullableOutputWithNullable(schema);
+    prettifyEnum(schema);
+  }
+  ensureNullableEnumIncludesNull(schema);
 };

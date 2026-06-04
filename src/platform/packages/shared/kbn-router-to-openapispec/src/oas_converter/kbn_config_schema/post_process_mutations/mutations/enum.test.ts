@@ -339,6 +339,27 @@ describe('processEnum', () => {
         nullable: true,
       },
     },
+    {
+      name: 'collapses nullable anyOf for numeric enums',
+      input: {
+        anyOf: [
+          {
+            type: 'number',
+            enum: [1, 2, 3],
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        type: 'number',
+        enum: [1, 2, 3, null],
+        nullable: true,
+      },
+    },
   ])('$name', ({ input, expected }) => {
     processEnum(input);
     expect(input).toEqual(expected);
