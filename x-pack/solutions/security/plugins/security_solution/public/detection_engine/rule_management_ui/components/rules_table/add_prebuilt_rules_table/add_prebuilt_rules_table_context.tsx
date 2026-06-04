@@ -201,10 +201,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
       perPage: pagination.perPage,
       filterOptions,
       sortingOptions,
-      // When deep-linked to a specific rule (e.g. chat link), scope the query
-      // server-side so the rule is returned regardless of where it falls in
-      // the catalog. The default pagination still applies on top.
-      ruleIds: ruleIdFromUrl ? [ruleIdFromUrl] : undefined,
     },
     {
       refetchInterval: 60000, // Refetch available rules for installation every minute

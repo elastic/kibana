@@ -347,7 +347,9 @@ export const recommendRulesToInstallTool = (
         installedRuleVersionsMap
       );
 
-      const installableAssets = await ruleAssetsClient.fetchAssetsByVersion(installableVersions);
+      const { assets: installableAssets } = await ruleAssetsClient.fetchAssetsByVersion(
+        installableVersions
+      );
 
       const {
         runnableRules,

@@ -25,7 +25,7 @@ export const useFindInstalledPrebuiltRuleByRuleId = (
 ): { rule: RuleResponse | undefined; isFetching: boolean; isFetched: boolean } => {
   const queryResult = useFindRulesQuery(
     {
-      filter: ruleId ? `alert.attributes.params.ruleId: "${ruleId}"` : '',
+      filter: ruleId ? { term: `alert.attributes.params.ruleId: "${ruleId}"` } : undefined,
       pagination: { page: 1, perPage: 1 },
     },
     { enabled: Boolean(ruleId) && (options?.enabled ?? true) }
