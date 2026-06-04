@@ -17,18 +17,22 @@ import type { ContextDependencies } from './types';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
+export type WorkflowExecutionForInputRendering = Partial<EsWorkflowExecution> &
+  Pick<EsWorkflowExecution, 'id' | 'workflowId' | 'spaceId' | 'createdAt'>;
+
 export function buildInputDefaultRenderContext(
-  workflowExecution: Partial<EsWorkflowExecution>,
+  workflowExecution: WorkflowExecutionForInputRendering,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): WorkflowContext {
-  const executionId = workflowExecution.id ?? '';
-  const workflowId = workflowExecution.workflowId ?? '';
-  const spaceId = workflowExecution.spaceId ?? 'default';
-  const startedAt =
-    workflowExecution.startedAt ?? workflowExecution.createdAt ?? new Date().toISOString();
+  const startedAt = workflowExecution.startedAt ?? workflowExecution.createdAt;
   const kibanaUrl = getKibanaUrl(coreStart, dependencies?.cloudSetup);
-  const executionUrl = buildWorkflowExecutionUrl(kibanaUrl, spaceId, workflowId, executionId);
+  const executionUrl = buildWorkflowExecutionUrl(
+    kibanaUrl,
+    workflowExecution.spaceId,
+    workflowExecution.workflowId,
+    workflowExecution.id
+  );
   const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
   const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
     | string
@@ -41,7 +45,7 @@ export function buildInputDefaultRenderContext(
 
   return {
     execution: {
-      id: executionId,
+      id: workflowExecution.id,
       isTestRun: !!workflowExecution.isTestRun,
       startedAt: new Date(startedAt),
       url: executionUrl,
@@ -49,10 +53,10 @@ export function buildInputDefaultRenderContext(
       triggeredBy: workflowExecution.triggeredBy,
     },
     workflow: {
-      id: workflowId,
+      id: workflowExecution.workflowId,
       name: workflowExecution.workflowDefinition?.name ?? '',
       enabled: workflowExecution.workflowDefinition?.enabled ?? false,
-      spaceId,
+      spaceId: workflowExecution.spaceId,
     },
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},

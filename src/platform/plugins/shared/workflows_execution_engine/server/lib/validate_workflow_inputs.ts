@@ -8,7 +8,6 @@
  */
 
 import type { CoreStart, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
@@ -17,7 +16,10 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildInputDefaultRenderContext } from '../workflow_context_manager/build_workflow_context';
+import {
+  buildInputDefaultRenderContext,
+  type WorkflowExecutionForInputRendering,
+} from '../workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 
 /**
@@ -27,16 +29,12 @@ import type { ContextDependencies } from '../workflow_context_manager/types';
  * @returns true if inputs are valid and execution can proceed, false if validation failed
  */
 export const validateWorkflowInputs = async (
-  workflowExecution: Partial<EsWorkflowExecution>,
+  workflowExecution: WorkflowExecutionForInputRendering,
   workflowExecutionRepository: WorkflowExecutionRepository,
   logger: Logger,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): Promise<boolean> => {
-  if (!workflowExecution.id) {
-    throw new Error('Workflow execution ID is required for input validation');
-  }
-
   if (!workflowExecution.workflowDefinition) {
     return true;
   }
