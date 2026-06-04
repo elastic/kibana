@@ -359,6 +359,7 @@ export const SECURITY_TELEMETRY_URL = `/internal/security_solution/telemetry` as
 export const TIMELINE_RESOLVE_URL = '/api/timeline/resolve' as const;
 export const TIMELINE_URL = '/api/timeline' as const;
 export const TIMELINES_URL = '/api/timelines' as const;
+export const INTERNAL_TIMELINE_BY_IDS_URL = '/internal/timeline/_by_ids' as const;
 export const TIMELINE_FAVORITE_URL = '/api/timeline/_favorite' as const;
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;

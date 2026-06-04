@@ -61,3 +61,10 @@ export const SELECT_TIMELINE_MODAL_TITLE = i18n.translate(
     defaultMessage: 'Select a timeline',
   }
 );
+
+export const NO_TIMELINES_ATTACHED = i18n.translate(
+  'xpack.securitySolution.cases.timelineAttachment.tab.empty',
+  {
+    defaultMessage: 'No timelines have been attached to this case yet.',
+  }
+);
