@@ -11,15 +11,11 @@ import type { InitialBenchConfig } from '@kbn/bench';
 import type { ScriptBenchmark } from '@kbn/bench';
 
 function createBenchmark(name: string, config: string) {
-  let runEnv = '';
-  if (!process.env.CI) {
-    runEnv = 'CI=true NODE_OPTIONS=--no-deprecation '; // just for local runs
-  }
   return {
     kind: 'script' as const,
     name,
     run: ({ kibanaBuildDir }) =>
-      `${runEnv} node scripts/functional_tests --config ${config} --kibana-install-dir "${kibanaBuildDir}"`,
+      `node scripts/functional_tests --config ${config} --kibana-install-dir "${kibanaBuildDir}"`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
