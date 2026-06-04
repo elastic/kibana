@@ -77,11 +77,10 @@ describe('LanguageModal', () => {
     fireEvent.click(getByTestId('languageModalSaveButton'));
 
     expect(onChangeMock).toHaveBeenCalledWith('fr-FR', true);
-    expect(reportUiCounterMock).toHaveBeenCalledWith(
-      'display_language',
-      METRIC_TYPE.COUNT,
-      'language_changed_fr-FR'
-    );
+    expect(reportUiCounterMock).toHaveBeenCalledWith('display_language', METRIC_TYPE.COUNT, [
+      'language_changed_from_en',
+      'language_changed_to_fr-FR',
+    ]);
     expect(closeModal).toHaveBeenCalled();
   });
 

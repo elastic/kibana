@@ -474,11 +474,10 @@ describe('useUserProfileForm', () => {
         await result.current.submitForm();
       });
 
-      expect(reportUiCounter).toHaveBeenCalledWith(
-        'display_language',
-        METRIC_TYPE.COUNT,
-        'language_changed_fr-FR'
-      );
+      expect(reportUiCounter).toHaveBeenCalledWith('display_language', METRIC_TYPE.COUNT, [
+        'language_changed_from_en',
+        'language_changed_to_fr-FR',
+      ]);
     });
 
     it('should not call reportUiCounter when locale is unchanged on submit', async () => {

@@ -119,11 +119,10 @@ export const LanguageModal: FC<Props> = ({ closeModal, usageCollection }) => {
           onClick={() => {
             if (locale !== initialLocaleValue) {
               onChange(locale, true);
-              usageCollection?.reportUiCounter(
-                'display_language',
-                METRIC_TYPE.COUNT,
-                `language_changed_${locale}`
-              );
+              usageCollection?.reportUiCounter('display_language', METRIC_TYPE.COUNT, [
+                `language_changed_from_${initialLocaleValue}`,
+                `language_changed_to_${locale}`,
+              ]);
             }
             closeModal();
           }}

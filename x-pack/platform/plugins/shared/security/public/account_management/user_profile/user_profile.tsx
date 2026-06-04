@@ -1035,11 +1035,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         values.data &&
         initialValues.data?.userSettings.locale !== values.data.userSettings.locale
       ) {
-        services.usageCollection?.reportUiCounter(
-          'display_language',
-          METRIC_TYPE.COUNT,
-          `language_changed_${values.data.userSettings.locale}`
-        );
+        services.usageCollection?.reportUiCounter('display_language', METRIC_TYPE.COUNT, [
+          `language_changed_from_${initialValues.data?.userSettings.locale}`,
+          `language_changed_to_${values.data.userSettings.locale}`,
+        ]);
       }
 
       showSuccessNotification({ isRefreshRequired });
