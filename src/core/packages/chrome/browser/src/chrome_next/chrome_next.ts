@@ -8,6 +8,7 @@
  */
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
+import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
@@ -186,4 +187,20 @@ export interface ChromeNext {
      */
     set(config: AppHeaderConfig): () => void;
   };
+  /**
+   * Register a handler that opens the feedback UI in the Chrome Next help menu.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerFeedbackHandler(handler: () => void): () => void;
+  /** Get the currently registered Chrome Next feedback handler. */
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+  /**
+   * Register a handler that opens the newsfeed UI in the Chrome Next help menu.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerNewsfeedHandler(handler: { open: () => void; hasNew$: Observable<boolean> }): () => void;
+  /** Get the currently registered Chrome Next newsfeed handler. */
+  getNewsfeedHandler$(): Observable<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 }
