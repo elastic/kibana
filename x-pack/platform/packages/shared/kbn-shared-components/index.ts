@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export * from './src/connector_icon';
-export * from './src/kibana_version';
-export * from './src/form_info_field/form_info_field';
-export * from './src/search_empty_prompt';
-export * from './src/constants';
-export type * from './src/types';
+export { TrialUsageBadge } from './src/trial_usage_badge';
+export { CloudLinks } from './src/cloud_links';

@@ -7,9 +7,16 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { CloudLinksPillStyle } from './cloud_links_styles';
 
 interface CloudLink {
@@ -18,11 +25,13 @@ interface CloudLink {
   href: string;
 }
 
-export const CloudLinks = () => {
-  const {
-    services: { cloud },
-  } = useKibana();
+interface CloudLinksProps {
+  cloud?: CloudStart;
+  CloudBaseOnly?: boolean;
+}
 
+export const CloudLinks = ({ cloud, CloudBaseOnly = false }: CloudLinksProps) => {
+  const euiThemeContext = useEuiTheme();
   const [billingUrl, setBillingUrl] = useState<string>('');
   const [isLoadingPrivilegedUrls, setIsLoadingPrivilegedUrls] = useState(true);
   useEffect(() => {
@@ -43,27 +52,27 @@ export const CloudLinks = () => {
     if (cloud?.baseUrl) {
       links.push({
         id: 'elasticCloud',
-        label: i18n.translate('xpack.searchHomepage.cloudLinks.elasticCloud', {
+        label: i18n.translate('xpack.sharedComponents.cloudLinks.elasticCloud', {
           defaultMessage: 'Elastic Cloud',
         }),
         href: cloud.baseUrl,
       });
     }
 
-    if (billingUrl) {
+    if (billingUrl && !CloudBaseOnly) {
       links.push({
         id: 'usage',
-        label: i18n.translate('xpack.searchHomepage.cloudLinks.usage', {
+        label: i18n.translate('xpack.sharedComponents.cloudLinks.usage', {
           defaultMessage: 'Usage',
         }),
         href: billingUrl,
       });
     }
 
-    if (cloud?.organizationUrl) {
+    if (cloud?.organizationUrl && !CloudBaseOnly) {
       links.push({
         id: 'organization',
-        label: i18n.translate('xpack.searchHomepage.cloudLinks.organization', {
+        label: i18n.translate('xpack.sharedComponents.cloudLinks.organization', {
           defaultMessage: 'Organization',
         }),
         href: cloud.organizationUrl,
@@ -71,7 +80,7 @@ export const CloudLinks = () => {
     }
 
     return links;
-  }, [cloud, billingUrl]);
+  }, [cloud, CloudBaseOnly, billingUrl]);
 
   if (!cloud?.isCloudEnabled || !cloud?.baseUrl) {
     return null;
@@ -82,13 +91,13 @@ export const CloudLinks = () => {
   }
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" css={CloudLinksPillStyle}>
+    <EuiFlexGroup gutterSize="m" alignItems="center" css={CloudLinksPillStyle(euiThemeContext)}>
       <EuiFlexItem grow={false}>
         <EuiLink
           href={cloud.baseUrl}
           target="_blank"
           external={false}
-          aria-label={i18n.translate('xpack.searchHomepage.cloudLinks.homeAriaLabel', {
+          aria-label={i18n.translate('xpack.sharedComponents.cloudLinks.homeAriaLabel', {
             defaultMessage: 'Elastic Cloud home',
           })}
           data-test-subj="searchHomepageCloudLink-home"
