@@ -52,6 +52,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws#connect');
 
     // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
     await page.evaluate(() => {
@@ -60,8 +61,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
         JSON.stringify({ selectedServiceIds: [] })
       );
     });
-
-    await page.gotoApp('onboarding/aws#connect');
+    await page.reload();
     await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
     // Identity federation is shown when no services are selected; with no connectors the New Identity tab is shown
@@ -135,6 +135,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
       connectorId = response.data.item.id;
 
       await browserAuth.loginAsAdmin();
+      await page.gotoApp('onboarding/aws#connect');
 
       // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
       await page.evaluate(() => {
@@ -143,8 +144,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
           JSON.stringify({ selectedServiceIds: [] })
         );
       });
-
-      await page.gotoApp('onboarding/aws#connect');
+      await page.reload();
       await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
       // When at least one connector exists, the Existing Identity tab is pre-selected
