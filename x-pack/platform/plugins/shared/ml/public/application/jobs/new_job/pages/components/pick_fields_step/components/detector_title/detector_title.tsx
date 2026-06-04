@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
@@ -46,18 +46,25 @@ export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
 
       <EuiFlexItem grow={false}>
         {deleteDetector !== undefined && (
-          <EuiButtonIcon
-            color={'danger'}
-            onClick={() => deleteDetector(index)}
-            iconType="cross"
-            size="s"
-            aria-label={i18n.translate(
-              'xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel',
-              {
-                defaultMessage: 'Next',
-              }
-            )}
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.deleteButtonAriaLabel', {
+              defaultMessage: 'Delete',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              color={'danger'}
+              onClick={() => deleteDetector(index)}
+              iconType="cross"
+              size="s"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.pickFieldsStep.deleteButtonAriaLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
+            />
+          </EuiToolTip>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

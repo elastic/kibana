@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiEmptyPrompt,
@@ -35,8 +35,8 @@ import useAsync from 'react-use/lib/useAsync';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import { embeddableService } from '../../../../services/kibana_services';
 import { useMenuItemGroups } from '../use_menu_item_groups';
+import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
-import { FeaturedItems } from './featured_menu_items';
 import { Groups } from './groups';
 
 const TAB_NEW_ID = 'new' as const;
@@ -44,7 +44,12 @@ const TAB_LIBRARY_ID = 'library' as const;
 type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
 
 function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
-  const { groups, loading, error } = useMenuItemGroups({ dashboardApi });
+  const {
+    groups,
+    loading: isLoadingGroups,
+    error: loadGroupsError,
+  } = useMenuItemGroups({ dashboardApi });
+  const { featuredItems, loading: isLoadingFeaturedItems } = useFeaturedItems({ dashboardApi });
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
@@ -87,28 +92,8 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
     );
   }, [groups, searchTerm]);
 
-  const { featuredItems, groupsForList } = useMemo(() => {
-    const featuredItemIds = Object.keys(FeaturedItems);
-    const featured: Array<MenuItem & { id: keyof typeof FeaturedItems }> = [];
-    const list: MenuItemGroup[] = [];
-    filteredGroups.forEach((group, index) => {
-      list.push({ ...group, items: [] });
-      group.items.forEach((item) => {
-        if (featuredItemIds.includes(item.id)) {
-          featured.push({ ...item, id: item.id as keyof typeof FeaturedItems });
-        } else {
-          list[index].items.push(item);
-        }
-      });
-    });
-    return {
-      featuredItems: featured,
-      groupsForList: list.filter((group) => group.items.length > 0),
-    };
-  }, [filteredGroups]);
-
   return (
-    <EuiSkeletonText isLoading={loading}>
+    <EuiSkeletonText isLoading={isLoadingGroups || isLoadingFeaturedItems}>
       <EuiFlexGroup
         data-test-subj="dashboardPanelSelectionFlyout"
         direction="column"
@@ -148,14 +133,14 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type={FeaturedItems[item.id].icon} size="m" aria-hidden={true} />
+                        <EuiIcon type={item.icon} size="m" aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="s">
-                          <strong>{FeaturedItems[item.id].title}</strong>
+                          <strong>{item.name}</strong>
                         </EuiText>
                         <EuiText size="xs" color="subdued">
-                          {FeaturedItems[item.id].description}
+                          {item.description}
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -165,7 +150,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
           </EuiFlexItem>
         )}
         <EuiFlexItem css={styles.flyoutContentWrapper}>
-          {error ? (
+          {loadGroupsError ? (
             <EuiEmptyPrompt
               iconType="warning"
               iconColor="danger"
@@ -180,7 +165,7 @@ function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
               data-test-subj="dashboardPanelSelectionErrorIndicator"
             />
           ) : (
-            <Groups groups={groupsForList} />
+            <Groups groups={filteredGroups} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

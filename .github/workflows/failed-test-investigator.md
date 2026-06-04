@@ -27,6 +27,8 @@ concurrency:
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+  # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
+  BUILDKITE_ORGANIZATION_SLUG: elastic
 
 engine:
   id: claude
@@ -53,6 +55,7 @@ network:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
+    - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
@@ -60,6 +63,28 @@ network:
     - elastic.litellm-prod.ai
 sandbox:
   agent: awf # Migrated from deprecated network setting
+steps:
+  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+    env:
+      BK_VERSION: 3.44.0
+      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
+      tmp="$(mktemp -d)"
+      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
+      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
+      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
+      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
+      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
+      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
+      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
+        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
+        exit 1
+      fi
+      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
+
 safe-outputs:
   noop:
     report-as-issue: false
@@ -89,7 +114,7 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 
 ## Investigate
 
-Investigate the test failure(s) using the `flaky-test-investigator` skill.
+Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -139,32 +164,42 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment. Keep the visible portion very short and easy to read:
+Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure. **Use `####` for all subsections** (e.g., `#### Proposed Fix`, `#### Root Cause`).
 
-1. **One-line bold headline** stating the result kind and one identifying detail.
-2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
-3. **Next steps** (≤5 concise bullet points).
+Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value. Do not also mention why the `ai:auto-flaky-fix` isn't added.
 
-Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Open the block with a `#### Findings` subsection containing exactly these four bullets in this order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape. These bullets must live **inside `<details>`**, never in the visible portion:
+### 1. The TL;DR (Required)
 
-- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-- `confidence`: `high` | `medium` | `low`
-- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-- `test.file`: repo-relative path, or `unknown`
+Start with a clear heading, essential metadata, and a brief summary of the failure, followed by a horizontal rule.
 
-The skill's "Reporting" subsections should also be inside the collapsible section:
+```
+## {Classification}: {One-line description of what broke}
 
-- What the test does
-- What failed and when
-- Where it ran
-- Root cause hypothesis
-- Evidence
-- Failure screenshot
-- Recommended next step
-- Open questions
+## **Classification:** {type} | **Confidence:** {level} | **Introduced by:** {commit/PR if known}
 
-Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+**Summary:** One or two sentences explaining the exact failure point.
+```
 
-End the comment with this footer line (verbatim, on its own line after the `</details>` block):
+### 2. Proposed fix (required)
 
-`<sup>AI-generated, share feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3)</sup>`
+Provide the most direct path to resolution immediately after the summary.
+
+- **Single file:** lead directly with the suggested code diff or specific action.
+- **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
+- **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
+
+### 3. Root Cause & Evidence (required)
+
+Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
+
+- Use concise paragraphs with inline Markdown links pointing to specific code lines, commits, or files.
+- Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
+- Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
+
+### 4. Additional context (optional)
+
+Include the following only if they provide high-value, actionable signal:
+
+- **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
+- **Verification:** specific steps to reproduce the failure or confirm the fix.
+- **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).

@@ -89,14 +89,13 @@ const buildRouteSetup = ({
   };
 
   const mockCoreContext = coreMock.createRequestHandlerContext();
-  const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
   datasetService.getClient.mockReturnValue(datasetClient);
   const context = coreMock.createCustomRequestHandlerContext({
     core: mockCoreContext,
     evals: { datasetService } as any,
   });
 
-  return { handler, context, logger, datasetClient, datasetService, esClient };
+  return { handler, context, logger, datasetClient, datasetService };
 };
 
 describe('dataset routes', () => {
@@ -125,7 +124,7 @@ describe('dataset routes', () => {
 
   describe('GET /internal/evals/datasets', () => {
     it('returns dataset listings with pagination', async () => {
-      const { handler, context, datasetClient, datasetService, esClient } = buildRouteSetup({
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
         registerRoute: registerListDatasetsRoute,
         method: 'get',
         path: EVALS_DATASETS_URL,
@@ -143,7 +142,7 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetService.getClient).toHaveBeenCalledWith(esClient);
+      expect(datasetService.getClient).toHaveBeenCalledWith();
       expect(datasetClient.list).toHaveBeenCalledWith({ page: 2, perPage: 5 });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -937,7 +936,6 @@ describe('dataset routes', () => {
       ];
 
       const mockCoreContext = coreMock.createRequestHandlerContext();
-      const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
       const datasetClient = { list: jest.fn() };
       const datasetService = { getClient: jest.fn().mockReturnValue(datasetClient) };
       const context = coreMock.createCustomRequestHandlerContext({
@@ -945,7 +943,7 @@ describe('dataset routes', () => {
         evals: { datasetService } as any,
       });
 
-      return { handler, context, logger, datasetClient, esClient };
+      return { handler, context, logger, datasetClient };
     };
 
     it('returns 501 when destination is remote but encryption is not configured', async () => {

@@ -353,11 +353,20 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.blocks.recover ?? '';
+          if (current.trim()) return q;
+          if (isBuilderMode) {
+            const formQuery = methods.getValues('query');
+            const builderRecover =
+              formQuery.format === 'composed' ? formQuery.blocks.recover ?? '' : '';
+            if (builderRecover.trim()) {
+              return { ...q, blocks: { ...q.blocks, recover: builderRecover } };
+            }
+          }
           return {
             ...q,
             blocks: {
               ...q.blocks,
-              recover: current.trim() ? current : guessRecoveryBlock(q.blocks.breach),
+              recover: guessRecoveryBlock(q.blocks.breach),
             },
           };
         });
@@ -378,6 +387,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
             methods.setValue('query', { format: 'standalone', breach: current.breach });
           }
         }
+        if (isBuilderMode && builderState) {
+          const { recovery: _, ...rest } = builderState as Record<string, unknown>;
+          setBuilderState(rest);
+        }
         // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
         // overwriting the recovery type change by writing the stale sandboxQuery back.
         // Skip syncSandbox here: (a) already set the clean state directly, and
@@ -386,15 +399,24 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
+      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
     },
-    [dispatch, methods, uiState.queryCommitted, uiState.childOpen, uiState.yamlMode]
+    [
+      dispatch,
+      methods,
+      isBuilderMode,
+      builderState,
+      uiState.queryCommitted,
+      uiState.childOpen,
+      uiState.yamlMode,
+    ]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
+  const isEditing = mode === 'edit';
   const title = getFlyoutTitle(mode);
 
-  const steps = getSteps(isAlert, builderType);
+  const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -436,10 +458,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const compose = formValuesFromYamlToCompose(result.values);
-          methods.reset(compose);
+          const composed = formValuesFromYamlToCompose(result.values);
+          methods.reset(composed);
           syncSandbox();
-          if (getBreachQuery(compose.query).trim()) {
+          if (getBreachQuery(composed.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
           }
         }
@@ -489,9 +511,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncSandbox() here: sandbox is temporarily stale after methods.reset(), but
+      // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
-      // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
+      // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
   }, [cancelYamlParse, yamlText, methods, handleSubmit]);
@@ -597,6 +619,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                   services={baseServices}
                   onRecoveryTypeChange={handleRecoveryTypeChange}
                   onKindChange={handleKindChange}
+                  isEditing={isEditing}
                   ruleId={ruleId}
                   builderType={builderType}
                 />

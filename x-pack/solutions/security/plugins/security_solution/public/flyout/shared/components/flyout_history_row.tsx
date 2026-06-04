@@ -213,6 +213,7 @@ export const AttackDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, 
   const { data: attackData, isLoading } = useFindAttackDiscoveries({
     ids: attackId ? [attackId] : [],
     http,
+    includeAllAuthors: true,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
     perPage: 1,
   });
