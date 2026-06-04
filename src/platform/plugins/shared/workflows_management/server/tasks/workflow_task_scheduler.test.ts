@@ -115,6 +115,22 @@ describe('WorkflowTaskScheduler', () => {
       );
     });
 
+    it('schedules without request options when no request is provided', async () => {
+      const mockTm = makeMockTaskManager();
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      const result = await scheduler.scheduleWorkflowTasks(makeWorkflow(), 'default');
+
+      expect(result).toEqual(['test-task-id']);
+      expect(mockTm.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow:test-workflow:scheduled',
+          taskType: 'workflow:scheduled',
+        }),
+        undefined
+      );
+    });
+
     it('returns empty array when workflow has no scheduled triggers', async () => {
       const mockTm = makeMockTaskManager();
       const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);

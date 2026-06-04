@@ -21,6 +21,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-executi
 import { ManagedWorkflowsService } from './managed_workflows_service';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 let mockManagedWorkflowDefinitions: ManagedWorkflowDefinition[] = [];
 
@@ -162,12 +163,15 @@ const createCrudServiceMock = () => {
         spaceId: string;
       }) => {
         const enabled = getYamlEnabled(yaml);
+        const triggers = yaml.includes('type: scheduled')
+          ? [{ type: 'scheduled' as const, with: { every: '5m' } }]
+          : [];
         return {
           workflowData: createWorkflowSource({
             name: id,
             enabled,
             yaml,
-            definition: { name: id, enabled } as WorkflowYaml,
+            definition: { name: id, enabled, triggers } as WorkflowYaml,
             createdBy: actor,
             lastUpdatedBy: actor,
             spaceId,
@@ -194,19 +198,27 @@ const createExecutionEngineMock = () =>
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
   } as unknown as WorkflowsExecutionEnginePluginStart);
 
+const createTaskSchedulerMock = () =>
+  ({
+    scheduleWorkflowTask: jest.fn().mockResolvedValue('task-id'),
+  } as unknown as jest.Mocked<WorkflowTaskScheduler>);
+
 const createService = () => {
   const crudService = createCrudServiceMock();
   const workflowsExecutionEngine = createExecutionEngineMock();
+  const taskScheduler = createTaskSchedulerMock();
   const logger = loggerMock.create();
   const service = new ManagedWorkflowsService({
     crudService: crudService as unknown as WorkflowCrudService,
     workflowsExecutionEngine,
+    taskScheduler,
     logger,
   });
 
   return {
     crudService,
     workflowsExecutionEngine,
+    taskScheduler,
     logger,
     service,
   };
@@ -250,6 +262,51 @@ describe('ManagedWorkflowsService', () => {
         }),
         { create: true }
       );
+    });
+
+    it('schedules enabled managed workflows with scheduled triggers without a request', async () => {
+      const definition = createDefinition({
+        yaml: `name: Managed Scheduled Workflow
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+steps: []
+`,
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service, taskScheduler } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(taskScheduler.scheduleWorkflowTask).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ type: 'scheduled' }),
+        undefined
+      );
+    });
+
+    it('does not schedule disabled managed workflows with scheduled triggers', async () => {
+      const definition = createDefinition({
+        yaml: `name: Managed Scheduled Workflow
+enabled: false
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+steps: []
+`,
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service, taskScheduler } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(taskScheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
     });
 
     it('preserves the stored enabled state when enablement is restorable', async () => {

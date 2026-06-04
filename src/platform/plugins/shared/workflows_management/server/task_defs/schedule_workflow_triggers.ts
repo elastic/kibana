@@ -22,7 +22,7 @@ export const scheduleWorkflowTriggers = async (params: {
   enabled: boolean;
   valid: boolean;
   spaceId: string;
-  request: KibanaRequest;
+  request?: KibanaRequest;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
 }): Promise<void> => {

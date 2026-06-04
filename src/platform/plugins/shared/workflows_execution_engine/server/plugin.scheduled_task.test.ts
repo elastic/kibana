@@ -139,4 +139,128 @@ describe('workflow:scheduled task runner', () => {
       `Workflow ${workflowId} not found in space ${spaceId}; removing orphaned scheduled task`
     );
   });
+
+  it('rejects request-less scheduled executions for user workflows', async () => {
+    const taskDefinitions: Record<string, TaskRegisterDefinition> = {};
+    const initializerContext = coreMock.createPluginInitializerContext({
+      logging: { console: false },
+      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    });
+
+    const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreSetup.getStartServices.mockResolvedValue([
+      coreStart,
+      {
+        taskManager: taskManagerMock.createStart(),
+        actions: {} as never,
+        workflowsExtensions: {} as never,
+        licensing: licensingMock.createStart(),
+      },
+      {} as never,
+    ]);
+
+    const taskManagerSetup = taskManagerMock.createSetup();
+    taskManagerSetup.registerTaskDefinitions.mockImplementation((definitions) => {
+      Object.assign(taskDefinitions, definitions);
+    });
+
+    plugin.setup(coreSetup as never, {
+      taskManager: taskManagerSetup,
+      cloud: {} as never,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
+    });
+
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      name: 'User workflow',
+      enabled: true,
+      managed: false,
+      definition: { name: 'User workflow', triggers: [], steps: [] },
+      yaml: '',
+    });
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner({
+      taskInstance: createTaskInstance(),
+      fakeRequest: undefined,
+      abortController: new AbortController(),
+    });
+
+    await expect(runner.run()).rejects.toThrow(
+      'Cannot execute a scheduled workflow without Kibana Request'
+    );
+  });
+
+  it('creates a Kibana system request for request-less managed scheduled executions', async () => {
+    const taskDefinitions: Record<string, TaskRegisterDefinition> = {};
+    const initializerContext = coreMock.createPluginInitializerContext({
+      logging: { console: false },
+      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    });
+
+    const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreStart.elasticsearch.client.asInternalUser.security.createApiKey.mockResolvedValue({
+      id: 'system-key-id',
+      api_key: 'system-key',
+    });
+    coreSetup.getStartServices.mockResolvedValue([
+      coreStart,
+      {
+        taskManager: taskManagerMock.createStart(),
+        actions: {} as never,
+        workflowsExtensions: {} as never,
+        licensing: licensingMock.createStart(),
+      },
+      {} as never,
+    ]);
+
+    const taskManagerSetup = taskManagerMock.createSetup();
+    taskManagerSetup.registerTaskDefinitions.mockImplementation((definitions) => {
+      Object.assign(taskDefinitions, definitions);
+    });
+
+    plugin.setup(coreSetup as never, {
+      taskManager: taskManagerSetup,
+      cloud: {} as never,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
+    });
+
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      name: 'Managed workflow',
+      enabled: true,
+      managed: true,
+      definition: {
+        name: 'Managed workflow',
+        settings: { timeout: '30m' },
+        triggers: [],
+        steps: [],
+      },
+      yaml: '',
+    });
+    mockCheckAndSkipIfExistingScheduledExecution.mockResolvedValueOnce(true);
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner({
+      taskInstance: createTaskInstance(),
+      fakeRequest: undefined,
+      abortController: new AbortController(),
+    });
+
+    await runner.run();
+
+    expect(coreStart.elasticsearch.client.asInternalUser.security.createApiKey).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expiration: '2100s',
+        metadata: expect.objectContaining({
+          type: 'managed_scheduled_workflow',
+          workflowId,
+        }),
+      })
+    );
+    expect(mockCheckAndSkipIfExistingScheduledExecution).toHaveBeenCalled();
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+  });
 });

@@ -17,6 +17,9 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
@@ -30,6 +33,7 @@ import {
 } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
+import { DEFAULT_WORKFLOW_TIMEOUT } from './default_workflow_settings';
 import {
   cancelWorkflow,
   checkAndSkipIfExistingScheduledExecution,
@@ -68,7 +72,7 @@ import type {
   WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-import { generateExecutionTaskScope } from './utils';
+import { generateExecutionTaskScope, parseDuration } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
@@ -87,6 +91,79 @@ import {
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
+
+const SYSTEM_WORKFLOW_API_KEY_EXPIRATION_BUFFER_MS = 5 * 60 * 1000;
+
+const getSystemWorkflowApiKeyExpiration = (workflow: WorkflowExecutionEngineModel): string => {
+  const timeout = workflow.definition?.settings?.timeout ?? DEFAULT_WORKFLOW_TIMEOUT;
+  const expirationMs = parseDuration(timeout) + SYSTEM_WORKFLOW_API_KEY_EXPIRATION_BUFFER_MS;
+  return `${Math.ceil(expirationMs / 1000)}s`;
+};
+
+const createKibanaSystemWorkflowRequest = async ({
+  coreStart,
+  workflow,
+  spaceId,
+}: {
+  coreStart: CoreStart;
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+}): Promise<KibanaRequest> => {
+  const apiKey = await coreStart.elasticsearch.client.asInternalUser.security.createApiKey({
+    name: `Managed scheduled workflow: ${workflow.id}`,
+    expiration: getSystemWorkflowApiKeyExpiration(workflow),
+    role_descriptors: {},
+    metadata: {
+      managed: true,
+      type: 'managed_scheduled_workflow',
+      workflowId: workflow.id,
+    },
+  });
+
+  const encodedApiKey = Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64');
+  const path = addSpaceIdToPath('/', spaceId);
+  const fakeRawRequest: FakeRawRequest = {
+    headers: {
+      authorization: `ApiKey ${encodedApiKey}`,
+      'kbn-system-request': 'true',
+    },
+    path,
+    url: new URL(`https://fake-request${path}`),
+    auth: {
+      isAuthenticated: true,
+    },
+  };
+  const request = kibanaRequestFactory(fakeRawRequest);
+  coreStart.http.basePath.set(request, path);
+
+  return request;
+};
+
+const getScheduledWorkflowExecutionRequest = async ({
+  fakeRequest,
+  coreStart,
+  workflow,
+  spaceId,
+}: {
+  fakeRequest?: KibanaRequest;
+  coreStart: CoreStart;
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+}): Promise<KibanaRequest> => {
+  if (fakeRequest) {
+    return fakeRequest;
+  }
+
+  if (!workflow.managed) {
+    throw new Error('Cannot execute a scheduled workflow without Kibana Request');
+  }
+
+  return createKibanaSystemWorkflowRequest({
+    coreStart,
+    workflow,
+    spaceId,
+  });
+};
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -400,9 +477,6 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         maxAttempts: 3,
         createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
-          if (!fakeRequest) {
-            throw new Error('Cannot execute a scheduled workflow without Kibana Request');
-          }
           const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
@@ -478,6 +552,13 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
+              const executionRequest = await getScheduledWorkflowExecutionRequest({
+                fakeRequest,
+                coreStart,
+                workflow,
+                spaceId,
+              });
+
               // Guard check: Check&Skip only when workflow has no concurrency strategy. When strategy is
               // set, the concurrency check (later) governs the limit and strategy.
               if (!workflow.definition?.settings?.concurrency?.strategy) {
@@ -523,7 +604,7 @@ export class WorkflowsExecutionEnginePlugin
                 'execution'
               );
               const executedBy = await getAuthenticatedUser(
-                fakeRequest,
+                executionRequest,
                 coreStart.security,
                 coreStart.elasticsearch.client
               );
@@ -595,7 +676,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskAbortController,
                 logger,
                 config,
-                fakeRequest,
+                fakeRequest: executionRequest,
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
