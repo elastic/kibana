@@ -10,19 +10,21 @@
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
 import type { DashboardDeleteResponseBody } from './types';
 
 export async function deleteDashboard(
   requestCtx: RequestHandlerContext,
-  id: string
+  id: string,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): Promise<DashboardDeleteResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { attributes: soAttributes, references: soReferences } =
     await core.savedObjects.client.get<DashboardSavedObjectAttributes>('dashboard', id);
   const {
     dashboardState: { title, tags },
-  } = transformDashboardOut(soAttributes, soReferences);
+  } = transformDashboardOut(soAttributes, soReferences, undefined, strictValidationSchema);
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
   return { id, data: { title: title ?? '', tags: tags ?? [] } };
 }
