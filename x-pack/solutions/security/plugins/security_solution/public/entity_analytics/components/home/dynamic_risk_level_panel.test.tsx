@@ -13,7 +13,7 @@ import { useCombinedRiskScoreKpi } from './use_combined_risk_score_kpi';
 import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_levels_esql_query';
 import { useKibana } from '../../../common/lib/kibana';
 import { RiskSeverity } from '../../../../common/search_strategy';
-import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_breakdown_table';
+import { ENTITY_RISK_LEVEL_FIELD } from './risk_level_breakdown_table';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 
 jest.mock('./use_combined_risk_score_kpi');
@@ -27,16 +27,10 @@ jest.mock('../risk_score_donut_chart', () => ({
   RiskScoreDonutChart: jest.fn(() => <div data-test-subj="mock-risk-score-donut-chart" />),
 }));
 
-jest.mock('./risk_level_breakdown_table', () => ({
-  ...jest.requireActual('./risk_level_breakdown_table'),
-  RiskLevelBreakdownTable: jest.fn(() => <div data-test-subj="mock-risk-level-breakdown-table" />),
-}));
-
 const mockUseCombinedRiskScoreKpi = useCombinedRiskScoreKpi as jest.Mock;
 const mockUseRiskLevelsEsqlQuery = useRiskLevelsEsqlQuery as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockRiskScoreDonutChart = RiskScoreDonutChart as unknown as jest.Mock;
-const mockRiskLevelBreakdownTable = RiskLevelBreakdownTable as unknown as jest.Mock;
 
 const buildKibanaServices = (addFilters: jest.Mock, isV2Enabled: boolean) => ({
   services: {
