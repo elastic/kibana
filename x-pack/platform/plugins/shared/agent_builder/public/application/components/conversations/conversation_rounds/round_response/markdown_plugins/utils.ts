@@ -27,7 +27,9 @@ export const createTagParser = <T extends Record<string, string | undefined>>(co
 }) => {
   return () => {
     const extractAttribute = (value: string, attr: string) => {
-      const regex = new RegExp(`${attr}="([^"]*)"`, 'i');
+      // (?:^|\s) prevents a short attr name like "id" from matching inside a
+      // longer attribute name (e.g. "field-id") that ends with the same string.
+      const regex = new RegExp(`(?:^|\\s)${attr}="([^"]*)"`, 'i');
       return value.match(regex)?.[1];
     };
 
