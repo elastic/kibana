@@ -12,12 +12,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
-import {
-  CLOUDFORMATION_TEMPLATE_FILENAME,
-  renderAgentlessCft,
-} from '../cloud_formation/render_agentless_cft';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
+import { getSelectedServicePermissions } from '../service_permissions';
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import { AwsPermissionsViewer } from './aws_permissions_viewer';
 
 interface ConnectStepProps {
   onNext: () => void;
@@ -36,9 +34,14 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
     );
   }, [selectedServiceIds]);
 
-  const staticKeysCloudFormationTemplate = useMemo(
-    () => renderAgentlessCft(selectedServiceIds),
+  const staticKeysPermissions = useMemo(
+    () => getSelectedServicePermissions(selectedServiceIds),
     [selectedServiceIds]
+  );
+
+  const staticKeysContent = useMemo(
+    () => <AwsPermissionsViewer services={staticKeysPermissions} />,
+    [staticKeysPermissions]
   );
 
   return (
@@ -50,8 +53,7 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
           initialStaticKeys={connectStep.staticKeys}
           initialTemporaryKeys={connectStep.temporaryKeys}
           showIdentityFederation={showIdentityFederation}
-          staticKeysCloudFormationTemplate={staticKeysCloudFormationTemplate || undefined}
-          staticKeysCloudFormationTemplateFileName={CLOUDFORMATION_TEMPLATE_FILENAME}
+          staticKeysContent={staticKeysContent}
           onNext={onNext}
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}

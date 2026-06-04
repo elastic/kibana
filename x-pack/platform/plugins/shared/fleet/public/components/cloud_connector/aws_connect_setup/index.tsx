@@ -32,6 +32,7 @@ export interface AwsConnectSetupProps {
   initialStaticKeys?: Partial<AwsStaticKeyCredentials>;
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
   showIdentityFederation?: boolean;
+  staticKeysContent?: React.ReactNode;
   staticKeysCloudFormationTemplate?: string;
   staticKeysCloudFormationTemplateFileName?: string;
   onNext?: () => void;
@@ -49,6 +50,7 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialStaticKeys,
   initialTemporaryKeys,
   showIdentityFederation = true,
+  staticKeysContent,
   staticKeysCloudFormationTemplate,
   staticKeysCloudFormationTemplateFileName,
   onNext,
@@ -110,12 +112,13 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
       )}
       {authType === 'static_keys' && (
         <>
-          {staticKeysCloudFormationTemplate ? (
-            <AwsStaticKeysCloudFormationGuide
-              cloudFormationTemplate={staticKeysCloudFormationTemplate}
-              cloudFormationTemplateFileName={staticKeysCloudFormationTemplateFileName}
-            />
-          ) : null}
+          {staticKeysContent ??
+            (staticKeysCloudFormationTemplate ? (
+              <AwsStaticKeysCloudFormationGuide
+                cloudFormationTemplate={staticKeysCloudFormationTemplate}
+                cloudFormationTemplateFileName={staticKeysCloudFormationTemplateFileName}
+              />
+            ) : null)}
           <AwsStaticKeysForm
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             initialValues={initialStaticKeys}
