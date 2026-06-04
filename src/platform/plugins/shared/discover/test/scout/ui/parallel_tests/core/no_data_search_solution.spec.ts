@@ -14,7 +14,7 @@
  */
 
 import type { PageObjects } from '@kbn/scout';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
@@ -33,7 +33,7 @@ const expectDocsRenderedWithTabsBar = async (discover: PageObjects['discover']) 
 
 spaceTest.describe(
   'Discover - no custom data view (search solution)',
-  { tag: testData.DISCOVER_STATEFUL_TAGS },
+  { tag: tags.stateful.all },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       // `es` is the search/Elasticsearch solution view (FTR's "search" solution).

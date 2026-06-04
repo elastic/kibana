@@ -34,6 +34,7 @@ import type { Schema, VisualizationsSetup, VisualizationsStart } from '.';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
+  createBaseVisualizationAsync: jest.fn(),
   registerAlias: jest.fn(),
   visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
   listingViewRegistry: { add: jest.fn() },

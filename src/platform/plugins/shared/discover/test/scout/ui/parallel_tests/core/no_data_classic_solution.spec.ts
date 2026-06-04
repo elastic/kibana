@@ -12,15 +12,14 @@
  * space: the default "All logs" data view is selected and the tabs bar shows.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
 
 const DEFAULT_LOGS_DATA_VIEW = 'All logs';
 
 spaceTest.describe(
   'Discover - no custom data view (classic solution)',
-  { tag: testData.DISCOVER_STATEFUL_TAGS },
+  { tag: tags.stateful.all },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       // A fresh space defaults to classic, but set it explicitly so a reused
