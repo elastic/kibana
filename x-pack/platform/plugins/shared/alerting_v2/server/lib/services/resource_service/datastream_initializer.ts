@@ -26,11 +26,6 @@ export class DatastreamInitializer implements IResourceInitializer {
   ) {}
 
   public async initialize(): Promise<void> {
-    await this.esClient.ilm.putLifecycle({
-      name: this.resourceDefinition.ilmPolicy.name,
-      policy: this.resourceDefinition.ilmPolicy.policy,
-    });
-
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
@@ -39,10 +34,11 @@ export class DatastreamInitializer implements IResourceInitializer {
         aliases: {},
         priority: 500,
         mappings: this.resourceDefinition.mappings,
+        lifecycle: this.resourceDefinition.lifecycle,
         settings: {
-          'index.lifecycle.name': this.resourceDefinition.ilmPolicy.name,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          'index.lifecycle.prefer_ilm': false,
         },
         _meta: {
           managed: true,
