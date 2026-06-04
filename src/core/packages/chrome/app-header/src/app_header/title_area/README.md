@@ -70,13 +70,13 @@ activates, so editable and non-editable headings line up identically.
 
 ## Edge cases that are deliberately handled
 
-- **Empty draft is still clickable.** An empty draft with no placeholder shrinks the
-  sizer to zero, collapsing the box to just the status icon — nothing to click into.
-  `emptyDraftFrame` floors the track to `~128px` **only while the draft is empty**, so
-  non-empty titles keep read/edit parity (no jump) but the empty field stays a
-  comfortable target. Trade-off: typing the first char shrinks the box to content
-  width. This is intentional; don't "fix" it by flooring all the time (that brings back
-  the width jump on short titles).
+- **Edit mode has a minimum width.** `editingTitleFrame` floors the grid track to
+  `~128px` (`minmax(calc(size.base * 8), max-content)`) so a short or empty title still
+  gives a comfortable click/typing target instead of collapsing to content width (or to
+  nothing, leaving only the status icon when empty). Long titles exceed the floor and
+  size to content. Trade-off: a short title widens slightly on entering edit mode; this
+  is the deliberate simple version (previously the floor was applied only while the draft
+  was empty to avoid that jump, at the cost of extra conditional logic).
 - **Trailing blur after Enter/Escape.** Resolving via keyboard unmounts the focused
   input, which fires a blur that would otherwise re-enter `save()`. `resolvingRef`
   guards against that double-commit; a genuine click-away still saves.

@@ -134,8 +134,12 @@ const useTitleStyles = () => {
       }
     `;
 
+    // Edit mode keeps a reasonable minimum width so a short or empty title still gives a
+    // comfortable click/typing target instead of collapsing to the content (or to nothing
+    // when empty). Long titles exceed the floor and size to content as usual.
     const editingTitleFrame = css`
       ${titleFrame};
+      grid-template-columns: minmax(calc(${euiTheme.size.base} * 8), max-content);
 
       &::after {
         border-width: ${euiTheme.border.width.thin};
@@ -146,14 +150,6 @@ const useTitleStyles = () => {
         border-width: ${euiTheme.border.width.thick};
         border-color: ${euiTheme.components.forms.borderFocused};
       }
-    `;
-
-    // An empty draft (no placeholder) shrinks the sizer to zero, collapsing the frame to
-    // just the absolutely-positioned status icon and leaving no clickable input to type
-    // back into. Floor the track only while the draft is empty so non-empty titles keep
-    // read/edit parity (no width jump) but the empty field stays a comfortable click target.
-    const emptyDraftFrame = css`
-      grid-template-columns: minmax(calc(${euiTheme.size.base} * 8), max-content);
     `;
 
     const invalidTitleFrame = css`
@@ -250,7 +246,6 @@ const useTitleStyles = () => {
       titleWrapper,
       titleFrame,
       editingTitleFrame,
-      emptyDraftFrame,
       invalidTitleFrame,
       readModeTrigger,
       input,
@@ -411,13 +406,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
         <EuiTitle size="s">
           <h1>
             {isEditing ? (
-              <div
-                css={[
-                  styles.editingTitleFrame,
-                  !draft.trim() ? styles.emptyDraftFrame : undefined,
-                  error ? styles.invalidTitleFrame : undefined,
-                ]}
-              >
+              <div css={[styles.editingTitleFrame, error ? styles.invalidTitleFrame : undefined]}>
                 {renderSizer(draft || placeholder || '')}
                 <input
                   ref={inputRef}
