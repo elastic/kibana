@@ -19,6 +19,7 @@ target
 /build
 .jruby
 .idea
+.claude/*.local.md
 .claude/*.local.json
 .claude/worktrees/
 .cursor
