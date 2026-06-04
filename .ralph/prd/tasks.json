@@ -51,7 +51,7 @@
         "A new entry has been prepended to ~/Repos/integrations/packages/security_ai_prompts/changelog.yml referencing elastic/kibana#271330",
         "A PR has been opened against elastic/integrations main and its URL has been logged to stdout"
       ],
-      "passes": false,
+      "passes": true,
       "dependsOn": [],
       "notes": "Read x-pack/solutions/security/packages/security-ai-prompts/README.md before starting — it contains the authoritative steps and exact paths. If yarn generate-security-ai-prompts is not in package.json scripts, check for node scripts/generate_security_ai_prompts.js. Increment patch version only (1.2.3 → 1.2.4). Changelog entry format must match the existing entries in changelog.yml. Branch name: sync/security-ai-prompts-kibana-271330."
     }
