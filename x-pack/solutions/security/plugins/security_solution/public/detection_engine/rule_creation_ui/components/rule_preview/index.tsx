@@ -34,6 +34,7 @@ import { LoadingHistogram } from './loading_histogram';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { AddRulePreviewAttachmentToChatButton } from './add_rule_preview_attachment_to_chat_button';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -97,6 +98,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 }) => {
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
+  const isRulePreviewAttachmentEnabled = useIsExperimentalFeatureEnabled(
+    'rulePreviewAttachmentEnabled'
+  );
 
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
@@ -341,7 +345,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       ) : null}
       <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
-      {!isPreviewRequestInProgress && previewId && (
+      {!isPreviewRequestInProgress && previewId && isRulePreviewAttachmentEnabled && (
         <>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
