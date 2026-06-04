@@ -98,6 +98,35 @@ export const createInboxActionConflictError = (
 };
 
 /**
+ * Signals that a provider could not parse the `source_id` segment for its
+ * namespace. This is a client/addressing error, not a provider outage, so the
+ * route maps it to HTTP 400 instead of the generic 500 fallback.
+ */
+export interface InvalidInboxActionSourceIdError extends Error {
+  readonly sourceApp: string;
+  readonly sourceId: string;
+}
+
+export const isInvalidInboxActionSourceIdError = (
+  error: unknown
+): error is InvalidInboxActionSourceIdError =>
+  error instanceof Error && error.name === 'InvalidInboxActionSourceIdError';
+
+export const createInvalidInboxActionSourceIdError = (
+  sourceApp: string,
+  sourceId: string,
+  expectedFormat: string
+): InvalidInboxActionSourceIdError => {
+  const error = new Error(
+    `Inbox action ${sourceApp}/${sourceId} has an invalid source_id. Expected format: ${expectedFormat}.`
+  ) as InvalidInboxActionSourceIdError;
+  error.name = 'InvalidInboxActionSourceIdError';
+  (error as { sourceApp: string }).sourceApp = sourceApp;
+  (error as { sourceId: string }).sourceId = sourceId;
+  return error;
+};
+
+/**
  * Fan-out + merge-sort + paginate registry. Each registered provider owns a
  * `sourceApp` namespace and handles its own storage. The registry is
  * deliberately dumb — it does not persist actions itself; it's a routing
@@ -169,6 +198,7 @@ export class InboxActionRegistry {
     }
   ): Promise<InboxActionRegistryListResult> {
     const { sourceApp, page, perPage } = params;
+    const providerPageSize = page * perPage;
     const scoped = sourceApp ? this.providers.get(sourceApp) : undefined;
     const targetProviders = sourceApp
       ? scoped
@@ -192,17 +222,25 @@ export class InboxActionRegistry {
           return { actions: [], total: 0 };
         }
         try {
-          const result = await handler.call(provider, providerParams as never, ctx);
-          // Providers may report a pre-pagination `total` larger than the
-          // number of actions they return (the workflows provider asks the
-          // management service for a bounded slice). If we expose that
-          // larger number as the registry-level total the UI shows
-          // pagination controls for pages the registry can never produce,
-          // since we merge-sort within what we received.
-          if (result.total > result.actions.length) {
+          const result = await handler.call(
+            provider,
+            {
+              ...providerParams,
+              page: 1,
+              perPage: providerPageSize,
+            } as never,
+            ctx
+          );
+          // The registry fetches the first N rows from each provider, where N
+          // is the end offset of the requested registry page. That is enough
+          // material to merge-sort and produce this page while still reporting
+          // each provider's true total. If a provider returns fewer rows than
+          // requested while claiming more exist, keep the response usable but
+          // log the contract mismatch because later pages may be incomplete.
+          if (result.total > result.actions.length && result.actions.length < providerPageSize) {
             this.logger.warn(
               `Inbox action provider "${provider.sourceApp}" reported ${result.total} total but returned ${result.actions.length}. ` +
-                `Truncating to the returned slice for registry-level pagination.`
+                `Registry pagination may be incomplete for this provider.`
             );
           }
           return result;
@@ -226,10 +264,7 @@ export class InboxActionRegistry {
           : sortKey(b).localeCompare(sortKey(a))
       );
 
-    // Use the merged length so `total` is always consistent with what the
-    // registry can actually page through. This avoids the empty-page
-    // footgun described above.
-    const total = merged.length;
+    const total = results.reduce((sum, result) => sum + result.total, 0);
 
     const start = (page - 1) * perPage;
     const end = start + perPage;

@@ -68,9 +68,14 @@ export const InboxAction = lazySchema(() =>
      */
     responded_at: z.string().nullable().optional(),
     /**
-     * Surface the response was submitted through (inbox, kibana_execution_view, agent_builder, slack, api)
+     * Surface the response was submitted through (inbox, kibana_execution_view, agent_builder, slack, or another slug-shaped client id)
      */
-    channel: z.string().nullable().optional(),
+    channel: z
+      .string()
+      .max(64)
+      .regex(/^[a-z0-9][a-z0-9_-]*$/)
+      .nullable()
+      .optional(),
     /**
      * Distinguishes a human response from a timeout-default resolution
      */
@@ -113,7 +118,7 @@ export const ListInboxActionsRequestQuery = lazySchema(() =>
      * Filter actions by the originating app id
      */
     source_app: z.string().max(256).optional(),
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce.number().int().min(1).max(100).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })
 );

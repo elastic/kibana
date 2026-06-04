@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -40,6 +40,9 @@ import { DEFAULT_INBOX_ACTIONS_PER_PAGE, INBOX_CHANNELS } from '@kbn/inbox-commo
 import { useInboxActionsHistory, useInboxActionsHistoryFacets } from '../../../hooks/use_inbox_api';
 import * as i18n from '../translations';
 import { InboxReasoning } from './inbox_reasoning';
+
+const HISTORY_SEARCH_MAX_LENGTH = 256;
+const HISTORY_SEARCH_DEBOUNCE_MS = 300;
 
 /**
  * History rows pass through two server states during the "responded but
@@ -144,7 +147,11 @@ const buildBody = (action: InboxAction) => {
         <EuiText size="xs" color="subdued">
           <strong>{i18n.HISTORY_RESPONSE_LABEL}</strong>
         </EuiText>
-        {responsePayload && Object.keys(responsePayload).length > 0 ? (
+        {isProcessing(action) ? (
+          <EuiText size="s" color="subdued">
+            <p>{i18n.HISTORY_RESPONSE_PROCESSING_BODY}</p>
+          </EuiText>
+        ) : responsePayload && Object.keys(responsePayload).length > 0 ? (
           <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
             {JSON.stringify(responsePayload, null, 2)}
           </EuiCodeBlock>
@@ -521,6 +528,7 @@ const HistoryFiltersBar: React.FC<HistoryFiltersBarProps> = ({
           placeholder={i18n.HISTORY_FILTERS_SEARCH_PLACEHOLDER}
           aria-label={i18n.HISTORY_FILTERS_SEARCH_ARIA_LABEL}
           value={search}
+          maxLength={HISTORY_SEARCH_MAX_LENGTH}
           onChange={(event) => onSearchChange(event.target.value)}
           data-test-subj="inboxHistorySearchInput"
         />
@@ -552,10 +560,19 @@ const HistoryFiltersBar: React.FC<HistoryFiltersBarProps> = ({
 export const InboxHistoryFeed: React.FC = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_INBOX_ACTIONS_PER_PAGE);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [channel, setChannel] = useState<string[]>([]);
   const [respondedBy, setRespondedBy] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearch(searchInput);
+      setPageIndex(0);
+    }, HISTORY_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
 
   // Build the filter payload exactly once per render. Whitespace-only search
   // strings collapse to undefined so the hook does not emit an empty-`q`
@@ -590,8 +607,7 @@ export const InboxHistoryFeed: React.FC = () => {
   // result-set is different, so showing "page 5 of the new result set" would
   // silently land the user on something they didn't ask for.
   const handleSearchChange = useCallback((next: string) => {
-    setSearch(next);
-    setPageIndex(0);
+    setSearchInput(next.slice(0, HISTORY_SEARCH_MAX_LENGTH));
   }, []);
   const handleChannelChange = useCallback((next: string[]) => {
     setChannel(next);
@@ -606,6 +622,9 @@ export const InboxHistoryFeed: React.FC = () => {
     setPageIndex(0);
   }, []);
 
+  const hasActiveFilters =
+    searchInput.trim().length > 0 || channel.length > 0 || respondedBy.length > 0;
+
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="inboxHistorySection">
       <EuiTitle size="m">
@@ -618,7 +637,7 @@ export const InboxHistoryFeed: React.FC = () => {
       <EuiSpacer size="m" />
 
       <HistoryFiltersBar
-        search={search}
+        search={searchInput}
         channel={channel}
         respondedBy={respondedBy}
         sortOrder={sortOrder}
@@ -651,9 +670,15 @@ export const InboxHistoryFeed: React.FC = () => {
         </EuiFlexGroup>
       ) : items.length === 0 ? (
         <EuiEmptyPrompt
-          iconType="clock"
-          title={<h3>{i18n.HISTORY_EMPTY_TITLE}</h3>}
-          body={<p>{i18n.HISTORY_EMPTY_BODY}</p>}
+          iconType={hasActiveFilters ? 'search' : 'clock'}
+          title={
+            <h3>
+              {hasActiveFilters ? i18n.HISTORY_FILTERED_EMPTY_TITLE : i18n.HISTORY_EMPTY_TITLE}
+            </h3>
+          }
+          body={
+            <p>{hasActiveFilters ? i18n.HISTORY_FILTERED_EMPTY_BODY : i18n.HISTORY_EMPTY_BODY}</p>
+          }
         />
       ) : (
         <>

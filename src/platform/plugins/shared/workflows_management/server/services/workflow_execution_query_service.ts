@@ -851,8 +851,9 @@ export class WorkflowExecutionQueryService {
    * latency is bounded — ES refresh interval applies once per shard.
    *
    * Returns `true` if the doc was updated, `false` if the doc was not
-   * found (already terminated / wrong space). Throws on transport / ES
-   * errors so callers can decide whether to retry.
+   * found, belongs to a different space, or was already claimed by another
+   * responder. Throws on transport / ES errors so callers can decide whether
+   * to retry.
    */
   async markStepAsResponded(
     stepExecutionId: string,
@@ -860,7 +861,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<boolean> {
     try {
-      await this.deps.esClient.update({
+      const response = await this.deps.esClient.update({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         id: stepExecutionId,
         // Scripted update guarded on `spaceId` so a misrouted call can't
@@ -868,14 +869,32 @@ export class WorkflowExecutionQueryService {
         // caller (workflows inbox provider) has already verified the
         // step belongs to the active space, but treating the index as
         // append-mostly + space-scoped at every write is cheap defence.
+        // The `respondedAt` guard makes this a first-writer-wins claim:
+        // concurrent responders cannot overwrite the audit identity/channel
+        // after another client has already submitted a response.
+        //
+        // The painless guard only resolves *sequential* races (the second
+        // responder reads a doc that already has `respondedAt`). For two
+        // *simultaneous* updates, both read the same `_seq_no` before either
+        // writes, so the loser's write fails with a version conflict. Without
+        // a retry that surfaces as a raw 409 the route can't classify (→ 500).
+        // `retry_on_conflict` makes ES re-read the now-stamped doc and re-run
+        // the script, which then takes the noop branch — so the loser
+        // deterministically returns `false` and the provider can raise a clean
+        // `InboxActionConflictError` (→ 409) instead of a generic 500.
+        retry_on_conflict: 3,
         script: {
           source:
-            'if (ctx._source.spaceId == params.spaceId) {' +
-            '  if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
-            '  ctx._source.hitl.respondedBy = params.respondedBy;' +
-            '  ctx._source.hitl.respondedAt = params.respondedAt;' +
-            '  ctx._source.hitl.channel = params.channel;' +
-            '} else { ctx.op = "noop"; }',
+            'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; }' +
+            'else {' +
+            '  if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; }' +
+            '  else {' +
+            '    if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
+            '    ctx._source.hitl.respondedBy = params.respondedBy;' +
+            '    ctx._source.hitl.respondedAt = params.respondedAt;' +
+            '    ctx._source.hitl.channel = params.channel;' +
+            '  }' +
+            '}',
           lang: 'painless',
           params: {
             spaceId,
@@ -886,7 +905,7 @@ export class WorkflowExecutionQueryService {
         },
         refresh: 'wait_for',
       });
-      return true;
+      return response.result !== 'noop';
     } catch (error) {
       if (
         error?.statusCode === 404 ||

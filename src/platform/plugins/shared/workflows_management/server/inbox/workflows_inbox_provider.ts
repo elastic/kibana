@@ -10,6 +10,7 @@
 import type { Logger } from '@kbn/core/server';
 import {
   createInboxActionConflictError,
+  createInvalidInboxActionSourceIdError,
   type InboxActionProvider,
   type InboxActionProviderFacetsResult,
   type InboxActionProviderListParams,
@@ -29,25 +30,14 @@ import type { WorkflowsManagementApi } from '../api/workflows_management_api';
 
 export const WORKFLOWS_INBOX_SOURCE_APP = 'workflows' as const;
 
-export class InvalidWorkflowSourceIdError extends Error {
-  constructor(public readonly sourceId: string) {
-    super(
-      `Workflows inbox provider received an unparseable source_id "${sourceId}". ` +
-        `Expected format: workflowId:workflowRunId:stepExecutionId.`
-    );
-    this.name = 'InvalidWorkflowSourceIdError';
-  }
-}
-
 export interface CreateWorkflowsInboxProviderArgs {
   api: WorkflowsManagementApi;
   logger: Logger;
   /** Same instance as HTTP routes — inbox resume must emit identical security audit events. */
   audit: WorkflowManagementAuditLog;
   /**
-   * Upper bound on rows the registry hands us per `list()`. Phase 1 leans on
-   * the registry's own pagination; we ask the service for a generous slice
-   * and let the registry merge-sort + paginate downstream.
+   * Fallback slice size for direct provider calls. The Inbox registry passes
+   * an explicit `perPage` sized to the requested merged page.
    */
   pageSize?: number;
 }
@@ -71,14 +61,14 @@ export const createWorkflowsInboxProvider = ({
     sourceApp: WORKFLOWS_INBOX_SOURCE_APP,
 
     async list(
-      _params: InboxActionProviderListParams,
+      params: InboxActionProviderListParams,
       ctx: InboxRequestContext
     ): Promise<InboxActionProviderListResult> {
       const { results, total, reasoningByStepId } = await api.listWaitingForInputSteps(
         ctx.spaceId,
         {
-          page: 1,
-          perPage: pageSize,
+          page: params.page ?? 1,
+          perPage: params.perPage ?? pageSize,
         }
       );
 
@@ -94,8 +84,8 @@ export const createWorkflowsInboxProvider = ({
     ): Promise<InboxActionProviderListResult> {
       const { results, total, reasoningByStepId, deletedWorkflowIds } =
         await api.listProcessedWaitForInputSteps(ctx.spaceId, {
-          page: 1,
-          perPage: pageSize,
+          page: params.page ?? 1,
+          perPage: params.perPage ?? pageSize,
           // Push the filter dimensions the workflows step-exec index can
           // answer with native predicates straight down to the query service.
           q: params.q,
@@ -131,7 +121,11 @@ export const createWorkflowsInboxProvider = ({
     ): Promise<void> {
       const parsed = parseWorkflowSourceId(sourceId);
       if (!parsed) {
-        throw new InvalidWorkflowSourceIdError(sourceId);
+        throw createInvalidInboxActionSourceIdError(
+          WORKFLOWS_INBOX_SOURCE_APP,
+          sourceId,
+          'workflowId:workflowRunId:stepExecutionId'
+        );
       }
 
       // The engine's `resumeWorkflowExecution` only validates the
@@ -142,13 +136,12 @@ export const createWorkflowsInboxProvider = ({
       //      *later* `waitForInput` is now blocking — the engine would
       //      silently apply the input to that unrelated later step.
       //   2. Two near-simultaneous responses to the same step both pass
-      //      the workflow-level check; one input gets dropped on the
-      //      floor with no error surfaced to either client.
+      //      the workflow-level check; without a step-level claim, one
+      //      input could be dropped with no error surfaced to either client.
       // We mitigate (1) here by re-reading the targeted step doc and
-      // refusing to forward unless it is still the one waiting. (2)
-      // requires server-side optimistic concurrency on the workflows
-      // execution doc — tracked as a follow-up against the workflows
-      // team since it lives outside our ownership boundary.
+      // refusing to forward unless it is still the one waiting. We mitigate
+      // (2) below by using `markStepAsResponded` as a first-writer-wins
+      // claim before scheduling the resume.
       const stepExecution = await api.getStepExecution(
         { executionId: parsed.executionId, id: parsed.stepExecutionId },
         ctx.spaceId
@@ -196,20 +189,31 @@ export const createWorkflowsInboxProvider = ({
       // forward. The reverse ordering would let a responder see "no
       // change" on a successful resume that beat its own audit write.
       // `ctx.channel` is set by the inbox respond route from the request
-      // body's closed-enum field; it falls back to `'inbox'` when the
+      // body's slug-validated field; it falls back to `'inbox'` when the
       // caller (e.g. the in-product Kibana inbox UI) doesn't explicitly
       // identify itself, preserving pre-existing audit semantics. Non-UI
       // clients (MCP, Slack bot, agent builder) tag their channel
       // explicitly so the audit feed can render "via …" attribution.
       const channel = ctx.channel ?? 'inbox';
+      let didMarkStep: boolean;
       try {
-        await api.markStepAsResponded(parsed.stepExecutionId, ctx.request, channel, ctx.spaceId);
+        didMarkStep = await api.markStepAsResponded(
+          parsed.stepExecutionId,
+          ctx.request,
+          channel,
+          ctx.spaceId
+        );
       } catch (error) {
-        // Don't block the response on audit failure — the workflow
-        // resume is the user-visible primitive. Log loudly so we notice
-        // pattern-level failures.
-        logger.warn(
-          `Workflows inbox provider failed to mark step ${parsed.stepExecutionId} as responded; proceeding with resume: ${error}`
+        logger.error(
+          `Workflows inbox provider failed to mark step ${parsed.stepExecutionId} as responded; aborting resume: ${error}`
+        );
+        throw error;
+      }
+      if (!didMarkStep) {
+        throw createInboxActionConflictError(
+          WORKFLOWS_INBOX_SOURCE_APP,
+          sourceId,
+          `step execution ${parsed.stepExecutionId} was already claimed or no longer exists`
         );
       }
 

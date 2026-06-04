@@ -93,7 +93,7 @@ describe('InboxActionRegistry', () => {
       await registry.list({ page: 1, perPage: 25, status: 'pending' }, ctx());
 
       expect(workflows.list).toHaveBeenCalledWith(
-        { status: 'pending' },
+        { status: 'pending', page: 1, perPage: 25 },
         expect.objectContaining({ spaceId: 'default' })
       );
     });
@@ -168,28 +168,26 @@ describe('InboxActionRegistry', () => {
       expect(page3.actions.map((a) => a.id)).toEqual(['a-0']);
     });
 
-    it('clamps total to the merge-sorted slice length when a provider reports truncation', async () => {
-      // Providers like the workflows provider ask the underlying service
-      // for a bounded slice but surface the full ES `total`. If we trusted
-      // that number verbatim the client would see pagination controls for
-      // pages that can never be produced — reproducing an empty-inbox bug
-      // when the actual items lived past the provider's slice. The
-      // registry clamps `total` to what it can merge-sort over.
-      const truncating: InboxActionProvider = {
+    it('requests enough provider rows for the requested merged page and preserves totals', async () => {
+      const paged: InboxActionProvider = {
         sourceApp: 'workflows',
-        list: jest.fn(async () => ({
-          actions: createStubInboxActions(2, { source_app: 'workflows' }),
-          total: 50, // reported, but only 2 rows actually returned
+        list: jest.fn(async ({ perPage }) => ({
+          actions: createStubInboxActions(perPage ?? 0, { source_app: 'workflows' }),
+          total: 50,
         })),
         respond: jest.fn(async () => {}),
       };
-      registry.register(truncating);
+      registry.register(paged);
 
-      const result = await registry.list({ page: 1, perPage: 25 }, ctx());
+      const result = await registry.list({ page: 2, perPage: 25 }, ctx());
 
-      expect(result.total).toBe(2);
-      expect(result.actions).toHaveLength(2);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('workflows'));
+      expect(paged.list).toHaveBeenCalledWith(
+        { page: 1, perPage: 50, status: undefined },
+        expect.objectContaining({ spaceId: 'default' })
+      );
+      expect(result.total).toBe(50);
+      expect(result.actions).toHaveLength(25);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('treats a single provider failure as empty and does not short-circuit other providers', async () => {
@@ -254,6 +252,8 @@ describe('InboxActionRegistry', () => {
 
       expect(withHistory.listProcessed).toHaveBeenCalledWith(
         expect.objectContaining({
+          page: 1,
+          perPage: 25,
           q: 'alice',
           channel: ['inbox'],
           workflowId: ['wf-1'],
@@ -337,6 +337,25 @@ describe('InboxActionRegistry', () => {
       expect(result.actions.map((a) => a.id)).toEqual(['healthy-1']);
       expect(result.total).toBe(1);
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('listProcessed'));
+    });
+
+    it('requests enough history rows to serve deeper merged pages', async () => {
+      const withHistory = fakeProvider('workflows', [], {
+        withListProcessed: createStubInboxActions(50, {
+          source_app: 'workflows',
+          status: 'approved',
+        }),
+      });
+      registry.register(withHistory);
+
+      const result = await registry.listHistory({ page: 2, perPage: 25 }, ctx());
+
+      expect(withHistory.listProcessed).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 1, perPage: 50 }),
+        expect.objectContaining({ spaceId: 'default' })
+      );
+      expect(result.total).toBe(50);
+      expect(result.actions).toHaveLength(25);
     });
   });
 

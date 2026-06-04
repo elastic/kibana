@@ -11,7 +11,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { INBOX_ACTIONS_HISTORY_URL, INBOX_ACTIONS_URL } from '@kbn/inbox-common';
+import {
+  INBOX_ACTIONS_HISTORY_FACETS_URL,
+  INBOX_ACTIONS_HISTORY_URL,
+  INBOX_ACTIONS_URL,
+} from '@kbn/inbox-common';
 import { createStubInboxAction } from '../../../common/test_helpers';
 import { InboxActionsPage } from '.';
 
@@ -62,6 +66,9 @@ describe('InboxActionsPage', () => {
           total: 1,
         };
       }
+      if (url === INBOX_ACTIONS_HISTORY_FACETS_URL) {
+        return { channel: [], respondedBy: [] };
+      }
       throw new Error(`Unexpected URL ${url}`);
     });
 
@@ -105,6 +112,9 @@ describe('InboxActionsPage', () => {
       }
       if (url === INBOX_ACTIONS_HISTORY_URL) {
         return { actions: [], total: 0 };
+      }
+      if (url === INBOX_ACTIONS_HISTORY_FACETS_URL) {
+        return { channel: [], respondedBy: [] };
       }
       throw new Error(`Unexpected URL ${url}`);
     });

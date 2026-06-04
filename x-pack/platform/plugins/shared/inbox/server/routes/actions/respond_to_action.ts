@@ -18,6 +18,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { INBOX_API_PRIVILEGE_RESPOND } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import {
+  isInvalidInboxActionSourceIdError,
   isInboxActionConflictError,
   isUnknownInboxSourceAppError,
 } from '../../services/inbox_action_registry';
@@ -85,6 +86,11 @@ export const registerRespondToActionRoute = ({
             // can accept a response. Surface as 409 so clients can refresh
             // their inbox instead of treating it like a server error.
             return response.conflict({
+              body: { message: error.message },
+            });
+          }
+          if (isInvalidInboxActionSourceIdError(error)) {
+            return response.badRequest({
               body: { message: error.message },
             });
           }

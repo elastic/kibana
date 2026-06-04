@@ -51,7 +51,7 @@ export const ListInboxActionsHistoryRequestQuery = lazySchema(() =>
      * Sort direction on the responded-at / finished-at timestamp.
      */
     sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
-    page: z.coerce.number().int().min(1).optional().default(1),
+    page: z.coerce.number().int().min(1).max(100).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })
 );

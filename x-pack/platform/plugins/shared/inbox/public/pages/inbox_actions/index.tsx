@@ -71,7 +71,9 @@ export const InboxActionsPage: React.FC = () => {
         ...prev,
         [item.id]: (
           <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
-            <InboxReasoning reasoning={item.reasoning} />
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <InboxReasoning reasoning={item.reasoning} />
+            </EuiFlexGroup>
           </EuiPanel>
         ),
       };

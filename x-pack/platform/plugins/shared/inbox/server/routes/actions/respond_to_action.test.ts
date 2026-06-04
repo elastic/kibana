@@ -15,6 +15,7 @@ import {
 } from '@kbn/inbox-common';
 import { registerRespondToActionRoute } from './respond_to_action';
 import {
+  createInvalidInboxActionSourceIdError,
   createInboxActionConflictError,
   InboxActionRegistry,
 } from '../../services/inbox_action_registry';
@@ -263,6 +264,29 @@ describe('POST /internal/inbox/actions/{source_app}/{source_id}/respond', () => 
         expect.objectContaining({
           body: expect.objectContaining({
             message: expect.stringContaining('step is no longer waiting'),
+          }),
+        })
+      );
+      expect(response.customError).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 Bad Request when the provider rejects a malformed source_id', async () => {
+      const workflows = fakeProvider('workflows');
+      workflows.respond.mockRejectedValueOnce(
+        createInvalidInboxActionSourceIdError(
+          'workflows',
+          'invalid',
+          'workflowId:workflowRunId:stepExecutionId'
+        )
+      );
+      registry.register(workflows);
+
+      const response = await invokeHandler(router, 'workflows', 'invalid', {});
+
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: expect.stringContaining('invalid source_id'),
           }),
         })
       );

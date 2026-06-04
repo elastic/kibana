@@ -50,9 +50,9 @@ There are two equivalent ways to seed the demo data — pick whichever fits your
 
 ### Option A — From the `elastic-security` MCP (recommended for customers)
 
-If you already have the `[elastic-security` MCP app](https://github.com/elastic/example-mcp-app-security)
+If you already have the [elastic-security MCP app](https://github.com/elastic/example-mcp-app-security)
 configured, just call its `generate-inbox-data` tool. The MCP imports the
-same six workflows in-process, so customers can stand up an Inbox demo
+same eight workflows in-process, so customers can stand up an Inbox demo
 without cloning Kibana or running this script directly.
 
 ### Option B — From this repo

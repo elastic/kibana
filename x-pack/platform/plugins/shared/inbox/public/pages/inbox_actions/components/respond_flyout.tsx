@@ -33,6 +33,12 @@ import {
 } from './schema_form';
 import { TimeoutChip } from './timeout_chip';
 
+const formatTimestamp = (iso?: string | null): string => {
+  if (!iso) return '';
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
+};
+
 export interface RespondFlyoutProps {
   action: InboxAction;
   onClose: () => void;
@@ -122,7 +128,11 @@ export const RespondFlyout: React.FC<RespondFlyoutProps> = ({ action, onClose, o
         ) : null}
         {isTimedOut ? (
           <EuiCallOut announceOnMount color="warning" iconType="clock">
-            <p>{i18n.getTimedOutBannerText(action.responded_at ?? action.timeout_at ?? '')}</p>
+            <p>
+              {i18n.getTimedOutBannerText(
+                formatTimestamp(action.responded_at ?? action.timeout_at)
+              )}
+            </p>
           </EuiCallOut>
         ) : (
           <>

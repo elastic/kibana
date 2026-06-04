@@ -19,7 +19,7 @@ export interface InboxRequestContext {
   /**
    * Surface the response was submitted through. Only populated for the
    * `respond()` path — list/history fan-outs leave this `undefined`. The
-   * respond HTTP route reads it from the (closed-enum) request body, so
+   * respond HTTP route reads it from a slug-validated request body field, so
    * providers can treat it as a trusted-shape but client-supplied tag.
    * Defaults to `inbox` if a respond client doesn't explicitly identify
    * itself. Paired with the server-derived `respondedBy` in audit
@@ -31,11 +31,18 @@ export interface InboxRequestContext {
 /**
  * Filters a provider sees when satisfying a list request. These mirror the
  * public `ListInboxActionsRequestQuery` but are pre-validated by the framework
- * and exclude cross-provider pagination concerns (those are handled by the
- * registry after fan-out).
+ * and include the bounded provider slice the registry needs before it performs
+ * cross-provider merge-sort pagination.
  */
 export interface InboxActionProviderListParams {
   status?: ListInboxActionsRequestQuery['status'];
+  /**
+   * Provider-local page request. The registry currently calls providers with
+   * `page: 1` and `perPage: requestedPage * requestedPerPage`, then applies
+   * final cross-provider pagination after merge-sorting.
+   */
+  page?: number;
+  perPage?: number;
 }
 
 /**

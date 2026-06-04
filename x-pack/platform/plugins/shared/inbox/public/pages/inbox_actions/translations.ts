@@ -179,6 +179,20 @@ export const HISTORY_EMPTY_BODY = i18n.translate(
   }
 );
 
+export const HISTORY_FILTERED_EMPTY_TITLE = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filteredEmpty.title',
+  {
+    defaultMessage: 'No history matches your filters',
+  }
+);
+
+export const HISTORY_FILTERED_EMPTY_BODY = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.filteredEmpty.body',
+  {
+    defaultMessage: 'Try changing your search, responder, or channel filters.',
+  }
+);
+
 export const HISTORY_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.inbox.actionsPage.historySection.loadError.title',
   {
@@ -287,6 +301,13 @@ export const HISTORY_NO_RESPONSE_PAYLOAD = i18n.translate(
   'xpack.inbox.actionsPage.historySection.noResponsePayload',
   {
     defaultMessage: 'No response payload was recorded.',
+  }
+);
+
+export const HISTORY_RESPONSE_PROCESSING_BODY = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.responseProcessingBody',
+  {
+    defaultMessage: 'Response payload is still being recorded.',
   }
 );
 

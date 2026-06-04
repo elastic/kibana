@@ -1,8 +1,11 @@
 # Follow-up plan: concurrent-response ("lost race") outcome surfacing
 
-Status: **proposed** (not started). Scoped out of the `inbox-history` PR on purpose to
-keep that change focused on search/sort/facets + reasoning. This document is the
-self-contained spec for the follow-up.
+Status: **partially addressed in `inbox-history`**. The PR now uses the
+`hitl.respondedAt` audit stamp as a first-writer-wins gate: a concurrent loser gets a
+`409 Conflict` before `resumeWorkflowExecution` is called, and the winner's
+`hitl.{respondedBy,respondedAt,channel}` fields are no longer overwritten. This document
+tracks the remaining follow-up: recording loser attempts and exposing richer outcome
+metadata in the history feed.
 
 ## 1. Problem statement
 
@@ -12,34 +15,29 @@ raw API all resolve the **same** `source_id`). Today the respond flow in
 `x-pack/platform/plugins/shared/inbox/server/routes/actions/respond_to_action.ts` →
 `InboxActionRegistry.respondTo` → `createWorkflowsInboxProvider.respond`
 (`src/platform/plugins/shared/workflows_management/server/inbox/workflows_inbox_provider.ts`)
-guards against **stale** responses but **not** against a **concurrent** one:
+guards against **stale** responses and now prevents a **concurrent** loser from
+scheduling a second resume:
 
 1. Both callers re-read the step doc via `api.getStepExecution` and both observe
    `status === WAITING_FOR_INPUT` with no `finishedAt`/`error` — so both pass the
    pre-respond conflict check.
-2. Both call `api.markStepAsResponded(...)`. The current Painless script
-   (`WorkflowExecutionQueryService.markStepAsResponded`) **unconditionally** overwrites
-   `ctx._source.hitl.{respondedBy,respondedAt,channel}`, so the second write silently
-   clobbers the first responder's audit metadata.
-3. Both call `api.resumeWorkflowExecution(...)`. The engine applies whichever resume
-   lands first against its execution-doc freshness check; the loser's `input` is
-   **dropped on the floor** and the loser's client still receives `200 OK { ok: true }`.
+2. Both call `api.markStepAsResponded(...)`. The current Painless script serializes on the
+   step doc and only writes `hitl.{respondedBy,respondedAt,channel}` when
+   `hitl.respondedAt` is unset.
+3. The winner proceeds to `api.resumeWorkflowExecution(...)`; the loser sees the update
+   result as `noop` and receives `409 Conflict`.
 
-Net effect: silent data loss + a misleading success response + a corrupted audit trail
-(the history feed shows whichever responder wrote `hitl.*` last, which may not be the
-responder whose input actually advanced the workflow).
-
-The inline comment in `workflows_inbox_provider.respond` (the "(2) requires server-side
-optimistic concurrency …" note) already flags this as a known follow-up. This is that
-follow-up.
+Remaining gap: the loser's attempted input/channel/user are not retained, and history
+consumers only see the applied response rather than a richer "applied vs superseded"
+outcome model.
 
 ## 2. Goals / non-goals
 
 **Goals**
-- Make the audit stamp a **compare-and-set** serialization point so exactly one
-  responder is declared the winner deterministically.
+- Keep the audit stamp as the **compare-and-set** serialization point so exactly one
+  responder is declared the winner deterministically. (Implemented in the current PR.)
 - The **loser** receives a clear `409 Conflict` (not a misleading `200`), so clients can
-  refetch and show "someone else already responded".
+  refetch and show "someone else already responded". (Implemented in the current PR.)
 - The audit trail records the **lost attempt** (who, when, via which channel) so the
   history feed can render "also responded" context instead of losing it.
 - Surface a per-row `outcome` on `InboxAction` so history consumers can distinguish a
@@ -62,10 +60,10 @@ Promote the existing audit stamp into the **concurrency gate**:
 ```
 respond(sourceId, input, ctx)
   ├─ getStepExecution → stale/terminal checks (unchanged: throws InboxActionConflictError)
-  ├─ markStepAsResponded(...)  ← becomes compare-and-set
-  │     ├─ hitl.respondedAt UNSET  → stamp winner, return { won: true }
-  │     └─ hitl.respondedAt SET    → record lost attempt, return { won: false, winner: {...} }
-  ├─ if !won → throw InboxActionConflictError (lost-race variant)  ← NEW: stop before resume
+  ├─ markStepAsResponded(...)  ← compare-and-set gate
+  │     ├─ hitl.respondedAt UNSET  → stamp winner, return true
+  │     └─ hitl.respondedAt SET    → noop, return false
+  ├─ if false → throw InboxActionConflictError  (implemented: stop before resume)
   └─ resumeWorkflowExecution(...)  (only the winner reaches here)
 ```
 
@@ -74,11 +72,11 @@ two concurrent updates to the same `_id` are serialized by Elasticsearch at the 
 level — the second script execution observes the first's write and takes the
 `already-responded` branch. No external lock required.
 
-### 3.1 Winner determination (Painless compare-and-set)
+### 3.1 Remaining loser-attempt capture
 
-Update the script in `WorkflowExecutionQueryService.markStepAsResponded` so it only
-writes the winning fields when `hitl.respondedAt` is unset, and records losers in a
-bounded `hitl.lostResponses` array:
+The current script in `WorkflowExecutionQueryService.markStepAsResponded` already writes
+the winning fields only when `hitl.respondedAt` is unset. Extend that loser branch from a
+plain `noop` into a bounded `hitl.lostResponses` append:
 
 ```painless
 if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; }
@@ -115,13 +113,15 @@ result. Two options:
   `esClient.update({ ..., _source: true })` and inspect the returned `get._source.hitl`
   to determine whether *this* call's `respondedAt`/`respondedBy` match the winner. If they
   match → won; otherwise → lost (and `winner` = the stored `hitl.{respondedBy,respondedAt,channel}`).
-- **Option B: `result: 'noop'|'updated'` heuristic.** Less reliable because the loser
-  branch *does* mutate the doc (appends to `lostResponses`), so `result` is `updated` in
-  both cases. Rejected.
+- **Option B: `result: 'noop'|'updated'` heuristic.** This is sufficient for the current
+  first-writer gate because losers are no-ops. It will stop being sufficient once the
+  loser branch mutates the doc by appending `lostResponses`, so the follow-up needs
+  Option A or an equivalent read-back.
 
 ### 3.2 New return type from `markStepAsResponded`
 
-Replace the current `Promise<boolean>` with a structured result:
+Replace the current `Promise<boolean>` with a structured result when loser attempts are
+recorded:
 
 ```ts
 // src/platform/plugins/shared/workflows_management/server/services/workflow_execution_query_service.ts
@@ -137,7 +137,8 @@ export interface MarkStepAsRespondedResult {
 
 Update the three call sites that currently treat the return as a boolean:
 `workflows_management_api.ts`, `workflows_management_service.ts`, and the provider.
-Keep the existing "doc not found ⇒ `updated: false`" branch (today's `return false`).
+Keep the existing "doc not found / wrong space / already claimed ⇒ `updated: false`"
+branch (today's `return false`).
 
 ### 3.3 Lost-race conflict signal
 
@@ -276,11 +277,10 @@ Validation gates (per repo rules): `node scripts/eslint --fix $(git diff --name-
   for a per-respond write. Avoid fetching the full `output` blob — request only `hitl`
   via `_source: ['hitl']` if the client supports it on update (verify; otherwise filter
   in memory).
-- **Audit-stamp failure is currently swallowed.** Today the provider logs and proceeds to
-  resume if `markStepAsResponded` throws. With compare-and-set as the gate, a thrown audit
-  write must **not** silently fall through to resume (that reintroduces the race). Decide:
-  treat a *thrown* audit error as fail-closed (surface 500/conflict) while keeping the
-  benign "doc not found ⇒ updated:false ⇒ stale 409" path.
+- **Audit-stamp failure is fail-closed.** The provider now aborts before
+  `resumeWorkflowExecution` if `markStepAsResponded` throws; keep that invariant when the
+  loser branch starts mutating `lostResponses`. Benign `false` results still map to a
+  refreshable 409 conflict.
 - **`lostResponses` unbounded growth**: capped by `maxLostResponses`.
 - **Backwards compatibility**: pre-existing rows have no `outcome`/`lostResponses`; both
   are nullable/optional. Winner read-back must tolerate a `hitl` written by the old

@@ -98,7 +98,10 @@ export const InboxReasoning: React.FC<InboxReasoningProps> = ({ reasoning }) => 
                 </EuiText>
               ) : null}
               {sections.map((section, index) => (
-                <div key={section.title ?? index} data-test-subj="inboxReasoningSection">
+                <div
+                  key={`${section.title ?? 'untitled'}-${index}`}
+                  data-test-subj="inboxReasoningSection"
+                >
                   {section.title ? (
                     <EuiText size="xs" color="subdued">
                       <strong>{section.title}</strong>

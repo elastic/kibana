@@ -8,13 +8,15 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { isInboxActionConflictError } from '@kbn/inbox-plugin/server';
+import {
+  isInboxActionConflictError,
+  isInvalidInboxActionSourceIdError,
+} from '@kbn/inbox-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   createWorkflowsInboxProvider,
-  InvalidWorkflowSourceIdError,
   WORKFLOWS_INBOX_SOURCE_APP,
 } from './workflows_inbox_provider';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
@@ -318,11 +320,11 @@ describe('createWorkflowsInboxProvider', () => {
       expect(auditOrder).toBeLessThan(resumeOrder);
     });
 
-    it('proceeds with the resume even if the audit-stamp write fails', async () => {
-      // The resume is the user-visible primitive. A logged-but-non-fatal
-      // failure on the audit write keeps the system forward-progressing
-      // — the worst case is a transient missed audit row, which the
-      // engine's own `finishedAt` write will repair on the next refetch.
+    it('does not resume if the audit-stamp write fails', async () => {
+      // The audit stamp is the source-of-truth claim that removes the row from
+      // pending for every client. If it fails, scheduling the resume would
+      // create a window where the workflow advanced but the durable audit row
+      // was never claimed.
       const api = fakeApi();
       (api.markStepAsResponded as jest.Mock).mockRejectedValueOnce(new Error('audit boom'));
       const logger = loggerMock.create();
@@ -332,12 +334,32 @@ describe('createWorkflowsInboxProvider', () => {
         audit: createTestAudit(),
       });
 
-      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, ctx());
+      await expect(
+        provider.respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
+      ).rejects.toThrow('audit boom');
 
-      expect(api.resumeWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('failed to mark step step-exec-1 as responded')
       );
+    });
+
+    it('throws InboxActionConflictError when the audit stamp was already claimed', async () => {
+      const api = fakeApi();
+      (api.markStepAsResponded as jest.Mock).mockResolvedValueOnce(false);
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+
+      const err = await provider
+        .respond('wf-1:run-1:step-exec-1', { approved: true }, ctx())
+        .catch((e: unknown) => e);
+
+      expect(isInboxActionConflictError(err)).toBe(true);
+      expect((err as Error).message).toContain('already claimed');
+      expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
     it('emits the same security audit as the resume HTTP route after a successful inbox resume', async () => {
@@ -484,21 +506,20 @@ describe('createWorkflowsInboxProvider', () => {
       expect(api.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
-    it('throws InvalidWorkflowSourceIdError when source_id is malformed', async () => {
+    it('throws InvalidInboxActionSourceIdError when source_id is malformed', async () => {
       const provider = createWorkflowsInboxProvider({
         api: fakeApi(),
         logger: loggerMock.create(),
         audit: createTestAudit(),
       });
 
-      await expect(provider.respond('invalid', {}, ctx())).rejects.toBeInstanceOf(
-        InvalidWorkflowSourceIdError
-      );
+      const err = await provider.respond('invalid', {}, ctx()).catch((e: unknown) => e);
+      expect(isInvalidInboxActionSourceIdError(err)).toBe(true);
     });
 
     it('does not perform the step lookup when source_id is malformed', async () => {
       // Defensive: a malformed id has no addressable step, so we must
-      // surface the `InvalidWorkflowSourceIdError` synchronously without
+      // surface the `InvalidInboxActionSourceIdError` synchronously without
       // an extra ES round-trip.
       const api = fakeApi();
       const provider = createWorkflowsInboxProvider({

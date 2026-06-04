@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -31,7 +31,7 @@ describe('InboxHistoryFeed', () => {
   let httpGet: jest.Mock;
 
   beforeEach(() => {
-    httpGet = jest.fn();
+    httpGet = jest.fn().mockResolvedValue({ channel: [], respondedBy: [] });
     useKibanaMock.mockReturnValue({
       services: { http: { get: httpGet } },
     } as unknown as ReturnType<typeof useKibana>);
@@ -43,6 +43,33 @@ describe('InboxHistoryFeed', () => {
     render(<InboxHistoryFeed />, { wrapper: createWrapper() });
 
     expect(await screen.findByText('No processed actions yet')).toBeInTheDocument();
+  });
+
+  it('renders a filtered empty-state prompt when search text excludes all rows', async () => {
+    httpGet.mockResolvedValueOnce({ actions: [], total: 0 });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText('No processed actions yet')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('inboxHistorySearchInput'), {
+      target: { value: 'alice' },
+    });
+
+    expect(screen.getByText('No history matches your filters')).toBeInTheDocument();
+    expect(
+      screen.getByText('Try changing your search, responder, or channel filters.')
+    ).toBeInTheDocument();
+  });
+
+  it('clamps the search input to the server-side query length limit', async () => {
+    httpGet.mockResolvedValueOnce({ actions: [], total: 0 });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    const input = await screen.findByTestId('inboxHistorySearchInput');
+    fireEvent.change(input, { target: { value: 'a'.repeat(300) } });
+
+    expect(input).toHaveValue('a'.repeat(256));
   });
 
   it('renders one comment per processed action with the response payload', async () => {
@@ -232,6 +259,8 @@ describe('InboxHistoryFeed', () => {
     render(<InboxHistoryFeed />, { wrapper: createWrapper() });
 
     expect(await screen.findByText('Processing…')).toBeInTheDocument();
+    expect(screen.getByText('Response payload is still being recorded.')).toBeInTheDocument();
+    expect(screen.queryByText('No response payload was recorded.')).not.toBeInTheDocument();
     // The approve/reject outcome is still unknown during the
     // responded-but-not-resumed window (the server can't classify it until
     // `response_input` lands), so we must NOT assert a green "Approved"

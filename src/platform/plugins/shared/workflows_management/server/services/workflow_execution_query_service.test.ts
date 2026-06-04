@@ -1266,7 +1266,7 @@ describe('WorkflowExecutionQueryService', () => {
       // audit fields. spaceId guard is defence-in-depth: a misrouted
       // call cannot stamp a doc in another space, even though the
       // caller has already verified ownership.
-      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({});
+      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'updated' });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
@@ -1275,24 +1275,41 @@ describe('WorkflowExecutionQueryService', () => {
         index: string;
         id: string;
         refresh: string;
+        retry_on_conflict: number;
         script: { source: string; lang: string; params: Record<string, unknown> };
       };
       expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
       expect(args.id).toBe('step-exec-1');
       expect(args.refresh).toBe('wait_for');
+      // Simultaneous responders read the same _seq_no; retry_on_conflict lets
+      // ES re-run the script against the now-stamped doc so the loser noops
+      // (→ clean 409) instead of throwing a raw version conflict (→ 500).
+      expect(args.retry_on_conflict).toBeGreaterThan(0);
       expect(args.script.lang).toBe('painless');
-      expect(args.script.source).toContain('ctx._source.spaceId == params.spaceId');
+      expect(args.script.source).toContain('ctx._source.spaceId != params.spaceId');
+      expect(args.script.source).toContain('ctx._source.hitl.respondedAt != null');
       expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
       expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
       expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
       expect(args.script.params).toEqual({ spaceId: 'default', ...audit });
     });
 
+    it('returns false when the scripted update no-ops', async () => {
+      // A noop means either the space guard failed or another responder
+      // already set hitl.respondedAt. The provider treats both as a conflict
+      // and does not schedule a second resume.
+      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'noop' });
+
+      const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
+
+      expect(ok).toBe(false);
+    });
+
     it('returns false (not throws) when the step doc is gone', async () => {
       // Concurrent termination — e.g. the workflow timeout monitor flipped
       // the step status between the pre-respond freshness check and the
-      // audit write. The provider treats this as a soft no-op so the
-      // resume call proceeds (and surfaces the real conflict).
+      // audit write. The provider treats this as a soft no-op and returns
+      // a conflict before scheduling the resume.
       (mockEsClient.update as jest.Mock).mockRejectedValueOnce(
         new errors.ResponseError({
           statusCode: 404,
