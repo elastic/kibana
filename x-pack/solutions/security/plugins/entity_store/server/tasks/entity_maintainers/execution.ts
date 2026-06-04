@@ -268,6 +268,7 @@ export async function runEntityMaintainerTask({
       esClient,
       cpsEsClient,
       crudClient,
+      entityMetadataClient,
       telemetry: telemetryClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
