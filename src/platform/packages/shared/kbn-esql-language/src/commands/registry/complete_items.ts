@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ISuggestionItem } from './types';
 import { esqlCommandRegistry } from '.';
+import { ESQL_NEW_LINE_COMMAND } from './constants';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { buildConstantsDefinitions, TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
@@ -44,6 +45,25 @@ function buildCharCompleteItem(
     ...(category && { category }),
   };
   return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
+}
+
+/** "New line" affordance prepended to every popover so users can break to a new line via Enter. */
+export function getNewLineSuggestion(): ISuggestionItem {
+  const title = i18n.translate('kbn-esql-language.esql.autocomplete.newLineLabel', {
+    defaultMessage: 'New line',
+  });
+
+  return {
+    label: `${title} ⏎`,
+    filterText: title,
+    text: '',
+    kind: 'Issue',
+    category: SuggestionCategory.NEW_LINE,
+    command: {
+      id: ESQL_NEW_LINE_COMMAND,
+      title,
+    },
+  } as ISuggestionItem;
 }
 
 export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({

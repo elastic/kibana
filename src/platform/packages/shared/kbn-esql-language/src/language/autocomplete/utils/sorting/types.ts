@@ -8,6 +8,7 @@
  */
 
 export enum SuggestionCategory {
+  NEW_LINE = 'new_line', // "New line" editor affordance, always shown first
   CUSTOM_ACTION = 'custom_action',
   PROMQL_METRIC_QUALIFIER = 'promql_metric_qualifier', // PromQL label selector {}, range selector [5m]
   LANGUAGE_KEYWORD = 'language_keyword', // BY, WHERE, ON, WITH, AS
