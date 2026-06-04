@@ -49,18 +49,8 @@ export const querySchema = z.object({
     .optional()
     .describe('Relationship kind to filter on.'),
   target: z.string().max(1000).optional().describe('Target EUID to filter on.'),
-  from: z
-    .string()
-    .max(100)
-    .datetime()
-    .optional()
-    .describe('ISO-8601 lower bound for @timestamp.'),
-  to: z
-    .string()
-    .max(100)
-    .datetime()
-    .optional()
-    .describe('ISO-8601 upper bound for @timestamp.'),
+  from: z.string().max(100).datetime().optional().describe('ISO-8601 lower bound for @timestamp.'),
+  to: z.string().max(100).datetime().optional().describe('ISO-8601 upper bound for @timestamp.'),
 });
 
 export type { RelationshipRecord };
