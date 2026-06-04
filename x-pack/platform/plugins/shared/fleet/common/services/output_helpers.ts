@@ -9,13 +9,21 @@ import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
 
-import type { AgentPolicy, PackagePolicy, OutputType, ValueOf, Output } from '../types';
+import type {
+  AgentPolicy,
+  PackagePolicy,
+  OutputType,
+  ValueOf,
+  Output,
+  OtelExporterOutput,
+} from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   outputType,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
+  OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
   AGENTLESS_ALLOWED_OUTPUT_TYPES,
   DEFAULT_OUTPUT,
@@ -111,6 +119,17 @@ export function getDefaultPresetForEsOutput(
 
 export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
   return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
+}
+
+export function outputTypeSupportsOtelExporter(type: ValueOf<OutputType> | undefined): boolean {
+  return type !== undefined && OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT.includes(type);
+}
+
+/** Narrows outputs that carry OTel exporter fields. */
+export function isOtelExporterOutput<T extends { type?: ValueOf<OutputType> }>(
+  output: T
+): output is T & OtelExporterOutput {
+  return outputTypeSupportsOtelExporter(output.type);
 }
 
 /**

@@ -8,11 +8,6 @@
 import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
-  border-left: ${euiTheme.border.thin};
-  height: ${euiTheme.size.l};
-`;
-
 export const CloudLinksPillStyle = ({ euiTheme }: UseEuiTheme) => css`
   background: ${euiTheme.colors.backgroundBasePrimary};
   border-radius: ${euiTheme.size.m};

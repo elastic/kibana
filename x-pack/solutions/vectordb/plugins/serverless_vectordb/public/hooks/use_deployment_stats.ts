@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from './use_kibana';
 
 const DEPLOYMENT_STATS_PATH = '/internal/serverless_vectordb/deployment_stats';
 
@@ -16,7 +16,7 @@ export interface DeploymentStats {
   storeSizeBytes: number | null;
   agentsCount: number | null;
   workflowsCount: number | null;
-  elasticsearchUrl: string | null;
+  dashboardsCount: number | null;
 }
 
 const initialStats: DeploymentStats = {
@@ -25,22 +25,25 @@ const initialStats: DeploymentStats = {
   storeSizeBytes: null,
   agentsCount: null,
   workflowsCount: null,
-  elasticsearchUrl: null,
+  dashboardsCount: null,
 };
 
 export const useDeploymentStats = () => {
   const {
-    services: { http, cloud },
+    services: { http },
   } = useKibana();
 
   const { data, isLoading } = useQuery({
     queryKey: ['deploymentStats'],
     queryFn: async () => {
-      const [esStats, agentsResponse, workflowsResponse, esConfig] = await Promise.all([
+      const [esStats, agentsResponse, workflowsResponse] = await Promise.all([
         http
-          .get<{ indicesCount: number; vectorDocsCount: number; storeSizeBytes: number }>(
-            DEPLOYMENT_STATS_PATH
-          )
+          .get<{
+            indicesCount: number;
+            vectorDocsCount: number;
+            storeSizeBytes: number;
+            dashboardsCount: number;
+          }>(DEPLOYMENT_STATS_PATH)
           .catch(() => null),
         http
           .get<{ results?: unknown[] } | unknown[]>('/api/agent_builder/agents')
@@ -48,13 +51,12 @@ export const useDeploymentStats = () => {
         http
           .get<{ workflows?: { enabled?: number; disabled?: number } }>('/api/workflows/stats')
           .catch(() => null),
-        cloud ? cloud.fetchElasticsearchConfig().catch(() => null) : Promise.resolve(null),
       ]);
 
       const agentsCount = Array.isArray(agentsResponse)
         ? agentsResponse.length
         : Array.isArray(agentsResponse?.results)
-        ? agentsResponse!.results!.length
+        ? agentsResponse?.results?.length
         : null;
 
       return {
@@ -65,7 +67,7 @@ export const useDeploymentStats = () => {
         workflowsCount: workflowsResponse?.workflows
           ? (workflowsResponse.workflows.enabled ?? 0) + (workflowsResponse.workflows.disabled ?? 0)
           : null,
-        elasticsearchUrl: esConfig?.elasticsearchUrl ?? null,
+        dashboardsCount: esStats?.dashboardsCount ?? null,
       };
     },
     refetchOnWindowFocus: false,

@@ -9059,6 +9059,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-components@link:x-pack/platform/packages/shared/kbn-shared-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-svg@link:src/platform/packages/shared/kbn-shared-svg":
   version "0.0.0"
   uid ""
