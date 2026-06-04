@@ -30,6 +30,8 @@ import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-executi
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowProperties } from '../storage/workflow_storage';
+import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
@@ -48,6 +50,7 @@ const computeDefinitionHash = (yaml: string): string => {
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
+  taskScheduler: WorkflowTaskScheduler;
   logger: Logger;
 }
 
@@ -193,6 +196,7 @@ export class ManagedWorkflowsService {
       await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document, {
         create: true,
       });
+      await this.scheduleManagedWorkflowIfNeeded(workflowDocumentId, document, spaceId);
       return;
     }
 
@@ -233,6 +237,7 @@ export class ManagedWorkflowsService {
       ifSeqNo: existingDocument.seqNo,
       ifPrimaryTerm: existingDocument.primaryTerm,
     });
+    await this.scheduleManagedWorkflowIfNeeded(workflowDocumentId, document, spaceId);
   }
 
   public async uninstallManagedWorkflow(
@@ -547,6 +552,22 @@ export class ManagedWorkflowsService {
       storedHash: existing?.definitionHash ?? null,
       registryHash,
     };
+  }
+
+  private async scheduleManagedWorkflowIfNeeded(
+    workflowDocumentId: string,
+    document: WorkflowProperties,
+    spaceId: string
+  ): Promise<void> {
+    await scheduleWorkflowTriggers({
+      workflowId: workflowDocumentId,
+      definition: document.definition ?? undefined,
+      enabled: document.enabled,
+      valid: document.valid,
+      spaceId,
+      taskScheduler: this.deps.taskScheduler,
+      logger: this.logger,
+    });
   }
 
   private async prepareManagedWorkflowDocument(params: {
