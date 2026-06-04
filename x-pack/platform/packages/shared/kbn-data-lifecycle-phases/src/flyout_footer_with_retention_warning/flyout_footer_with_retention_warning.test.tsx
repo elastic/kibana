@@ -98,6 +98,13 @@ describe('FlyoutFooterWithRetentionWarning', () => {
     expect(applyButton).toBeDisabled();
   });
 
+  it('renders the action button test subjects', () => {
+    renderWithTheme(<FlyoutFooterWithRetentionWarning onCancel={() => {}} onApply={() => {}} />);
+
+    expect(screen.getByTestId('streamsEditDataLifecycleFlyoutCancelButton')).toBeInTheDocument();
+    expect(screen.getByTestId('streamsEditDataLifecycleFlyoutApplyButton')).toBeInTheDocument();
+  });
+
   it('shows the downsampling warning when canUseDownsampling becomes false between renders', () => {
     const { rerender } = renderWithTheme(
       <WarningFooter selectedIlmPolicyName={POLICY_WITH_DOWNSAMPLE.name} canUseDownsampling />

@@ -6,6 +6,7 @@
  */
 
 import type { IlmPolicyForFlyout } from './types';
+import { PHASE_ORDER } from '../phases';
 
 type PhasesForStats = IlmPolicyForFlyout['phases'];
 
@@ -16,7 +17,7 @@ export interface IlmPolicySummaryStats {
 }
 
 export const getIlmPolicySummaryStats = (phases: PhasesForStats): IlmPolicySummaryStats => {
-  const phaseCount = Object.keys(phases).filter((p) => p !== 'delete').length;
+  const phaseCount = PHASE_ORDER.filter((phaseName) => Boolean(phases[phaseName])).length;
 
   const deleteAfter =
     phases.delete?.actions?.delete !== undefined && phases.delete?.min_age
@@ -26,7 +27,9 @@ export const getIlmPolicySummaryStats = (phases: PhasesForStats): IlmPolicySumma
   // Downsampling is only supported in the hot/warm/cold phases (not frozen).
   const downsampleStepCount = (['hot', 'warm', 'cold'] as const).reduce((count, phase) => {
     const downsample = phases[phase]?.actions?.downsample;
-    return downsample ? count + 1 : count;
+    if (!downsample || typeof downsample !== 'object') return count;
+    const fixedInterval = (downsample as { fixed_interval?: unknown }).fixed_interval;
+    return typeof fixedInterval === 'string' && fixedInterval.trim() ? count + 1 : count;
   }, 0);
 
   return { deleteAfter, phaseCount, downsampleStepCount };
