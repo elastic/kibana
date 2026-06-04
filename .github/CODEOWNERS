@@ -1204,6 +1204,7 @@ x-pack/platform/plugins/shared/logs_shared @elastic/obs-exploration-team
 x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
+x-pack/platform/plugins/shared/notification-center @elastic/search-kibana
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-team
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
