@@ -181,6 +181,15 @@ describe('WorkflowsPage authorization', () => {
     );
   });
 
+  it('shows the workflow type filter when managed workflows are visible and the custom workflow list is empty', () => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+
+    renderPage();
+
+    expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
+  });
+
   it('requests all workflows when custom and managed workflow types are selected', async () => {
     mockCapabilities(true, true);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(true);

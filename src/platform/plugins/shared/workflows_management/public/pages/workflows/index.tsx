@@ -168,6 +168,7 @@ export function WorkflowsPage() {
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
+  const shouldShowFilters = !shouldShowEmptyState || showManagedWorkflowsFilter;
 
   return (
     <EuiPageTemplate
@@ -230,7 +231,7 @@ export function WorkflowsPage() {
         </EuiFlexGroup>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth={false}>
-        {!shouldShowEmptyState && (
+        {shouldShowFilters ? (
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
@@ -299,9 +300,11 @@ export function WorkflowsPage() {
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
-            {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
+            {!shouldShowEmptyState && isExecutionStatsBarEnabled ? (
+              <WorkflowExecutionStatsBar height={140} />
+            ) : null}
           </>
-        )}
+        ) : null}
 
         <WorkflowList
           search={search}
