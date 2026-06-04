@@ -9,7 +9,7 @@ description: Register and implement custom workflow triggers from an external Ki
 
 ## Canonical guide — read this for implementation steps
 
-**Do not duplicate the contributing guide here.** Follow the end-to-end steps, code templates, emit patterns, guardrails, and approval workflow in:
+Follow the end-to-end steps, code templates, emit patterns, guardrails, and approval workflow in:
 
 **[dev_docs/TRIGGERS.md](../../dev_docs/TRIGGERS.md)**
 
