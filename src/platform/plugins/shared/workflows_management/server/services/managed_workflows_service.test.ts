@@ -233,6 +233,11 @@ describe('ManagedWorkflowsService', () => {
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
+      expect(crudService.prepareWorkflowDocumentForStorage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lightweightValidation: true,
+        })
+      );
       expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
         expect.objectContaining({
