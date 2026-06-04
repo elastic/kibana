@@ -22,3 +22,15 @@ export const ATTACH_MENU_TIMELINE = i18n.translate('xpack.cases.caseView.attach.
 export const ATTACH_MENU_LABEL = i18n.translate('xpack.cases.caseView.attach.menu.ariaLabel', {
   defaultMessage: 'Attach options',
 });
+
+export const TYPE = i18n.translate('xpack.cases.attachmentTypeFilter.type', {
+  defaultMessage: 'Type',
+});
+
+export const OBSERVABLE = i18n.translate('xpack.cases.attachmentTypeFilter.observable', {
+  defaultMessage: 'Observable',
+});
+
+export const AUTHOR = i18n.translate('xpack.cases.authorFilter.buttonLabel', {
+  defaultMessage: 'Author',
+});
