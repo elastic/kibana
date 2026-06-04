@@ -50,6 +50,7 @@ paths:
                   type: array
                   description: |
                     Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
+                  maxItems: 100
                   items:
                     type: string
       responses:

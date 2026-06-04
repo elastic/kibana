@@ -76,7 +76,7 @@ export const reviewRuleUpgradeHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    // Schema enforces maxItems: 1, so only one sort criterion is supported for now.
+    // Only the first sort criterion is used; multi-sort is reserved for future expansion.
     const firstSort = sort?.[0];
 
     const {

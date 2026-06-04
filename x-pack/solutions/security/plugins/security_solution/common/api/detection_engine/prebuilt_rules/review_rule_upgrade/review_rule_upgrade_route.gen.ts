@@ -211,7 +211,7 @@ upgradeable rules.
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(z.string()).optional(),
+      fields: z.array(z.string()).max(100).optional(),
     })
     .strict()
 );

@@ -46,6 +46,7 @@ paths:
                 fields:
                   type: array
                   description: Restrict the response to only include the specified fields and necessary metadata.
+                  maxItems: 100
                   items:
                     type: string
                 filter:

@@ -57,7 +57,7 @@ export const SearchRulesRequestBody = lazySchema(() =>
       /**
        * Restrict the response to only include the specified fields and necessary metadata.
        */
-      fields: z.array(z.string()).optional(),
+      fields: z.array(z.string()).max(100).optional(),
       /**
        * Structured KQL filter applied to detection rules (alert saved objects).
        */
