@@ -36,7 +36,9 @@
     "@kbn/crypto",
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": ["target/**/*"]
 }
