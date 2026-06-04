@@ -203,9 +203,7 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
       },
       options: { excludeFromOAS: true },
     })
-    .addVersion(
-      { version: '2023-10-31', validate: false },
-      async (ctx, request, response) =>
-        response.customError({ statusCode: 405, body: { message: 'Method Not Allowed' } })
+    .addVersion({ version: '2023-10-31', validate: false }, async (ctx, request, response) =>
+      response.customError({ statusCode: 405, body: { message: 'Method Not Allowed' } })
     );
 }
