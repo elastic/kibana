@@ -51,7 +51,6 @@ export function writeErrorHandler(
 
   const message = error.stack ?? error.message;
   logRequest(logger, req, 'error', message);
-
   // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
   throw error;
 }

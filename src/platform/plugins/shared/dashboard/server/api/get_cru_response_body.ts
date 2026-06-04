@@ -39,7 +39,6 @@ export function getDashboardCRUResponseBody(
       strictValidationSchema
     ));
     warnings.push(...dashboardStateWarnings);
-
     if (!isDashboardAppRequest && operation === 'read') {
       const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
         dashboardState as Partial<DashboardState>
