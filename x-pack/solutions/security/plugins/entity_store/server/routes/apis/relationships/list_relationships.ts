@@ -22,7 +22,7 @@ import {
 } from '../../../../common/domain/entity_metadata/relationship_metadata';
 
 export const paramsSchema = z.object({
-  entityId: z.string().min(1).describe('The EUID of the entity to list relationships for.'),
+  entityId: z.string().min(1).max(1000).describe('The EUID of the entity to list relationships for.'),
 });
 
 export type { RelationshipRecord };

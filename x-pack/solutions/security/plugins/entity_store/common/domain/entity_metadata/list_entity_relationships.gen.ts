@@ -25,7 +25,7 @@ export const ListEntityRelationshipsRequestQuery = lazySchema(() =>
       .min(1)
       .optional()
       .describe('Number of records per page.'),
-    sort_field: z.string().optional().describe('Field to sort results by.'),
+    sort_field: z.string().max(1000).optional().describe('Field to sort results by.'),
     sort_order: z.enum(['asc', 'desc']).optional().describe('Sort order.'),
     kind: z
       .enum([
@@ -39,9 +39,9 @@ export const ListEntityRelationshipsRequestQuery = lazySchema(() =>
       ])
       .optional()
       .describe('Relationship kind to filter on.'),
-    target: z.string().optional().describe('Target EUID to filter on.'),
-    from: z.string().datetime().optional().describe('ISO-8601 lower bound for @timestamp.'),
-    to: z.string().datetime().optional().describe('ISO-8601 upper bound for @timestamp.'),
+    target: z.string().max(1000).optional().describe('Target EUID to filter on.'),
+    from: z.string().max(100).datetime().optional().describe('ISO-8601 lower bound for @timestamp.'),
+    to: z.string().max(100).datetime().optional().describe('ISO-8601 upper bound for @timestamp.'),
   })
 );
 export type ListEntityRelationshipsRequestQuery = z.infer<
@@ -56,7 +56,7 @@ export const ListEntityRelationshipsRequestParams = lazySchema(() =>
     /**
      * The EUID of the entity to list relationships for.
      */
-    entityId: z.string().min(1),
+    entityId: z.string().min(1).max(1000),
   })
 );
 export type ListEntityRelationshipsRequestParams = z.infer<

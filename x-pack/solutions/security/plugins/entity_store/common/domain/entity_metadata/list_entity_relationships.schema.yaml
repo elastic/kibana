@@ -22,6 +22,7 @@ paths:
           schema:
             type: string
             minLength: 1
+            maxLength: 1000
           description: The EUID of the entity to list relationships for.
           example: 'user:alice@corp'
         - name: page
@@ -45,6 +46,7 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 1000
           description: Field to sort results by.
           example: '@timestamp'
         - name: sort_order
@@ -75,6 +77,7 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 1000
           description: Target EUID to filter on.
           example: 'host:laptopA'
         - name: from
@@ -83,6 +86,7 @@ paths:
           schema:
             type: string
             format: date-time
+            maxLength: 100
           description: ISO-8601 lower bound for @timestamp.
           example: '2026-04-27T00:00:00.000Z'
         - name: to
@@ -91,6 +95,7 @@ paths:
           schema:
             type: string
             format: date-time
+            maxLength: 100
           description: ISO-8601 upper bound for @timestamp.
           example: '2026-05-27T23:59:59.999Z'
       responses:
