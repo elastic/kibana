@@ -162,9 +162,7 @@ describe('FormattedRelativeEnhanced', () => {
 
     it('renders relative time for minute unit when updateIntervalInSeconds is provided', () => {
       mockSelectUnit.mockReturnValue({ value: -5, unit: 'minute' });
-      renderWithI18n(
-        <FormattedRelativeEnhanced value={new Date()} updateIntervalInSeconds={60} />
-      );
+      renderWithI18n(<FormattedRelativeEnhanced value={new Date()} updateIntervalInSeconds={60} />);
       expect(screen.getByText('5 minutes ago')).toBeInTheDocument();
     });
   });
