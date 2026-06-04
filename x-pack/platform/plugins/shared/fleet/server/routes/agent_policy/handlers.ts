@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
-import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import {
   escapeKuery,
   escapeQuotes,
