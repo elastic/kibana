@@ -78,11 +78,13 @@ const HeaderWithTitle = ({
             { type: 'button', label: 'Updated 2 minutes ago', onClick: action('metadata-clicked') },
           ]}
           favorite={
-            <EuiButtonIcon
-              aria-label="Favorite"
-              iconType="starEmpty"
-              onClick={action('favorite')}
-            />
+            <EuiToolTip content="Favorite" disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label="Favorite"
+                iconType="starEmpty"
+                onClick={action('favorite')}
+              />
+            </EuiToolTip>
           }
           sticky={false}
           padding="m"

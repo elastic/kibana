@@ -100,11 +100,13 @@ const ComposedHeader = ({
           menu={showMenu ? menu : undefined}
           favorite={
             showFavorite ? (
-              <EuiButtonIcon
-                aria-label="Favorite"
-                iconType="starEmpty"
-                onClick={action('favorite')}
-              />
+              <EuiToolTip content="Favorite" disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label="Favorite"
+                  iconType="starEmpty"
+                  onClick={action('favorite')}
+                />
+              </EuiToolTip>
             ) : undefined
           }
           sticky={false}
