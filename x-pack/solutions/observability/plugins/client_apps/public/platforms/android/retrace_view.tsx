@@ -23,14 +23,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { ANDROID_CRASH_DOCUMENT_API_PATH, ANDROID_RETRACE_API_PATH } from '../../../common';
-import type { AndroidCrashDocumentResponse, SymbolicationResponse } from '../../../common/types';
+import type { AndroidCrashDocumentResponse, RetraceResponse } from '../../../common/types';
 
 interface RetraceViewProps {
   core: CoreStart;
 }
 
 export function RetraceView({ core }: RetraceViewProps) {
-  const [result, setResult] = useState<SymbolicationResponse | null>(null);
+  const [result, setResult] = useState<RetraceResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +52,7 @@ export function RetraceView({ core }: RetraceViewProps) {
           { query: index ? { doc_id: docId, index } : { doc_id: docId } }
         );
 
-        const res = await core.http.fetch<SymbolicationResponse>(ANDROID_RETRACE_API_PATH, {
+        const res = await core.http.fetch<RetraceResponse>(ANDROID_RETRACE_API_PATH, {
           method: 'POST',
           body: JSON.stringify({
             stacktrace: crashDoc.stacktrace,
@@ -79,7 +79,7 @@ export function RetraceView({ core }: RetraceViewProps) {
           <EuiTitle size="l">
             <h1>
               {i18n.translate('xpack.clientApps.android.retrace.title', {
-                defaultMessage: 'Android Crash Deobfuscation',
+                defaultMessage: 'Android Crash Retrace',
               })}
             </h1>
           </EuiTitle>
@@ -106,7 +106,7 @@ export function RetraceView({ core }: RetraceViewProps) {
             <EuiCallOut
               announceOnMount
               title={i18n.translate('xpack.clientApps.android.retrace.errorTitle', {
-                defaultMessage: 'Deobfuscation failed',
+                defaultMessage: 'Retrace failed',
               })}
               color="danger"
               iconType="alert"
@@ -121,8 +121,8 @@ export function RetraceView({ core }: RetraceViewProps) {
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiTitle size="s">
                     <h2>
-                      {i18n.translate('xpack.clientApps.android.retrace.deobfuscatedTitle', {
-                        defaultMessage: 'Deobfuscated Stacktrace',
+                      {i18n.translate('xpack.clientApps.android.retrace.retracedTitle', {
+                        defaultMessage: 'Retraced Stacktrace',
                       })}
                     </h2>
                   </EuiTitle>
@@ -134,7 +134,7 @@ export function RetraceView({ core }: RetraceViewProps) {
                     overflowHeight={500}
                     fontSize="s"
                   >
-                    {result.resolved}
+                    {result.retraced}
                   </EuiCodeBlock>
                 </EuiPanel>
               </EuiFlexItem>

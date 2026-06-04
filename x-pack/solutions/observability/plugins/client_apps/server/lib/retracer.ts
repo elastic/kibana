@@ -10,18 +10,18 @@ import type { Logger } from '@kbn/core/server';
 export type { Logger };
 
 /**
- * Strategy interface for fetching symbolication map documents from a data source.
+ * Strategy interface for fetching retrace map documents from a data source.
  *
  * Implementations are responsible for all storage concerns (Elasticsearch, in-memory
  * fixtures, etc.). The retracer algorithm depends only on this interface, which makes
  * it straightforwardly testable without a running Elasticsearch cluster.
  *
- * @typeParam SourceMapType - The document shape returned by this fetcher. Each
+ * @typeParam MapType - The document shape returned by this fetcher. Each
  *   platform defines its own (e.g. {@link AndroidClassMap} for Android R8).
  */
-export interface SourceMapFetcher<SourceMapType> {
+export interface RetraceMapFetcher<MapType> {
   /**
-   * Fetches symbolication map documents for the given source identifiers.
+   * Fetches retrace map documents for the given source identifiers.
    *
    * Implementations should return one document per identifier that was found,
    * and silently omit identifiers for which no document exists (e.g. SDK classes
@@ -32,7 +32,7 @@ export interface SourceMapFetcher<SourceMapType> {
    *   (e.g. obfuscated class names for Android R8).
    * @returns The matching documents in any order.
    */
-  fetch: (sources: string[]) => Promise<SourceMapType[]>;
+  fetch: (sources: string[]) => Promise<MapType[]>;
 }
 
 /**
@@ -49,32 +49,32 @@ export interface RetracerOptions {
 /**
  * Abstract base class for platform-specific stacktrace retracers.
  *
- * Subclasses implement the full symbolication algorithm for one platform
- * (Android R8, JavaScript source maps, etc.) by overriding {@link retrace}.
- * All storage concerns are delegated to the injected {@link SourceMapFetcher},
+ * Subclasses implement the full retrace algorithm for one platform
+ * (Android R8, JavaScript retrace maps, etc.) by overriding {@link retrace}.
+ * All storage concerns are delegated to the injected {@link RetraceMapFetcher},
  * keeping the algorithm independent of Elasticsearch or any other backend.
  *
- * @typeParam SourceMapType - The document shape this retracer understands.
+ * @typeParam MapType - The retrace map document shape this retracer understands.
  */
-export abstract class Retracer<SourceMapType> {
+export abstract class Retracer<MapType> {
   protected _stackTrace: string;
-  protected _fetcher: SourceMapFetcher<SourceMapType>;
+  protected _fetcher: RetraceMapFetcher<MapType>;
   protected _logger: Logger | undefined;
 
   constructor(
     stackTrace: string,
-    sourceMapFetcher: SourceMapFetcher<SourceMapType>,
+    retraceMapFetcher: RetraceMapFetcher<MapType>,
     options: RetracerOptions = {}
   ) {
     this._stackTrace = stackTrace;
-    this._fetcher = sourceMapFetcher;
+    this._fetcher = retraceMapFetcher;
     this._logger = options.logger;
   }
 
   /**
    * Resolves the obfuscated stacktrace back to human-readable form.
    *
-   * @returns The deobfuscated stacktrace, or `undefined` if the input was empty
+   * @returns The retraced stacktrace, or `undefined` if the input was empty
    *   or could not be processed at all.
    */
   abstract retrace(): Promise<string | undefined>;
