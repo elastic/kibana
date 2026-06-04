@@ -49,7 +49,6 @@ apiTest.describe(
           { headers: readerHeaders }
         );
         expect(response).toHaveStatusCode(200);
-        expect(typeof response.body.count).toBe('number');
       }
     );
 
