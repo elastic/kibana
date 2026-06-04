@@ -13,19 +13,19 @@ import { BaseESAggSourceSchema } from './es_agg_source_schemas';
 export const ESJoinSourceSchema = BaseESAggSourceSchema.extend({
   type: z.string(),
   whereQuery: querySchema.optional(),
-}).strict();
+});
 
 export const ESDistanceSourceSchema = ESJoinSourceSchema.extend({
   distance: z.number(),
   geoField: z.string(),
   type: z.literal(SOURCE_TYPES.ES_DISTANCE_SOURCE),
-}).strict();
+});
 
 export const ESTermSourceSchema = ESJoinSourceSchema.extend({
   size: z.number().min(1).optional(),
   term: z.string(),
   type: z.literal(SOURCE_TYPES.ES_TERM_SOURCE),
-}).strict();
+});
 
 export const joinSourceSchema = z.union([
   z

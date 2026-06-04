@@ -54,7 +54,6 @@ export const staticOperationDefinitionSchema = genericOperationOptionsSchema
       description: 'Static value',
     }),
   })
-  .strict()
   .meta({ id: 'staticOperationDefinition', title: METRIC_OP_TITLES.static });
 
 const advancedOperationSettings = {
@@ -109,7 +108,6 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema
       .optional()
       .meta({ description: 'Time scale' }),
   })
-  .strict()
   .meta({ id: 'formulaOperation', title: METRIC_OP_TITLES.formula });
 
 const esqlColumn = {
@@ -125,20 +123,17 @@ export const esqlColumnSchema = z
   })
   .strict();
 
-export const esqlColumnWithFormatSchema = esqlColumnSchema.extend(formatSchema.shape).strict();
+export const esqlColumnWithFormatSchema = esqlColumnSchema.extend(formatSchema.shape);
 
-export const metricOperationSharedSchema = genericOperationOptionsSchema
-  .extend(advancedOperationSettings)
-  .strict();
+export const metricOperationSharedSchema =
+  genericOperationOptionsSchema.extend(advancedOperationSettings);
 
-export const fieldBasedOperationSharedSchema = metricOperationSharedSchema
-  .extend({
-    /**
-     * Field to be used for the metric
-     */
-    field: z.string().meta({ description: 'Field to be used for the metric' }),
-  })
-  .strict();
+export const fieldBasedOperationSharedSchema = metricOperationSharedSchema.extend({
+  /**
+   * Field to be used for the metric
+   */
+  field: z.string().meta({ description: 'Field to be used for the metric' }),
+});
 
 const emptyAsNullSchemaRawObject = {
   /**
@@ -151,7 +146,6 @@ const emptyAsNullSchemaRawObject = {
 
 export const countMetricOperationSchema = fieldBasedOperationSharedSchema
   .extend(emptyAsNullSchemaRawObject)
-  .strict()
   .extend({
     /**
      * Select the operation type
@@ -159,16 +153,13 @@ export const countMetricOperationSchema = fieldBasedOperationSharedSchema
     operation: z.literal('count'),
     field: z.string().optional().meta({ description: 'Field to be used for the metric' }),
   })
-  .strict()
   .meta({ id: 'countMetricOperation', title: METRIC_OP_TITLES.count });
 
 export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
   .extend(emptyAsNullSchemaRawObject)
-  .strict()
   .extend({
     operation: z.literal('unique_count'),
   })
-  .strict()
   .meta({ id: 'uniqueCountMetricOperation', title: METRIC_OP_TITLES.uniqueCount });
 
 export const metricOperationSchema = fieldBasedOperationSharedSchema
@@ -181,16 +172,13 @@ export const metricOperationSchema = fieldBasedOperationSharedSchema
       z.literal('standard_deviation'),
     ]),
   })
-  .strict()
   .meta({ id: 'minMaxAvgMedianStdDevMetricOperation', title: METRIC_OP_TITLES.stats });
 
 export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
   .extend(emptyAsNullSchemaRawObject)
-  .strict()
   .extend({
     operation: z.literal('sum'),
   })
-  .strict()
   .meta({ id: 'sumMetricOperation', title: METRIC_OP_TITLES.sum });
 
 export const lastValueOperationSchema = fieldBasedOperationSharedSchema
@@ -206,7 +194,6 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema
         'Whether to return all values for multi-value fields. Only affects data table and metric charts; other charts use the last value from the array.',
     }),
   })
-  .strict()
   .meta({ id: 'lastValueOperation', title: METRIC_OP_TITLES.lastValue });
 
 export const percentileOperationSchema = fieldBasedOperationSharedSchema
@@ -217,7 +204,6 @@ export const percentileOperationSchema = fieldBasedOperationSharedSchema
       .default(LENS_PERCENTILE_DEFAULT_VALUE)
       .meta({ description: 'Percentile' }),
   })
-  .strict()
   .meta({ id: 'percentileOperation', title: METRIC_OP_TITLES.percentile });
 
 export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema
@@ -228,7 +214,6 @@ export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema
       .default(LENS_PERCENTILE_RANK_DEFAULT_VALUE)
       .meta({ description: 'Percentile Rank' }),
   })
-  .strict()
   .meta({ id: 'percentileRanksOperation', title: METRIC_OP_TITLES.percentileRanks });
 
 export const fieldMetricOperationsSchema = z
@@ -248,7 +233,6 @@ export const differencesOperationSchema = metricOperationSharedSchema
     operation: z.literal('differences'),
     of: fieldMetricOperationsSchema,
   })
-  .strict()
   .meta({ id: 'differencesOperation', title: METRIC_OP_TITLES.differences });
 
 export const movingAverageOperationSchema = metricOperationSharedSchema
@@ -257,21 +241,18 @@ export const movingAverageOperationSchema = metricOperationSharedSchema
     of: fieldMetricOperationsSchema,
     window: z.number().default(LENS_MOVING_AVERAGE_DEFAULT_WINDOW).meta({ description: 'Window' }),
   })
-  .strict()
   .meta({ id: 'movingAverageOperation', title: METRIC_OP_TITLES.movingAverage });
 
 export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema
   .extend({
     operation: z.literal('cumulative_sum'),
   })
-  .strict()
   .meta({ id: 'cumulativeSumOperation', title: METRIC_OP_TITLES.cumulativeSum });
 
 export const counterRateOperationSchema = fieldBasedOperationSharedSchema
   .extend({
     operation: z.literal('counter_rate'),
   })
-  .strict()
   .meta({ id: 'counterRateOperation', title: METRIC_OP_TITLES.counterRate });
 
 export const metricOperationDefinitionSchema = z

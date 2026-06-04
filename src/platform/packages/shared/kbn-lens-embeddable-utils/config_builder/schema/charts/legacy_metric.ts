@@ -111,7 +111,7 @@ const esqlLegacyMetricConfig = z
     /**
      * Metric configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape).strict(),
+    metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape),
   })
   .strict()
   .meta({ id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' });

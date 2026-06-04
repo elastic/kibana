@@ -96,14 +96,12 @@ const barBackgroundChartSchema = z
 
 export const complementaryVizSchemaNoESQL = z
   .union([
-    barBackgroundChartSchema
-      .extend({
-        /**
-         * Max value
-         */
-        max_value: metricOperationDefinitionSchema,
-      })
-      .strict(),
+    barBackgroundChartSchema.extend({
+      /**
+       * Max value
+       */
+      max_value: metricOperationDefinitionSchema,
+    }),
     z
       .object({
         type: z.literal('trend'),
@@ -125,7 +123,6 @@ export const complementaryVizSchemaESQL = barBackgroundChartSchema
      */
     max_value: esqlColumnSchema,
   })
-  .strict()
   .meta({ id: 'metricComplementaryBar', title: 'Complementary Bar' });
 
 const metricConfigBackgroundChartShapeNoESQL = {
@@ -358,13 +355,11 @@ const metricConfigSecondaryMetricOptionsShape = {
           to: z.literal('baseline'),
           baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
         })
-        .strict()
         .meta({ id: 'metricCompareToBaseline', title: 'Compare To Baseline' }),
       compareToSchemaShared
         .extend({
           to: z.literal('primary'),
         })
-        .strict()
         .meta({ id: 'metricCompareToPrimary', title: 'Compare To Primary' }),
     ])
     .optional()
@@ -495,13 +490,11 @@ export const metricConfigSchemaNoESQL = z
 
 const primaryMetricESQL = esqlColumnWithFormatSchema
   .extend(metricConfigPrimaryMetricOptionsShape)
-  .strict()
-  .extend(metricConfigBackgroundChartShapeESQL)
-  .strict();
+  .extend(metricConfigBackgroundChartShapeESQL);
 
-const secondaryMetricESQL = esqlColumnWithFormatSchema
-  .extend(metricConfigSecondaryMetricOptionsShape)
-  .strict();
+const secondaryMetricESQL = esqlColumnWithFormatSchema.extend(
+  metricConfigSecondaryMetricOptionsShape
+);
 
 export const metricConfigSchemaESQL = z
   .object({

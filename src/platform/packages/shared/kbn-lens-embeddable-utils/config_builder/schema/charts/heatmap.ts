@@ -157,7 +157,6 @@ export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema
       z.object(heatmapConfigMetricOptionsShape).strict()
     ),
   })
-  .strict()
   .meta({
     id: 'heatmapNoESQL',
     title: 'Heatmap Chart (DSL)',
@@ -169,9 +168,8 @@ export const heatmapConfigSchemaESQL = heatmapSharedConfigSchema
     ...heatmapAxesConfigESQLShape,
     ...dataSourceEsqlTableSchema.shape,
     styling: heatmapStylingSchema.optional(),
-    metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape).strict(),
+    metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape),
   })
-  .strict()
   .meta({
     id: 'heatmapESQL',
     title: 'Heatmap Chart (ES|QL)',

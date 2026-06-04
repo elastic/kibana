@@ -124,7 +124,6 @@ const singleConditionSchema = baseConditionSchema
       ])
       .meta({ description: 'Single value to compare against the field.' }),
   })
-  .strict()
   .meta({
     description: 'Matches documents where `field` equals a single specified value.',
     title: ASCODE_FILTER_OPERATOR.IS,
@@ -147,7 +146,6 @@ const oneOfConditionSchema = baseConditionSchema
         description: 'Homogeneous array of values to match against the field.',
       }),
   })
-  .strict()
   .meta({
     description: 'Matches documents where `field` equals any value in a provided list.',
     title: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
@@ -162,7 +160,6 @@ const rangeConditionSchema = baseConditionSchema
     operator: z.literal(ASCODE_FILTER_OPERATOR.RANGE),
     value: rangeSchema,
   })
-  .strict()
   .meta({
     description: 'Matches documents where `field` falls within a specified numeric or date range.',
     title: ASCODE_FILTER_OPERATOR.RANGE,
@@ -177,7 +174,6 @@ const existsConditionSchema = baseConditionSchema
     operator: z.literal(ASCODE_FILTER_OPERATOR.EXISTS),
     // value is intentionally omitted for exists operator
   })
-  .strict()
   .meta({
     description: 'Matches documents where `field` exists and contains a non-null value.',
     title: ASCODE_FILTER_OPERATOR.EXISTS,
@@ -216,7 +212,6 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema
     type: z.literal(ASCODE_FILTER_TYPE.CONDITION),
     condition: conditionSchema,
   })
-  .strict()
   .meta({
     description:
       'A filter that evaluates a single field condition such as equality, range, or existence.',
@@ -251,7 +246,6 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema
     type: z.literal(ASCODE_FILTER_TYPE.GROUP),
     group: groupConditionSchema,
   })
-  .strict()
   .meta({
     description:
       'A filter that combines multiple conditions or nested groups using a logical `and` or `or` operator.',
@@ -277,7 +271,6 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema
         'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
     }),
   })
-  .strict()
   .meta({
     description:
       'A filter expressed as a raw [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl) object, used for queries that cannot be represented by condition or group filters.',
@@ -296,7 +289,6 @@ export const asCodeSpatialFilterSchema = commonBasePropertiesSchema
       description: 'Elasticsearch geo query DSL object.',
     }),
   })
-  .strict()
   .meta({
     description:
       'A filter that applies an Elasticsearch geo query, used for geographic boundary and shape matching.',

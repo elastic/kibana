@@ -183,7 +183,6 @@ const yAxisSchema = sharedAxisSchema
     scale: yScaleSchema.optional(),
     domain: yDomainSchema.optional(),
   })
-  .strict()
   .meta({
     description:
       'Y-axis configuration with scale and bounds. The axis position is determined by the key: y renders on the start side (left in vertical charts), y2 on the end side (right in vertical charts).',
@@ -197,7 +196,6 @@ const xAxisSchema = sharedAxisSchema
       description: 'X-axis domain configuration',
     }),
   })
-  .strict()
   .meta({ description: 'X-axis configuration' });
 export type XAxisSchemaType = z.output<typeof xAxisSchema>;
 
@@ -430,7 +428,6 @@ const xyLegendOutsideHorizontalSchema = sharedLegendSchema
     layout: z.union([gridLayout, listLayout]).optional(),
     position: z.union([z.literal('top'), z.literal('bottom')]).optional(),
   })
-  .strict()
   .meta({
     id: 'xyLegendOutsideHorizontal',
     title: 'Outside horizontal',
@@ -444,7 +441,6 @@ const xyLegendOutsideVerticalSchema = sharedLegendSchema
     position: z.union([z.literal('left'), z.literal('right')]).optional(),
     size: legendSizeSchema,
   })
-  .strict()
   .meta({
     id: 'xyLegendOutsideVertical',
     title: 'Outside vertical',
@@ -460,7 +456,6 @@ const xyLegendInsideSchema = sharedLegendSchema
       description: 'Legend position inside the chart',
     }),
   })
-  .strict()
   .meta({
     id: 'xyLegendInside',
     title: 'Inside',
@@ -684,7 +679,7 @@ const referenceLineLayerSchemaESQL = z
     ...dataSourceEsqlTableSchema.shape,
     type: z.literal('reference_lines'),
     thresholds: z
-      .array(esqlColumnWithFormatSchema.extend(referenceLineLayerSharedShape).strict())
+      .array(esqlColumnWithFormatSchema.extend(referenceLineLayerSharedShape))
       .min(1)
       .max(100)
       .meta({ description: 'Array of ES|QL-based reference line thresholds' }),

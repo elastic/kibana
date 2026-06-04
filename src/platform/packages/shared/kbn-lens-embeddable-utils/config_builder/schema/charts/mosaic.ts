@@ -170,17 +170,13 @@ export const mosaicConfigSchemaESQL = z
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: z
-      .array(
-        esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape).strict()
-      )
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
       .min(1)
       .max(100)
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
     group_breakdown_by: z
-      .array(
-        esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape).strict()
-      )
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
       .min(1)
       .max(100)
 

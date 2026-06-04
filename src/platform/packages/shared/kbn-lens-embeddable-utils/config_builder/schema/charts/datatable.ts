@@ -195,91 +195,85 @@ const datatableConfigCommonOptionsSchema = z
   })
   .strict();
 
-const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchema
-  .extend({
-    /**
-     * Alignment of the rows
-     */
-    alignment: horizontalAlignmentSchema.default('left').optional().meta({
-      description: 'Alignment of the rows.',
-    }),
-    /**
-     * Color configuration
-     */
-    color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
-    /**
-     * Whether to enable the one click filter
-     */
-    click_filter: z
-      .boolean()
-      .default(false)
-      .optional()
-      .meta({ description: 'When `true`, enables one-click filtering on cell values.' }),
-    /**
-     * Collapse by function. This parameter is used to collapse the
-     * metric chart when the number of columns is bigger than the
-     * number of columns specified in the columns parameter.
-     */
-    collapse_by: collapseBySchema.optional(),
-  })
-  .strict();
+const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchema.extend({
+  /**
+   * Alignment of the rows
+   */
+  alignment: horizontalAlignmentSchema.default('left').optional().meta({
+    description: 'Alignment of the rows.',
+  }),
+  /**
+   * Color configuration
+   */
+  color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+  /**
+   * Whether to enable the one click filter
+   */
+  click_filter: z
+    .boolean()
+    .default(false)
+    .optional()
+    .meta({ description: 'When `true`, enables one-click filtering on cell values.' }),
+  /**
+   * Collapse by function. This parameter is used to collapse the
+   * metric chart when the number of columns is bigger than the
+   * number of columns specified in the columns parameter.
+   */
+  collapse_by: collapseBySchema.optional(),
+});
 
-const datatableConfigRowsOptionsESQLSchema = datatableConfigRowsOptionsNoESQLSchema
-  .extend({
-    /**
-     * Color configuration
-     */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
-  })
-  .strict();
-
-const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema
-  .extend({
-    /**
-     * Color configuration
-     */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
-    /**
-     * Alignment of the columns
-     */
-    alignment: horizontalAlignmentSchema.default('right').optional().meta({
-      description: 'Alignment of the columns.',
+const datatableConfigRowsOptionsESQLSchema = datatableConfigRowsOptionsNoESQLSchema.extend({
+  /**
+   * Color configuration
+   */
+  color: z
+    .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
+    .default(AUTO_COLOR)
+    .optional()
+    .meta({
+      description:
+        'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
     }),
-    /**
-     * Summary configuration
-     */
-    summary: z
-      .object({
-        type: z
-          .union([
-            z.literal('sum'),
-            z.literal('avg'),
-            z.literal('count'),
-            z.literal('min'),
-            z.literal('max'),
-          ])
-          .meta({ description: 'Type of summary function to apply to the column.' }),
-        label: z.string().optional().meta({ description: 'Summary row label.' }),
-      })
-      .strict()
-      .optional()
-      .meta({ description: 'Summary row configuration' }),
-  })
-  .strict();
+});
+
+const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema.extend({
+  /**
+   * Color configuration
+   */
+  color: z
+    .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
+    .default(AUTO_COLOR)
+    .optional()
+    .meta({
+      description:
+        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+    }),
+  /**
+   * Alignment of the columns
+   */
+  alignment: horizontalAlignmentSchema.default('right').optional().meta({
+    description: 'Alignment of the columns.',
+  }),
+  /**
+   * Summary configuration
+   */
+  summary: z
+    .object({
+      type: z
+        .union([
+          z.literal('sum'),
+          z.literal('avg'),
+          z.literal('count'),
+          z.literal('min'),
+          z.literal('max'),
+        ])
+        .meta({ description: 'Type of summary function to apply to the column.' }),
+      label: z.string().optional().meta({ description: 'Summary row label.' }),
+    })
+    .strict()
+    .optional()
+    .meta({ description: 'Summary row configuration' }),
+});
 
 interface SortByValidationInput {
   metrics?: Array<{}>;
@@ -408,7 +402,7 @@ export const datatableConfigSchemaESQL = z
      */
     metrics: z
       .array(
-        esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).strict().meta({
+        esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
           id: 'datatableESQLMetric',
           title: 'Datatable Metric (ES|QL)',
         })
@@ -421,7 +415,7 @@ export const datatableConfigSchemaESQL = z
      * Row configuration, optional operations.
      */
     rows: z
-      .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape).strict())
+      .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape))
       .min(1)
       .max(50)
       .optional()

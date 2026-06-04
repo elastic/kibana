@@ -66,7 +66,7 @@ export const regionMapConfigSchemaESQL = z
     /**
      * Configure how to break down to regions
      */
-    region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape).strict(),
+    region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape),
   })
   .strict()
   .meta({

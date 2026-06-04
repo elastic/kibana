@@ -106,7 +106,6 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       z.literal('last_value'),
     ]),
   })
-  .strict()
   .meta({
     id: 'termsRankByCustomOperation',
     title: 'Terms Rank By Custom Operation',
@@ -120,7 +119,6 @@ const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomShare
       description: 'Numeric field to be used for the custom operation.',
     }),
   })
-  .strict()
   .meta({
     id: 'termsRankByCustomCountOperation',
     title: 'Terms Rank By Custom Count Operation',
@@ -135,7 +133,6 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
         'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
     }),
   })
-  .strict()
   .meta({
     id: 'termsRankByPercentileOperation',
     title: 'Terms Rank By Percentile Operation',
@@ -150,7 +147,6 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
         'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
     }),
   })
-  .strict()
   .meta({
     id: 'termsRankByPercentileRankOperation',
     title: 'Terms Rank By Percentile Rank Operation',

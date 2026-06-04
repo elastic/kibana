@@ -16,17 +16,14 @@ import {
 } from './common';
 import { fieldSettingsBaseSchema } from '../schema_field_settings';
 
-export const runtimeFieldBaseSchema = fieldSettingsBaseSchema
-  .extend({
-    type: primitiveTypeSchema,
-  })
-  .strict();
+export const runtimeFieldBaseSchema = fieldSettingsBaseSchema.extend({
+  type: primitiveTypeSchema,
+});
 
 export const primitiveRuntimeFieldSchema = runtimeFieldBaseSchema
   .extend({
     script: scriptSchema,
   })
-  .strict()
   .meta({ id: 'kbn-runtime-field-schema', title: 'Runtime field' });
 
 export const compositeRuntimeFieldSchema = z

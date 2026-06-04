@@ -84,12 +84,10 @@ export const ESSearchSourceSchema = BaseESSourceSchema.extend({
     description: 'Document properties displayed in tooltip.',
   }),
   type: z.literal(SOURCE_TYPES.ES_SEARCH),
-})
-  .strict()
-  .meta({
-    description:
-      'Vector tile or vector feature source returning points, lines, and polygons from Elasticsearch documents.',
-  });
+}).meta({
+  description:
+    'Vector tile or vector feature source returning points, lines, and polygons from Elasticsearch documents.',
+});
 
 export const ESQLSourceSchema = z
   .object({

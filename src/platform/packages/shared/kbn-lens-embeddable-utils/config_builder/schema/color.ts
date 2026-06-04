@@ -152,7 +152,6 @@ export const legacyColorByValueSchema = colorByValueBaseSchema
         'When `true`, shifts the palette colors so they start from a different offset. Defaults to `false`.',
     }),
   })
-  .strict()
   .meta({
     id: 'legacyColorByValue',
     title: 'Legacy color by value',
@@ -164,7 +163,6 @@ export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema
   .extend({
     range: z.literal('absolute'),
   })
-  .strict()
   .meta({
     id: 'legacyColorByValueAbsolute',
     title: 'Legacy color by value (absolute)',
@@ -176,7 +174,6 @@ export const colorByValueAbsoluteSchema = colorByValueBaseSchema
   .extend({
     range: z.literal('absolute'),
   })
-  .strict()
   .meta({
     id: 'colorByValueAbsolute',
     title: 'Color By Value (Absolute)',
@@ -187,7 +184,6 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema
   .extend({
     range: z.literal('percentage'),
   })
-  .strict()
   .meta({
     id: 'colorByValuePercentage',
     title: 'Color By Value (Percentage)',

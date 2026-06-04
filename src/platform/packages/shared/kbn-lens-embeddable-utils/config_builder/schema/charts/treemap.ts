@@ -181,7 +181,7 @@ export const treemapConfigSchemaESQL = z
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
     metrics: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).strict())
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape))
       .min(1)
       .max(100)
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
@@ -189,7 +189,7 @@ export const treemapConfigSchemaESQL = z
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape).strict())
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
       .min(1)
       .max(100)
       .optional()

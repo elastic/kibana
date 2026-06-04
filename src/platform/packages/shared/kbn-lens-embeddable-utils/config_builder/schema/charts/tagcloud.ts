@@ -111,7 +111,7 @@ export const tagcloudConfigSchemaESQL = z
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: esqlColumnWithFormatSchema.extend(tagcloudConfigTagsByOptionsShape).strict(),
+    tag_by: esqlColumnWithFormatSchema.extend(tagcloudConfigTagsByOptionsShape),
   })
   .strict()
   .meta({

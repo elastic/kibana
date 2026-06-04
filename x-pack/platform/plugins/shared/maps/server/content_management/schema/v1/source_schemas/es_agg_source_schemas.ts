@@ -68,7 +68,7 @@ export const BaseESAggSourceSchema = BaseESSourceSchema.extend({
     .array(AggSchema)
     .default([{ type: AGG_TYPE.COUNT }])
     .optional(),
-}).strict();
+});
 
 export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
   geoField: z.string().meta({
@@ -87,12 +87,10 @@ export const ESGeoGridSourceSchema = BaseESAggSourceSchema.extend({
     z.literal(GRID_RESOLUTION.SUPER_FINE),
   ]),
   type: z.literal(SOURCE_TYPES.ES_GEO_GRID),
-})
-  .strict()
-  .meta({
-    description:
-      'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
-  });
+}).meta({
+  description:
+    'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
+});
 
 export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
   geoField: z.string().meta({
@@ -111,12 +109,10 @@ export const ESGeoLineSourceSchema = BaseESAggSourceSchema.extend({
     description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
   }),
   type: z.literal(SOURCE_TYPES.ES_GEO_LINE),
-})
-  .strict()
-  .meta({
-    description:
-      'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
-  });
+}).meta({
+  description:
+    'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
+});
 
 export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
   destGeoField: z.string().meta({
@@ -126,9 +122,7 @@ export const ESPewPewSourceSchema = BaseESAggSourceSchema.extend({
     description: `Field containing indexed geo-point values.`,
   }),
   type: z.literal(SOURCE_TYPES.ES_PEW_PEW),
-})
-  .strict()
-  .meta({
-    description:
-      'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
-  });
+}).meta({
+  description:
+    'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
+});

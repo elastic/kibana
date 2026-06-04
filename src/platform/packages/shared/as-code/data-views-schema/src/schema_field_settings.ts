@@ -56,7 +56,6 @@ export const fieldSettingsWithPopularitySchema = fieldSettingsBaseSchema
   .extend({
     popularity: popularitySchema,
   })
-  .strict()
   .meta({
     id: 'kbn-field-settings-with-popularity',
     title: 'Field settings',

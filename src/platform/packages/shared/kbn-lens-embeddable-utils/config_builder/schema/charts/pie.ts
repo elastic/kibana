@@ -182,7 +182,7 @@ export const pieConfigSchemaESQL = z
     styling: pieStylingSchema.optional(),
     metrics: z
       .array(
-        esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).strict().meta({
+        esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).meta({
           description: 'ES|QL column reference for primary metric',
         })
       )
@@ -190,7 +190,7 @@ export const pieConfigSchemaESQL = z
       .max(100)
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape).strict())
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
       .min(1)
       .max(100)
       .optional()
