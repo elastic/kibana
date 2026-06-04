@@ -33,6 +33,7 @@ import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_w
 import { useInputHintText } from './hooks/use_input_hint_text';
 import { inputControlTexts } from './translations';
 import { DateRangeValueDisplay } from './date_range_value_display';
+import { applyPartModification } from './parse/modify_range_parts';
 import type { RangePart } from './parse/parse_range_parts';
 import { parseDisplayParts, parseInputParts } from './parse/parse_range_parts';
 
@@ -91,16 +92,9 @@ export function DateRangePickerControl() {
     isActive: isEditing && !wasClearedRef.current,
     initialSelection: 'none',
     rangeType: timeRange.type,
-    // TODO this is simply increasing/decreasing integers,
-    // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
-    onModifyPart: ({ text: currentText, part, action }) => {
-      const value = parseInt(part.text, 10);
-      if (isNaN(value)) return undefined;
-      const nextValue = action === 'increase' ? value + 1 : value - 1;
-      // Values below 1 not useful, so return
-      if (nextValue < 1) return undefined;
-      const newText =
-        currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
+    onModifyPart: ({ text: currentText, part, parts, action }) => {
+      const newText = applyPartModification(currentText, part, action, parts);
+      if (newText === undefined) return undefined;
       setText(newText);
       onInputChange?.(newText);
       return newText;
