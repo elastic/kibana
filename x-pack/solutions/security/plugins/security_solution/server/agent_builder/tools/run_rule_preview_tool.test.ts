@@ -6,6 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { z } from '@kbn/zod/v4';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -109,6 +110,9 @@ describe('runRulePreviewTool', () => {
 
   it('defaults the non-essential rule fields in the preview body', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      status: ConfirmationStatus.accepted,
+    });
     (context.attachments.add as jest.Mock).mockResolvedValue({
       id: 'security-rule-preview-preview-123',
       type: SecurityAgentBuilderAttachments.rulePreview,
@@ -140,6 +144,9 @@ describe('runRulePreviewTool', () => {
 
   it('runs the preview and creates a rule preview attachment', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      status: ConfirmationStatus.accepted,
+    });
     (context.attachments.add as jest.Mock).mockResolvedValue({
       id: 'security-rule-preview-preview-123',
       type: SecurityAgentBuilderAttachments.rulePreview,
@@ -195,6 +202,86 @@ describe('runRulePreviewTool', () => {
     });
   });
 
+  describe('HITL confirmation for large previews', () => {
+    const highInvocationParams = {
+      rule: validRule,
+      timeframeStart: '2024-01-01T00:00:00.000Z',
+      timeframeEnd: '2024-01-01T01:00:00.000Z',
+      enableLoggedRequests: false,
+    };
+
+    it('returns a confirmation prompt when invocationCount exceeds the threshold', async () => {
+      const mockPrompt = { prompt: { type: 'confirmation', id: 'test-prompt' } };
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+      (context.prompts.askForConfirmation as jest.Mock).mockReturnValue(mockPrompt);
+
+      const result = await tool.handler(highInvocationParams, context);
+
+      expect(runRulePreviewMock).not.toHaveBeenCalled();
+      expect(context.prompts.askForConfirmation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: `run_rule_preview.high_invocation_count.${context.callContext.toolCallId}`,
+          color: 'warning',
+        })
+      );
+      expect(result).toBe(mockPrompt);
+    });
+
+    it('proceeds after the user confirms the large preview', async () => {
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+      (context.attachments.add as jest.Mock).mockResolvedValue({
+        id: 'security-rule-preview-preview-123',
+        type: SecurityAgentBuilderAttachments.rulePreview,
+        current_version: 1,
+      });
+
+      const result = await tool.handler(highInvocationParams, context);
+
+      expect(runRulePreviewMock).toHaveBeenCalledTimes(1);
+      expect(getResults(result)[0].type).toBe(ToolResultType.other);
+    });
+
+    it('returns an error when the user cancels the large preview', async () => {
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.rejected,
+      });
+
+      const result = await tool.handler(highInvocationParams, context);
+
+      expect(runRulePreviewMock).not.toHaveBeenCalled();
+      expect(getResults(result)[0].type).toBe(ToolResultType.error);
+    });
+
+    it('does not prompt when invocationCount is within the threshold', async () => {
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      (context.attachments.add as jest.Mock).mockResolvedValue({
+        id: 'security-rule-preview-preview-123',
+        type: SecurityAgentBuilderAttachments.rulePreview,
+        current_version: 1,
+      });
+
+      await tool.handler(
+        {
+          rule: { ...validRule, interval: '1h' },
+          timeframeStart: '2024-01-01T00:00:00.000Z',
+          timeframeEnd: '2024-01-01T09:00:00.000Z',
+          enableLoggedRequests: false,
+        },
+        context
+      );
+
+      expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+      expect(runRulePreviewMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('returns an error result for an invalid timeframe', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
@@ -219,6 +306,9 @@ describe('runRulePreviewTool', () => {
       isAborted: false,
     });
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      status: ConfirmationStatus.accepted,
+    });
 
     const result = await tool.handler(
       {

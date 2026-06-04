@@ -10,6 +10,7 @@ import dateMath from '@kbn/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/rule_schema';
 import type { RulePreviewRequestBody } from '../../../common/api/detection_engine';
@@ -23,6 +24,13 @@ export const SECURITY_RUN_RULE_PREVIEW_TOOL_ID = securityTool('run_rule_preview'
 const DEFAULT_TIMEFRAME_START = 'now-1h';
 const DEFAULT_TIMEFRAME_END = 'now';
 const DEFAULT_INTERVAL = '5m';
+
+/**
+ * Ask the user to confirm before running a preview with more than this many
+ * executor invocations.  Beyond this count the preview can take a significant
+ * amount of time and should be intentional.
+ */
+const INVOCATION_COUNT_CONFIRMATION_THRESHOLD = 10;
 
 /**
  * Fields required by `EsqlRuleCreateProps` that do not affect whether/which alerts a
@@ -86,7 +94,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
     tags: ['security', 'detection', 'rule-preview', 'attachment'],
     handler: async (
       { rule, timeframeStart, timeframeEnd, enableLoggedRequests },
-      { request, spaceId, savedObjectsClient, attachments }
+      { request, spaceId, savedObjectsClient, attachments, prompts, callContext }
     ) => {
       const start = dateMath.parse(timeframeStart);
       const end = dateMath.parse(timeframeEnd, { roundUp: true });
@@ -144,6 +152,35 @@ The tool returns the generated previewId and the attachment metadata. Use the re
         Math.ceil((end.valueOf() - start.valueOf()) / intervalMs),
         1
       );
+
+      if (invocationCount > INVOCATION_COUNT_CONFIRMATION_THRESHOLD) {
+        const promptId = `run_rule_preview.high_invocation_count.${callContext.toolCallId}`;
+        const { status } = prompts.checkConfirmationStatus(promptId);
+
+        if (status === ConfirmationStatus.unprompted) {
+          return prompts.askForConfirmation({
+            id: promptId,
+            title: 'Large rule preview',
+            message: `This preview will run the rule **${invocationCount}** times (${timeframeStart} → ${timeframeEnd} at \`${
+              rule.interval ?? DEFAULT_INTERVAL
+            }\` intervals). Large previews can take a while. Do you want to continue?`,
+            confirm_text: 'Run preview',
+            cancel_text: 'Cancel',
+            color: 'warning',
+          });
+        }
+
+        if (status === ConfirmationStatus.rejected) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: { message: 'Rule preview cancelled.' },
+              },
+            ],
+          };
+        }
+      }
 
       const body = {
         ...RULE_PREVIEW_RULE_DEFAULTS,
