@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DispatcherTickSummary } from './telemetry/types';
 import type { ActionPolicyType } from '@kbn/alerting-v2-schemas';
 import type { AlertEventSeverity } from '../../resources/datastreams/alert_events';
 
@@ -40,15 +41,35 @@ export interface AlertEpisodeSuppression {
 
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
+  /**
+   * Upper bound (exclusive after the first run) on `@timestamp` values
+   * already processed by `fetch_episodes`. Drives the per-tick query
+   * window together with `TICK_LOOKBACK_CAP_MINUTES` and
+   * `SETTLE_BUFFER_SECONDS`. When undefined, the dispatcher cold-starts
+   * from `now − LOOKBACK_WINDOW_MINUTES`.
+   */
+  eventWatermark?: Date;
   abortController?: AbortController;
 }
 
 export interface DispatcherExecutionResult {
   startedAt: Date;
+  tick: DispatcherTickSummary;
+  /**
+   * Watermark to persist for the next tick. Set only when the pipeline
+   * fully completed or halted on a controlled, non-error reason
+   * (`no_episodes`, `no_actions`); undefined on `step_error` or any
+   * pipeline-level throw, so a failed tick re-reads its window next time.
+   */
+  nextEventWatermark?: string;
 }
 
 export interface DispatcherTaskState {
   previousStartedAt?: string;
+  eventWatermark?: string;
+  // Task Manager persists state as `Record<string, unknown>`; the index
+  // signature keeps assignment in both directions safe without per-call casts.
+  [key: string]: unknown;
 }
 
 export interface Rule {
@@ -136,6 +157,7 @@ export interface LastNotifiedInfo {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
+  readonly eventWatermark?: Date;
   readonly executionUuid: string;
 }
 
@@ -151,16 +173,74 @@ export interface DispatcherPipelineState {
   readonly groups?: ActionGroup[];
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
+  /**
+   * Proposed watermark for the next tick. Written by `fetch_episodes`
+   * once it has bounded its query window; left unset when `fetch_episodes`
+   * elects not to query (e.g. settle buffer collapses the window).
+   */
+  readonly nextEventWatermark?: string;
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
+/**
+ * Controlled halt reasons a step may return from its own output when
+ * there is nothing further to do. Expected, non-error outcomes.
+ */
+export type DispatcherStepHaltReason = 'no_episodes' | 'no_actions';
+
+/**
+ * Reasons a dispatcher tick stopped before completing all stages.
+ *
+ * Superset of `DispatcherStepHaltReason` plus `step_error`, which is
+ * produced by the pipeline itself when it catches a thrown step.
+ * `step_error` is intentionally NOT part of `DispatcherStepHaltReason`
+ * so the type system prevents a step from accidentally returning it.
+ */
+export type DispatcherHaltReason = DispatcherStepHaltReason | 'step_error';
+
+/**
+ * Halt reasons that allow the event watermark to advance. Defined here,
+ * next to the halt-reason types, so adding a new controlled reason only
+ * requires a single change.
+ */
+export const CLEAN_HALT_REASONS: ReadonlySet<DispatcherHaltReason> = new Set<DispatcherHaltReason>([
+  'no_episodes',
+  'no_actions',
+]);
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
-  | { type: 'halt'; reason: DispatcherHaltReason };
+  | {
+      type: 'halt';
+      reason: DispatcherStepHaltReason;
+      /**
+       * Optional state update applied even though the step is halting.
+       * Used by `fetch_episodes` to publish `nextEventWatermark` when it
+       * successfully queried an empty window — the tick is "done" for
+       * that interval and the watermark must still advance.
+       */
+      data?: Partial<Omit<DispatcherPipelineState, 'input'>>;
+    };
 
 export interface DispatcherStep {
   readonly name: string;
   execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput>;
 }
+
+/**
+ * A group of steps that may run concurrently because none of them depend
+ * on state produced by another member of the group. See
+ * `execution_pipeline.ts` for the precise group semantics.
+ */
+export interface DispatcherParallelGroup {
+  readonly kind: 'parallel';
+  readonly steps: readonly DispatcherStep[];
+}
+
+/**
+ * A pipeline entry is either a single step (executed serially) or a
+ * parallel group of steps (executed concurrently). Single-step bindings
+ * are the default; parallel groups are an opt-in optimization for steps
+ * proven to have no in-tick dependencies on one another.
+ */
+export type DispatcherPipelineEntry = DispatcherStep | DispatcherParallelGroup;

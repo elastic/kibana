@@ -81,7 +81,7 @@ The dispatcher combines:
 
 - a Task Manager boundary (`DispatcherTaskRunner`)
 - a service boundary (`DispatcherService`)
-- a sequential pipeline (`DispatcherPipeline`)
+- a mostly-sequential pipeline (`DispatcherPipeline`) with opt-in parallel groups
 - explicit step contracts (`DispatcherStep`)
 
 ```text
@@ -96,11 +96,11 @@ DispatcherService
    v
 DispatcherPipeline
    |
-   +--> FetchEpisodesStep
+   +--> [FetchEpisodesStep ∥ FetchPoliciesStep]   ← parallel group
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
    +--> FetchRulesStep
-   +--> FetchPoliciesStep
+   +--> ApplyMaintenanceWindowStep
    +--> EvaluateMatchersStep
    +--> BuildGroupsStep
    +--> ApplyThrottlingStep
@@ -113,7 +113,18 @@ Unlike the rule executor, the dispatcher is not streaming. Each step receives on
 - `continue` with a partial state merge, or
 - `halt` with a `DispatcherHaltReason`
 
-## Action policy model
+### Parallel groups
+
+A pipeline entry is either a single step (executed serially) or a `DispatcherParallelGroup` (children executed concurrently). Group semantics — see `execution_pipeline.ts` for the full contract:
+
+- All children always start; none are skipped within the group on sibling failure.
+- Each child sees the same pre-group state snapshot. Concurrency is therefore safe only when group members read non-overlapping state and produce non-overlapping deltas.
+- Per-child stage timings are appended in declaration order, regardless of finish order, so `tick_summary.totals` and ES|QL aggregations on `stages[].name` remain deterministic.
+- Halt precedence is declaration order: the first child that halted or threw decides the group's halt reason. The remaining children's deltas are still merged into pipeline state (so a successful sibling's work isn't discarded), but the pipeline halts before subsequent serial entries run.
+
+Parallel groups are an optimization, not a default. Add a step as a single serial entry unless its `execute` reads no fields from prior pipeline state (the only safe candidates today).
+
+## Notification policy model
 
 An action policy is a saved object scoped to a Kibana space. Policies are not embedded into the rule. Instead, the dispatcher loads enabled policies for the space and evaluates each policy against the candidate episodes.
 
@@ -159,14 +170,15 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | # | Step | Responsibility |
 | --- | --- | --- |
-| 1 | `FetchEpisodesStep` | Load episodes that should be considered in this run. |
+| 1a | `FetchEpisodesStep` ∥ | Load episodes that should be considered in this run. |
+| 1b | ∥ `FetchPoliciesStep` | Load enabled notification policies for the space. Runs concurrently with `FetchEpisodesStep` because it has no in-tick state dependency. |
 | 2 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
 | 3 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
 | 4 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
-| 5 | `FetchPoliciesStep` | Load enabled action policies for the space. |
+| 5 | `ApplyMaintenanceWindowStep` | Suppress dispatchable episodes whose timestamp falls within an active maintenance window in the same space. |
 | 6 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
-| 7 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
-| 8 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
+| 7 | `BuildGroupsStep` | Build `NotificationGroup` objects based on policy grouping settings. |
+| 8 | `ApplyThrottlingStep` | Compare candidate groups with notification history and split them into dispatch vs throttled. |
 | 9 | `DispatchStep` | Perform delivery side effects for eligible groups. |
 | 10 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
 
@@ -272,12 +284,26 @@ Export the step from `steps/index.ts`, then register it in `setup/bind_dispatche
 ```typescript
 import { MyNewStep } from '../lib/dispatcher/steps';
 
-bind(DispatcherExecutionStepsToken).to(FetchEpisodesStep).inSingletonScope();
 bind(DispatcherExecutionStepsToken).to(MyNewStep).inSingletonScope();
 bind(DispatcherExecutionStepsToken).to(FetchSuppressionsStep).inSingletonScope();
 ```
 
 Binding order is execution order.
+
+To bind a step into a parallel group, bind the group via `toDynamicValue` and bind the participating step classes to themselves so they can be resolved by the factory:
+
+```typescript
+import { parallelGroup } from '../lib/dispatcher/execution_pipeline';
+
+bind(MyNewStep).toSelf().inSingletonScope();
+bind(FetchEpisodesStep).toSelf().inSingletonScope();
+
+bind(DispatcherExecutionStepsToken)
+  .toDynamicValue(({ get }) => parallelGroup(get(FetchEpisodesStep), get(MyNewStep)))
+  .inSingletonScope();
+```
+
+Only put a step in a parallel group when its `execute` reads no fields from prior pipeline state. The serial-vs-parallel equivalence test (`execution_pipeline.equivalence.test.ts`) is the gate on any new parallel binding.
 
 ### Step 4: Add focused tests
 
