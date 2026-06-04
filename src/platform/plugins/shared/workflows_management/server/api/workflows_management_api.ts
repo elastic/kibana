@@ -63,8 +63,8 @@ import type {
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 import type {
-  InboxHistoryFacets,
-  InboxHistoryFilters,
+  ProcessedWaitForInputFacets,
+  ProcessedWaitForInputFilters,
   WaitForInputListResult,
 } from '../services/workflow_execution_query_service';
 
@@ -860,10 +860,7 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
-  /**
-   * Cross-workflow listing of step executions currently blocked on
-   * `waitForInput`. Consumed by the Inbox plugin's workflows provider.
-   */
+  /** Cross-workflow listing of active `waitForInput` step executions. */
   public async listWaitingForInputSteps(
     spaceId: string,
     params: { page?: number; perPage?: number } = {}
@@ -871,52 +868,23 @@ export class WorkflowsManagementApi {
     return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
-  /**
-   * Cross-workflow listing of `waitForInput` step executions that have
-   * already terminated (a response was submitted, or the step
-   * settled abnormally). Consumed by the Inbox plugin's workflows provider
-   * to populate the processed-history audit log.
-   *
-   * Accepts the inbox-history filter bundle (`q`, `channel`, `workflowId`,
-   * `respondedBy`, `sortOrder`) which is pushed down into native ES clauses
-   * by the query service.
-   */
+  /** Cross-workflow listing of processed `waitForInput` step executions. */
   public async listProcessedWaitForInputSteps(
     spaceId: string,
-    params: { page?: number; perPage?: number } & InboxHistoryFilters = {}
+    params: { page?: number; perPage?: number } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     return this.workflowsService.listProcessedWaitForInputSteps(spaceId, params);
   }
 
-  /**
-   * Distinct-value buckets for the inbox-history filter dropdowns
-   * (`channel`, `respondedBy`) over the space's processed history. Buckets
-   * are computed against the same baseline as the list endpoint but with no
-   * user-supplied filters applied so the dropdown options stay stable as
-   * filters toggle.
-   */
+  /** Facet buckets for processed `waitForInput` step executions. */
   public async listProcessedWaitForInputFacets(
     spaceId: string,
     options: { maxBuckets?: number } = {}
-  ): Promise<InboxHistoryFacets> {
+  ): Promise<ProcessedWaitForInputFacets> {
     return this.workflowsService.listProcessedWaitForInputFacets(spaceId, options);
   }
 
-  /**
-   * Records the HITL audit fields (`respondedBy`, `respondedAt`,
-   * `channel`) on a `wait_for_input` step doc the moment a responder
-   * submits a response — *before* Task Manager runs the resume. This
-   * lets every client (Kibana inbox, Slack, agent builder, raw API)
-   * detect the "responded but not yet resumed" state by reading the
-   * step doc directly. See `WorkflowExecutionQueryService.markStepAsResponded`.
-   *
-   * The responder username is resolved server-side from `request` via
-   * the security service, so callers cannot spoof the audit identity.
-   *
-   * Returns `true` on update, `false` if the step doc was already
-   * removed (e.g. workflow concurrently terminated). Throws on transport
-   * / unexpected ES errors.
-   */
+  /** Claims a `waitForInput` step by writing server-derived HITL audit metadata. */
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,

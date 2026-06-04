@@ -316,10 +316,8 @@ describe('WorkflowsService (facade)', () => {
 
   describe('markStepAsResponded', () => {
     it('resolves the responder via the security service and delegates with full audit metadata', async () => {
-      // The service owns username resolution so each entry point
-      // (Kibana inbox, Slack, agent builder, raw API) can't spoof the
-      // audit identity. Behavioural coverage of the underlying ES
-      // update lives in `workflow_execution_query_service.test.ts`.
+      // The service owns username resolution so callers cannot spoof audit identity.
+      // Behavioral coverage of the ES update lives in the query-service tests.
       const markSpy = jest
         .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
         .mockResolvedValue(true as never);

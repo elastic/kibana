@@ -744,7 +744,7 @@ describe('WorkflowExecutionQueryService', () => {
         expect(result.results).toHaveLength(1);
         expect(result.total).toBe(1);
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to validate parent workflows for inbox listing')
+          expect.stringContaining('Failed to validate parent workflows for wait-for-input listing')
         );
       });
 
@@ -1243,7 +1243,7 @@ describe('WorkflowExecutionQueryService', () => {
 
       await expect(service.listProcessedWaitForInputFacets('default')).rejects.toThrow('boom');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to compute inbox-history filter facets')
+        expect.stringContaining('Failed to compute processed wait-for-input facets')
       );
     });
   });

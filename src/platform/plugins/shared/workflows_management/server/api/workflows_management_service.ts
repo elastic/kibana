@@ -77,8 +77,8 @@ import { getAuthenticatedUser } from '../lib/get_user';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import type {
-  InboxHistoryFacets,
-  InboxHistoryFilters,
+  ProcessedWaitForInputFacets,
+  ProcessedWaitForInputFilters,
   WaitForInputListResult,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -369,22 +369,17 @@ export class WorkflowsService {
 
   public async listProcessedWaitForInputSteps(
     spaceId: string,
-    options: { page?: number; perPage?: number } & InboxHistoryFilters = {}
+    options: { page?: number; perPage?: number } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
     return this.executionQueryService.listProcessedWaitForInputSteps(spaceId, options);
   }
 
-  /**
-   * Distinct-value buckets for the inbox-history filter dropdowns
-   * (`channel`, `respondedBy`). See
-   * {@link WorkflowExecutionQueryService.listProcessedWaitForInputFacets}
-   * for the baseline-must / no-user-filters guarantee.
-   */
+  /** Facet buckets for processed wait-for-input rows. */
   public async listProcessedWaitForInputFacets(
     spaceId: string,
     options: { maxBuckets?: number } = {}
-  ): Promise<InboxHistoryFacets> {
+  ): Promise<ProcessedWaitForInputFacets> {
     await this.ensureInitialized();
     return this.executionQueryService.listProcessedWaitForInputFacets(spaceId, options);
   }
@@ -396,10 +391,7 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<boolean> {
     await this.ensureInitialized();
-    // We resolve the responder server-side rather than letting callers
-    // pass a username. This keeps the audit trail trustworthy across
-    // every entry point — Kibana inbox, Slack bot, agent builder, raw
-    // API — without each having to repeat the security-service dance.
+    // Resolve responder identity server-side so callers cannot spoof audit metadata.
     const respondedBy = getAuthenticatedUser(request, this.coreStart?.security);
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,

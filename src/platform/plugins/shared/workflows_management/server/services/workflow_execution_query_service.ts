@@ -45,14 +45,7 @@ import type { SearchWorkflowExecutionsParams } from '../api/workflows_management
 
 const DEFAULT_PAGE_SIZE = 100;
 
-/**
- * Upper bound on completed step-execution docs fetched in a single
- * predecessor-reasoning lookup. The lookup is scoped to the workflow runs
- * on the current inbox page and ordered most-recent-first per run, so the
- * immediate predecessor of each wait step is always near the top — a
- * generous cap keeps the soft-interface resolution bounded without missing
- * the relevant doc for realistically-sized runs.
- */
+/** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
 
 /**
@@ -64,13 +57,11 @@ interface StepExecutionWithLegacyFields extends EsWorkflowStepExecution {
 }
 
 /**
- * Inbox-history filter bundle pushed down into native ES clauses by
- * {@link WorkflowExecutionQueryService.listProcessedWaitForInputSteps}.
- * Multi-value fields are OR'd within a field and AND'd across fields,
- * mirroring the OpenAPI contract. `q` is a case-insensitive substring
- * search over the indexed responder / workflow / step keyword fields.
+ * Filters applied to processed wait-for-input step executions. Multi-value
+ * fields are OR'd within a field and AND'd across fields; `q` is a
+ * case-insensitive substring search over responder, workflow id, and step id.
  */
-export interface InboxHistoryFilters {
+export interface ProcessedWaitForInputFilters {
   q?: string;
   channel?: string[];
   workflowId?: string[];
@@ -80,17 +71,15 @@ export interface InboxHistoryFilters {
 
 /**
  * Result of the cross-workflow `waitForInput` listings. `reasoningByStepId`
- * carries the soft-interface reasoning resolved from each row's preceding
- * step output, keyed by the wait step's execution id (absent when the
- * predecessor produced no `reasoning`).
+ * contains any `output.reasoning` object found on the step that immediately
+ * preceded each wait step.
  *
  * `deletedWorkflowIds` lists the parent workflow ids in `results` that no
  * longer resolve to an alive workflow (soft-deleted, or hard-deleted and
  * thus absent). The pending listing filters these out entirely, so the set
  * is only ever populated by the processed/audit listing — which retains the
- * rows so the audit trail survives workflow deletion, and tags them so the
- * UI can flag the source as gone. Empty when the alive-workflow lookup
- * failed (we can't reliably attribute deletion, so we omit the flag).
+ * rows so the audit trail survives workflow deletion. Empty when the
+ * alive-workflow lookup failed and deletion cannot be attributed reliably.
  */
 export interface WaitForInputListResult {
   results: EsWorkflowStepExecution[];
@@ -99,23 +88,13 @@ export interface WaitForInputListResult {
   deletedWorkflowIds: Set<string>;
 }
 
-/**
- * Result of {@link WorkflowExecutionQueryService.listProcessedWaitForInputFacets}.
- * Mirrors the `ListInboxActionsHistoryFacetsResponse` schema; declared as a
- * plain interface here so the workflows plugin doesn't grow a runtime
- * dependency on the inbox-common Zod schemas.
- */
-export interface InboxHistoryFacets {
+/** Facet buckets for processed wait-for-input step executions. */
+export interface ProcessedWaitForInputFacets {
   channel: Array<{ value: string; count: number }>;
   respondedBy: Array<{ value: string; count: number }>;
 }
 
-/**
- * Aggregations envelope shape we ask Elasticsearch to populate on the
- * facets query. Both aggs are fixed-name `terms` aggregations over
- * `keyword` fields, so the bucket key type is `string`.
- */
-interface InboxHistoryFacetAggs {
+interface ProcessedWaitForInputFacetAggs {
   channel: estypes.AggregationsStringTermsAggregate;
   respondedBy: estypes.AggregationsStringTermsAggregate;
 }
@@ -322,36 +301,12 @@ export class WorkflowExecutionQueryService {
   }
 
   /**
-   * Cross-workflow fan-out: returns every step execution currently blocked on
-   * `waitForInput` in the given space. Used by the Inbox plugin to surface
-   * pending HITL items across all workflows a user has access to.
+   * Lists active `waitForInput` step executions for a space.
    *
-   * Intentionally minimal — the Inbox registry owns higher-level concerns
-   * like status filtering and paginated merge-sort across providers.
-   *
-   * NOTE: only `spaceId` and `status` are filtered here because those are the
-   * only keyword-indexed fields on `.workflows-step-executions`. An earlier
-   * draft also added `term: { stepType: 'waitForInput' }`, which silently
-   * matched zero docs and made the Inbox UI appear empty even when workflows
-   * were paused on `waitForInput`. The status filter is sufficient because
-   * `waiting_for_input` is only ever produced by the `waitForInput` step type.
-   *
-   * Defence-in-depth `must_not` on `finishedAt`: if a race between the
-   * workflow-level timeout monitor and the waitForInput step leaves a doc with
-   * `status: waiting_for_input` AND `finishedAt` set (the step is actually
-   * settled), we must not resurface it in the Inbox — responding to it is a
-   * no-op because the execution doc is terminal. The underlying race is fixed
-   * in `WaitForInputStepImpl`, but this keeps the Inbox honest even for
-   * pre-existing zombie docs or any future regression.
-   *
-   * Orphan filtering: `.workflows-step-executions` is NOT transactionally
-   * cleaned up when a workflow is soft-deleted (see `workflow_deletion.ts`
-   * — only hard-deletes call `deleteByQuery`). Without a join the Inbox
-   * would surface ghost actions for workflows the user has already removed
-   * from `/app/workflows`. We do this as a list-time filter rather than a
-   * delete-time cancel so soft-deletes stay reversible (step executions
-   * resurface if the workflow is restored) and so pre-existing orphans get
-   * cleaned up retroactively.
+   * Pending rows exclude settled steps and rows that have already been claimed
+   * by a response audit stamp. Soft-deleted parent workflows are filtered out
+   * at read time because step executions are retained unless the workflow is
+   * hard-deleted.
    */
   async listWaitingForInputSteps(
     spaceId: string,
@@ -365,14 +320,8 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
-            // A step doc with `hitl.respondedAt` set has already received
-            // a response — Task Manager simply hasn't run the resume yet.
-            // Filter those out of pending so the row drops from the
-            // user's "needs my action" list the moment they submit. The
-            // processed listing picks them up immediately so the audit
-            // feed populates with no perceptible gap, and the row will
-            // settle out of the responded-but-not-resumed window once
-            // the engine writes `finishedAt`.
+            // `hitl.respondedAt` marks a claimed response that Task Manager
+            // may not have resumed yet; it belongs to the processed listing.
             must_not: [
               { exists: { field: 'finishedAt' } },
               { exists: { field: 'hitl.respondedAt' } },
@@ -427,7 +376,7 @@ export class WorkflowExecutionQueryService {
 
     if (aliveIds === null) {
       // Lookup itself failed (already logged). Fall back to unfiltered
-      // results so a transient ES error doesn't black-hole the Inbox.
+      // results so a transient ES error does not hide active steps.
       return {
         results: allResults,
         total,
@@ -447,30 +396,17 @@ export class WorkflowExecutionQueryService {
       results,
       total: Math.max(0, total - dropped),
       reasoningByStepId: await this.resolvePredecessorReasoning(results, spaceId),
-      // Pending drops orphans outright (you can't respond to a step whose
-      // workflow is gone), so no surviving row is ever from a deleted parent.
+      // Pending drops orphans outright, so no surviving row is from a deleted parent.
       deletedWorkflowIds: new Set(),
     };
   }
 
   /**
-   * Cross-workflow fan-out for terminated `waitForInput` step executions in a
-   * space — i.e. steps that have already received a response (or been
-   * cancelled / errored out). Used by the Inbox plugin to render the
-   * processed-actions audit log below the pending list.
+   * Lists processed `waitForInput` step executions for a space.
    *
-   * Filters by indexed `stepType: 'waitForInput'` (added to the step
-   * execution mapping for this very purpose; pre-deploy terminated rows
-   * therefore won't be queryable by this field — acceptable for a brand-new
-   * feature). Status filter intentionally accepts `completed`, `failed` and
-   * `cancelled` so the audit log still surfaces rows where the workflow
-   * settled abnormally after a response was submitted.
-   *
-   * Unlike the pending listing, this does NOT orphan-filter: an audit trail
-   * must retain processed rows even after their parent workflow is deleted.
-   * Rows whose parent is no longer alive (soft-deleted, or hard-deleted and
-   * thus absent) are kept and reported back via `deletedWorkflowIds` so the
-   * caller can flag the source as gone.
+   * A row is processed once it has either terminated or received a response
+   * audit stamp. Unlike the pending listing, deleted parent workflows are
+   * retained and reported via `deletedWorkflowIds`.
    */
   async listProcessedWaitForInputSteps(
     spaceId: string,
@@ -482,7 +418,7 @@ export class WorkflowExecutionQueryService {
       workflowId,
       respondedBy,
       sortOrder = 'desc',
-    }: { page?: number; perPage?: number } & InboxHistoryFilters = {}
+    }: { page?: number; perPage?: number } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     const from = Math.max(0, (page - 1) * perPage);
     const filterMust = buildHistoryFilterClauses({ channel, workflowId, respondedBy, q });
@@ -493,15 +429,8 @@ export class WorkflowExecutionQueryService {
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }, ...filterMust],
-            // A step belongs in the audit feed when it has either:
-            //   (a) actually terminated (`finishedAt` + a terminal
-            //       status — the engine resumed and ran the step body), or
-            //   (b) been audit-stamped via `markStepAsResponded` but not
-            //       yet resumed by Task Manager (`hitl.respondedAt` set,
-            //       status still `waiting_for_input`). Surfacing (b)
-            //       immediately is what makes the inbox feel multi-client
-            //       safe — every responder sees the response land
-            //       regardless of which Task Manager polled the resume task.
+            // Include terminated rows and response claims that have not yet
+            // been resumed by Task Manager.
             should: [
               {
                 bool: {
@@ -516,11 +445,8 @@ export class WorkflowExecutionQueryService {
             minimum_should_match: 1,
           },
         },
-        // `hitl.respondedAt` is set the moment a response arrives; for the
-        // brief responded-but-not-resumed window it precedes
-        // `finishedAt`. Sorting on it (with `finishedAt` as a tiebreak)
-        // keeps the audit feed stable: the row's relative position
-        // doesn't shift when the engine eventually writes `finishedAt`.
+        // Keep claimed-but-not-yet-resumed rows in the same relative position
+        // after the engine later writes `finishedAt`.
         sort: [
           { 'hitl.respondedAt': { order: sortOrder, missing: '_last' } },
           { finishedAt: { order: sortOrder, missing: '_last' } },
@@ -579,13 +505,8 @@ export class WorkflowExecutionQueryService {
       };
     }
 
-    // Unlike the pending listing, the audit feed does NOT drop rows whose
-    // parent workflow is deleted — an audit trail must retain "what happened"
-    // even for workflows that were later removed. We keep every row and
-    // instead tag the ones whose parent is no longer alive so the UI can flag
-    // the source as deleted. (Hard-deletes also purge step executions via
-    // `deleteByQuery`, so in practice this set is dominated by soft-deletes,
-    // whose step rows survive and remain reversible.)
+    // Processed rows are retained when their parent workflow is deleted; the
+    // caller can decide how to display the deleted source.
     const deletedWorkflowIds = new Set(distinctWorkflowIds.filter((id) => !aliveIds.has(id)));
     return {
       results: allResults,
@@ -596,32 +517,21 @@ export class WorkflowExecutionQueryService {
   }
 
   /**
-   * Distinct-value buckets for the inbox-history filter dropdowns.
+   * Returns facet buckets for processed `waitForInput` rows.
    *
-   * Returns the top `channel` and `respondedBy` values across the space's
-   * processed wait-for-input rows. The query baseline mirrors
-   * {@link listProcessedWaitForInputSteps} (`spaceId` + `stepType:
-   * 'waitForInput'` + the terminated-or-audit-stamped `should`) but
-   * intentionally applies **no** user-supplied filter clauses — the
-   * dropdowns must stay stable regardless of which other filters are
-   * already toggled, otherwise selecting one option would silently
-   * truncate the others' choices.
-   *
-   * Index-not-found is treated as an empty result (cold install). Other ES
-   * errors are logged and rethrown so the caller can decide how to surface
-   * them. Soft-deleted-parent filtering is intentionally skipped here so the
-   * dropdown stays consistent with the history list endpoint, which RETAINS
-   * rows whose parent workflow was deleted (it flags them rather than dropping
-   * them — an audit trail must survive deletion). The bucket count is bounded
-   * by the `terms` agg `size` cap.
+   * Facets use the same baseline as `listProcessedWaitForInputSteps`, without
+   * caller-supplied filters and without parent-workflow deletion filtering.
    */
   async listProcessedWaitForInputFacets(
     spaceId: string,
     { maxBuckets = 50 }: { maxBuckets?: number } = {}
-  ): Promise<InboxHistoryFacets> {
-    let response: estypes.SearchResponse<EsWorkflowStepExecution, InboxHistoryFacetAggs>;
+  ): Promise<ProcessedWaitForInputFacets> {
+    let response: estypes.SearchResponse<EsWorkflowStepExecution, ProcessedWaitForInputFacetAggs>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution, InboxHistoryFacetAggs>({
+      response = await this.deps.esClient.search<
+        EsWorkflowStepExecution,
+        ProcessedWaitForInputFacetAggs
+      >({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         // `size: 0` — we only want the aggs, not the matching docs.
         size: 0,
@@ -652,7 +562,7 @@ export class WorkflowExecutionQueryService {
       if (isIndexNotFoundError(error)) {
         return { channel: [], respondedBy: [] };
       }
-      this.deps.logger.error(`Failed to compute inbox-history filter facets: ${error}`);
+      this.deps.logger.error(`Failed to compute processed wait-for-input facets: ${error}`);
       throw error;
     }
 
@@ -663,23 +573,8 @@ export class WorkflowExecutionQueryService {
   }
 
   /**
-   * Soft-interface reasoning resolver. For a page of `waitForInput` step
-   * executions, fetch the most-recent *completed* step that finished at or
-   * before each wait step started (the work the workflow did right before
-   * pausing) and, when that predecessor's `output` carries a `reasoning`
-   * object, surface it keyed by the wait step's execution id.
-   *
-   * One batched ES search per page (`terms workflowRunId` + `status:
-   * completed` + a `finishedAt <= maxWaitStart` upper bound). Ordering uses
-   * timestamps, not `globalExecutionIndex`, because the step-exec mapping is
-   * `dynamic: false` and those index fields aren't queryable/sortable; the
-   * `output` blob is read from `_source` in memory (durable — output
-   * eviction is memory-only, the persisted doc keeps the payload).
-   *
-   * Best-effort by construction: branches / parallel steps may yield a
-   * sibling, and a predecessor without a `reasoning` key simply produces no
-   * entry. Failures never propagate — reasoning is an enhancement, not a
-   * prerequisite for the listing.
+   * Best-effort lookup of `output.reasoning` from the completed step that
+   * finished immediately before each wait step started.
    */
   private async resolvePredecessorReasoning(
     steps: EsWorkflowStepExecution[],
@@ -734,9 +629,8 @@ export class WorkflowExecutionQueryService {
       if (isIndexNotFoundError(error)) {
         return reasoningByStepId;
       }
-      // Reasoning is a soft enhancement — never fail the listing because the
-      // predecessor lookup errored. Log and return what we have (nothing).
-      this.deps.logger.warn(`Failed to resolve predecessor reasoning for inbox listing: ${error}`);
+      // Reasoning is optional context; do not fail the listing if lookup fails.
+      this.deps.logger.warn(`Failed to resolve predecessor reasoning: ${error}`);
       return reasoningByStepId;
     }
 
@@ -807,7 +701,7 @@ export class WorkflowExecutionQueryService {
         return new Set();
       }
       this.deps.logger.warn(
-        `Failed to validate parent workflows for inbox listing; returning unfiltered results: ${error}`
+        `Failed to validate parent workflows for wait-for-input listing; returning unfiltered results: ${error}`
       );
       return null;
     }
@@ -837,23 +731,11 @@ export class WorkflowExecutionQueryService {
   }
 
   /**
-   * Synchronously records HITL audit metadata on the step execution doc
-   * the moment a responder submits a response — *before* the engine's
-   * Task Manager flow has a chance to run the resume.  Because the
-   * fields land on the step row itself, every client (Kibana inbox,
-   * Slack, agent builder, raw API) can detect the
-   * "responded but not yet resumed" state simply by reading
-   * `.workflows-step-executions`.  No per-client overlay state required.
+   * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
-   * Refresh = `wait_for` so the immediate refetch on the inbox client
-   * (after the respond mutation settles) sees the audit fields and can
-   * render the "Responded" overlay without an extra round trip. The
-   * latency is bounded — ES refresh interval applies once per shard.
-   *
-   * Returns `true` if the doc was updated, `false` if the doc was not
-   * found, belongs to a different space, or was already claimed by another
-   * responder. Throws on transport / ES errors so callers can decide whether
-   * to retry.
+   * Returns `true` when this caller won the claim, or `false` when the doc is
+   * missing, belongs to another space, or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
@@ -864,24 +746,9 @@ export class WorkflowExecutionQueryService {
       const response = await this.deps.esClient.update({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         id: stepExecutionId,
-        // Scripted update guarded on `spaceId` so a misrouted call can't
-        // stamp audit fields on the wrong space's doc. In practice the
-        // caller (workflows inbox provider) has already verified the
-        // step belongs to the active space, but treating the index as
-        // append-mostly + space-scoped at every write is cheap defence.
-        // The `respondedAt` guard makes this a first-writer-wins claim:
-        // concurrent responders cannot overwrite the audit identity/channel
-        // after another client has already submitted a response.
-        //
-        // The painless guard only resolves *sequential* races (the second
-        // responder reads a doc that already has `respondedAt`). For two
-        // *simultaneous* updates, both read the same `_seq_no` before either
-        // writes, so the loser's write fails with a version conflict. Without
-        // a retry that surfaces as a raw 409 the route can't classify (→ 500).
-        // `retry_on_conflict` makes ES re-read the now-stamped doc and re-run
-        // the script, which then takes the noop branch — so the loser
-        // deterministically returns `false` and the provider can raise a clean
-        // `InboxActionConflictError` (→ 409) instead of a generic 500.
+        // `respondedAt` is the first-writer-wins guard. Retrying conflicts
+        // lets simultaneous updates re-run the script against the winner's
+        // write and return `noop` instead of leaking a version conflict.
         retry_on_conflict: 3,
         script: {
           source:
@@ -912,11 +779,7 @@ export class WorkflowExecutionQueryService {
         error?.meta?.body?.result === 'not_found' ||
         error?.body?.result === 'not_found'
       ) {
-        // Step doc is gone — workflow likely already terminated. The
-        // pre-respond conflict check should have caught this; reaching
-        // here means a race (e.g. timeout monitor flipped status during
-        // the response). Surface as a soft "no-op" so the caller can
-        // decide.
+        // Treat concurrent deletion or termination as a lost claim.
         return false;
       }
       this.deps.logger.error(
@@ -928,18 +791,14 @@ export class WorkflowExecutionQueryService {
 }
 
 /**
- * Translate the inbox-history filter shape into the `must` clause additions
- * the listing query layers on top of its baseline `spaceId` + `stepType`
- * filters. Each filter is independent and AND'd into the must list — the
- * OpenAPI contract documents multi-value within-field as OR (which `terms`
- * honours) and cross-field as AND.
+ * Builds additional `must` clauses for processed wait-for-input filters.
  */
 function buildHistoryFilterClauses({
   channel,
   workflowId,
   respondedBy,
   q,
-}: InboxHistoryFilters): estypes.QueryDslQueryContainer[] {
+}: ProcessedWaitForInputFilters): estypes.QueryDslQueryContainer[] {
   const filterMust: estypes.QueryDslQueryContainer[] = [];
   if (channel && channel.length > 0) {
     filterMust.push({ terms: { 'hitl.channel': channel } });
@@ -951,16 +810,8 @@ function buildHistoryFilterClauses({
     filterMust.push({ terms: { 'hitl.respondedBy': respondedBy } });
   }
   if (q && q.length > 0) {
-    // Free-text search applied to the indexed string fields most useful for
-    // narrowing the audit feed (responder, workflow id, step id). All three
-    // are mapped as `keyword`, so `match` / `phrase_prefix` would only match
-    // when the doc's entire keyword starts with the exact query — typing
-    // `test_user` would miss `test_user_alice`. We instead OR a
-    // case-insensitive substring `wildcard` against each field, after
-    // escaping the ES wildcard metacharacters in the user input so a literal
-    // `*` or `?` can't escape into the query. Wildcard performance is
-    // acceptable here because the feed is space-scoped and already bounded by
-    // the `terms`/`bool` filters earlier in the request.
+    // These fields are keywords, so substring search requires wildcards. The
+    // user input is escaped before it is wrapped in our own wildcard envelope.
     const escaped = escapeWildcardOperators(q);
     filterMust.push({
       bool: {
@@ -990,10 +841,7 @@ function escapeWildcardOperators(input: string): string {
 }
 
 /**
- * Pull the soft-interface `reasoning` object out of a step's `output`, if
- * present. Returns `undefined` unless `output` is a plain object carrying a
- * plain-object `reasoning` value — the contract is intentionally loose
- * (extra keys tolerated) but we never surface a non-object reasoning blob.
+ * Pull a plain-object `reasoning` value out of a step output, when present.
  */
 function extractReasoning(output: unknown): Record<string, unknown> | undefined {
   if (!output || typeof output !== 'object' || Array.isArray(output)) {
@@ -1006,12 +854,7 @@ function extractReasoning(output: unknown): Record<string, unknown> | undefined 
   return reasoning as Record<string, unknown>;
 }
 
-/**
- * Convert ES `terms` agg buckets into the inbox-common facet shape. Buckets
- * with non-string keys (a defensive guard — our fields are keyword-typed)
- * and empty-string values are dropped. The agg already returns descending
- * count order; we don't re-sort.
- */
+/** Convert ES `terms` agg buckets into `{ value, count }` entries. */
 function bucketsToFacet(
   buckets: estypes.AggregationsStringTermsAggregate['buckets'] | undefined
 ): Array<{ value: string; count: number }> {
