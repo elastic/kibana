@@ -190,8 +190,32 @@ describe('useServiceFlyoutTransactions', () => {
     await waitFor(() => expect(result.current.hasActiveAlerts).toBe(false));
   });
 
-  it('re-fetches when searchQuery changes', async () => {
-    const http = makeHttp(EMPTY_RESPONSE);
+  it('filters items in-memory when maxCountExceeded is false and searchQuery changes', async () => {
+    const http = makeHttp({
+      maxCountExceeded: false,
+      transactionGroups: [
+        { name: 'GET /api/orders', latency: 100, throughput: 1, errorRate: 0, alertsCount: 0 },
+        { name: 'POST /api/checkout', latency: 200, throughput: 2, errorRate: 0, alertsCount: 0 },
+      ],
+    });
+
+    const { result, rerender } = renderHook(
+      ({ searchQuery }: { searchQuery: string }) =>
+        useServiceFlyoutTransactions({ http, ...BASE_PARAMS, searchQuery }),
+      { initialProps: { searchQuery: '' } }
+    );
+
+    await waitFor(() => expect(result.current.items).toHaveLength(2));
+
+    rerender({ searchQuery: 'checkout' });
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0].name).toBe('POST /api/checkout');
+  });
+
+  it('re-fetches when searchQuery changes and maxCountExceeded is true', async () => {
+    const http = makeHttp({ transactionGroups: [], maxCountExceeded: true });
 
     const { rerender } = renderHook(
       ({ searchQuery }: { searchQuery: string }) =>

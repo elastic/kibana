@@ -54,6 +54,11 @@ export function useServiceFlyoutTransactions({
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<MainStatisticsResponse | undefined>(undefined);
 
+  // When the server returns fewer groups than the limit, all data is already in memory —
+  // pass an empty searchQuery to avoid re-fetching on every keystroke.
+  // When maxCountExceeded is true the full list is truncated, so the server must filter.
+  const serverSearchQuery = response?.maxCountExceeded ? searchQuery : '';
+
   useEffect(() => {
     if (!enabled || !dataSource) return;
 
@@ -76,7 +81,7 @@ export function useServiceFlyoutTransactions({
             latencyAggregationType,
             documentType: dataSource.documentType,
             rollupInterval: dataSource.rollupInterval,
-            searchQuery,
+            searchQuery: serverSearchQuery,
           },
         }
       )
@@ -99,24 +104,27 @@ export function useServiceFlyoutTransactions({
     end,
     transactionType,
     latencyAggregationType,
-    searchQuery,
+    serverSearchQuery,
     enabled,
     dataSource,
   ]);
 
-  const items: TransactionGroup[] = useMemo(
-    () =>
-      (response?.transactionGroups ?? []).map((group) => ({
-        name: group.name,
-        transactionType: group.transactionType,
-        latency: { value: group.latency ?? null },
-        throughput: { value: group.throughput ?? 0 },
-        errorRate: { value: group.errorRate ?? null },
-        alertsCount: group.alertsCount,
-        impact: group.impact != null ? { value: group.impact } : undefined,
-      })),
-    [response?.transactionGroups]
-  );
+  const items: TransactionGroup[] = useMemo(() => {
+    const groups = response?.transactionGroups ?? [];
+    const filtered =
+      !response?.maxCountExceeded && searchQuery
+        ? groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        : groups;
+    return filtered.map((group) => ({
+      name: group.name,
+      transactionType: group.transactionType,
+      latency: { value: group.latency ?? null },
+      throughput: { value: group.throughput ?? 0 },
+      errorRate: { value: group.errorRate ?? null },
+      alertsCount: group.alertsCount,
+      impact: group.impact != null ? { value: group.impact } : undefined,
+    }));
+  }, [response, searchQuery]);
 
   return {
     items,
