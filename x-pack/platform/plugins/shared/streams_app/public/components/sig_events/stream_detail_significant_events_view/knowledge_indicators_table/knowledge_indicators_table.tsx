@@ -17,6 +17,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type Streams, QUERY_TYPE_STATS } from '@kbn/streams-schema';

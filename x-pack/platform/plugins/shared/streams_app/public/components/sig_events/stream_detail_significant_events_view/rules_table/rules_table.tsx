@@ -16,6 +16,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';

@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

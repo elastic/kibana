@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/streams-schema';
