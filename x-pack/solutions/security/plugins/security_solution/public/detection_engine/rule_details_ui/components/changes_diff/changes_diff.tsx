@@ -58,7 +58,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
   if (!item) {
     if (isLoading) {
       return (
-        <EuiPanel hasBorder data-test-subj="ruleChangesHistoryDiffLoading">
+        <EuiPanel data-test-subj="ruleChangesHistoryDiffLoading">
           <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="m" />
@@ -72,7 +72,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     }
 
     return (
-      <EuiPanel hasBorder data-test-subj="ruleChangesHistoryNothingSelected">
+      <EuiPanel data-test-subj="ruleChangesHistoryNothingSelected">
         <EuiEmptyPrompt iconType="inspect" title={<h2>{i18n.NOTHING_TO_COMPARE_TITLE}</h2>} />
       </EuiPanel>
     );
@@ -80,7 +80,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
 
   if (item.old_values && numOfChangedFields === 0) {
     return (
-      <EuiPanel hasBorder data-test-subj="ruleChangesHistoryNoChanges">
+      <EuiPanel hasBorder={false} hasShadow={false} data-test-subj="ruleChangesHistoryNoChanges">
         <EuiEmptyPrompt
           iconType="checkInCircleFilled"
           title={<h2>{i18n.NO_VISIBLE_CHANGES_TITLE}</h2>}

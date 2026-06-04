@@ -11,7 +11,9 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiResizableContainer,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -27,6 +29,8 @@ import { useInfiniteChangeHistory } from '../../../rule_management/api/hooks/use
 import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { RuleChangesDiff } from '../changes_diff/changes_diff';
 import * as i18n from './translations';
+
+const SIDEBAR_WIDTH = 400;
 
 interface RuleChangesHistoryProps {
   header?: React.ReactNode;
@@ -67,90 +71,94 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
 
   const styles = useMemo(
     () => ({
-      rightPanelHeaderCss: css`
-        padding: ${euiTheme.size.m};
-        border-bottom: ${euiTheme.border.thin};
-      `,
-      leftPanelCss: css`
+      mainCss: css`
+        flex: 1;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         overflow: hidden;
       `,
-      leftPanelContentCss: css`
+      diffCss: css`
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        padding-right: ${euiTheme.size.m};
       `,
-      rightPanelContentCss: css`
-        overflow: hidden;
+      sidebarHeaderCss: css`
+        padding: ${euiTheme.size.m};
+      `,
+      flyoutBodyCss: css`
+        & .euiFlyoutBody__overflowContent {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+      `,
+      flyoutCss: css`
+        top: calc(var(--euiFixedHeadersOffset, 0) + ${euiTheme.size.base});
+        bottom: ${euiTheme.size.base};
+        height: auto;
+        border-top-left-radius: ${euiTheme.border.radius.medium};
+        border-bottom-left-radius: ${euiTheme.border.radius.medium};
       `,
     }),
     [euiTheme]
   );
 
   return (
-    <EuiResizableContainer style={{ flex: '1 1 0', minHeight: 0 }}>
-      {(EuiResizablePanel, EuiResizableButton) => (
-        <>
-          <EuiResizablePanel
-            id="rule-changes-history-left"
-            initialSize={65}
-            minSize="200px"
-            paddingSize="none"
-            css={styles.leftPanelCss}
+    <>
+      <EuiFlyout
+        type="push"
+        size={`${SIDEBAR_WIDTH}px`}
+        ownFocus={false}
+        onClose={handleClose}
+        hideCloseButton
+        pushMinBreakpoint="xs"
+        paddingSize="none"
+        aria-labelledby="ruleChangesHistorySidebarTitle"
+        data-test-subj="ruleChangesHistorySidebar"
+        css={styles.flyoutCss}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            css={styles.sidebarHeaderCss}
           >
-            {header}
-            <div css={styles.leftPanelContentCss}>
-              <RuleChangesDiff item={selectedItem} isLoading={isLoading} />
-            </div>
-          </EuiResizablePanel>
-          <EuiResizableButton />
-          <EuiResizablePanel
-            id="rule-changes-history-right"
-            initialSize={35}
-            minSize="300px"
-            paddingSize="none"
-          >
-            <EuiFlexGroup direction="column" gutterSize="none" style={{ height: '100%' }}>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  css={styles.rightPanelHeaderCss}
-                >
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h2>{i18n.VERSION_HISTORY_TITLE}</h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={i18n.CLOSE_VERSION_HISTORY} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        iconType="cross"
-                        aria-label={i18n.CLOSE_VERSION_HISTORY}
-                        onClick={handleClose}
-                        data-test-subj="ruleChangesHistoryClose"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem css={styles.rightPanelContentCss}>
-                <RuleChangesHistoryTimeline
-                  items={items}
-                  selectedItem={selectedItem}
-                  isLoading={isLoading || isFetching}
-                  startedAt={changeHistoryStartedAt}
-                  onLoadMore={handleNextPageLoading}
-                  onSelectItem={setSelectedItem}
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2 id="ruleChangesHistorySidebarTitle">{i18n.VERSION_HISTORY_TITLE}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.CLOSE_VERSION_HISTORY} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.CLOSE_VERSION_HISTORY}
+                  onClick={handleClose}
+                  data-test-subj="ruleChangesHistoryClose"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiResizablePanel>
-        </>
-      )}
-    </EuiResizableContainer>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody css={styles.flyoutBodyCss}>
+          <RuleChangesHistoryTimeline
+            items={items}
+            selectedItem={selectedItem}
+            isLoading={isLoading || isFetching}
+            startedAt={changeHistoryStartedAt}
+            onLoadMore={handleNextPageLoading}
+            onSelectItem={setSelectedItem}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+      <div css={styles.mainCss}>
+        {header}
+        <div css={styles.diffCss}>
+          <RuleChangesDiff item={selectedItem} isLoading={isLoading} />
+        </div>
+      </div>
+    </>
   );
 });
