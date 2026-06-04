@@ -13,21 +13,12 @@ import {
 } from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, ActionGroupId } from './types';
 
-/**
- * Fetches dispatchable alert events by querying both alert_events and alert_actions data streams.
- *
- * Uses field-based discrimination instead of `_index LIKE` to tell rows apart:
- *  - alert_events has a `type` field ('signal' | 'alert'); alert_actions does not (NULL in ES|QL).
- *  - alert_actions has an `action_type` field; alert_events does not (NULL in ES|QL).
- *
- * `_source` is dropped immediately after the EVAL that consumes it. The ES|QL planner does
- * not auto-prune `METADATA _source`, so without an explicit DROP it would ride through the
- * INLINE STATS hash-join buffer and push the per-shard sub-plan output past the ~16.8 MB
- * limit at production volumes (data is `flattened`, only addressable via `_source`).
- *
- * This avoids an ES|QL regression where `WHERE _index LIKE` before `STATS` in a multi-index
- * query returns 0 rows. See: https://github.com/elastic/elasticsearch/issues/146318
- */
+// Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
+// an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
+// See: https://github.com/elastic/elasticsearch/issues/146318
+//
+// `_source` is dropped after JSON_EXTRACT because ES|QL does not auto-prune METADATA fields;
+// without the explicit DROP it rides through the INLINE STATS buffer and can exceed ~16.8 MB.
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
 
@@ -56,51 +47,17 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
 
 const PAIR_SEPARATOR = '::';
 
-/**
- * Maximum bytes to allocate to in-clause literals per chunked ES|QL query.
- *
- * ES|QL has a hard 1,000,000-byte cap on the statement text. The two
- * dispatcher queries that inline pipeline-state-derived inputs as quoted
- * literals inside `IN (...)` (`getAlertEpisodeSuppressionsQueries` and
- * `getLastNotifiedTimestampsQueries`) can exceed that cap at LIMIT-sized
- * batches, producing `parsing_exception: ESQL statement is too large`.
- * Because the dispatcher does not advance its watermark on `step_error`,
- * a single offending tick stalls every subsequent tick permanently.
- *
- * The 600 KB budget is intentionally well below the cap to leave room for:
- *   - the static query body (FROM/EVAL/WHERE/STATS/...) which is < 2 KB
- *     for either current query, but may grow,
- *   - escape characters added when literals contain quotes,
- *   - future ES|QL grammar/serialization changes that grow the per-literal
- *     cost,
- *   - downstream proxy/transport headers that may add fixed overhead.
- */
+// ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
+// producing `parsing_exception: ESQL statement is too large`. Without chunking the dispatcher
+// watermark never advances past the offending tick. 600 KB leaves headroom for the static
+// query body and escape overhead.
 export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 
-/**
- * Per-literal serialization cost in the ES|QL `IN (...)` clause.
- *
- * Each literal is rendered as `"<value>", ` — that's two surrounding quotes,
- * a comma, and a space (4 bytes) on top of the literal length. We add 2 more
- * bytes as a margin for backslash escapes when the value contains quotes,
- * for a total overhead of `length + 6` bytes per literal.
- */
+// `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
 const PER_LITERAL_OVERHEAD_BYTES = 6;
 
-/**
- * Split a list of literal values into groups small enough to be safely
- * embedded inside an ES|QL `IN (...)` clause without exceeding the statement
- * size cap.
- *
- * Exported for unit testing of chunk boundaries; production callers should
- * use {@link getAlertEpisodeSuppressionsQueries} or
- * {@link getLastNotifiedTimestampsQueries}, which apply this helper internally.
- *
- * Pathological case: a single literal whose serialized size exceeds the
- * budget is placed alone in its own chunk. The resulting query may still
- * exceed the ES|QL cap; in practice every key passed in is a UUID/hash with
- * bounded length (≤ ~150 bytes), so this is unreachable.
- */
+// Exported for unit-testing chunk boundaries. An oversized single literal gets its own chunk;
+// at ≤150-byte keys (UUID/hash) this is unreachable in practice.
 export const chunkInClauseLiterals = (literals: readonly string[]): string[][] => {
   if (literals.length === 0) return [];
 
@@ -123,23 +80,9 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
   return chunks;
 };
 
-/**
- * Build the ES|QL request(s) that fetch suppression state for a batch of
- * alert episodes.
- *
- * Returns an array because the `WHERE _pair_key IN (...)` clause is chunked
- * to keep each emitted statement under the ES|QL 1 MB cap (see
- * {@link ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES}). Aggregation correctness is
- * preserved across chunks: the `INLINE STATS BY rule_id, group_hash` and
- * `STATS BY rule_id, group_hash, episode_id` aggregations partition by the
- * chunk key (or finer), so no row ever participates in two chunks'
- * aggregations and concatenated results are identical to a single-query
- * result.
- *
- * `minLastEventTimestamp` is computed once from the full input and reused
- * across every chunk's snooze-expiry filter so the filter semantics do not
- * shift with the chunking.
- */
+// Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
+// aggregations key on rule_id/group_hash so no row spans two chunks. minLastEventTimestamp
+// is computed from the full input so the snooze-expiry filter is consistent across chunks.
 export const getAlertEpisodeSuppressionsQueries = (
   alertEpisodes: AlertEpisode[]
 ): EsqlRequest[] => {
@@ -184,15 +127,8 @@ export const getAlertEpisodeSuppressionsQueries = (
   });
 };
 
-/**
- * Build the ES|QL request(s) that fetch last-notified timestamps for a batch
- * of action groups.
- *
- * Returns an array for the same statement-size reason as
- * {@link getAlertEpisodeSuppressionsQueries}. The query's only aggregation
- * (`STATS ... BY action_group_id`) partitions by the same key the chunks are
- * partitioned on, so concatenated results equal a single-query result.
- */
+// Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
+// STATS aggregates by action_group_id, the same key used for chunking.
 export const getLastNotifiedTimestampsQueries = (
   actionGroupIds: ActionGroupId[]
 ): EsqlRequest[] => {
