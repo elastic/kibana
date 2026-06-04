@@ -215,6 +215,29 @@ describe('LifecycleSummary', () => {
       );
     });
 
+    it('should disable "Add delete phase" when the DSL downsample flyout is open', async () => {
+      const definition = createDslDefinition(undefined, [{ after: '1d', fixed_interval: '1d' }]);
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream onAddDeletePhase={jest.fn()} />
+      );
+
+      const addDeletePhaseButton = screen.getByTestId('dataLifecycleSummaryAddDeletePhase');
+      expect(addDeletePhaseButton).toBeEnabled();
+
+      fireEvent.click(screen.getByTestId('downsamplingPhase-1d-label'));
+      await waitFor(() =>
+        expect(screen.getByTestId('downsamplingPopover-step1-editButton')).toBeInTheDocument()
+      );
+      fireEvent.click(screen.getByTestId('downsamplingPopover-step1-editButton'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('streamsEditDslStepsFlyoutFromSummary')).toBeInTheDocument()
+      );
+
+      await waitFor(() => expect(addDeletePhaseButton).toBeDisabled());
+    });
+
     it('should disable "Add downsample step" button when there are 10 steps', () => {
       const manySteps = Array.from({ length: 10 }, (_, i) => ({
         after: `${i + 1}d`,

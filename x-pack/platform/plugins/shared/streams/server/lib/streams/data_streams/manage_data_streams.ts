@@ -222,11 +222,7 @@ export async function updateDataStreamsLifecycle({
             {
               logger,
             }
-          )) as {
-            template: IndicesSimulateTemplateTemplate & {
-              lifecycle?: { enabled: boolean; data_retention?: string };
-            };
-          };
+          )) as SimulateClassicStreamTemplateResponse;
 
           // simulateIndexTemplate returns an empty response for replicated data streams
           // that have no local index template
@@ -406,10 +402,64 @@ export async function updateDataStreamsFailureStore({
   }
 }
 
+/**
+ * Simulated template shape augmented with the `lifecycle` / `data_stream_options` fields ES returns but the generated type omits.
+ */
+export type SimulatedClassicStreamTemplate = IndicesSimulateTemplateTemplate & {
+  lifecycle?: { enabled?: boolean; data_retention?: string };
+  data_stream_options?: {
+    failure_store?: {
+      enabled?: boolean;
+      lifecycle?: { enabled?: boolean; data_retention?: string; effective_retention?: string };
+    };
+  };
+};
+
+/**
+ * `simulateIndexTemplate` response narrowed to the augmented template shape
+ * above. The generated ES client type doesn't model `lifecycle` /
+ * `data_stream_options`, so we describe the response once here and reuse it at
+ * every call site instead of casting inline.
+ */
+interface SimulateClassicStreamTemplateResponse {
+  template?: SimulatedClassicStreamTemplate;
+}
+
+/**
+ * Resolves the simulated index-template (with component-template merges) backing a classic stream, returning `undefined` for an empty template (e.g. replicated streams).
+ */
+export async function simulateClassicStreamTemplate({
+  esClient,
+  streamsClient,
+  name,
+}: {
+  esClient: ElasticsearchClient;
+  streamsClient: { getDataStream: (name: string) => Promise<{ name: string; template: string }> };
+  name: string;
+}): Promise<SimulatedClassicStreamTemplate | undefined> {
+  const dataStream = await streamsClient.getDataStream(name).catch(() => null);
+
+  const templateName = dataStream?.template;
+  const indexTemplateResponse = templateName
+    ? await esClient.indices.getIndexTemplate({ name: templateName })
+    : undefined;
+  const indexPatterns = indexTemplateResponse?.index_templates?.[0]?.index_template?.index_patterns;
+
+  const pattern = indexPatterns?.[0];
+  const simulatedIndexName =
+    typeof pattern === 'string' && pattern.length > 0
+      ? pattern.replace(/\*/g, '0').replace(/\?/g, '0')
+      : dataStream?.name ?? name;
+
+  const { template } = (await esClient.indices.simulateIndexTemplate({
+    name: simulatedIndexName,
+  })) as SimulateClassicStreamTemplateResponse;
+
+  return template;
+}
+
 export function getTemplateLifecycle(
-  template: IndicesSimulateTemplateTemplate & {
-    lifecycle?: { enabled: boolean; data_retention?: string };
-  }
+  template: SimulatedClassicStreamTemplate
 ): IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled {
   const toBoolean = (value: boolean | string | undefined): boolean => {
     if (typeof value === 'boolean') {
@@ -418,20 +468,26 @@ export function getTemplateLifecycle(
     return value === 'true';
   };
 
-  const hasEffectiveDsl =
-    toBoolean(template.lifecycle?.enabled) &&
-    !(
-      toBoolean(template.settings.index?.lifecycle?.prefer_ilm) &&
-      template.settings.index?.lifecycle?.name
-    );
+  // `simulateIndexTemplate` sometimes omits `lifecycle.enabled`. Treat DSL as
+  // enabled when the flag is explicitly truthy, or when it is omitted but a
+  // `data_retention` is configured (which only DSL exposes).
+  const dslEnabled =
+    template.lifecycle?.enabled !== undefined
+      ? toBoolean(template.lifecycle.enabled)
+      : template.lifecycle?.data_retention != null;
+
+  const ilmPolicyName = template.settings?.index?.lifecycle?.name;
+  const preferIlm = toBoolean(template.settings?.index?.lifecycle?.prefer_ilm);
+
+  const hasEffectiveDsl = dslEnabled && !(preferIlm && ilmPolicyName);
   if (hasEffectiveDsl) {
-    return { dsl: { data_retention: template.lifecycle!.data_retention } };
+    return { dsl: { data_retention: template.lifecycle?.data_retention } };
   }
 
-  if (template.settings.index?.lifecycle?.name) {
+  if (ilmPolicyName) {
     // if dsl is not enabled and a policy is set, the ilm will be effective
     // regardless of the prefer_ilm setting
-    return { ilm: { policy: template.settings.index.lifecycle.name } };
+    return { ilm: { policy: ilmPolicyName } };
   }
 
   return { disabled: {} };

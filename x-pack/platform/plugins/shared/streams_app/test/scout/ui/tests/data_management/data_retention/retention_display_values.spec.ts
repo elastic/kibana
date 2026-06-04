@@ -11,10 +11,7 @@ import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
   closeToastsIfPresent,
-  openRetentionModal,
-  saveRetentionChanges,
   setCustomRetention,
-  toggleInheritSwitch,
   RETENTION_TEST_IDS,
 } from '../../../fixtures/retention_helpers';
 
@@ -61,18 +58,12 @@ test.describe(
     });
 
     test('should show data phase count subtitle when custom retention is set', async ({ page }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
       await expect(page.getByTestId('retention-metric-subtitle')).toContainText('2 data phases');
     });
 
     test('should display retention metric prominently', async ({ page }) => {
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
       const retentionMetric = page.getByTestId(RETENTION_TEST_IDS.retentionMetric);
       await expect(retentionMetric).toBeVisible();
       await expect(retentionMetric).toContainText('7 days');

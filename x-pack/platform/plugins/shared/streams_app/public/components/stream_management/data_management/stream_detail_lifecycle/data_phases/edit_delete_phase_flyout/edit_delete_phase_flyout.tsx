@@ -25,7 +25,11 @@ import {
 import type { PhaseName } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
-import type { EditDeletePhaseFlyoutProps, EditDeletePhaseFlyoutValue } from './types';
+import type {
+  EditDeletePhaseFlyoutContentProps,
+  EditDeletePhaseFlyoutProps,
+  EditDeletePhaseFlyoutValue,
+} from './types';
 import { DeleteAfterField } from './delete_after_field';
 import { editDeletePhaseFlyoutI18n } from './i18n';
 import { useEditDeletePhaseFlyoutStyles } from './styles';
@@ -48,23 +52,25 @@ const isEditDeletePhaseFlyoutForm = (data: unknown): data is EditDeletePhaseFlyo
   );
 };
 
-export const EditDeletePhaseFlyout = ({
+export const EditDeletePhaseFlyoutContent = ({
   initialValue,
   defaultRetentionPeriod,
   maximumRetentionPeriod,
   showRestoreDefaultButton = Boolean(defaultRetentionPeriod),
+  allowRemoveDeletePhase = true,
   onChange,
   onChangeDebounceMs = 250,
   onSave,
   onClose,
   isSaving,
+  titleId: titleIdProp,
   'data-test-subj': dataTestSubjProp,
-}: EditDeletePhaseFlyoutProps) => {
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutTitle' });
+}: EditDeletePhaseFlyoutContentProps) => {
+  const generatedTitleId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutTitle' });
+  const flyoutTitleId = titleIdProp ?? generatedTitleId;
   const formId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditDeletePhaseFlyout';
-  const { flyoutBodyStyles, footerStyles, headerStyles, sectionStyles } =
-    useEditDeletePhaseFlyoutStyles();
+  const { footerStyles, headerStyles, sectionStyles } = useEditDeletePhaseFlyoutStyles();
 
   const schema = useMemo(
     () => getEditDeletePhaseFlyoutFormSchema({ maximumRetentionPeriod }),
@@ -191,7 +197,8 @@ export const EditDeletePhaseFlyout = ({
   }, [currentMappedValue, errors, isDirty, scheduleOnChangeEmit]);
 
   const hasFormErrors = Object.keys(errors).length > 0;
-  const isApplyDisabled = hasFormErrors || !hasChanges || isSubmitting;
+  const isAddingDeletePhase = initialValue.deletePhaseEnabled === false;
+  const isApplyDisabled = hasFormErrors || isSubmitting || (!isAddingDeletePhase && !hasChanges);
   const disabledApplyTooltip = isSubmitting
     ? editDeletePhaseFlyoutI18n.applySubmittingDisabledTooltip
     : hasFormErrors
@@ -243,15 +250,7 @@ export const EditDeletePhaseFlyout = ({
   );
 
   return (
-    <EuiFlyout
-      type="push"
-      size="s"
-      paddingSize="none"
-      ownFocus={false}
-      onClose={onClose}
-      aria-labelledby={flyoutTitleId}
-      data-test-subj={dataTestSubj}
-    >
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
           <EuiFlexItem grow={false}>
@@ -267,7 +266,7 @@ export const EditDeletePhaseFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody css={flyoutBodyStyles}>
+      <EuiFlyoutBody>
         <FormProvider {...methods}>
           <form
             id={formId}
@@ -284,7 +283,7 @@ export const EditDeletePhaseFlyout = ({
               />
             </EuiPanel>
 
-            {!maximumRetentionPeriod ? (
+            {allowRemoveDeletePhase && !maximumRetentionPeriod ? (
               <>
                 <EuiHorizontalRule margin="none" />
 
@@ -337,6 +336,26 @@ export const EditDeletePhaseFlyout = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
+    </>
+  );
+};
+
+export const EditDeletePhaseFlyout = (contentProps: EditDeletePhaseFlyoutProps) => {
+  const { onClose, 'data-test-subj': dataTestSubjProp } = contentProps;
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutTitle' });
+  const dataTestSubj = dataTestSubjProp ?? 'streamsEditDeletePhaseFlyout';
+
+  return (
+    <EuiFlyout
+      type="push"
+      size="s"
+      paddingSize="none"
+      ownFocus={false}
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      data-test-subj={dataTestSubj}
+    >
+      <EditDeletePhaseFlyoutContent {...contentProps} titleId={flyoutTitleId} />
     </EuiFlyout>
   );
 };

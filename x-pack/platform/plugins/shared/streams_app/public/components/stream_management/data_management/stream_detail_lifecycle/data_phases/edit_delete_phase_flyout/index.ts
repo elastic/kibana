@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { EditDeletePhaseFlyout } from './edit_delete_phase_flyout';
-export type { EditDeletePhaseFlyoutProps, EditDeletePhaseFlyoutValue } from './types';
+export { EditDeletePhaseFlyout, EditDeletePhaseFlyoutContent } from './edit_delete_phase_flyout';
+export type {
+  EditDeletePhaseFlyoutContentProps,
+  EditDeletePhaseFlyoutProps,
+  EditDeletePhaseFlyoutValue,
+} from './types';

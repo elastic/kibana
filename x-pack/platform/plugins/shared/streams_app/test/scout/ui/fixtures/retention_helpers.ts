@@ -9,53 +9,97 @@ import { type Locator, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 /**
- * Wait for an element to be visible and enabled (not disabled)
+ * Test IDs for the data lifecycle / retention UI.
+ *
+ * The retention editing UX is flyout-based:
+ * - The "edit lifecycle method" flyout (inherit + DLM/ILM method) is opened from
+ *   the lifecycle summary header action and uses the `streamsEditSuccessfulDataLifecycleFlyout`
+ *   prefix.
+ * - The custom DSL retention (delete phase) is configured in a separate
+ *   `streamsEditSuccessfulDeletePhaseFlyout`.
  */
-async function waitForElementToBeEnabled(page: ScoutPage, testSubj: string): Promise<void> {
-  const element = page.getByTestId(testSubj);
-  await element.waitFor({ state: 'visible' });
-  await page.waitForFunction((selector) => {
-    const el = document.querySelector(`[data-test-subj="${selector}"]`);
-    return el && !el.hasAttribute('disabled');
-  }, testSubj);
-}
-
-// Test IDs constants for retention UI elements
 export const RETENTION_TEST_IDS = {
-  // Buttons and controls
-  editButton: 'streamsAppRetentionMetadataEditDataRetentionButton',
-  editFailureStoreButton: 'streamsAppFailureStoreRetentionMetadataEditDataRetentionButton',
-  inheritSwitch: 'inheritDataRetentionSwitch',
-  buttonGroup: 'dataRetentionButtonGroup',
-  indefiniteButton: 'indefiniteRetentionButton',
-  customButton: 'customRetentionButton',
-  ilmButton: 'ilmRetentionButton',
-  cancelButton: 'streamsAppModalFooterCancelButton',
-  saveButton: 'streamsAppModalFooterButton',
+  // Entry points (lifecycle summary header actions)
+  editLifecycleMethodButton: 'dataLifecycleSummaryEditLifecycleMethod',
+  addDeletePhaseButton: 'dataLifecycleSummaryAddDeletePhase',
+  addPhaseButton: 'dataLifecycleSummaryAddPhase',
+  addDownsampleStepButton: 'dataLifecycleSummaryAddDownsampleStep',
 
-  // Modal elements
-  modal: 'editLifecycleModalTitle',
-  modalCloseButton: 'euiModalCloseButton',
-  inheritHeading: 'inheritRetentionHeading',
-  customHeading: 'customRetentionHeading',
+  // Successful data: edit lifecycle method flyout
+  successfulLifecycleFlyout: 'streamsEditSuccessfulDataLifecycleFlyout',
+  successfulInheritCheckbox: 'streamsEditDataLifecycleInheritCheckbox',
+  // Backwards-compatible alias for the inherit control (now a checkbox in the flyout).
+  inheritSwitch: 'streamsEditDataLifecycleInheritCheckbox',
+  successfulFlyoutApplyButton: 'streamsEditDataLifecycleFlyoutApplyButton',
+  successfulFlyoutCancelButton: 'streamsEditDataLifecycleFlyoutCancelButton',
 
-  // DSL fields
-  dslField: 'streamsAppDslModalDaysField',
-  dslUnitButton: 'streamsAppDslModalButton',
-  dslUnitOption: (unit: 'd' | 'h' | 'm' | 's') => `streamsAppDslModalUnitOption-${unit}`,
+  // Successful data: delete phase flyout (custom DSL retention)
+  successfulDeletePhaseFlyout: 'streamsEditSuccessfulDeletePhaseFlyout',
+  successfulDeletePhaseValue: 'streamsEditSuccessfulDeletePhaseFlyoutDeleteAfterValue',
+  successfulDeletePhaseUnit: 'streamsEditSuccessfulDeletePhaseFlyoutDeleteAfterUnit',
+  successfulDeletePhaseApplyButton: 'streamsEditSuccessfulDeletePhaseFlyoutApplyButton',
+  successfulDeletePhaseCancelButton: 'streamsEditSuccessfulDeletePhaseFlyoutCancelButton',
+  successfulDeletePhaseRemoveButton:
+    'streamsEditSuccessfulDeletePhaseFlyoutRemoveDeletePhaseButton',
+
+  // Lifecycle method cards (DLM / ILM)
+  methodCardDlm: 'editDataLifecycle-methodCard-dlm',
+  methodCardIlm: 'editDataLifecycle-methodCard-ilm',
+
+  // ILM policy selector (inside the lifecycle method flyout when ILM is selected)
+  ilmSearchInput: 'retentionSelectorSearchInput',
+  ilmPolicyRow: (policyName: string) =>
+    `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
 
   // Display elements
   retentionMetric: 'retention-metric',
+  retentionMetricSubtitle: 'retention-metric-subtitle',
   retentionCard: 'retentionCard',
   failureStoreRetentionCard: 'failureStoreRetentionCard',
+  failureStoreRetentionMetric: 'failureStoreRetention-metric',
+  failureStoreRetentionMetricSubtitle: 'failureStoreRetention-metric-subtitle',
   retentionColumn: (streamName: string) => `retentionColumn-${streamName}`,
   lifecycleBadge: 'lifecycleBadge',
 
-  // ILM elements (ESS only)
-  ilmPolicyDropdown: 'ilmPolicyDropdown',
-  ilmPolicyOption: (policyName: string) => `ilmPolicyOption-${policyName}`,
-  ilmLink: 'ilmPolicyLink',
+  // Failure store: edit failed lifecycle flyout
+  failureStoreEnableButton: 'streamsAppFailureStoreEnableButton',
+  failureStoreEditButton: 'failureStoreSummaryEditFailedLifecycle',
+  failureStoreAddDeletePhaseButton: 'failureStoreSummaryAddDeletePhase',
+  failedLifecycleFlyout: 'streamsEditFailedDataLifecycleFlyout',
+  failedInheritCheckbox: 'streamsEditDataLifecycleInheritCheckbox',
+  enableFailureStoreCheckbox: 'editFailedDataLifecycle-enableFailureStoreCheckbox',
+  failedFlyoutApplyButton: 'streamsEditDataLifecycleFlyoutApplyButton',
+  failedFlyoutCancelButton: 'streamsEditDataLifecycleFlyoutCancelButton',
+
+  // Failure store: delete phase flyout (custom failed retention)
+  failedDeletePhaseFlyout: 'streamsEditFailedDeletePhaseFlyout',
+  failedDeletePhaseValue: 'streamsEditFailedDeletePhaseFlyoutDeleteAfterValue',
+  failedDeletePhaseUnit: 'streamsEditFailedDeletePhaseFlyoutDeleteAfterUnit',
+  failedDeletePhaseApplyButton: 'streamsEditFailedDeletePhaseFlyoutApplyButton',
+  failedDeletePhaseRemoveButton: 'streamsEditFailedDeletePhaseFlyoutRemoveDeletePhaseButton',
 } as const;
+
+/**
+ * Confirms the "This will override index template settings" modal when it appears.
+ *
+ * Saving a DLM lifecycle change (successful or failure store) on a stream that
+ * currently inherits its lifecycle (classic streams and root wired streams)
+ * shows this confirmation modal before the change is applied. It does not appear
+ * once the stream already overrides the inherited settings, so this is a no-op
+ * in that case.
+ */
+export async function confirmOverrideIfPresent(page: ScoutPage): Promise<void> {
+  const overrideButton = page.getByTestId('overrideSettingsModal-overrideButton');
+  if (
+    await overrideButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false)
+  ) {
+    await overrideButton.click();
+    await expect(overrideButton).toBeHidden();
+  }
+}
 
 // Mock retention values for testing
 export const MOCK_RETENTION_VALUES = {
@@ -65,157 +109,166 @@ export const MOCK_RETENTION_VALUES = {
   oneHour: { value: '1', unit: 'h' as const, display: '1 hour' },
   sixtyMinutes: { value: '60', unit: 'm' as const, display: '60 minutes' },
   oneMinute: { value: '1', unit: 'm' as const, display: '1 minute' },
-  threeThousandSixHundredSeconds: {
-    value: '3600',
-    unit: 's' as const,
-    display: '3600 seconds',
-  },
-  oneSecond: { value: '1', unit: 's' as const, display: '1 second' },
   thirtyDays: { value: '30', unit: 'd' as const, display: '30 days' },
   ninetyDays: { value: '90', unit: 'd' as const, display: '90 days' },
-  oneYear: { value: '365', unit: 'd' as const, display: '365 days' },
-  tenThousandDays: { value: '10000', unit: 'd' as const, display: '10000 days' },
-} as const;
-
-// Invalid values for validation testing
-export const INVALID_RETENTION_VALUES = {
-  negative: '-5',
-  decimal: '7.5',
-  zero: '0',
-  nonNumeric: 'abc',
-  empty: '',
-  specialChars: '7!@#',
-} as const;
-
-// Expected error messages
-export const VALIDATION_ERRORS = {
-  positiveInteger: 'A positive integer is required',
-} as const;
-
-// Badge text constants
-export const BADGE_TEXT = {
-  inheritFromParent: 'Inherit from parent',
-  overrideParent: 'Override parent',
-  inheritFromIndexTemplate: 'Inherit from index template',
-  overrideIndexTemplate: 'Override index template',
-  customPeriod: 'Custom period',
-  ilmPolicy: 'ILM policy',
-  indefinite: 'Indefinite',
 } as const;
 
 /**
- * Opens the retention modal by clicking the edit button
+ * Opens the "edit lifecycle method" flyout (inherit + DLM/ILM) for successful data.
  */
-export async function openRetentionModal(
-  page: ScoutPage,
-  isFailureStore = false
-): Promise<Locator> {
-  const buttonTestId = isFailureStore
-    ? RETENTION_TEST_IDS.editFailureStoreButton
-    : RETENTION_TEST_IDS.editButton;
-  await page.getByTestId(buttonTestId).click();
-  const modal = page.getByTestId(RETENTION_TEST_IDS.modal);
-  await expect(modal).toBeVisible();
-  return modal;
+export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locator> {
+  await page.getByTestId(RETENTION_TEST_IDS.editLifecycleMethodButton).click();
+  const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout);
+  await expect(flyout).toBeVisible();
+  return flyout;
 }
 
 /**
- * Closes the retention modal using specified method
+ * Backwards-compatible alias used by specs: opens the lifecycle method flyout.
  */
-export async function closeRetentionModal(
-  page: ScoutPage,
-  method: 'cancel' | 'escape' | 'x' = 'cancel'
-): Promise<void> {
-  switch (method) {
-    case 'cancel':
-      await page.getByTestId(RETENTION_TEST_IDS.cancelButton).click();
-      break;
-    case 'escape':
-      await page.keyboard.press('Escape');
-      break;
-    case 'x':
-      await page.getByTestId(RETENTION_TEST_IDS.modalCloseButton).click();
-      break;
-  }
-  await expect(page.getByTestId(RETENTION_TEST_IDS.modal)).toBeHidden();
-}
+export const openRetentionModal = openLifecycleMethodFlyout;
 
 /**
- * Saves retention changes by clicking the save button
+ * Saves the lifecycle method flyout changes (Apply) and waits for it to close.
  */
 export async function saveRetentionChanges(page: ScoutPage): Promise<void> {
-  await page.getByTestId(RETENTION_TEST_IDS.saveButton).click();
-  await expect(page.getByTestId(RETENTION_TEST_IDS.modal)).toBeHidden();
+  await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
+  await confirmOverrideIfPresent(page);
+  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)).toBeHidden();
 }
 
 /**
- * Saves failure store changes by waiting for the save button to be enabled and clicking it
+ * Cancels the lifecycle method flyout and waits for it to close.
  */
-export async function saveFailureStoreChanges(page: ScoutPage): Promise<void> {
-  const saveButton = page.getByTestId('failureStoreModalSaveButton');
-  await expect(saveButton).toBeEnabled();
-  await saveButton.click();
+export async function cancelRetentionChanges(page: ScoutPage): Promise<void> {
+  await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutCancelButton).click();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)).toBeHidden();
 }
 
 /**
- * Sets custom DSL retention with specified value and unit
+ * Toggles the "inherit lifecycle" checkbox inside the lifecycle method flyout.
+ */
+export async function toggleInheritSwitch(page: ScoutPage, enabled: boolean): Promise<void> {
+  const inheritCheckbox = page.getByTestId(RETENTION_TEST_IDS.successfulInheritCheckbox);
+  await inheritCheckbox.waitFor({ state: 'visible' });
+  const isChecked = await inheritCheckbox.isChecked();
+
+  if (isChecked !== enabled) {
+    await inheritCheckbox.click();
+  }
+
+  if (enabled) {
+    await expect(inheritCheckbox).toBeChecked();
+  } else {
+    await expect(inheritCheckbox).not.toBeChecked();
+  }
+}
+
+/**
+ * Verifies the "inherit lifecycle" checkbox is visible inside the lifecycle method flyout.
+ */
+export async function verifyInheritSwitchVisible(page: ScoutPage): Promise<void> {
+  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulInheritCheckbox)).toBeVisible();
+}
+
+/**
+ * Selects the ILM lifecycle method inside the lifecycle method flyout.
+ */
+export async function selectIlmMethod(page: ScoutPage): Promise<void> {
+  const card = page.getByTestId(RETENTION_TEST_IDS.methodCardIlm);
+  await card.waitFor({ state: 'visible' });
+  await card.getByRole('radio').click();
+}
+
+/**
+ * Selects the DLM (data stream lifecycle) method inside the lifecycle method flyout.
+ */
+export async function selectDlmMethod(page: ScoutPage): Promise<void> {
+  const card = page.getByTestId(RETENTION_TEST_IDS.methodCardDlm);
+  await card.waitFor({ state: 'visible' });
+  await card.getByRole('radio').click();
+}
+
+/**
+ * Selects an ILM policy by name in the ILM retention selector
+ * (the lifecycle method flyout must already have ILM selected).
+ */
+export async function selectIlmPolicy(page: ScoutPage, policyName: string): Promise<void> {
+  await selectIlmMethod(page);
+  const search = page.getByTestId(RETENTION_TEST_IDS.ilmSearchInput);
+  await search.waitFor({ state: 'visible' });
+  await search.fill(policyName);
+  await page.getByTestId(RETENTION_TEST_IDS.ilmPolicyRow(policyName)).click();
+}
+
+/**
+ * Opens the delete-phase flyout for successful data so a custom DSL retention can be set.
+ *
+ * When no delete phase exists yet, the entry point is the "Add delete phase" header
+ * action. When a delete phase already exists, it is edited via the lifecycle bar phase
+ * popover edit button.
+ */
+export async function openDeletePhaseFlyout(page: ScoutPage): Promise<Locator> {
+  const addButton = page.getByTestId(RETENTION_TEST_IDS.addDeletePhaseButton);
+  const deletePhaseButton = page.getByTestId('lifecyclePhase-delete-button');
+  const flyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
+
+  // Either the "Add delete phase" header action is shown (no delete phase yet)
+  // or an existing delete phase is edited through the lifecycle bar popover.
+  // Wait for whichever entry point renders first to avoid racing on visibility.
+  const opener = await Promise.any([
+    addButton.waitFor({ state: 'visible', timeout: 15_000 }).then(() => 'add' as const),
+    deletePhaseButton.waitFor({ state: 'visible', timeout: 15_000 }).then(() => 'edit' as const),
+  ]);
+
+  if (opener === 'add') {
+    await addButton.click();
+  } else {
+    await deletePhaseButton.click();
+    await page.getByTestId('lifecyclePhase-delete-editButton').click();
+  }
+
+  await expect(flyout).toBeVisible();
+  return flyout;
+}
+
+/**
+ * Sets a custom DSL retention (delete phase) for successful data.
+ * Opens the delete-phase flyout, fills the value/unit and applies.
  */
 export async function setCustomRetention(
   page: ScoutPage,
   value: string,
   unit: 'd' | 'h' | 'm' | 's' = 'd'
 ): Promise<void> {
-  // Click custom retention button
-  await page.getByRole('button', { name: 'Custom period' }).click();
+  const flyout = await openDeletePhaseFlyout(page);
 
-  // Clear and fill in the value (clear is needed because the field has a default value of 90)
-  const field = page.getByTestId(RETENTION_TEST_IDS.dslField);
-  await field.clear();
+  const field = flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue);
+  await field.fill('');
   await field.fill(value);
 
-  // Select the unit if not days (days is default)
-  if (unit !== 'd') {
-    await page.getByTestId(RETENTION_TEST_IDS.dslUnitButton).click();
-    await page.getByTestId(RETENTION_TEST_IDS.dslUnitOption(unit)).click();
-  }
+  await flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseUnit).selectOption(unit);
+
+  // Blur so the field commits before submit.
+  await flyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseUnit).click();
+
+  await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseApplyButton).click();
+  await confirmOverrideIfPresent(page);
+  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)).toBeHidden();
 }
 
 /**
- * Sets indefinite (unlimited) retention
+ * Removes the delete phase (resets to indefinite retention) for successful data.
  */
-export async function setIndefiniteRetention(page: ScoutPage): Promise<void> {
-  await page.getByRole('button', { name: 'Indefinite' }).click();
+export async function removeDeletePhase(page: ScoutPage): Promise<void> {
+  await openDeletePhaseFlyout(page);
+  await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseRemoveButton).click();
+  await confirmOverrideIfPresent(page);
+  await expect(page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout)).toBeHidden();
 }
 
 /**
- * Selects an ILM policy (ESS only)
- */
-export async function selectIlmPolicy(page: ScoutPage, policyName: string): Promise<void> {
-  await page.getByRole('button', { name: 'ILM policy' }).click();
-  await page.getByTestId(RETENTION_TEST_IDS.ilmPolicyDropdown).click();
-  await page.getByTestId(RETENTION_TEST_IDS.ilmPolicyOption(policyName)).click();
-}
-
-/**
- * Toggles the inherit switch
- */
-export async function toggleInheritSwitch(page: ScoutPage, enabled: boolean): Promise<void> {
-  const inheritSwitch = page.getByTestId(RETENTION_TEST_IDS.inheritSwitch);
-  const isChecked = await inheritSwitch.isChecked();
-
-  if (isChecked !== enabled) {
-    await inheritSwitch.click();
-  }
-
-  if (enabled) {
-    await expect(inheritSwitch).toBeChecked();
-  } else {
-    await expect(inheritSwitch).not.toBeChecked();
-  }
-}
-
-/**
- * Verifies the displayed retention value
+ * Verifies the displayed retention value.
  */
 export async function verifyRetentionDisplay(
   page: ScoutPage,
@@ -223,94 +276,13 @@ export async function verifyRetentionDisplay(
   isFailureStore = false
 ): Promise<void> {
   const testId = isFailureStore
-    ? 'failureStoreRetention-metric'
+    ? RETENTION_TEST_IDS.failureStoreRetentionMetric
     : RETENTION_TEST_IDS.retentionMetric;
   await expect(page.getByTestId(testId)).toContainText(expectedValue);
 }
 
 /**
- * Verifies a badge is displayed with specific text
- */
-export async function verifyRetentionBadge(page: ScoutPage, badgeText: string): Promise<void> {
-  await expect(page.getByText(badgeText)).toBeVisible();
-}
-
-/**
- * Selects a retention mode (indefinite, custom, or ILM)
- */
-export async function selectRetentionMode(
-  page: ScoutPage,
-  mode: 'indefinite' | 'custom' | 'ilm'
-): Promise<void> {
-  switch (mode) {
-    case 'indefinite':
-      await setIndefiniteRetention(page);
-      break;
-    case 'custom':
-      await page.getByRole('button', { name: 'Custom period' }).click();
-      break;
-    case 'ilm':
-      await page.getByRole('button', { name: 'ILM policy' }).click();
-      break;
-  }
-}
-
-/**
- * Verifies the modal is in a specific state
- */
-export async function verifyModalState(
-  page: ScoutPage,
-  expectedState: {
-    inheritEnabled?: boolean;
-    selectedMode?: 'indefinite' | 'custom' | 'ilm';
-    customValue?: string;
-    customUnit?: 'd' | 'h' | 'm' | 's';
-  }
-): Promise<void> {
-  if (expectedState.inheritEnabled !== undefined) {
-    const inheritSwitch = page.getByTestId(RETENTION_TEST_IDS.inheritSwitch);
-    if (expectedState.inheritEnabled) {
-      await expect(inheritSwitch).toBeChecked();
-    } else {
-      await expect(inheritSwitch).not.toBeChecked();
-    }
-  }
-
-  if (expectedState.selectedMode) {
-    // Verify the correct button is selected/active
-    // Implementation depends on how the UI shows the selected state
-  }
-
-  if (expectedState.customValue !== undefined) {
-    const dslField = page.getByTestId(RETENTION_TEST_IDS.dslField);
-    await expect(dslField).toHaveValue(expectedState.customValue);
-  }
-}
-
-/**
- * Verifies that a validation error is displayed
- */
-export async function verifyValidationError(page: ScoutPage, expectedError: string): Promise<void> {
-  await expect(page.getByText(expectedError)).toBeVisible();
-}
-
-/**
- * Verifies the save button state (enabled/disabled)
- */
-export async function verifySaveButtonState(
-  page: ScoutPage,
-  shouldBeEnabled: boolean
-): Promise<void> {
-  const saveButton = page.getByTestId(RETENTION_TEST_IDS.saveButton);
-  if (shouldBeEnabled) {
-    await expect(saveButton).toBeEnabled();
-  } else {
-    await expect(saveButton).toBeDisabled();
-  }
-}
-
-/**
- * Verifies retention display in the streams table
+ * Verifies retention display in the streams table.
  */
 export async function verifyRetentionInTable(
   page: ScoutPage,
@@ -322,35 +294,7 @@ export async function verifyRetentionInTable(
 }
 
 /**
- * Disables inherit mode to enable custom retention options
- */
-export async function disableInheritMode(page: ScoutPage): Promise<void> {
-  await toggleInheritSwitch(page, false);
-}
-
-/**
- * Enables inherit mode
- */
-export async function enableInheritMode(page: ScoutPage): Promise<void> {
-  await toggleInheritSwitch(page, true);
-}
-
-/**
- * Verifies that the inherit switch is visible
- */
-export async function verifyInheritSwitchVisible(page: ScoutPage): Promise<void> {
-  await expect(page.getByTestId(RETENTION_TEST_IDS.inheritSwitch)).toBeVisible();
-}
-
-/**
- * Verifies that the inherit switch is not visible
- */
-export async function verifyInheritSwitchNotVisible(page: ScoutPage): Promise<void> {
-  await expect(page.getByTestId(RETENTION_TEST_IDS.inheritSwitch)).toBeHidden();
-}
-
-/**
- * Closes toasts if they exist (safe cleanup helper)
+ * Closes toasts if they exist (safe cleanup helper).
  */
 export async function closeToastsIfPresent(page: ScoutPage): Promise<void> {
   const toasts = page.locator('.euiToast');
@@ -362,99 +306,139 @@ export async function closeToastsIfPresent(page: ScoutPage): Promise<void> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Failure store helpers
+// ---------------------------------------------------------------------------
+
 /**
- * Sets failure store retention with custom value
+ * Opens the "edit failed data lifecycle" flyout. Works from either the disabled
+ * panel (Enable failure store) or the enabled summary (edit action).
+ */
+export async function openFailureStoreFlyout(page: ScoutPage): Promise<Locator> {
+  const enableButton = page.getByTestId(RETENTION_TEST_IDS.failureStoreEnableButton);
+  const editButton = page.getByTestId(RETENTION_TEST_IDS.failureStoreEditButton);
+
+  const opener = await Promise.any([
+    enableButton.waitFor({ state: 'visible', timeout: 10_000 }).then(() => enableButton),
+    editButton.waitFor({ state: 'visible', timeout: 10_000 }).then(() => editButton),
+  ]);
+
+  await opener.click();
+  const flyout = page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout);
+  await expect(flyout).toBeVisible();
+  return flyout;
+}
+
+/**
+ * Saves failure store changes in the shared failure store modal
+ * (`@kbn/failure-store-modal`, used from the data quality page).
+ */
+export async function saveFailureStoreChanges(page: ScoutPage): Promise<void> {
+  const saveButton = page.getByTestId('failureStoreModalSaveButton');
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+}
+
+/**
+ * Saves the streams "edit failed data lifecycle" flyout (Apply) and waits for it to close.
+ */
+export async function applyFailedLifecycleFlyout(page: ScoutPage): Promise<void> {
+  const saveButton = page.getByTestId(RETENTION_TEST_IDS.failedFlyoutApplyButton);
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+  await confirmOverrideIfPresent(page);
+  await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden();
+}
+
+/**
+ * Ensures the failure store "inherit" checkbox is unchecked, if visible.
+ */
+export async function disableInheritFailureStoreIfEnabled(page: ScoutPage): Promise<void> {
+  const inheritCheckbox = page.getByTestId(RETENTION_TEST_IDS.failedInheritCheckbox);
+  if (await inheritCheckbox.isVisible().catch(() => false)) {
+    if (await inheritCheckbox.isChecked()) {
+      await inheritCheckbox.click();
+    }
+  }
+}
+
+/**
+ * Toggles failure store enabled/disabled via the edit failed lifecycle flyout.
+ */
+export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Promise<void> {
+  await openFailureStoreFlyout(page);
+
+  // For wired (and non-root) streams the failure store can inherit from the
+  // parent. Stop inheriting so the enabled state can be controlled directly.
+  await disableInheritFailureStoreIfEnabled(page);
+
+  const checkbox = page.getByTestId(RETENTION_TEST_IDS.enableFailureStoreCheckbox);
+  await checkbox.waitFor({ state: 'visible' });
+  if ((await checkbox.isChecked()) !== enabled) {
+    await checkbox.click();
+  }
+
+  // The Apply button is disabled when the draft matches the current settings
+  // (neither the inherit nor the enabled state changed). In that case the
+  // failure store is already in the desired state, so just close the flyout.
+  const applyButton = page.getByTestId(RETENTION_TEST_IDS.failedFlyoutApplyButton);
+  const applyEnabled = await applyButton
+    .isEnabled()
+    .then((isEnabled) => isEnabled)
+    .catch(() => false);
+
+  if (!applyEnabled) {
+    await page.getByTestId(RETENTION_TEST_IDS.failedFlyoutCancelButton).click();
+    await expect(page.getByTestId(RETENTION_TEST_IDS.failedLifecycleFlyout)).toBeHidden();
+    return;
+  }
+
+  await applyFailedLifecycleFlyout(page);
+}
+
+/**
+ * Sets a custom failure store retention by opening the failed delete-phase flyout.
+ * Requires the failure store to already be enabled.
  */
 export async function setFailureStoreRetention(
   page: ScoutPage,
   value: string,
   unit: 'd' | 'h' | 'm' | 's' = 'd'
 ): Promise<void> {
-  await page.getByTestId('streamFailureStoreEditRetention').click();
+  const addButton = page.getByTestId(RETENTION_TEST_IDS.failureStoreAddDeletePhaseButton);
+  const deletePhaseButton = page.getByTestId('failureStore-lifecyclePhase-delete-button');
+  const flyout = page.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseFlyout);
 
-  // Check if inherit mode is currently ON and turn it OFF if needed
-  const inheritSwitch = page.getByTestId('inheritFailureStoreSwitch');
-  const isInheritOn = await inheritSwitch.getAttribute('aria-checked');
-  if (isInheritOn === 'true') {
-    await inheritSwitch.click();
-  }
-
-  // Now select custom period type - wait for it to be enabled
-  await waitForElementToBeEnabled(page, 'custom');
-  await page.getByTestId('custom').click();
-  const dialog = page.getByRole('dialog');
-  const field = dialog.getByTestId('selectFailureStorePeriodValue');
-  await field.fill('');
-  await field.fill(value);
-
-  if (unit !== 'd') {
-    await dialog.getByTestId('failureStoreDslUnitButton').click();
-    await dialog.getByTestId(`failureStoreDslUnitOption-${unit}`).click();
-  }
-
-  await saveFailureStoreChanges(page);
-  await expect(page.getByRole('dialog')).toBeHidden();
-}
-
-export async function disableInheritFailureStoreIfEnabled(page: ScoutPage): Promise<void> {
-  const inheritSwitch = page.getByTestId('inheritFailureStoreSwitch');
-  if (await inheritSwitch.isVisible()) {
-    const isInheritOn = await inheritSwitch.getAttribute('aria-checked');
-    if (isInheritOn === 'true') {
-      await inheritSwitch.click();
-    }
-  }
-}
-
-/**
- * Toggles failure store enabled/disabled
- */
-export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Promise<void> {
-  const enableButton = page.getByTestId('streamsAppFailureStoreEnableButton');
-  const editButton = page.getByTestId('streamFailureStoreEditRetention');
-
-  // The UI renders either:
-  // - disabled panel with "Enable failure store" button, or
-  // - enabled state with "Edit" button.
-  // Rendering is async, so we must wait for whichever appears.
-  const modalOpener = await Promise.any([
-    enableButton.waitFor({ state: 'visible', timeout: 10_000 }).then(() => enableButton),
-    editButton.waitFor({ state: 'visible', timeout: 10_000 }).then(() => editButton),
+  const opener = await Promise.any([
+    addButton.waitFor({ state: 'visible', timeout: 15_000 }).then(() => 'add' as const),
+    deletePhaseButton.waitFor({ state: 'visible', timeout: 15_000 }).then(() => 'edit' as const),
   ]);
 
-  await modalOpener.click();
-
-  const toggle = page.getByTestId('enableFailureStoreToggle');
-  await toggle.waitFor({ state: 'visible' });
-  const isChecked = await toggle.isChecked();
-  if (isChecked === enabled) {
-    // No changes to apply; close the modal.
-    await page.getByTestId('failureStoreModalCancelButton').click();
-    await expect(page.getByRole('dialog')).toBeHidden();
-    return;
+  if (opener === 'add') {
+    await addButton.click();
+  } else {
+    await deletePhaseButton.click();
+    await page.getByTestId('lifecyclePhase-delete-editButton').click();
   }
+  await expect(flyout).toBeVisible();
 
-  // If we're changing state, ensure editing isn't blocked by inherit mode.
-  await disableInheritFailureStoreIfEnabled(page);
+  const field = flyout.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseValue);
+  await field.fill('');
+  await field.fill(value);
+  await flyout.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseUnit).selectOption(unit);
+  await flyout.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseUnit).click();
 
-  await expect(toggle).toBeEnabled();
-  await toggle.click();
-  await saveFailureStoreChanges(page);
-  await expect(page.getByRole('dialog')).toBeHidden();
+  await page.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseApplyButton).click();
+  await confirmOverrideIfPresent(page);
+  await expect(flyout).toBeHidden();
 }
 
 /**
- * Test a list of retention configurations
+ * Removes the failure store delete phase (sets retention to indefinite / disables lifecycle)
+ * via the phase popover remove action. Requires the failure store to be enabled with a delete phase.
  */
-export async function testRetentionConfigurations(
-  page: ScoutPage,
-  configs: Array<{ value: string; unit: 'd' | 'h' | 'm' | 's'; display: string }>
-): Promise<void> {
-  for (const config of configs) {
-    await openRetentionModal(page);
-    await toggleInheritSwitch(page, false);
-    await setCustomRetention(page, config.value, config.unit);
-    await saveRetentionChanges(page);
-    await verifyRetentionDisplay(page, config.display);
-  }
+export async function removeFailureStoreDeletePhase(page: ScoutPage): Promise<void> {
+  await page.getByTestId('failureStore-lifecyclePhase-delete-button').click();
+  await page.getByTestId('lifecyclePhase-delete-removeButton').click();
+  await confirmOverrideIfPresent(page);
 }

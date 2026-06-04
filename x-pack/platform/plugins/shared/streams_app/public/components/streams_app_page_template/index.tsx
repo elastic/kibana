@@ -13,6 +13,7 @@ import { css } from '@emotion/css';
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
     <EuiPageTemplate
+      data-test-subj="streamsAppPageTemplate"
       offset={0}
       minHeight={0}
       restrictWidth={false}
@@ -32,6 +33,7 @@ StreamsAppPageTemplate.Body = ({
   ...props
 }: EuiPageSectionProps & { noPadding?: boolean }) => (
   <EuiPageTemplate.Section
+    data-test-subj="streamsAppPageBody"
     grow
     className={css`
       overflow-y: auto;

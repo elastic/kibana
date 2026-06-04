@@ -47,11 +47,20 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('../../../../../hooks/use_timefilter', () => ({
-  useTimefilter: () => ({ timeState: {} }),
+  useTimefilter: () => ({
+    timeState: {},
+    timeState$: { subscribe: () => ({ unsubscribe: () => {} }) },
+  }),
 }));
 
 jest.mock('@kbn/react-hooks', () => ({
   useAbortController: () => ({ signal: undefined }),
+  useAbortableAsync: () => ({
+    value: undefined,
+    loading: false,
+    error: undefined,
+    refresh: () => {},
+  }),
 }));
 
 jest.mock('../common/section_panel', () => ({
@@ -86,10 +95,6 @@ jest.mock('./cards/ingestion_card', () => ({
 
 jest.mock('./ingestion_rate', () => ({
   IngestionRate: () => <div data-test-subj="ingestionRate" />,
-}));
-
-jest.mock('./modal', () => ({
-  EditLifecycleModal: () => <div data-test-subj="editLifecycleModal" />,
 }));
 
 jest.mock('./lifecycle_summary', () => ({

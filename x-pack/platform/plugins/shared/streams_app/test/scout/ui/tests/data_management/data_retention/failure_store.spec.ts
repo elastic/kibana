@@ -10,14 +10,13 @@ import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
-  disableInheritFailureStoreIfEnabled,
-  openRetentionModal,
-  saveFailureStoreChanges,
-  saveRetentionChanges,
+  openFailureStoreFlyout,
+  removeFailureStoreDeletePhase,
+  RETENTION_TEST_IDS,
+  applyFailedLifecycleFlyout,
   setCustomRetention,
   setFailureStoreRetention,
   toggleFailureStore,
-  toggleInheritSwitch,
   verifyRetentionDisplay,
 } from '../../../fixtures/retention_helpers';
 
@@ -35,6 +34,9 @@ test.describe('Stream data retention - updating failure store', () => {
     );
     // Ensure logs.otel has a backing data stream (deferred by default) so retention UI renders
     await apiServices.streams.restoreDataStream('logs.otel');
+    // Start from a clean child state so a leftover fork from an interrupted run
+    // doesn't make the fork below fail with a 409 Conflict.
+    await apiServices.streams.clearStreamChildren('logs.otel');
     await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',
@@ -63,27 +65,30 @@ test.describe('Stream data retention - updating failure store', () => {
     {
       label: 'classic streams',
       streamName: 'logs-generic-default' as const,
-      enableBtnTag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
+      isWired: false,
     },
     {
       label: 'wired streams',
       streamName: 'logs.otel.nginx' as const,
-      enableBtnTag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
+      isWired: true,
     },
   ];
 
-  for (const { label, streamName } of STREAM_CONFIGS) {
+  for (const { label, streamName, isWired } of STREAM_CONFIGS) {
     test(
       `should edit failure store successfully for ${label}`,
       { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
       async ({ page, pageObjects }) => {
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
+        // Ensure the failure store is enabled.
+        await toggleFailureStore(page, true);
+
         await setFailureStoreRetention(page, '7', 'd');
         await verifyRetentionDisplay(page, '7 days', true);
-        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
-          '2 data phases'
-        );
+        await expect(
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
+        ).toContainText('2 data phases');
       }
     );
 
@@ -110,9 +115,9 @@ test.describe('Stream data retention - updating failure store', () => {
         await toggleFailureStore(page, false);
         await toggleFailureStore(page, true);
         await verifyRetentionDisplay(page, '30 days', true);
-        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
-          '2 data phases'
-        );
+        await expect(
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
+        ).toContainText('2 data phases');
       }
     );
 
@@ -122,47 +127,49 @@ test.describe('Stream data retention - updating failure store', () => {
       async ({ page, pageObjects }) => {
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
-        // Ensure the failure store is enabled, otherwise lifecycle options are disabled.
+        // Ensure the failure store is enabled with a delete phase.
         await toggleFailureStore(page, true);
-        await page.getByTestId('streamFailureStoreEditRetention').click();
 
-        // The disable lifecycle option should be visible on ESS
-        await expect(page.getByTestId('disabledLifecycle')).toBeVisible();
-
-        await disableInheritFailureStoreIfEnabled(page);
-
-        // Enable disable lifecycle
-        const disabledLifecycleButton = page.getByTestId('disabledLifecycle');
-        await expect(disabledLifecycleButton).toBeEnabled();
-        await disabledLifecycleButton.click();
-        await saveFailureStoreChanges(page);
+        // Remove the delete phase -> indefinite retention (lifecycle disabled).
+        await removeFailureStoreDeletePhase(page);
 
         // Verify infinite retention is shown
-        await expect(page.getByTestId('failureStoreRetention-metric').getByText('∞')).toBeVisible();
-        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
-          '1 data phase'
-        );
-      }
-    );
-
-    test(
-      `should inherit failure store for ${label}`,
-      { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-      async ({ page, pageObjects }) => {
-        await pageObjects.streams.gotoDataRetentionTab(streamName);
-
-        // Enable inherit failure store
-        await page.getByTestId('streamFailureStoreEditRetention').click();
-        await page.getByTestId('inheritFailureStoreSwitch').click();
-        await saveFailureStoreChanges(page);
         await expect(
-          page.getByTestId('failureStoreRetention-metric').getByText('30 days')
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric).getByText('∞')
         ).toBeVisible();
-        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
-          '2 data phases'
-        );
+        await expect(
+          page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
+        ).toContainText('1 data phase');
       }
     );
+
+    if (isWired) {
+      test(
+        `should inherit failure store for ${label}`,
+        { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+        async ({ page, pageObjects }) => {
+          await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+          // Ensure failure store is enabled first.
+          await toggleFailureStore(page, true);
+
+          // Enable inherit failure store (only wired non-root streams expose this checkbox).
+          const flyout = await openFailureStoreFlyout(page);
+          const inheritCheckbox = flyout.getByTestId(RETENTION_TEST_IDS.failedInheritCheckbox);
+          await expect(inheritCheckbox).toBeVisible();
+          await inheritCheckbox.check();
+          await applyFailedLifecycleFlyout(page);
+
+          // Inherits the parent's 30 day failure store retention.
+          await expect(
+            page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric).getByText('30 days')
+          ).toBeVisible();
+          await expect(
+            page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetricSubtitle)
+          ).toContainText('2 data phases');
+        }
+      );
+    }
   }
 
   test(
@@ -171,9 +178,9 @@ test.describe('Stream data retention - updating failure store', () => {
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs.otel');
 
-      // Try to enable inherit failure store - the switch should not be visible for root streams
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await expect(page.getByTestId('inheritFailureStoreSwitch')).toBeHidden();
+      // The inherit checkbox should not be visible for root streams
+      const flyout = await openFailureStoreFlyout(page);
+      await expect(flyout.getByTestId(RETENTION_TEST_IDS.failedInheritCheckbox)).toBeHidden();
     }
   );
 
@@ -183,19 +190,21 @@ test.describe('Stream data retention - updating failure store', () => {
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
+      // Ensure failure store is enabled.
+      await toggleFailureStore(page, true);
+
       // Set main retention to 30 days
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '30', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '30 days');
 
       // Set failure store retention to 7 days
       await setFailureStoreRetention(page, '7', 'd');
 
       // Verify both are set correctly
-      await expect(page.getByTestId('retention-metric')).toContainText('30 days');
-      await expect(page.getByTestId('failureStoreRetention-metric')).toContainText('7 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('30 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)).toContainText(
+        '7 days'
+      );
     }
   );
 
@@ -205,13 +214,16 @@ test.describe('Stream data retention - updating failure store', () => {
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
+      await toggleFailureStore(page, true);
       await setFailureStoreRetention(page, '21', 'd');
 
       // Reload page
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
       // Verify value persists
-      await expect(page.getByTestId('failureStoreRetention-metric')).toContainText('21 days');
+      await expect(page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)).toContainText(
+        '21 days'
+      );
     }
   );
 
@@ -221,18 +233,27 @@ test.describe('Stream data retention - updating failure store', () => {
     async ({ page, pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs-generic-default');
 
-      // Get current value
-      const initialRetention = await page.getByTestId('failureStoreRetention-metric').textContent();
+      await toggleFailureStore(page, true);
 
-      // Open modal and change value but cancel
-      await page.getByTestId('streamFailureStoreEditRetention').click();
-      await page.getByTestId('custom').click();
-      const dialog = page.getByRole('dialog');
-      await dialog.getByTestId('selectFailureStorePeriodValue').fill('99');
-      await page.getByTestId('failureStoreModalCancelButton').click();
+      // Establish a known delete phase so the edit entry point is deterministic.
+      await setFailureStoreRetention(page, '14', 'd');
+
+      // Get current value
+      const initialRetention = await page
+        .getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)
+        .textContent();
+
+      // Open the delete phase flyout via the phase popover, change the value but cancel
+      const deletePhaseFlyout = page.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseFlyout);
+      await page.getByTestId('failureStore-lifecyclePhase-delete-button').click();
+      await page.getByTestId('lifecyclePhase-delete-editButton').click();
+      await expect(deletePhaseFlyout).toBeVisible();
+      await deletePhaseFlyout.getByTestId(RETENTION_TEST_IDS.failedDeletePhaseValue).fill('99');
+      await page.getByTestId('streamsEditFailedDeletePhaseFlyoutCancelButton').click();
+      await expect(deletePhaseFlyout).toBeHidden();
 
       // Verify value unchanged
-      await expect(page.getByTestId('failureStoreRetention-metric')).toContainText(
+      await expect(page.getByTestId(RETENTION_TEST_IDS.failureStoreRetentionMetric)).toContainText(
         initialRetention || ''
       );
     }

@@ -10,18 +10,16 @@ import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
-  closeRetentionModal,
+  cancelRetentionChanges,
   closeToastsIfPresent,
-  openRetentionModal,
-  saveRetentionChanges,
+  openLifecycleMethodFlyout,
   setCustomRetention,
-  toggleInheritSwitch,
   verifyRetentionDisplay,
   RETENTION_TEST_IDS,
 } from '../../../fixtures/retention_helpers';
 
 test.describe(
-  'Stream data retention - modal interactions',
+  'Stream data retention - flyout interactions',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -62,33 +60,32 @@ test.describe(
       await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
-    test('should open and close modal', async ({ page }) => {
-      const modal = await openRetentionModal(page);
-      await expect(modal).toBeVisible();
+    test('should open and close the lifecycle method flyout', async ({ page }) => {
+      const flyout = await openLifecycleMethodFlyout(page);
+      await expect(flyout).toBeVisible();
 
-      // Test cancel button closes modal
-      await closeRetentionModal(page, 'cancel');
-      await expect(page.getByTestId(RETENTION_TEST_IDS.modal)).toBeHidden();
+      // Cancel button closes the flyout
+      await cancelRetentionChanges(page);
+      await expect(page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout)).toBeHidden();
     });
 
     test('should preserve values on cancel and update on save', async ({ page }) => {
-      // Set initial value
-      await openRetentionModal(page);
-      await toggleInheritSwitch(page, false);
+      // Set initial custom retention via the delete-phase flyout
       await setCustomRetention(page, '7', 'd');
-      await saveRetentionChanges(page);
       await verifyRetentionDisplay(page, '7 days');
 
-      // Open modal, change value, but cancel - original preserved
-      await openRetentionModal(page);
-      await page.getByTestId(RETENTION_TEST_IDS.dslField).fill('14');
-      await closeRetentionModal(page, 'cancel');
+      // Open the delete-phase flyout, change the value but cancel - original preserved
+      await page.getByTestId('lifecyclePhase-delete-button').click();
+      await page.getByTestId('lifecyclePhase-delete-editButton').click();
+      const deletePhaseFlyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
+      await expect(deletePhaseFlyout).toBeVisible();
+      await deletePhaseFlyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue).fill('14');
+      await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseCancelButton).click();
+      await expect(deletePhaseFlyout).toBeHidden();
       await verifyRetentionDisplay(page, '7 days');
 
-      // Open modal again, save new value - value updates
-      await openRetentionModal(page);
-      await page.getByTestId(RETENTION_TEST_IDS.dslField).fill('30');
-      await saveRetentionChanges(page);
+      // Set a new value and save - value updates
+      await setCustomRetention(page, '30', 'd');
       await verifyRetentionDisplay(page, '30 days');
     });
   }

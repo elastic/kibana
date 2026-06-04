@@ -62,6 +62,17 @@ describe('getTemplateLifecycle', () => {
     expect(result).toEqual({ dsl: { data_retention: '30d' } });
   });
 
+  it('returns dsl when enabled is omitted but data_retention is set', () => {
+    const result = getTemplateLifecycle({
+      aliases: {},
+      mappings: {},
+      // `simulateIndexTemplate` may omit `enabled` in some responses.
+      lifecycle: { data_retention: '30d' },
+      settings: { index: { lifecycle: { prefer_ilm: false } } },
+    });
+    expect(result).toEqual({ dsl: { data_retention: '30d' } });
+  });
+
   it('returns dsl when dsl and ilm are enabled but no policy is set', () => {
     const result = getTemplateLifecycle({
       aliases: {},

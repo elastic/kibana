@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
 import { FailureStoreSummary } from './failure_store_summary';
+import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
 
 jest.mock('../../../../../hooks/use_kibana');
 
@@ -59,11 +60,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig();
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(
@@ -76,11 +79,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig();
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(
@@ -93,11 +98,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '7d' });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
@@ -111,14 +118,38 @@ describe('FailureStoreSummary', () => {
       });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
+    });
+
+    it('does not expose the remove delete phase action (disabling the lifecycle is not supported)', () => {
+      const stats = createMockStats(100000);
+      const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '7d' });
+
+      render(
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+            onEditDeletePhase={jest.fn()}
+            onRemoveDeletePhase={jest.fn()}
+          />
+        </LifecyclePreviewProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('failureStore-lifecyclePhase-delete-button'));
+
+      expect(screen.getByTestId('lifecyclePhase-delete-editButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('lifecyclePhase-delete-removeButton')).not.toBeInTheDocument();
     });
   });
 
@@ -133,11 +164,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByTestId('failureStore-lifecyclePhase-Hot-name')).toBeInTheDocument();
@@ -148,11 +181,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByTestId('failureStore-lifecyclePhase-Hot-size')).toHaveTextContent(
@@ -165,14 +200,38 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
+    });
+
+    it('exposes the remove delete phase action', () => {
+      const stats = createMockStats(250000);
+      const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
+
+      render(
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+            onEditDeletePhase={jest.fn()}
+            onRemoveDeletePhase={jest.fn()}
+          />
+        </LifecyclePreviewProvider>
+      );
+
+      fireEvent.click(screen.getByTestId('failureStore-lifecyclePhase-delete-button'));
+
+      expect(screen.getByTestId('lifecyclePhase-delete-editButton')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-delete-removeButton')).toBeInTheDocument();
     });
   });
 
@@ -187,11 +246,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig({ retentionDisabled: true });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(
@@ -204,11 +265,13 @@ describe('FailureStoreSummary', () => {
       const failureStoreConfig = createMockFailureStoreConfig({ retentionDisabled: true });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByText('∞')).toBeInTheDocument();
@@ -228,11 +291,13 @@ describe('FailureStoreSummary', () => {
       });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByText('Inherited')).toBeInTheDocument();
@@ -245,11 +310,13 @@ describe('FailureStoreSummary', () => {
       });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.getByText('Inherited')).toBeInTheDocument();
@@ -262,11 +329,13 @@ describe('FailureStoreSummary', () => {
       });
 
       render(
-        <FailureStoreSummary
-          stats={stats}
-          failureStoreConfig={failureStoreConfig}
-          canManageLifecycle
-        />
+        <LifecyclePreviewProvider>
+          <FailureStoreSummary
+            stats={stats}
+            failureStoreConfig={failureStoreConfig}
+            canManageLifecycle
+          />
+        </LifecyclePreviewProvider>
       );
 
       expect(screen.queryByText('Inherited')).not.toBeInTheDocument();
