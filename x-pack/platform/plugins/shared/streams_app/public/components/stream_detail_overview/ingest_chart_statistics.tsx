@@ -36,9 +36,9 @@ export interface IngestChartStatisticsProps {
   /** ES|QL source for the stream (stream name, or query view for query streams). */
   esqlSource: string;
   streamName: string;
-  /** Query streams are views over other streams and have no dedicated index, so storage is not shown. */
+  /** Query streams are views over other streams and have no dedicated index, so storage / total docs are not shown. */
   isQueryStream: boolean;
-  /** Draft streams have no backing data stream, so total docs is not shown. */
+  /** Draft streams have no backing data stream, so storage / total docs are not shown. */
   isDraft: boolean;
 }
 
@@ -65,7 +65,9 @@ export function IngestChartStatistics({
     },
   } = useKibana();
 
+  // Query and Draft streams are temporary in nature and don't have real backing indices.
   const showTotalDocs = !isQueryStream && !isDraft;
+  const showStorageSize = !isQueryStream && !isDraft && !isServerless;
 
   const totalDocsFetch = useStreamsAppFetch(
     ({ signal }) =>
@@ -185,7 +187,7 @@ export function IngestChartStatistics({
           }
         />
 
-        {!isQueryStream && !isDraft && !isServerless && (
+        {showStorageSize && (
           <StatCell
             title={i18n.translate('xpack.streams.ingestChartStatistics.storageSize.label', {
               defaultMessage: 'Storage size',
