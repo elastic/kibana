@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
+import { MARKDOWN_CONTENT_MAX_LENGTH } from '../../common/constants';
 
 export const markdownByValueStateSchema = schema.object({
   content: schema.string({
@@ -18,7 +19,7 @@ export const markdownByValueStateSchema = schema.object({
       description:
         'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
     },
-    maxLength: 50000,
+    maxLength: MARKDOWN_CONTENT_MAX_LENGTH,
   }),
   settings: schema.object(
     {

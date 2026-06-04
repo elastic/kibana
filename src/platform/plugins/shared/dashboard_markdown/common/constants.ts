@@ -27,3 +27,7 @@ export const APP_NAME = i18n.translate('dashboardMarkdown.title', {
 export const DISPLAY_NAME = i18n.translate('dashboardMarkdown.displayName', {
   defaultMessage: 'markdown',
 });
+
+export const MARKDOWN_TITLE_MAX_LENGTH = 250;
+export const MARKDOWN_DESCRIPTION_MAX_LENGTH = 1000;
+export const MARKDOWN_CONTENT_MAX_LENGTH = 50000;

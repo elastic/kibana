@@ -8,19 +8,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  MARKDOWN_TITLE_MAX_LENGTH,
+  MARKDOWN_DESCRIPTION_MAX_LENGTH,
+  MARKDOWN_CONTENT_MAX_LENGTH,
+} from '../../../../common/constants';
 
 export const markdownAttributesSchema = schema.object(
   {
     title: schema.string({
       meta: { description: 'A human-readable title' },
-      maxLength: 256,
+      maxLength: MARKDOWN_TITLE_MAX_LENGTH,
     }),
     description: schema.maybe(
-      schema.string({ meta: { description: 'A short description.' }, maxLength: 1000 })
+      schema.string({
+        meta: { description: 'A short description.' },
+        maxLength: MARKDOWN_DESCRIPTION_MAX_LENGTH,
+      })
     ),
     content: schema.string({
       meta: { description: 'Markdown enriched text content' },
-      maxLength: 5000,
+      maxLength: MARKDOWN_CONTENT_MAX_LENGTH,
     }),
     settings: schema.maybe(
       schema.object({
