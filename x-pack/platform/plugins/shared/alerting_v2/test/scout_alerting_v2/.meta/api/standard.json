@@ -1,5 +1,5 @@
 {
-  "sha1": "51e0785db6023412a0f05205cf3319c8de01e4a9",
+  "sha1": "6d0dc9426e65bfda99274a64806b35d837491401",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -5681,7 +5681,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 38,
+        "line": 47,
         "column": 10
       }
     },
@@ -5694,7 +5694,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 47,
+        "line": 56,
         "column": 10
       }
     },
@@ -5707,7 +5707,33 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 75,
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-fdaa3febd09601a",
+      "title": "Get rule tags API filter: should only return tags from rules matching the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 109,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-dc9caa1fe588586",
+      "title": "Get rule tags API filter: should return 400 for an invalid filter field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 145,
         "column": 10
       }
     },
@@ -5720,7 +5746,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 100,
+        "line": 160,
         "column": 10
       }
     },
@@ -5733,7 +5759,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 116,
+        "line": 176,
         "column": 10
       }
     },
@@ -5746,7 +5772,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 135,
+        "line": 195,
         "column": 10
       }
     },

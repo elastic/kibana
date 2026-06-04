@@ -11,6 +11,7 @@ export { hasSeenOnboarding, markOnboardingSeen } from './src/first_load';
 export { PathSelection } from './src/onboarding/path_selection';
 export { IngestStep } from './src/onboarding/ingest_step';
 export { SearchStep } from './src/onboarding/search_step';
+export { ConnectToProject } from './src/connection_details/connect_to_project';
 export { TutorialsPage } from './src/tutorials/tutorials_page';
 export {
   markTutorialComplete,

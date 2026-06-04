@@ -42,7 +42,7 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
-    condition?: AgentConditionExpression;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -52,7 +52,7 @@ export type SimplifiedInputs = Record<
     enabled?: boolean | undefined;
     vars?: SimplifiedVars;
     streams?: SimplifiedPackagePolicyStreams;
-    condition?: AgentConditionExpression;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -74,7 +74,7 @@ export interface SimplifiedPackagePolicy {
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags?: Array<{ name: string; value: string | number }> | null;
-  condition?: AgentConditionExpression;
+  condition?: AgentConditionExpression | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {

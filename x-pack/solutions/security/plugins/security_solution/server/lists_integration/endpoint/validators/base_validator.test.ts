@@ -32,7 +32,7 @@ import {
   buildSpaceOwnerIdTag,
   setArtifactOwnerSpaceId,
 } from '../../../../common/endpoint/service/artifacts/utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type {

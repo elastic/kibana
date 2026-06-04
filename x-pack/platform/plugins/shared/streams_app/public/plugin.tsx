@@ -38,6 +38,7 @@ import {
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
+import { registerSignificantEventAttachment } from './components/sig_events/significant_event_attachment';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
@@ -221,6 +222,10 @@ export class StreamsAppPlugin
   }
 
   start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+    if (pluginsStart.agentBuilder) {
+      registerSignificantEventAttachment({ agentBuilder: pluginsStart.agentBuilder });
+    }
+
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
