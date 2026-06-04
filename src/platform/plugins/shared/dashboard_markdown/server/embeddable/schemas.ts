@@ -18,7 +18,7 @@ export const markdownByValueStateSchema = schema.object({
       description:
         'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
     },
-    maxLength: 5000,
+    maxLength: 50000,
   }),
   settings: schema.object(
     {
