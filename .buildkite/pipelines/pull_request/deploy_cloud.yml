@@ -1,5 +1,9 @@
 steps:
   - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+    env:
+      KIBANA_MEMORY_SIZE: 4096
+      ES_HOT_TIER_MEMORY_SIZE: 8192
+      ES_ZONE_COUNT: 1
     label: 'Build and Deploy to Cloud'
     key: deploy_cloud
     agents:

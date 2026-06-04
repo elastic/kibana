@@ -61,7 +61,7 @@
               ],
               "id": "hot_content",
               "size": {
-                "value": 2048,
+                "value": 16384,
                 "resource": "memory"
               }
             },
@@ -169,7 +169,7 @@
           "cluster_topology": [
             {
               "instance_configuration_id": "gcp.kibana.n2.68x32x45",
-              "zone_count": 1,
+              "zone_count": 2,
               "size": {
                 "value": null,
                 "resource": "memory"
