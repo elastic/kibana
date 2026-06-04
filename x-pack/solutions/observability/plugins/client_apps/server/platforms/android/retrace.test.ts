@@ -37,7 +37,7 @@ const simpleClassMap: AndroidClassMap = {
 };
 
 describe('retrace (Android ES fetcher)', () => {
-  it('queries android-r8-mappings-<buildId> with SHA-256 hashed class names', async () => {
+  it('queries .android-r8-mappings-<buildId> with SHA-256 hashed class names', async () => {
     const mget = makeMget([{ found: true, _source: simpleClassMap }]);
 
     await retrace({
@@ -49,7 +49,7 @@ describe('retrace (Android ES fetcher)', () => {
 
     expect(mget).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: `android-r8-mappings-${BUILD_ID}`,
+        index: `.android-r8-mappings-${BUILD_ID}`,
         ids: [sha256('f8')],
       })
     );
