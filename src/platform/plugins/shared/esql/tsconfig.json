@@ -52,6 +52,7 @@
     "@kbn/logging-mocks",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
     "@kbn/code-editor",
   ],
   "exclude": [
