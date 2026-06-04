@@ -45,7 +45,10 @@ const http = {
 
 const locators = {
   get: (id: string) => ({
-    getRedirectUrl: () => `#mock-${id}`,
+    getRedirectUrl: (params: Record<string, unknown>) =>
+      `#mock-${id}?${Object.entries(params)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&')}`,
   }),
 } as unknown as SharePluginStart['url']['locators'];
 
