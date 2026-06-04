@@ -31,8 +31,8 @@ import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builde
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
-import type { ToolCallResultTransformer } from './create_result_transformer';
-import { serializeCompactionSummary } from './conversation_compactor';
+import type { ToolCallResultTransformer } from './tool_summarization';
+import { serializeCompactionSummary } from './compaction_serialize';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
