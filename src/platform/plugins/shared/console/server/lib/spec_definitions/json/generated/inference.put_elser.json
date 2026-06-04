@@ -16,6 +16,30 @@
         "sparse_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "elser"
+        ]
+      },
+      "service_settings": {
+        "adaptive_allocations": {
+          "enabled": "__flag__",
+          "max_number_of_allocations": "",
+          "min_number_of_allocations": ""
+        },
+        "num_allocations": "",
+        "num_threads": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

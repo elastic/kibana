@@ -6,6 +6,40 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "last_access_control_sync_error": "",
+      "last_access_control_sync_scheduled_at": "",
+      "last_access_control_sync_status": {
+        "__one_of": [
+          "canceling",
+          "canceled",
+          "completed",
+          "error",
+          "in_progress",
+          "pending",
+          "suspended"
+        ]
+      },
+      "last_deleted_document_count": "",
+      "last_incremental_sync_scheduled_at": "",
+      "last_indexed_document_count": "",
+      "last_seen": "",
+      "last_sync_error": "",
+      "last_sync_scheduled_at": "",
+      "last_sync_status": {
+        "__one_of": [
+          "canceling",
+          "canceled",
+          "completed",
+          "error",
+          "in_progress",
+          "pending",
+          "suspended"
+        ]
+      },
+      "last_synced": "",
+      "sync_cursor": ""
+    },
     "methods": [
       "PUT"
     ],

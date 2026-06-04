@@ -23,6 +23,19 @@
         "-1"
       ]
     },
+    "data_autocomplete_rules": {
+      "anomaly_score": "",
+      "desc": "__flag__",
+      "end": "",
+      "exclude_interim": "__flag__",
+      "expand": "__flag__",
+      "page": {
+        "from": "",
+        "size": ""
+      },
+      "sort": "",
+      "start": ""
+    },
     "methods": [
       "GET",
       "POST"

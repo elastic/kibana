@@ -17,6 +17,20 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "script": {
+        "lang": {
+          "__one_of": [
+            "painless",
+            "expression",
+            "mustache",
+            "java"
+          ]
+        },
+        "options": {},
+        "source": ""
+      }
+    },
     "methods": [
       "PUT",
       "POST"

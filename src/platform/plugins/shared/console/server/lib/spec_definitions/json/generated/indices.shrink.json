@@ -21,6 +21,10 @@
         "index-setting"
       ]
     },
+    "data_autocomplete_rules": {
+      "aliases": {},
+      "settings": {}
+    },
     "methods": [
       "PUT",
       "POST"

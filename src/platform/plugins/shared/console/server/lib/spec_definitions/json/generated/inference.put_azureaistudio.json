@@ -18,6 +18,39 @@
         "text_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "azureaistudio"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "endpoint_type": "",
+        "target": "",
+        "provider": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      },
+      "task_settings": {
+        "do_sample": "",
+        "max_new_tokens": "",
+        "temperature": "",
+        "top_p": "",
+        "user": "",
+        "return_documents": "__flag__",
+        "top_n": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

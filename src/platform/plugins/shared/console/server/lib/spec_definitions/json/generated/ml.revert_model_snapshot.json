@@ -7,6 +7,9 @@
       "pretty": "__flag__",
       "delete_intervening_results": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "delete_intervening_results": "__flag__"
+    },
     "methods": [
       "POST"
     ],

@@ -18,6 +18,41 @@
         "text_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "fireworksai"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "model_id": "",
+        "url": "",
+        "dimensions": "",
+        "similarity": {
+          "__one_of": [
+            "cosine",
+            "dot_product",
+            "l2_norm"
+          ]
+        },
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      },
+      "task_settings": {
+        "user": "",
+        "headers": {}
+      }
+    },
     "methods": [
       "PUT"
     ],

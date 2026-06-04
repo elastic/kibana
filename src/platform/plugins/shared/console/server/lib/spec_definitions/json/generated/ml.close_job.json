@@ -13,6 +13,11 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "allow_no_match": "__flag__",
+      "force": "__flag__",
+      "timeout": ""
+    },
     "methods": [
       "POST"
     ],

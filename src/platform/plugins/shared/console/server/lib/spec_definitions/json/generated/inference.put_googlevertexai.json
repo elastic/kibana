@@ -19,6 +19,52 @@
         "chat_completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "googlevertexai"
+        ]
+      },
+      "service_settings": {
+        "provider": {
+          "__one_of": [
+            "google",
+            "anthropic",
+            "meta",
+            "hugging_face",
+            "mistral",
+            "ai21"
+          ]
+        },
+        "url": "",
+        "streaming_url": "",
+        "location": "",
+        "model_id": "",
+        "project_id": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        },
+        "service_account_json": "",
+        "dimensions": "",
+        "max_batch_size": ""
+      },
+      "task_settings": {
+        "auto_truncate": "__flag__",
+        "top_n": "",
+        "thinking_config": {
+          "thinking_budget": ""
+        },
+        "max_tokens": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

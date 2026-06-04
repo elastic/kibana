@@ -17,6 +17,35 @@
         "rerank"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "voyageai"
+        ]
+      },
+      "service_settings": {
+        "dimensions": "",
+        "model_id": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        },
+        "embedding_type": ""
+      },
+      "task_settings": {
+        "input_type": "",
+        "return_documents": "__flag__",
+        "top_k": "",
+        "truncation": "__flag__"
+      }
+    },
     "methods": [
       "PUT"
     ],

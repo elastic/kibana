@@ -6,6 +6,22 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "id": "",
+      "job_type": {
+        "__one_of": [
+          "full",
+          "incremental",
+          "access_control"
+        ]
+      },
+      "trigger_method": {
+        "__one_of": [
+          "on_demand",
+          "scheduled"
+        ]
+      }
+    },
     "methods": [
       "POST"
     ],

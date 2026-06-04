@@ -18,6 +18,37 @@
         "text_embedding"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "amazonbedrock"
+        ]
+      },
+      "service_settings": {
+        "access_key": "",
+        "model": "",
+        "provider": "",
+        "region": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        },
+        "secret_key": ""
+      },
+      "task_settings": {
+        "max_new_tokens": "",
+        "temperature": "",
+        "top_k": "",
+        "top_p": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

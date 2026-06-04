@@ -6,6 +6,14 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "pipeline": {
+        "extract_binary_content": "__flag__",
+        "name": "",
+        "reduce_whitespace": "__flag__",
+        "run_ml_inference": "__flag__"
+      }
+    },
     "methods": [
       "PUT"
     ],

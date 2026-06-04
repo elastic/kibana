@@ -14,6 +14,12 @@
       ],
       "close_job": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "allow_no_match": "__flag__",
+      "force": "__flag__",
+      "timeout": "",
+      "close_job": "__flag__"
+    },
     "methods": [
       "POST"
     ],

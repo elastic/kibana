@@ -11,6 +11,13 @@
       "skip_time": [],
       "start": []
     },
+    "data_autocomplete_rules": {
+      "advance_time": "",
+      "calc_interim": "__flag__",
+      "end": "",
+      "skip_time": "",
+      "start": ""
+    },
     "methods": [
       "POST"
     ],

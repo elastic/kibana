@@ -16,6 +16,278 @@
         "index-setting"
       ]
     },
+    "data_autocomplete_rules": {
+      "data_stream_name": "",
+      "leader_index": "",
+      "max_outstanding_read_requests": "",
+      "max_outstanding_write_requests": "",
+      "max_read_request_operation_count": "",
+      "max_read_request_size": "",
+      "max_retry_delay": "",
+      "max_write_buffer_count": "",
+      "max_write_buffer_size": "",
+      "max_write_request_operation_count": "",
+      "max_write_request_size": "",
+      "read_poll_timeout": "",
+      "remote_cluster": "",
+      "settings": {
+        "index": {},
+        "mode": "",
+        "routing_path": "",
+        "soft_deletes": {
+          "enabled": "__flag__",
+          "retention_lease": {
+            "period": ""
+          }
+        },
+        "sort": {
+          "field": "",
+          "order": {
+            "__one_of": [
+              "asc",
+              "desc"
+            ]
+          },
+          "mode": {
+            "__one_of": [
+              "min",
+              "max"
+            ]
+          },
+          "missing": {
+            "__one_of": [
+              "_last",
+              "_first"
+            ]
+          }
+        },
+        "number_of_shards": "",
+        "number_of_replicas": "",
+        "number_of_routing_shards": "",
+        "check_on_startup": {
+          "__one_of": [
+            "true",
+            "false",
+            "checksum"
+          ]
+        },
+        "codec": "",
+        "routing_partition_size": "",
+        "load_fixed_bitset_filters_eagerly": "__flag__",
+        "hidden": "",
+        "auto_expand_replicas": "",
+        "merge": {
+          "scheduler": {
+            "max_thread_count": "",
+            "max_merge_count": ""
+          }
+        },
+        "search": {
+          "idle": {
+            "after": ""
+          },
+          "slowlog": {
+            "level": "",
+            "source": "",
+            "reformat": "__flag__",
+            "threshold": {
+              "query": {
+                "warn": "",
+                "info": "",
+                "debug": "",
+                "trace": ""
+              },
+              "fetch": {
+                "warn": "",
+                "info": "",
+                "debug": "",
+                "trace": ""
+              }
+            }
+          }
+        },
+        "refresh_interval": "",
+        "max_result_window": "",
+        "max_inner_result_window": "",
+        "max_rescore_window": "",
+        "max_docvalue_fields_search": "",
+        "max_script_fields": "",
+        "max_ngram_diff": "",
+        "max_shingle_diff": "",
+        "blocks": {
+          "read_only": "",
+          "read_only_allow_delete": "",
+          "read": "",
+          "write": "",
+          "metadata": ""
+        },
+        "max_refresh_listeners": "",
+        "analyze": {
+          "max_token_count": ""
+        },
+        "highlight": {
+          "max_analyzed_offset": ""
+        },
+        "max_terms_count": "",
+        "max_regex_length": "",
+        "routing": {
+          "allocation": {
+            "enable": {
+              "__one_of": [
+                "all",
+                "primaries",
+                "new_primaries",
+                "none"
+              ]
+            },
+            "include": {
+              "_tier_preference": "",
+              "_id": ""
+            },
+            "initial_recovery": {
+              "_id": ""
+            },
+            "disk": {
+              "threshold_enabled": ""
+            }
+          },
+          "rebalance": {
+            "enable": {
+              "__one_of": [
+                "all",
+                "primaries",
+                "replicas",
+                "none"
+              ]
+            }
+          }
+        },
+        "gc_deletes": "",
+        "default_pipeline": "",
+        "final_pipeline": "",
+        "lifecycle": {
+          "name": "",
+          "indexing_complete": "",
+          "origination_date": "",
+          "parse_origination_date": "__flag__",
+          "step": {
+            "wait_time_threshold": ""
+          },
+          "rollover_alias": "",
+          "prefer_ilm": ""
+        },
+        "provided_name": "",
+        "creation_date": "",
+        "creation_date_string": "",
+        "uuid": "",
+        "version": {
+          "created": "",
+          "created_string": ""
+        },
+        "verified_before_close": "",
+        "format": "",
+        "max_slices_per_scroll": "",
+        "translog": {
+          "sync_interval": "",
+          "durability": {
+            "__one_of": [
+              "request",
+              "async"
+            ]
+          },
+          "flush_threshold_size": "",
+          "retention": {
+            "size": "",
+            "age": ""
+          }
+        },
+        "query_string": {
+          "lenient": ""
+        },
+        "priority": "",
+        "top_metrics_max_size": "",
+        "analysis": {
+          "analyzer": {},
+          "char_filter": {},
+          "filter": {},
+          "normalizer": {},
+          "tokenizer": {}
+        },
+        "settings": {},
+        "time_series": {
+          "end_time": "",
+          "start_time": ""
+        },
+        "queries": {
+          "cache": {
+            "enabled": "__flag__"
+          }
+        },
+        "similarity": {},
+        "mapping": {
+          "coerce": "__flag__",
+          "total_fields": {
+            "limit": "",
+            "ignore_dynamic_beyond_limit": ""
+          },
+          "depth": {
+            "limit": ""
+          },
+          "nested_fields": {
+            "limit": ""
+          },
+          "nested_objects": {
+            "limit": ""
+          },
+          "field_name_length": {
+            "limit": ""
+          },
+          "dimension_fields": {
+            "limit": ""
+          },
+          "source": {
+            "mode": {
+              "__one_of": [
+                "disabled",
+                "stored",
+                "synthetic"
+              ]
+            }
+          },
+          "ignore_malformed": ""
+        },
+        "indexing.slowlog": {
+          "level": "",
+          "source": "",
+          "reformat": "__flag__",
+          "threshold": {
+            "index": {
+              "warn": "",
+              "info": "",
+              "debug": "",
+              "trace": ""
+            }
+          }
+        },
+        "indexing_pressure": {
+          "memory": {
+            "limit": ""
+          }
+        },
+        "store": {
+          "type": {
+            "__one_of": [
+              "fs",
+              "niofs",
+              "mmapfs",
+              "hybridfs"
+            ]
+          },
+          "allow_mmap": "__flag__",
+          "stats_refresh_interval": ""
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

@@ -23,6 +23,15 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "failure_store": {
+        "enabled": "__flag__",
+        "lifecycle": {
+          "data_retention": "",
+          "enabled": "__flag__"
+        }
+      }
+    },
     "methods": [
       "PUT"
     ],

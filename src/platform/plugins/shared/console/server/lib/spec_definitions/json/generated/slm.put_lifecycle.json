@@ -16,6 +16,24 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "config": {
+        "ignore_unavailable": "__flag__",
+        "indices": "",
+        "include_global_state": "__flag__",
+        "feature_states": [],
+        "metadata": {},
+        "partial": "__flag__"
+      },
+      "name": "",
+      "repository": "",
+      "retention": {
+        "expire_after": "",
+        "max_count": "",
+        "min_count": ""
+      },
+      "schedule": ""
+    },
     "methods": [
       "PUT"
     ],

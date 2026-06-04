@@ -16,6 +16,18 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "type": {
+        "__one_of": [
+          "restart",
+          "remove",
+          "replace"
+        ]
+      },
+      "reason": "",
+      "allocation_delay": "",
+      "target_node_name": ""
+    },
     "methods": [
       "PUT"
     ],

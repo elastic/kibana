@@ -8,6 +8,248 @@
       "defer_definition_decompression": "__flag__",
       "wait_for_completion": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "compressed_definition": "",
+      "definition": {
+        "preprocessors": [
+          {
+            "frequency_encoding": {
+              "field": "",
+              "feature_name": "",
+              "frequency_map": {}
+            },
+            "one_hot_encoding": {
+              "field": "",
+              "hot_map": {}
+            },
+            "target_mean_encoding": {
+              "field": "",
+              "feature_name": "",
+              "target_map": {},
+              "default_value": ""
+            }
+          }
+        ],
+        "trained_model": {
+          "tree": {
+            "classification_labels": [],
+            "feature_names": [],
+            "target_type": "",
+            "tree_structure": [
+              {
+                "decision_type": "",
+                "default_left": "__flag__",
+                "leaf_value": "",
+                "left_child": "",
+                "node_index": "",
+                "right_child": "",
+                "split_feature": "",
+                "split_gain": "",
+                "threshold": ""
+              }
+            ]
+          },
+          "tree_node": {
+            "decision_type": "",
+            "default_left": "__flag__",
+            "leaf_value": "",
+            "left_child": "",
+            "node_index": "",
+            "right_child": "",
+            "split_feature": "",
+            "split_gain": "",
+            "threshold": ""
+          },
+          "ensemble": {
+            "aggregate_output": {
+              "logistic_regression": {
+                "weights": ""
+              },
+              "weighted_sum": {
+                "weights": ""
+              },
+              "weighted_mode": {
+                "weights": ""
+              },
+              "exponent": {
+                "weights": ""
+              }
+            },
+            "classification_labels": [],
+            "feature_names": [],
+            "target_type": "",
+            "trained_models": [
+              {}
+            ]
+          }
+        }
+      },
+      "description": "",
+      "inference_config": {
+        "regression": {
+          "results_field": "",
+          "num_top_feature_importance_values": ""
+        },
+        "classification": {
+          "num_top_classes": "",
+          "num_top_feature_importance_values": "",
+          "prediction_field_type": "",
+          "results_field": "",
+          "top_classes_results_field": ""
+        },
+        "text_classification": {
+          "num_top_classes": "",
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "classification_labels": [],
+          "vocabulary": {
+            "index": ""
+          }
+        },
+        "zero_shot_classification": {
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "hypothesis_template": "",
+          "classification_labels": [],
+          "results_field": "",
+          "multi_label": "__flag__",
+          "labels": []
+        },
+        "fill_mask": {
+          "mask_token": "",
+          "num_top_classes": "",
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "vocabulary": {
+            "index": ""
+          }
+        },
+        "learning_to_rank": {
+          "default_params": {},
+          "feature_extractors": [
+            {}
+          ],
+          "num_top_feature_importance_values": ""
+        },
+        "ner": {
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "classification_labels": [],
+          "vocabulary": {
+            "index": ""
+          }
+        },
+        "pass_through": {
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "vocabulary": {
+            "index": ""
+          }
+        },
+        "text_embedding": {
+          "embedding_size": "",
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "vocabulary": {
+            "index": ""
+          }
+        },
+        "text_expansion": {
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "vocabulary": {
+            "index": ""
+          }
+        },
+        "question_answering": {
+          "num_top_classes": "",
+          "tokenization": {
+            "bert": {},
+            "bert_ja": {},
+            "mpnet": {},
+            "roberta": {
+              "add_prefix_space": "__flag__"
+            },
+            "xlm_roberta": {}
+          },
+          "results_field": "",
+          "max_answer_length": ""
+        }
+      },
+      "input": {
+        "field_names": ""
+      },
+      "metadata": "",
+      "model_type": {
+        "__one_of": [
+          "tree_ensemble",
+          "lang_ident",
+          "pytorch"
+        ]
+      },
+      "model_size_bytes": "",
+      "platform_architecture": "",
+      "tags": [],
+      "prefix_strings": {
+        "ingest": "",
+        "search": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

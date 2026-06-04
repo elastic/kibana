@@ -23,6 +23,22 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "data_retention": "",
+      "downsampling": [
+        {
+          "after": "",
+          "fixed_interval": ""
+        }
+      ],
+      "downsampling_method": {
+        "__one_of": [
+          "aggregate",
+          "last_value"
+        ]
+      },
+      "enabled": "__flag__"
+    },
     "methods": [
       "PUT"
     ],

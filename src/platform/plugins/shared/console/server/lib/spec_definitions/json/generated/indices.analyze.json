@@ -7,6 +7,17 @@
       "pretty": "__flag__",
       "index": ""
     },
+    "data_autocomplete_rules": {
+      "analyzer": "",
+      "attributes": [],
+      "char_filter": [],
+      "explain": "__flag__",
+      "field": "",
+      "filter": [],
+      "normalizer": "",
+      "text": "",
+      "tokenizer": ""
+    },
     "methods": [
       "GET",
       "POST"

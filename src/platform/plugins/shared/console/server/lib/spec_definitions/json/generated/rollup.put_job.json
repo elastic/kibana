@@ -6,6 +6,46 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "cron": "",
+      "groups": {
+        "date_histogram": {
+          "delay": "",
+          "field": "",
+          "format": "",
+          "interval": "",
+          "calendar_interval": "",
+          "fixed_interval": "",
+          "time_zone": ""
+        },
+        "histogram": {
+          "fields": "",
+          "interval": ""
+        },
+        "terms": {
+          "fields": ""
+        }
+      },
+      "index_pattern": "",
+      "metrics": [
+        {
+          "field": "",
+          "metrics": {
+            "__any_of": [
+              "min",
+              "max",
+              "sum",
+              "avg",
+              "value_count"
+            ]
+          }
+        }
+      ],
+      "page_size": "",
+      "rollup_index": "",
+      "timeout": "",
+      "headers": {}
+    },
     "methods": [
       "PUT"
     ],

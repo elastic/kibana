@@ -6,6 +6,69 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "allow_lazy_open": "__flag__",
+      "analysis_limits": {
+        "model_memory_limit": ""
+      },
+      "background_persist_interval": "",
+      "custom_settings": {},
+      "categorization_filters": [],
+      "description": "",
+      "model_plot_config": {
+        "annotations_enabled": "__flag__",
+        "enabled": "__flag__",
+        "terms": ""
+      },
+      "model_prune_window": "",
+      "daily_model_snapshot_retention_after_days": "",
+      "model_snapshot_retention_days": "",
+      "renormalization_window_days": "",
+      "results_retention_days": "",
+      "groups": [],
+      "detectors": [
+        {
+          "detector_index": "",
+          "description": "",
+          "custom_rules": [
+            {
+              "actions": {
+                "__any_of": [
+                  "skip_result",
+                  "skip_model_update"
+                ]
+              },
+              "conditions": [
+                {
+                  "applies_to": {
+                    "__one_of": [
+                      "actual",
+                      "typical",
+                      "diff_from_typical",
+                      "time"
+                    ]
+                  },
+                  "operator": {
+                    "__one_of": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte"
+                    ]
+                  },
+                  "value": ""
+                }
+              ],
+              "scope": {}
+            }
+          ]
+        }
+      ],
+      "per_partition_categorization": {
+        "enabled": "__flag__",
+        "stop_on_warn": "__flag__"
+      }
+    },
     "methods": [
       "POST"
     ],

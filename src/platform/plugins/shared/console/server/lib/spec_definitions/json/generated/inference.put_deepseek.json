@@ -17,6 +17,18 @@
         "chat_completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "service": {
+        "__one_of": [
+          "deepseek"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "model_id": "",
+        "url": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

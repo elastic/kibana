@@ -16,6 +16,293 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "policy": {
+        "phases": {
+          "cold": {
+            "actions": {
+              "allocate": {
+                "number_of_replicas": "",
+                "total_shards_per_node": "",
+                "include": {},
+                "exclude": {},
+                "require": {}
+              },
+              "delete": {
+                "delete_searchable_snapshot": "__flag__"
+              },
+              "downsample": {
+                "fixed_interval": "",
+                "wait_timeout": ""
+              },
+              "freeze": {},
+              "forcemerge": {
+                "max_num_segments": "",
+                "index_codec": ""
+              },
+              "migrate": {
+                "enabled": "__flag__"
+              },
+              "readonly": {},
+              "rollover": {
+                "max_size": "",
+                "max_primary_shard_size": "",
+                "max_age": "",
+                "max_docs": "",
+                "max_primary_shard_docs": "",
+                "min_size": "",
+                "min_primary_shard_size": "",
+                "min_age": "",
+                "min_docs": "",
+                "min_primary_shard_docs": ""
+              },
+              "set_priority": {
+                "priority": ""
+              },
+              "searchable_snapshot": {
+                "snapshot_repository": "",
+                "force_merge_index": "__flag__"
+              },
+              "shrink": {
+                "number_of_shards": "",
+                "max_primary_shard_size": "",
+                "allow_write_after_shrink": "__flag__"
+              },
+              "unfollow": {},
+              "wait_for_snapshot": {
+                "policy": ""
+              }
+            },
+            "min_age": ""
+          },
+          "delete": {
+            "actions": {
+              "allocate": {
+                "number_of_replicas": "",
+                "total_shards_per_node": "",
+                "include": {},
+                "exclude": {},
+                "require": {}
+              },
+              "delete": {
+                "delete_searchable_snapshot": "__flag__"
+              },
+              "downsample": {
+                "fixed_interval": "",
+                "wait_timeout": ""
+              },
+              "freeze": {},
+              "forcemerge": {
+                "max_num_segments": "",
+                "index_codec": ""
+              },
+              "migrate": {
+                "enabled": "__flag__"
+              },
+              "readonly": {},
+              "rollover": {
+                "max_size": "",
+                "max_primary_shard_size": "",
+                "max_age": "",
+                "max_docs": "",
+                "max_primary_shard_docs": "",
+                "min_size": "",
+                "min_primary_shard_size": "",
+                "min_age": "",
+                "min_docs": "",
+                "min_primary_shard_docs": ""
+              },
+              "set_priority": {
+                "priority": ""
+              },
+              "searchable_snapshot": {
+                "snapshot_repository": "",
+                "force_merge_index": "__flag__"
+              },
+              "shrink": {
+                "number_of_shards": "",
+                "max_primary_shard_size": "",
+                "allow_write_after_shrink": "__flag__"
+              },
+              "unfollow": {},
+              "wait_for_snapshot": {
+                "policy": ""
+              }
+            },
+            "min_age": ""
+          },
+          "frozen": {
+            "actions": {
+              "allocate": {
+                "number_of_replicas": "",
+                "total_shards_per_node": "",
+                "include": {},
+                "exclude": {},
+                "require": {}
+              },
+              "delete": {
+                "delete_searchable_snapshot": "__flag__"
+              },
+              "downsample": {
+                "fixed_interval": "",
+                "wait_timeout": ""
+              },
+              "freeze": {},
+              "forcemerge": {
+                "max_num_segments": "",
+                "index_codec": ""
+              },
+              "migrate": {
+                "enabled": "__flag__"
+              },
+              "readonly": {},
+              "rollover": {
+                "max_size": "",
+                "max_primary_shard_size": "",
+                "max_age": "",
+                "max_docs": "",
+                "max_primary_shard_docs": "",
+                "min_size": "",
+                "min_primary_shard_size": "",
+                "min_age": "",
+                "min_docs": "",
+                "min_primary_shard_docs": ""
+              },
+              "set_priority": {
+                "priority": ""
+              },
+              "searchable_snapshot": {
+                "snapshot_repository": "",
+                "force_merge_index": "__flag__"
+              },
+              "shrink": {
+                "number_of_shards": "",
+                "max_primary_shard_size": "",
+                "allow_write_after_shrink": "__flag__"
+              },
+              "unfollow": {},
+              "wait_for_snapshot": {
+                "policy": ""
+              }
+            },
+            "min_age": ""
+          },
+          "hot": {
+            "actions": {
+              "allocate": {
+                "number_of_replicas": "",
+                "total_shards_per_node": "",
+                "include": {},
+                "exclude": {},
+                "require": {}
+              },
+              "delete": {
+                "delete_searchable_snapshot": "__flag__"
+              },
+              "downsample": {
+                "fixed_interval": "",
+                "wait_timeout": ""
+              },
+              "freeze": {},
+              "forcemerge": {
+                "max_num_segments": "",
+                "index_codec": ""
+              },
+              "migrate": {
+                "enabled": "__flag__"
+              },
+              "readonly": {},
+              "rollover": {
+                "max_size": "",
+                "max_primary_shard_size": "",
+                "max_age": "",
+                "max_docs": "",
+                "max_primary_shard_docs": "",
+                "min_size": "",
+                "min_primary_shard_size": "",
+                "min_age": "",
+                "min_docs": "",
+                "min_primary_shard_docs": ""
+              },
+              "set_priority": {
+                "priority": ""
+              },
+              "searchable_snapshot": {
+                "snapshot_repository": "",
+                "force_merge_index": "__flag__"
+              },
+              "shrink": {
+                "number_of_shards": "",
+                "max_primary_shard_size": "",
+                "allow_write_after_shrink": "__flag__"
+              },
+              "unfollow": {},
+              "wait_for_snapshot": {
+                "policy": ""
+              }
+            },
+            "min_age": ""
+          },
+          "warm": {
+            "actions": {
+              "allocate": {
+                "number_of_replicas": "",
+                "total_shards_per_node": "",
+                "include": {},
+                "exclude": {},
+                "require": {}
+              },
+              "delete": {
+                "delete_searchable_snapshot": "__flag__"
+              },
+              "downsample": {
+                "fixed_interval": "",
+                "wait_timeout": ""
+              },
+              "freeze": {},
+              "forcemerge": {
+                "max_num_segments": "",
+                "index_codec": ""
+              },
+              "migrate": {
+                "enabled": "__flag__"
+              },
+              "readonly": {},
+              "rollover": {
+                "max_size": "",
+                "max_primary_shard_size": "",
+                "max_age": "",
+                "max_docs": "",
+                "max_primary_shard_docs": "",
+                "min_size": "",
+                "min_primary_shard_size": "",
+                "min_age": "",
+                "min_docs": "",
+                "min_primary_shard_docs": ""
+              },
+              "set_priority": {
+                "priority": ""
+              },
+              "searchable_snapshot": {
+                "snapshot_repository": "",
+                "force_merge_index": "__flag__"
+              },
+              "shrink": {
+                "number_of_shards": "",
+                "max_primary_shard_size": "",
+                "allow_write_after_shrink": "__flag__"
+              },
+              "unfollow": {},
+              "wait_for_snapshot": {
+                "policy": ""
+              }
+            },
+            "min_age": ""
+          }
+        },
+        "_meta": {}
+      }
+    },
     "methods": [
       "PUT"
     ],

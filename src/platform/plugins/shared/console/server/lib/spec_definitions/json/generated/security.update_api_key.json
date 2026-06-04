@@ -6,6 +6,11 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "role_descriptors": {},
+      "metadata": {},
+      "expiration": ""
+    },
     "methods": [
       "PUT"
     ],
