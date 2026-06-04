@@ -82,9 +82,9 @@ import { PatternExtractionService } from './lib/pattern_extraction/pattern_extra
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
-  createContinuousKiExtractionWorkflowService,
-  type ContinuousKiExtractionWorkflowService,
-} from './lib/workflows/continuous_extraction_workflow';
+  createContinuousKiOnboardingWorkflowService,
+  type ContinuousKiOnboardingWorkflowService,
+} from './lib/workflows/continuous_onboarding_workflow';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -348,10 +348,10 @@ export class StreamsPlugin
         });
     }
 
-    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
+    let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
+      continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         streamsKIsOnboardingClient,
@@ -434,7 +434,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflowService,
+        continuousKiOnboardingWorkflowService,
         streamsKIsOnboardingClient,
         workflowClients,
         getSpaceId: async (request: KibanaRequest) => {

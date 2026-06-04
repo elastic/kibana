@@ -324,7 +324,7 @@ export class StreamsKIsOnboardingClient {
 
   /**
    * Cancels every non-terminal onboarding execution across all streams.
-   * Used during teardown of the continuous KI extraction workflow.
+   * Used during teardown of the continuous KI onboarding workflow.
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
     const { results } = await this.workflowExecutionService.getExecutions(
