@@ -7,8 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
-
-const DEPLOYMENT_STATS_PATH = '/internal/serverless_vectordb/deployment_stats';
+import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
 
 export interface DeploymentStats {
   indicesCount: number | null;
