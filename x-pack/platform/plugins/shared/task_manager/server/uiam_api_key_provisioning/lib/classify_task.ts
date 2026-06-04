@@ -22,23 +22,13 @@ export type ClassifyTaskResult =
   | { action: 'skip'; status: TaskUiamProvisioningStatusDoc }
   | { action: 'convert'; task: ApiKeyToConvert };
 
-export interface ClassifyTaskOptions {
-  /**
-   * When `true`, do NOT skip a task just because it already carries a `uiamApiKey`; re-convert it
-   * instead. Set only during the one-time repair campaign, where an existing `uiamApiKey` may be the
-   * plaintext value written by the pre-fix run and must be replaced with a properly encrypted key.
-   */
-  forceReconvert?: boolean;
-}
-
 /**
  * Classifies a task as either skip (with status doc) or convert (with API key payload + instance for merge).
- * Skip: no API key, already has UIAM key (unless `forceReconvert`), user-created key, or unusable userScope.
- * Convert: system-generated API key, no UIAM key yet (or `forceReconvert`), usable userScope.
+ * Skip: no API key, already has UIAM key, user-created key, or unusable userScope.
+ * Convert: system-generated API key, no UIAM key yet, usable userScope.
  */
 export const classifyTaskForUiamProvisioning = (
-  task: TaskForClassification,
-  options?: ClassifyTaskOptions
+  task: TaskForClassification
 ): ClassifyTaskResult => {
   const { id, apiKey, uiamApiKey, userScope, taskType } = task;
   if (!apiKey) {
@@ -47,7 +37,7 @@ export const classifyTaskForUiamProvisioning = (
       status: createSkippedTaskProvisioningStatus(id, 'The task has no API key'),
     };
   }
-  if (!options?.forceReconvert && uiamApiKey && userScope?.uiamApiKeyId) {
+  if (uiamApiKey && userScope?.uiamApiKeyId) {
     return {
       action: 'skip',
       status: createSkippedTaskProvisioningStatus(id, 'The task already has a UIAM API key'),
@@ -92,14 +82,13 @@ export interface ClassifyTasksResult {
  * Mirrors `classifyRulesForUiamProvisioning` in `alerting/.../classify_rule.ts`.
  */
 export const classifyTasksForUiamProvisioning = (
-  tasks: TaskForClassification[],
-  options?: ClassifyTaskOptions
+  tasks: TaskForClassification[]
 ): ClassifyTasksResult => {
   const provisioningStatusForSkippedTasks: TaskUiamProvisioningStatusDoc[] = [];
   const apiKeysToConvert: ApiKeyToConvert[] = [];
 
   for (const t of tasks) {
-    const result = classifyTaskForUiamProvisioning(t, options);
+    const result = classifyTaskForUiamProvisioning(t);
     if (result.action === 'skip') {
       provisioningStatusForSkippedTasks.push(result.status);
     } else {

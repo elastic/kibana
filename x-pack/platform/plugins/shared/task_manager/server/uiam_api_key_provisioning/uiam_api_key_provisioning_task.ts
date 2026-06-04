@@ -44,7 +44,7 @@ import { mapUiamConvertResponseToKeyResults } from './lib/map_uiam_convert_respo
 import { buildSavedObjectBulkUpdatesForUiamKeys } from './lib/build_saved_object_bulk_updates_for_uiam';
 import { markApiKeysForInvalidation } from '../api_key_strategy';
 import { statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate } from './lib/task_status_and_orphaned_keys_from_bulk_update';
-import { flushTaskProvisioningStatus } from './lib/flush_task_provisioning_status';
+import { resetUiamKeysForReprovisioning } from './lib/reset_uiam_keys_for_reprovisioning';
 import { UiamProvisioningFeatureFlagScheduler } from './lib/uiam_provisioning_feature_flag_scheduler';
 import {
   createUiamProvisioningTaskRunner,
@@ -130,22 +130,13 @@ export class UiamApiKeyProvisioningTask {
     const context = await createProvisioningRunContext(coreSetup);
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
 
-    // One-time remediation for keys persisted in plaintext by the pre-fix run: flush the stale task
-    // provisioning status docs (which would otherwise exclude the broken tasks) so the normal flow
-    // re-provisions them. Runs before the fetch so this same run re-provisions them. Failure must
-    // not block normal provisioning, so it is caught and retried on the next run.
-    const staleProvisioningStatusFlushed = await this.flushStaleProvisioningStatusOnce(
-      state,
-      context
-    );
-
-    // While the repair campaign is in progress, re-convert tasks that already carry a `uiamApiKey`
-    // (it may be the plaintext value from the pre-fix run). Once the campaign latches, classification
-    // returns to skipping already-provisioned tasks.
-    const forceReconvert = !state.plaintextUiamKeysRepaired;
+    // One-time remediation for keys persisted in plaintext by the pre-fix run. Runs before the
+    // normal flow so the stripped tasks are re-provisioned (with proper encryption) in this same
+    // run. Failure here must not block normal provisioning, so it is caught and retried next run.
+    const plaintextUiamKeysRepaired = await this.repairPlaintextUiamKeysOnce(state, context);
 
     const { apiKeysToConvert, hasMoreToProvision, provisioningStatusForSkippedTasks } =
-      await this.getApiKeysToConvert(context, { forceReconvert });
+      await this.getApiKeysToConvert(context);
 
     const { converted, provisioningStatusForFailedConversions } = await this.convertApiKeys(
       apiKeysToConvert,
@@ -178,45 +169,40 @@ export class UiamApiKeyProvisioningTask {
       nextRunNumber: nextRuns,
     });
 
-    // The repair campaign completes once the flush has happened and the post-flush backlog has
-    // drained (no more tasks to provision). Until then we keep force-reconverting and rescheduling.
-    const plaintextUiamKeysRepaired =
-      state.plaintextUiamKeysRepaired || (staleProvisioningStatusFlushed && !hasMoreToProvision);
-
-    // Re-run soon when there is more to provision, or when the repair campaign has not completed yet
-    // (so the broken tasks get re-provisioned promptly rather than waiting for the daily schedule).
+    // Re-run soon when there is more to provision, or when the one-time repair has not completed
+    // yet (so the freshly stripped tasks get re-provisioned promptly).
     const shouldRunAgainSoon = hasMoreToProvision || !plaintextUiamKeysRepaired;
 
     return {
-      state: { runs: nextRuns, staleProvisioningStatusFlushed, plaintextUiamKeysRepaired },
+      state: { runs: nextRuns, plaintextUiamKeysRepaired },
       ...(shouldRunAgainSoon ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL_MS) } : {}),
       telemetry,
     };
   };
 
   /**
-   * One-time (per environment) flush of stale task UIAM provisioning status docs, so the regular
-   * flow re-provisions the tasks whose `uiamApiKey` was stored in plaintext by the pre-fix run.
-   * Latches via task state once it succeeds; errors are swallowed so a transient failure does not
-   * block provisioning and the flush is retried on the next run. Runs exactly once because a
-   * re-flush would delete the status docs written for tasks already re-provisioned in earlier
-   * batches (re-fetching and re-minting them).
+   * One-time (per environment) repair: strips plaintext `uiamApiKey`/`userScope.uiamApiKeyId` from
+   * all provisioned tasks and flushes their provisioning status so the regular flow re-mints
+   * properly encrypted keys. Latches via task state once it succeeds; errors are swallowed so a
+   * transient failure does not block provisioning and the repair is retried on the next run.
    */
-  private flushStaleProvisioningStatusOnce = async (
+  private repairPlaintextUiamKeysOnce = async (
     state: LatestTaskStateSchema,
     context: TaskManagerUiamProvisioningRunContext
   ): Promise<boolean> => {
-    if (state.staleProvisioningStatusFlushed) {
+    if (state.plaintextUiamKeysRepaired) {
       return true;
     }
     try {
-      await flushTaskProvisioningStatus(context.savedObjectsClient, this.logger);
+      await resetUiamKeysForReprovisioning(
+        context.coreStart.elasticsearch.client.asInternalUser,
+        context.savedObjectsClient,
+        this.logger
+      );
       return true;
     } catch (error) {
       this.logger.error(
-        `Flushing stale UIAM provisioning status failed; will retry next run: ${getErrorMessage(
-          error
-        )}`,
+        `Plaintext UIAM key repair failed; will retry next run: ${getErrorMessage(error)}`,
         { error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS } }
       );
       return false;
@@ -234,8 +220,7 @@ export class UiamApiKeyProvisioningTask {
   };
 
   private getApiKeysToConvert = async (
-    context: TaskManagerUiamProvisioningRunContext,
-    { forceReconvert }: { forceReconvert: boolean }
+    context: TaskManagerUiamProvisioningRunContext
   ): Promise<GetApiKeysToConvertResult> => {
     try {
       const excludeTaskEntityIdsWithFinalStatus = await getExcludeTasksFilter(
@@ -246,7 +231,7 @@ export class UiamApiKeyProvisioningTask {
         { excludeTaskEntityIdsWithFinalStatus }
       );
       const { apiKeysToConvert, provisioningStatusForSkippedTasks } =
-        classifyTasksForUiamProvisioning(tasks, { forceReconvert });
+        classifyTasksForUiamProvisioning(tasks);
       return {
         apiKeysToConvert,
         provisioningStatusForSkippedTasks,

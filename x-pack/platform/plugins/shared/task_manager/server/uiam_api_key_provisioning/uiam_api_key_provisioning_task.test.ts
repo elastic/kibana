@@ -16,7 +16,7 @@ import { createProvisioningRunContext } from './lib/create_provisioning_run_cont
 import { getExcludeTasksFilter } from './lib/get_exclude_tasks_filter';
 import { fetchFirstBatchOfTasksToConvert } from './lib/fetch_first_batch_of_tasks_to_convert';
 import { writeTaskUiamProvisioningObservabilityStatus } from './lib/task_uiam_provisioning_observability_status';
-import { flushTaskProvisioningStatus } from './lib/flush_task_provisioning_status';
+import { resetUiamKeysForReprovisioning } from './lib/reset_uiam_keys_for_reprovisioning';
 import { RUN_AT_INTERVAL_MS, TASK_TYPE } from './constants';
 import { emptyState } from './task_state';
 import type { UiamProvisioningRunTaskOutcome } from './lib/create_uiam_provisioning_task_runner';
@@ -25,7 +25,7 @@ jest.mock('./lib/create_provisioning_run_context');
 jest.mock('./lib/get_exclude_tasks_filter');
 jest.mock('./lib/fetch_first_batch_of_tasks_to_convert');
 jest.mock('./lib/task_uiam_provisioning_observability_status');
-jest.mock('./lib/flush_task_provisioning_status');
+jest.mock('./lib/reset_uiam_keys_for_reprovisioning');
 jest.mock('../api_key_strategy', () => ({
   markApiKeysForInvalidation: jest.fn().mockResolvedValue(undefined),
 }));
@@ -46,11 +46,14 @@ const writeTaskUiamProvisioningObservabilityStatusMock =
 const markApiKeysForInvalidationMock = markApiKeysForInvalidation as jest.MockedFunction<
   typeof markApiKeysForInvalidation
 >;
-const flushTaskProvisioningStatusMock = flushTaskProvisioningStatus as jest.MockedFunction<
-  typeof flushTaskProvisioningStatus
+const resetUiamKeysForReprovisioningMock = resetUiamKeysForReprovisioning as jest.MockedFunction<
+  typeof resetUiamKeysForReprovisioning
 >;
 
-const coreStartMock = {} as unknown as CoreStart;
+/** Minimal `coreStart` exposing the internal ES client the repair reaches for. */
+const coreStartMock = {
+  elasticsearch: { client: { asInternalUser: {} } },
+} as unknown as CoreStart;
 
 const uiamSuccess = (id: string, key: string) => ({
   status: 'success' as const,
@@ -115,7 +118,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     jest.clearAllMocks();
     getExcludeTasksFilterMock.mockResolvedValue([]);
     markApiKeysForInvalidationMock.mockResolvedValue(undefined);
-    flushTaskProvisioningStatusMock.mockResolvedValue(0);
+    resetUiamKeysForReprovisioningMock.mockResolvedValue({
+      tasksStripped: 0,
+      statusDocsFlushed: 0,
+    });
   });
 
   const createTask = () =>
@@ -142,9 +148,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     const result = await (createTask() as unknown as UiamTaskPrivate).runTask(
-      makeConcreteTask({
-        state: { runs: 0, staleProvisioningStatusFlushed: true, plaintextUiamKeysRepaired: true },
-      }),
+      makeConcreteTask({ state: { runs: 0, plaintextUiamKeysRepaired: true } }),
       coreSetup
     );
 
@@ -155,14 +159,10 @@ describe('UiamApiKeyProvisioningTask', () => {
     const writePayload = writeTaskUiamProvisioningObservabilityStatusMock.mock.calls[0][2];
     expect(writePayload.completed).toHaveLength(1);
     expect(writePayload.skipped).toEqual([]);
-    expect(result.state).toEqual({
-      runs: 1,
-      staleProvisioningStatusFlushed: true,
-      plaintextUiamKeysRepaired: true,
-    });
+    expect(result.state).toEqual({ runs: 1, plaintextUiamKeysRepaired: true });
     expect(result.runAt).toBeUndefined();
-    // Already repaired, so the one-time flush is not invoked again.
-    expect(flushTaskProvisioningStatusMock).not.toHaveBeenCalled();
+    // Already repaired, so the one-time reset is not invoked again.
+    expect(resetUiamKeysForReprovisioningMock).not.toHaveBeenCalled();
     expect(result.telemetry.total).toBe(1);
     expect(result.telemetry.completed).toBe(1);
     expect(markApiKeysForInvalidationMock).not.toHaveBeenCalled();
@@ -300,7 +300,7 @@ describe('UiamApiKeyProvisioningTask', () => {
     );
   });
 
-  it('flushes stale provisioning status once before provisioning and latches the state flags', async () => {
+  it('runs the one-time plaintext-key repair before provisioning and latches the state flag', async () => {
     const savedObjectsClient = { find: jest.fn() } as never;
     const uiamConvert = jest.fn().mockResolvedValue({
       results: [uiamSuccess('uiam-id', 'raw-secret')],
@@ -319,98 +319,26 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     const result = await (createTask() as unknown as UiamTaskPrivate).runTask(
-      makeConcreteTask({
-        state: { runs: 0, staleProvisioningStatusFlushed: false, plaintextUiamKeysRepaired: false },
-      }),
+      makeConcreteTask({ state: { runs: 0, plaintextUiamKeysRepaired: false } }),
       coreSetup
     );
 
-    expect(flushTaskProvisioningStatusMock).toHaveBeenCalledTimes(1);
-    expect(flushTaskProvisioningStatusMock).toHaveBeenCalledWith(savedObjectsClient, logger);
-    // Flush done and backlog drained (hasMore=false), so the campaign latches complete.
-    expect(result.state).toEqual({
-      runs: 1,
-      staleProvisioningStatusFlushed: true,
-      plaintextUiamKeysRepaired: true,
-    });
+    expect(resetUiamKeysForReprovisioningMock).toHaveBeenCalledTimes(1);
+    expect(resetUiamKeysForReprovisioningMock).toHaveBeenCalledWith(
+      coreStartMock.elasticsearch.client.asInternalUser,
+      savedObjectsClient,
+      logger
+    );
+    expect(result.state).toEqual({ runs: 1, plaintextUiamKeysRepaired: true });
+    // Repair completed and nothing else outstanding, so no early re-run.
     expect(result.runAt).toBeUndefined();
   });
 
-  it('force-reconverts a task that already has a UIAM key while the campaign is in progress', async () => {
-    const uiamConvert = jest.fn().mockResolvedValue({
-      results: [uiamSuccess('new-uiam', 'new-secret')],
-    } as ConvertUiamAPIKeysResponse);
-    const bulkUpdate = jest.fn().mockResolvedValue({ saved_objects: [{ id: 'broken' }] });
-    createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: coreStartMock,
-      taskManager: {} as never,
-      savedObjectsClient: {} as never,
-      unsafeSavedObjectsClient: { bulkUpdate } as never,
-      uiamConvert,
-    });
-    const brokenTask = {
-      ...convertibleTask,
-      id: 'broken',
-      uiamApiKey: 'plaintext-key',
-      userScope: { apiKeyId: 'es', uiamApiKeyId: 'old-uiam', apiKeyCreatedByUser: false },
-    } as unknown as ConcreteTaskInstance;
-    fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({ tasks: [brokenTask], hasMore: false });
-
-    const result = await (createTask() as unknown as UiamTaskPrivate).runTask(
-      // Flush already done, campaign not complete yet -> forceReconvert is active.
-      makeConcreteTask({
-        state: { runs: 0, staleProvisioningStatusFlushed: true, plaintextUiamKeysRepaired: false },
-      }),
-      coreSetup
-    );
-
-    expect(flushTaskProvisioningStatusMock).not.toHaveBeenCalled();
-    expect(uiamConvert).toHaveBeenCalledWith(['es-k']);
-    expect(bulkUpdate).toHaveBeenCalled();
-    expect(result.state.plaintextUiamKeysRepaired).toBe(true);
-  });
-
-  it('skips a task that already has a UIAM key once the campaign has completed', async () => {
-    const uiamConvert = jest.fn();
-    const bulkUpdate = jest.fn();
-    createProvisioningRunContextMock.mockResolvedValue({
-      coreStart: coreStartMock,
-      taskManager: {} as never,
-      savedObjectsClient: {} as never,
-      unsafeSavedObjectsClient: { bulkUpdate } as never,
-      uiamConvert,
-    });
-    const provisionedTask = {
-      ...convertibleTask,
-      id: 'done',
-      uiamApiKey: 'encrypted-key',
-      userScope: { apiKeyId: 'es', uiamApiKeyId: 'uiam', apiKeyCreatedByUser: false },
-    } as unknown as ConcreteTaskInstance;
-    fetchFirstBatchOfTasksToConvertMock.mockResolvedValue({
-      tasks: [provisionedTask],
-      hasMore: false,
-    });
-
-    await (createTask() as unknown as UiamTaskPrivate).runTask(
-      makeConcreteTask({
-        state: { runs: 5, staleProvisioningStatusFlushed: true, plaintextUiamKeysRepaired: true },
-      }),
-      coreSetup
-    );
-
-    // Campaign complete -> the task with a UIAM key is skipped, not re-converted.
-    expect(uiamConvert).not.toHaveBeenCalled();
-    expect(bulkUpdate).not.toHaveBeenCalled();
-    const writePayload = writeTaskUiamProvisioningObservabilityStatusMock.mock.calls[0][2];
-    expect(writePayload.skipped).toHaveLength(1);
-    expect(writePayload.completed).toEqual([]);
-  });
-
-  it('keeps the flush flag false and reschedules when the flush fails, without blocking provisioning', async () => {
+  it('keeps the repair flag false and reschedules when the repair fails, without blocking provisioning', async () => {
     jest.useFakeTimers();
     const now = Date.parse('2026-04-20T12:00:00.000Z');
     jest.setSystemTime(now);
-    flushTaskProvisioningStatusMock.mockRejectedValue(new Error('flush boom'));
+    resetUiamKeysForReprovisioningMock.mockRejectedValue(new Error('reset boom'));
     const uiamConvert = jest.fn().mockResolvedValue({
       results: [uiamSuccess('uiam-id', 'raw-secret')],
     } as ConvertUiamAPIKeysResponse);
@@ -428,25 +356,19 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     const result = await (createTask() as unknown as UiamTaskPrivate).runTask(
-      makeConcreteTask({
-        state: { runs: 0, staleProvisioningStatusFlushed: false, plaintextUiamKeysRepaired: false },
-      }),
+      makeConcreteTask({ state: { runs: 0, plaintextUiamKeysRepaired: false } }),
       coreSetup
     );
 
-    // Flush error is swallowed; provisioning still ran.
+    // Repair error is swallowed; provisioning still ran.
     expect(bulkUpdate).toHaveBeenCalled();
     expect(writeTaskUiamProvisioningObservabilityStatusMock).toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Flushing stale UIAM provisioning status failed'),
+      expect.stringContaining('Plaintext UIAM key repair failed'),
       expect.any(Object)
     );
-    expect(result.state).toEqual({
-      runs: 1,
-      staleProvisioningStatusFlushed: false,
-      plaintextUiamKeysRepaired: false,
-    });
-    // Flush not done yet, so reschedule soon to retry.
+    expect(result.state).toEqual({ runs: 1, plaintextUiamKeysRepaired: false });
+    // Not repaired yet, so reschedule soon to retry.
     expect(result.runAt).toEqual(new Date(now + RUN_AT_INTERVAL_MS));
     jest.useRealTimers();
   });

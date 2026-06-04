@@ -63,37 +63,6 @@ describe('classifyTasksForUiamProvisioning', () => {
     ]);
   });
 
-  it('with forceReconvert, re-converts tasks that already have a UIAM key (keeps other skips)', () => {
-    const tasks = [
-      // already has a UIAM key: skipped normally, converted under forceReconvert
-      {
-        id: 'has-uiam',
-        taskType: 'alerting:.index-threshold',
-        apiKey: 'k',
-        uiamApiKey: 'plaintext',
-        userScope: { apiKeyId: 'es', uiamApiKeyId: 'uid', apiKeyCreatedByUser: false },
-      },
-      // no API key: skipped regardless of forceReconvert
-      { id: 'no-key', taskType: 'alerting:.index-threshold', apiKey: undefined },
-      // user-created key: skipped regardless of forceReconvert
-      {
-        id: 'user-key',
-        taskType: 'alerting:.index-threshold',
-        apiKey: 'k',
-        uiamApiKey: 'plaintext',
-        userScope: { apiKeyId: 'es', uiamApiKeyId: 'uid', apiKeyCreatedByUser: true },
-      },
-    ];
-
-    const result = classifyTasksForUiamProvisioning(tasks as never, { forceReconvert: true });
-
-    expect(result.apiKeysToConvert.map((a) => a.taskId)).toEqual(['has-uiam']);
-    expect(result.provisioningStatusForSkippedTasks.map((d) => d.attributes.message)).toEqual([
-      'The task has no API key',
-      'The API key was created by the user',
-    ]);
-  });
-
   it('carries userScope, apiKey, taskType, and version on each convert payload', () => {
     const tasks = Array.from({ length: 10 }, (_, i) => ({
       id: String(i),
