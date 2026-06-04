@@ -29,7 +29,8 @@ import { ConversationListItemRow } from './conversation_list_item_row';
 const deriveDisplayStatus = (
   conversation: { read?: boolean; status?: ConversationRoundStatus },
   isStreaming: boolean,
-  hasError: boolean
+  hasError: boolean,
+  isActive: boolean
 ): ConversationDisplayStatus | undefined => {
   if (isStreaming || conversation.status === ConversationRoundStatus.inProgress) {
     return ConversationDisplayStatus.inProgress;
@@ -40,7 +41,9 @@ const deriveDisplayStatus = (
   if (conversation.status === ConversationRoundStatus.awaitingPrompt) {
     return ConversationDisplayStatus.awaitingPrompt;
   }
-  if (conversation.read === false) {
+  // Do not show the "unread" status for the "active" (current) conversation.
+  // Since the user is actively viewing it, a request to mark it as read has likely already been sent.
+  if (conversation.read === false && !isActive) {
     return ConversationDisplayStatus.unread;
   }
   return undefined;
@@ -117,7 +120,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         const isActive = currentConversationId === conversation.id;
         const isStreaming = activeStreams.has(conversation.id);
         const hasError = Boolean(byConversationId[conversation.id]?.error);
-        const status = deriveDisplayStatus(conversation, isStreaming, hasError);
+        const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <ConversationListItemRow
