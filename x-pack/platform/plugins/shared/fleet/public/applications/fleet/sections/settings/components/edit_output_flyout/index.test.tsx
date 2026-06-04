@@ -766,6 +766,64 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    it.each([
+      {
+        type: 'elasticsearch' as const,
+        outputId: 'outputE',
+        outputName: 'elasticsearch output',
+        extra: { hosts: ['http://localhost:9200'] },
+      },
+      {
+        type: 'remote_elasticsearch' as const,
+        outputId: 'outputR',
+        outputName: 'remote es output',
+        extra: { hosts: ['https://remote-es:9200'], service_token: 'remote-token' },
+      },
+    ])(
+      'should block saving a $type output when otel_exporter_config_yaml is invalid YAML',
+      async ({ type, outputId, outputName, extra }) => {
+        jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+        jest
+          .spyOn(ExperimentalFeaturesService, 'get')
+          .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          isReady: true,
+          isSecretsStorageEnabled: true,
+        } as any);
+
+        const { utils } = renderFlyout({
+          type,
+          name: outputName,
+          id: outputId,
+          is_default: false,
+          is_default_monitoring: false,
+          // Invalid YAML — unbalanced brackets cause the parser to throw
+          otel_exporter_config_yaml: 'foo: [bar',
+          ...extra,
+        } as Output);
+
+        // The yaml parser used by validators is loaded asynchronously via
+        // useYaml — wait until it has been picked up so that
+        // createValidateYamlConfig is wired to the real parser before save.
+        await waitFor(() => {
+          expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+        });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        fireEvent.change(utils.getByDisplayValue(outputName), {
+          target: { value: `${outputName} updated` },
+        });
+
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        // Submit must NOT be called because invalid OTel exporter YAML must
+        // block save for both ES and remote ES outputs.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      }
+    );
+
     it('should include otel_exporter_config_yaml in the save payload when editing a remote ES output', async () => {
       jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
       jest

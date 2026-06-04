@@ -782,6 +782,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
       return (
         remoteElasticsearchUrlsValid &&
         additionalYamlConfigValid &&
+        otelExporterConfigValid &&
         nameInputValid &&
         sslCertificateAuthoritiesValid &&
         sslCertificateValid &&
