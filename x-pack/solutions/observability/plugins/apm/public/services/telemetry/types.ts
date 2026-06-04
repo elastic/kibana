@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type { getIngestionPath } from '@kbn/elastic-agent-utils';
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
@@ -37,6 +38,18 @@ export interface ServiceMapDagreLayoutFallbackParams {
   stack_head: string;
 }
 
+export type MetricsCalloutType = 'overlap' | 'non_overlap';
+
+export interface MetricsCalloutDateRangeSelectedParams {
+  calloutType: MetricsCalloutType;
+  selectedInstrumentationType: ReturnType<typeof getIngestionPath>;
+}
+
+export interface MetricsCalloutLoadedParams {
+  calloutType: MetricsCalloutType;
+  shownInstrumentationType: ReturnType<typeof getIngestionPath>;
+}
+
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
   reportSloOverviewFlyoutViewed(): void;
@@ -44,6 +57,8 @@ export interface ITelemetryClient {
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
   reportSloInfoShown(): void;
   reportServiceMapDagreLayoutFallback(params: ServiceMapDagreLayoutFallbackParams): void;
+  reportMetricsCalloutDateRangeSelected(params: MetricsCalloutDateRangeSelectedParams): void;
+  reportMetricsCalloutLoaded(params: MetricsCalloutLoadedParams): void;
 }
 
 export enum TelemetryEventTypes {
@@ -53,6 +68,8 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
   SLO_INFO_SHOWN = 'slo_info_shown',
   SERVICE_MAP_DAGRE_LAYOUT_FALLBACK = 'service_map_dagre_layout_fallback',
+  METRICS_CALLOUT_DATE_RANGE_SELECTED = 'metrics_callout_date_range_selected',
+  METRICS_CALLOUT_LOADED = 'metrics_callout_loaded',
 }
 
 export type TelemetryEvent =
@@ -76,4 +93,12 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK;
       schema: RootSchema<ServiceMapDagreLayoutFallbackParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED;
+      schema: RootSchema<MetricsCalloutDateRangeSelectedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.METRICS_CALLOUT_LOADED;
+      schema: RootSchema<MetricsCalloutLoadedParams>;
     };
