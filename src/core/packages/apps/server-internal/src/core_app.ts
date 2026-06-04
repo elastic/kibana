@@ -73,6 +73,7 @@ export class CoreAppsService {
   private readonly config$: Observable<CoreAppConfig>;
   private readonly savedObjectsStart$ = new ReplaySubject<InternalSavedObjectsServiceStart>(1);
   private readonly stop$ = new Subject<void>();
+  private esClient?: InternalCoreStart['elasticsearch']['client']['asInternalUser'];
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
@@ -116,6 +117,7 @@ export class CoreAppsService {
 
   start(coreStart: InternalCoreStart) {
     this.savedObjectsStart$.next(coreStart.savedObjects);
+    this.esClient = coreStart.elasticsearch.client.asInternalUser;
   }
 
   stop() {
@@ -161,6 +163,76 @@ export class CoreAppsService {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
+
+    router.get(
+      {
+        path: '/api/epipe',
+        validate: {},
+        security: {
+          authz: {
+            enabled: false,
+            reason: '',
+          },
+          authc: {
+            enabled: false,
+            reason: '',
+          },
+        },
+        options: {
+          access: 'public',
+        },
+      },
+      async (context, req, res) => {
+        try {
+          const waitSync = (ms: number) => {
+            const end = Date.now() + ms;
+            while (Date.now() < end) {
+              continue;
+            }
+          };
+
+          const waitAsync = (ms: number) => {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+          };
+
+          async function* generate() {
+            yield '"';
+            yield '0';
+            await waitAsync(1000);
+            yield '1';
+            await waitAsync(5);
+            waitSync(5000);
+            yield '"';
+          }
+
+          const result = await this.esClient?.transport.request(
+            {
+              method: 'POST',
+              path: '/.epipe/_doc/0',
+              body: Readable.from(generate(), { objectMode: false }),
+            },
+            {
+              headers: { 'Content-Type': 'application/json' },
+              meta: true,
+            }
+          );
+
+          if (!result) {
+            throw new Error('No client');
+          }
+
+          const { body, statusCode } = result;
+
+          return res.custom({
+            body,
+            statusCode,
+          });
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      }
+    );
 
     router.get(
       {
