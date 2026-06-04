@@ -55,11 +55,11 @@ import {
   buildEntityFlyoutAttachment,
   buildEntityFlyoutInitialMessage,
 } from './build_entity_flyout_attachment';
-import { entityTypeToKind, inferEntityKind } from './kind_templates';
+import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
 import type { FlyoutCustomLink } from './flyout_template_overrides';
 import { resolveEntityDisplayName, useEntityDisplayName } from './entity_display_name';
-import { setChaosModeEnabled, useChaosModeEnabled } from './chaos_mode';
+import { getEffectiveEntityHealth, setChaosModeEnabled, useChaosModeEnabled } from './chaos_mode';
 
 interface EntityFlyoutProps {
   readonly entityName: string;
@@ -194,19 +194,29 @@ export const EntityFlyout = ({
     });
   }, [onSelectEntity]);
 
-  // Subscribe to chaos-mode flips so the flyout re-renders the
-  // moment the user toggles the storyline. `buildFakeEntityOverview`
-  // / `buildFakeEntityTabsData` already read the toggle internally;
-  // this just makes the memos recompute. No-op for entities outside
-  // the PayFlow storyline.
+  // Subscribe to chaos-mode flips and pre-resolve the "effective"
+  // health here so it can be threaded into the builders as a real
+  // dep. `getEffectiveEntityHealth` is a no-op for entities outside
+  // the PayFlow storyline, so non-PayFlow flyouts see no behavioural
+  // change. The builders themselves still consult `getStoryOverview`
+  // / `getStoryTabsData` internally to swap between the curated
+  // storyline payload and the kind template — both reads converge on
+  // the same toggle so the result stays consistent.
   const chaosOn = useChaosModeEnabled();
+  const effectiveHealth = useMemo(
+    () =>
+      entityHealth === undefined
+        ? undefined
+        : getEffectiveEntityHealth(entityName, normalizeEntityHealth(entityHealth), chaosOn),
+    [entityName, entityHealth, chaosOn]
+  );
   const overview = useMemo(
-    () => buildFakeEntityOverview(entityName, entityType, entityHealth),
-    [entityName, entityType, entityHealth, chaosOn]
+    () => buildFakeEntityOverview(entityName, entityType, effectiveHealth),
+    [entityName, entityType, effectiveHealth]
   );
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType, entityHealth),
-    [entityName, entityType, entityHealth, chaosOn]
+    () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth),
+    [entityName, entityType, effectiveHealth]
   );
 
   // Resolved label honoured everywhere the entity reads as text. The

@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiToolTip,
+  type EuiSwitchEvent,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -34,7 +35,12 @@ import {
   useEntityTypeEnabled,
 } from '@kbn/entity-centric-lab-flyout';
 import { useEntityCentricLab } from './entity_centric_lab_provider';
-import { FAKE_LOG_ENTRIES, type FakeLogEntry, type FakeLogLevel } from './constants';
+import {
+  FAKE_LOG_ENTRIES,
+  FAKE_LOG_ENTRIES_RECOVERY,
+  type FakeLogEntry,
+  type FakeLogLevel,
+} from './constants';
 
 const styles = {
   container: ({ euiTheme }: UseEuiTheme) =>
@@ -188,7 +194,7 @@ export const EntityCentricLabPanel = () => {
  */
 const ChaosModeToggle = () => {
   const chaosOn = useChaosModeEnabled();
-  const onChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChange = useCallback((event: EuiSwitchEvent) => {
     setChaosModeEnabled(event.target.checked);
   }, []);
   return (
@@ -213,6 +219,13 @@ const ChaosModeToggle = () => {
 
 export const FakeLogsPanel = () => {
   const containerStyles = useMemoCss(styles);
+  // Subscribe to chaos mode so the log feed swaps the moment Sofia
+  // flips the toggle (or clicks "Roll back to previous version" in a
+  // service flyout). The flyout / entity list / grouped grid already
+  // honour the same store; switching the log set here keeps Discover
+  // in sync with the rest of the lab.
+  const chaosOn = useChaosModeEnabled();
+  const entries = chaosOn ? FAKE_LOG_ENTRIES : FAKE_LOG_ENTRIES_RECOVERY;
 
   return (
     <EuiPanel
@@ -269,7 +282,7 @@ export const FakeLogsPanel = () => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <div role="list">
-        {FAKE_LOG_ENTRIES.map((entry) => (
+        {entries.map((entry) => (
           <FakeLogRow key={entry.id} entry={entry} />
         ))}
       </div>

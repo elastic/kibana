@@ -170,7 +170,7 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   const {
     core: { notifications },
     dependencies: {
-      start: { charts },
+      start: { agentBuilder, charts },
     },
   } = useKibana();
   // URL-state-backed time range, shared with every other Streams page
@@ -293,10 +293,15 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
     });
   }, [selectedEntity, selectedEntityKind, router]);
 
-  // `agentBuilder` is intentionally undefined: streams_app does not declare it
-  // as a start dependency. The shared flyout hides the "Add to chat" button
-  // when this is omitted, so the rest of the UI keeps working.
-  const flyoutServices = useMemo(() => ({ notifications, charts }), [notifications, charts]);
+  // `agentBuilder` is an *optional* start dep on Streams — when it's
+  // available (most environments) the shared flyout's "Add to chat"
+  // footer button lights up and the entity context is forwarded to the
+  // AI chat with the same payload Discover uses. When it's missing the
+  // button is hidden and the rest of the flyout keeps working.
+  const flyoutServices = useMemo(
+    () => ({ agentBuilder, notifications, charts }),
+    [agentBuilder, notifications, charts]
+  );
 
   return (
     <>

@@ -36,7 +36,7 @@
  */
 
 import { useSyncExternalStore } from 'react';
-import { STORY_CLICKABLE_NAMES } from './payflow_story';
+import { PAYFLOW_AFFECTED_NAMES } from './payflow_story';
 import type { EntityHealthVariant } from './kind_templates';
 
 const STORAGE_KEY = 'entityCentricLab.chaosMode.v1';
@@ -165,22 +165,30 @@ export const useChaosModeEnabled = (): boolean =>
   );
 
 /**
- * Returns the "effective" health for an entity given the current
- * chaos mode. PayFlow click-path entities (the four storyline
- * services + pod + node) are forced to `'healthy'` when chaos is
- * OFF; every other entity keeps its dataset-defined health
- * verbatim.
+ * Returns the "effective" health for an entity given the supplied
+ * chaos-mode flag. Every entity in {@link PAYFLOW_AFFECTED_NAMES} —
+ * the four click-path flyouts *plus* the supporting cast directly
+ * impacted by the v2.14.3 deploy (PayFlow namespaces, the EU
+ * cluster + region, the batch job sharing the failing node) — is
+ * forced to `'healthy'` when chaos is OFF. Background unhealthy
+ * entities outside that set (random EC2 / Lambda / S3 issues
+ * elsewhere) keep their dataset-defined health verbatim so the
+ * rollback heals PayFlow without magically fixing unrelated
+ * problems.
  *
- * Callers should use this anywhere a storyline entity's health is
- * read for display or for downstream rendering decisions (health
- * column badge, grouped grid tile colour, kind-template variant
- * selection) so the rollback is consistent across surfaces.
+ * The chaos-mode flag is passed in explicitly (rather than read
+ * from the global store inside the helper) so React call sites can
+ * couple the helper's result to `useChaosModeEnabled()` via a
+ * single dep without tripping `react-hooks/exhaustive-deps`. Pure
+ * call sites (the flyout builders) read the global state via
+ * {@link getChaosModeEnabled} and forward it in.
  */
 export const getEffectiveEntityHealth = <T extends EntityHealthVariant>(
   entityName: string,
-  health: T
+  health: T,
+  chaosOn: boolean
 ): T => {
-  if (!STORY_CLICKABLE_NAMES.has(entityName)) return health;
-  if (getChaosModeEnabled()) return health;
+  if (chaosOn) return health;
+  if (!PAYFLOW_AFFECTED_NAMES.has(entityName)) return health;
   return 'healthy' as T;
 };

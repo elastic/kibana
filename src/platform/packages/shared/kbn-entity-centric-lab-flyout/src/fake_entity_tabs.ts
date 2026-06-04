@@ -15,7 +15,7 @@
  */
 
 import { getStoryTabsData } from './payflow_story';
-import { getEffectiveEntityHealth } from './chaos_mode';
+import { getChaosModeEnabled, getEffectiveEntityHealth } from './chaos_mode';
 import {
   buildKindTemplate,
   entityTypeToKind,
@@ -203,7 +203,8 @@ export const buildFakeEntityTabsData = (
   // user has rolled back. Other entities pass through unchanged.
   const effectiveHealth = getEffectiveEntityHealth(
     entityName,
-    normalizeEntityHealth(entityHealth)
+    normalizeEntityHealth(entityHealth),
+    getChaosModeEnabled()
   );
   const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType);
   if (kindTemplate) {

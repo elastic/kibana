@@ -13,7 +13,7 @@
  */
 
 import { getStoryOverview } from './payflow_story';
-import { getEffectiveEntityHealth } from './chaos_mode';
+import { getChaosModeEnabled, getEffectiveEntityHealth } from './chaos_mode';
 import {
   buildKindTemplate,
   entityTypeToKind,
@@ -142,9 +142,13 @@ export const buildFakeEntityOverview = (
   // storyline entity (e.g. `payments-service`) flips to the healthy
   // template the moment the user rolls back. Non-storyline entities
   // pass through unchanged.
+  // The chaos-mode boolean is read from the global store here — React
+  // callers compute the equivalent through `useChaosModeEnabled()` and
+  // pass it to their own memos so the rebuild triggers cleanly on flip.
   const effectiveHealth = getEffectiveEntityHealth(
     entityName,
-    normalizeEntityHealth(entityHealth)
+    normalizeEntityHealth(entityHealth),
+    getChaosModeEnabled()
   );
   const kindTemplate = buildKindTemplate(entityName, kind, effectiveHealth, entityType);
   if (kindTemplate) {

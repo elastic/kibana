@@ -222,6 +222,55 @@ const deltaCopy = (h: EntityHealthVariant): string =>
   );
 
 // ---------------------------------------------------------------------------
+// Type-label normalisers — keep the flyout header tags faithful to the
+// dispatched entity's `.type` even when the dispatcher collapses several
+// types into the same template body (e.g. `'K8s container'` and
+// `'K8s deployment'` both reach `buildPodTemplate`).
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the ECS-style kubernetes tag (`kubernetes.pod`,
+ * `kubernetes.container`, `kubernetes.deployment`) for the dispatched
+ * entity's `typeLabel`. Falls back to {@link defaultLabel} when the
+ * caller didn't supply a recognisable typeLabel — keeps non-storyline
+ * usage compatible with the previous hardcoded behaviour.
+ */
+const kubernetesTagFromTypeLabel = (
+  typeLabel: string | undefined,
+  defaultLabel: 'kubernetes.pod' | 'kubernetes.container' | 'kubernetes.deployment'
+): string => {
+  if (!typeLabel) return defaultLabel;
+  const lower = typeLabel.toLowerCase();
+  if (lower.includes('container')) return 'kubernetes.container';
+  if (lower.includes('deployment')) return 'kubernetes.deployment';
+  if (lower.includes('pod')) return 'kubernetes.pod';
+  return defaultLabel;
+};
+
+/**
+ * Returns the host sub-type tag (`Bare-metal`, `VM`, or whatever the
+ * caller passes through verbatim) so a VM host no longer renders with
+ * the `Bare-metal` tag. Defaults to `Bare-metal` when no typeLabel is
+ * available — matches the historical behaviour for legacy callers.
+ */
+const hostSubTypeFromTypeLabel = (typeLabel: string | undefined): string => {
+  if (!typeLabel) return 'Bare-metal';
+  const lower = typeLabel.toLowerCase();
+  if (lower.includes('vm')) return 'VM';
+  if (lower.includes('bare')) return 'Bare-metal';
+  return typeLabel;
+};
+
+/**
+ * Returns the database engine tag verbatim (e.g. `'Postgres'`,
+ * `'MySQL'`, `'MongoDB'`) so a non-Postgres engine no longer
+ * misrenders as `Postgres`. Defaults to `Postgres` when no typeLabel
+ * is provided — matches the historical behaviour for legacy callers.
+ */
+const databaseEngineFromTypeLabel = (typeLabel: string | undefined): string =>
+  typeLabel && typeLabel.trim().length > 0 ? typeLabel : 'Postgres';
+
+// ---------------------------------------------------------------------------
 // Trend generators (24 points, aligned with INCIDENT_X_DOMAIN)
 // ---------------------------------------------------------------------------
 
@@ -968,11 +1017,15 @@ const buildServiceTemplate = (
 
 const buildHostTemplate = (
   name: string,
-  h: EntityHealthVariant
+  h: EntityHealthVariant,
+  typeLabel?: string
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
+  // VM vs Bare-metal: the host category dispatches both sub-types to
+  // this builder, so derive the secondary tag from the entity's
+  // typeLabel instead of hard-coding "Bare-metal".
   const tags: EntityTag[] = [
     { label: 'Host', color: 'hollow' },
-    { label: 'Bare-metal', color: 'hollow' },
+    { label: hostSubTypeFromTypeLabel(typeLabel), color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
   ];
@@ -1600,10 +1653,17 @@ const buildNodeTemplate = (
 
 const buildPodTemplate = (
   name: string,
-  h: EntityHealthVariant
+  h: EntityHealthVariant,
+  typeLabel?: string
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
+  // Pod / container / deployment share this builder (they're all
+  // workload-shaped — same metrics, same narrative shape). The
+  // dispatcher forwards the dataset's typeLabel so the header tag
+  // still reads correctly (`kubernetes.container` for a container,
+  // `kubernetes.deployment` for a deployment) instead of always
+  // claiming "kubernetes.pod".
   const tags: EntityTag[] = [
-    { label: 'kubernetes.pod', color: 'hollow' },
+    { label: kubernetesTagFromTypeLabel(typeLabel, 'kubernetes.pod'), color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
   ];
@@ -2507,11 +2567,15 @@ const buildNamespaceTemplate = (
 
 const buildDatabaseTemplate = (
   name: string,
-  h: EntityHealthVariant
+  h: EntityHealthVariant,
+  typeLabel?: string
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
+  // Database covers Postgres / MySQL / MongoDB / Redis / Elasticsearch
+  // with one builder. Surface the actual engine in the secondary tag
+  // so a MySQL row no longer renders as "Postgres".
   const tags: EntityTag[] = [
     { label: 'database', color: 'hollow' },
-    { label: 'Postgres', color: 'hollow' },
+    { label: databaseEngineFromTypeLabel(typeLabel), color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
   ];
@@ -3914,9 +3978,17 @@ const buildCloudS3Template = (
 
 const buildMiddlewareTemplate = (
   name: string,
-  h: EntityHealthVariant
+  h: EntityHealthVariant,
+  typeLabel?: string
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
-  const isRabbit = name.toLowerCase().includes('rabbit');
+  // Prefer the dataset's typeLabel ('Kafka' / 'RabbitMQ') over a name
+  // sniff so a Kafka cluster named "rabbit-something" can't slip
+  // through as RabbitMQ. The name fallback stays for legacy callers
+  // that don't pass a typeLabel.
+  const labelFromType = typeLabel ? typeLabel.toLowerCase() : '';
+  const isRabbit = labelFromType
+    ? labelFromType.includes('rabbit')
+    : name.toLowerCase().includes('rabbit');
   const productLabel = isRabbit ? 'RabbitMQ' : 'Kafka';
   const tags: EntityTag[] = [
     { label: 'middleware', color: 'hollow' },
@@ -4206,9 +4278,16 @@ const buildMiddlewareTemplate = (
 
 const buildLlmTemplate = (
   name: string,
-  h: EntityHealthVariant
+  h: EntityHealthVariant,
+  typeLabel?: string
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
-  const isClaude = name.toLowerCase().includes('claude');
+  // Prefer the dataset's typeLabel ('OpenAI' / 'Anthropic') over a
+  // name sniff so an Anthropic model named with a non-`claude-` slug
+  // (or vice versa) still picks the right provider tag.
+  const labelFromType = typeLabel ? typeLabel.toLowerCase() : '';
+  const isClaude = labelFromType
+    ? labelFromType.includes('anthropic') || labelFromType.includes('claude')
+    : name.toLowerCase().includes('claude');
   const provider = isClaude ? 'Anthropic' : 'OpenAI';
   const model = isClaude ? 'claude-3.5-sonnet' : 'gpt-4o-2024-05-13';
   const tags: EntityTag[] = [
@@ -4516,24 +4595,33 @@ export const buildKindTemplate = (
     case 'service':
       return buildServiceTemplate(entityName, health);
     case 'host':
-      return buildHostTemplate(entityName, health);
+      // typeLabel drives the Bare-metal vs VM secondary tag.
+      return buildHostTemplate(entityName, health, typeLabel);
     case 'node':
       return buildNodeTemplate(entityName, health);
     case 'pod':
     case 'container':
     case 'deployment':
-      return buildPodTemplate(entityName, health);
+      // typeLabel drives the kubernetes.{pod,container,deployment}
+      // header tag so the three sub-kinds keep their own identity
+      // even though they share this builder.
+      return buildPodTemplate(entityName, health, typeLabel);
     case 'cluster':
       return buildClusterTemplate(entityName, health);
     case 'namespace':
       return buildNamespaceTemplate(entityName, health);
     case 'database':
-      return buildDatabaseTemplate(entityName, health);
+      // typeLabel drives the engine tag (Postgres / MySQL / Mongo / …).
+      return buildDatabaseTemplate(entityName, health, typeLabel);
     case 'cloud':
       return buildCloudTemplate(entityName, health, typeLabel);
     case 'middleware':
-      return buildMiddlewareTemplate(entityName, health);
+      // typeLabel disambiguates Kafka vs RabbitMQ ahead of the name
+      // sniff used as a legacy fallback.
+      return buildMiddlewareTemplate(entityName, health, typeLabel);
     case 'llm':
-      return buildLlmTemplate(entityName, health);
+      // typeLabel disambiguates OpenAI vs Anthropic ahead of the name
+      // sniff used as a legacy fallback.
+      return buildLlmTemplate(entityName, health, typeLabel);
   }
 };

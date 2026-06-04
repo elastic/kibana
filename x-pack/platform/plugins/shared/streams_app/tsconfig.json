@@ -119,5 +119,6 @@
     "@kbn/inference-connectors",
     "@kbn/safer-lodash-set",
     "@kbn/entity-centric-lab-flyout",
+    "@kbn/agent-builder-browser",
   ]
 }

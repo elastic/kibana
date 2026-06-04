@@ -27,6 +27,11 @@ export interface FakeLogEntry {
  * (`stripe-api`, `payments-pod-7f9b2`, `node-prod-eu-04`, …) are intentionally
  * left as plain text — they are reachable only via the Dependencies tab of
  * the click-path flyouts.
+ *
+ * When chaos mode is OFF (Sofia rolled back v2.14.3) the panel swaps in
+ * {@link FAKE_LOG_ENTRIES_RECOVERY} instead — the same six entities
+ * but on the healthy side of the rollback, so the lab matches the
+ * recovered state of the flyout / entity list.
  */
 export const FAKE_LOG_ENTRIES: readonly FakeLogEntry[] = [
   {
@@ -70,5 +75,59 @@ export const FAKE_LOG_ENTRIES: readonly FakeLogEntry[] = [
     level: 'ERROR',
     serviceName: 'checkout-service',
     message: 'POST /checkout/confirm 503 upstream error 841ms — error rate above 5%',
+  },
+];
+
+/**
+ * PayFlow recovery feed — surfaced when chaos mode is OFF.
+ * Same six services and pod / node references as {@link FAKE_LOG_ENTRIES}
+ * so the visual diff between the two states is purely "everything's
+ * red" → "everything's green". Timestamps advance ~10 minutes past
+ * the rollback so the recovery narrative reads as the latest activity
+ * (Sofia ran the rollback, watched the dashboards, and these are the
+ * follow-up logs confirming the stack came back to healthy).
+ */
+export const FAKE_LOG_ENTRIES_RECOVERY: readonly FakeLogEntry[] = [
+  {
+    id: 'log-recovery-1',
+    timestamp: '2026-04-14T02:57:14.018Z',
+    level: 'INFO',
+    serviceName: 'payments-service',
+    message: 'Rollback to v2.14.2 complete — pod payments-pod-7f9b2 ready (1/1)',
+  },
+  {
+    id: 'log-recovery-2',
+    timestamp: '2026-04-14T02:57:26.402Z',
+    level: 'INFO',
+    serviceName: 'payments-service',
+    message: 'Memory usage at 41% of limit (pod payments-pod-7f9b2) — no restarts in last 10 min',
+  },
+  {
+    id: 'log-recovery-3',
+    timestamp: '2026-04-14T02:57:38.171Z',
+    level: 'INFO',
+    serviceName: 'payments-service',
+    message: 'stripe-api responding within SLO (median 238ms, p95 412ms)',
+  },
+  {
+    id: 'log-recovery-4',
+    timestamp: '2026-04-14T02:57:49.044Z',
+    level: 'INFO',
+    serviceName: 'payments-service',
+    message: 'P95 latency back within target (181ms over last 5 min)',
+  },
+  {
+    id: 'log-recovery-5',
+    timestamp: '2026-04-14T02:58:02.519Z',
+    level: 'INFO',
+    serviceName: 'checkout-service',
+    message: 'POST /checkout/confirm 200 — error rate 0.04% (below 0.5% threshold)',
+  },
+  {
+    id: 'log-recovery-6',
+    timestamp: '2026-04-14T02:58:14.987Z',
+    level: 'INFO',
+    serviceName: 'checkout-service',
+    message: 'Healthcheck passing on all 4 replicas — node-prod-eu-04 reporting Ready',
   },
 ];

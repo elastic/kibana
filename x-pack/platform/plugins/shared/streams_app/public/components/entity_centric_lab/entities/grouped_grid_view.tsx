@@ -793,7 +793,7 @@ export const GroupedGridView = ({ entities, onSelectEntity }: Props) => {
   const effectiveEntities = useMemo<Entity[]>(
     () =>
       entities.map((entity) => {
-        const effective = getEffectiveEntityHealth(entity.name, entity.health);
+        const effective = getEffectiveEntityHealth(entity.name, entity.health, chaosOn);
         return effective === entity.health ? entity : { ...entity, health: effective };
       }),
     [entities, chaosOn]

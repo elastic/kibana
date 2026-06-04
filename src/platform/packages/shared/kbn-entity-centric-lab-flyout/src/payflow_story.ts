@@ -57,6 +57,37 @@ export const STORY_CLICKABLE_NAMES: ReadonlySet<string> = new Set<string>([
   'node-prod-eu-04',
 ]);
 
+/**
+ * Wider set of entities the PayFlow incident visibly impacts. Includes
+ * the four click-path flyouts plus the supporting cast that's seeded
+ * `unhealthy` or `atRisk` in `fake_entities.ts` precisely because they
+ * sit on the same blast radius as the v2.14.3 deploy:
+ *
+ *   - `batch-settlement-job-xk2p` — shares the same node as
+ *     `payments-pod-7f9b2`, dragged into the incident by memory
+ *     pressure (called out in node-prod-eu-04's narrative).
+ *   - `k8s-eu-prod` — the EU prod cluster hosting every PayFlow
+ *     workload; degrades whenever a node + namespaces inside it do.
+ *   - `aws-eu-central-1` — the region the EU cluster runs in.
+ *   - `payments`, `checkout`, `settlement` — the three k8s
+ *     namespaces directly housing the PayFlow workloads.
+ *
+ * Used by the chaos-mode override ({@link getEffectiveEntityHealth})
+ * to flip the *whole* PayFlow stack to healthy on rollback. Background
+ * unhealthy entities outside this set (random EC2 / Lambda / S3 issues
+ * elsewhere) stay as-is — the rollback heals PayFlow, not the rest of
+ * the org.
+ */
+export const PAYFLOW_AFFECTED_NAMES: ReadonlySet<string> = new Set<string>([
+  ...STORY_CLICKABLE_NAMES,
+  'batch-settlement-job-xk2p',
+  'k8s-eu-prod',
+  'aws-eu-central-1',
+  'payments',
+  'checkout',
+  'settlement',
+]);
+
 // ---------------------------------------------------------------------------
 // Shared helpers: trends + relative timestamps anchored on the incident.
 // ---------------------------------------------------------------------------

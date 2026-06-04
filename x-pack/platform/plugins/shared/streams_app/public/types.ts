@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -53,6 +54,10 @@ export interface StreamsAppSetupDependencies {
 }
 
 export interface StreamsAppStartDependencies {
+  // Optional — Agent Builder is only wired in environments where it's
+  // available. The entity-centric lab uses it to power the flyout's
+  // "Add to chat" footer button; when omitted, the button is hidden.
+  agentBuilder?: AgentBuilderPluginStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   datasetQuality: DatasetQualityPluginStart;
