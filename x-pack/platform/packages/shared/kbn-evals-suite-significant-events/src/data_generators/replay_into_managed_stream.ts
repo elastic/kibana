@@ -382,12 +382,17 @@ export const deleteTemporaryReplayIndices = async (
   try {
     const resolved = await esClient.indices.get({
       index: `${REPLAY_TEMP_PREFIX}*`,
+      expand_wildcards: 'all',
       ignore_unavailable: true,
       allow_no_indices: true,
     });
     const indexNames = Object.keys(resolved);
     if (indexNames.length === 0) return;
-    await esClient.indices.delete({ index: indexNames, ignore_unavailable: true });
+    await esClient.indices.delete({
+      index: indexNames,
+      expand_wildcards: 'all',
+      ignore_unavailable: true,
+    });
     log.debug(`Deleted ${indexNames.length} temporary replay indices`);
   } catch (error) {
     log.warning(
