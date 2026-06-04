@@ -17,7 +17,6 @@ import { testData } from '../../fixtures/common';
 
 spaceTest.describe('Discover ES|QL panel edit flow', { tag: testData.DISCOVER_CORE_TAGS }, () => {
   const panelName = 'ES|QL Discover Session';
-  const editingTitle = 'ES|QL Discover Session';
   const savedAsTitle = 'ES|QL Discover Session Saved As';
 
   spaceTest.use({ viewport: { width: 1600, height: 1200 } });
@@ -58,8 +57,7 @@ spaceTest.describe('Discover ES|QL panel edit flow', { tag: testData.DISCOVER_CO
       await page.getByTestId('discoverEmbeddableInlineEditEditInDiscoverLink').click();
       await pageObjects.discover.waitForDocTableRendered();
 
-      expect(await page.getByText('Dashboards').count()).toBeGreaterThan(0);
-      expect(await page.getByText(`Editing ${editingTitle}`).count()).toBeGreaterThan(0);
+      expect(await page.getByText('Save and return').count()).toBeGreaterThan(0);
 
       await pageObjects.discover.saveSearch(panelName);
       await pageObjects.dashboard.waitForRenderComplete();
@@ -77,8 +75,7 @@ spaceTest.describe('Discover ES|QL panel edit flow', { tag: testData.DISCOVER_CO
       await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
       await pageObjects.discover.waitForDocTableRendered();
 
-      expect(await page.getByText('Dashboards').count()).toBeGreaterThan(0);
-      expect(await page.getByText(`Editing ${editingTitle}`).count()).toBeGreaterThan(0);
+      expect(await page.getByText('Save and return').count()).toBeGreaterThan(0);
 
       await page.testSubj.click('discoverSaveButton');
       await pageObjects.dashboard.waitForRenderComplete();

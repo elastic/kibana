@@ -234,17 +234,13 @@ spaceTest.describe('Discover saved search embeddable', { tag: testData.DISCOVER_
       await page.getByTestId('discoverEmbeddableInlineEditEditInDiscoverLink').click();
       await pageObjects.discover.waitForDocTableRendered();
 
-      expect(await page.getByText('Dashboards').count()).toBeGreaterThan(0);
-      expect(await page.getByText('Editing Rendering Test: saved search').count()).toBeGreaterThan(
-        0
-      );
+      expect(await page.getByText('Save and return').count()).toBeGreaterThan(0);
       await expect(page.getByTestId('unifiedTabs_tabsBar')).toBeInViewport();
 
       await page.reload();
       await pageObjects.discover.waitForDocTableRendered();
 
-      expect(await page.getByText('Discover').count()).toBeGreaterThan(0);
-      expect(await page.getByText('Rendering Test: saved search').count()).toBeGreaterThan(0);
+      await expect(page.getByText('Save and return')).toHaveCount(0);
     }
   );
 });

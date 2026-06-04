@@ -20,7 +20,6 @@ spaceTest.describe(
   { tag: testData.DISCOVER_CORE_TAGS },
   () => {
     const panelName = 'Rendering Test: saved search';
-    const editingTitle = 'Rendering Test: saved search';
     const savedAsTitle = 'Rendering Test: saved as search';
 
     spaceTest.use({ viewport: { width: 1600, height: 1200 } });
@@ -61,8 +60,7 @@ spaceTest.describe(
         await page.getByTestId('discoverEmbeddableInlineEditEditInDiscoverLink').click();
         await pageObjects.discover.waitForDocTableRendered();
 
-        expect(await page.getByText('Dashboards').count()).toBeGreaterThan(0);
-        expect(await page.getByText(`Editing ${editingTitle}`).count()).toBeGreaterThan(0);
+        expect(await page.getByText('Save and return').count()).toBeGreaterThan(0);
 
         await pageObjects.discover.saveSearch(panelName);
         await pageObjects.dashboard.waitForRenderComplete();
@@ -80,8 +78,7 @@ spaceTest.describe(
         await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel');
         await pageObjects.discover.waitForDocTableRendered();
 
-        expect(await page.getByText('Dashboards').count()).toBeGreaterThan(0);
-        expect(await page.getByText(`Editing ${editingTitle}`).count()).toBeGreaterThan(0);
+        expect(await page.getByText('Save and return').count()).toBeGreaterThan(0);
 
         await page.testSubj.click('discoverSaveButton');
         await pageObjects.dashboard.waitForRenderComplete();
