@@ -15,7 +15,7 @@ store_failing_tests() {
   [[ -d "$junitDir" ]] || return
 
   local failedTestNames
-  failedTestNames=$(node scripts/ftr_check_retry_result list-failures "$junitDir" 2>/dev/null || true)
+  failedTestNames=$(node scripts/ftr_check_retry_result collect-results --type failures --junit-dir "$junitDir" || true)
   if [[ "$failedTestNames" ]]; then
     buildkite-agent meta-data set "$FAILED_TESTS_KEY" "$failedTestNames"
     echo "Stored $(echo "$failedTestNames" | wc -l | tr -d ' ') previously-failing test name(s) for retry evaluation"
@@ -43,15 +43,13 @@ apply_smart_retry() {
 
   local junitDir="target/junit/$JOB"
 
-  local intersectionCode
-  set +e
-  printf '%s' "$prevFailedTests" | node scripts/ftr_check_retry_result check-intersection \
-    --junit-dir "$junitDir" \
-    --prev-failures-stdin
-  intersectionCode=$?
-  set -e
+  local currentPassed
+  currentPassed=$(node scripts/ftr_check_retry_result collect-results --type passes --junit-dir "$junitDir" 2>/dev/null || true)
 
-  if [[ "$intersectionCode" == "0" ]]; then
+  local notRecovered
+  notRecovered=$(comm -23 <(echo "$prevFailedTests" | sort) <(echo "$currentPassed" | sort))
+
+  if [[ -z "$notRecovered" ]]; then
     echo "--- [smart-retry] All previously-failing tests recovered on retry — marking step green"
     exitCode=0
     failedConfigs=""
