@@ -17,6 +17,7 @@ import type { NavigationLink } from '../../../links/types';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
+import { SecurityGroupName } from '@kbn/security-solution-navigation';
 
 const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,
@@ -32,6 +33,24 @@ const settingsNavLink: NavigationLink = {
     },
   ],
 };
+
+const launchpadNavLink: NavigationLink = {
+  id: SecurityPageName.launchpad,
+  title: 'Launchpad',
+  description: 'Launchpad',
+  categories: [{ label: 'Launchpad category', linkIds: [] }],
+  links: [
+    {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+    },
+    {
+      id: SecurityPageName.siemReadiness,
+      title: 'SIEM Readiness',
+    },
+  ],
+};
+
 const alertsNavLink: NavigationLink = {
   id: SecurityPageName.alerts,
   title: 'alerts',
@@ -176,20 +195,75 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render launchpad item', () => {
-    mockUseNavLinks.mockReturnValue([
-      { id: SecurityPageName.launchpad, title: 'Launchpad', sideNavIcon: 'rocket' },
-    ]);
+  it('should render launchpad item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [
           expect.objectContaining({
-            id: SecurityPageName.launchpad,
-            label: 'Launchpad',
+            id: SecurityGroupName.launchpad,
+            position: 'bottom',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should place administration item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.administration,
+            position: 'bottom',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should not include administration item in body', () => {
+    mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
+    renderNav();
+    const calls = mockSolutionSideNav.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const items = lastCall[0].items;
+    const administrationItemsInBody = items.filter(
+      (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
+    );
+    expect(administrationItemsInBody).toHaveLength(0);
+  });
+
+  it('should select launchpad when landing page is selected', () => {
+    mockUseRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.landing }]);
+    const landingNavLink: NavigationLink = {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+      description: 'Get started description',
+    };
+    mockUseNavLinks.mockReturnValue([alertsNavLink, landingNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: 'securityGroup:launchpad',
+      })
+    );
+  });
+
+  it('should maintain top position for most items', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.alerts,
             position: 'top',
           }),
-        ],
+        ]),
       })
     );
   });
