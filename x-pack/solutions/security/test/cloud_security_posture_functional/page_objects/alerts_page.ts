@@ -65,7 +65,7 @@ export class AlertsPageObject extends FtrService {
   }
 
   async ensureOnAlertsPage(): Promise<void> {
-    await this.testSubjects.existOrFail('detectionsAlertsPage');
+    await this.testSubjects.existOrFail('alerts-page-content');
   }
 
   async waitForListToHaveAlerts(timeoutMs?: number): Promise<void> {

@@ -347,6 +347,9 @@ interface RelationshipGroup {
  * targetType, targetSubType) — NOT by raw actorId. Two actors of the same type sharing the
  * same relationship and target type produce one relationship node instead of two.
  *
+ * Pinned actors are always isolated into their own group (never merged with others) so that
+ * pinned entities always appear as individual nodes in the graph.
+ *
  * Actor type/sub_type and name come directly off the row (the entity store IS the actor source).
  * All aggregation (badge, actorIdsCount, targetIdsCount, targetIds collection, host IPs) is
  * computed in TypeScript.
@@ -356,7 +359,8 @@ interface RelationshipGroup {
  */
 export const regroupRelationships = (
   records: RelationshipEsqlRow[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>
+  enrichmentMap: Map<string, EntityEnrichmentFields>,
+  pinnedIds: Set<string> = new Set()
 ): RelationshipEdge[] => {
   const groups = new Map<string, RelationshipGroup>();
 
@@ -370,7 +374,12 @@ export const regroupRelationships = (
     const targetType = targetEnrichment?.type ?? null;
     const targetSubType = targetEnrichment?.subType ?? null;
 
+    // Pinned actors get their own isolated group — use the raw actorId as the key
+    // dimension so they never merge with other actors of the same type.
+    const actorDimension = pinnedIds.has(actorId) ? actorId : null;
+
     const groupKey = JSON.stringify([
+      actorDimension,
       record.actorEntityType ?? null,
       record.actorEntitySubType ?? null,
       record.relationship,

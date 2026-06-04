@@ -171,10 +171,12 @@ export const fetchGraph = async ({
         })
       : new Map<string, EntityEnrichmentFields>();
 
+  const pinnedIdsSet = new Set(pinnedIds ?? []);
+
   return {
     events: enrichEventDocData(regroupEvents(eventsResult.records, enrichmentMap), enrichmentMap),
     relationships: enrichRelationshipDocData(
-      regroupRelationships(relationshipsResult.records, enrichmentMap),
+      regroupRelationships(relationshipsResult.records, enrichmentMap, pinnedIdsSet),
       enrichmentMap
     ),
     entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),

@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const timelinePage = pageObjects.timeline;
 
   // Failing: See https://github.com/elastic/kibana/issues/271798
-  describe.skip('Security Alerts Page - Graph visualization', function () {
+  describe('Security Alerts Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -433,7 +433,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 36,
+            expectedCount: 41,
           });
         });
 
