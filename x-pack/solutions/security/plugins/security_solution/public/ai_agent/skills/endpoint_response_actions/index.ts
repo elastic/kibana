@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export type { ActionType, HostRef, ActionIntent, ActionResult } from './types';
+export type { ActionType, HostRef, ActionIntent, ActionResult, PendingActionState } from './types';
+export { isActionType, isHostRef, isActionIntent, isActionResult, isPendingActionState } from './types';
 export type { ExecuteActionFn, PollActionStatusFn } from './use_execute_action';
 export type { SkillResponse, SkillContext, SkillStatus } from './isolate_skill';
 export { parseIntent } from './intent_parser';
