@@ -45,7 +45,6 @@
     "@kbn/inference-plugin",
     "@kbn/actions-plugin",
     "@kbn/core-http-server",
-    "@kbn/management-settings-ids",
     "@kbn/es-types",
     "@kbn/controls-constants",
     "@kbn/logging",
