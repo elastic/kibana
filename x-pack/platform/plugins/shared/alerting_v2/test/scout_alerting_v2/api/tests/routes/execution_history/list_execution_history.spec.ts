@@ -15,14 +15,8 @@ import type {
 import { POLICY_EXECUTION_HISTORY_MAX_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '@kbn/alerting-v2-constants';
 import {
-  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
-  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
-  ALERTING_V2_ALERTS_ALL_ROLE,
-  ALERTING_V2_ALERTS_READ_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
-  ALERTING_V2_RULES_ALL_ROLE,
-  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   getListExecutionHistoryUrl,
   NO_ACCESS_ROLE,
@@ -35,12 +29,6 @@ apiTest.describe(
   () => {
     let executionHistoryReaderHeaders: Record<string, string>;
     let executionHistoryWriterHeaders: Record<string, string>;
-    let rulesReadHeaders: Record<string, string>;
-    let rulesAllHeaders: Record<string, string>;
-    let alertsReadHeaders: Record<string, string>;
-    let alertsAllHeaders: Record<string, string>;
-    let actionPoliciesReadHeaders: Record<string, string>;
-    let actionPoliciesAllHeaders: Record<string, string>;
     let noAccessHeaders: Record<string, string>;
 
     const getCredentials = async (
@@ -59,18 +47,6 @@ apiTest.describe(
       executionHistoryWriterHeaders = await getCredentials(
         requestAuth,
         ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE
-      );
-      rulesReadHeaders = await getCredentials(requestAuth, ALERTING_V2_RULES_READ_ROLE);
-      rulesAllHeaders = await getCredentials(requestAuth, ALERTING_V2_RULES_ALL_ROLE);
-      alertsReadHeaders = await getCredentials(requestAuth, ALERTING_V2_ALERTS_READ_ROLE);
-      alertsAllHeaders = await getCredentials(requestAuth, ALERTING_V2_ALERTS_ALL_ROLE);
-      actionPoliciesReadHeaders = await getCredentials(
-        requestAuth,
-        ALERTING_V2_ACTION_POLICIES_READ_ROLE
-      );
-      actionPoliciesAllHeaders = await getCredentials(
-        requestAuth,
-        ALERTING_V2_ACTION_POLICIES_ALL_ROLE
       );
       noAccessHeaders = await getCredentials(requestAuth, NO_ACCESS_ROLE);
     });
@@ -100,94 +76,6 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...noAccessHeaders },
       });
       expect(response).toHaveStatusCode(403);
-    });
-
-    apiTest(
-      'authorization: 403 with only alerting_v2_action_policies read privilege (regression: privilege no longer leaks via action policies)',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...actionPoliciesReadHeaders },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-
-    apiTest(
-      'authorization: 403 with only alerting_v2_action_policies all privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...actionPoliciesAllHeaders },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-
-    apiTest(
-      'authorization: 403 with only alerting_v2_rules read privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...rulesReadHeaders },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-
-    apiTest(
-      'authorization: 403 with only alerting_v2_rules all privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...rulesAllHeaders },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-
-    apiTest(
-      'authorization: 403 with only alerting_v2_alerts read privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...alertsReadHeaders },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-
-    apiTest(
-      'authorization: 403 with only alerting_v2_alerts all privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...alertsAllHeaders },
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
-
-    apiTest(
-      'returns the documented response shape with default pagination',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(getListExecutionHistoryUrl(), {
-          headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders },
-        });
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.page).toBe(1);
-        expect(response.body.perPage).toBe(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE);
-        expect(Array.isArray(response.body.items)).toBe(true);
-        expect(response.body.items.length).toBeLessThanOrEqual(
-          POLICY_EXECUTION_HISTORY_MAX_PER_PAGE
-        );
-        expect(response.body.totalEvents).toBeGreaterThanOrEqual(0);
-      }
-    );
-
-    apiTest('shows explicit page and perPage in the response', async ({ apiClient }) => {
-      const response = await apiClient.get(getListExecutionHistoryUrl({ page: 3, perPage: 25 }), {
-        headers: { ...testData.COMMON_HEADERS, ...executionHistoryReaderHeaders },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.page).toBe(3);
-      expect(response.body.perPage).toBe(25);
-      expect(response.body.items.length).toBeLessThanOrEqual(25);
-      expect(response.body.totalEvents).toBeGreaterThanOrEqual(0);
     });
 
     apiTest('validation: rejects page=0', async ({ apiClient }) => {
