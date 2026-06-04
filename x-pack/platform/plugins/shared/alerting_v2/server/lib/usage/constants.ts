@@ -7,6 +7,6 @@
 
 import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
 
-export const TELEMETRY_TASK_TYPE = 'alerting_v2_telemetry';
+export const TELEMETRY_TASK_TYPE = 'alerting_v2:telemetry';
 export const TASK_ID = `AlertingV2-${TELEMETRY_TASK_TYPE}`;
 export const SCHEDULE: IntervalSchedule = { interval: '1d' };
