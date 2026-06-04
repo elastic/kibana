@@ -23,6 +23,7 @@ interface DocLink {
   title: string;
   href: string;
   telemetryId: string;
+  testSubj: string;
 }
 
 export const DocumentationQuickLinks = () => {
@@ -39,6 +40,7 @@ export const DocumentationQuickLinks = () => {
       }),
       href: docLinks.links.enterpriseSearch.knnSearch,
       telemetryId: 'serverlessVectordb-home-docLink-slices',
+      testSubj: 'quickLinkPanel-slices',
     },
     {
       title: i18n.translate('xpack.serverlessVectordb.home.docs.vectorSearch.title', {
@@ -46,6 +48,7 @@ export const DocumentationQuickLinks = () => {
       }),
       href: docLinks.links.enterpriseSearch.knnSearch,
       telemetryId: 'serverlessVectordb-home-docLink-vectorSearch',
+      testSubj: 'quickLinkPanel-vectorSearch',
     },
     {
       title: i18n.translate('xpack.serverlessVectordb.home.docs.semanticSearch.title', {
@@ -53,6 +56,7 @@ export const DocumentationQuickLinks = () => {
       }),
       href: docLinks.links.enterpriseSearch.semanticSearch,
       telemetryId: 'serverlessVectordb-home-docLink-semanticSearch',
+      testSubj: 'quickLinkPanel-semanticSearch',
     },
   ];
 
@@ -72,13 +76,14 @@ export const DocumentationQuickLinks = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-          <EuiLink
-            href={docLinks.links.enterpriseSearch.knnSearch}
-            target="_blank"
-            external
-            rel="noopener noreferrer"
-            data-telemetry-id="serverlessVectordb-home-viewDocumentation"
-          >
+            <EuiLink
+              href={docLinks.links.enterpriseSearch.knnSearch}
+              target="_blank"
+              external
+              rel="noopener noreferrer"
+              data-test-subj="viewDocumentationLink"
+              data-telemetry-id="serverlessVectordb-home-viewDocumentation"
+            >
               {i18n.translate('xpack.serverlessVectordb.home.docs.viewAll', {
                 defaultMessage: 'View documentation',
               })}
@@ -90,7 +95,12 @@ export const DocumentationQuickLinks = () => {
       <EuiFlexGroup gutterSize="m">
         {DOC_LINKS.map((link, index) => (
           <EuiFlexItem key={index}>
-            <QuickLinkPanel title={link.title} href={link.href} telemetryId={link.telemetryId} />
+            <QuickLinkPanel
+              title={link.title}
+              href={link.href}
+              telemetryId={link.telemetryId}
+              testSubj={link.testSubj}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

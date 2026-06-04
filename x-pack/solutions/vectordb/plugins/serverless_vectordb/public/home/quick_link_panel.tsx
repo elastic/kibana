@@ -22,9 +22,10 @@ interface QuickLinkPanelProps {
   title: string;
   href: string;
   telemetryId?: string;
+  testSubj?: string;
 }
 
-export const QuickLinkPanel = ({ title, href, telemetryId }: QuickLinkPanelProps) => {
+export const QuickLinkPanel = ({ title, href, telemetryId, testSubj }: QuickLinkPanelProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -39,6 +40,7 @@ export const QuickLinkPanel = ({ title, href, telemetryId }: QuickLinkPanelProps
       hasBorder
       paddingSize="s"
       layout="horizontal"
+      data-test-subj={testSubj}
       data-telemetry-id={telemetryId}
     >
       <EuiFlexGroup

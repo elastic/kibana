@@ -69,6 +69,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
           borderRadius: `${euiTheme.border.radius.medium}`,
         })}
         onDismiss={hasData ? handleDismiss : undefined}
+        data-test-subj="homePageBanner"
       >
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -88,6 +89,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
                 href={docLinks.links.enterpriseSearch.elasticInferenceServiceSupportedModels}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-test-subj="homePageBannerViewSupportedModelsBtn"
                 data-telemetry-id="serverlessVectordb-home-banner-viewSupportedModels-btn"
               >
                 {buttonLabel}
@@ -97,6 +99,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
                 fill
                 iconType="rocket"
                 onClick={handleGetStarted}
+                data-test-subj="homePageBannerGetStartedBtn"
                 data-telemetry-id="serverlessVectordb-home-banner-getStarted-btn"
               >
                 {buttonLabel}
