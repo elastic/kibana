@@ -22,28 +22,27 @@ const delayedDataCheckSchema = z.object({
   check_window: z.string().optional().describe('Duration string, e.g. "2h".'),
 });
 
-const schema = z.discriminatedUnion('operation', [
-  z.object({
-    operation: z.literal('update_memory_limit'),
-    job_id: z.string().describe('The anomaly detection job ID.'),
-    value: z.string().describe('New model memory limit, e.g. "512mb".'),
-  }),
-  z.object({
-    operation: z.literal('update_query_delay'),
-    job_id: z.string().describe('The anomaly detection job ID.'),
-    value: z.string().describe('New datafeed query delay, e.g. "120s".'),
-  }),
-  z.object({
-    operation: z.literal('update_delayed_data_check'),
-    job_id: z.string().describe('The anomaly detection job ID.'),
-    value: delayedDataCheckSchema,
-  }),
-  z.object({
-    operation: z.literal('create_calendar_event'),
-    job_id: z.string().describe('The anomaly detection job ID.'),
-    value: calendarEventSchema,
-  }),
-]);
+const schema = z.object({
+  operation: z.enum([
+    'update_memory_limit',
+    'update_query_delay',
+    'update_delayed_data_check',
+    'create_calendar_event',
+  ]),
+  job_id: z.string().describe('The anomaly detection job ID.'),
+  memory_limit: z
+    .string()
+    .optional()
+    .describe('Required for update_memory_limit. New model memory limit, e.g. "512mb".'),
+  query_delay: z
+    .string()
+    .optional()
+    .describe('Required for update_query_delay. New datafeed query delay, e.g. "120s".'),
+  delayed_data_check: delayedDataCheckSchema
+    .optional()
+    .describe('Required for update_delayed_data_check.'),
+  calendar_event: calendarEventSchema.optional().describe('Required for create_calendar_event.'),
+});
 
 export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
   id: AD_UPDATE_JOB_CONFIG_TOOL_ID,
@@ -51,7 +50,10 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
   description:
     'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event.',
   schema,
-  handler: async ({ operation, job_id: jobId, value }, { esClient }) => {
+  handler: async (
+    { operation, job_id: jobId, memory_limit, query_delay, delayed_data_check, calendar_event },
+    { esClient }
+  ) => {
     const ml = esClient.asCurrentUser.ml;
     const datafeedId = `datafeed-${jobId}`;
 
@@ -60,7 +62,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
         case 'update_memory_limit': {
           const response = await ml.updateJob({
             job_id: jobId,
-            body: { analysis_limits: { model_memory_limit: value } } as any,
+            body: { analysis_limits: { model_memory_limit: memory_limit } } as any,
           });
           return { results: [{ type: ToolResultType.json, data: response }] };
         }
@@ -68,7 +70,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
         case 'update_query_delay': {
           const response = await ml.updateDatafeed({
             datafeed_id: datafeedId,
-            body: { query_delay: value } as any,
+            body: { query_delay } as any,
           });
           return { results: [{ type: ToolResultType.json, data: response }] };
         }
@@ -76,7 +78,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
         case 'update_delayed_data_check': {
           const response = await ml.updateDatafeed({
             datafeed_id: datafeedId,
-            body: { delayed_data_check_config: value } as any,
+            body: { delayed_data_check_config: delayed_data_check } as any,
           });
           return { results: [{ type: ToolResultType.json, data: response }] };
         }
@@ -85,7 +87,7 @@ export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
           const calendarId = `calendar-${jobId}`;
           const response = await ml.postCalendarEvents({
             calendar_id: calendarId,
-            body: { events: [value] } as any,
+            body: { events: [calendar_event] } as any,
           });
           return { results: [{ type: ToolResultType.json, data: response }] };
         }
