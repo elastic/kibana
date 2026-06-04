@@ -45,6 +45,9 @@ export function registerListRelationships(router: EntityStorePluginRouter) {
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       enableQueryVersion: true,
     })
     .addVersion(
