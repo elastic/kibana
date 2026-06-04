@@ -100,7 +100,8 @@ const useTitleStyles = () => {
 
       &::after {
         border: ${euiTheme.border.width.thin} solid transparent;
-        transition: border-color ${euiTheme.animation.fast} ease;
+        transition: border-color ${euiTheme.animation.fast} ease,
+          border-width ${euiTheme.animation.fast} ease;
       }
     `;
 
@@ -109,14 +110,8 @@ const useTitleStyles = () => {
       cursor: text;
       appearance: none;
 
-      &:hover::before,
-      &:focus::before {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-      }
-
-      &:hover::after,
-      &:focus::after {
-        border-color: ${euiTheme.colors.borderBasePlain};
+      &:hover::before {
+        background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
       }
 
       &:focus {
@@ -136,12 +131,14 @@ const useTitleStyles = () => {
     const editingTitleFrame = css`
       ${titleFrame};
 
-      &::before {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      &::after {
+        border-width: ${euiTheme.border.width.thin};
+        border-color: ${euiTheme.components.forms.border};
       }
 
-      &::after {
-        border-color: ${euiTheme.colors.borderBasePlain};
+      &:focus-within::after {
+        border-width: ${euiTheme.border.width.thick};
+        border-color: ${euiTheme.components.forms.borderFocused};
       }
     `;
 
@@ -154,8 +151,9 @@ const useTitleStyles = () => {
     `;
 
     const invalidTitleFrame = css`
-      &::after {
-        border-color: ${euiTheme.colors.danger};
+      &:not(:focus-within)::after {
+        border-width: ${euiTheme.border.width.thin};
+        border-color: ${euiTheme.components.forms.borderInvalid};
       }
     `;
 
@@ -236,6 +234,10 @@ const useTitleStyles = () => {
       }
     `;
 
+    const editingStatusIcon = css`
+      background: none;
+    `;
+
     // Applied only when there is no back button, so a lone title lines up with where the
     // text sits when a back button precedes it.
     const titleOffsetStyle = css`
@@ -251,6 +253,7 @@ const useTitleStyles = () => {
       readModeTrigger,
       input,
       statusIcon,
+      editingStatusIcon,
       titleSizer,
       titleText,
       placeholderText,
@@ -455,7 +458,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                   </EuiScreenReaderOnly>
                 )}
                 {(isSaving || error) && (
-                  <span css={styles.statusIcon}>
+                  <span css={[styles.statusIcon, styles.editingStatusIcon]}>
                     {isSaving ? (
                       <EuiLoadingSpinner size="m" />
                     ) : (
