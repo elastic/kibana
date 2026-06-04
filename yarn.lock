@@ -34,35 +34,35 @@
   resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.4.0.tgz#728c484f4e10df03d5a3acd0d8adcbbebff8ad63"
   integrity sha512-Ff9+ksdQQB3rMncgqDK78uLznstjyfIf2Arnh22pW8kBpLs6rpKDwgnZT46hin5Hl1WzazzK64DOrhSwYpS7bQ==
 
-"@ai-sdk/gateway@2.0.15":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-2.0.15.tgz#16db3b2fa8305a6b639d056ff4269127949cb9d5"
-  integrity sha512-i1YVKzC1dg9LGvt+GthhD7NlRhz9J4+ZRj3KELU14IZ/MHPsOBiFeEoCCIDLR+3tqT8/+5nIsK3eZ7DFRfMfdw==
+"@ai-sdk/gateway@2.0.91":
+  version "2.0.91"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-2.0.91.tgz#6eece11eb0d5c07123fce66bb867ab6bfc2c4f31"
+  integrity sha512-w0qAUeqOM0Qgppb1+QACNCz+LQnbHTWcyhEg4NtcCPtGzdE6/4yWjJV4faeigW+YltiB/kjPfJjF/fX3nr3BsA==
   dependencies:
-    "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.17"
-    "@vercel/oidc" "3.0.5"
+    "@ai-sdk/provider" "2.0.3"
+    "@ai-sdk/provider-utils" "3.0.25"
+    "@vercel/oidc" "3.1.0"
 
-"@ai-sdk/langchain@1.0.102":
-  version "1.0.102"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/langchain/-/langchain-1.0.102.tgz#f553f3e920d120d660796ebd224639e310dbce3e"
-  integrity sha512-Yw4qrjaTQGw4I9FWYc2rjQaGWf/dbIlAifN1NjzVWyUpHk1HWVM6yM/DGGzG3F/t5/J/MqUmVGu8ChKFBxW0pg==
+"@ai-sdk/langchain@1.0.190":
+  version "1.0.190"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/langchain/-/langchain-1.0.190.tgz#e98a57e3bc2909ed40aba764e6c16264d45aba27"
+  integrity sha512-FLz/uGXSJEsF1IRHDqE9Lf8QcSpDnr38/ANPY1c0Odaa2Z9Yzz5+WsrnLO0/cR/+h8U4anrQz6LiLw1dKfelIg==
   dependencies:
-    ai "5.0.102"
+    ai "5.0.190"
 
-"@ai-sdk/provider-utils@3.0.17":
-  version "3.0.17"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-3.0.17.tgz#2f3d0be398d3f165efe8dd252b63aea6ac3896d1"
-  integrity sha512-TR3Gs4I3Tym4Ll+EPdzRdvo/rc8Js6c4nVhFLuvGLX/Y4V9ZcQMa/HTiYsHEgmYrf1zVi6Q145UEZUfleOwOjw==
+"@ai-sdk/provider-utils@3.0.25":
+  version "3.0.25"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-3.0.25.tgz#052165ea2b034f34eb383c51a47e14f55c1a3a23"
+  integrity sha512-CvsRu+32Y8a167s+lrIBtsybvgTHp8j9y+6BeTvLeoW3Q+okw/b4CnNUFOLIXsRaKHQKAH+IHNJPYWywfpw0LA==
   dependencies:
-    "@ai-sdk/provider" "2.0.0"
+    "@ai-sdk/provider" "2.0.3"
     "@standard-schema/spec" "^1.0.0"
     eventsource-parser "^3.0.6"
 
-"@ai-sdk/provider@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-2.0.0.tgz#b853c739d523b33675bc74b6c506b2c690bc602b"
-  integrity sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==
+"@ai-sdk/provider@2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider/-/provider-2.0.3.tgz#8a3727d31947c6238e59dcbb72b7e1a871fd570c"
+  integrity sha512-h88OPkavHTiN9tMn2l5awAznGB0lXzjcLhgR1/rvjB2zlLprsNxbM2tt6OJsHUxduLC3klq0/eqaSf6fX5XVww==
   dependencies:
     json-schema "^0.4.0"
 
@@ -2364,10 +2364,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.11.0":
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.11.0.tgz#27abb0d3a86879f7629f0aef24342bf3359ec3d4"
-  integrity sha512-P+1njt18ong32ucBiXI3+c0/sKjoX3ffsArcHhmsJW5y9+rvdzZ9rtgWLtRhhtJnpiBI0fyDabEff/ISCU7tZg==
+"@elastic/eslint-plugin-eui@2.12.0":
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.12.0.tgz#9333e558c6a5786f4aaf984eeda737d35edd17a0"
+  integrity sha512-nDOmel4ywBWrc6q/j0nqsXna/yD8yK+QyzS3UapxN9C13dhDZaTychqP7B9om95yYvlHd9k0kzKv6IHTUKfhqg==
 
 "@elastic/esql@1.8.0":
   version "1.8.0"
@@ -2395,10 +2395,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@114.0.0":
-  version "114.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-114.0.0.tgz#643f0020d7d00cd8ec8fa2e66f1435f21eca6a09"
-  integrity sha512-wozSyxPpDTM5oMoldWBds6NdjCa+nf0FilTl0BoL3rgYaEGGvbEg3rWR7ff2P7SKWI40GPbKE6pGCaX66swq7A==
+"@elastic/eui@115.0.0":
+  version "115.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-115.0.0.tgz#a946565fc1fa336c1b02834584a879e02bdc2efe"
+  integrity sha512-jbkoTnfF9qYTzLoDsudREIlhLXTpg1vB7uPoytpoZlUkxkxE4773BiUgtcyDzNInZ00KUFlY/NzgI8Wy6IW5eA==
   dependencies:
     "@elastic/eui-theme-common" "9.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -15881,10 +15881,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@vercel/oidc@3.0.5":
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.0.5.tgz#bd8db7ee777255c686443413492db4d98ef49657"
-  integrity sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw==
+"@vercel/oidc@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.1.0.tgz#066caee449b84079f33c7445fc862464fe10ec32"
+  integrity sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==
 
 "@vitest/expect@2.0.5":
   version "2.0.5"
@@ -16379,14 +16379,14 @@ aggregate-error@3.1.0, aggregate-error@^3.0.0:
     clean-stack "^2.0.0"
     indent-string "^4.0.0"
 
-ai@5.0.102, ai@^5.0.38:
-  version "5.0.102"
-  resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.102.tgz#1c313495edccf19459ec87b4b22da5a7eee42bb5"
-  integrity sha512-snRK3nS5DESOjjpq7S74g8YszWVMzjagfHqlJWZsbtl9PyOS+2XUd8dt2wWg/jdaq/jh0aU66W1mx5qFjUQyEg==
+ai@5.0.190, ai@^5.0.38:
+  version "5.0.190"
+  resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.190.tgz#8c0896cb7348bb1d591944f282936d3e95b9a58b"
+  integrity sha512-aDaixi6U7TgJoGYjefO35hxGkym9mbTrAY9b+xSq/DE7LonwNCHUuCFl1EwaZdt/eo8rCa5Td7kKga4p1LqL8Q==
   dependencies:
-    "@ai-sdk/gateway" "2.0.15"
-    "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.17"
+    "@ai-sdk/gateway" "2.0.91"
+    "@ai-sdk/provider" "2.0.3"
+    "@ai-sdk/provider-utils" "3.0.25"
     "@opentelemetry/api" "1.9.0"
 
 ajv-draft-04@1.0.0, ajv-draft-04@^1.0.0:
@@ -18243,10 +18243,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@148.0.3:
-  version "148.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-148.0.3.tgz#817a6fb2aff7123036ff46b72bcb3b36abc36815"
-  integrity sha512-efk4NIkjjRr3Zy0C8Trj8jpMGgDY+ZA6kVpYFerH3M4tM4fguKCi81PguWwmHVx8FZdMmhFYczb1PaPvJqUkZQ==
+chromedriver@148.0.4:
+  version "148.0.4"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-148.0.4.tgz#2b9947cc64dfd1f938d205f10e79b2afbcbde2d8"
+  integrity sha512-3UyptFDG4YF1Pyv3fzn95s1CN4K3zCpHSmE6g+6J4f2u9KxxOYzrwN2GApVyM2z02hlbSqzo9Ajn2hMi7LnvCw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     adm-zip "^0.5.17"
