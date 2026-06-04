@@ -22,6 +22,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     logger,
     status,
     crudClient,
+    entityMetadataClient,
     abortController,
     telemetry,
   }) => {
@@ -33,6 +34,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       logger,
       namespace,
       crudClient,
+      entityMetadataClient,
       integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
       abortController,
     });

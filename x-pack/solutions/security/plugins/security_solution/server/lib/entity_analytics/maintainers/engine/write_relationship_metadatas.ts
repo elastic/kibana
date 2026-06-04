@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { EntityMetadataClient } from '@kbn/entity-store/server';
 import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
 
 import type { EntityRelationshipRecord } from './types';
@@ -71,7 +71,7 @@ export interface WriteRelationshipMetadatasResult {
 }
 
 export const writeRelationshipMetadatas = async (
-  crudClient: EntityUpdateClient,
+  entityMetadataClient: EntityMetadataClient,
   logger: Logger,
   records: EntityRelationshipRecord[],
   context: WriteRelationshipMetadataContext
@@ -92,7 +92,7 @@ export const writeRelationshipMetadatas = async (
 
   if (docs.length === 0) return { docsAttempted: 0, docsApplied: 0 };
 
-  const failures = await crudClient.bulkAppendRelationshipMetadata(docs);
+  const failures = await entityMetadataClient.bulkAppendMetadata(docs);
   const docsApplied = docs.length - failures.length;
 
   if (failures.length > 0) {

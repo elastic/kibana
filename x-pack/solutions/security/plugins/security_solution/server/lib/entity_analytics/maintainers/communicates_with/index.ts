@@ -21,6 +21,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     logger,
     status,
     crudClient,
+    entityMetadataClient,
     abortController,
     telemetry,
   }) => {
@@ -32,6 +33,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       logger,
       namespace,
       crudClient,
+      entityMetadataClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
       abortController,
     });

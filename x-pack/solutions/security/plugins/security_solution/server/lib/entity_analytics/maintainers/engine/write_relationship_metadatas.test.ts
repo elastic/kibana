@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { EntityMetadataClient } from '@kbn/entity-store/server';
 import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
 
 import { writeRelationshipMetadatas } from './write_relationship_metadatas';
@@ -23,17 +23,17 @@ const baseContext = {
   observedAt: '2026-05-15T10:30:00.000Z',
 };
 
-const makeCrudClient = (
+const makeEntityMetadataClient = (
   responses: Array<{ status: number; type?: string; reason?: string }> = []
 ): {
-  crudClient: EntityUpdateClient;
+  entityMetadataClient: EntityMetadataClient;
   bulkAppend: jest.Mock;
 } => {
   const bulkAppend = jest.fn().mockResolvedValue(responses);
-  const crudClient = {
-    bulkAppendRelationshipMetadata: bulkAppend,
-  } as unknown as EntityUpdateClient;
-  return { crudClient, bulkAppend };
+  const entityMetadataClient = {
+    bulkAppendMetadata: bulkAppend,
+  } as unknown as EntityMetadataClient;
+  return { entityMetadataClient, bulkAppend };
 };
 
 const getDocsFromCall = (bulkAppend: jest.Mock): RelationshipMetadataDoc[] => {
@@ -43,13 +43,13 @@ const getDocsFromCall = (bulkAppend: jest.Mock): RelationshipMetadataDoc[] => {
 
 describe('writeRelationshipMetadatas', () => {
   it('does not call the CRUD client when records is empty', async () => {
-    const { crudClient, bulkAppend } = makeCrudClient();
-    await writeRelationshipMetadatas(crudClient, loggerMock.create(), [], baseContext);
+    const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
+    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), [], baseContext);
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
   it('emits one doc per (entityId, relType, targetId) triple', async () => {
-    const { crudClient, bulkAppend } = makeCrudClient();
+    const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
@@ -57,13 +57,13 @@ describe('writeRelationshipMetadatas', () => {
         relationships: { accesses_frequently: ['host:laptopA'] },
       },
     ];
-    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
     const docs = getDocsFromCall(bulkAppend);
     expect(docs).toHaveLength(1);
   });
 
   it('fans one entity × one kind × multiple targets into one doc per target', async () => {
-    const { crudClient, bulkAppend } = makeCrudClient();
+    const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
@@ -73,7 +73,7 @@ describe('writeRelationshipMetadatas', () => {
         },
       },
     ];
-    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
     const docs = getDocsFromCall(bulkAppend);
     expect(docs).toHaveLength(3);
     const targets = docs.map((d) => d['entity.relationships.accesses_frequently.target']);
@@ -81,7 +81,7 @@ describe('writeRelationshipMetadatas', () => {
   });
 
   it('fans multiple entities × multiple kinds × multiple targets correctly', async () => {
-    const { crudClient, bulkAppend } = makeCrudClient();
+    const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
@@ -99,7 +99,7 @@ describe('writeRelationshipMetadatas', () => {
         },
       },
     ];
-    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
     const docs = getDocsFromCall(bulkAppend);
     // 2 + 1 + 1 = 4 docs.
     expect(docs).toHaveLength(4);
@@ -109,7 +109,7 @@ describe('writeRelationshipMetadatas', () => {
   });
 
   it('skips records with null entityId (cannot identify the source actor)', async () => {
-    const { crudClient, bulkAppend } = makeCrudClient();
+    const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: null,
@@ -117,12 +117,12 @@ describe('writeRelationshipMetadatas', () => {
         relationships: { accesses_frequently: ['host:laptopA'] },
       },
     ];
-    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
   it('skips records where every relationship array is empty (nothing to observe)', async () => {
-    const { crudClient, bulkAppend } = makeCrudClient();
+    const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp',
@@ -130,7 +130,7 @@ describe('writeRelationshipMetadatas', () => {
         relationships: { accesses_frequently: [], accesses_infrequently: [] },
       },
     ];
-    await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
@@ -138,7 +138,7 @@ describe('writeRelationshipMetadatas', () => {
     let docs: RelationshipMetadataDoc[];
 
     beforeEach(async () => {
-      const { crudClient, bulkAppend } = makeCrudClient();
+      const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',
@@ -146,7 +146,7 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
       docs = getDocsFromCall(bulkAppend);
     });
 
@@ -193,7 +193,7 @@ describe('writeRelationshipMetadatas', () => {
 
   describe('related.* flat lookup arrays', () => {
     it('populates related.user with the source actor username parsed from entity.id', async () => {
-      const { crudClient, bulkAppend } = makeCrudClient();
+      const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',
@@ -201,13 +201,13 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.user']).toEqual(['alice']);
     });
 
     it('populates related.hosts with the target host name when the target EUID is a host', async () => {
-      const { crudClient, bulkAppend } = makeCrudClient();
+      const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',
@@ -215,13 +215,13 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.hosts']).toEqual(['laptopA']);
     });
 
     it('omits related.hosts when the target EUID is not a host', async () => {
-      const { crudClient, bulkAppend } = makeCrudClient();
+      const { entityMetadataClient, bulkAppend } = makeEntityMetadataClient();
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',
@@ -229,19 +229,19 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { communicates_with: ['user:bob@corp'] },
         },
       ];
-      await writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.hosts']).toBeUndefined();
     });
   });
 
   describe('error propagation', () => {
-    it('does NOT catch CRUDClient exceptions — they propagate to the boundary', async () => {
-      const crudClient = {
-        bulkAppendRelationshipMetadata: jest
+    it('does NOT catch EntityMetadataClient exceptions — they propagate to the boundary', async () => {
+      const entityMetadataClient = {
+        bulkAppendMetadata: jest
           .fn()
           .mockRejectedValue(new Error('bulk transport failure')),
-      } as unknown as EntityUpdateClient;
+      } as unknown as EntityMetadataClient;
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',
@@ -250,13 +250,13 @@ describe('writeRelationshipMetadatas', () => {
         },
       ];
       await expect(
-        writeRelationshipMetadatas(crudClient, loggerMock.create(), records, baseContext)
+        writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext)
       ).rejects.toThrow(/bulk transport failure/);
     });
 
     it('logs at error level when bulkAppend returns failed items but does not throw', async () => {
       const logger = loggerMock.create();
-      const { crudClient } = makeCrudClient([
+      const { entityMetadataClient } = makeEntityMetadataClient([
         { status: 503, type: 'cluster_block_exception', reason: 'read-only' },
       ]);
       const records: EntityRelationshipRecord[] = [
@@ -266,13 +266,13 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(crudClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
       expect(logger.error).toHaveBeenCalled();
     });
 
     it('logs at info level (not error) when bulkAppend returns no failures', async () => {
       const logger = loggerMock.create();
-      const { crudClient } = makeCrudClient();
+      const { entityMetadataClient } = makeEntityMetadataClient();
       const records: EntityRelationshipRecord[] = [
         {
           entityId: 'user:alice@corp',
@@ -280,7 +280,7 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(crudClient, logger, records, baseContext);
+      await writeRelationshipMetadatas(entityMetadataClient, logger, records, baseContext);
       expect(logger.error).not.toHaveBeenCalled();
     });
   });

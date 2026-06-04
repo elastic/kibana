@@ -34,6 +34,8 @@ import type { FeatureFlags } from './infra/feature_flags';
 import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
+import type { EntityMetadataClient } from './domain/entity_metadata';
+import type { RelationshipsClient } from './domain/relationships';
 import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
@@ -58,6 +60,8 @@ export interface EntityStoreApiRequestHandlerContext {
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
+  entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
   resolutionClient: ResolutionClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
   featureFlags: FeatureFlags;
@@ -80,6 +84,14 @@ export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
 export interface EntityStoreStartContract {
   createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
+  createEntityMetadataClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => EntityMetadataClient;
+  createRelationshipsClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => RelationshipsClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
 }
 

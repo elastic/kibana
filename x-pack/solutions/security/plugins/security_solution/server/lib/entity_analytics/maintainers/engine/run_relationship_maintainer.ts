@@ -11,7 +11,7 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
 
 import type {
   RelationshipIntegrationConfig,
@@ -164,6 +164,7 @@ async function runIntegration(
   logger: Logger,
   namespace: string,
   crudClient: EntityUpdateClient,
+  entityMetadataClient: EntityMetadataClient,
   abortController: AbortController | undefined,
   metadataContext: { scanId: string; observedAt: string }
 ): Promise<{
@@ -232,7 +233,7 @@ async function runIntegration(
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
   const write = await writeEntityIds(crudClient, logger, records);
-  const metadata = await writeRelationshipMetadatas(crudClient, logger, records, {
+  const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
     scanId: metadataContext.scanId,
     lookbackWindow: LOOKBACK_WINDOW,
     entitySource: config.id,
@@ -262,6 +263,7 @@ export const runRelationshipMaintainer = async ({
   logger,
   namespace,
   crudClient,
+  entityMetadataClient,
   integrations,
   abortController,
 }: {
@@ -270,6 +272,7 @@ export const runRelationshipMaintainer = async ({
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
+  entityMetadataClient: EntityMetadataClient;
   integrations: RelationshipIntegrationConfig[];
   abortController?: AbortController;
 }): Promise<{
@@ -324,6 +327,7 @@ export const runRelationshipMaintainer = async ({
       logger,
       namespace,
       crudClient,
+      entityMetadataClient,
       abortController,
       metadataContext
     );

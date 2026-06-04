@@ -18,18 +18,8 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
-import {
-  RELATIONSHIP_KINDS,
-  type RelationshipKind,
-  type RelationshipMetadataDoc,
-} from '../../../common/domain/entity_metadata/relationship_metadata';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
-import {
-  ENTITY_METADATA,
-  getEntitiesAlias,
-  getLatestEntitiesIndexName,
-} from '../../../common/domain/entity_index';
-import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
+import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import {
   BadCRUDRequestError,
   EntityNotFoundError,
@@ -93,27 +83,6 @@ export interface BulkObjectResponse {
 interface BulkUpdateEntityParams {
   objects: BulkObject[];
   force?: boolean;
-}
-
-const RELATIONSHIP_METADATA_SORT_FIELDS = ['@timestamp', 'event.ingested'] as const;
-
-export interface ListRelationshipMetadataParams {
-  entityId: string;
-  kind?: RelationshipKind;
-  target?: string;
-  from?: string;
-  to?: string;
-  page?: number;
-  per_page?: number;
-  sort_field?: string;
-  sort_order?: SortOrder;
-}
-
-export interface ListRelationshipMetadataResult {
-  records: RelationshipMetadataDoc[];
-  total: number;
-  page: number;
-  per_page: number;
 }
 
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
@@ -197,26 +166,6 @@ export class CRUDClient {
       writable: true,
     });
 
-    const baseBulkAppendRelationshipMetadata = this.bulkAppendRelationshipMetadata.bind(this);
-    const tracedBulkAppendRelationshipMetadata = (
-      docs: RelationshipMetadataDoc[]
-    ): Promise<BulkObjectResponse[]> =>
-      runWithSpan({
-        name: 'entityStore.crud.bulk_append_relationship_metadatas',
-        namespace,
-        attributes: {
-          'entity_store.crud.operation': 'bulk_append_relationship_metadatas',
-          'entity_store.objects.count': docs.length,
-        },
-        cb: () => baseBulkAppendRelationshipMetadata(docs),
-      });
-
-    Object.defineProperty(this, 'bulkAppendRelationshipMetadata', {
-      value: tracedBulkAppendRelationshipMetadata,
-      configurable: true,
-      writable: true,
-    });
-
     const baseDeleteEntity = this.deleteEntity.bind(this);
     const tracedDeleteEntity = (id: string): Promise<void> =>
       runWithSpan({
@@ -267,25 +216,6 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'searchLatestEntities', {
       value: tracedSearchLatestEntities,
-      configurable: true,
-      writable: true,
-    });
-
-    const baseListRelationshipMetadata = this.listRelationshipMetadata.bind(this);
-    const tracedListRelationshipMetadata = (
-      params: ListRelationshipMetadataParams
-    ): Promise<ListRelationshipMetadataResult> =>
-      runWithSpan({
-        name: 'entityStore.crud.list_relationship_metadata',
-        namespace,
-        attributes: {
-          'entity_store.crud.operation': 'list_relationship_metadata',
-        },
-        cb: () => baseListRelationshipMetadata(params),
-      });
-
-    Object.defineProperty(this, 'listRelationshipMetadata', {
-      value: tracedListRelationshipMetadata,
       configurable: true,
       writable: true,
     });
@@ -391,43 +321,6 @@ export class CRUDClient {
       return [];
     }
     this.logger.debug(`Bulk updated ${objects.length} entities with errors`);
-    return resp.items
-      .map((item) => Object.entries(item)[0][1])
-      .filter((value) => value.error !== undefined || value.status >= 400)
-      .map((value) => {
-        return {
-          _id: value._id,
-          status: value.status,
-          type: value.error?.type,
-          reason: value.error?.reason,
-        } as BulkObjectResponse;
-      });
-  }
-
-  // Appends RelationshipMetadataDoc records to the metadata datastream.
-  // Datastream is append-only, so the bulk op is `create` rather than `update`.
-  // Mirrors `bulkUpdateEntity`'s contract: does not throw on partial bulk
-  // failure — returns one BulkObjectResponse per failed item. Transport-level
-  // exceptions from esClient.bulk propagate to the maintainer's task boundary.
-  public async bulkAppendRelationshipMetadata(
-    docs: RelationshipMetadataDoc[]
-  ): Promise<BulkObjectResponse[]> {
-    if (docs.length === 0) return [];
-    const operations: Array<BulkOperationContainer | RelationshipMetadataDoc> = [];
-    for (const doc of docs) {
-      operations.push({ create: {} }, doc);
-    }
-    const resp = await this.esClient.bulk({
-      index: getMetadataEntitiesDataStreamName(this.namespace),
-      operations,
-      refresh: 'wait_for',
-    });
-
-    if (!resp.errors) {
-      this.logger.debug(`Successfully appended ${docs.length} relationship metadata docs`);
-      return [];
-    }
-    this.logger.debug(`Appended ${docs.length} relationship metadata docs with errors`);
     return resp.items
       .map((item) => Object.entries(item)[0][1])
       .filter((value) => value.error !== undefined || value.status >= 400)
@@ -548,70 +441,5 @@ export class CRUDClient {
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
       ...(entityFields ? { fields: entityFields } : {}),
     };
-  }
-
-  // Reads relationship records from the metadata datastream alias. The
-  // method owns query construction — routes forward parsed params untouched.
-  public async listRelationshipMetadata(
-    params: ListRelationshipMetadataParams
-  ): Promise<ListRelationshipMetadataResult> {
-    const page = params.page ?? 1;
-    const perPage = params.per_page ?? 10;
-    const sortField: string = params.sort_field ?? '@timestamp';
-    const sortOrder: SortOrder = params.sort_order ?? 'desc';
-
-    if (!(RELATIONSHIP_METADATA_SORT_FIELDS as readonly string[]).includes(sortField)) {
-      throw new BadCRUDRequestError(
-        `Invalid sort_field "${sortField}": must be one of ${RELATIONSHIP_METADATA_SORT_FIELDS.join(
-          ', '
-        )}`
-      );
-    }
-
-    const filter: QueryDslQueryContainer[] = [
-      { term: { 'event.action': 'relationship_observed' } },
-      { term: { 'entity.id': params.entityId } },
-    ];
-
-    if (params.from !== undefined || params.to !== undefined) {
-      const range: { gte?: string; lte?: string } = {};
-      if (params.from !== undefined) range.gte = params.from;
-      if (params.to !== undefined) range.lte = params.to;
-      filter.push({ range: { '@timestamp': range } });
-    }
-
-    if (params.kind !== undefined && params.target !== undefined) {
-      filter.push({
-        term: { [`entity.relationships.${params.kind}.target`]: params.target },
-      });
-    } else if (params.kind !== undefined) {
-      filter.push({ exists: { field: `entity.relationships.${params.kind}` } });
-    } else if (params.target !== undefined) {
-      const target = params.target;
-      filter.push({
-        bool: {
-          should: RELATIONSHIP_KINDS.map((kind) => ({
-            term: { [`entity.relationships.${kind}.target`]: target },
-          })),
-          minimum_should_match: 1,
-        },
-      });
-    }
-
-    const resp = await this.esClient.search<RelationshipMetadataDoc>({
-      index: getEntitiesAlias(ENTITY_METADATA, this.namespace),
-      query: { bool: { filter } },
-      from: (page - 1) * perPage,
-      size: perPage,
-      sort: [{ [sortField]: sortOrder }, { _shard_doc: 'desc' }],
-    });
-
-    const records = resp.hits.hits
-      .map((hit) => hit._source)
-      .filter((src): src is RelationshipMetadataDoc => src !== undefined);
-    const total =
-      typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
-
-    return { records, total, page, per_page: perPage };
   }
 }
