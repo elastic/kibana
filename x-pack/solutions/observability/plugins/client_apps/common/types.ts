@@ -6,13 +6,13 @@
  */
 
 /**
- * Common response shape returned by all platform symbolication APIs.
- * Each platform (Android retrace, JS source maps, etc.) returns the original
- * stacktrace alongside the resolved (deobfuscated / unmapped) version.
+ * Common response shape returned by all platform retrace APIs.
+ * Each platform returns the original obfuscated stacktrace alongside
+ * the retraced (human-readable) version so the UI can show both.
  */
-export interface SymbolicationResponse {
+export interface RetraceResponse {
   original: string;
-  resolved: string;
+  retraced: string;
 }
 
 /** Response from the Android crash document fetch endpoint. */

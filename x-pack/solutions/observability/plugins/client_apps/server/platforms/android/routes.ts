@@ -12,7 +12,7 @@ import {
   ANDROID_RETRACE_API_PATH,
   DEFAULT_CRASH_INDEX,
 } from '../../../common';
-import { MappingNotFoundError, retrace } from './retrace';
+import { RetraceMapNotFoundError, retrace } from './retrace';
 import { handleRouteError } from '../../lib/handle_route_error';
 
 export function registerAndroidRoutes({ router, logger }: { router: IRouter; logger: Logger }) {
@@ -107,13 +107,13 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const { stacktrace, build_id: buildId } = request.body;
 
-        const resolved = await retrace({ esClient, stacktrace, buildId, logger });
+        const retraced = await retrace({ esClient, stacktrace, buildId, logger });
 
         return response.ok({
-          body: { original: stacktrace, resolved },
+          body: { original: stacktrace, retraced },
         });
       } catch (error) {
-        if (error instanceof MappingNotFoundError) {
+        if (error instanceof RetraceMapNotFoundError) {
           return response.notFound({ body: { message: (error as Error).message } });
         }
         return handleRouteError({ error, logger, response, message: 'Android retrace failed' });

@@ -17,7 +17,7 @@ export interface AndroidClassMap {
    * Version of the document format. Goes up only when a consumer
    * must change to keep working (a field renamed, removed, etc.).
    * Documents with a version this retracer doesn't understand are
-   * skipped, since deobfuscating them partially could be wrong.
+   * skipped, since retracing them partially could give wrong results.
    */
   schema_version: number;
   /**
@@ -36,7 +36,7 @@ export interface AndroidClassMap {
   obfuscated_class: string;
   /**
    * The original (unobfuscated) class name. Always present. Also
-   * used to deobfuscate exception class names in the trace.
+   * used to retrace exception class names in the stacktrace.
    */
   original_class: string;
   /**
@@ -305,10 +305,11 @@ const THROWS_CONDITION_RE = /^throws\((.*)\)$/;
  * outline/outlineCallsite handling, synthesized frame stripping, and
  * rewriteFrame condition evaluation. Output matches Google's `retrace` CLI tool.
  *
- * The fetcher receives a list of obfuscated class names and is expected to
- * return {@link AndroidClassMap} documents keyed by {@link AndroidClassMap.obfuscated_class}.
- * A single fetch call is issued per {@link retrace} invocation regardless of how
- * many unique classes appear in the stacktrace.
+ * The {@link RetraceMapFetcher} receives a list of obfuscated class names and is
+ * expected to return {@link AndroidClassMap} documents keyed by
+ * {@link AndroidClassMap.obfuscated_class}. A single fetch call is issued per
+ * {@link retrace} invocation regardless of how many unique classes appear in the
+ * stacktrace.
  */
 export class RetracerAndroid extends Retracer<AndroidClassMap> {
   async retrace(): Promise<string | undefined> {
@@ -384,11 +385,11 @@ export class RetracerAndroid extends Retracer<AndroidClassMap> {
       if (line.type === ParsedLineType.Text) {
         // Header lines (exception class names, "Caused by",
         // etc.) are wrapped in try/catch too. A bad document
-        // could make `deobfuscateExceptionClassName` throw;
+        // could make `retraceExceptionClassName` throw;
         // falling back to the original line keeps the rest
         // of the trace usable.
         try {
-          output.push(deobfuscateExceptionClassName(line.originalLine, documents));
+          output.push(retraceExceptionClassName(line.originalLine, documents));
         } catch {
           output.push(line.originalLine);
         }
@@ -660,18 +661,15 @@ function findExceptionType(
     if (!className) {
       continue;
     }
-    const deobfuscated = documents.get(className)?.originalClass ?? className;
-    if (deobfuscated.includes('.') || documents.has(className)) {
-      return `L${deobfuscated.replace(/\./g, '/')};`;
+    const retraced = documents.get(className)?.originalClass ?? className;
+    if (retraced.includes('.') || documents.has(className)) {
+      return `L${retraced.replace(/\./g, '/')};`;
     }
   }
   return undefined;
 }
 
-function deobfuscateExceptionClassName(
-  line: string,
-  documents: Map<string, ClassDocument>
-): string {
+function retraceExceptionClassName(line: string, documents: Map<string, ClassDocument>): string {
   const className = extractThrowableClassName(line);
   if (!className) {
     return line;

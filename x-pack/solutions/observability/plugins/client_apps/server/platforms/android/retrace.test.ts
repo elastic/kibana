@@ -8,7 +8,7 @@
 import crypto from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AndroidClassMap } from '../../lib/retracer_android';
-import { MappingNotFoundError, retrace } from './retrace';
+import { RetraceMapNotFoundError, retrace } from './retrace';
 
 function sha256(input: string) {
   return crypto.createHash('sha256').update(input).digest('hex');
@@ -55,7 +55,7 @@ describe('retrace (Android ES fetcher)', () => {
     );
   });
 
-  it('deobfuscates frames when mapping documents are found', async () => {
+  it('retraces frames when mapping documents are found', async () => {
     const mget = makeMget([{ found: true, _source: simpleClassMap }]);
 
     const result = await retrace({
@@ -82,7 +82,7 @@ describe('retrace (Android ES fetcher)', () => {
     expect(result).toBe(stacktrace);
   });
 
-  it('throws MappingNotFoundError when the mapping index does not exist', async () => {
+  it('throws RetraceMapNotFoundError when the mapping index does not exist', async () => {
     const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
@@ -95,10 +95,10 @@ describe('retrace (Android ES fetcher)', () => {
         buildId: BUILD_ID,
         logger: loggingSystemMock.createLogger(),
       })
-    ).rejects.toThrow(MappingNotFoundError);
+    ).rejects.toThrow(RetraceMapNotFoundError);
   });
 
-  it('MappingNotFoundError message includes the build ID', async () => {
+  it('RetraceMapNotFoundError message includes the build ID', async () => {
     const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });

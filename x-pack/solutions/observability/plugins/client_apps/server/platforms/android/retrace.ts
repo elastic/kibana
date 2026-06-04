@@ -17,12 +17,12 @@ interface RetraceParams {
   logger: Logger;
 }
 
-export class MappingNotFoundError extends Error {
+export class RetraceMapNotFoundError extends Error {
   constructor(buildId: string) {
     super(
       `No R8 mapping found for build ID "${buildId}". Upload the app's R8 mapping before retracing.`
     );
-    this.name = 'MappingNotFoundError';
+    this.name = 'RetraceMapNotFoundError';
   }
 }
 
@@ -64,7 +64,7 @@ export async function retrace({
 
   if (fetchError !== undefined) {
     if (isIndexNotFoundError(fetchError)) {
-      throw new MappingNotFoundError(buildId);
+      throw new RetraceMapNotFoundError(buildId);
     }
     logger.warn(
       `Failed to fetch R8 mappings for build ID "${buildId}": ${
