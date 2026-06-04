@@ -5,38 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { deleteCompositeSLOParamsSchema } from '@kbn/slo-schema';
-import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
-import { buildCompositeSloSummaryDocId } from '../../services/composites/composite_slo_summary_index';
-import { retryTransientEsErrors } from '../../utils/retry';
+import { deleteCompositeSlo } from '../../services/composites/delete_composite_slo';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
-
-// TODO: move into CompositeSummaryRepository alongside the upsert added for inline summary persist on create/update
-export const deleteCompositeSummaryDoc = async (
-  esClient: ElasticsearchClient,
-  spaceId: string,
-  id: string,
-  logger: Logger
-): Promise<void> => {
-  const docId = buildCompositeSloSummaryDocId(spaceId, id);
-  try {
-    await retryTransientEsErrors(
-      () =>
-        esClient.delete({
-          index: COMPOSITE_SUMMARY_INDEX_NAME,
-          id: docId,
-          refresh: true,
-        }),
-      { logger }
-    );
-  } catch (err) {
-    // 404 means the summary doc was never written (e.g. task hasn't run yet) — not an error
-    if (err?.statusCode !== 404) {
-      logger.debug(`Failed to delete composite summary doc [${docId}]: ${err}`);
-    }
-  }
-};
 
 export const deleteCompositeSLORoute = createCompositeSloServerRoute({
   endpoint: 'DELETE /api/observability/slo_composites/{id} 2023-10-31',
@@ -47,20 +18,19 @@ export const deleteCompositeSLORoute = createCompositeSloServerRoute({
     },
   },
   params: deleteCompositeSLOParamsSchema,
-  handler: async ({ response, params, logger, request, getScopedClients }) => {
+  handler: async ({ params, logger, request, getScopedClients }) => {
     const { scopedClusterClient, compositeRepository, spaceId } = await getScopedClients({
       request,
       logger,
     });
 
-    await compositeRepository.deleteById(params.path.id);
-    await deleteCompositeSummaryDoc(
-      scopedClusterClient.asCurrentUser,
-      spaceId,
-      params.path.id,
-      logger
+    return await deleteCompositeSlo(
+      { id: params.path.id, spaceId },
+      {
+        esClient: scopedClusterClient.asCurrentUser,
+        compositeRepository,
+        logger,
+      }
     );
-
-    return response.noContent();
   },
 });
