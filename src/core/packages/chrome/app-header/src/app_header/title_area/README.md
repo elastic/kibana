@@ -9,6 +9,7 @@ user can rename inline.
 - `title.tsx` — `Title`: the editable/read-only title itself. All the styling, width
   model, save flow, and a11y live here. Also exports the `isEditableTitle` type guard.
 - `title_area.stories.tsx` — every scenario, rendered inside the full app header.
+- `title.test.tsx` — behavior/a11y tests for the save, validation, and cancel flows.
 - `index.ts` — public barrel (`TitleArea`, `TitleAreaProps`).
 
 This README is the orientation doc for anyone (human or agent) changing this code. It
@@ -43,10 +44,10 @@ Everything below follows from that.
 
 Both modes use a single CSS grid cell (`grid-template-columns: minmax(0, max-content)`)
 sized by a hidden `<span>` (`titleSizer`, `white-space: pre`, `visibility: hidden`).
-The visible text truncates inside that track; the input scrolls inside it. There is
-**no `getBoundingClientRect`, no `ResizeObserver`, no width state** — earlier versions
-had them and caused stutter/jitter on click and while typing. If you need the box to
-grow as the user types, feed the typed value into the sizer; do not measure.
+The visible text truncates inside that track; the input scrolls inside it. Keep it that
+way: **no `getBoundingClientRect`, no `ResizeObserver`, no width state** — measuring the
+box causes stutter/jitter on click and while typing. If you need the box to grow as the
+user types, feed the typed value into the sizer; do not measure.
 
 - Read mode sizes to the visible text (or `placeholder` when empty).
 - Edit mode sizes to `draft` (or `placeholder` while the draft is empty).
@@ -74,9 +75,8 @@ activates, so editable and non-editable headings line up identically.
   `~128px` (`minmax(calc(size.base * 8), max-content)`) so a short or empty title still
   gives a comfortable click/typing target instead of collapsing to content width (or to
   nothing, leaving only the status icon when empty). Long titles exceed the floor and
-  size to content. Trade-off: a short title widens slightly on entering edit mode; this
-  is the deliberate simple version (previously the floor was applied only while the draft
-  was empty to avoid that jump, at the cost of extra conditional logic).
+  size to content. Trade-off: a short title widens slightly on entering edit mode —
+  accepted to keep the rule a single constant floor instead of conditional logic.
 - **Trailing blur after Enter/Escape.** Resolving via keyboard unmounts the focused
   input, which fires a blur that would otherwise re-enter `save()`. `resolvingRef`
   guards against that double-commit; a genuine click-away still saves.
@@ -93,12 +93,14 @@ activates, so editable and non-editable headings line up identically.
 
 ## Interaction & save semantics
 
-- Click, `Enter`, or `F2` on the read trigger enters edit mode.
+- The read trigger is a `<button>`, so click, `Enter`, or `Space` all enter edit mode.
 - `Enter` or blur **saves**; `Escape` **cancels** (restores `text`).
 - On entry the whole title is selected (`input.select()` in a `requestAnimationFrame`)
   so the caret never lands in a surprising spot. Re-clicking positions it normally.
 - `save`/`cancel` return focus to the read trigger via `returnFocusToTitle` so keyboard
-  users aren't dropped at the top of the page.
+  users aren't dropped at the top of the page. The focus ring only reappears when edit
+  mode was opened via keyboard (`event.detail === 0`), so a mouse-driven save doesn't
+  leave a lingering ring.
 
 ## Accessibility decisions
 
@@ -130,5 +132,7 @@ Default, Truncated, Placeholder, Saving-and-error (async), Read-only.
 3. Verify Enter/blur save, Escape cancels, blur-after-Enter doesn't double-save, and an
    unchanged title doesn't call `onSave`.
 4. Re-check the heading's accessible name and the error alert.
-5. Run `node scripts/eslint --fix` and `node scripts/type_check --project` on the
+5. Run the behavior/a11y tests in `title.test.tsx` (save, no-op, validation, saving,
+   cancel) — they guard the save flow that pixel checks can't.
+6. Run `node scripts/eslint --fix` and `node scripts/type_check --project` on the
    package's tsconfig.
