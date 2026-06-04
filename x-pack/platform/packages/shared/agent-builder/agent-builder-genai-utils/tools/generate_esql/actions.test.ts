@@ -12,6 +12,7 @@ import {
   type ValidateQueryAction,
   type ExecuteQueryAction,
   type GenerateQueryAction,
+  type RequestDocumentationAction,
 } from './actions';
 
 describe('generate_esql actions', () => {
@@ -91,6 +92,48 @@ describe('generate_esql actions', () => {
         const toolContent = JSON.parse((messages[1] as ToolMessage).content as string);
         expect(toolContent.success).toBe(false);
         expect(toolContent.error).toBe('expected integer');
+      });
+    });
+
+    describe('request_documentation', () => {
+      const action: RequestDocumentationAction = {
+        type: 'request_documentation',
+        requestedKeywords: ['STATS', 'DATE_TRUNC'],
+        fetchedDoc: { STATS: 'STATS docs', DATE_TRUNC: 'DATE_TRUNC docs' },
+      };
+
+      it('uses plain conversation messages (no tool calls) by default', () => {
+        const messages = formatAction(action);
+        expect(messages).toHaveLength(2);
+
+        expect(messages[0]).toBeInstanceOf(AIMessage);
+        const aiMessage = messages[0] as AIMessage;
+        // No tool calls must leak into a request whose follow-up call declares no tools,
+        // otherwise Anthropic-compatible gateways reject it.
+        expect(aiMessage.tool_calls ?? []).toHaveLength(0);
+        expect(aiMessage.content as string).toContain('STATS');
+        expect(aiMessage.content as string).toContain('DATE_TRUNC');
+
+        expect(messages[1]).toBeInstanceOf(HumanMessage);
+        const userContent = (messages[1] as HumanMessage).content as string;
+        // The fetched documentation must remain in context for the generation step.
+        expect(userContent).toContain('STATS docs');
+        expect(userContent).toContain('DATE_TRUNC docs');
+      });
+
+      it('uses tool call + tool result format when withoutToolCalls=false', () => {
+        const messages = formatAction(action, false);
+        expect(messages).toHaveLength(2);
+
+        expect(messages[0]).toBeInstanceOf(AIMessage);
+        const aiMessage = messages[0] as AIMessage;
+        expect(aiMessage.tool_calls).toHaveLength(1);
+        expect(aiMessage.tool_calls?.[0].name).toBe('request_documentation');
+        expect(aiMessage.tool_calls?.[0].args).toEqual({ keywords: action.requestedKeywords });
+
+        expect(messages[1]).toBeInstanceOf(ToolMessage);
+        const toolContent = JSON.parse((messages[1] as ToolMessage).content as string);
+        expect(toolContent.documentation).toEqual(action.fetchedDoc);
       });
     });
   });
