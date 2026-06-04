@@ -64,11 +64,15 @@ if [ -n "$SAVE_SNAPSHOT_FLAG" ]; then
   buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
 fi
 
-if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ] && [ -n "${SLACK_BOT_TOKEN:-}" ]; then
+if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
-  # shellcheck disable=SC2086
-  node "$SLACK_SCRIPT" "$FALLOW_JSON" \
-    --owners $FALLOW_OWNERS \
-    --channel "${SLACK_NOTIFICATIONS_CHANNEL:-#search-code-quality-check-test}" \
-    --build-url "${BUILDKITE_BUILD_URL:-}"
+  if [ -z "${SLACK_BOT_TOKEN:-}" ]; then
+    echo "Skipping: SLACK_BOT_TOKEN is not set"
+  else
+    # shellcheck disable=SC2086
+    node "$SLACK_SCRIPT" "$FALLOW_JSON" \
+      --owners $FALLOW_OWNERS \
+      --channel "${SLACK_NOTIFICATIONS_CHANNEL:-#search-code-quality-check-test}" \
+      --build-url "${BUILDKITE_BUILD_URL:-}"
+  fi
 fi
