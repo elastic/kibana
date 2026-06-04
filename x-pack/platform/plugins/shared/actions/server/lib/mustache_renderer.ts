@@ -10,7 +10,11 @@ import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
-export type Escape = 'markdown' | 'slack' | 'json' | 'none';
+export type Escape = 'markdown' | 'slack' | 'json' | 'none' | 'html';
+
+// Capture Mustache's built-in HTML escape before any render calls can change it.
+// This is the default Mustache.escape: it escapes &, <, >, ", ', /, `, and =.
+const mustacheEscapeHtml = Mustache.escape;
 
 type Variables = Record<string, unknown>;
 
@@ -142,6 +146,7 @@ function getEscape(escape: Escape): (value: unknown) => string {
   if (escape === 'markdown') return escapeMarkdown;
   if (escape === 'slack') return escapeSlack;
   if (escape === 'json') return escapeJSON;
+  if (escape === 'html') return mustacheEscapeHtml;
   return escapeNone;
 }
 
