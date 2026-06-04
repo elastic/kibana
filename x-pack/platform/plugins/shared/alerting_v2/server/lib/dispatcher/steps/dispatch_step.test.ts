@@ -81,10 +81,12 @@ describe('DispatchStep', () => {
       expect.objectContaining({ id: 'workflow-1', name: 'Test Workflow' }),
       'default',
       expect.objectContaining({
-        id: 'g1',
-        policyId: 'p1',
-        groupKey: group.groupKey,
-        episodes: group.episodes,
+        payload: expect.objectContaining({
+          id: 'g1',
+          policyId: 'p1',
+          groupKey: group.groupKey,
+          episodes: group.episodes,
+        }),
       }),
       expect.objectContaining({
         headers: expect.objectContaining({
@@ -329,7 +331,9 @@ describe('DispatchStep', () => {
       expect.anything(),
       expect.anything(),
       expect.objectContaining({
-        rules: { 'rule-1': { name: 'CPU spike monitor' } },
+        payload: expect.objectContaining({
+          rules: { 'rule-1': { name: 'CPU spike monitor' } },
+        }),
       }),
       expect.anything(),
       expect.anything()
@@ -364,7 +368,7 @@ describe('DispatchStep', () => {
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.objectContaining({ rules: {} }),
+      expect.objectContaining({ payload: expect.objectContaining({ rules: {} }) }),
       expect.anything(),
       expect.anything()
     );
