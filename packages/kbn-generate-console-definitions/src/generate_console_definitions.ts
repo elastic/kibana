@@ -16,6 +16,7 @@ import type {
   EndpointDescription,
 } from '@kbn/console-plugin/common/types';
 import { generateQueryParams } from './generate_query_params';
+import { generateBodyParams } from './generate_body_params';
 import { generateAvailability } from './generate_availability';
 import type { SpecificationTypes } from './types';
 import { findTypeDefinition } from './helpers';
@@ -55,6 +56,7 @@ const generateServerlessDocumentation = (
 interface GeneratedParameters {
   urlParams: DefinitionUrlParams;
   urlComponents: DefinitionUrlParams;
+  bodyParams: Record<string, unknown>;
 }
 const generateParameters = (
   endpoint: SpecificationTypes.Endpoint,
@@ -71,19 +73,23 @@ const generateParameters = (
 
   const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
   const urlComponents = generateUrlComponents(requestType as SpecificationTypes.Request, schema);
-  return { urlParams, urlComponents };
+  const bodyParams = generateBodyParams(requestType as SpecificationTypes.Request, schema);
+  return { urlParams, urlComponents, bodyParams };
 };
 
 const addParams = (
   definition: EndpointDescription,
   params: GeneratedParameters
 ): EndpointDescription => {
-  const { urlParams, urlComponents } = params;
+  const { urlParams, urlComponents, bodyParams } = params;
   if (Object.keys(urlParams).length > 0) {
     definition.url_params = urlParams;
   }
   if (Object.keys(urlComponents).length > 0) {
     definition.url_components = urlComponents;
+  }
+  if (Object.keys(bodyParams).length > 0) {
+    definition.data_autocomplete_rules = bodyParams;
   }
   return definition;
 };
