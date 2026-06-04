@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
     - alerting_v2
     - apm
@@ -9,11 +10,14 @@ plugins:
     - banners
     - cloud_security_posture
     - console
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
+    - data_view_editor
     - data_views
+    - data_view_management
     - discover
     - discover_enhanced
     - entity_store
@@ -22,12 +26,18 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - graph
+    - home
+    - index_lifecycle_management
     - index_management
     - infra
     - intercepts
     - lens
     - logstash
+    - management
     - maps
+    - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
@@ -47,6 +57,7 @@ plugins:
     - synthetics
     - transform
     - triggers_actions_ui
+    - unified_search
     - uptime
     - ux
     - workflows_extensions

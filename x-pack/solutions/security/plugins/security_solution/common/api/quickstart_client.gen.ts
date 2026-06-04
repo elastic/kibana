@@ -3043,7 +3043,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
     return this.kbnClient
       .request<RunScriptActionResponse>({
-        path: '/api/endpoint/action/runscript',
+        path: '/api/endpoint/action/run_script',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
