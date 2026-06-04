@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'agentContextLayer.smlIndexAttachment',
-    handlerHash: '4aac53ae2de88200a49ff9881ca43d548d966a91502ede2605951a90ea0bdd5a',
+    handlerHash: '8a9316425c5d8aa467ee6bb5a31508cd1bfcf04d82e6033fed7b89008046a2c7',
   },
   {
     id: 'ai.agent',
