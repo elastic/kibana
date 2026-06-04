@@ -82,11 +82,23 @@ export class ReferencedPanelManager {
     const panelReference = references.find(
       (r) => r.name.includes(uid) && r.type === savedObjectType
     );
-    // A reference of the panel was not found
+    // A reference of the panel was not found.
+    //
+    // This is a recoverable condition: the panel is silently skipped from
+    // suggested-dashboards scoring and the endpoint still returns
+    // successfully. We log at `warn` (not `error`) to avoid inflating the
+    // server error metric, and we keep panel/dashboard identifiers out of
+    // the message string so the log can be aggregated by message without
+    // exploding cardinality. The identifiers stay searchable via `labels`.
     if (!panelReference) {
-      this.logger.error(
-        `Reference for panel of type ${type} (saved object type ${savedObjectType}) and uid ${uid} was not found in dashboard with id ${dashboardId}`
-      );
+      this.logger.warn(`Reference for dashboard panel not found in dashboard.references`, {
+        labels: {
+          panel_embeddable_type: type,
+          panel_saved_object_type: savedObjectType,
+          panel_uid: uid,
+          dashboard_id: dashboardId,
+        },
+      });
       return;
     }
 
