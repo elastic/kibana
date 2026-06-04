@@ -71,7 +71,6 @@ export class SearchMethodsService implements ISearchMethods {
     );
     return {
       rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
     };
   }
 
@@ -93,7 +92,6 @@ export class SearchMethodsService implements ISearchMethods {
     );
     return {
       rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
     };
   }
 
@@ -119,7 +117,6 @@ export class SearchMethodsService implements ISearchMethods {
 
     return {
       rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
       pagination: this.buildDslPagination(response.rawResponse, params, options),
     };
   }
@@ -141,7 +138,6 @@ export class SearchMethodsService implements ISearchMethods {
     );
     return {
       rawResponse: response.rawResponse,
-      requestParams: response.requestParams,
     };
   }
 
@@ -186,7 +182,6 @@ export class SearchMethodsService implements ISearchMethods {
     return {
       rawResponse: response.rawResponse,
       took: response.took,
-      requestParams: response.requestParams,
     };
   }
 
@@ -338,7 +333,6 @@ export class SearchMethodsService implements ISearchMethods {
 
         return {
           rawResponse: nextResponse.rawResponse,
-          requestParams: nextResponse.requestParams,
           pagination: self.buildDslPagination(nextResponse.rawResponse, nextParams, options),
         };
       },
