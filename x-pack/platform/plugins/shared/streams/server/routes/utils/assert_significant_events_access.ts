@@ -20,14 +20,28 @@ interface SignificantEventsAccessContext {
   uiSettingsClient: IUiSettingsClient;
 }
 
-type RequirementCheckResult = { met: true } | { met: false; reason: string };
+type RequirementCheckResult = { met: true } | { met: false; errorMessage: string };
 
 interface SignificantEventsRequirement {
   /** Resolves whether the requirement is satisfied for the given context. */
   check: (context: SignificantEventsAccessContext) => Promise<RequirementCheckResult>;
   /** Builds the error thrown when the requirement is unmet. */
-  toError: (reason: string) => Error;
+  toError: (errorMessage: string) => Error;
 }
+
+/** Significant events depends on a handful of optional plugins simply being present. */
+type RequiredPlugin = 'workflowsExtensions' | 'searchInferenceEndpoints' | 'agentBuilder';
+
+const requirePlugin = (plugin: RequiredPlugin): SignificantEventsRequirement => ({
+  check: async ({ server }) =>
+    server[plugin]
+      ? { met: true }
+      : {
+          met: false,
+          errorMessage: `The "${plugin}" plugin is not available in this environment. Significant events relies on it.`,
+        },
+  toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
+});
 
 /**
  * The single source of truth for everything that must be true for significant
@@ -36,77 +50,47 @@ interface SignificantEventsRequirement {
  */
 const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
   {
-    check: async ({ server }) => {
-      const met = server.core.pricing.isFeatureAvailable(
-        STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-      );
-      return met
-        ? { met }
-        : { met, reason: 'Significant events is not available on the current pricing tier.' };
-    },
-    toError: (reason) => new SecurityError(reason),
-  },
-  {
-    check: async ({ licensing }) => {
-      const license = await licensing.getLicense();
-      const met = license.hasAtLeast('enterprise');
-      return met
-        ? { met }
-        : { met, reason: 'An Enterprise license or higher is required to use significant events.' };
-    },
-    toError: (reason) => forbidden(reason),
-  },
-  {
-    check: async ({ uiSettingsClient }) => {
-      const enabled = await uiSettingsClient.get<boolean>(
-        OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
-      );
-      return enabled
+    check: async ({ server }) =>
+      server.core.pricing.isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
         ? { met: true }
         : {
             met: false,
-            reason: `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`,
-          };
-    },
-    toError: (reason) => new FeatureNotEnabledError(reason),
+            errorMessage: 'Significant events is not available on the current pricing tier.',
+          },
+    toError: (errorMessage) => new SecurityError(errorMessage),
   },
   {
-    check: async ({ server }) => {
-      return server.workflowsExtensions
+    check: async ({ licensing }) =>
+      (await licensing.getLicense()).hasAtLeast('enterprise')
         ? { met: true }
         : {
             met: false,
-            reason:
-              'The Workflows feature is not available in this environment. Significant events relies on Workflows.',
-          };
-    },
-    toError: (reason) => new FeatureNotEnabledError(reason),
+            errorMessage: 'An Enterprise license or higher is required to use significant events.',
+          },
+    toError: (errorMessage) => forbidden(errorMessage),
   },
   {
-    check: async ({ server }) => {
-      return server.searchInferenceEndpoints
+    check: async ({ uiSettingsClient }) =>
+      (await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS))
         ? { met: true }
         : {
             met: false,
-            reason:
-              'The inference endpoints feature is not available. Significant events requires inference connectors.',
-          };
-    },
-    toError: (reason) => new FeatureNotEnabledError(reason),
+            errorMessage: `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`,
+          },
+    toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
   },
-  {
-    check: async ({ server }) => {
-      return server.agentBuilder
-        ? { met: true }
-        : {
-            met: false,
-            reason:
-              'Agent Builder is not available in this environment. Significant events relies on Agent Builder.',
-          };
-    },
-    toError: (reason) => new FeatureNotEnabledError(reason),
-  },
+  requirePlugin('workflowsExtensions'),
+  requirePlugin('searchInferenceEndpoints'),
+  requirePlugin('agentBuilder'),
 ];
+
+const evaluateRequirements = (context: SignificantEventsAccessContext) =>
+  Promise.all(
+    significantEventsRequirements.map(async (requirement) => ({
+      requirement,
+      result: await requirement.check(context),
+    }))
+  );
 
 /**
  * Asserts that every significant events requirement is met. Throws the
@@ -116,15 +100,22 @@ const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
 export async function assertSignificantEventsAccess(
   context: SignificantEventsAccessContext
 ): Promise<void> {
-  const results = await Promise.all(
-    significantEventsRequirements.map(async (requirement) => ({
-      requirement,
-      result: await requirement.check(context),
-    }))
-  );
+  const results = await evaluateRequirements(context);
 
-  const firstUnmet = results.find(({ result }) => !result.met);
-  if (firstUnmet && !firstUnmet.result.met) {
-    throw firstUnmet.requirement.toError(firstUnmet.result.reason);
+  for (const { requirement, result } of results) {
+    if (!result.met) {
+      throw requirement.toError(result.errorMessage);
+    }
   }
+}
+
+/**
+ * Returns whether every significant events requirement is met, without
+ * throwing. Used by the availability endpoint that the UI calls.
+ */
+export async function isSignificantEventsAvailable(
+  context: SignificantEventsAccessContext
+): Promise<boolean> {
+  const results = await evaluateRequirements(context);
+  return results.every(({ result }) => result.met);
 }

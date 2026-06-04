@@ -29,7 +29,9 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
+import { useSignificantEventsAvailability } from '../../../hooks/sig_events/use_significant_events_availability';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
@@ -56,6 +58,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     },
   } = useKibana();
   const queryClient = useQueryClient();
+  const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
     .trim()
@@ -198,8 +201,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const isGenerateButtonDisabled =
     knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
 
-  if (isKnowledgeIndicatorsLoading) {
+  if (isAvailabilityLoading || isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
+  }
+
+  if (!isAvailable) {
+    return <SignificantEventsNotEnabledPrompt />;
   }
 
   if (isEmpty) {
