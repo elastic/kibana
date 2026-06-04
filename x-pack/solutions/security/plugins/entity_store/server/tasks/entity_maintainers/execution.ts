@@ -131,6 +131,9 @@ export async function executeMaintainerRun({
 
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+  const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
+    projectRouting: 'space',
+  }).asCurrentUser;
   const crudClient = new CRUDClient({
     logger,
     esClient,
@@ -161,6 +164,7 @@ export async function executeMaintainerRun({
         run,
         abortController,
         esClient,
+        cpsEsClient,
         crudClient,
         id,
         analytics,
@@ -191,6 +195,7 @@ export async function runEntityMaintainerTask({
   run,
   abortController,
   esClient,
+  cpsEsClient,
   crudClient,
   id,
   analytics,
@@ -203,6 +208,7 @@ export async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
+  cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
   id: string;
   analytics: TelemetryReporter;
@@ -233,6 +239,7 @@ export async function runEntityMaintainerTask({
         logger,
         fakeRequest,
         esClient,
+        cpsEsClient,
         crudClient,
         telemetry: telemetryClient,
       });
@@ -249,6 +256,7 @@ export async function runEntityMaintainerTask({
       logger,
       fakeRequest,
       esClient,
+      cpsEsClient,
       crudClient,
       telemetry: telemetryClient,
     });

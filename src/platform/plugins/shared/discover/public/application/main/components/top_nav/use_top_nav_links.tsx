@@ -140,14 +140,8 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      actions: {
-        updateAdHocDataViews: async (adHocDataViewList) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
-        },
-      },
     }),
-    [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
+    [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
   const canCreateESQLRule = !!services.capabilities.alertingVTwo;
@@ -165,6 +159,7 @@ export const useTopNavLinks = ({
         services,
         tabId: currentTab.id,
         getState,
+        dispatch,
         subscribe,
         showCreateRuleV2,
       });
@@ -183,7 +178,9 @@ export const useTopNavLinks = ({
             trackingProps: { openedFrom: 'background search button' },
             onBackgroundSearchOpened: ({ session, event }) => {
               event?.preventDefault();
-              dispatch(internalStateActions.openSearchSessionInNewTab({ searchSession: session }));
+              void dispatch(
+                internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+              );
             },
             onClose: onFinishAction,
           });
