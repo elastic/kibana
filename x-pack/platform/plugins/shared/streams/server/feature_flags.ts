@@ -243,7 +243,7 @@ export function registerFeatureFlags(
             value: '{}',
             description: i18n.translate('xpack.streams.sigEventsLinkedCodeIndicesDescription', {
               defaultMessage:
-                'Experimental. JSON object mapping stream names (or glob patterns such as "logs.checkout.*") to the Semantic Code Search index that holds their source code (e.g. {"logs.checkout": "code-acme_checkout-service"}). When set and code grounding is enabled, Significant Events query generation can consult the linked source code to verify queries.',
+                'Experimental. JSON object mapping stream names (or glob patterns such as "logs.checkout.*") to the Semantic Code Search index that holds their source code (e.g. \'{"logs.checkout": "code-acme_checkout-service"}\'). When set and code grounding is enabled, Significant Events query generation can consult the linked source code to verify queries.',
             }),
             type: 'json',
             schema: schema.recordOf(schema.string(), schema.string()),
