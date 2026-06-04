@@ -16,6 +16,7 @@ const createMocks = () => {
       getContext: jest.fn(() => ({})),
       getEsClientAsUser: jest.fn(() => ({})),
       getFakeRequest: jest.fn(() => null),
+      callKibanaApi: jest.fn(),
     },
     abortController: new AbortController(),
     node: { configuration: { with: { key: 'value' } } },
@@ -158,6 +159,48 @@ describe('CustomStepImpl', () => {
     );
 
     expect(typeof (impl as any).onCancel).toBe('function');
+  });
+
+  it('exposes callKibanaApi on the handler contextManager and forwards calls', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    stepExecutionRuntime.contextManager.callKibanaApi.mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { ok: true },
+    });
+
+    let observedCallKibanaApi: unknown;
+    const handler = jest.fn(async (ctx: any) => {
+      observedCallKibanaApi = ctx.contextManager.callKibanaApi;
+      const result = await ctx.contextManager.callKibanaApi({ method: 'GET', path: '/api/status' });
+      return { output: result };
+    });
+    const stepDefinition = { handler };
+
+    const node = {
+      stepId: 'custom-step',
+      stepType: 'my-custom-type',
+      configuration: { with: {}, 'max-step-size': undefined },
+    };
+
+    const impl = new CustomStepImpl(
+      node as any,
+      stepDefinition as any,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(typeof observedCallKibanaApi).toBe('function');
+    expect(stepExecutionRuntime.contextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/api/status',
+      signal: stepExecutionRuntime.abortController.signal,
+    });
+    expect(result.output).toEqual({ status: 200, headers: {}, body: { ok: true } });
   });
 
   it('getInput renders the with data from node configuration', () => {

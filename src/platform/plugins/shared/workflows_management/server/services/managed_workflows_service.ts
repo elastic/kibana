@@ -575,6 +575,7 @@ export class ManagedWorkflowsService {
       id: workflowDocumentId,
       yaml,
       actor: MANAGED_WORKFLOW_SYSTEM_USER,
+      lightweightValidation: true,
       now,
       spaceId,
     });
