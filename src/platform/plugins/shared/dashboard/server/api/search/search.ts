@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG, getMeta } from '@kbn/as-code-shared-schemas';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG, getMeta } from '@kbn/as-code-shared-schemas';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { transformDashboardOut } from '../transforms';
 import type {
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
   LegacyDashboardSearchRequestParams,
   LegacyDashboardSearchResponseBody,
 } from './types';
-import { transformDashboardOut } from '../transforms';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams
+  searchParams: DashboardSearchRequestParams | LegacyDashboardSearchRequestParams,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const useAsCodeSearchSchemas = await core.featureFlags.getBooleanValue(
@@ -86,7 +89,7 @@ export async function search(
     dashboards: soResponse.saved_objects.map((so) => {
       const {
         dashboardState: { description, tags, time_range, title },
-      } = transformDashboardOut(so.attributes, so.references);
+      } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
 
       return {
         id: so.id,
