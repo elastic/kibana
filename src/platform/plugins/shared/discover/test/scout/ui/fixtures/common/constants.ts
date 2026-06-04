@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
-
-/**
- * Default tags for Discover core / platform specs that should run across all
- * stateful + serverless deployment types.
- */
-export const DISCOVER_CORE_TAGS = tags.deploymentAgnostic;
-
 /**
  * Standard `kbn_archiver/discover` archive. Loads the `logstash-*` data view
  * and the other saved objects most Discover specs rely on.
