@@ -45,8 +45,10 @@ export const installWorkflows = async ({
   client: PluginScopedManagedWorkflowsApi;
   isSignificantEventsMemoryEnabled: boolean;
 }): Promise<void> => {
-  await Promise.all(
-    ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) => client.install(workflowId, { spaceId })),
+  await Promise.all([
+    ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) =>
+      client.install(workflowId, { spaceId })
+    ),
     ...(isSignificantEventsMemoryEnabled ? [installMemoryWorkflows({ client })] : []),
-  );
+  ]);
 };
