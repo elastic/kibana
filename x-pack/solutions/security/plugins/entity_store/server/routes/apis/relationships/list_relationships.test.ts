@@ -8,9 +8,10 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { API_VERSIONS, ListEntityRelationshipsRequestQuery } from '../../../../common';
+import { API_VERSIONS } from '../../../../common';
 import {
   paramsSchema,
+  querySchema,
   registerListRelationships,
   type RelationshipRecord,
 } from './list_relationships';
@@ -90,19 +91,15 @@ describe('registerListRelationships route', () => {
   });
 
   it('validates the query schema and rejects invalid sort_order', () => {
-    expect(ListEntityRelationshipsRequestQuery.safeParse({ sort_order: 'sideways' }).success).toBe(
-      false
-    );
+    expect(querySchema.safeParse({ sort_order: 'sideways' }).success).toBe(false);
   });
 
   it('rejects an invalid ISO-8601 `from` query param', () => {
-    expect(ListEntityRelationshipsRequestQuery.safeParse({ from: 'not-a-date' }).success).toBe(
-      false
-    );
+    expect(querySchema.safeParse({ from: 'not-a-date' }).success).toBe(false);
   });
 
   it('accepts an empty query object (all params optional)', () => {
-    expect(ListEntityRelationshipsRequestQuery.safeParse({}).success).toBe(true);
+    expect(querySchema.safeParse({}).success).toBe(true);
   });
 
   it('forwards entityId + query params to crudClient.listRelationshipMetadata', async () => {
