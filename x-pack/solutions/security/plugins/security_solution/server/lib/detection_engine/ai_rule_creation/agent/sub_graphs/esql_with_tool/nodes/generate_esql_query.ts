@@ -68,17 +68,51 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         sendUiEvent: () => {},
       };
 
-      // Generate ES|QL query using agent_builder tool
-      const esqlResponse = await generateEsql({
+      // First attempt: generate ES|QL query with NO retries to preserve refusal responses
+      const esqlResponseFirst = await generateEsql({
         nlQuery: state.userQuery,
         additionalInstructions,
         executeQuery: false,
-        maxRetries: 3,
+        maxRetries: 0,
         model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
         esClient,
         logger,
         events: toolEvents,
       });
+
+      // Detect explicit refusal before any retry loop can override it
+      const refusalPattern = /ERROR:\s*UNSUPPORTED_DETECTION/i;
+      if (
+        esqlResponseFirst.answer &&
+        refusalPattern.test(esqlResponseFirst.answer)
+      ) {
+        events?.reportProgress(
+          'The requested detection is not supported by the available data sources'
+        );
+        return {
+          ...state,
+          errors: [
+            `The requested detection is not supported by the available data sources: ${esqlResponseFirst.answer}`,
+          ],
+        };
+      }
+
+      // If first attempt produced a valid query, use it directly
+      let esqlResponse = esqlResponseFirst;
+
+      // If first attempt failed without refusal, retry up to 3 times for syntax corrections
+      if (!esqlResponse.query && !esqlResponse.error) {
+        esqlResponse = await generateEsql({
+          nlQuery: state.userQuery,
+          additionalInstructions,
+          executeQuery: false,
+          maxRetries: 3,
+          model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
+          esClient,
+          logger,
+          events: toolEvents,
+        });
+      }
 
       if (esqlResponse.error) {
         events?.reportProgress(`Failed to generate ES|QL query: ${esqlResponse.error}`);
@@ -93,20 +127,6 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         return {
           ...state,
           errors: ['Generated ES|QL query is empty'],
-        };
-      }
-
-      // Post-validation: detect refusal responses that may have been overridden by retry loops
-      const refusalPattern = /ERROR:\s*UNSUPPORTED_DETECTION/i;
-      if (esqlResponse.answer && refusalPattern.test(esqlResponse.answer)) {
-        events?.reportProgress(
-          'The requested detection is not supported by the available data sources'
-        );
-        return {
-          ...state,
-          errors: [
-            `The requested detection is not supported by the available data sources: ${esqlResponse.answer}`,
-          ],
         };
       }
 
