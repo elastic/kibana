@@ -24,7 +24,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TransactionGroup } from '../../transactions_table/types';
 import { TransactionsTable } from '../../transactions_table';
 import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
-import { useServiceFlyoutTransactions } from './use_service_flyout_transactions';
+import { useServiceFlyoutTransactions } from './hooks/use_service_flyout_transactions';
 
 const MAX_GROUPS_TOOLTIP = (
   <EuiText size="s" style={{ maxWidth: 448 }}>
