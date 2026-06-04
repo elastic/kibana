@@ -67,7 +67,7 @@ export const createGetInstalledRulesMitreCoverageTool = ({
   id: GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Returns MITRE ATT&CK coverage across the user\'s currently-installed detection rules. ' +
+    "Returns MITRE ATT&CK coverage across the user's currently-installed detection rules. " +
     'Includes total rule count, count with MITRE mappings, and per-tactic and per-technique ' +
     'rule counts with nested subtechnique counts. ' +
     'Only returns tactics and techniques with count > 0 — absence means zero coverage. ' +

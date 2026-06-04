@@ -65,9 +65,7 @@ export const createGetInstallableCatalogOverviewTool = ({
       const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
       const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
-      const installedRuleVersionsMap = new Map(
-        installedRuleVersions.map((v) => [v.rule_id, v])
-      );
+      const installedRuleVersionsMap = new Map(installedRuleVersions.map((v) => [v.rule_id, v]));
 
       const installableVersions = await getInstallableRuleVersions(
         ruleAssetsClient,
