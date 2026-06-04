@@ -1,5 +1,5 @@
 {
-  "sha1": "0bf7212c8111b8686d03dd4ffd5a0be4d122bf62",
+  "sha1": "60aa0d694a3d18c30df9b297e94e774e0a184f2d",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -24,13 +24,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -50,13 +44,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -76,13 +64,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -102,13 +84,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
@@ -128,13 +104,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -154,13 +124,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -180,13 +144,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -206,13 +164,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -232,13 +184,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
@@ -258,13 +204,7 @@
         "@local-stateful-observability_complete",
         "@cloud-stateful-observability_complete",
         "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
