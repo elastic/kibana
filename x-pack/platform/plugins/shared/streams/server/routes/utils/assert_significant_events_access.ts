@@ -29,8 +29,17 @@ interface SignificantEventsRequirement {
   toError: (errorMessage: string) => Error;
 }
 
-/** Significant events depends on a handful of optional plugins simply being present. */
-type RequiredPlugin = 'workflowsExtensions' | 'searchInferenceEndpoints' | 'agentBuilder';
+/**
+ * Significant events depends on a handful of optional plugins simply being
+ * present. To require a new plugin, add its name to this array.
+ */
+const requiredPlugins = [
+  'workflowsExtensions',
+  'searchInferenceEndpoints',
+  'agentBuilder',
+] as const satisfies ReadonlyArray<keyof StreamsServer>;
+
+type RequiredPlugin = (typeof requiredPlugins)[number];
 
 const requirePlugin = (plugin: RequiredPlugin): SignificantEventsRequirement => ({
   check: async ({ server }) =>
@@ -79,9 +88,7 @@ const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
           },
     toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
   },
-  requirePlugin('workflowsExtensions'),
-  requirePlugin('searchInferenceEndpoints'),
-  requirePlugin('agentBuilder'),
+  ...requiredPlugins.map(requirePlugin),
 ];
 
 const evaluateRequirements = (context: SignificantEventsAccessContext) =>
