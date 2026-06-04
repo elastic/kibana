@@ -7,9 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
-import * as jest from 'jest-mock';
-import '@elastic/charts/dist/theme_only_light.css';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 
-window.jest = jest;
-export const decorators = [EuiThemeProviderDecorator];
+export interface ActionBase {
+  id: string;
+  name: string;
+  onClick?: () => void;
+  href?: string;
+  icon?: string;
+  ebt: EbtClickAttrs;
+}
+
+export type ActionSubItem = ActionBase;
+
+export interface Action extends ActionBase {
+  items?: ActionSubItem[];
+}
+
+export interface ActionGroup {
+  id: string;
+  groupLabel?: string;
+  actions: Action[];
+}
+
+export type ActionGroups = ActionGroup[];
