@@ -17,7 +17,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { agentPolicyService } from '../services';
 import { createAgentPolicyMock } from '../../common/mocks';
 import { createAppContextStartContractMock } from '../mocks';
-import { getAgentsById, getAgentsByKuery } from '../services/agents';
+import { getAgentsByKuery } from '../services/agents';
 
 import { appContextService } from '../services';
 
@@ -54,7 +54,6 @@ const MOCK_TASK_INSTANCE = {
 
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
-const mockedGetAgentsById = getAgentsById as jest.MockedFunction<typeof getAgentsById>;
 
 describe('UnenrollInactiveAgentsTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -72,16 +71,19 @@ describe('UnenrollInactiveAgentsTask', () => {
       id: 'agent-1',
       policy_id: 'agent-policy-2',
       status: 'inactive',
+      active: true,
     },
     {
       id: 'agent-2',
       policy_id: 'agent-policy-1',
       status: 'inactive',
+      active: true,
     },
     {
       id: 'agent-3',
       policy_id: 'agent-policy-1',
       status: 'active',
+      active: true,
     },
   ];
 
@@ -203,8 +205,6 @@ describe('UnenrollInactiveAgentsTask', () => {
       const now = new Date('2025-06-01T02:00:00.000Z');
       jest.useFakeTimers().setSystemTime(now);
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
-      // Schedule phase finds no eligible agents so we can isolate the execute phase
-      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
       esClient.search
         // executeDueUnenrollments: find due UNENROLL actions
@@ -225,14 +225,18 @@ describe('UnenrollInactiveAgentsTask', () => {
         // executeDueUnenrollments: fetch all CANCEL actions (none)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
-      // getAgentsById for re-validation returns the agents still inactive
-      mockedGetAgentsById.mockResolvedValueOnce(agents as any);
+      // execute phase: re-validation returns agent-1 and agent-2 (still active, showInactive: true)
+      mockedGetAgentsByKuery.mockResolvedValueOnce({
+        agents: agents.filter((a) => a.id !== 'agent-3'),
+      } as any);
+      // schedule phase finds no eligible agents so we can isolate the execute phase
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
       await runTask();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(
         undefined,
         expect.anything(),
-        agents.filter((a) => a.status === 'inactive'),
+        agents.filter((a) => a.id !== 'agent-3'),
         expect.objectContaining({
           revoke: true,
           force: true,
@@ -288,8 +292,6 @@ describe('UnenrollInactiveAgentsTask', () => {
       const now = new Date('2025-06-01T02:00:00.000Z');
       jest.useFakeTimers().setSystemTime(now);
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
-      // Schedule phase finds no eligible agents
-      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
       esClient.search
         // executeDueUnenrollments: find due UNENROLL action
@@ -310,8 +312,12 @@ describe('UnenrollInactiveAgentsTask', () => {
         // executeDueUnenrollments: fetch all CANCEL actions (none)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
-      // agent is no longer inactive (getAgentsById returns agent with active status)
-      mockedGetAgentsById.mockResolvedValueOnce([{ id: 'agent-1', status: 'active' }] as any);
+      // execute phase re-validation: agent is already unenrolled (active: false)
+      mockedGetAgentsByKuery.mockResolvedValueOnce({
+        agents: [{ id: 'agent-1', active: false }],
+      } as any);
+      // schedule phase finds no eligible agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
       await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();

@@ -27,11 +27,11 @@ import {
   SO_SEARCH_LIMIT,
   SCHEDULED_UNENROLL_ACTION_ID_PREFIX,
 } from '../../common/constants';
-import { getAgentsById, getAgentsByKuery } from '../services/agents';
+import { getAgentsByKuery } from '../services/agents';
 import { bulkCreateAgentActionResults } from '../services/agents/actions';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService, appContextService, auditLoggingService } from '../services';
-import type { Agent, AgentPolicy, FleetServerAgentAction } from '../types';
+import type { AgentPolicy, FleetServerAgentAction } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.3';
@@ -324,16 +324,25 @@ export class UnenrollInactiveAgentsTask {
         continue;
       }
 
-      // Re-validate agents are still inactive. Agent IDs in action docs are ES document _ids,
-      // so use getAgentsById (terms on _id) rather than a kuery on a named field.
-      const agentDocs = await getAgentsById(esClient, soClient, action.agents);
-      const stillInactiveAgents = agentDocs.filter(
-        (a): a is Agent => !('notFound' in a) && a.status === 'inactive'
-      );
+      // Re-validate agents haven't already been unenrolled or re-enrolled.
+      // Use getAgentsByKuery with showInactive:true so that inactive agents (whose
+      // status runtime field is computed from inactivity_timeout, not unenroll_timeout)
+      // are not filtered out by the default ACTIVE_AGENT_CONDITION. Filter by agent.id
+      // since getAgentsById uses _filterAgents which excludes inactive agents.
+      const agentIdsKuery = `${AGENTS_PREFIX}.agent.id:(${action.agents
+        .map((id) => `"${id}"`)
+        .join(' OR ')})`;
+      const { agents: agentDocs } = await getAgentsByKuery(esClient, soClient, {
+        kuery: agentIdsKuery,
+        showInactive: true,
+        page: 1,
+        perPage: action.agents.length,
+      });
+      const stillInactiveAgents = agentDocs.filter((a) => a.active && !a.unenrolled_at);
 
       if (!stillInactiveAgents.length) {
         this.logger.debug(
-          `[UnenrollInactiveAgentsTask] No longer-inactive agents for action ${action.action_id}, skipping`
+          `[UnenrollInactiveAgentsTask] No eligible agents for action ${action.action_id}, skipping`
         );
         // Write results so the action resolves to COMPLETE in the activity flyout
         // rather than staying IN_PROGRESS indefinitely.

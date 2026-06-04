@@ -59,6 +59,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
       if (policyIdSpace1) {
         await apiClient.deleteAgentPolicy(policyIdSpace1, TEST_SPACE_1);
+        await spaces.delete(TEST_SPACE_1);
       }
     });
 
@@ -76,6 +77,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await es.deleteByQuery({
         index: '.fleet-actions',
         ignore_unavailable: true,
+        refresh: true,
         query: {
           match_all: {},
         },
@@ -120,6 +122,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     it('should unenroll inactive agents when policy has unenroll_timeout set in non-default space', async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
+      await spaces.createTestSpace(TEST_SPACE_1);
       const spaceResp = await apiClient.createAgentPolicy(TEST_SPACE_1, {
         name: 'Test policy for unenroll inactive in space1',
         namespace: 'default',
