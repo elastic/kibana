@@ -204,11 +204,18 @@ Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>`
 
 ### 1.3 On-demand evals (Buildkite)
 
-Run a suite on any branch without a PR:
+Run a suite on any branch without a PR
 
-1. Open the [on-demand evals trigger](https://ci-stats.kibana.dev/trigger_evals_runner) in CI Stats (recommended), or [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand) on Buildkite directly
-2. In CI Stats: choose branch, suite, and model groups, then trigger. In Buildkite: click **New build**, select the branch (or commit) to evaluate
-3. Add environment variables (CI Stats sets these for you when using the wizard):
+a. **CI Stats (recommended)**
+
+1.  Open the [on-demand evals trigger](https://ci-stats.kibana.dev/trigger_evals_runner)
+2.  In CI Stats: choose branch, suite, and model groups, then trigger.
+
+b. **Buildkite directly:**
+
+1.  Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
+2.  Click **New build**, select branch/commit
+3.  Add environment variables:
 
 | Variable                  | Required           | Description                                                                 |
 | ------------------------- | ------------------ | --------------------------------------------------------------------------- |
@@ -221,7 +228,6 @@ Run a suite on any branch without a PR:
 | `EVAL_GREP`               | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)       |
 | `EVALUATION_REPETITIONS`  | no                 | Repeat each example N times (same as `--repetitions`)                       |
 
-When using Buildkite directly, under **Environment variables** (in New build options), add the required variables below — one `KEY=value` per line.
 Example:
 
 ```text
