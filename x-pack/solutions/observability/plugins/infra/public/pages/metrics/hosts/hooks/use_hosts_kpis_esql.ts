@@ -158,8 +158,10 @@ export const buildSemconvQuery = (
     });
   }
 
-  // The `WHERE state` pre-filter only matters for the state-scoped metrics.
-  const usesState = clauses.some((clause) => clause.key !== 'normalizedLoad1m');
+  // The `WHERE state` pre-filter only matters for clauses that scope by state.
+  const usesState = clauses.some((clause) =>
+    clause.perHost.some((expr) => expr.includes('WHERE state'))
+  );
   const preFilter = usesState
     ? '| WHERE state IN ("idle", "used", "free") OR state IS NULL'
     : undefined;
