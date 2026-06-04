@@ -78,14 +78,6 @@ import {
   QueryStreamBadge,
 } from '../stream_badges';
 
-const datePickerStyle = css`
-  .euiFormControlLayout,
-  .euiSuperDatePicker button,
-  .euiButton {
-    height: 40px;
-  }
-`;
-
 const TechnicalPreviewBadge = () => (
   <EuiBetaBadge
     tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
@@ -332,16 +324,8 @@ export function StreamsTreeTable({
 
   // Expand/Collapse all button for the name column header
   const expandCollapseAllButton = (
-    <EuiButtonIcon
-      size="xs"
-      iconType={allExpanded ? 'fold' : 'unfold'}
-      color="text"
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        handleExpandCollapseAll();
-      }}
-      data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
-      aria-label={
+    <EuiToolTip
+      content={
         allExpanded
           ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
               defaultMessage: 'Collapse all',
@@ -350,7 +334,28 @@ export function StreamsTreeTable({
               defaultMessage: 'Expand all',
             })
       }
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="xs"
+        iconType={allExpanded ? 'fold' : 'unfold'}
+        color="text"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          handleExpandCollapseAll();
+        }}
+        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+        aria-label={
+          allExpanded
+            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+                defaultMessage: 'Collapse all',
+              })
+            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+                defaultMessage: 'Expand all',
+              })
+        }
+      />
+    </EuiToolTip>
   );
 
   const streamsListStepProps = getStepPropsByStepId('streams_list');
@@ -385,318 +390,335 @@ export function StreamsTreeTable({
   );
 
   return (
-    <EuiInMemoryTable<TableRow>
-      loading={loading}
-      data-test-subj="streamsTable"
-      columns={[
-        {
-          field: 'nameSortKey',
-          name: nameColumnHeader,
-          sortable: (row: TableRow) => row.rootNameSortKey,
-          dataType: 'string',
-          render: (_: unknown, item: TableRow) => {
-            // Only show expand/collapse if tree mode is active and has children
-            const treeMode = shouldComposeTree(sortField);
-            const hasChildren = !!item.children && item.children.length > 0;
-            const isCollapsed = collapsed.has(item.stream.name);
-            return (
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                className={css`
-                  margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
-                `}
-              >
-                {treeMode && item.children && hasChildren && (
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
-                      color="text"
-                      size="m"
-                      data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
-                        item.stream.name
-                      }`}
-                      aria-label={
-                        isCollapsed
-                          ? i18n.translate(
-                              'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel',
-                              {
-                                defaultMessage: 'Collapsed node with {childCount} children',
-                                values: { childCount: item.children.length },
-                              }
-                            )
-                          : i18n.translate('xpack.streams.streamsTreeTable.expandedNodeAriaLabel', {
-                              defaultMessage: 'Expanded node with {childCount} children',
-                              values: { childCount: item.children.length },
-                            })
-                      }
-                      onClick={(e: React.MouseEvent) => {
-                        handleToggleCollapse(item.stream.name);
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      onKeyDown={(e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleToggleCollapse(item.stream.name);
+    <div
+      className={css`
+        .euiFilterButton__wrapper,
+        .euiFilterButton {
+          block-size: ${euiTheme.size.xl};
+        }
+      `}
+    >
+      <EuiInMemoryTable<TableRow>
+        loading={loading}
+        data-test-subj="streamsTable"
+        columns={[
+          {
+            field: 'nameSortKey',
+            name: nameColumnHeader,
+            sortable: (row: TableRow) => row.rootNameSortKey,
+            dataType: 'string',
+            render: (_: unknown, item: TableRow) => {
+              // Only show expand/collapse if tree mode is active and has children
+              const treeMode = shouldComposeTree(sortField);
+              const hasChildren = !!item.children && item.children.length > 0;
+              const isCollapsed = collapsed.has(item.stream.name);
+              return (
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  className={css`
+                    margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
+                  `}
+                >
+                  {treeMode && item.children && hasChildren && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
+                        color="text"
+                        size="m"
+                        data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
+                          item.stream.name
+                        }`}
+                        aria-label={
+                          isCollapsed
+                            ? i18n.translate(
+                                'xpack.streams.streamsTreeTable.collapsedNodeAriaLabel',
+                                {
+                                  defaultMessage: 'Collapsed node with {childCount} children',
+                                  values: { childCount: item.children.length },
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
+                                {
+                                  defaultMessage: 'Expanded node with {childCount} children',
+                                  values: { childCount: item.children.length },
+                                }
+                              )
                         }
-                      }}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </EuiFlexItem>
-                )}
-                {treeMode && !hasChildren && (
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
-                  <EuiLink
-                    data-test-subj={`streamsNameLink-${item.stream.name}`}
-                    href={router.link('/{key}', {
-                      path: { key: item.stream.name },
-                      query: { rangeFrom, rangeTo },
-                    })}
-                    onClick={(e: React.MouseEvent) => {
-                      e.preventDefault();
-                      router.push('/{key}', {
+                        onClick={(e: React.MouseEvent) => {
+                          handleToggleCollapse(item.stream.name);
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        onKeyDown={(e: React.KeyboardEvent) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleToggleCollapse(item.stream.name);
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {treeMode && !hasChildren && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
+                    <EuiLink
+                      data-test-subj={`streamsNameLink-${item.stream.name}`}
+                      href={router.link('/{key}', {
                         path: { key: item.stream.name },
                         query: { rangeFrom, rangeTo },
-                      });
-                    }}
-                  >
-                    <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
-                  </EuiLink>
-                  {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
-                    Streams.QueryStream.Definition.is(item.stream) ||
-                    (Streams.WiredStream.Definition.is(item.stream) &&
-                      isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
-                  {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
-                  {isDraftStream(item.stream) && <DraftStreamBadge />}
-                  {item.stream.name === LOGS_ROOT_STREAM_NAME &&
-                    !Streams.QueryStream.Definition.is(item.stream) && (
-                      <DeprecatedLogsBadge
-                        openFlyout={openFlyout}
-                        hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
-                      />
-                    )}
-                  {isRoot(item.stream.name) &&
-                    item.stream.name !== LOGS_ROOT_STREAM_NAME &&
-                    !item.data_stream &&
-                    !Streams.QueryStream.Definition.is(item.stream) && (
-                      <EuiToolTip
-                        position="right"
-                        content={i18n.translate(
-                          'xpack.streams.streamsTable.pendingDataStream.tooltip',
-                          {
-                            defaultMessage:
-                              'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
-                          }
-                        )}
-                      >
-                        <EuiBadge color="default">
-                          {i18n.translate('xpack.streams.streamsTable.pendingDataStream.label', {
-                            defaultMessage: 'Pending',
-                          })}
-                        </EuiBadge>
-                      </EuiToolTip>
-                    )}
+                      })}
+                      onClick={(e: React.MouseEvent) => {
+                        e.preventDefault();
+                        router.push('/{key}', {
+                          path: { key: item.stream.name },
+                          query: { rangeFrom, rangeTo },
+                        });
+                      }}
+                    >
+                      <EuiHighlight search={searchQuery?.text ?? ''}>
+                        {item.stream.name}
+                      </EuiHighlight>
+                    </EuiLink>
+                    {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                      Streams.QueryStream.Definition.is(item.stream) ||
+                      (Streams.WiredStream.Definition.is(item.stream) &&
+                        isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
+                    {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                    {isDraftStream(item.stream) && <DraftStreamBadge />}
+                    {item.stream.name === LOGS_ROOT_STREAM_NAME &&
+                      !Streams.QueryStream.Definition.is(item.stream) && (
+                        <DeprecatedLogsBadge
+                          openFlyout={openFlyout}
+                          hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                        />
+                      )}
+                    {isRoot(item.stream.name) &&
+                      item.stream.name !== LOGS_ROOT_STREAM_NAME &&
+                      !item.data_stream &&
+                      !Streams.QueryStream.Definition.is(item.stream) && (
+                        <EuiToolTip
+                          position="right"
+                          content={i18n.translate(
+                            'xpack.streams.streamsTable.pendingDataStream.tooltip',
+                            {
+                              defaultMessage:
+                                'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
+                            }
+                          )}
+                        >
+                          <EuiBadge color="default">
+                            {i18n.translate('xpack.streams.streamsTable.pendingDataStream.label', {
+                              defaultMessage: 'Pending',
+                            })}
+                          </EuiBadge>
+                        </EuiToolTip>
+                      )}
+                  </EuiFlexGroup>
                 </EuiFlexGroup>
-              </EuiFlexGroup>
-            );
-          },
-        },
-        {
-          field: 'documentsCount',
-          name: (
-            <EuiFlexGroup alignItems="center" gutterSize="m">
-              {cpsHasLinkedProjects && (
-                <EuiIconTip
-                  content={CPS_DOCUMENTS_WARNING}
-                  type="info"
-                  size="s"
-                  data-test-subj="cpsDocumentsWarningTip"
-                />
-              )}
-              {DOCUMENTS_COLUMN_HEADER}
-              {!hasFailureStoreAccess && (
-                <EuiIconTip
-                  content={FAILURE_STORE_PERMISSIONS_ERROR}
-                  type="warning"
-                  color="warning"
-                  size="s"
-                />
-              )}
-            </EuiFlexGroup>
-          ),
-          width: '180px',
-          sortable: docCountsLoaded ? (row: TableRow) => docsByStream[row.stream.name] ?? 0 : false,
-          align: 'right',
-          dataType: 'number',
-          render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
-              <DocumentsColumn
-                indexPattern={item.stream.name}
-                histogramQueryFetch={getStreamHistogram(item.stream.name)}
-                timeState={timeState}
-                numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
-              />
-            ) : null,
-        },
-        {
-          field: 'dataQuality',
-          name: (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              {DATA_QUALITY_COLUMN_HEADER}
-              {!hasFailureStoreAccess && (
-                <EuiIconTip
-                  content={FAILURE_STORE_PERMISSIONS_ERROR}
-                  type="warning"
-                  color="warning"
-                  size="s"
-                />
-              )}
-            </EuiFlexGroup>
-          ),
-          width: '150px',
-          sortable: qualityLoaded
-            ? (item: TableRow) => qualityRank[item.dataQuality as QualityIndicators]
-            : false,
-          dataType: 'string',
-          render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
-              <DataQualityColumn
-                streamName={item.stream.name}
-                quality={item.dataQuality as QualityIndicators}
-                isLoading={
-                  totalDocsResult.loading || failedDocsResult.loading || degradedDocsResult.loading
-                }
-              />
-            ) : (
-              '-'
-            ),
-        },
-        {
-          field: 'retentionMs',
-          name: (
-            <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
-          ),
-          align: 'left',
-          sortable: (row: TableRow) => row.rootRetentionMs,
-          dataType: 'number',
-          width: '220px',
-          render: (_: unknown, item: TableRow) => {
-            if (isDraftStream(item.stream)) {
-              return (
-                <span>
-                  {i18n.translate('xpack.streams.streamsTreeTable.span.naLabel', {
-                    defaultMessage: 'N/A',
-                  })}
-                </span>
               );
-            }
-            return (
-              <RetentionColumn
-                lifecycle={item.effective_lifecycle!}
-                streamName={item.stream.name}
-                aria-label={i18n.translate(
-                  'xpack.streams.streamsTreeTable.retentionCellAriaLabel',
-                  {
-                    defaultMessage: 'Retention policy for {name}',
-                    values: { name: item.stream.name },
-                  }
+            },
+          },
+          {
+            field: 'documentsCount',
+            name: (
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                {cpsHasLinkedProjects && (
+                  <EuiIconTip
+                    content={CPS_DOCUMENTS_WARNING}
+                    type="info"
+                    size="s"
+                    data-test-subj="cpsDocumentsWarningTip"
+                  />
                 )}
-                dataTestSubj={`retentionColumn-${item.stream.name}`}
-              />
-            );
+                {DOCUMENTS_COLUMN_HEADER}
+                {!hasFailureStoreAccess && (
+                  <EuiIconTip
+                    content={FAILURE_STORE_PERMISSIONS_ERROR}
+                    type="warning"
+                    color="warning"
+                    size="s"
+                  />
+                )}
+              </EuiFlexGroup>
+            ),
+            width: '180px',
+            sortable: docCountsLoaded
+              ? (row: TableRow) => docsByStream[row.stream.name] ?? 0
+              : false,
+            align: 'right',
+            dataType: 'number',
+            render: (_: unknown, item: TableRow) =>
+              item.data_stream ? (
+                <DocumentsColumn
+                  indexPattern={item.stream.name}
+                  histogramQueryFetch={getStreamHistogram(item.stream.name)}
+                  timeState={timeState}
+                  numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
+                />
+              ) : null,
           },
-        },
-        {
-          field: 'definition',
-          name: 'Actions',
-          width: '60px',
-          align: 'left',
-          sortable: false,
-          dataType: 'string',
-          render: (_: unknown, item: TableRow) => {
-            const hasDataStream =
-              !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
-            if (Streams.QueryStream.Definition.is(item.stream)) {
-              return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
-            }
-            return (
-              <DiscoverBadgeButton
-                hasDataStream={hasDataStream}
-                indexMode={item.data_stream?.index_mode ?? 'standard'}
-                stream={item.stream}
-              />
-            );
+          {
+            field: 'dataQuality',
+            name: (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                {DATA_QUALITY_COLUMN_HEADER}
+                {!hasFailureStoreAccess && (
+                  <EuiIconTip
+                    content={FAILURE_STORE_PERMISSIONS_ERROR}
+                    type="warning"
+                    color="warning"
+                    size="s"
+                  />
+                )}
+              </EuiFlexGroup>
+            ),
+            width: '150px',
+            sortable: qualityLoaded
+              ? (item: TableRow) => qualityRank[item.dataQuality as QualityIndicators]
+              : false,
+            dataType: 'string',
+            render: (_: unknown, item: TableRow) =>
+              item.data_stream ? (
+                <DataQualityColumn
+                  streamName={item.stream.name}
+                  quality={item.dataQuality as QualityIndicators}
+                  isLoading={
+                    totalDocsResult.loading ||
+                    failedDocsResult.loading ||
+                    degradedDocsResult.loading
+                  }
+                />
+              ) : (
+                '-'
+              ),
           },
-        },
-      ]}
-      itemId="name"
-      items={items}
-      sorting={sorting}
-      noItemsMessage={NO_STREAMS_MESSAGE}
-      onTableChange={handleTableChange}
-      pagination={{
-        initialPageSize: 25,
-        pageSizeOptions: [25, 50, 100],
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
-      }}
-      executeQueryOptions={{ enabled: false }}
-      search={{
-        query: searchQuery,
-        onChange: handleQueryChange,
-        box: {
-          incremental: true,
-          'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
-        },
-        toolsRight: (
-          <div className={datePickerStyle}>
-            <StreamsAppSearchBar showDatePicker />
-          </div>
-        ),
-        filters:
-          qualityLoaded && hasFailureStoreAccess
-            ? [
-                {
-                  type: 'field_value_selection',
-                  name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
-                    defaultMessage: 'Data quality',
-                  }),
-                  field: 'dataQuality',
-                  multiSelect: 'or',
-                  options: [
+          {
+            field: 'retentionMs',
+            name: (
+              <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
+            ),
+            align: 'left',
+            sortable: (row: TableRow) => row.rootRetentionMs,
+            dataType: 'number',
+            width: '220px',
+            render: (_: unknown, item: TableRow) => {
+              if (isDraftStream(item.stream)) {
+                return (
+                  <span>
+                    {i18n.translate('xpack.streams.streamsTreeTable.span.naLabel', {
+                      defaultMessage: 'N/A',
+                    })}
+                  </span>
+                );
+              }
+              return (
+                <RetentionColumn
+                  lifecycle={item.effective_lifecycle!}
+                  streamName={item.stream.name}
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamsTreeTable.retentionCellAriaLabel',
                     {
-                      value: 'good',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
-                        { defaultMessage: 'Good' }
-                      ),
-                    },
-                    {
-                      value: 'degraded',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
-                        { defaultMessage: 'Degraded' }
-                      ),
-                    },
-                    {
-                      value: 'poor',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
-                        { defaultMessage: 'Poor' }
-                      ),
-                    },
-                  ],
-                },
-              ]
-            : [],
-      }}
-      tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
-    />
+                      defaultMessage: 'Retention policy for {name}',
+                      values: { name: item.stream.name },
+                    }
+                  )}
+                  dataTestSubj={`retentionColumn-${item.stream.name}`}
+                />
+              );
+            },
+          },
+          {
+            field: 'definition',
+            name: 'Actions',
+            width: '60px',
+            align: 'left',
+            sortable: false,
+            dataType: 'string',
+            render: (_: unknown, item: TableRow) => {
+              const hasDataStream =
+                !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
+              if (Streams.QueryStream.Definition.is(item.stream)) {
+                return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
+              }
+              return (
+                <DiscoverBadgeButton
+                  hasDataStream={hasDataStream}
+                  indexMode={item.data_stream?.index_mode ?? 'standard'}
+                  stream={item.stream}
+                />
+              );
+            },
+          },
+        ]}
+        itemId="name"
+        items={items}
+        sorting={sorting}
+        noItemsMessage={NO_STREAMS_MESSAGE}
+        onTableChange={handleTableChange}
+        pagination={{
+          initialPageSize: 25,
+          pageSizeOptions: [25, 50, 100],
+          pageIndex: pagination.pageIndex,
+          pageSize: pagination.pageSize,
+        }}
+        executeQueryOptions={{ enabled: false }}
+        search={{
+          query: searchQuery,
+          onChange: handleQueryChange,
+          box: {
+            incremental: true,
+            'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
+            compressed: true,
+          },
+          toolsRight: <StreamsAppSearchBar showDatePicker />,
+          // TODO add `compressed` prop when supported, and remove
+          // wrapper <div> with `tableSearchBarStylesOverride`
+          filters:
+            qualityLoaded && hasFailureStoreAccess
+              ? [
+                  {
+                    type: 'field_value_selection',
+                    name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
+                      defaultMessage: 'Data quality',
+                    }),
+                    field: 'dataQuality',
+                    multiSelect: 'or',
+                    options: [
+                      {
+                        value: 'good',
+                        name: i18n.translate(
+                          'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
+                          { defaultMessage: 'Good' }
+                        ),
+                      },
+                      {
+                        value: 'degraded',
+                        name: i18n.translate(
+                          'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
+                          { defaultMessage: 'Degraded' }
+                        ),
+                      },
+                      {
+                        value: 'poor',
+                        name: i18n.translate(
+                          'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
+                          { defaultMessage: 'Poor' }
+                        ),
+                      },
+                    ],
+                  },
+                ]
+              : [],
+        }}
+        tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
+      />
+    </div>
   );
 }
