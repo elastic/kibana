@@ -348,6 +348,14 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
         },
       })
     ),
+    create_dataset_templates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
+        },
+      })
+    ),
     force: schema.maybe(
       schema.boolean({
         meta: {
@@ -588,6 +596,14 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
             },
           })
         )
+      ),
+      create_dataset_templates: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
+          },
+        })
       ),
     },
     { meta: { id: 'simplified_create_package_policy_request' } }
