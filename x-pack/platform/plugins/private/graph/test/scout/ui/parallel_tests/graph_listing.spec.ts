@@ -18,11 +18,13 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
       type: 'graph-workspace',
       attributes: { ...GRAPH_A, ...WORKSPACE_ATTRS },
       space: scoutSpace.id,
+      overwrite: true,
     });
     await kbnClient.savedObjects.create({
       type: 'graph-workspace',
       attributes: { ...GRAPH_B, ...WORKSPACE_ATTRS },
       space: scoutSpace.id,
+      overwrite: true,
     });
   });
 
@@ -54,7 +56,7 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
     async ({ pageObjects, page }) => {
       await pageObjects.graphListing.goto();
       await pageObjects.graphListing.createGraphButton.click();
-      await expect(page).toHaveURL(/\/app\/graph#\/workspace\//);
+      await expect(page.locator('[data-test-subj~="graphCurrentGraphBreadcrumb"]')).toBeVisible();
     }
   );
 });
