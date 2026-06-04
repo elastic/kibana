@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import fetch from 'node-fetch';
-import { sha256 } from 'js-sha256';
+import { createHash } from 'crypto';
 import { CLOUD_USER_ID } from '@kbn/cloud-integration-saml-provider-plugin/constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       sessionUrl = sessionUrl!.replace('%3A', ':'); // undo encoding so comparisons work with API response
 
       // Check that the session was recorded in the FS API for the given user based on their hashed ID
-      const hashedUserId = sha256(CLOUD_USER_ID);
+      const hashedUserId = createHash('sha256').update(CLOUD_USER_ID).digest('hex');
       const fsSessions = await fetch(
         `https://www.fullstory.com/api/v1/sessions?uid=${hashedUserId}&limit=100`,
         {

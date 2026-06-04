@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
+import { createHash } from 'crypto';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge, isPlainObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { sha256 } from 'js-sha256';
 import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
@@ -350,7 +350,7 @@ export const newTelemetryLogger = (
 
 function obfuscateString(clusterId: string, toHash: string): string {
   const valueToObfuscate = toHash + clusterId;
-  return sha256.create().update(valueToObfuscate).hex();
+  return createHash('sha256').update(valueToObfuscate).digest('hex');
 }
 
 function isAllowlistK8sUsername(username: string) {

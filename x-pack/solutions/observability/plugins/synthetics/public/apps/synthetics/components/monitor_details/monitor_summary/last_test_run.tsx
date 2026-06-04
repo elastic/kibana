@@ -43,6 +43,7 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 export const LastTestRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
@@ -84,6 +85,7 @@ export const LastTestRunComponent = ({
 
   const selectedLocation = useSelectedLocation();
   const { basePath } = useSyntheticsSettingsContext();
+  const spaceId = useUrlSpaceId();
 
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
@@ -112,6 +114,7 @@ export const LastTestRunComponent = ({
                 configId: monitor?.[ConfigKey.CONFIG_ID]!,
                 locationId: selectedLocation!.id,
                 stateId: latestPing.state?.id!,
+                spaceId,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
@@ -152,6 +155,7 @@ const PanelHeader = ({
   const { basePath } = useSyntheticsSettingsContext();
 
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
@@ -214,6 +218,7 @@ const PanelHeader = ({
                 monitorId,
                 checkGroup: latestPing?.monitor.check_group,
                 locationId: selectedLocation?.id,
+                spaceId,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {

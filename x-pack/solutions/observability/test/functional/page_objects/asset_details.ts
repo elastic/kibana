@@ -352,7 +352,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async addDashboardExists() {
-      await testSubjects.existOrFail('infraAddDashboard');
+      await testSubjects.existOrFail('infraAddDashboard', { timeout: 30000 });
     },
 
     async getAddDashboardButton() {

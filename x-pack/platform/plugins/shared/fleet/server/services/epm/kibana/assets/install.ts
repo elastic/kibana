@@ -215,7 +215,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg,
   spaceId,
   assetTags,
-  installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
@@ -225,8 +224,13 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
-  installAsAdditionalSpace?: boolean;
 }) {
+  // Derive whether this is an additional-space install from the package's sticky primary space.
+  // Any request from a space other than installed_kibana_space_id is an additional-space install.
+  const installAsAdditionalSpace = installedPkg
+    ? (installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId
+    : false;
+
   if (installedPkg && !installAsAdditionalSpace) {
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
@@ -241,9 +245,10 @@ export async function installKibanaAssetsAndReferencesMultispace({
       installAsAdditionalSpace,
     });
 
+    const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
     for (const additionnalSpaceId of Object.keys(
       installedPkg.attributes.additional_spaces_installed_kibana ?? {}
-    )) {
+    ).filter((s) => s !== primarySpaceId)) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
         logger,
@@ -332,6 +337,7 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsClient,
     pkgName,
     assets,
+    spaceId,
     installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
       ? false
       : installAsAdditionalSpace
@@ -375,7 +381,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
     );
   }
   await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, spaceId, true);
 }
 
 const kibanaAssetTypes = Object.values(KibanaAssetType);

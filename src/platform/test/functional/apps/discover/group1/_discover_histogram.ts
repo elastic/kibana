@@ -35,9 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
       );

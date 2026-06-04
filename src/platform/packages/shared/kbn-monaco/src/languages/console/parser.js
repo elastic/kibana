@@ -25,8 +25,20 @@ export const createParser = () => {
     },
     text,
     errors,
-    addError = function (text) {
-      errors.push({ text: text, offset: at });
+    addError = function (text, offset = at, endOffset) {
+      const errorAnnotation = { text: text, offset: offset };
+      if (endOffset !== undefined) {
+        errorAnnotation.endOffset = endOffset;
+      }
+      errors.push(errorAnnotation);
+    },
+    hasErrorCoveringOffset = function (offset) {
+      return errors.some(
+        (errorAnnotation) =>
+          errorAnnotation.endOffset !== undefined &&
+          errorAnnotation.offset <= offset &&
+          offset <= errorAnnotation.endOffset
+      );
     },
     requests,
     requestStartOffset,
@@ -46,11 +58,12 @@ export const createParser = () => {
       lastRequest.endOffset = requestEndOffset;
       requests.push(lastRequest);
     },
-    error = function (m) {
+    error = function (m, errorAt = at, errorEndAt) {
       throw {
         name: 'SyntaxError',
         message: m,
-        at: at,
+        at: errorAt,
+        endAt: errorEndAt,
         text: text,
       };
     },
@@ -88,6 +101,16 @@ export const createParser = () => {
     },
     peek = function (offset) {
       return text.charAt(at + offset);
+    },
+    isRequestLineSeparator = function (character) {
+      return character === ' ' || character === '\t' || character === '\n' || character === '\r';
+    },
+    readCurrentLineTokenEndOffset = function (startOffset) {
+      let tokenEndOffset = startOffset;
+      while (tokenEndOffset < text.length && !isRequestLineSeparator(text[tokenEndOffset])) {
+        tokenEndOffset++;
+      }
+      return tokenEndOffset;
     },
     number = function () {
       let number,
@@ -230,6 +253,18 @@ export const createParser = () => {
       }
       error('Unexpected \'' + ch + '\'');
     },
+    // After consuming method letters, the next character must separate the
+    // method from the URL/body: horizontal whitespace, a line break, or
+    // end-of-input. Anything else is part of an invalid method token.
+    methodBoundary = function () {
+      if (ch && !isRequestLineSeparator(ch)) {
+        error(
+          'Expected one of GET/POST/PUT/DELETE/HEAD/PATCH',
+          requestStartOffset ?? at,
+          readCurrentLineTokenEndOffset(at)
+        );
+      }
+    },
     // parses and returns the method
     method = function () {
     const upperCaseChar = ch.toUpperCase();
@@ -238,12 +273,14 @@ export const createParser = () => {
           nextOneOf(['G', 'g']);
           nextOneOf(['E', 'e']);
           nextOneOf(['T', 't']);
+          methodBoundary();
           return 'GET';
         case 'H':
           nextOneOf(['H', 'h']);
           nextOneOf(['E', 'e']);
           nextOneOf(['A', 'a']);
           nextOneOf(['D', 'd']);
+          methodBoundary();
           return 'HEAD';
         case 'D':
           nextOneOf(['D', 'd']);
@@ -252,6 +289,7 @@ export const createParser = () => {
           nextOneOf(['E', 'e']);
           nextOneOf(['T', 't']);
           nextOneOf(['E', 'e']);
+          methodBoundary();
           return 'DELETE';
         case 'P':
           nextOneOf(['P', 'p']);
@@ -262,15 +300,18 @@ export const createParser = () => {
               nextOneOf(['T', 't']);
               nextOneOf(['C', 'c']);
               nextOneOf(['H', 'h']);
+              methodBoundary();
               return 'PATCH';
             case 'U':
               nextOneOf(['U', 'u']);
               nextOneOf(['T', 't']);
+              methodBoundary();
               return 'PUT';
             case 'O':
               nextOneOf(['O', 'o']);
               nextOneOf(['S', 's']);
               nextOneOf(['T', 't']);
+              methodBoundary();
               return 'POST';
             default:
               error('Unexpected \'' + ch + '\'');
@@ -414,10 +455,15 @@ export const createParser = () => {
           request();
           white();
         } catch (e) {
-          addError(e.message);
+          addError(e.message, e.at, e.endAt);
           // snap
           const remainingText = text.substr(at);
-          const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)\b/mi);
+          // Match the verb without a trailing `\b` so that lines starting with
+          // a valid method prefix but continuing with identifier characters
+          // (`GETT`, `POSTS`, `PUThjjkjoj`) are picked up as recovery anchors;
+          // `method()` then re-throws at the boundary and an error annotation
+          // is recorded for each such line.
+          const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)/mi);
           const nextCommentLine = remainingText.search(/^\s*(#|\/\*|\/\/).*$/m);
           if (nextMethodIndex === -1 && nextCommentLine === -1) {
             // If there are no comments or other requests after the error, there is no point in parsing more so we stop here
@@ -441,7 +487,9 @@ export const createParser = () => {
     multi_request();
     white();
     if (ch) {
-      addError('Syntax error');
+      if (!hasErrorCoveringOffset(at)) {
+        addError('Syntax error');
+      }
     }
 
     result = { errors, requests };

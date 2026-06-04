@@ -28,6 +28,7 @@ import {
   toAssetReference,
 } from './install';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { indexPatternTypes } from '../index_pattern/install';
 
 interface InstallKibanaAssetsWithStreamingArgs {
   pkgName: string;
@@ -76,6 +77,13 @@ export async function installKibanaAssetsWithStreaming({
       return;
     }
 
+    if (
+      soType === KibanaSavedObjectType.indexPattern &&
+      indexPatternTypes.some((pattern) => `${pattern}-*` === savedObject.id)
+    ) {
+      return;
+    }
+
     batch.push(savedObject);
     assetRefs.push(toAssetReference(savedObject));
 
@@ -100,7 +108,7 @@ export async function installKibanaAssetsWithStreaming({
   }
 
   // Update the installation saved object with installed kibana assets
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId);
 
   return assetRefs;
 }
