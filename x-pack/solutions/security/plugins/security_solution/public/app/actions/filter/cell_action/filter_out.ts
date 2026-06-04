@@ -64,6 +64,36 @@ export const createFilterOutCellActionFactory = ({
 
       if (!fieldName) return;
 
+      const fm =
+        metadata?.scopeId && isTimelineScope(metadata.scopeId)
+          ? timelineFilterManager
+          : filterManager;
+
+      if (metadata?.includeNullValues) {
+        fm.addFilters([
+          {
+            meta: {
+              type: 'custom',
+              key: fieldName,
+              index: dataViewId,
+              alias: `${fieldName}: ${value[0]} OR null`,
+              disabled: false,
+              negate: metadata?.negateFilters !== true,
+            },
+            query: {
+              bool: {
+                should: [
+                  { match_phrase: { [fieldName]: value[0] } },
+                  { bool: { must_not: { exists: { field: fieldName } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          },
+        ]);
+        return;
+      }
+
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterIn with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterIn : addFilterOut;
 
