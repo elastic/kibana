@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/search-code-examples'
   - '@kbn/search-navigation'
   - '@kbn/cloud-plugin'
+  - '@kbn/shared-components'
   - '@kbn/serverless'
   - '@kbn/analytics'
   - '@kbn/config-schema'
