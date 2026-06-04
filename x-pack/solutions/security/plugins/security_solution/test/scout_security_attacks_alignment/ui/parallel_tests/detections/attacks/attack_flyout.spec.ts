@@ -33,8 +33,7 @@ spaceTest.describe(
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeAttached();
       await detectionsAttackDiscoveryPage.attacksTableSection.scrollIntoViewIfNeeded();
       await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(1);
-      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(2);
       await detectionsAttackDiscoveryPage.openFirstAttackDetailsFromTable();
       await expect(attackDetailsRightPanelPage.detailsFlyoutBody).toBeAttached();
       await attackDetailsRightPanelPage.detailsFlyoutBody.scrollIntoViewIfNeeded();
