@@ -18,15 +18,25 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ListEntityRelationshipsRequestQuery = lazySchema(() =>
   z.object({
-    page: z.coerce.number().int().min(1).optional().describe('Page number to return (1-indexed).'),
-    per_page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .describe('Number of records per page.'),
-    sort_field: z.string().max(1000).optional().describe('Field to sort results by.'),
-    sort_order: z.enum(['asc', 'desc']).optional().describe('Sort order.'),
+    /**
+     * Page number to return (1-indexed).
+     */
+    page: z.coerce.number().int().min(1).optional(),
+    /**
+     * Number of records per page.
+     */
+    per_page: z.coerce.number().int().min(1).optional(),
+    /**
+     * Field to sort results by.
+     */
+    sort_field: z.string().max(1000).optional(),
+    /**
+     * Sort order.
+     */
+    sort_order: z.enum(['asc', 'desc']).optional(),
+    /**
+     * Relationship kind to filter on.
+     */
     kind: z
       .enum([
         'accesses_frequently',
@@ -37,11 +47,19 @@ export const ListEntityRelationshipsRequestQuery = lazySchema(() =>
         'owns',
         'supervises',
       ])
-      .optional()
-      .describe('Relationship kind to filter on.'),
-    target: z.string().max(1000).optional().describe('Target EUID to filter on.'),
-    from: z.string().max(100).datetime().optional().describe('ISO-8601 lower bound for @timestamp.'),
-    to: z.string().max(100).datetime().optional().describe('ISO-8601 upper bound for @timestamp.'),
+      .optional(),
+    /**
+     * Target EUID to filter on.
+     */
+    target: z.string().max(1000).optional(),
+    /**
+     * ISO-8601 lower bound for @timestamp.
+     */
+    from: z.string().max(100).datetime().optional(),
+    /**
+     * ISO-8601 upper bound for @timestamp.
+     */
+    to: z.string().max(100).datetime().optional(),
   })
 );
 export type ListEntityRelationshipsRequestQuery = z.infer<
