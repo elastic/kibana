@@ -1,5 +1,5 @@
 {
-  "sha1": "cc9ca35b36110b9dba7c2f2b47a38b9190b47907",
+  "sha1": "ef651cc993edabddcda68cd6ef4b47ce8b7c60c9",
   "tests": [
     {
       "id": "6393a5cc96ae333-5ac88d9d8aa60c3",
@@ -128,6 +128,19 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/monitor_details.spec.ts",
         "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "21bac76d046ec23-6dae3f82b1ac81f",
+      "title": "MonitorStatusFlyoutInAlertingApp opens monitor status alert flyout and verifies the form renders",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/monitor_status_alert_flyout.spec.ts",
+        "line": 12,
         "column": 7
       }
     },
@@ -271,6 +284,19 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/settings.spec.ts",
         "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "ee9067f40536327-eacd05fe9ca70c1",
+      "title": "SimpleDownAlert enables and disables a simple status alert from the monitor list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/simple_down_alert.spec.ts",
+        "line": 78,
         "column": 7
       }
     },

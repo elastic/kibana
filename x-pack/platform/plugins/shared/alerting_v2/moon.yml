@@ -117,6 +117,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
