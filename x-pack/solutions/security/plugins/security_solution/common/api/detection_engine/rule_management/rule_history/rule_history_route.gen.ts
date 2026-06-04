@@ -113,7 +113,7 @@ export const RuleChangesHistoryResponse = lazySchema(() =>
     /**
      * ISO-8601 timestamp of the earliest recorded change event for this rule. Absent when no history items exist.
      */
-    tracking_started_at: z.string().optional(),
+    tracking_started_at: z.string().max(24).optional(),
     items: z.array(RuleHistoryItem),
   })
 );
