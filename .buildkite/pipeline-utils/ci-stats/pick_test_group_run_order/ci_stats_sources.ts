@@ -84,6 +84,7 @@ export function buildCiStatsGroups(args: {
       maxMin: config.jestUnitMaxMinutes,
       tooLongMin: config.jestUnitTooLongMinutes,
       names: jestUnitConfigs,
+      concurrency: 1,
     },
     {
       type: config.integrationType,
