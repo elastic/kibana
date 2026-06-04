@@ -22,26 +22,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { ANDROID_RETRACE_API_PATH } from '../../../common';
-import type { SymbolicationResponse } from '../../../common/types';
+import { ANDROID_CRASH_DOCUMENT_API_PATH, ANDROID_RETRACE_API_PATH } from '../../../common';
+import type { AndroidCrashDocumentResponse, SymbolicationResponse } from '../../../common/types';
 
 interface RetraceViewProps {
   core: CoreStart;
-}
-
-/**
- * Fetches the crash document from ES and extracts the stacktrace and build_id.
- *
- * TODO: Implement actual crash document fetching. The doc_id and index come from
- * the URL drilldown. This function should query ES for the document and return
- * the stacktrace and build_id fields.
- */
-async function fetchCrashDocument(
-  _core: CoreStart,
-  _docId: string,
-  _index: string | null
-): Promise<{ stacktrace: string; buildId: string } | null> {
-  return null;
 }
 
 export function RetraceView({ core }: RetraceViewProps) {
@@ -62,17 +47,16 @@ export function RetraceView({ core }: RetraceViewProps) {
 
     (async () => {
       try {
-        const crashDoc = await fetchCrashDocument(core, docId, index);
-        if (!crashDoc) {
-          setError(`No crash document found for doc_id "${docId}".`);
-          return;
-        }
+        const crashDoc = await core.http.fetch<AndroidCrashDocumentResponse>(
+          ANDROID_CRASH_DOCUMENT_API_PATH,
+          { query: index ? { doc_id: docId, index } : { doc_id: docId } }
+        );
 
         const res = await core.http.fetch<SymbolicationResponse>(ANDROID_RETRACE_API_PATH, {
           method: 'POST',
           body: JSON.stringify({
             stacktrace: crashDoc.stacktrace,
-            build_id: crashDoc.buildId,
+            build_id: crashDoc.build_id,
           }),
         });
         setResult(res);

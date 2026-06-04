@@ -14,3 +14,9 @@ export interface SymbolicationResponse {
   original: string;
   resolved: string;
 }
+
+/** Response from the Android crash document fetch endpoint. */
+export interface AndroidCrashDocumentResponse {
+  stacktrace: string;
+  build_id: string;
+}
