@@ -60,6 +60,7 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import type { FeatureClient } from './lib/streams/feature/feature_client';
 import type { QueryClient } from './lib/streams/assets/query/query_client';
+import { initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -324,6 +325,7 @@ export class StreamsPlugin
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
+        agentContextLayer: plugins.agentContextLayer,
         getScopedClients,
         server: this.server,
         logger: this.logger,
@@ -585,6 +587,17 @@ export class StreamsPlugin
     }).catch((error) => {
       this.logger.error(
         `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    initializeKnowledgeIndicatorsTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize knowledge indicators template: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
