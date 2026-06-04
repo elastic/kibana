@@ -671,6 +671,7 @@ const paymentsPodOverview: EntityOverview = {
   displayName: 'payments-pod-7f9b2',
   lastUpdate: `${INCIDENT_DAY} @ 02:47:31`,
   tags: [
+    { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.pod', color: 'hollow' },
     { label: 'Critical', color: 'danger' },
     { label: 'OOMKilled', color: 'danger' },
@@ -899,6 +900,7 @@ const nodeOverview: EntityOverview = {
   displayName: 'node-prod-eu-04',
   lastUpdate: `${INCIDENT_DAY} @ 02:47:31`,
   tags: [
+    { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.node', color: 'hollow' },
     { label: 'Critical', color: 'danger' },
     { label: 'Memory pressure', color: 'danger' },

@@ -1351,7 +1351,11 @@ const buildNodeTemplate = (
   name: string,
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
+  // Leading `Kubernetes` tag matches the {category} + {sub-type}
+  // shape used by every other multi-type kind (Host + Bare-metal,
+  // database + Postgres, cloud + AWS EC2 Instance, …).
   const tags: EntityTag[] = [
+    { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.node', color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
@@ -1661,8 +1665,12 @@ const buildPodTemplate = (
   // dispatcher forwards the dataset's typeLabel so the header tag
   // still reads correctly (`kubernetes.container` for a container,
   // `kubernetes.deployment` for a deployment) instead of always
-  // claiming "kubernetes.pod".
+  // claiming "kubernetes.pod". The leading `Kubernetes` tag follows
+  // the {category} + {sub-type} convention used by every other
+  // multi-type kind (Host + Bare-metal, cloud + AWS EC2 Instance,
+  // database + Postgres, …).
   const tags: EntityTag[] = [
+    { label: 'Kubernetes', color: 'hollow' },
     { label: kubernetesTagFromTypeLabel(typeLabel, 'kubernetes.pod'), color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
@@ -1972,7 +1980,11 @@ const buildClusterTemplate = (
   name: string,
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
+  // Leading `Kubernetes` tag matches the {category} + {sub-type}
+  // shape used by every other multi-type kind (Host + Bare-metal,
+  // database + Postgres, cloud + AWS EC2 Instance, …).
   const tags: EntityTag[] = [
+    { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.cluster', color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
@@ -2296,7 +2308,11 @@ const buildNamespaceTemplate = (
   name: string,
   h: EntityHealthVariant
 ): { overview: EntityOverview; tabs: EntityTabsData } => {
+  // Leading `Kubernetes` tag matches the {category} + {sub-type}
+  // shape used by every other multi-type kind (Host + Bare-metal,
+  // database + Postgres, cloud + AWS EC2 Instance, …).
   const tags: EntityTag[] = [
+    { label: 'Kubernetes', color: 'hollow' },
     { label: 'kubernetes.namespace', color: 'hollow' },
     healthTag(h),
     { label: 'Production', color: 'hollow' },
