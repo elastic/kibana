@@ -212,14 +212,35 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
 
-  // If the URL deep-links to a rule that's no longer in the installable set
-  // (most commonly because it was just installed), fall back to fetching the
-  // installed alerting rule by `rule_id` so the preview flyout can still open
-  // — just with disabled install actions.
+  // When deep-linked to a specific rule (e.g. from a chat recommendation link at
+  // /rules/add_rules/<rule_id>), the target may not fall on the current page of the
+  // catalog. Fetch it directly by `rule_id` so the preview flyout has data regardless of
+  // pagination. Scoped to the flyout only — the table keeps rendering the paginated `rules`.
+  const {
+    data: deepLinkReviewResponse,
+    isFetching: isFetchingDeepLinkRule,
+    isFetched: isFetchedDeepLinkRule,
+  } = usePrebuiltRulesInstallReview(
+    {
+      page: 1,
+      perPage: 1,
+      ruleIds: ruleIdFromUrl ? [ruleIdFromUrl] : undefined,
+    },
+    {
+      // Only run when deep-linked and the target isn't already on the current page.
+      enabled: Boolean(ruleIdFromUrl) && !rules.some((r) => r.rule_id === ruleIdFromUrl),
+    }
+  );
+  const deepLinkInstallableRule = deepLinkReviewResponse?.rules?.[0];
+
+  // If the deep-link target isn't in the installable catalog (most commonly because it was
+  // already installed), fall back to fetching the installed alerting rule by `rule_id` so
+  // the preview flyout can still open — just with disabled install actions.
   const shouldLookupInstalledFallback =
     Boolean(ruleIdFromUrl) &&
-    isFetched &&
-    !isFetching &&
+    isFetchedDeepLinkRule &&
+    !isFetchingDeepLinkRule &&
+    !deepLinkInstallableRule &&
     !rules.some((r) => r.rule_id === ruleIdFromUrl);
   const {
     rule: installedFallbackRule,
@@ -229,13 +250,16 @@ export const AddPrebuiltRulesTableContextProvider = ({
     enabled: shouldLookupInstalledFallback,
   });
 
-  // Rules array passed to the preview flyout: installable rules from the
-  // catalog plus the optional already-installed deep-link target. The table
-  // itself still renders only `rules` — the fallback is preview-only.
-  const flyoutRules = useMemo(
-    () => (installedFallbackRule ? [...rules, installedFallbackRule] : rules),
-    [rules, installedFallbackRule]
-  );
+  // Rules array passed to the preview flyout: the installable rules from the current page
+  // plus the optional deep-link target — either an installable rule fetched by id, or an
+  // already-installed fallback. The table itself still renders only `rules`.
+  const flyoutRules = useMemo(() => {
+    const deepLinkRule = deepLinkInstallableRule ?? installedFallbackRule;
+    if (deepLinkRule && !rules.some((r) => r.rule_id === deepLinkRule.rule_id)) {
+      return [...rules, deepLinkRule];
+    }
+    return rules;
+  }, [rules, deepLinkInstallableRule, installedFallbackRule]);
 
   const rulesMatchingFilterCount = reviewResponse?.total ?? 0;
   const installableRulesCount = reviewResponse?.stats.num_rules_to_install ?? 0;
@@ -401,6 +425,14 @@ export const AddPrebuiltRulesTableContextProvider = ({
     }
     if (autoOpenedRuleIdRef.current === ruleIdFromUrl) return;
     if (!isFetched || isFetching) return;
+    // When the target isn't on the current page, wait for the by-rule_id deep-link lookup
+    // (and, if it found nothing, the installed-rule fallback) to settle before deciding.
+    if (
+      !rules.some((r) => r.rule_id === ruleIdFromUrl) &&
+      (!isFetchedDeepLinkRule || isFetchingDeepLinkRule)
+    ) {
+      return;
+    }
     if (
       shouldLookupInstalledFallback &&
       (!isFetchedInstalledFallback || isFetchingInstalledFallback)
@@ -415,6 +447,9 @@ export const AddPrebuiltRulesTableContextProvider = ({
     ruleIdFromUrl,
     isFetched,
     isFetching,
+    rules,
+    isFetchedDeepLinkRule,
+    isFetchingDeepLinkRule,
     shouldLookupInstalledFallback,
     isFetchedInstalledFallback,
     isFetchingInstalledFallback,
