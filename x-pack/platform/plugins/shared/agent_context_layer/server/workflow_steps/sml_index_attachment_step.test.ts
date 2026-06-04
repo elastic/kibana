@@ -38,12 +38,14 @@ const buildSecurity = ({ authorized = true }: { authorized?: boolean } = {}): je
     checkPrivilegesDynamicallyWithRequest: jest.Mock;
   };
 } => {
-  const checkPrivileges = jest.fn().mockImplementation(async ({ kibana }: { kibana: string[] }) => ({
-    hasAllRequested: authorized,
-    privileges: {
-      kibana: kibana.map((privilege) => ({ privilege, authorized })),
-    },
-  }));
+  const checkPrivileges = jest
+    .fn()
+    .mockImplementation(async ({ kibana }: { kibana: string[] }) => ({
+      hasAllRequested: authorized,
+      privileges: {
+        kibana: kibana.map((privilege) => ({ privilege, authorized })),
+      },
+    }));
   return {
     authz: {
       actions: {
