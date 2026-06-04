@@ -7,6 +7,7 @@
 
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
@@ -31,6 +32,10 @@ export class ReferencedPanelManager {
         await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
 
       savedObjects.forEach((so) => {
+        if (isSavedObjectErrorResult(so)) {
+          this.logger.error(`Error fetching referenced panel ${so.id}: ${so.error.message}`);
+          return;
+        }
         this.panelsById.set(so.id, {
           ...so.attributes,
           references: so.references,

@@ -19,6 +19,9 @@ export type {
   SavedObjectsMigrationVersion,
 } from './src/saved_objects';
 
+export type { SavedObjectErrorResult, SavedObjectBulkResult } from './src/server_types';
+export { isSavedObjectErrorResult } from './src/server_types';
+
 export type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
