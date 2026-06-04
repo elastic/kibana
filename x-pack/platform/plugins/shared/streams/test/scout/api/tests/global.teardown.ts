@@ -8,13 +8,13 @@
 import { globalTeardownHook } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 
-globalTeardownHook('Teardown environment for Streams API tests', async ({ kbnClient, log }) => {
-  log.debug('[teardown] Disabling significant events feature...');
-  await kbnClient.uiSettings.unset(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS);
+globalTeardownHook(
+  'Teardown environment for Streams API tests',
+  async ({ kbnClient, apiServices, log }) => {
+    log.debug('[teardown] Disabling significant events feature...');
+    await kbnClient.uiSettings.unset(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS);
 
-  log.debug('[teardown] Disabling Streams...');
-  await kbnClient.request({
-    method: 'POST',
-    path: '/api/streams/_disable',
-  });
-});
+    log.debug('[teardown] Disabling Streams...');
+    await apiServices.streams.disable();
+  }
+);
