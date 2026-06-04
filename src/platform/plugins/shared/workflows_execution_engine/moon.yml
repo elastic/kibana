@@ -41,6 +41,8 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/spaces-plugin'
   - '@kbn/spaces-utils'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - prod
