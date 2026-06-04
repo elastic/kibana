@@ -5,110 +5,148 @@
  * 2.0.
  */
 
-import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
-import type { ContainerModuleLoadOptions } from 'inversify';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { Logger, OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
+import { CoreStart } from '@kbn/core-di-server';
+import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
-import { buildScopedActionPolicyClientFactory } from '../agent_builder/scoped_action_policy_client_factory';
-import { buildScopedRulesClientFactory } from '../agent_builder/scoped_rules_client_factory';
+import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
+import { AttachmentTypeToken } from '../agent_builder/tokens';
+import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { AlertingServerSetupDependencies } from '../types';
 
+type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
+
 /**
- * Setup-phase wiring for the Agent Builder integration (SML types, attachment
- * types, and skills).
+ * Returns the Agent Builder setup contract, or `undefined` when the optional
+ * `agentBuilder` plugin is not available.
+ */
+function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
+  const token = PluginSetup<AgentBuilderSetup>('agentBuilder');
+  return container.isBound(token) ? container.get(token) : undefined;
+}
+
+/**
+ * Wiring for the Agent Builder integration. No-op when the optional
+ * `agentBuilder` plugin is not available.
  *
- * No-op when the optional `agentBuilder` plugin is not available. SML types are
- * also gated on the optional `agentContextLayer` plugin, and the attachments and
- * skills are gated on the experimental features advanced setting.
+ * - SML types are registered during setup (synchronously) so the agent context
+ *   layer can schedule their crawler tasks during its own start phase. Gated on
+ *   the optional `agentContextLayer` plugin.
+ * - Attachment types are bound to {@link AttachmentTypeToken} (deps resolved via
+ *   DI) and registered during start, gated on the experimental features advanced
+ *   setting. Skills are registered alongside them.
+ *
+ * Both resolve request-scoped clients on demand via {@link resolveRequestScoped},
+ * since they run outside the HTTP route scope.
  */
 export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
+  bind(AttachmentTypeToken).toResolvedValue(
+    (logger, injection) =>
+      createRuleAttachmentType({
+        logger,
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+      }) as AttachmentTypeDefinition,
+    [Logger, CoreStart('injection')]
+  );
+  bind(AttachmentTypeToken).toResolvedValue(
+    (logger, injection) =>
+      createActionPolicyAttachmentType({
+        logger,
+        getActionPolicyClient: (context) =>
+          resolveRequestScoped(injection, context.request, ActionPolicyClient),
+      }) as AttachmentTypeDefinition,
+    [Logger, CoreStart('injection')]
+  );
+
   bind(OnSetup).toConstantValue((container) => {
-    const agentBuilderToken =
-      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilder']>>('agentBuilder');
-    if (!container.isBound(agentBuilderToken)) {
+    if (!getAgentBuilder(container)) {
       return;
     }
 
-    const logger = container.get(Logger);
-    const agentBuilder = container.get(agentBuilderToken);
-    const getInjection = () => container.get(CoreStart('injection'));
-    const getScopedRulesClient = buildScopedRulesClientFactory(getInjection);
-    const getScopedActionPolicyClient = buildScopedActionPolicyClientFactory(getInjection);
-
-    // SML types must be registered synchronously so the agent context layer
-    // can schedule their crawler tasks during its own start phase. The
-    // crawler itself gates on `agentContextLayer:experimentalFeatures`.
     const agentContextLayerToken =
       PluginSetup<NonNullable<AlertingServerSetupDependencies['agentContextLayer']>>(
         'agentContextLayer'
       );
-    if (container.isBound(agentContextLayerToken)) {
-      const agentContextLayer = container.get(agentContextLayerToken);
-      const getInternalRuleRepository = () =>
-        container.get(CoreStart('savedObjects')).createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
-      const getInternalActionPolicyRepository = () =>
-        container
-          .get(CoreStart('savedObjects'))
-          .createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]);
-      agentContextLayer.registerType(
-        createRuleSmlType({
-          getScopedRulesClient,
-          getInternalRepository: getInternalRuleRepository,
-        })
-      );
-      agentContextLayer.registerType(
-        createActionPolicySmlType({
-          getScopedActionPolicyClient,
-          getInternalRepository: getInternalActionPolicyRepository,
-        })
-      );
+    if (!container.isBound(agentContextLayerToken)) {
+      return;
     }
 
-    const getStartServices = container.get(CoreSetup('getStartServices'));
-    getStartServices()
-      .then(([coreStart]) => {
-        const soClient = coreStart.savedObjects.createInternalRepository();
-        const uiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(soClient);
-        return uiSettingsClient.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
-      })
-      .then((enabled) => {
-        if (enabled) {
-          agentBuilder.attachments.registerType(
-            createRuleAttachmentType({
-              logger,
-              getRulesClient: (context) => getScopedRulesClient(context.request),
-            }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
-          );
-          agentBuilder.attachments.registerType(
-            createActionPolicyAttachmentType({
-              logger,
-              getActionPolicyClient: (context) => getScopedActionPolicyClient(context.request),
-            }) as Parameters<typeof agentBuilder.attachments.registerType>[0]
-          );
+    const agentContextLayer = container.get(agentContextLayerToken);
 
-          const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
-          registerSkills(agentBuilder, {
-            getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
-            getAvailableConnectors: (sid, req) =>
-              workflowsManagementApi.getAvailableConnectors(sid, req),
-          });
-
-          logger.info(
-            'Rule management skill and attachments registered (experimental features enabled)'
-          );
-        }
+    // SML types are registered inline (not via a token registry like attachments):
+    // registration happens at setup, but their clients/repositories must be
+    // resolved lazily at crawl time (start phase), so deps cannot be eagerly
+    // injected at bind/resolution time.
+    agentContextLayer.registerType(
+      createRuleSmlType({
+        getScopedRulesClient: (request) =>
+          resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
+        getInternalRepository: () =>
+          container
+            .get(CoreStart('savedObjects'))
+            .createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
       })
-      .catch((err) => {
-        logger.warn(
-          `Failed to read alerting V2 experimental features setting; rule management skill not registered: ${err}`
-        );
+    );
+    agentContextLayer.registerType(
+      createActionPolicySmlType({
+        getScopedActionPolicyClient: (request) =>
+          resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),
+        getInternalRepository: () =>
+          container
+            .get(CoreStart('savedObjects'))
+            .createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]),
+      })
+    );
+  });
+
+  bind(OnStart).toConstantValue(async (container) => {
+    const agentBuilder = getAgentBuilder(container);
+    if (!agentBuilder) {
+      return;
+    }
+
+    const logger = container.get(Logger);
+
+    try {
+      const soClient = container.get(CoreStart('savedObjects')).createInternalRepository();
+      const uiSettingsClient = container
+        .get(CoreStart('uiSettings'))
+        .globalAsScopedToClient(soClient);
+      const enabled = await uiSettingsClient.get<boolean>(
+        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
+      );
+
+      if (!enabled) {
+        return;
+      }
+
+      for (const attachmentType of container.getAll(AttachmentTypeToken)) {
+        agentBuilder.attachments.registerType(attachmentType);
+      }
+
+      const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
+      registerSkills(agentBuilder, {
+        getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
+        getAvailableConnectors: (sid, req) =>
+          workflowsManagementApi.getAvailableConnectors(sid, req),
       });
+
+      logger.info(
+        'Rule management skill and attachments registered (experimental features enabled)'
+      );
+    } catch (err) {
+      logger.warn(
+        `Failed to read alerting V2 experimental features setting; rule management skill not registered: ${err}`
+      );
+    }
   });
 }
