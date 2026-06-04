@@ -11,16 +11,16 @@ import { renderHook, act } from '@testing-library/react';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 
 import { useCloseCaseFlow } from './use_close_case_flow';
-import { basicCase } from '../../../../containers/mock';
-import { TestProviders } from '../../../../common/mock';
-import { useStatusAction } from '../../../actions/status/use_status_action';
-import { useCloseCaseModal } from '../../../all_cases/use_close_case_modal';
-import { useCanSyncCloseReasonToAlerts } from '../../../all_cases/use_can_sync_close_reason_to_alerts';
+import { basicCase } from '../../../../../../containers/mock';
+import { TestProviders } from '../../../../../../common/mock';
+import { useStatusAction } from '../../../../../actions/status/use_status_action';
+import { useCloseCaseModal } from '../../../../../all_cases/use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from '../../../../../all_cases/use_can_sync_close_reason_to_alerts';
 
-jest.mock('../../../actions/status/use_status_action');
-jest.mock('../../../all_cases/use_close_case_modal');
-jest.mock('../../../all_cases/use_can_sync_close_reason_to_alerts');
-jest.mock('../../../case_view/use_on_refresh_case_view_page');
+jest.mock('../../../../../actions/status/use_status_action');
+jest.mock('../../../../../all_cases/use_close_case_modal');
+jest.mock('../../../../../all_cases/use_can_sync_close_reason_to_alerts');
+jest.mock('../../../../../case_view/use_on_refresh_case_view_page');
 
 const mockHandleUpdateCaseStatus = jest.fn();
 const mockOpenCloseCaseModal = jest.fn();

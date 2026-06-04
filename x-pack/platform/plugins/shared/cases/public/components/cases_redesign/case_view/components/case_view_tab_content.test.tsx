@@ -91,7 +91,7 @@ describe('CaseViewTabContent', () => {
 
   it('falls back to activity tab for unknown tabId values', async () => {
     useUrlParamsMock.mockReturnValue({
-      urlParams: { tabId: 'alerts' },
+      urlParams: { tabId: 'non-existent-tab' },
     });
 
     renderWithTestingProviders(<CaseViewTabContent {...defaultProps} />);

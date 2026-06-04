@@ -6,11 +6,12 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useGetCase } from '../../../containers/use_get_case';
 import { CasesTimelineIntegrationProvider } from '../../timeline_context';
 import { DoesNotExist } from '../../case_view/does_not_exist';
+// TODO: Replace CaseViewLoading with a proper skeleton placeholder
+import { CaseViewLoading } from '../../case_view';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../../common/navigation';
@@ -18,14 +19,6 @@ import { CaseViewPageRedesign } from './case_view_page';
 import type { CaseViewProps } from '../../case_view/types';
 import { useCasePageViewEbt } from '../../case_view/use_case_page_view_ebt';
 import * as i18n from '../../case_view/translations';
-
-const CaseViewLoading = () => (
-  <EuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 export const CaseViewRedesign = React.memo(({ timelineIntegration, refreshRef }: CaseViewProps) => {
   const { spaces: spacesApi } = useKibana().services;
@@ -74,7 +67,6 @@ export const CaseViewRedesign = React.memo(({ timelineIntegration, refreshRef }:
   ) : null;
 });
 
-CaseViewLoading.displayName = 'CaseViewLoading';
 CaseViewRedesign.displayName = 'CaseViewRedesign';
 
 // eslint-disable-next-line import/no-default-export

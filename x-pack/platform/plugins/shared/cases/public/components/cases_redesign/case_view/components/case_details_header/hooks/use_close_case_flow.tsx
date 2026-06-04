@@ -6,13 +6,13 @@
  */
 
 import { useCallback } from 'react';
-import type { CaseStatuses } from '../../../../../common/types/domain';
-import type { CaseUI } from '../../../../../common';
-import { useRefreshCaseViewPage } from '../../../case_view/use_on_refresh_case_view_page';
-import { useStatusAction } from '../../../actions/status/use_status_action';
-import { useCloseCaseModal } from '../../../all_cases/use_close_case_modal';
-import { useCanSyncCloseReasonToAlerts } from '../../../all_cases/use_can_sync_close_reason_to_alerts';
-import type { OnUpdateFields } from '../../../case_view/types';
+import { CaseStatuses } from '../../../../../../../common/types/domain';
+import type { CaseUI } from '../../../../../../../common';
+import { useRefreshCaseViewPage } from '../../../../../case_view/use_on_refresh_case_view_page';
+import { useStatusAction } from '../../../../../actions/status/use_status_action';
+import { useCloseCaseModal } from '../../../../../all_cases/use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from '../../../../../all_cases/use_can_sync_close_reason_to_alerts';
+import type { OnUpdateFields } from '../../../../../case_view/types';
 
 interface UseCloseCaseFlowArgs {
   caseData: CaseUI;
@@ -36,7 +36,7 @@ export const useCloseCaseFlow = ({ caseData, onUpdateField }: UseCloseCaseFlowAr
 
   const onCloseCase = useCallback(
     (closeReason?: string) => {
-      statusAction.handleUpdateCaseStatus([caseData], 'closed' as CaseStatuses, closeReason);
+      statusAction.handleUpdateCaseStatus([caseData], CaseStatuses.closed, closeReason);
     },
     [caseData, statusAction]
   );
@@ -48,7 +48,7 @@ export const useCloseCaseFlow = ({ caseData, onUpdateField }: UseCloseCaseFlowAr
 
   const onStatusChanged = useCallback(
     (status: CaseStatuses) => {
-      if (status !== 'closed') {
+      if (status !== CaseStatuses.closed) {
         onUpdateField({ key: 'status', value: status });
       } else {
         openCloseCaseModal();

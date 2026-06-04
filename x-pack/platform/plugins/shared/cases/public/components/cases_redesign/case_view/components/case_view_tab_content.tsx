@@ -11,6 +11,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { CASE_VIEW_PAGE_TABS } from '../../../../../common/types';
 import type { CaseUI } from '../../../../../common';
 import { useUrlParams } from '../../../../common/navigation';
+import { ATTACHMENT_TAB_ALIASES } from '../../../case_view/use_case_attachment_tabs';
 import { CaseViewActivity } from '../../../case_view/components/case_view_activity';
 import { CaseViewSimilarCases } from '../../../case_view/components/case_view_similar_cases';
 import { CaseViewAttachments } from '../../../case_view/components/case_view_attachments';
@@ -30,20 +31,21 @@ export const CaseViewTabContent: FC<CaseViewTabContentProps> = ({
   onUpdateField,
 }) => {
   const { urlParams } = useUrlParams();
-  const knownTabs: string[] = [
-    CASE_VIEW_PAGE_TABS.ACTIVITY,
-    CASE_VIEW_PAGE_TABS.ATTACHMENTS,
-    CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
-  ];
   const rawTabId = urlParams?.tabId ?? CASE_VIEW_PAGE_TABS.ACTIVITY;
-  const activeTabId = knownTabs.includes(rawTabId) ? rawTabId : CASE_VIEW_PAGE_TABS.ACTIVITY;
+
+  const activeTabId =
+    rawTabId === CASE_VIEW_PAGE_TABS.ACTIVITY ||
+    rawTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ||
+    ATTACHMENT_TAB_ALIASES.has(rawTabId)
+      ? rawTabId
+      : CASE_VIEW_PAGE_TABS.ACTIVITY;
 
   return (
     <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
       {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
         <CaseViewActivity caseData={caseData} searchTerm={searchTerm} />
       )}
-      {activeTabId === CASE_VIEW_PAGE_TABS.ATTACHMENTS && (
+      {ATTACHMENT_TAB_ALIASES.has(activeTabId) && (
         <CaseViewAttachments
           caseData={caseData}
           onSearch={onSearch}

@@ -28,9 +28,11 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CaseUI } from '../../../../../common';
 import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useGetTemplates } from '../../../templates_v2/hooks/use_get_templates';
 import { useChangeAppliedTemplate } from '../../../case_view/use_change_applied_template';
 import { useGetTemplate } from '../../../templates_v2/hooks/use_get_template';
+import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../case_view/translations';
 import * as commonI18n from '../../../../common/translations';
 import { SHOW_METRICS, EDIT_CASE_NAME, NEW_CASE_NAME_LABEL } from '../../translations';
@@ -59,6 +61,9 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
   anchorElement,
 }) => {
   const { owner } = useCasesContext();
+  const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
+  const hasMetrics = metricsFeatures.length > 0;
+  const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [newCaseName, setNewCaseName] = useState(caseData.title);
 
@@ -83,14 +88,21 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
     [options, selectedTemplateId]
   );
 
-  const { data: selectedTemplateData } = useGetTemplate(selectedTemplateId || undefined);
+  const { data: selectedTemplateData } = useGetTemplate(
+    isTemplatesEnabled ? selectedTemplateId || undefined : undefined
+  );
   const { mutate: changeTemplate } = useChangeAppliedTemplate();
 
+  // Applied via useEffect rather than inside onTemplateChange because the
+  // template definition (fields, version) is fetched asynchronously by
+  // useGetTemplate and isn't available at the time the user selects a template.
   useEffect(() => {
     if (
+      isTemplatesEnabled &&
       selectedTemplateId &&
       selectedTemplateData &&
-      selectedTemplateData.templateId === selectedTemplateId
+      selectedTemplateData.templateId === selectedTemplateId &&
+      caseData.template?.id !== selectedTemplateId
     ) {
       changeTemplate({
         caseData,
@@ -101,7 +113,7 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
         },
       });
     }
-  }, [selectedTemplateId, selectedTemplateData, caseData, changeTemplate]);
+  }, [isTemplatesEnabled, selectedTemplateId, selectedTemplateData, caseData, changeTemplate]);
 
   const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');
@@ -137,36 +149,48 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
         data-test-subj="case-settings-popover"
       >
         <EuiPopoverTitle>{i18n.CASE_SETTINGS}</EuiPopoverTitle>
-        <EuiFormRow label={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL} fullWidth>
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            options={options}
-            selectedOptions={selectedOptions}
-            onChange={onTemplateChange}
-            isLoading={isLoadingTemplates}
-            placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
-            data-test-subj="case-settings-template-select"
-            compressed
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiSwitch
-          label={i18n.SYNC_ALERTS}
-          checked={syncAlerts}
-          onChange={(e) => onSyncAlertsChange(e.target.checked)}
-          compressed
-          data-test-subj="case-settings-sync-alerts-switch"
-        />
-        <EuiSpacer size="m" />
-        <EuiSwitch
-          label={SHOW_METRICS}
-          checked={showMetrics}
-          onChange={(e) => onShowMetricsChange(e.target.checked)}
-          compressed
-          data-test-subj="case-settings-show-metrics-switch"
-        />
-        <EuiHorizontalRule margin="m" />
+        {isTemplatesEnabled && (
+          <>
+            <EuiFormRow label={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL} fullWidth>
+              <EuiComboBox
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                options={options}
+                selectedOptions={selectedOptions}
+                onChange={onTemplateChange}
+                isLoading={isLoadingTemplates}
+                placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
+                data-test-subj="case-settings-template-select"
+                compressed
+              />
+            </EuiFormRow>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {isSyncAlertsEnabled && (
+          <>
+            <EuiSwitch
+              label={i18n.SYNC_ALERTS}
+              checked={syncAlerts}
+              onChange={(e) => onSyncAlertsChange(e.target.checked)}
+              compressed
+              data-test-subj="case-settings-sync-alerts-switch"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {hasMetrics && (
+          <>
+            <EuiSwitch
+              label={SHOW_METRICS}
+              checked={showMetrics}
+              onChange={(e) => onShowMetricsChange(e.target.checked)}
+              compressed
+              data-test-subj="case-settings-show-metrics-switch"
+            />
+            <EuiHorizontalRule margin="m" />
+          </>
+        )}
         <EuiLink onClick={openRenameModal} data-test-subj="case-settings-change-name">
           {EDIT_CASE_NAME}
         </EuiLink>

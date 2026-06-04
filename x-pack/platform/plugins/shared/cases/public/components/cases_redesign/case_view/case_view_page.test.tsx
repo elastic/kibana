@@ -11,7 +11,6 @@ import { screen, waitFor } from '@testing-library/react';
 import { CaseViewPageRedesign } from './case_view_page';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { basicCase } from '../../../containers/mock';
-import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useOnUpdateField } from '../../case_view/use_on_update_field';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../containers/use_delete_cases';
@@ -20,7 +19,7 @@ import { useStatusAction } from '../../actions/status/use_status_action';
 import { useGetTemplates } from '../../templates_v2/hooks/use_get_templates';
 import { useChangeAppliedTemplate } from '../../case_view/use_change_applied_template';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
-import type { CaseViewPageProps } from '../../case_view/types';
+import type { CaseViewPageRedesignProps } from './case_view_page';
 
 jest.mock('../../case_view/use_on_update_field');
 jest.mock('../../case_view/use_on_refresh_case_view_page');
@@ -69,10 +68,9 @@ jest.mock('./components/case_settings_popover', () => ({
 (useGetTemplate as jest.Mock).mockReturnValue({ data: null });
 
 describe('CaseViewPageRedesign', () => {
-  const defaultProps: CaseViewPageProps = {
+  const defaultProps: CaseViewPageRedesignProps = {
     caseData: basicCase,
     refreshRef: { current: null },
-    fetchCase: jest.fn(),
   };
 
   beforeEach(() => {
@@ -105,22 +103,10 @@ describe('CaseViewPageRedesign', () => {
     expect(await screen.findByTestId('case-view-tab-content')).toBeInTheDocument();
   });
 
-  it('renders metrics when feature is enabled and showMetrics is true', async () => {
-    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} />, {
-      wrapperProps: { features: { metrics: [CaseMetricsFeature.LIFESPAN] } },
-    });
+  it('renders metrics by default', async () => {
+    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} />);
 
     expect(await screen.findByTestId('case-view-metrics')).toBeInTheDocument();
-  });
-
-  it('does not render metrics when feature is not enabled', async () => {
-    renderWithTestingProviders(<CaseViewPageRedesign {...defaultProps} />, {
-      wrapperProps: { features: { metrics: [] } },
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('case-view-metrics')).not.toBeInTheDocument();
-    });
   });
 
   it('sets the refreshRef', async () => {

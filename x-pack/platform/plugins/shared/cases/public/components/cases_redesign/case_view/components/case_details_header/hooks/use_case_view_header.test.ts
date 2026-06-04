@@ -9,29 +9,23 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
 import { useCaseViewHeader } from './use_case_view_header';
-import { useCloseCaseFlow } from './use_close_case_flow';
-import { basicCase } from '../../../../containers/mock';
-import { TestProviders } from '../../../../common/mock';
-import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
-import { useDeleteCases } from '../../../../containers/use_delete_cases';
-import { useShouldDisableStatus } from '../../../actions/status/use_should_disable_status';
-import type { CaseUI } from '../../../../../common';
+import { basicCase } from '../../../../../../containers/mock';
+import { TestProviders } from '../../../../../../common/mock';
+import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_connectors';
+import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
+import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
+import type { CaseUI } from '../../../../../../../common';
 
-jest.mock('./use_close_case_flow');
-jest.mock('../../../../containers/use_get_case_connectors');
-jest.mock('../../../../containers/use_delete_cases');
-jest.mock('../../../actions/status/use_should_disable_status');
-jest.mock('../../../../common/navigation/hooks');
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../case_view/use_on_refresh_case_view_page');
+jest.mock('../../../../../../containers/use_get_case_connectors');
+jest.mock('../../../../../../containers/use_delete_cases');
+jest.mock('../../../../../actions/status/use_should_disable_status');
+jest.mock('../../../../../../common/navigation/hooks');
+jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../../case_view/use_on_refresh_case_view_page');
 
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
 
-(useCloseCaseFlow as jest.Mock).mockReturnValue({
-  onStatusChanged: mockOnStatusChanged,
-  closeCaseModal: null,
-});
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
 (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
@@ -41,13 +35,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
 
 describe('useCaseViewHeader', () => {
   const onUpdateField = jest.fn();
+  const defaultArgs = {
+    caseData: basicCase,
+    onUpdateField,
+    onStatusChanged: mockOnStatusChanged,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useCloseCaseFlow as jest.Mock).mockReturnValue({
-      onStatusChanged: mockOnStatusChanged,
-      closeCaseModal: null,
-    });
     (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
     (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
@@ -56,7 +51,7 @@ describe('useCaseViewHeader', () => {
   it('returns a formatted title with incremental ID', () => {
     const caseWithId: CaseUI = { ...basicCase, incrementalId: 42 };
     const { result } = renderHook(
-      () => useCaseViewHeader({ caseData: caseWithId, onUpdateField }),
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithId }),
       { wrapper }
     );
 
@@ -64,7 +59,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('returns title without prefix when incrementalId is undefined', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -72,7 +67,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('returns a backHref', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -80,7 +75,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('returns severity and status badges', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -99,7 +94,7 @@ describe('useCaseViewHeader', () => {
   it('includes alerts count badge when totalAlerts > 0', () => {
     const caseWithAlerts: CaseUI = { ...basicCase, totalAlerts: 5 };
     const { result } = renderHook(
-      () => useCaseViewHeader({ caseData: caseWithAlerts, onUpdateField }),
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithAlerts }),
       { wrapper }
     );
 
@@ -112,7 +107,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('does not include alerts badge when totalAlerts is 0', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -124,7 +119,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('includes status dropdown items when status is not disabled', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -138,7 +133,7 @@ describe('useCaseViewHeader', () => {
   it('does not include status dropdown items when status is disabled', () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
 
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -150,7 +145,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('returns menu items with refresh action', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -159,7 +154,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('returns settings menu item when user has update permissions', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -168,7 +163,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('returns delete menu item when user has delete permissions', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -177,7 +172,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('opens delete modal when delete action is triggered', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -192,7 +187,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('calls deleteCases and navigates on confirm deletion', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -207,7 +202,7 @@ describe('useCaseViewHeader', () => {
   });
 
   it('toggles settings open state when settings action is triggered', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
@@ -224,22 +219,8 @@ describe('useCaseViewHeader', () => {
     expect(result.current.settingsAnchor).toBe(mockElement);
   });
 
-  it('returns closeCaseModal from useCloseCaseFlow', () => {
-    const mockModal = 'mock-close-case-modal';
-    (useCloseCaseFlow as jest.Mock).mockReturnValue({
-      onStatusChanged: mockOnStatusChanged,
-      closeCaseModal: mockModal,
-    });
-
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
-      wrapper,
-    });
-
-    expect(result.current.closeCaseModal).toBe(mockModal);
-  });
-
-  it('calls onStatusChanged from useCloseCaseFlow when status badge is clicked', () => {
-    const { result } = renderHook(() => useCaseViewHeader({ caseData: basicCase, onUpdateField }), {
+  it('calls onStatusChanged when status badge item is clicked', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
