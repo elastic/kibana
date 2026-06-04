@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
 import Path from 'path';
 
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -15,33 +14,19 @@ import { run } from '@kbn/dev-cli-runner';
 import globby from 'globby';
 import normalize from 'normalize-path';
 
-import { makeFailedTestCaseIter, makeTestCaseIter, readTestReport } from './test_report';
+import { makeTestCaseIter, readTestReport } from './test_report';
 
-export async function collectFailedTestNames(junitDir: string): Promise<Set<string>> {
-  const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
-  const names = new Set<string>();
-  for (const xmlPath of xmlPaths) {
-    const report = await readTestReport(xmlPath);
-    for (const testCase of makeFailedTestCaseIter(report)) {
-      names.add(testCase.$.name.trim());
-    }
-  }
-  return names;
-}
+type ResultType = 'failures' | 'passes';
 
-/**
- * Returns the names of test cases that completed without failure and without being skipped.
- * Used on retry to verify previously-failing tests explicitly passed, not merely that they
- * were absent from results (e.g. runner crash, beforeAll hook failure, or stale XML files
- * from the previous attempt coexisting on a persistent-workspace agent).
- */
-export async function collectPassedTestNames(junitDir: string): Promise<Set<string>> {
+export async function collectTestNames(junitDir: string, type: ResultType): Promise<Set<string>> {
   const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
   const names = new Set<string>();
   for (const xmlPath of xmlPaths) {
     const report = await readTestReport(xmlPath);
     for (const testCase of makeTestCaseIter(report)) {
-      if (!testCase.failure && !testCase.skipped) {
+      const isFailed = Boolean(testCase.failure);
+      const isSkipped = Boolean(testCase.skipped);
+      if (type === 'failures' ? isFailed : !isFailed && !isSkipped) {
         names.add(testCase.$.name.trim());
       }
     }
@@ -49,110 +34,46 @@ export async function collectPassedTestNames(junitDir: string): Promise<Set<stri
   return names;
 }
 
-const readStdin = (): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    process.stdin.on('data', (chunk) =>
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-    );
-    process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    process.stdin.on('error', reject);
-  });
-
 export function runRetryResultCheckerCli() {
   run(
-    async ({ log, flags }) => {
-      const [command, ...rest] = flags._;
+    async ({ flags }) => {
+      const [command] = flags._;
 
-      if (command === 'list-failures') {
-        const [junitDir] = rest;
-        if (!junitDir) {
-          throw createFlagError('Usage: list-failures <junit-dir>');
+      if (command === 'collect-results') {
+        const junitDir = flags['junit-dir'];
+        const type = flags.type;
+
+        if (typeof junitDir !== 'string' || !junitDir) {
+          throw createFlagError('--junit-dir is required');
         }
-        const names = await collectFailedTestNames(junitDir);
+        if (type !== 'failures' && type !== 'passes') {
+          throw createFlagError('--type must be "failures" or "passes"');
+        }
+
+        const names = await collectTestNames(junitDir, type);
         if (names.size > 0) {
           process.stdout.write([...names].join('\n') + '\n');
         }
         return;
       }
 
-      if (command === 'check-intersection') {
-        const junitDir = flags['junit-dir'];
-        const prevFailuresFile = flags['prev-failures-file'];
-        const prevFailuresStdin = flags['prev-failures-stdin'];
-
-        if (typeof junitDir !== 'string' || !junitDir) {
-          throw createFlagError('--junit-dir is required');
-        }
-
-        let prevContent: string;
-        if (prevFailuresStdin) {
-          prevContent = await readStdin();
-        } else if (typeof prevFailuresFile === 'string' && prevFailuresFile) {
-          prevContent = Fs.readFileSync(prevFailuresFile, 'utf8');
-        } else {
-          throw createFlagError('Either --prev-failures-file or --prev-failures-stdin is required');
-        }
-
-        const prevFailed = new Set(
-          prevContent
-            .split('\n')
-            .map((l) => l.trim())
-            .filter(Boolean)
-        );
-
-        if (prevFailed.size === 0) {
-          log.info('No previously-failing tests found — nothing to intersect');
-          return;
-        }
-
-        // Require every previously-failing test to appear as an explicit pass on retry.
-        // Checking for explicit passes (rather than absence of failure) guards against
-        // three false-green scenarios: (a) the runner crashes before reaching the test
-        // leaving an empty JUnit directory, (b) a beforeAll hook failure causes the test
-        // to be reported as skipped rather than failed, and (c) stale XML files from the
-        // previous attempt persist in the directory on a persistent-workspace agent.
-        const currentPassed = await collectPassedTestNames(junitDir);
-        const notRecovered = [...prevFailed].filter((name) => !currentPassed.has(name));
-
-        if (notRecovered.length === 0) {
-          log.success(`All ${prevFailed.size} previously-failing test(s) passed on retry`);
-          return;
-        }
-
-        log.error(`${notRecovered.length} test(s) did not pass on retry:`);
-        for (const name of notRecovered) {
-          log.error(`  ${name}`);
-        }
-        process.exit(1);
-      }
-
-      throw createFlagError(
-        `Unknown command: ${command}. Valid commands: list-failures, check-intersection`
-      );
+      throw createFlagError(`Unknown command: ${command}. Valid commands: collect-results`);
     },
     {
       description: `
         Utilities for evaluating FTR retry results.
 
         Commands:
-          list-failures <junit-dir>
-            Lists all failed test names (one per line) found in *.xml files under
-            the given directory. Used to capture attempt-1 failures before retry.
-
-          check-intersection --junit-dir <dir> --prev-failures-file <file>|--prev-failures-stdin
-            Checks whether every test named in <file> (or stdin) appears as an explicit
-            pass in <dir>. Exits 0 if all previously-failing tests passed (step can be
-            marked green). Exits 1 if any previously-failing test did not pass
-            (still failing, skipped, or absent).
+          collect-results --junit-dir <dir> --type failures|passes
+            Prints test names (one per line) of the requested type found in *.xml
+            files under <dir>. Used to capture attempt-1 failures and attempt-2
+            passes for smart-retry evaluation.
       `,
       flags: {
-        string: ['junit-dir', 'prev-failures-file'],
-        boolean: ['prev-failures-stdin'],
+        string: ['junit-dir', 'type'],
         help: `
-          --junit-dir              Directory containing JUnit XML files for the current attempt
-          --prev-failures-file     File with newline-separated test names that failed in attempt 1
-          --prev-failures-stdin    Read prev-failures from stdin instead of a file
+          --junit-dir   Directory containing JUnit XML files
+          --type        "failures" or "passes"
         `,
       },
     }

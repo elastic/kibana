@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-import { collectFailedTestNames, collectPassedTestNames } from './retry_result_checker';
+import { collectTestNames } from './retry_result_checker';
 
 // Minimal JUnit XML helpers
 const buildXml = (testcases: string) => `<?xml version="1.0" encoding="utf-8"?>
@@ -31,7 +31,7 @@ const skippedCase = (name: string) =>
 const hookFailure = (hookName: string) =>
   `<testcase name='suite "${hookName}" hook' classname="suite.file" time="0"><failure>error</failure></testcase>`;
 
-describe('collectFailedTestNames', () => {
+describe("collectTestNames('failures')", () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -47,36 +47,36 @@ describe('collectFailedTestNames', () => {
       Path.join(tmpDir, 'TEST-report.xml'),
       buildXml(failedCase('suite myTest') + passedCase('suite otherTest'))
     );
-    const names = await collectFailedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'failures');
     expect([...names]).toEqual(['suite myTest']);
   });
 
   it('aggregates failures across multiple XML files', async () => {
     Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(failedCase('test A')));
     Fs.writeFileSync(Path.join(tmpDir, 'TEST-b.xml'), buildXml(failedCase('test B')));
-    const names = await collectFailedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'failures');
     expect([...names].sort()).toEqual(['test A', 'test B']);
   });
 
   it('returns empty set when all tests pass', async () => {
     Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(passedCase('test A')));
-    const names = await collectFailedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'failures');
     expect(names.size).toBe(0);
   });
 
   it('returns empty set when no XML files exist', async () => {
-    const names = await collectFailedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'failures');
     expect(names.size).toBe(0);
   });
 
   it('captures hook failure names verbatim', async () => {
     Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(hookFailure('before all')));
-    const names = await collectFailedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'failures');
     expect([...names]).toEqual(['suite "before all" hook']);
   });
 });
 
-describe('collectPassedTestNames', () => {
+describe("collectTestNames('passes')", () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -92,18 +92,18 @@ describe('collectPassedTestNames', () => {
       Path.join(tmpDir, 'TEST-report.xml'),
       buildXml(passedCase('test A') + failedCase('test B') + skippedCase('test C'))
     );
-    const names = await collectPassedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'passes');
     expect([...names]).toEqual(['test A']);
   });
 
   it('does not count skipped tests as passed (beforeAll hook scenario)', async () => {
     Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(skippedCase('test A')));
-    const names = await collectPassedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'passes');
     expect(names.size).toBe(0);
   });
 
   it('returns empty set when no XML files exist (runner crash scenario)', async () => {
-    const names = await collectPassedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'passes');
     expect(names.size).toBe(0);
   });
 
@@ -113,7 +113,7 @@ describe('collectPassedTestNames', () => {
       Path.join(tmpDir, 'TEST-b.xml'),
       buildXml(passedCase('test B') + failedCase('test C'))
     );
-    const names = await collectPassedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'passes');
     expect([...names].sort()).toEqual(['test A', 'test B']);
   });
 
@@ -128,7 +128,7 @@ describe('collectPassedTestNames', () => {
       Path.join(tmpDir, 'TEST-attempt2-bk__NEW.xml'),
       buildXml(passedCase('test A'))
     );
-    const names = await collectPassedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'passes');
     expect(names.has('test A')).toBe(true);
   });
 
@@ -143,7 +143,7 @@ describe('collectPassedTestNames', () => {
       Path.join(tmpDir, 'TEST-attempt2-bk__NEW.xml'),
       buildXml(failedCase('test A'))
     );
-    const names = await collectPassedTestNames(tmpDir);
+    const names = await collectTestNames(tmpDir, 'passes');
     expect(names.has('test A')).toBe(false);
   });
 });
