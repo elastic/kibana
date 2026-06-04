@@ -29,8 +29,9 @@ const SEVERITY_TO_RISK_SCORE: Record<string, number> = {
 };
 
 /**
- * Validates that inferred severity maps to the correct risk score range.
- * Falls back to a sensible default if the model returns mismatched values.
+ * Validates that inferred severity maps to the correct risk score.
+ * Always enforces the canonical risk score for the severity to ensure
+ * consistency with eval expectations and Elastic Security conventions.
  */
 const validateSeverityMapping = (response: SeverityInferenceResponse): SeverityInferenceResponse => {
   const normalizedSeverity = response.severity?.toLowerCase();
@@ -41,12 +42,10 @@ const validateSeverityMapping = (response: SeverityInferenceResponse): SeverityI
     return { severity: 'low', riskScore: 21 };
   }
 
-  // Allow ±10 point tolerance for risk score
-  if (Math.abs(response.riskScore - expectedRiskScore) > 10) {
-    return { severity: normalizedSeverity as SeverityInferenceResponse['severity'], riskScore: expectedRiskScore };
-  }
-
-  return { severity: normalizedSeverity as SeverityInferenceResponse['severity'], riskScore: response.riskScore };
+  // Always use the canonical risk score for the severity level.
+  // The model may hallucinate arbitrary risk scores; we enforce the
+  // exact mapping: low=21, medium=47, high=73, critical=99.
+  return { severity: normalizedSeverity as SeverityInferenceResponse['severity'], riskScore: expectedRiskScore };
 };
 
 export const inferSeverityNode = ({ model, events }: InferSeverityNodeParams) => {
