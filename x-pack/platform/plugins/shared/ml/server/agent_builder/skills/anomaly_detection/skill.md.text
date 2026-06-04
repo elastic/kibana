@@ -58,7 +58,8 @@ Read scores this way:
 
 | Phase                 | Tool                              | ES|QL template (from `esql-read-queries` or `esql-metadata-queries`)      |
 | --------------------- | --------------------------------- | ------------------------------------------------------------------------- |
-| Discovery             | `platform.core.execute_esql`      | `ad_get_available_metadata`, `ad_get_jobs`, `ad_discover_related_jobs`    |
+| Discovery             | `ml.ad_get_job_info`              | `operation=get_available_metadata`                                        |
+| Job detail            | `platform.core.execute_esql`      | `ad_get_jobs`, `ad_discover_related_jobs`                                 |
 | Timeline / scope      | `platform.core.execute_esql`      | `ad_query_anomaly_timeline`                                               |
 | Cross-job / entities  | `platform.core.execute_esql`      | `ad_rca_cross_job_entity_match`, `ad_rca_multi_job_entities`, `ad_rca_entity_profile` |
 | Records / influencers | `platform.core.execute_esql`      | `ad_query_anomaly_records`, `ad_query_influencers`                        |
@@ -68,7 +69,7 @@ Read scores this way:
 
 ### Protocol
 
-High level: `ad_get_available_metadata` (via `platform.core.execute_esql`) → `ad_query_anomaly_timeline` → rank with `ad_rca_multi_job_entities` (`min_job_count=2`) → `ad_rca_detector_fingerprint` → drill with `ad_query_anomaly_records` + `ad_query_influencers` (low `min_score=25`) → profile with `ad_rca_entity_profile` → order with `ad_rca_correlation` → confirm with `ad_rca_source_evidence`.
+High level: `ml.ad_get_job_info` (`operation=get_available_metadata`) → `ad_query_anomaly_timeline` (via `platform.core.execute_esql`) → rank with `ad_rca_multi_job_entities` (`min_job_count=2`) → `ad_rca_detector_fingerprint` → drill with `ad_query_anomaly_records` + `ad_query_influencers` (low `min_score=25`) → profile with `ad_rca_entity_profile` → order with `ad_rca_correlation` → confirm with `ad_rca_source_evidence`.
 
 When `by_field_name == "mlcategory"`, compare with `ad_get_categories` + `ad_search_log_category_examples` (baseline vs. anomaly window).
 
@@ -292,7 +293,7 @@ For **batch analysis on historical data**, pass `start` and `end` to `ml.ad_mana
 
 ## Examples
 
-**RCA:** "Something caused a spike in our error rate at 2pm — what broke?" → Investigate → `ad_get_available_metadata` via `platform.core.execute_esql` → `ad_query_anomaly_timeline` → `ad_rca_multi_job_entities` → RCA report.
+**RCA:** "Something caused a spike in our error rate at 2pm — what broke?" → Investigate → `ml.ad_get_job_info` (`operation=get_available_metadata`) → `ad_query_anomaly_timeline` (via `platform.core.execute_esql`) → `ad_rca_multi_job_entities` → RCA report.
 
 **Score drop:** "My anomaly score went from 90 to 55 — did the model change?" → Explain → `ad_rca_score_reassessment` via `platform.core.execute_esql` for drift → explain renormalization.
 
