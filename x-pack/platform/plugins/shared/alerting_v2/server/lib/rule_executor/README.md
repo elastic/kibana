@@ -123,14 +123,14 @@ In both formats the `breach` sub-object is required; the `recovery` sub-object i
 | --- | --- | --- |
 | `breach` | Yes | The breach query (composed: `segment`; standalone: `query`). Produces breached events on matching rows. |
 | `recovery` | Optional | The recovery query payload only. Present when `recovery_strategy` is `'query'` and holds the leaf field: `segment` for composed, `query` for standalone. No `strategy` field — that is the top-level `recovery_strategy`. |
-| `has_data` | Optional (standalone only) | Data-presence query. Present when `no_data_strategy` is not `'none'`. Composed queries do not have a `has_data` block. |
+| `no_data` | Optional (standalone only) | Data-presence query. Present when `no_data_strategy` is not `'none'`. Composed queries do not have a `no_data` block. |
 
 Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 
 | Top-level field | Values | Meaning |
 | --- | --- | --- |
 | `recovery_strategy` | `'no_breach'` \| `'query'` \| `'none'` | How the executor detects recovery. `'none'` disables recovery entirely. |
-| `no_data_strategy` | `'emit'` \| `'last_known_status'` \| `'recover'` \| `'none'` | How the executor reacts when `has_data` returns no rows. The executor does not yet act on this field — no-data event emission will be wired up in a future change. |
+| `no_data_strategy` | `'emit'` \| `'last_known_status'` \| `'recover'` \| `'none'` | How the executor reacts when `no_data` returns no rows. The executor does not yet act on this field — no-data event emission will be wired up in a future change. |
 
 ## Operational parameters
 

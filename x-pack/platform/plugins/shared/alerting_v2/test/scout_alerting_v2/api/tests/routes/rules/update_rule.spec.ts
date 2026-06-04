@@ -168,7 +168,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'update: should add a has_data query to a standalone-format rule',
+    'update: should add a no_data query to a standalone-format rule',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-add-no-data' } })
@@ -181,7 +181,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
           query: {
             format: 'standalone',
             breach: { query: 'FROM logs-* | LIMIT 1' },
-            has_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+            no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
           },
         },
       });
@@ -191,7 +191,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.query).toStrictEqual({
         format: 'standalone',
         breach: { query: 'FROM logs-* | LIMIT 1' },
-        has_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+        no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
       });
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }

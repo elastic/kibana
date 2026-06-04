@@ -23,8 +23,8 @@ export interface ComposedQuery {
 
 export interface StandaloneQuery {
   format: 'standalone';
-  /** Corollary of `base` in `ComposedQuery` — the "has data" base query. Maps to `query.has_data` in the API schema. */
-  has_data?: { query: string };
+  /** Corollary of `base` in `ComposedQuery` — the "no data" base query. Maps to `query.no_data` in the API schema. */
+  no_data?: { query: string };
   breach: { query: string };
   recovery?: { query: string };
 }

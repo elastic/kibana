@@ -132,7 +132,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
             recover: query.recovery?.segment ?? '',
           }
         : {
-            base: query.has_data?.query ?? '',
+            base: query.no_data?.query ?? '',
             breach: query.breach.query,
             recover: query.recovery?.query ?? '',
           },
@@ -154,7 +154,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           : {
               format: 'standalone',
               breach: { query: next.breach },
-              ...(next.base ? { has_data: { query: next.base } } : {}),
+              ...(next.base ? { no_data: { query: next.base } } : {}),
               ...(next.recover ? { recovery: { query: next.recover } } : {}),
             }
       );

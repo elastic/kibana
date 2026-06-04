@@ -224,7 +224,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          has_data: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | LIMIT 1' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -387,7 +387,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'create: returns 201 with standalone format and a has_data query',
+    'create: returns 201 with standalone format and a no_data query',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'standalone-no-data-rule' },
@@ -395,7 +395,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          has_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {

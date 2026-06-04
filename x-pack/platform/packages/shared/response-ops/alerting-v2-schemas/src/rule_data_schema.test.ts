@@ -320,20 +320,20 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts a standalone query with a has_data block', () => {
+    it('accepts a standalone query with a no_data block', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
         no_data_strategy: 'emit',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
         },
       });
       expect(result.query).toEqual({
         format: 'standalone',
         breach: { query: 'FROM logs-* | LIMIT 1' },
-        has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+        no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
       });
     });
 
@@ -344,7 +344,7 @@ describe('createRuleDataSchema', () => {
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
         },
       });
       expect(result.success).toBe(true);
@@ -374,6 +374,18 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects a composed query with an invalid breach segment (compose fails ES|QL validation)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE (' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a composed query with a whitespace-only recovery segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -383,6 +395,20 @@ describe('createRuleDataSchema', () => {
           base: 'FROM metrics-*',
           breach: { segment: 'WHERE cpu > 0.9' },
           recovery: { segment: ' ' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a composed query with an invalid recovery segment (compose fails ES|QL validation)', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+          recovery: { segment: 'WHERE (' },
         },
       });
       expect(result.success).toBe(false);
@@ -457,6 +483,18 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects recovery_strategy "query" when query.recovery is absent', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects recovery_strategy "no_breach" when query.recovery is also provided', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -491,7 +529,7 @@ describe('createRuleDataSchema', () => {
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
-          has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+          no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
         },
       });
       expect(result.success).toBe(false);
@@ -1192,16 +1230,16 @@ describe('getRecoverEsqlQuery', () => {
 });
 
 describe('getNoDataEsqlQuery', () => {
-  it('returns the has_data query verbatim for standalone format when no_data_strategy is set', () => {
+  it('returns the no_data query verbatim for standalone format when no_data_strategy is set', () => {
     const query = {
       format: 'standalone' as const,
       breach: { query: 'FROM logs-* | LIMIT 1' },
-      has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+      no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
     };
     expect(getNoDataEsqlQuery(query, 'emit')).toBe('FROM heartbeat-* | LIMIT 1');
   });
 
-  it('returns undefined for composed format (no has_data block)', () => {
+  it('returns undefined for composed format (no no_data block)', () => {
     const query = {
       format: 'composed' as const,
       base: 'FROM metrics-*',
@@ -1214,7 +1252,7 @@ describe('getNoDataEsqlQuery', () => {
     const query = {
       format: 'standalone' as const,
       breach: { query: 'FROM logs-* | LIMIT 1' },
-      has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+      no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
     };
     expect(getNoDataEsqlQuery(query, 'none')).toBeUndefined();
   });
@@ -1223,12 +1261,12 @@ describe('getNoDataEsqlQuery', () => {
     const query = {
       format: 'standalone' as const,
       breach: { query: 'FROM logs-* | LIMIT 1' },
-      has_data: { query: 'FROM heartbeat-* | LIMIT 1' },
+      no_data: { query: 'FROM heartbeat-* | LIMIT 1' },
     };
     expect(getNoDataEsqlQuery(query, undefined)).toBeUndefined();
   });
 
-  it('returns undefined when has_data block is absent even with active strategy', () => {
+  it('returns undefined when no_data block is absent even with active strategy', () => {
     const query = {
       format: 'standalone' as const,
       breach: { query: 'FROM logs-* | LIMIT 1' },

@@ -53,7 +53,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       format: schema.literal('standalone'),
       breach: schema.object({ query: schema.string() }),
       recovery: schema.maybe(schema.object({ query: schema.string() })),
-      has_data: schema.maybe(schema.object({ query: schema.string() })),
+      no_data: schema.maybe(schema.object({ query: schema.string() })),
     }),
   ]),
   state_transition: schema.maybe(

@@ -16,6 +16,7 @@ import { durationSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
+  MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
@@ -30,7 +31,7 @@ import {
 export const esqlQuerySchema = z
   .string()
   .min(1)
-  .max(10000)
+  .max(MAX_ESQL_QUERY_LENGTH)
   .superRefine((value, ctx) => {
     const error = validateEsqlQuery(value);
     if (error) {
@@ -124,7 +125,7 @@ export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
-  .max(10000)
+  .max(MAX_ESQL_QUERY_LENGTH)
   .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
 
 /** Composed wrappers (segment-based, appended to `base`). */
@@ -159,7 +160,7 @@ const standaloneRecoverySchema = z
   .strict()
   .describe('Recovery query. Present only when recovery_strategy is "query".');
 
-const standaloneHasDataSchema = z
+const standaloneNoDataSchema = z
   .object({
     query: esqlQuerySchema.describe('Full ES|QL query that detects presence of data.'),
   })
@@ -178,6 +179,32 @@ export const composedQuerySchema = z
       .describe('Recovery query segment. Required when recovery_strategy is "query".'),
   })
   .strict()
+  .check((ctx) => {
+    const breachError = validateEsqlQuery(
+      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
+    );
+    if (breachError) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['breach', 'segment'],
+        message: breachError,
+        input: ctx.value.breach.segment,
+      });
+    }
+    if (ctx.value.recovery) {
+      const recoveryError = validateEsqlQuery(
+        composeEsqlQuery(ctx.value.base, ctx.value.recovery.segment)
+      );
+      if (recoveryError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['recovery', 'segment'],
+          message: recoveryError,
+          input: ctx.value.recovery.segment,
+        });
+      }
+    }
+  })
   .describe('Composed query: a shared base with appendable breach and recovery segments.');
 
 export const standaloneQuerySchema = z
@@ -187,12 +214,12 @@ export const standaloneQuerySchema = z
     recovery: standaloneRecoverySchema
       .optional()
       .describe('Recovery query. Required when recovery_strategy is "query".'),
-    has_data: standaloneHasDataSchema
+    no_data: standaloneNoDataSchema
       .optional()
       .describe('No-data detection query. Required when no_data_strategy is not "none".'),
   })
   .strict()
-  .describe('Standalone queries: independent full queries for breach, recovery, and has_data.');
+  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.');
 
 export const querySchema = z
   .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
@@ -228,12 +255,12 @@ export const getRecoverEsqlQuery = (
 
 /**
  * Returns the has-data ES|QL query when `noDataStrategy` is not `'none'`,
- * otherwise `undefined`. Only standalone queries support a `has_data` block.
+ * otherwise `undefined`. Only standalone queries support a `no_data` block.
  */
 export const getNoDataEsqlQuery = (query: Query, strategy?: NoDataStrategy): string | undefined => {
   if (strategy == null || strategy === noDataStrategy.none) return undefined;
-  if (query.format === 'standalone' && query.has_data) {
-    return query.has_data.query;
+  if (query.format === 'standalone' && query.no_data) {
+    return query.no_data.query;
   }
   return undefined;
 };
@@ -387,6 +414,12 @@ export const isRecoveryQueryConsistentWithStrategy = (data: {
   return data.recovery_strategy === recoveryStrategy.query;
 };
 
+/** recovery_strategy "query" requires a recovery query block. */
+export const isRecoveryQueryProvidedForStrategy = (data: {
+  recovery_strategy?: RecoveryStrategy | null;
+  query?: { recovery?: unknown };
+}): boolean => data.recovery_strategy !== recoveryStrategy.query || data.query?.recovery != null;
+
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
@@ -402,6 +435,10 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   })
   .refine(isRecoveryQueryConsistentWithStrategy, {
     message: 'query.recovery is only allowed when recovery_strategy is "query".',
+    path: ['query', 'recovery'],
+  })
+  .refine(isRecoveryQueryProvidedForStrategy, {
+    message: 'query.recovery is required when recovery_strategy is "query".',
     path: ['query', 'recovery'],
   });
 

@@ -176,7 +176,7 @@ describe('manageRuleTool', () => {
       expect(addCall.data.recovery_strategy).toBe('query');
     });
 
-    it('stores no_data_strategy and has_data from set_query', async () => {
+    it('stores no_data_strategy and no_data from set_query', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({
         columns: [{ name: 'host.name', type: 'keyword' }],
@@ -193,7 +193,7 @@ describe('manageRuleTool', () => {
               query: {
                 format: 'standalone',
                 breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-                has_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
+                no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
               },
               no_data_strategy: 'emit',
             },

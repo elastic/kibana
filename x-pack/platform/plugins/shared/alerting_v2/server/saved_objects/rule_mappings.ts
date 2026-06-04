@@ -47,7 +47,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
             query: { type: 'text' },
           },
         },
-        has_data: {
+        no_data: {
           properties: {
             query: { type: 'text' },
           },

@@ -129,14 +129,14 @@ describe('executeRuleOperations', () => {
       });
     });
 
-    it('stores no_data_strategy: "emit" and has_data block on the rule data', async () => {
+    it('stores no_data_strategy: "emit" and no_data block on the rule data', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
           query: {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            has_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
           },
           no_data_strategy: 'emit',
         },
@@ -145,7 +145,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.no_data_strategy).toBe('emit');
-      expect((result.data.query as { has_data?: { query: string } }).has_data).toEqual({
+      expect((result.data.query as { no_data?: { query: string } }).no_data).toEqual({
         query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
       });
     });
@@ -490,7 +490,7 @@ describe('executeRuleOperations', () => {
           query: {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
-            has_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
           },
         },
         ops

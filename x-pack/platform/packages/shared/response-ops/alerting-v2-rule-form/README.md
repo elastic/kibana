@@ -161,7 +161,7 @@ interface FormValues {
 }
 ```
 
-> The form keeps a simple `{ breach, recover? }` shape internally. It is translated to the canonical API shape (`{ format: 'standalone', breach: { query }, recovery?: { query } }`) by `mapFormValuesToRuleRequest`, with a top-level `recovery_strategy: 'query'` emitted alongside when a recovery query is present. The form does not currently surface `has_data`, `no_data_strategy`, or `recovery_strategy: 'no_breach'`; they are dropped on round-trip and need to be set through the canonical API or the Compose Discover flyout if required.
+> The form keeps a simple `{ breach, recover? }` shape internally. It is translated to the canonical API shape (`{ format: 'standalone', breach: { query }, recovery?: { query } }`) by `mapFormValuesToRuleRequest`, with a top-level `recovery_strategy: 'query'` emitted alongside when a recovery query is present. The form does not currently surface `no_data`, `no_data_strategy`, or `recovery_strategy: 'no_breach'`; they are dropped on round-trip and need to be set through the canonical API or the Compose Discover flyout if required.
 
 ## Required Services
 
