@@ -15,6 +15,7 @@ import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
@@ -65,6 +66,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
     setPreviewedAttachmentKey,
   } = useCanvasContext();
   const { conversationActions } = useConversationContext();
+  const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
@@ -103,6 +105,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       uiDefinition?.getActionButtons?.({
         attachment,
         isSidebar,
+        agentId,
         updateOrigin,
         openCanvas,
         openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
@@ -117,6 +120,7 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
       uiDefinition,
       attachment,
       isSidebar,
+      agentId,
       updateOrigin,
       openCanvas,
       setPreviewedAttachmentKey,

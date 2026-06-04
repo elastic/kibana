@@ -15,6 +15,7 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
@@ -28,6 +29,7 @@ export interface ChromeNavigationProps {
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
+  const isNextChrome = useIsNextChrome();
 
   if (!state) {
     return null;
@@ -44,6 +46,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
+        showTopSeparator={isNextChrome}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
@@ -57,16 +60,17 @@ export default Navigation;
 const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const isNextChrome = useIsNextChrome();
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
     return chrome.project.getNavigation$().pipe(
       map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
+        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager, isNextChrome),
         solutionId: nav.solutionId,
       }))
     );
-  }, [chrome, basePath]);
+  }, [chrome, basePath, isNextChrome]);
 
   return useObservable(items$, null);
 };
