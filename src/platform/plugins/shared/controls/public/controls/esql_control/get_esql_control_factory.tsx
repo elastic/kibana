@@ -9,12 +9,11 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, map, merge, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
-  apiPublishesESQLVariable,
   apiPublishesESQLVariables,
   isStaticESQLControl,
   type QueryESQLControl,
