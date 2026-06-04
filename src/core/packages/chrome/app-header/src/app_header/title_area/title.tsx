@@ -20,6 +20,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AppHeaderEditableTitle, AppHeaderTitle } from '../../types';
 
+// The bundled lib.dom `FocusOptions` does not yet include `focusVisible`, which lets us
+// force the focus ring on/off when restoring focus programmatically.
+interface FocusOptionsWithVisible extends FocusOptions {
+  focusVisible?: boolean;
+}
+
 const defaultAriaLabel = i18n.translate('core.ui.chrome.appHeader.editableTitle.ariaLabel', {
   defaultMessage: 'Edit title',
 });
@@ -271,6 +277,9 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
     const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const titleRef = useRef<HTMLButtonElement>(null);
+    // Whether the current edit was opened via keyboard, so the focus ring only returns for
+    // keyboard users when focus is restored to the title.
+    const enteredViaKeyboardRef = useRef(false);
     // Marks that an edit was resolved by an explicit action (Enter/Escape) so the trailing
     // blur from unmounting the focused input does not re-enter save().
     const resolvingRef = useRef(false);
@@ -297,16 +306,18 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
     }, [isEditing]);
 
     const returnFocusToTitle = () => {
+      const options: FocusOptionsWithVisible = { focusVisible: enteredViaKeyboardRef.current };
       requestAnimationFrame(() => {
-        titleRef.current?.focus();
+        titleRef.current?.focus(options);
       });
     };
 
-    const startEditing = () => {
+    const startEditing = (viaKeyboard = false) => {
       if (!editable) {
         return;
       }
 
+      enteredViaKeyboardRef.current = viaKeyboard;
       resolvingRef.current = false;
       setDraft(text);
       setError(undefined);
@@ -471,13 +482,9 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                 type="button"
                 css={styles.readModeTrigger}
                 aria-describedby={instructionsId}
-                onClick={startEditing}
-                onKeyDown={(event) => {
-                  if (event.key === 'F2') {
-                    event.preventDefault();
-                    startEditing();
-                  }
-                }}
+                // `event.detail === 0` marks a keyboard activation (Enter/Space) vs a mouse
+                // click, so the ring only returns to keyboard users after editing.
+                onClick={(event) => startEditing(event.detail === 0)}
               >
                 {readContent}
               </button>
