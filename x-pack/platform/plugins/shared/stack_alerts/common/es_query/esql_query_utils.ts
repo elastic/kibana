@@ -12,6 +12,10 @@ import type { ESQLCommandOption } from '@kbn/esql-ast';
 import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem, isFunctionItem } from '@kbn/esql-validation-autocomplete';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
+import type {
+  EsqlQueryResponse,
+  FieldValue
+} from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -48,16 +52,21 @@ export interface EsqlTable {
 export const ALERT_ID_COLUMN = 'Alert ID';
 export const ALERT_ID_SUGGESTED_MAX = 10;
 
-export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
-  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
-    acc[column.name] = row[i];
-
-    return acc;
-  }, {});
+export const rowToDocument = (
+  columns: EsqlQueryResponse['columns'],
+  row: FieldValue[]
+): EsqlDocument => {
+  const doc: EsqlDocument = {};
+  for (let i = 0; i < columns.length; ++i) {
+    doc[columns[i].name] = row[i]?.toString() || null;
+  }
+  return doc;
 };
 
+// The union type "EsqlTable | EsqlQueryResponse" is needed in this file to support both the UI test query funtionality and the server side execution of the rule.
+// The UI uses the data plugin to fetch results and while the server side execution calls the esClient directly.
 export const getEsqlQueryHits = (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   query: string,
   isGroupAgg: boolean
 ): EsqlQueryHits => {
@@ -68,7 +77,7 @@ export const getEsqlQueryHits = (
   return toEsqlQueryHits(table);
 };
 
-export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
+export const toEsqlQueryHits = (table: EsqlTable | EsqlQueryResponse): EsqlQueryHits => {
   const hits: EsqlHit[] = [];
   const rows: EsqlDocument[] = [];
   for (const row of table.values) {
@@ -101,7 +110,7 @@ export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
 };
 
 export const toGroupedEsqlQueryHits = (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   alertIdFields: string[]
 ): EsqlQueryHits => {
   const duplicateAlertIds: Set<string> = new Set<string>();
