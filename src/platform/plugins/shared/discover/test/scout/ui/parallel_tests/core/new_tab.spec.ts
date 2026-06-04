@@ -16,13 +16,6 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { setupDiscoverDefaults, teardownDiscoverDefaults } from '../../fixtures/common';
 
-const ESQL_DATA_VIEW = 'logst';
-const KQL_QUERY = 'machine.os: "macOS"';
-const WIDE_TIME_RANGE = {
-  from: 'Jan 10, 2000 @ 00:00:00.000',
-  to: 'Dec 10, 2025 @ 00:00:00.000',
-};
-
 spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all }, () => {
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
@@ -42,6 +35,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
 
   spaceTest('should create a new tab in classic mode', async ({ pageObjects }) => {
     const { discover, filterBar, queryBar } = pageObjects;
+    const KQL_QUERY = 'machine.os: "macOS"';
 
     // tab 0 - created automatically with the default data view
 
@@ -100,14 +94,16 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
     );
   });
 
-  spaceTest('should create a new tab in ES|QL mode', async ({ page, pageObjects }) => {
+  spaceTest('should create a new tab in ES|QL mode', async ({ pageObjects }) => {
     const { discover } = pageObjects;
     const defaultQuery = 'FROM logst*';
     const updatedQuery = 'FROM logst* | LIMIT 1050';
 
+    // tab 0 - created automatically with the default data view
+
     await spaceTest.step('tab 0: create an ad hoc data view from the search bar', async () => {
       expect(await discover.getCurrentQueryMode()).toBe('classic');
-      await discover.createDataViewFromSearchBar({ name: ESQL_DATA_VIEW, hasTimeField: true });
+      await discover.createDataViewFromSearchBar({ name: 'logst', hasTimeField: true });
     });
 
     await spaceTest.step(
@@ -120,7 +116,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
         expect(await discover.getEsqlQueryValue()).toBe(defaultQuery);
 
         await discover.codeEditor.setCodeEditorValue(updatedQuery);
-        await page.testSubj.click('querySubmitButton');
+        await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getEsqlQueryValue()).toBe(updatedQuery);
       }
@@ -133,6 +129,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
     });
   });
 
+  // TODO should be removed/modified after empty canvas is implemented #255686
   spaceTest('should be able to complete all quickly opened tabs', async ({ pageObjects }) => {
     const { discover, datePicker } = pageObjects;
 
@@ -141,7 +138,10 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
       async () => {
         await discover.writeAndSubmitEsqlQuery('FROM *');
         await discover.waitUntilTabIsLoaded();
-        await datePicker.setAbsoluteRange(WIDE_TIME_RANGE);
+        await datePicker.setAbsoluteRange({
+          from: 'Jan 10, 2000 @ 00:00:00.000',
+          to: 'Dec 10, 2025 @ 00:00:00.000',
+        });
         await discover.waitUntilTabIsLoaded();
       }
     );

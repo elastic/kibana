@@ -632,7 +632,7 @@ export class DiscoverApp {
 
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
-    await this.page.testSubj.click('querySubmitButton');
+    await this.submitQuery();
     await this.waitUntilSearchingHasFinished();
   }
 
@@ -694,8 +694,17 @@ export class DiscoverApp {
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
-    await this.page.testSubj.click('querySubmitButton');
+    await this.submitQuery();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Submits the current query (classic search bar or ES|QL editor) by clicking
+   * the query submit button. Does not wait for results — pair with
+   * `waitUntilSearchingHasFinished()` or `waitUntilTabIsLoaded()` as appropriate.
+   */
+  async submitQuery() {
+    await this.page.testSubj.click('querySubmitButton');
   }
 
   async navigateToTabByName(name: string) {
@@ -811,7 +820,7 @@ export class DiscoverApp {
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
-    await this.page.testSubj.click('querySubmitButton');
+    await this.submitQuery();
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
