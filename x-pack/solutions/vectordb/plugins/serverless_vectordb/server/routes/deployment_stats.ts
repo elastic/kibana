@@ -93,11 +93,23 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
           }
         }
 
+        let dashboardsCount = 0;
+        try {
+          const savedObjectsClient = core.savedObjects.getClient();
+          const result = await savedObjectsClient.find({ type: 'dashboard', perPage: 0 });
+          dashboardsCount = result.total;
+        } catch (dashboardError) {
+          logger.warn(
+            `Failed to fetch dashboard count for vectordb deployment stats: ${dashboardError.message}`
+          );
+        }
+
         return response.ok({
           body: {
             indicesCount,
             storeSizeBytes,
             vectorDocsCount,
+            dashboardsCount,
           },
         });
       } catch (error) {
