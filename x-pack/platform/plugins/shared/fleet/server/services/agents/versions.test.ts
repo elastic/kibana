@@ -10,7 +10,7 @@ import { readFile } from 'fs/promises';
 import fetch from 'node-fetch';
 import type { DeepPartial } from 'utility-types';
 
-import type { FleetConfigType } from '../../../public/plugin';
+import type { FleetConfigType } from '../../config';
 
 import {
   getAvailableVersions,
@@ -21,11 +21,13 @@ import {
 let mockKibanaVersion = '300.0.0';
 let mockConfig: DeepPartial<FleetConfigType> = {};
 
+const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+const mockLogger = loggerMock.create();
+
 jest.mock('../app_context', () => {
-  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
     appContextService: {
-      getLogger: () => loggerMock.create(),
+      getLogger: () => mockLogger,
       getKibanaVersion: () => mockKibanaVersion,
       getConfig: () => mockConfig,
     },
@@ -46,6 +48,7 @@ const emptyResponse = {
 beforeEach(() => {
   mockedReadFile.mockReset();
   mockedFetch.mockReset();
+  loggerMock.clear(mockLogger);
 });
 
 describe('getLatestAvailableAgentVersion', () => {
@@ -539,5 +542,64 @@ describe('getAvailableVersions', () => {
     // No API data should be included since air-gapped
     expect(res).toEqual(['8.10.2', '8.10.4', '8.10.1', '8.9.0', '7.17.0']);
     expect(mockedFetch).not.toHaveBeenCalled(); // Verify no API call was made
+  });
+
+  it('should fall back to disk versions and log a warning when the fetch times out (AbortError)', async () => {
+    mockKibanaVersion = '300.0.0';
+    // Use a very short timeout so the AbortController fires quickly in tests
+    mockConfig = { productVersionsApiTimeoutMs: 1 };
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0"]`);
+
+    const abortError = Object.assign(new Error('The operation was aborted'), {
+      name: 'AbortError',
+    });
+    mockedFetch.mockRejectedValue(abortError);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Timed out fetching available agent versions')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('xpack.fleet.isAirGapped: true')
+    );
+  });
+
+  it('should fall back to disk versions and log a warning when the fetch times out (TimeoutError)', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockConfig = { productVersionsApiTimeoutMs: 1 };
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0"]`);
+
+    const timeoutError = Object.assign(new Error('The operation timed out'), {
+      name: 'TimeoutError',
+    });
+    mockedFetch.mockRejectedValue(timeoutError);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Timed out fetching available agent versions')
+    );
+  });
+
+  it('should honour productVersionsApiTimeoutMs config when set', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockConfig = { productVersionsApiTimeoutMs: 5000 };
+    mockedReadFile.mockResolvedValue(`["8.1.0"]`);
+
+    const abortError = Object.assign(new Error('The operation was aborted'), {
+      name: 'AbortError',
+    });
+    mockedFetch.mockRejectedValue(abortError);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('5000ms'));
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('xpack.fleet.productVersionsApiTimeoutMs')
+    );
   });
 });

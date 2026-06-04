@@ -178,6 +178,7 @@ export const config: PluginConfigDescriptor = {
   schema: schema.object(
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
+      productVersionsApiTimeoutMs: schema.number({ defaultValue: 60 * 1000, min: 1000 }),
       enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
       enableManagedLogsAndMetricsDataviews: schema.boolean({ defaultValue: true }),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),

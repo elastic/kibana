@@ -29,7 +29,7 @@ const AGENT_VERSION_BUILD_FILE =
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
-const MAX_REQUEST_TIMEOUT = 60 * 1000; // Only attempt to fetch product versions for one minute total
+const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
 // Cache available versions in memory for 1 hour
 const CACHE_DURATION = 1000 * 60 * 60;
@@ -173,6 +173,9 @@ async function fetchAgentVersionsFromApi() {
   }
 
   const logger = appContextService.getLogger();
+  const timeoutMs =
+    appContextService.getConfig()?.productVersionsApiTimeoutMs ??
+    DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS;
 
   const options = {
     headers: {
@@ -181,10 +184,17 @@ async function fetchAgentVersionsFromApi() {
   };
 
   try {
-    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), {
-      retries: 1,
-      maxRetryTime: MAX_REQUEST_TIMEOUT,
-    });
+    const controller = new AbortController();
+    const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
+    let response;
+    try {
+      response = await pRetry(
+        () => fetch(PRODUCT_VERSIONS_URL, { ...options, signal: controller.signal }),
+        { retries: 1 }
+      );
+    } finally {
+      clearTimeout(timeoutHandle);
+    }
     const rawBody = await response.text();
 
     // We need to handle non-200 responses gracefully here to support airgapped environments where
@@ -202,6 +212,14 @@ async function fetchAgentVersionsFromApi() {
 
     return versions;
   } catch (error) {
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+      logger.warn(
+        `Timed out fetching available agent versions from ${PRODUCT_VERSIONS_URL} after ${timeoutMs}ms. ` +
+          `If this Kibana instance cannot reach the product versions API, set xpack.fleet.isAirGapped: true ` +
+          `or increase xpack.fleet.productVersionsApiTimeoutMs.`
+      );
+      return [];
+    }
     logger.debug(`Error fetching available versions from API: ${error.message}`);
     return [];
   }
