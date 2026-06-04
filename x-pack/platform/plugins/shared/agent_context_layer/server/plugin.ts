@@ -154,7 +154,7 @@ export class AgentContextLayerPlugin
         });
         const spaceId =
           params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        return smlService.indexAttachment({
+        const base = {
           originId: params.originId,
           attachmentType: params.attachmentType,
           action: params.action,
@@ -162,7 +162,11 @@ export class AgentContextLayerPlugin
           esClient: elasticsearch.client.asInternalUser,
           savedObjectsClient: soClient,
           logger: this.logger.get('sml'),
-        });
+        };
+        if (params.content !== undefined) {
+          return smlService.indexAttachment({ ...base, content: params.content });
+        }
+        return smlService.indexAttachment({ ...base, force: params.force });
       },
     };
   }
