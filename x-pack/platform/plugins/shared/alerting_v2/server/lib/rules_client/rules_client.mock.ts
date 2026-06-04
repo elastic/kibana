@@ -9,14 +9,15 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ActionPolicyClient } from '../action_policy_client';
+import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
-import type { WorkflowServiceContract } from '../services/workflow_service/workflow_service';
 import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  ruleEventPublisher: jest.Mocked<RuleEventPublisher>;
 } {
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
   const request = httpServerMock.createKibanaRequest();
@@ -27,9 +28,14 @@ export function createRulesClient(): {
       .fn()
       .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
   } as unknown as ActionPolicyClient;
-  const workflowService = {
-    emitEvent: jest.fn().mockResolvedValue(undefined),
-  } as unknown as WorkflowServiceContract;
+  const ruleEventPublisher = {
+    emitRuleCreated: jest.fn(),
+    emitRuleUpdated: jest.fn(),
+    emitRuleDeleted: jest.fn(),
+    emitRuleEnabled: jest.fn(),
+    emitRuleDisabled: jest.fn(),
+    emitAfterRuleUpdate: jest.fn(),
+  } as unknown as jest.Mocked<RuleEventPublisher>;
 
   const rulesClient = new RulesClient({
     services: {
@@ -38,10 +44,10 @@ export function createRulesClient(): {
       taskManager,
       userService,
       actionPolicyClient,
-      workflowService,
+      ruleEventPublisher,
     },
     options: { spaceId: 'default' },
   });
 
-  return { rulesClient, mockSavedObjectsClient };
+  return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };
 }

@@ -26,9 +26,8 @@ import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import type { WorkflowServiceContract } from '../services/workflow_service/workflow_service';
+import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { UserServiceContract } from '../services/user_service/user_service';
-import { createRuleWorkflowEmitter } from '../workflow_extensions/rule_workflow_emitter';
 import { buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
@@ -84,7 +83,7 @@ interface RulesClientParams {
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
     actionPolicyClient: ActionPolicyClient;
-    workflowService: WorkflowServiceContract;
+    ruleEventPublisher: RuleEventPublisher;
   };
   options: {
     spaceId: string;
@@ -97,7 +96,7 @@ export class RulesClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
   private readonly actionPolicyClient: ActionPolicyClient;
-  private readonly workflowEmitter: ReturnType<typeof createRuleWorkflowEmitter>;
+  private readonly ruleEventPublisher: RuleEventPublisher;
   private readonly spaceId: string;
 
   constructor({ services, options }: RulesClientParams) {
@@ -106,11 +105,7 @@ export class RulesClient {
     this.taskManager = services.taskManager;
     this.userService = services.userService;
     this.actionPolicyClient = services.actionPolicyClient;
-    this.workflowEmitter = createRuleWorkflowEmitter(
-      services.workflowService,
-      services.request,
-      options.spaceId
-    );
+    this.ruleEventPublisher = services.ruleEventPublisher;
     this.spaceId = options.spaceId;
   }
 
@@ -243,7 +238,7 @@ export class RulesClient {
     }
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
-    await this.workflowEmitter.emitCreated(rule);
+    this.ruleEventPublisher.emitRuleCreated(this.request, rule, this.spaceId);
     return rule;
   }
 
@@ -287,7 +282,13 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    await this.workflowEmitter.emitAfterUpdate(parsed, existingAttrs, rule);
+    this.ruleEventPublisher.emitAfterRuleUpdate(
+      this.request,
+      parsed,
+      existingAttrs,
+      rule,
+      this.spaceId
+    );
     return rule;
   }
 
@@ -343,7 +344,7 @@ export class RulesClient {
       ruleId: id,
     });
 
-    await this.workflowEmitter.emitDeleted([deletedRule]);
+    this.ruleEventPublisher.emitRuleDeleted(this.request, [deletedRule], this.spaceId);
   }
 
   @withApm
@@ -379,7 +380,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    await this.workflowEmitter.emitEnabled([rule]);
+    this.ruleEventPublisher.emitRuleEnabled(this.request, [rule], this.spaceId);
     return rule;
   }
 
@@ -413,7 +414,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    await this.workflowEmitter.emitDisabled([rule]);
+    this.ruleEventPublisher.emitRuleDisabled(this.request, [rule], this.spaceId);
     return rule;
   }
 
@@ -573,7 +574,7 @@ export class RulesClient {
       }
     }
 
-    await this.workflowEmitter.emitDeleted(deletedRules);
+    this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules, this.spaceId);
 
     return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -680,7 +681,7 @@ export class RulesClient {
       const enabledRules = itemsToUpdate
         .filter((item) => !errors.some((e) => e.id === item.id))
         .map((item) => transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
-      await this.workflowEmitter.emitEnabled(enabledRules);
+      this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules, this.spaceId);
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
@@ -772,7 +773,10 @@ export class RulesClient {
     const disabledRules = itemsToUpdate
       .filter((item) => !errors.some((e) => e.id === item.id))
       .map((item) => transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
-    await this.workflowEmitter.emitDisabled(disabledRules);
+
+    if (disabledRules.length > 0) {
+      this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules, this.spaceId);
+    }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -823,7 +827,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    await this.workflowEmitter.emitUpdated(rule);
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [rule], this.spaceId);
     return { rule, created: false };
   }
 }

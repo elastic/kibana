@@ -25,6 +25,7 @@ import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
+import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
 import { RulesClient } from '../lib/rules_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
@@ -93,7 +94,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
           actionPolicyClient: get(ActionPolicyClient),
-          workflowService: get(WorkflowServiceToken),
+          ruleEventPublisher: get(RuleEventPublisher),
         },
         options: {
           spaceId: get(RequestSpaceIdToken),

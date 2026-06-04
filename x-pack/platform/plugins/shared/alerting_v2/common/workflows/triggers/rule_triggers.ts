@@ -29,7 +29,7 @@ const createRuleTriggerDefinition = ({
   description: string;
   documentationDetails: string;
   exampleCondition: string;
-}): CommonTriggerDefinition => ({
+}): CommonTriggerDefinition<typeof ruleLifecycleEventSchema> => ({
   id,
   eventSchema: ruleLifecycleEventSchema,
   title,
