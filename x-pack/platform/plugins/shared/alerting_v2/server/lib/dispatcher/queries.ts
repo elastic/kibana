@@ -20,6 +20,11 @@ import type { AlertEpisode, ActionGroupId } from './types';
  *  - alert_events has a `type` field ('signal' | 'alert'); alert_actions does not (NULL in ES|QL).
  *  - alert_actions has an `action_type` field; alert_events does not (NULL in ES|QL).
  *
+ * `_source` is dropped immediately after the EVAL that consumes it. The ES|QL planner does
+ * not auto-prune `METADATA _source`, so without an explicit DROP it would ride through the
+ * INLINE STATS hash-join buffer and push the per-shard sub-plan output past the ~16.8 MB
+ * limit at production volumes (data is `flattened`, only addressable via `_source`).
+ *
  * This avoids an ES|QL regression where `WHERE _index LIKE` before `STATS` in a multi-index
  * query returns 0 rows. See: https://github.com/elastic/elasticsearch/issues/146318
  */
@@ -33,7 +38,7 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
           episode_id = COALESCE(episode.id, episode_id),
           episode_status = episode.status,
           data_json = CASE(type IS NOT NULL, JSON_EXTRACT(_source, "$.data"), NULL)
-      | DROP episode.id, rule.id, episode.status
+      | DROP episode.id, rule.id, episode.status, _source
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY rule_id, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
