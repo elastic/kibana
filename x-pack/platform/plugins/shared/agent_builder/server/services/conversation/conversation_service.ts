@@ -12,17 +12,13 @@ import type {
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
 
 export interface ConversationService {
-  getScopedClient(options: {
-    request: KibanaRequest;
-    userName?: string;
-  }): Promise<ConversationClient>;
+  getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
 }
 
 interface ConversationServiceDeps {
@@ -45,28 +41,13 @@ export class ConversationServiceImpl implements ConversationService {
     this.spaces = spaces;
   }
 
-  async getScopedClient({
-    request,
-    userName,
-  }: {
-    request: KibanaRequest;
-    /**
-     * Optional override for the conversation owner's username. Pass this when the request
-     * is a Task Manager `fakeRequest` and the human owner's identity was captured
-     * upstream (e.g. on the agent execution document). Without it, the conversation would
-     * be persisted under the API key's identity instead of the originating user's, which
-     * makes the conversation unreadable to the originator (SO filtered by `user_name`).
-     */
-    userName?: string;
-  }): Promise<ConversationClient> {
+  async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
     const scopedClient = this.elasticsearch.client.asScoped(request);
-    const user: UserIdAndName = userName
-      ? { username: userName }
-      : await getUserFromRequest({
-          request,
-          security: this.security,
-          esClient: scopedClient.asCurrentUser,
-        });
+    const user = await getUserFromRequest({
+      request,
+      security: this.security,
+      esClient: scopedClient.asCurrentUser,
+    });
     const esClient = scopedClient.asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
 

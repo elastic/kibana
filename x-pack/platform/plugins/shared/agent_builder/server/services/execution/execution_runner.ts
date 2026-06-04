@@ -124,14 +124,11 @@ const handleConversationExecution = async ({
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
-  // Resolve scoped services. `execution.userName` is the originating user's username
-  // (captured at scheduling time from the real request) — forward it so the conversation
-  // is owned by that user rather than the TM fakeRequest's API-key identity.
+  // Resolve scoped services
   const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
     request,
-    userName: execution.userName,
     ...deps,
   });
 

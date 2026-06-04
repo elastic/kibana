@@ -13,7 +13,6 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -44,7 +43,6 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
-  security: SecurityServiceStart;
 }
 
 export const createAgentExecutionService = (
@@ -94,16 +92,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    // Capture the original user's username from the real HTTP request so it survives the
-    // Task Manager fakeRequest auth at execution time (where API-key-based authentication
-    // surfaces the key's identity instead of the human owner's username). The conversation
-    // SO will be persisted with this user_name so the originator can read it back.
-    // For sub-agent executions spawned from within a running task, the request is itself
-    // a fakeRequest and `getCurrentUser` returns null — leave `userName` undefined and let
-    // downstream callers inherit from the parent execution if they need it.
-    const currentUser = this.deps.security.authc.getCurrentUser(request);
-    const userName = currentUser?.username;
-
     const execution = await executionClient.create({
       executionMode: mode,
       executionId,
@@ -112,7 +100,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       agentParams: validatedParams,
       parentExecutionId: params.parentExecutionId,
       metadata,
-      userName,
     });
 
     // Wire up external abort signal to execution abort

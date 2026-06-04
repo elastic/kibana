@@ -29,7 +29,6 @@ const storageSettings = {
       execution_mode: types.keyword({}),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
-      user_name: types.keyword({}),
       agent_params: types.object({ dynamic: false, properties: {} }),
       error: types.object({
         dynamic: false,
@@ -53,11 +52,6 @@ export interface AgentExecutionProperties {
   execution_mode?: string;
   parent_execution_id?: string;
   space_id: string;
-  /**
-   * Username of the user who initiated the execution. See `AgentExecution.userName` for
-   * the full rationale (TM fakeRequest auth surfaces the API key id instead of the human owner).
-   */
-  user_name?: string;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
   event_count?: number;

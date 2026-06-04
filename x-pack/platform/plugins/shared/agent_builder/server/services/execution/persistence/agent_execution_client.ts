@@ -22,7 +22,6 @@ type CreateExecutionParams = Pick<
   | 'metadata'
   | 'executionMode'
   | 'parentExecutionId'
-  | 'userName'
 >;
 
 /**
@@ -43,7 +42,6 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     agentId: source.agent_id,
     executionMode: source.execution_mode ?? AgentExecutionMode.conversation,
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
-    ...(source.user_name ? { userName: source.user_name } : {}),
     spaceId: source.space_id,
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
@@ -128,7 +126,6 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     metadata,
     executionMode,
     parentExecutionId,
-    userName,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -147,7 +144,6 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       execution_mode: executionMode,
       parent_execution_id: parentExecutionId,
       space_id: spaceId,
-      ...(userName ? { user_name: userName } : {}),
       agent_params: agentParams,
       event_count: 0,
       events: [],

@@ -91,14 +91,6 @@ interface BaseAgentExecution {
   metadata?: Record<string, string>;
   /** The ID of the parent execution that spawned this standalone execution. */
   parentExecutionId?: string;
-  /**
-   * Username of the user who initiated the execution. Captured at scheduling time from the
-   * real HTTP request so it survives Task Manager fakeRequest auth (where `security.authenticate()`
-   * surfaces the API key's identity instead of the human owner's username). Used downstream as
-   * the conversation `user_name` so that the originating user can read back their own
-   * conversation after a TM-executed agent run.
-   */
-  userName?: string;
 }
 
 /**
