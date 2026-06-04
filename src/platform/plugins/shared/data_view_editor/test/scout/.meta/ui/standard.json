@@ -1,0 +1,19 @@
+{
+  "sha1": "f837afe9443012a45a6eb6ac3d5f4f0117c0aa1f",
+  "tests": [
+    {
+      "id": "a86ab1ab968d807-0bb82867e148f1f",
+      "title": "Create Data View wizard data stream is accepted as an index pattern source and wizard auto-detects the timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_editor/test/scout/ui/tests/create_data_view_wizard.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    }
+  ]
+}

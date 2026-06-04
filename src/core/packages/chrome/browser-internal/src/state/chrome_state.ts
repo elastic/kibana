@@ -67,6 +67,7 @@ export interface ChromeState {
   globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
   inlineAppHeader: State<boolean>;
   appHeader: State<AppHeaderConfig | undefined>;
 
@@ -76,6 +77,12 @@ export interface ChromeState {
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
   };
+
+  /** Feedback handler registered by the feedback plugin */
+  feedbackHandler: State<(() => void) | undefined>;
+
+  /** Newsfeed handler registered by the newsfeed plugin */
+  newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -114,6 +121,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const globalFooter = createState<ReactNode>(null);
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
   const inlineAppHeader = createState<boolean>(false);
   const appHeader = createState<AppHeaderConfig | undefined>(undefined);
 
@@ -121,6 +129,14 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+
+  // Feedback
+  const feedbackHandler = createState<(() => void) | undefined>(undefined);
+
+  // Newsfeed
+  const newsfeedHandler = createState<
+    { open: () => void; hasNew$: Observable<boolean> } | undefined
+  >(undefined);
 
   return {
     visibility,
@@ -148,5 +164,8 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    contextSwitcher,
+    feedbackHandler,
+    newsfeedHandler,
   };
 }

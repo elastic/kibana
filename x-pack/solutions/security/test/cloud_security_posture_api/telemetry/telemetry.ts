@@ -16,6 +16,10 @@ import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
 const FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
+// Concrete entity-store latest index (matches the `.entities.v2.latest.security_*` pattern
+// queried by the asset inventory telemetry collectors).
+const ENTITY_STORE_LATEST_INDEX = '.entities.v2.latest.security_default-00001';
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -23,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const logger = getService('log');
   const findingsIndexProvider = new EsIndexDataProvider(es, FINDINGS_INDEX);
+  const entitiesIndexProvider = new EsIndexDataProvider(es, ENTITY_STORE_LATEST_INDEX);
 
   describe('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
@@ -31,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await findingsIndexProvider.deleteAll();
+      await entitiesIndexProvider.destroyIndex();
     });
 
     it('includes only KSPM findings', async () => {
@@ -398,8 +404,44 @@ export default function ({ getService }: FtrProviderContext) {
       // - packagePolicyCount: number
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/247313
-    it.skip('includes asset_inventory_cloud_connector_usage_stats in telemetry', async () => {
+    it('reports populated entity stats in asset_inventory telemetry', async () => {
+      // The entity telemetry collectors read the entity-store index as `kibana_system` and
+      // swallow read/permission errors by returning empty arrays/objects. Seeding real entity
+      // documents and asserting the stats come back populated ensures the test fails if that
+      // read path breaks (e.g. querying an index the collector cannot read).
+      await entitiesIndexProvider.destroyIndex();
+      await es.indices.create({
+        index: ENTITY_STORE_LATEST_INDEX,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            entity: {
+              properties: {
+                type: { type: 'keyword' },
+                source: { type: 'keyword' },
+                EngineMetadata: { properties: { Type: { type: 'keyword' } } },
+              },
+            },
+            asset: { properties: { criticality: { type: 'keyword' } } },
+          },
+        },
+      });
+
+      await entitiesIndexProvider.addBulk([
+        {
+          entity: { type: 'host', source: 'logs-endpoint', EngineMetadata: { Type: 'host' } },
+          asset: { criticality: 'high_impact' },
+        },
+        {
+          entity: { type: 'host', source: 'logs-endpoint', EngineMetadata: { Type: 'host' } },
+          asset: { criticality: 'medium_impact' },
+        },
+        {
+          entity: { type: 'user', source: 'logs-okta', EngineMetadata: { Type: 'user' } },
+          asset: { criticality: 'low_impact' },
+        },
+      ]);
+
       const {
         body: [{ stats: apiResponse }],
       } = await supertest
@@ -413,18 +455,28 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      // Verify that asset_inventory_cloud_connector_usage_stats field exists in asset_inventory
-      expect(apiResponse.stack_stats.kibana.plugins.asset_inventory).to.have.property(
-        'asset_inventory_cloud_connector_usage_stats'
-      );
+      const assetInventory = apiResponse.stack_stats.kibana.plugins.asset_inventory;
 
-      // Verify it's an array (even if empty)
-      expect(
-        Array.isArray(
-          apiResponse.stack_stats.kibana.plugins.asset_inventory
-            .asset_inventory_cloud_connector_usage_stats
-        )
-      ).to.be(true);
+      // entities: non-null doc_count + timestamp (would be {} on a read/permission failure)
+      expect(assetInventory.entities.doc_count).to.be.greaterThan(0);
+      expect(assetInventory.entities.last_doc_timestamp).to.be.a('string');
+
+      // aggregation-based stats: non-empty (would be [] on a read/permission failure)
+      expect(assetInventory.entities_type_stats.length).to.be.greaterThan(0);
+      expect(assetInventory.entity_store_stats.length).to.be.greaterThan(0);
+      expect(assetInventory.entity_source_stats.length).to.be.greaterThan(0);
+      expect(assetInventory.asset_criticality_stats.length).to.be.greaterThan(0);
+
+      // targeted: seeded entity types are present
+      const entityTypes = assetInventory.entities_type_stats.map(
+        (stats: { entity_type: string }) => stats.entity_type
+      );
+      expect(entityTypes).to.contain('host');
+      expect(entityTypes).to.contain('user');
+
+      // preserve prior coverage: the cloud-connector stats array still exists
+      expect(assetInventory).to.have.property('asset_inventory_cloud_connector_usage_stats');
+      expect(Array.isArray(assetInventory.asset_inventory_cloud_connector_usage_stats)).to.be(true);
     });
   });
 }

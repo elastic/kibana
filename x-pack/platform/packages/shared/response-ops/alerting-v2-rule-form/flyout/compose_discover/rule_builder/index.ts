@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export type { RuleBuilderDefinition, RuleBuilderStepProps } from './types';
+export type {
+  RuleBuilderDefinition,
+  RuleBuilderStepProps,
+  RuleBuilderRecoveryProps,
+  BuilderState,
+} from './types';
 export { RULE_BUILDER_REGISTRY } from './registry';
+export { BuilderStateProvider, useBuilderState } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 export { buildThresholdEsql } from './threshold/build_esql';
 export { parseThresholdEsql } from './threshold/parse_esql';
