@@ -14,6 +14,7 @@ import { commonRouteConfig } from '../constants';
 import { readResponseBodySchema } from './schemas';
 import { read } from './read';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
+import { readLinksOASOperationObject } from '../oas_examples';
 
 export const LINKS_READ_DESCRIPTION =
   'Returns the complete state of a links library item by ID.' as const;
@@ -29,6 +30,9 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
   readRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: () => readLinksOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({

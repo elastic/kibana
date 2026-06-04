@@ -16,6 +16,7 @@ import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
+import { updateLinksOASOperationObject } from '../oas_examples';
 
 export const LINKS_UPDATE_DESCRIPTION =
   `Replaces the full state of a links library item. Partial updates are not supported.
@@ -34,6 +35,9 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
   updateRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: () => updateLinksOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({

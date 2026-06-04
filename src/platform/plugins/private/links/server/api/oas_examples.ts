@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * This file is loaded only when generating the public OpenAPI spec. Always import it lazily
- * from a route's `oasOperationObject` thunk so the example payloads do not ship with the
- * server bundle at runtime.
- */
+import { omit } from 'lodash';
 
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_API_PATH } from '../../common/constants';
@@ -53,27 +49,21 @@ const linksCreateRequestExamples = {
   createLinks: {
     summary: 'Create a links library item',
     value: {
-      title: 'Important Resources',
-      description: 'A collection of important links',
+      ...linksCreateBody,
       links: [
         {
-          label: 'Overview',
-          type: 'dashboardLink',
-          destination: 'dashboard-abc-123',
+          ...omit(linksCreateBody.links[0], 'options'),
         },
         {
-          label: 'Elastic Documentation',
-          type: 'externalLink',
-          destination: 'https://www.elastic.co/guide',
+          ...omit(linksCreateBody.links[1], 'options'),
         },
       ],
-      layout: 'horizontal',
     },
   },
 };
 
 const linksCreateResponseExamples = {
-  createLinksResponse: {
+  createLinks: {
     summary: 'Create links library item response',
     description: LINKS_CREATE_DESCRIPTION,
     value: {
@@ -102,11 +92,14 @@ export const createLinksOASOperationObject = {
         '  -H "Authorization: ApiKey ${API_KEY}" \\\n' +
         '  -H "kbn-xsrf: true" \\\n' +
         '  -H "Content-Type: application/json" \\\n' +
-        `  -d '${JSON.stringify(linksCreateBody, null, 2)}'`,
+        `  -d '${JSON.stringify(linksCreateRequestExamples.createLinks, null, 2)}'`,
     },
     {
-      lang: 'Console',
-      source: `POST kbn:${LINKS_API_PATH}\n` + JSON.stringify(linksCreateBody, null, 2) + '\n',
+      lang: 'Create a links library item - Console',
+      source:
+        `POST kbn:${LINKS_API_PATH}\n` +
+        JSON.stringify(linksCreateRequestExamples.createLinks, null, 2) +
+        '\n',
     },
   ],
   requestBody: {
@@ -132,7 +125,7 @@ export const createLinksOASOperationObject = {
 // ---------------------------------------------------------------------------
 
 const linksSearchResponseExamples = {
-  searchlinksResponse: {
+  searchLinks: {
     summary: 'Search links library items response',
     description: LINKS_SEARCH_DESCRIPTION,
     value: {
@@ -234,6 +227,9 @@ export const readLinksOASOperationObject = {
         },
       },
     },
+    404: {
+      description: 'A links library item with the given ID was not found.',
+    },
   },
 };
 
@@ -253,8 +249,26 @@ const linksUpdateRequestExamples = {
   },
 };
 
+const linksCreateWithUpdateResponseExamples = {
+  createdLinks: {
+    summary: 'Create links library item response (via upsert)',
+    description:
+      'Returned when the upsert created a new item because no item existed with the specified ID.',
+    value: {
+      id: '0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3',
+      data: linksCreateBody,
+      meta: {
+        created_at: '2026-04-13T10:00:00.000Z',
+        managed: false,
+        updated_at: '2026-04-13T10:00:00.000Z',
+        version: 'WzU5LDFd',
+      },
+    } satisfies LinksUpdateResponseBody,
+  },
+};
+
 const linksUpdateResponseExamples = {
-  updatedLinksResponse: {
+  upsertLinks: {
     summary: 'Update links library item response',
     description:
       'The complete updated links library item state after a full replacement. PUT replaces the entire item, so any fields omitted from the request are reset to their defaults.',
@@ -311,23 +325,7 @@ export const updateLinksOASOperationObject = {
     201: {
       content: {
         'application/json': {
-          examples: {
-            createdLinksResponse: {
-              summary: 'Create links library item response (via upsert)',
-              description:
-                'Returned when the upsert created a new item because no item existed with the specified ID.',
-              value: {
-                id: '0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3',
-                data: linksCreateBody,
-                meta: {
-                  created_at: '2026-04-13T10:00:00.000Z',
-                  managed: false,
-                  updated_at: '2026-04-13T10:00:00.000Z',
-                  version: 'WzU5LDFd',
-                },
-              } satisfies LinksUpdateResponseBody,
-            },
-          },
+          examples: linksCreateWithUpdateResponseExamples,
         },
       },
     },
@@ -358,6 +356,9 @@ export const deleteLinksOASOperationObject = {
   responses: {
     204: {
       description: 'No content, the links library item was successfully deleted.',
+    },
+    404: {
+      description: 'A links library item with the given ID was not found.',
     },
   },
 };
