@@ -29,12 +29,12 @@ feature_flags.overrides:
   notificationCenter.uiEnabled: true
 ```
 
-> ⚠️ Feature flags are dynamic config and cannot not be used to decide plugin
+> ⚠️ Feature flags are dynamic config and cannot be used to decide plugin
 > setup lifecycle
 
 ## Static plugin enablement
 
-`xpack.notificationCenter.enabled` (default `false`) is set in `kibana.yaml` config
+`xpack.notificationCenter.enabled` (default `false`) is set in `kibana.yml` config
 
 ```yaml
 xpack.notificationCenter.enabled: true

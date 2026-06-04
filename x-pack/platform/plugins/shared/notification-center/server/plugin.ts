@@ -67,19 +67,18 @@ export class NotificationCenterPlugin
         NOTIFICATION_CENTER_UI_ENABLED_FLAG,
         NOTIFICATION_CENTER_UI_ENABLED_DEFAULT
       );
-      const notificationTypeFlags = await Promise.all(
+      this.logger.debug(`Search notification center UI enabled: ${uiEnabled}`);
+      await Promise.all(
         Object.values(NOTIFICATION_TYPE_FLAGS).map((flag) =>
-          featureFlags.getBooleanValue(flag, false)
+          featureFlags.getBooleanValue(flag, false).then((value) => {
+            this.logger.debug(`Search notification center type ${flag} resolved to: ${value}`);
+          })
         )
       );
-      this.logger.debug(
-        `Notification Center feature flags resolved: ${JSON.stringify({
-          uiEnabled,
-          notificationTypeFlags,
-        })}`
-      );
     } catch (error) {
-      this.logger.warn(`Failed to resolve Notification Center feature flags: ${String(error)}`);
+      this.logger.warn(`Failed to resolve Notification Center feature flags`, {
+        error,
+      });
     }
   }
 }
