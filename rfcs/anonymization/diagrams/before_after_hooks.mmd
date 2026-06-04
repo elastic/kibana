@@ -1,0 +1,27 @@
+%%{init: {'theme': 'dark', 'sequence': {'actorMargin': 60, 'width': 160, 'useMaxWidth': false}}}%%
+sequenceDiagram
+    participant C as Caller
+    participant I as Inference plugin
+    participant B as beforeCompletion
+    participant WB as Workflow
+    participant L as LLM
+    participant A as afterCompletion
+    participant WA as Workflow
+
+    C->>I: chatComplete
+    I->>B: invokeHook — full prompt
+    B->>WB: ai.pii step
+    WB-->>B: anonymized prompt + tokenMap
+    B-->>I: anonymized prompt + tokenMap
+    Note over I: Outside YAML expression boundary
+    I->>L: connector call (stream)
+    loop each chunk
+        L-->>I: chunk
+        I-->>C: de-anonymized chunk (sliding buffer)
+    end
+    I->>A: invokeHook — response + tokenMap
+    Note over A: Expressions bind complete values
+    A->>WA: transform.pii_restore step
+    WA-->>A: restored response
+    A-->>I: restored response
+    I-->>C: final result

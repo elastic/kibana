@@ -270,7 +270,7 @@ There is **no opt-in flag** and **no alternate in-memory handler path** for prod
 3. **Non-durable by design** — sync runs use synthetic execution IDs (`sync_<uuid>`); no Task Manager, no ES execution documents, no retries, no cross-node resume
 4. **Caller-owned timeout** — per-workflow `maxTimeout` plus a documented **chain budget** when multiple workflows subscribe to one trigger; a slow step blocks the LLM call
 5. **Save-time validation** — linear topology only; structural branching/parallel/loops rejected at install; capability subset checked at registration
-6. **Chained I/O validation** — when `sync.chained: true`, save-time check that each workflow's output schema is compatible with the next workflow's expected input
+6. **Chained I/O validation** — when `sync.chained: true`, validate that each workflow's `workflow.output` schema is compatible with the next workflow's trigger `event` schema. This is **workflow-level chaining** (one complete workflow's output becomes the next workflow's event input), distinct from step-level chaining within a single workflow (handled by the template engine via `${{ steps.x.output.y }}` expressions). Validation can only happen when the full chain is known — i.e., when an execution order is established (workflows enabled and ordered for a trigger). Not possible at individual workflow save time, since chain membership and order are determined at activation/configuration time.
 7. **PII-safe logging** — event logger redacts known sensitive fields (`tokenMap`, step inputs/outputs for PII steps) before write
 8. **Deterministic multi-workflow order** — explicit ordering (e.g. priority field or stable install order), not implicit sort by `updated_at`
 9. **`invokeHook` contract** — sync triggers always resolve and execute subscribed YAML workflows; no dual execution backends
@@ -411,7 +411,7 @@ Before + after workflows are a known operational footgun. Requirements:
 - Sync runs observable in APM + event log with `mode: sync` and `triggerId` tags
 - `tokenMap` redacted in all observability sinks
 - Save-time rejection of non-linear sync workflows and capability mismatches
-- Chained workflow I/O validated at save time
+- Chained workflow I/O validated at activation/ordering time (when execution order for a trigger's enabled workflows is established)
 - Deterministic multi-workflow execution order
 - `pass_through` never used when anonymization is enabled
 - Workflows team sign-off on non-durable sync semantics
