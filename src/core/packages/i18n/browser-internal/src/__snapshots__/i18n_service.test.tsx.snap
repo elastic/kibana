@@ -296,7 +296,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiTableSortMobile.sorting\\": \\"Sorting\\",
     \\"euiToast.dismissToast\\": \\"Dismiss toast\\",
     \\"euiToast.newNotification\\": \\"A new notification appears\\",
-    \\"euiToast.notification\\": \\"Notification\\",
     \\"euiTourFooter.endTour\\": \\"End tour\\",
     \\"euiTourFooter.skipTour\\": \\"Skip tour\\",
     \\"euiTourFooter.closeTour\\": \\"Close tour\\",

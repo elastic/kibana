@@ -1805,10 +1805,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiToast.newNotification': i18n.translate('core.euiToast.newNotification', {
       defaultMessage: 'A new notification appears',
     }),
-    'euiToast.notification': i18n.translate('core.euiToast.notification', {
-      defaultMessage: 'Notification',
-      description: 'ARIA label on an element containing a notification',
-    }),
     'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
