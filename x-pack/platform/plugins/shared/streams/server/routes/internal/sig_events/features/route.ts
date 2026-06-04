@@ -348,7 +348,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       opsByUuid.set(id, kiOp);
     }
     const requestedUuids = Array.from(opsByUuid.keys());
-    const { hits: resolved } = await kiClient.getFeatures([], { id: requestedUuids });
+    const resolved = await kiClient.findFeaturesByIds(requestedUuids);
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
     // Group resolved ops by stream.
