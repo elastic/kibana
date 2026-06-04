@@ -57,7 +57,7 @@ describe('renderApp - read-only badge', () => {
     expect(deps.chrome.setBadge).toHaveBeenCalledWith(
       expect.objectContaining({
         text: 'Read only',
-        iconType: 'readOnly',
+        iconType: 'glasses',
       })
     );
   });
