@@ -18,6 +18,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiTextTruncate,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
@@ -83,22 +84,32 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
         return (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="searchSynonymsColumnsButton"
-                iconType="maximize"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.searchSynonyms.synonymsSetTable.expandSynonyms.aria.label',
                   {
                     defaultMessage: 'Expand synonyms rule',
                   }
                 )}
-                onClick={() => {
-                  if (synonymRule.id) {
-                    setSynonymsRuleToEdit(synonymRule.id);
-                    setIsRuleFlyoutOpen(true);
-                  }
-                }}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="searchSynonymsColumnsButton"
+                  iconType="maximize"
+                  aria-label={i18n.translate(
+                    'xpack.searchSynonyms.synonymsSetTable.expandSynonyms.aria.label',
+                    {
+                      defaultMessage: 'Expand synonyms rule',
+                    }
+                  )}
+                  onClick={() => {
+                    if (synonymRule.id) {
+                      setSynonymsRuleToEdit(synonymRule.id);
+                      setIsRuleFlyoutOpen(true);
+                    }
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             {isExplicit ? (
               <>

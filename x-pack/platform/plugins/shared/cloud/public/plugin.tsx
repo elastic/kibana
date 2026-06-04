@@ -32,7 +32,9 @@ export interface CloudConfigType {
   profile_url?: string;
   deployments_url?: string;
   deployment_url?: string;
+  create_deployment_url?: string;
   projects_url?: string;
+  create_project_url?: string;
   billing_url?: string;
   organization_url?: string;
   users_and_roles_url?: string;
