@@ -201,4 +201,22 @@ describe('classifyStreams', () => {
 
     expect(candidateNames(result)).toEqual(['new-stream', 'old-stream']);
   });
+
+  it('orders candidates by oldest onboarding first', () => {
+    const finishedTwelveMinAgo = new Date(Date.now() - 12 * 60_000).toISOString();
+    const finishedTenMinAgo = new Date(Date.now() - 10 * 60_000).toISOString();
+    const result = classifyStreams({
+      ...defaultArgs,
+      intervalHours: 0,
+      // Provide executions newest-first (as the API returns them) to prove the
+      // candidates are reordered by oldest completion, not left in input order.
+      allStreams: [makeStream('recent-stream'), makeStream('older-stream')],
+      executions: [
+        makeExecution('recent-stream', { finishedAt: finishedTenMinAgo }),
+        makeExecution('older-stream', { finishedAt: finishedTwelveMinAgo }),
+      ],
+    });
+
+    expect(candidateNames(result)).toEqual(['older-stream', 'recent-stream']);
+  });
 });

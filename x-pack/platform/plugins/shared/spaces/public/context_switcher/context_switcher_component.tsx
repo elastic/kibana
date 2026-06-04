@@ -18,6 +18,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   useActiveSpace,
   useEnvironmentContext,
+  useFooterLinks,
   useManagementActions,
   useSpaceItems,
 } from './hooks';
@@ -71,6 +72,13 @@ const ContextSwitcherInner = ({
     isServerless,
   });
 
+  const footerLinks = useFooterLinks({
+    application: core.application,
+    cloud,
+    isServerless,
+    activeSpaceSolution: activeSpace?.solution,
+  });
+
   const managementActions = useManagementActions({
     application: core.application,
     canManageSpaces: core.application.capabilities.spaces?.manage === true,
@@ -106,6 +114,7 @@ const ContextSwitcherInner = ({
       spaces={spacesConfig}
       environmentContext={environmentContext}
       onOpen={handleOpen}
+      footerLinks={footerLinks}
     />
   );
 };
