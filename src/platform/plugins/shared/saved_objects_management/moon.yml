@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/css-utils'
   - '@kbn/scout'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod

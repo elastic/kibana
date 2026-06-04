@@ -43,6 +43,12 @@ export * from './src/playwright/eui_components';
 // Kibana-wide components
 export * from './src/playwright/ui_components';
 
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  CopySavedObjectsToSpaceFlyout,
+  SavedObjectsManagementPage,
+} from './src/playwright/page_objects';
+
 // Scout core types
 export type {
   ScoutPlaywrightOptions,

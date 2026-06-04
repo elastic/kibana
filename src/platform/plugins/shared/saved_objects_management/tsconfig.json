@@ -30,7 +30,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/repo-info"
   ],
   "exclude": [
     "target/**/*",
