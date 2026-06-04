@@ -60,6 +60,7 @@ import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wire
 import { FeatureService } from './lib/streams/feature/feature_service';
 import type { FeatureClient } from './lib/streams/feature/feature_client';
 import type { QueryClient } from './lib/streams/assets/query/query_client';
+import { initializeKnowledgeIndicatorsTemplate } from './lib/streams/ki';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -81,9 +82,9 @@ import { PatternExtractionService } from './lib/pattern_extraction/pattern_extra
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
-  createContinuousKiExtractionWorkflowService,
-  type ContinuousKiExtractionWorkflowService,
-} from './lib/workflows/continuous_extraction_workflow';
+  createContinuousKiOnboardingWorkflowService,
+  type ContinuousKiOnboardingWorkflowService,
+} from './lib/workflows/continuous_onboarding_workflow';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -323,6 +324,7 @@ export class StreamsPlugin
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
+        agentContextLayer: plugins.agentContextLayer,
         getScopedClients,
         server: this.server,
         logger: this.logger,
@@ -345,10 +347,10 @@ export class StreamsPlugin
         });
     }
 
-    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
+    let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
+      continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         streamsKIsOnboardingClient,
@@ -431,7 +433,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflowService,
+        continuousKiOnboardingWorkflowService,
         streamsKIsOnboardingClient,
       },
       core,
@@ -579,6 +581,17 @@ export class StreamsPlugin
     }).catch((error) => {
       this.logger.error(
         `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    initializeKnowledgeIndicatorsTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize knowledge indicators template: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
