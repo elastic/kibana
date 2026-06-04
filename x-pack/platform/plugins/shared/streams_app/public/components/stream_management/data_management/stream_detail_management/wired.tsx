@@ -23,6 +23,8 @@ import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 
 const wiredStreamManagementSubTabs = [
   'overview',
@@ -55,6 +57,9 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { notifications, application },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -174,19 +179,13 @@ export function WiredStreamDetailManagement({
               />
             ),
             label: (
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-                  defaultMessage:
-                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-                })}
-              >
-                <span data-test-subj="retentionTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Data lifecycle',
-                  })}
-                </span>
-              </EuiToolTip>
+              <LifecycleTabLabel
+                definition={definition}
+                showActions={tab === 'lifecycle'}
+                indexTemplateName={`${definition.stream.name}@stream`}
+                notifications={notifications}
+                application={application}
+              />
             ),
           },
         }

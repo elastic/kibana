@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { RedirectTo } from '../../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
@@ -24,6 +25,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -57,6 +59,9 @@ export function ClassicStreamDetailManagement({
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { notifications, application },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -111,18 +116,13 @@ export function ClassicStreamDetailManagement({
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
     label: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-          defaultMessage:
-            'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-        })}
-      >
-        <span data-test-subj="retentionTab" tabIndex={0}>
-          {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-            defaultMessage: 'Data lifecycle',
-          })}
-        </span>
-      </EuiToolTip>
+      <LifecycleTabLabel
+        definition={definition}
+        showActions={tab === 'lifecycle'}
+        indexTemplateName={definition.elasticsearch_assets?.indexTemplate}
+        notifications={notifications}
+        application={application}
+      />
     ),
   };
 
