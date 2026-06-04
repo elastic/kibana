@@ -18,6 +18,15 @@ import {
 
 const TAGS_URL = `${testData.RULE_API_PATH}/_tags`;
 
+const tagsUrl = (params: Record<string, string | undefined> = {}): string => {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) search.set(key, value);
+  }
+  const qs = search.toString();
+  return qs ? `${TAGS_URL}?${qs}` : TAGS_URL;
+};
+
 apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
@@ -94,6 +103,57 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       expect(response.body.tags).not.toContain(undefined);
       expect(response.body.tags).not.toContain(null);
       expect(response.body.tags).not.toContain('');
+    }
+  );
+
+  apiTest(
+    'filter: should only return tags from rules matching the filter',
+    async ({ apiClient, apiServices }) => {
+      // Seed an alert-kind rule and a signal-kind rule with disjoint tags so a
+      // `kind:alert` filter must exclude the signal rule's tags entirely.
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'alert-rule', tags: ['alert-tag'] },
+        })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'signal',
+          state_transition: undefined,
+          metadata: { name: 'signal-rule', tags: ['signal-tag'] },
+        })
+      );
+
+      const filtered = await apiClient.get(tagsUrl({ filter: 'kind:alert' }), {
+        headers: readerHeaders,
+      });
+
+      expect(filtered).toHaveStatusCode(200);
+      expect(filtered.body).toStrictEqual({ tags: ['alert-tag'] });
+
+      // Without a filter both rules' tags are returned.
+      const unfiltered = await apiClient.get(TAGS_URL, {
+        headers: readerHeaders,
+      });
+
+      expect(unfiltered).toHaveStatusCode(200);
+      expect(unfiltered.body).toStrictEqual({ tags: ['alert-tag', 'signal-tag'] });
+    }
+  );
+
+  apiTest(
+    'filter: should return 400 for an invalid filter field',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'alert-rule', tags: ['alert-tag'] } })
+      );
+
+      const response = await apiClient.get(tagsUrl({ filter: 'not_a_field:alert' }), {
+        headers: readerHeaders,
+      });
+
+      expect(response).toHaveStatusCode(400);
     }
   );
 
