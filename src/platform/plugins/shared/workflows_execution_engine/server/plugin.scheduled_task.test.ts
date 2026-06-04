@@ -251,7 +251,9 @@ describe('workflow:scheduled task runner', () => {
 
     await runner.run();
 
-    expect(coreStart.elasticsearch.client.asInternalUser.security.createApiKey).toHaveBeenCalledWith(
+    expect(
+      coreStart.elasticsearch.client.asInternalUser.security.createApiKey
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         expiration: '2100s',
         metadata: expect.objectContaining({
