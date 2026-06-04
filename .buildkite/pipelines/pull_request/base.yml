@@ -52,7 +52,7 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: n2d-standard-16
+      machineType: n4-highcpu-16
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
@@ -68,7 +68,7 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: n2d-standard-32
+      machineType: n4-highcpu-32
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
