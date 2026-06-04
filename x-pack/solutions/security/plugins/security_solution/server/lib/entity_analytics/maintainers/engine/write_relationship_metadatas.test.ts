@@ -57,7 +57,12 @@ describe('writeRelationshipMetadatas', () => {
         relationships: { accesses_frequently: ['host:laptopA'] },
       },
     ];
-    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(
+      entityMetadataClient,
+      loggerMock.create(),
+      records,
+      baseContext
+    );
     const docs = getDocsFromCall(bulkAppend);
     expect(docs).toHaveLength(1);
   });
@@ -73,7 +78,12 @@ describe('writeRelationshipMetadatas', () => {
         },
       },
     ];
-    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(
+      entityMetadataClient,
+      loggerMock.create(),
+      records,
+      baseContext
+    );
     const docs = getDocsFromCall(bulkAppend);
     expect(docs).toHaveLength(3);
     const targets = docs.map((d) => d['entity.relationships.accesses_frequently.target']);
@@ -99,7 +109,12 @@ describe('writeRelationshipMetadatas', () => {
         },
       },
     ];
-    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(
+      entityMetadataClient,
+      loggerMock.create(),
+      records,
+      baseContext
+    );
     const docs = getDocsFromCall(bulkAppend);
     // 2 + 1 + 1 = 4 docs.
     expect(docs).toHaveLength(4);
@@ -117,7 +132,12 @@ describe('writeRelationshipMetadatas', () => {
         relationships: { accesses_frequently: ['host:laptopA'] },
       },
     ];
-    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(
+      entityMetadataClient,
+      loggerMock.create(),
+      records,
+      baseContext
+    );
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
@@ -130,7 +150,12 @@ describe('writeRelationshipMetadatas', () => {
         relationships: { accesses_frequently: [], accesses_infrequently: [] },
       },
     ];
-    await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+    await writeRelationshipMetadatas(
+      entityMetadataClient,
+      loggerMock.create(),
+      records,
+      baseContext
+    );
     expect(bulkAppend).not.toHaveBeenCalled();
   });
 
@@ -146,7 +171,12 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        loggerMock.create(),
+        records,
+        baseContext
+      );
       docs = getDocsFromCall(bulkAppend);
     });
 
@@ -201,7 +231,12 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        loggerMock.create(),
+        records,
+        baseContext
+      );
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.user']).toEqual(['alice']);
     });
@@ -215,7 +250,12 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { accesses_frequently: ['host:laptopA'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        loggerMock.create(),
+        records,
+        baseContext
+      );
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.hosts']).toEqual(['laptopA']);
     });
@@ -229,7 +269,12 @@ describe('writeRelationshipMetadatas', () => {
           relationships: { communicates_with: ['user:bob@corp'] },
         },
       ];
-      await writeRelationshipMetadatas(entityMetadataClient, loggerMock.create(), records, baseContext);
+      await writeRelationshipMetadatas(
+        entityMetadataClient,
+        loggerMock.create(),
+        records,
+        baseContext
+      );
       const docs = getDocsFromCall(bulkAppend);
       expect(docs[0]['related.hosts']).toBeUndefined();
     });
@@ -238,9 +283,7 @@ describe('writeRelationshipMetadatas', () => {
   describe('error propagation', () => {
     it('does NOT catch EntityMetadataClient exceptions — they propagate to the boundary', async () => {
       const entityMetadataClient = {
-        bulkAppendMetadata: jest
-          .fn()
-          .mockRejectedValue(new Error('bulk transport failure')),
+        bulkAppendMetadata: jest.fn().mockRejectedValue(new Error('bulk transport failure')),
       } as unknown as EntityMetadataClient;
       const records: EntityRelationshipRecord[] = [
         {
