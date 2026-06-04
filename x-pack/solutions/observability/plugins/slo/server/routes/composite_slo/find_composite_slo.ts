@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Paginated } from '@kbn/slo-schema';
+import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import type { CompositeSLODefinition } from '../../domain/models';
 import type { CompositeSLORepository } from '../../services';
@@ -25,8 +25,8 @@ interface FindCompositeSloParams {
   perPage: number;
 }
 
-interface FindCompositeSloDeps {
-  compositeSloRepository: CompositeSLORepository;
+interface Dependencies {
+  compositeRepository: CompositeSLORepository;
   esClient: ElasticsearchClient;
 }
 
@@ -50,7 +50,7 @@ async function findCompositeSlos(
     page,
     perPage,
   }: FindCompositeSloParams,
-  { compositeSloRepository, esClient }: FindCompositeSloDeps
+  { compositeRepository, esClient }: Dependencies
 ): Promise<Paginated<CompositeSLODefinition>> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];
   if (search) {
@@ -94,7 +94,7 @@ async function findCompositeSlos(
     return { page, perPage, total, results: [] };
   }
 
-  const definitions = await compositeSloRepository.findAllByIds(compositeIds);
+  const definitions = await compositeRepository.findAllByIds(compositeIds);
   const definitionsById = new Map(definitions.map((d) => [d.id, d]));
 
   // Preserve the order returned by the ES search (which honours the sort).
@@ -115,7 +115,7 @@ export const findCompositeSLORoute = createCompositeSloServerRoute({
   },
   params: findCompositeSLOParamsSchema,
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
-    const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
+    const { scopedClusterClient, compositeRepository, spaceId } = await getScopedClients({
       request,
       logger,
     });
@@ -138,7 +138,7 @@ export const findCompositeSLORoute = createCompositeSloServerRoute({
         perPage,
       },
       {
-        compositeSloRepository,
+        compositeRepository,
         esClient: scopedClusterClient.asCurrentUser,
       }
     );

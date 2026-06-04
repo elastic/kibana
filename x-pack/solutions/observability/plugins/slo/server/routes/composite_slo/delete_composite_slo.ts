@@ -48,12 +48,12 @@ export const deleteCompositeSLORoute = createCompositeSloServerRoute({
   },
   params: deleteCompositeSLOParamsSchema,
   handler: async ({ context, response, params, logger, request, plugins, getScopedClients }) => {
-    const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
+    const { scopedClusterClient, compositeRepository, spaceId } = await getScopedClients({
       request,
       logger,
     });
 
-    await compositeSloRepository.deleteById(params.path.id);
+    await compositeRepository.deleteById(params.path.id);
     await deleteCompositeSummaryDoc(
       scopedClusterClient.asCurrentUser,
       spaceId,
