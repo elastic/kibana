@@ -18,6 +18,8 @@ const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
 const REINDEX_REQUEST_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_LOGGED_REINDEX_FAILURES = 5;
 
+const replayTempPrefix = (runId: number): string => `${REPLAY_TEMP_PREFIX}${runId}-`;
+
 const TIMESTAMP_TRANSFORM_SCRIPT = `
   // Reset the _id field to null to avoid conflicts with subsequent reindex operations
   ctx._id = null;
@@ -37,6 +39,8 @@ export interface ReplayStats {
 }
 
 interface ReplayArtifacts {
+  runId: number;
+  tempPrefix: string;
   repoName: string;
   pipelineName: string;
   tempIndices: string[];
@@ -51,6 +55,8 @@ interface LogsDataStream {
 const createReplayArtifacts = (): ReplayArtifacts => {
   const runId = Date.now();
   return {
+    runId,
+    tempPrefix: replayTempPrefix(runId),
     repoName: `sigevents-replay-${runId}`,
     pipelineName: `sigevents-ts-transform-${runId}`,
     tempIndices: [],
@@ -91,12 +97,14 @@ const restoreLogsIndicesToTemp = async ({
   repoName,
   snapshotName,
   logsIndices,
+  tempPrefix,
   log,
 }: {
   esClient: Client;
   repoName: string;
   snapshotName: string;
   logsIndices: string[];
+  tempPrefix: string;
   log: ToolingLog;
 }): Promise<string[]> => {
   log.debug(`Restoring ${logsIndices.length} indices to temp location`);
@@ -108,10 +116,10 @@ const restoreLogsIndicesToTemp = async ({
     indices: logsIndices.join(','),
     include_global_state: false,
     rename_pattern: '(.+)',
-    rename_replacement: `${REPLAY_TEMP_PREFIX}$1`,
+    rename_replacement: `${tempPrefix}$1`,
   });
 
-  return logsIndices.map((indexName) => `${REPLAY_TEMP_PREFIX}${indexName}`);
+  return logsIndices.map((indexName) => `${tempPrefix}${indexName}`);
 };
 
 const getMaxTimestampFromTempIndices = async ({
@@ -377,11 +385,12 @@ const cleanupReplayArtifacts = async ({
 
 export const deleteTemporaryReplayIndices = async (
   esClient: Client,
-  log: ToolingLog
+  log: ToolingLog,
+  prefix: string = REPLAY_TEMP_PREFIX
 ): Promise<void> => {
   try {
     const resolved = await esClient.indices.get({
-      index: `${REPLAY_TEMP_PREFIX}*`,
+      index: `${prefix}*`,
       expand_wildcards: 'all',
       ignore_unavailable: true,
       allow_no_indices: true,
@@ -448,6 +457,7 @@ export async function replayIntoManagedStream(
       repoName: artifacts.repoName,
       snapshotName,
       logsIndices,
+      tempPrefix: artifacts.tempPrefix,
       log,
     });
 

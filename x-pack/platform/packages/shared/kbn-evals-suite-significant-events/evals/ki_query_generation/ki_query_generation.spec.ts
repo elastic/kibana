@@ -267,7 +267,19 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     }
                     await deleteTemporaryReplayIndices(esClient, log);
                     await ensureStreamsEnabled({ esClient, apiServices, log });
-                    await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
+
+                    const stats = await replayIntoManagedStream(
+                      esClient,
+                      log,
+                      source.snapshotName,
+                      source.gcs
+                    );
+                    if (stats.created === 0) {
+                      throw new Error(
+                        `No documents indexed after replaying snapshot "${source.snapshotName}" into managed stream`
+                      );
+                    }
+
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshot = source.snapshotName;
                   }
