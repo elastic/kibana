@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMedianMaxRssBytes, median } from './median_max_rss';
+import { getMedianMaxRssBytes, getMedianTailRssBytes, median } from './median_max_rss';
 import { makeWarmStartMemoryCompareContext } from './test_helpers';
 
 describe('median', () => {
@@ -29,5 +29,19 @@ describe('getMedianMaxRssBytes', () => {
 
     expect(getMedianMaxRssBytes(context.leftSummary)).toBe(200);
     expect(getMedianMaxRssBytes(context.rightSummary)).toBe(500);
+  });
+});
+
+describe('getMedianTailRssBytes', () => {
+  it('computes the median Tail RSS from warm-start benchmark summary values', () => {
+    const context = makeWarmStartMemoryCompareContext({
+      baselineMaxRssValues: [1000, 1000, 1000],
+      baselineTailRssValues: [100, 300, 200],
+      targetMaxRssValues: [1000, 1000, 1000],
+      targetTailRssValues: [400, 500, 600],
+    });
+
+    expect(getMedianTailRssBytes(context.leftSummary)).toBe(200);
+    expect(getMedianTailRssBytes(context.rightSummary)).toBe(500);
   });
 });

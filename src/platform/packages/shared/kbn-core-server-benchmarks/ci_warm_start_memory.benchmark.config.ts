@@ -13,6 +13,7 @@ import { compareWarmStartMemory } from './ci_warm_start_memory/compare_warm_star
 const config: InitialBenchConfig = {
   name: 'kibana_ci_warm_start_memory',
   runs: 3,
+  monitorInterval: 250,
   profile: false,
   timeout: 10 * 60_000,
   onCompare: compareWarmStartMemory,

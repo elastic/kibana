@@ -22,6 +22,7 @@ function makeLoadedConfig(
     runs: 1,
     tags: [],
     timeout: 30_000,
+    monitorInterval: 250,
     profile: false,
     openProfile: false,
     tracing: false,

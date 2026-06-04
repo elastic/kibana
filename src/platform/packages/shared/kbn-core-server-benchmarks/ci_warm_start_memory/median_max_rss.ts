@@ -11,6 +11,7 @@ import type { OnCompareContext } from '@kbn/bench';
 
 export const WARM_START_BENCHMARK_NAME = 'warm_start';
 export const MAX_RSS_METRIC_KEY = 'maxRssSize';
+export const TAIL_RSS_METRIC_KEY = 'tailRssSize';
 
 export const median = (values: readonly number[]): number => {
   if (values.length === 0) {
@@ -27,8 +28,10 @@ export const median = (values: readonly number[]): number => {
   return sorted[middle];
 };
 
-export const getMedianMaxRssBytes = (
+export const getMedianRssMetricBytes = (
   summary: OnCompareContext['leftSummary'],
+  metricKey: string,
+  metricLabel: string,
   benchmarkName: string = WARM_START_BENCHMARK_NAME
 ): number => {
   const benchmark = summary.benchmarks.find(({ name }) => name === benchmarkName);
@@ -37,12 +40,22 @@ export const getMedianMaxRssBytes = (
     throw new Error(`Benchmark "${benchmarkName}" not found in benchmark summary`);
   }
 
-  const maxRssMetric = benchmark.metrics[MAX_RSS_METRIC_KEY];
-  const values = maxRssMetric?.summary?.values;
+  const rssMetric = benchmark.metrics[metricKey];
+  const values = rssMetric?.summary?.values;
 
   if (!values?.length) {
-    throw new Error(`Max RSS metric is missing for benchmark "${benchmarkName}"`);
+    throw new Error(`${metricLabel} metric is missing for benchmark "${benchmarkName}"`);
   }
 
   return median(values);
 };
+
+export const getMedianMaxRssBytes = (
+  summary: OnCompareContext['leftSummary'],
+  benchmarkName: string = WARM_START_BENCHMARK_NAME
+): number => getMedianRssMetricBytes(summary, MAX_RSS_METRIC_KEY, 'Max RSS', benchmarkName);
+
+export const getMedianTailRssBytes = (
+  summary: OnCompareContext['leftSummary'],
+  benchmarkName: string = WARM_START_BENCHMARK_NAME
+): number => getMedianRssMetricBytes(summary, TAIL_RSS_METRIC_KEY, 'Tail RSS', benchmarkName);

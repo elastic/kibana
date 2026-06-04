@@ -8,11 +8,17 @@
  */
 
 import type { OnCompareCallback } from '@kbn/bench';
-import { getMedianMaxRssBytes } from './median_max_rss';
-import { getAllowedRegressionDeltaBytes, isMemoryRegression } from './memory_regression_threshold';
+import { getMedianMaxRssBytes, getMedianTailRssBytes } from './median_max_rss';
+import {
+  getAllowedRegressionDeltaBytes,
+  isMemoryRegression,
+  MAX_RSS_REGRESSION_THRESHOLD_POLICY,
+  TAIL_RSS_REGRESSION_THRESHOLD_POLICY,
+} from './memory_regression_threshold';
 import {
   buildWarmStartMemoryRegressionReport,
   getWarmStartMemoryRegressionReportContextFromEnv,
+  type WarmStartMemoryRegressionMetricName,
   writeWarmStartMemoryRegressionReport,
 } from './memory_regression_report';
 
@@ -21,31 +27,74 @@ const formatBytes = (bytes: number): string => {
 };
 
 export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, rightSummary }) => {
-  const baselineMedianRssBytes = getMedianMaxRssBytes(leftSummary);
-  const targetMedianRssBytes = getMedianMaxRssBytes(rightSummary);
+  const baselineMedianTailRssBytes = getMedianTailRssBytes(leftSummary);
+  const targetMedianTailRssBytes = getMedianTailRssBytes(rightSummary);
+  const baselineMedianMaxRssBytes = getMedianMaxRssBytes(leftSummary);
+  const targetMedianMaxRssBytes = getMedianMaxRssBytes(rightSummary);
 
-  if (!isMemoryRegression(baselineMedianRssBytes, targetMedianRssBytes)) {
+  const allowedTailRssDeltaBytes = getAllowedRegressionDeltaBytes(
+    baselineMedianTailRssBytes,
+    TAIL_RSS_REGRESSION_THRESHOLD_POLICY
+  );
+  const allowedMaxRssDeltaBytes = getAllowedRegressionDeltaBytes(
+    baselineMedianMaxRssBytes,
+    MAX_RSS_REGRESSION_THRESHOLD_POLICY
+  );
+  const tailRssRegressed = isMemoryRegression(
+    baselineMedianTailRssBytes,
+    targetMedianTailRssBytes,
+    TAIL_RSS_REGRESSION_THRESHOLD_POLICY
+  );
+  const maxRssRegressed = isMemoryRegression(
+    baselineMedianMaxRssBytes,
+    targetMedianMaxRssBytes,
+    MAX_RSS_REGRESSION_THRESHOLD_POLICY
+  );
+
+  const triggeredMetrics: WarmStartMemoryRegressionMetricName[] = [
+    ...(tailRssRegressed ? (['tailRss'] as const) : []),
+    ...(maxRssRegressed ? (['maxRss'] as const) : []),
+  ];
+
+  if (!triggeredMetrics.length) {
     return;
   }
 
-  const allowedDeltaBytes = getAllowedRegressionDeltaBytes(baselineMedianRssBytes);
   const report = buildWarmStartMemoryRegressionReport({
-    baselineRssBytes: baselineMedianRssBytes,
-    targetRssBytes: targetMedianRssBytes,
-    allowedDeltaBytes,
+    metrics: {
+      tailRss: {
+        baselineRssBytes: baselineMedianTailRssBytes,
+        targetRssBytes: targetMedianTailRssBytes,
+        allowedDeltaBytes: allowedTailRssDeltaBytes,
+        regressed: tailRssRegressed,
+      },
+      maxRss: {
+        baselineRssBytes: baselineMedianMaxRssBytes,
+        targetRssBytes: targetMedianMaxRssBytes,
+        allowedDeltaBytes: allowedMaxRssDeltaBytes,
+        regressed: maxRssRegressed,
+      },
+    },
+    triggeredMetrics,
     context: getWarmStartMemoryRegressionReportContextFromEnv(),
   });
 
   const reportPath = await writeWarmStartMemoryRegressionReport(report);
 
-  const deltaBytes = targetMedianRssBytes - baselineMedianRssBytes;
-
   throw new Error(
     [
       'Warm-start memory regression detected.',
-      `Baseline median Max RSS: ${formatBytes(baselineMedianRssBytes)}`,
-      `Target median Max RSS: ${formatBytes(targetMedianRssBytes)}`,
-      `Delta: ${formatBytes(deltaBytes)} (allowed: ${formatBytes(allowedDeltaBytes)})`,
+      `Triggered metric(s): ${triggeredMetrics.join(', ')}`,
+      `Tail RSS baseline: ${formatBytes(baselineMedianTailRssBytes)}`,
+      `Tail RSS target: ${formatBytes(targetMedianTailRssBytes)}`,
+      `Tail RSS delta: ${formatBytes(
+        targetMedianTailRssBytes - baselineMedianTailRssBytes
+      )} (allowed: ${formatBytes(allowedTailRssDeltaBytes)})`,
+      `Max RSS baseline: ${formatBytes(baselineMedianMaxRssBytes)}`,
+      `Max RSS target: ${formatBytes(targetMedianMaxRssBytes)}`,
+      `Max RSS delta: ${formatBytes(
+        targetMedianMaxRssBytes - baselineMedianMaxRssBytes
+      )} (allowed: ${formatBytes(allowedMaxRssDeltaBytes)})`,
       `Report: ${reportPath}`,
     ].join(' ')
   );

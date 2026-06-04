@@ -37,7 +37,9 @@ export function makeStats(
   samples: Array<{
     time: number;
     cpuUs: number;
+    rss?: number;
     rssMax: number;
+    tailRss?: number;
     heapUsed: number;
     gcTotal: number;
     gcMajor?: number;
@@ -52,7 +54,9 @@ export function makeStats(
       argv: ['node', 'bench.js'],
       time: s.time,
       cpuUsage: s.cpuUs, // cumulative microseconds
+      rss: s.rss ?? s.rssMax, // bytes
       rssMax: s.rssMax, // bytes
+      tailRss: s.tailRss ?? s.rss ?? s.rssMax, // bytes
       heapUsage: s.heapUsed / (s.heapUsed || 1), // not used in aggregation except mean; keep ratio simplistic
       gcTotal: s.gcTotal,
       gcMajor: s.gcMajor ?? 0,

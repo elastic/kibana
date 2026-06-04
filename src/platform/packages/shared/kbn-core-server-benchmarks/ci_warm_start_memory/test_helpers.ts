@@ -9,7 +9,11 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type { OnCompareContext } from '@kbn/bench';
-import { MAX_RSS_METRIC_KEY, WARM_START_BENCHMARK_NAME } from './median_max_rss';
+import {
+  MAX_RSS_METRIC_KEY,
+  TAIL_RSS_METRIC_KEY,
+  WARM_START_BENCHMARK_NAME,
+} from './median_max_rss';
 
 const makeMetricSummary = (values: number[]) => {
   const count = values.length;
@@ -30,9 +34,13 @@ const makeMetricSummary = (values: number[]) => {
   };
 };
 
-const makeWarmStartSummary = (
-  maxRssValues: number[]
-): OnCompareContext['leftSummary']['benchmarks'][number] => {
+const makeWarmStartSummary = ({
+  maxRssValues,
+  tailRssValues,
+}: {
+  maxRssValues: number[];
+  tailRssValues: number[];
+}): OnCompareContext['leftSummary']['benchmarks'][number] => {
   return {
     name: WARM_START_BENCHMARK_NAME,
     completed: maxRssValues.length,
@@ -48,24 +56,43 @@ const makeWarmStartSummary = (
         format: 'size',
         summary: makeMetricSummary(maxRssValues),
       },
+      [TAIL_RSS_METRIC_KEY]: {
+        title: 'Tail RSS',
+        format: 'size',
+        summary: makeMetricSummary(tailRssValues),
+      },
     },
   };
 };
 
 export const makeWarmStartMemoryCompareContext = ({
   baselineMaxRssValues,
+  baselineTailRssValues = baselineMaxRssValues,
   targetMaxRssValues,
+  targetTailRssValues = targetMaxRssValues,
 }: {
   baselineMaxRssValues: number[];
+  baselineTailRssValues?: number[];
   targetMaxRssValues: number[];
+  targetTailRssValues?: number[];
 }): OnCompareContext => {
   const leftSummary: OnCompareContext['leftSummary'] = {
     name: 'kibana_ci_warm_start_memory',
-    benchmarks: [makeWarmStartSummary(baselineMaxRssValues)],
+    benchmarks: [
+      makeWarmStartSummary({
+        maxRssValues: baselineMaxRssValues,
+        tailRssValues: baselineTailRssValues,
+      }),
+    ],
   };
   const rightSummary: OnCompareContext['rightSummary'] = {
     name: 'kibana_ci_warm_start_memory',
-    benchmarks: [makeWarmStartSummary(targetMaxRssValues)],
+    benchmarks: [
+      makeWarmStartSummary({
+        maxRssValues: targetMaxRssValues,
+        tailRssValues: targetTailRssValues,
+      }),
+    ],
   };
 
   return {

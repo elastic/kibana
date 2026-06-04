@@ -14,6 +14,7 @@ describe('assertConfig', () => {
     expect(() =>
       assertConfig({
         name: 'memory-check',
+        monitorInterval: 250,
         onCompare: () => {},
         benchmarks: [
           {

@@ -19,9 +19,21 @@ import {
 describe('buildWarmStartMemoryRegressionReport', () => {
   it('includes baseline, target, delta, allowed delta, and optional context', () => {
     const report = buildWarmStartMemoryRegressionReport({
-      baselineRssBytes: 1_000,
-      targetRssBytes: 1_500,
-      allowedDeltaBytes: 200,
+      metrics: {
+        tailRss: {
+          baselineRssBytes: 1_000,
+          targetRssBytes: 1_500,
+          allowedDeltaBytes: 200,
+          regressed: true,
+        },
+        maxRss: {
+          baselineRssBytes: 2_000,
+          targetRssBytes: 2_100,
+          allowedDeltaBytes: 300,
+          regressed: false,
+        },
+      },
+      triggeredMetrics: ['tailRss'],
       context: {
         baselineCommit: 'baseline-sha',
         targetCommit: 'target-sha',
@@ -29,10 +41,23 @@ describe('buildWarmStartMemoryRegressionReport', () => {
     });
 
     expect(report).toEqual({
-      baselineRssBytes: 1_000,
-      targetRssBytes: 1_500,
-      deltaBytes: 500,
-      allowedDeltaBytes: 200,
+      metrics: {
+        tailRss: {
+          baselineRssBytes: 1_000,
+          targetRssBytes: 1_500,
+          deltaBytes: 500,
+          allowedDeltaBytes: 200,
+          regressed: true,
+        },
+        maxRss: {
+          baselineRssBytes: 2_000,
+          targetRssBytes: 2_100,
+          deltaBytes: 100,
+          allowedDeltaBytes: 300,
+          regressed: false,
+        },
+      },
+      triggeredMetrics: ['tailRss'],
       context: {
         baselineCommit: 'baseline-sha',
         targetCommit: 'target-sha',
@@ -72,9 +97,21 @@ describe('writeWarmStartMemoryRegressionReport', () => {
 
     try {
       const report = buildWarmStartMemoryRegressionReport({
-        baselineRssBytes: 1_000,
-        targetRssBytes: 2_000,
-        allowedDeltaBytes: 150,
+        metrics: {
+          tailRss: {
+            baselineRssBytes: 1_000,
+            targetRssBytes: 2_000,
+            allowedDeltaBytes: 150,
+            regressed: true,
+          },
+          maxRss: {
+            baselineRssBytes: 1_500,
+            targetRssBytes: 1_600,
+            allowedDeltaBytes: 300,
+            regressed: false,
+          },
+        },
+        triggeredMetrics: ['tailRss'],
       });
 
       await writeWarmStartMemoryRegressionReport(report, reportPath);

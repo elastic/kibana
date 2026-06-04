@@ -77,6 +77,8 @@ const MONITOR_KEY = '__KBN_BENCH_MONITOR';
 
     const mem = process.memoryUsage();
 
+    const rss = mem.rss;
+
     // Heap stats
     const heapUsed = mem.heapUsed;
     const heapTotal = mem.heapTotal;
@@ -95,6 +97,7 @@ const MONITOR_KEY = '__KBN_BENCH_MONITOR';
         argv,
         time: now,
         cpuUsage: cpuUsage / 1000,
+        rss: rss,
         rssMax: rssMax,
         heapUsage: heapUsed / heapTotal,
         gcMajor: gcMajor,

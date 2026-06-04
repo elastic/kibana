@@ -10,14 +10,36 @@
 import { last, mean, sumBy } from 'lodash';
 import type { ProcStats, ProcStatSample, RunProcStats } from '../runner/monitor/types';
 
+const TAIL_RSS_SAMPLE_COUNT = 8;
+
+export const median = (values: readonly number[]): number => {
+  if (!values.length) {
+    return 0;
+  }
+
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+
+  if (sorted.length % 2 === 0) {
+    return (sorted[middle - 1] + sorted[middle]) / 2;
+  }
+
+  return sorted[middle];
+};
+
 /**
  * Aggregate samples for single process
  */
 export function aggregateProcStatSamples(samples: ProcStatSample[]): ProcStats {
   // all metrics are cumulative, except for heap usage
   const aggregated = last(samples)!;
+  const tailRssSamples = samples
+    .slice(-TAIL_RSS_SAMPLE_COUNT)
+    .map((sample) => sample.rss)
+    .filter((rss) => rss !== undefined);
 
   aggregated.heapUsage = mean(samples.map((sample) => sample.heapUsage));
+  aggregated.tailRss = median(tailRssSamples);
   return aggregated;
 }
 
@@ -32,6 +54,8 @@ export function aggregateProcStats(stats: ProcStats[]): RunProcStats {
     gcMajor: sumBy(stats, (stat) => stat.gcMajor),
     gcTotal: sumBy(stats, (stat) => stat.gcTotal),
     cpuUsage: sumBy(stats, (stat) => stat.cpuUsage),
+    rss: sumBy(stats, (stat) => stat.rss),
     rssMax: sumBy(stats, (stat) => stat.rssMax),
+    tailRss: sumBy(stats, (stat) => stat.tailRss),
   };
 }

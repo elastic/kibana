@@ -148,27 +148,27 @@ describe('reportDiff', () => {
   test('includes aggregated system metrics and shows deltas', () => {
     const leftProcRun1 = [
       makeStats(1, [
-        { time: 1, cpuUs: 10_000, rssMax: 600, heapUsed: 100_000, gcTotal: 1 },
-        { time: 2, cpuUs: 20_000, rssMax: 620, heapUsed: 110_000, gcTotal: 2 },
+        { time: 1, cpuUs: 10_000, rss: 500, rssMax: 600, heapUsed: 100_000, gcTotal: 1 },
+        { time: 2, cpuUs: 20_000, rss: 520, rssMax: 620, heapUsed: 110_000, gcTotal: 2 },
       ]),
     ];
     const leftProcRun2 = [
       makeStats(1, [
-        { time: 1, cpuUs: 11_000, rssMax: 610, heapUsed: 100_000, gcTotal: 1 },
-        { time: 2, cpuUs: 21_000, rssMax: 630, heapUsed: 115_000, gcTotal: 3 },
+        { time: 1, cpuUs: 11_000, rss: 510, rssMax: 610, heapUsed: 100_000, gcTotal: 1 },
+        { time: 2, cpuUs: 21_000, rss: 530, rssMax: 630, heapUsed: 115_000, gcTotal: 3 },
       ]),
     ];
 
     const rightProcRun1 = [
       makeStats(1, [
-        { time: 1, cpuUs: 15_000, rssMax: 650, heapUsed: 120_000, gcTotal: 2 },
-        { time: 2, cpuUs: 25_000, rssMax: 670, heapUsed: 130_000, gcTotal: 4 },
+        { time: 1, cpuUs: 15_000, rss: 550, rssMax: 650, heapUsed: 120_000, gcTotal: 2 },
+        { time: 2, cpuUs: 25_000, rss: 570, rssMax: 670, heapUsed: 130_000, gcTotal: 4 },
       ]),
     ];
     const rightProcRun2 = [
       makeStats(1, [
-        { time: 1, cpuUs: 14_000, rssMax: 660, heapUsed: 125_000, gcTotal: 2 },
-        { time: 2, cpuUs: 24_000, rssMax: 680, heapUsed: 135_000, gcTotal: 5 },
+        { time: 1, cpuUs: 14_000, rss: 560, rssMax: 660, heapUsed: 125_000, gcTotal: 2 },
+        { time: 2, cpuUs: 24_000, rss: 580, rssMax: 680, heapUsed: 135_000, gcTotal: 5 },
       ]),
     ];
 
@@ -191,6 +191,7 @@ describe('reportDiff', () => {
     expect(out).toContain('Duration');
     expect(out).toContain('CPU Usage');
     expect(out).toContain('Max RSS');
+    expect(out).toContain('Tail RSS');
     expect(out).toContain('GC time');
 
     expect(out).toMatchInlineSnapshot(`
@@ -203,6 +204,7 @@ describe('reportDiff', () => {
        Duration         1s ±0.0%       1s ±20.0%        0ms (+0.0%)   Run 3139 more times 
        CPU Usage       31s ±3.2%       39s ±2.6%        8s (+25.8%)    95%, +16.1%–+36.4% 
        Max RSS     1.20 KB ±0.8%   1.30 KB ±0.8%   100.00 B (+8.1%)     95%, +5.8%–+10.5% 
+       Tail RSS    1.01 KB ±1.0%   1.10 KB ±0.9%   100.00 B (+9.7%)     95%, +6.9%–+12.6% 
        GC time        4ms ±14.3%       7ms ±7.7%       3ms (+85.7%)   95%, +38.5%–+156.2%"
     `);
   });

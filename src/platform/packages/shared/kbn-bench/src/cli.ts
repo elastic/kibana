@@ -25,12 +25,22 @@ export function cli() {
         openProfile: Boolean(flags['open-profile']),
         grep: flags.grep,
         runs: flags.runs ? Number(flags.runs) : undefined,
+        monitorInterval: flags['monitor-interval'] ? Number(flags['monitor-interval']) : undefined,
         configFromCwd: Boolean(flags['config-from-cwd']),
       });
     },
     {
       flags: {
-        string: ['config', 'left', 'right', 'left-build-dir', 'right-build-dir', 'grep', 'runs'],
+        string: [
+          'config',
+          'left',
+          'right',
+          'left-build-dir',
+          'right-build-dir',
+          'grep',
+          'runs',
+          'monitor-interval',
+        ],
         boolean: ['profile', 'open-profile', 'config-from-cwd'],
         help: `--config           Location (glob) of benchmark config files
       --left            Git ref for baseline (defaults to current working directory)
@@ -41,6 +51,7 @@ export function cli() {
       --open-profile    After merging, open each merged profile in speedscope
       --grep            Filter benchmarks by (case-insensitive) substring(s); can repeat
       --runs            Number of runs, overrides # of runs in config
+      --monitor-interval Process monitor sample interval in milliseconds
       --config-from-cwd Use process.cwd() for config file path instead of workspace root
       `,
       } as const,

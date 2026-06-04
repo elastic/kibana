@@ -95,6 +95,16 @@ export function toBenchmarkSummary(result: BenchmarkResult): BenchmarkSummary {
       };
     }
 
+    const tailRssValues = compact(runProcStats.map((stat) => stat.tailRss));
+
+    if (tailRssValues.length) {
+      metrics.tailRssSize = {
+        values: compact(runProcStats.map((stat) => stat.tailRss)),
+        title: 'Tail RSS',
+        format: 'size',
+      };
+    }
+
     const gcValues = compact(runProcStats.map((stat) => stat.gcTotal));
 
     if (gcValues.length) {

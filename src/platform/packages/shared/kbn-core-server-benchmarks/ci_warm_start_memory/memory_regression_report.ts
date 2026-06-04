@@ -21,30 +21,48 @@ export interface WarmStartMemoryRegressionReportContext {
   readonly targetBuildId?: string;
 }
 
-export interface WarmStartMemoryRegressionReport {
+export type WarmStartMemoryRegressionMetricName = 'tailRss' | 'maxRss';
+
+export interface WarmStartMemoryRegressionMetricReport {
   readonly baselineRssBytes: number;
   readonly targetRssBytes: number;
   readonly deltaBytes: number;
   readonly allowedDeltaBytes: number;
+  readonly regressed: boolean;
+}
+
+export interface WarmStartMemoryRegressionReport {
+  readonly metrics: Record<
+    WarmStartMemoryRegressionMetricName,
+    WarmStartMemoryRegressionMetricReport
+  >;
+  readonly triggeredMetrics: WarmStartMemoryRegressionMetricName[];
   readonly context?: WarmStartMemoryRegressionReportContext;
 }
 
 export const buildWarmStartMemoryRegressionReport = ({
-  baselineRssBytes,
-  targetRssBytes,
-  allowedDeltaBytes,
+  metrics,
+  triggeredMetrics,
   context,
 }: {
-  baselineRssBytes: number;
-  targetRssBytes: number;
-  allowedDeltaBytes: number;
+  metrics: Record<
+    WarmStartMemoryRegressionMetricName,
+    Omit<WarmStartMemoryRegressionMetricReport, 'deltaBytes'>
+  >;
+  triggeredMetrics: WarmStartMemoryRegressionMetricName[];
   context?: WarmStartMemoryRegressionReportContext;
 }): WarmStartMemoryRegressionReport => {
   const report: WarmStartMemoryRegressionReport = {
-    baselineRssBytes,
-    targetRssBytes,
-    deltaBytes: targetRssBytes - baselineRssBytes,
-    allowedDeltaBytes,
+    metrics: Object.fromEntries(
+      Object.entries(metrics).map(([metricName, metric]) => [
+        metricName,
+        {
+          ...metric,
+          deltaBytes: metric.targetRssBytes - metric.baselineRssBytes,
+        },
+      ])
+    ) as WarmStartMemoryRegressionReport['metrics'],
+    triggeredMetrics,
   };
 
   if (context && Object.keys(context).length > 0) {

@@ -34,6 +34,7 @@ export async function bench({
   openProfile,
   grep,
   runs,
+  monitorInterval,
   configFromCwd,
 }: {
   log: ToolingLog;
@@ -46,6 +47,7 @@ export async function bench({
   openProfile?: boolean;
   grep?: string | string[];
   runs?: number;
+  monitorInterval?: number;
   configFromCwd?: boolean;
 }) {
   const buildDirOverrides = await resolveBuildDirOverrides({ leftBuildDir, rightBuildDir });
@@ -77,6 +79,7 @@ export async function bench({
     openProfile,
     grep: grepArray,
     runs,
+    monitorInterval,
   };
 
   const globalRunContext: Omit<GlobalRunContext, 'workspace' | 'log'> = {

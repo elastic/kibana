@@ -31,6 +31,7 @@ interface TestCliRunContext {
     'open-profile': boolean;
     grep?: string;
     runs: string;
+    'monitor-interval'?: string;
     'config-from-cwd': boolean;
     verbose: boolean;
     quiet: boolean;
@@ -74,6 +75,7 @@ describe('cli', () => {
         'open-profile': false,
         grep: undefined,
         runs: '3',
+        'monitor-interval': '250',
         'config-from-cwd': false,
         verbose: false,
         quiet: false,
@@ -98,6 +100,7 @@ describe('cli', () => {
       openProfile: false,
       grep: undefined,
       runs: 3,
+      monitorInterval: 250,
       configFromCwd: false,
     });
   });
@@ -109,5 +112,6 @@ describe('cli', () => {
 
     expect(options?.flags?.string).toContain('left-build-dir');
     expect(options?.flags?.string).toContain('right-build-dir');
+    expect(options?.flags?.string).toContain('monitor-interval');
   });
 });

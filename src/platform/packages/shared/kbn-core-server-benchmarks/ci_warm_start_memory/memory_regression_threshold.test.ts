@@ -10,14 +10,18 @@
 import {
   getAllowedRegressionDeltaBytes,
   isMemoryRegression,
-  MIN_REGRESSION_DELTA_BYTES,
+  MAX_RSS_REGRESSION_THRESHOLD_POLICY,
+  MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
+  MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
 } from './memory_regression_threshold';
 
 describe('getAllowedRegressionDeltaBytes', () => {
   it('uses the fixed 150 MiB floor for small baselines', () => {
     const baselineMedianRssBytes = 500 * 1024 * 1024;
 
-    expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(MIN_REGRESSION_DELTA_BYTES);
+    expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
+      MIN_TAIL_RSS_REGRESSION_DELTA_BYTES
+    );
   });
 
   it('uses 8% of the baseline median when that exceeds 150 MiB', () => {
@@ -26,6 +30,14 @@ describe('getAllowedRegressionDeltaBytes', () => {
     expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
       baselineMedianRssBytes * 0.08
     );
+  });
+
+  it('supports the looser Max RSS threshold policy', () => {
+    const baselineMedianRssBytes = 500 * 1024 * 1024;
+
+    expect(
+      getAllowedRegressionDeltaBytes(baselineMedianRssBytes, MAX_RSS_REGRESSION_THRESHOLD_POLICY)
+    ).toBe(MIN_MAX_RSS_REGRESSION_DELTA_BYTES);
   });
 });
 

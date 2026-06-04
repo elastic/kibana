@@ -68,6 +68,7 @@ export interface InitialBenchConfig {
   runs?: number;
   tags?: string[];
   timeout?: number;
+  monitorInterval?: number;
   profile?: boolean;
   openProfile?: boolean;
   onCompare?: OnCompareCallback;
@@ -81,6 +82,7 @@ export interface LoadedBenchConfig extends InitialBenchConfigWithPath {
   runs: number;
   tags: string[];
   timeout: number;
+  monitorInterval: number;
   profile: boolean;
   openProfile: boolean;
   tracing: boolean;
@@ -94,4 +96,5 @@ export interface GlobalBenchConfig {
   openProfile?: boolean;
   tracing?: boolean;
   grep?: string[];
+  monitorInterval?: number;
 }

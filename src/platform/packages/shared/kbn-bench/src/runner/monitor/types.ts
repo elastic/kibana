@@ -10,7 +10,9 @@
 type ProcMetricType =
   | 'heapUsage'
   | 'cpuUsage'
+  | 'rss'
   | 'rssMax'
+  | 'tailRss'
   | 'gcTotal'
   | 'gcMajor'
   | 'gcMinor'

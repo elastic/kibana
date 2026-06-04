@@ -57,6 +57,7 @@ const configSchema = z.object({
   name: z.string(),
   runs: z.number().optional(),
   timeout: z.number().optional(),
+  monitorInterval: z.number().positive().optional(),
   profile: z.boolean().optional(),
   openProfile: z.boolean().optional(),
   benchmarks: z.array(benchmarkSchema),
