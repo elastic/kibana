@@ -1,0 +1,178 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Feature, QueryLink, StreamQuery } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import type {
+  StoredFeatureKnowledgeIndicator,
+  StoredKnowledgeIndicator,
+  StoredQueryKnowledgeIndicator,
+  StoredTombstone,
+} from '../data_stream';
+import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
+import { computeRuleId } from '../helpers/compute_rule_id';
+
+export function buildSearchEmbeddingFeature(feature: Feature, streamName: string): string {
+  const parts: string[] = [`Stream: ${streamName}`];
+  if (feature.title) parts.push(`Title: ${feature.title}`);
+  if (feature.description) parts.push(`Description: ${feature.description}`);
+  if (feature.type) parts.push(`Type: ${feature.type}`);
+  if (feature.subtype) parts.push(`Subtype: ${feature.subtype}`);
+  if ((feature.tags?.length ?? 0) > 0) parts.push(`Tags: ${feature.tags?.join(', ')}`);
+  return parts.join('\n');
+}
+
+export function buildSearchEmbeddingQuery(
+  query: Pick<StreamQuery, 'title' | 'description'>,
+  streamName: string
+): string {
+  const parts: string[] = [`Stream: ${streamName}`, `Title: ${query.title}`];
+  if (query.description) parts.push(`Description: ${query.description}`);
+  return parts.join('\n');
+}
+
+function computeExpiresAt(timestamp: string, ttlDays: number): string {
+  return new Date(new Date(timestamp).getTime() + ttlDays * 24 * 60 * 60 * 1000).toISOString();
+}
+
+export function toStoredFeature(
+  streamName: string,
+  feature: Feature,
+  includeEmbedding: boolean,
+  ttlDays: number
+): StoredFeatureKnowledgeIndicator {
+  const embedding = buildSearchEmbeddingFeature(feature, streamName);
+  const timestamp = new Date().toISOString();
+  return {
+    '@timestamp': timestamp,
+    id: feature.id,
+    type: KI_TYPE_FEATURE,
+    title: feature.title,
+    description: feature.description,
+    tags: feature.tags,
+    evidence: feature.evidence,
+    'stream.name': streamName,
+    excluded: feature.excluded,
+    run_id: feature.run_id,
+    expires_at: computeExpiresAt(timestamp, ttlDays),
+    feature: {
+      type: feature.type,
+      subtype: feature.subtype,
+      properties: feature.properties,
+      confidence: feature.confidence,
+      evidence_doc_ids: feature.evidence_doc_ids,
+      filter: feature.filter,
+      meta: feature.meta,
+    },
+    ...(includeEmbedding && embedding ? { search_embedding: embedding } : {}),
+  };
+}
+
+export function toStoredQuery(
+  streamName: string,
+  query: StreamQuery & { rule_backed?: boolean; rule_id?: string },
+  includeEmbedding: boolean,
+  ttlDays: number
+): StoredQueryKnowledgeIndicator {
+  const embedding = buildSearchEmbeddingQuery(query, streamName);
+  const derivedType = deriveQueryType(query.esql.query);
+  // STATS queries are never rule-backed.
+  const ruleBacked = derivedType === QUERY_TYPE_STATS ? false : Boolean(query.rule_backed);
+  const ruleId = query.rule_id ?? computeRuleId(streamName, query.id, query.esql.query);
+  const timestamp = new Date().toISOString();
+  return {
+    '@timestamp': timestamp,
+    id: query.id,
+    type: KI_TYPE_QUERY,
+    title: query.title,
+    description: query.description,
+    evidence: query.evidence,
+    'stream.name': streamName,
+    expires_at: computeExpiresAt(timestamp, ttlDays),
+    query: {
+      esql: query.esql.query,
+      query_type: derivedType,
+      severity_score: query.severity_score,
+      rule_backed: ruleBacked,
+      rule_id: ruleId,
+      features: query.features,
+    },
+    ...(includeEmbedding && embedding ? { search_embedding: embedding } : {}),
+  };
+}
+
+export function toTombstone(
+  streamName: string,
+  identity: Pick<StoredKnowledgeIndicator, 'id' | 'type'>
+): StoredTombstone {
+  return {
+    '@timestamp': new Date().toISOString(),
+    id: identity.id,
+    type: identity.type,
+    'stream.name': streamName,
+    deleted: true,
+  };
+}
+
+export function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature {
+  return {
+    id: doc.id,
+    stream_name: doc['stream.name'],
+    type: doc.feature.type,
+    description: doc.description,
+    properties: doc.feature.properties,
+    confidence: doc.feature.confidence,
+    title: doc.title,
+    subtype: doc.feature.subtype,
+    evidence: doc.evidence,
+    evidence_doc_ids: doc.feature.evidence_doc_ids,
+    tags: doc.tags,
+    filter: doc.feature.filter,
+    meta: doc.feature.meta,
+    run_id: doc.run_id,
+    excluded: doc.excluded,
+    updated_at: doc['@timestamp'],
+    expires_at: doc.expires_at,
+    uuid: doc.id,
+    status: doc.excluded ? 'stale' : 'active',
+    last_seen: doc['@timestamp'],
+    excluded_at: doc.excluded ? doc['@timestamp'] : undefined,
+  };
+}
+
+export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
+  const {
+    query_type: type,
+    rule_backed,
+    rule_id,
+    esql: esqlQuery,
+    severity_score,
+    features,
+  } = doc.query;
+  const ruleBacked = type === QUERY_TYPE_STATS ? false : rule_backed;
+
+  return {
+    'asset.uuid': doc.id,
+    'asset.type': 'query',
+    'asset.id': doc.id,
+    stream_name: doc['stream.name'],
+    rule_backed: ruleBacked,
+    rule_id,
+    updated_at: doc['@timestamp'],
+    expires_at: doc.expires_at,
+    query: {
+      id: doc.id,
+      type,
+      title: doc.title,
+      description: doc.description,
+      esql: { query: esqlQuery },
+      severity_score,
+      features,
+      evidence: doc.evidence,
+    },
+  };
+}
