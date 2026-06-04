@@ -14,11 +14,8 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
+import { setupDiscoverDefaults, teardownDiscoverDefaults } from '../../fixtures/common';
 
-// The editor appends `*` to the title automatically, so the selected data view
-// ends up as `logsta*` / `logst*`.
-const CLASSIC_DATA_VIEW = 'logsta';
 const ESQL_DATA_VIEW = 'logst';
 const KQL_QUERY = 'machine.os: "macOS"';
 const WIDE_TIME_RANGE = {
@@ -30,84 +27,80 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+    await setupDiscoverDefaults(scoutSpace);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    // Force a deterministic classic start so the suite stays correct even when
-    // the default Discover query mode is ES|QL.
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+    await teardownDiscoverDefaults(scoutSpace);
   });
 
-  spaceTest(
-    'creates a new tab in classic mode with isolated per-tab state',
-    async ({ pageObjects }) => {
-      const { discover, filterBar, queryBar } = pageObjects;
+  spaceTest('should create a new tab in classic mode', async ({ pageObjects }) => {
+    const { discover, filterBar, queryBar } = pageObjects;
 
-      await spaceTest.step(
-        'tab 1: new tab with an ad hoc data view, a filter and a KQL query',
-        async () => {
-          expect(await discover.getCurrentQueryMode()).toBe('classic');
+    // tab 0 - created automatically with the default data view
 
-          await discover.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-
-          await discover.createDataViewFromSearchBar({
-            name: CLASSIC_DATA_VIEW,
-            hasTimeField: true,
-          });
-
-          await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpeg' });
-          await discover.writeAndSubmitKqlQuery(KQL_QUERY);
-        }
-      );
-
-      await spaceTest.step('tab 2: new ES|QL tab defaults to FROM logsta*', async () => {
+    await spaceTest.step(
+      'tab 1: create a new tab, create another data view from search bar, set query and filter',
+      async () => {
         await discover.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
+
+        await discover.createDataViewFromSearchBar({
+          name: 'logsta',
+          hasTimeField: true,
+        });
         await discover.waitUntilTabIsLoaded();
-        expect(await discover.getEsqlQueryValue()).toBe('FROM logsta*');
-      });
 
-      await spaceTest.step(
-        'switching tabs restores each tab data view, query and filters',
-        async () => {
-          await discover.navigateToTabByIndex(0);
-          expect(await discover.getSelectedDataViewName()).toBe('logstash-*');
-          expect(await queryBar.getQuery()).toBe('');
-          expect(await filterBar.getFilterCount()).toBe(0);
+        await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpeg' });
+        await discover.writeAndSubmitKqlQuery(KQL_QUERY);
+        await discover.waitUntilTabIsLoaded();
+      }
+    );
 
-          await discover.navigateToTabByIndex(1);
-          expect(await discover.getSelectedDataViewName()).toBe('logsta*');
-          expect(await queryBar.getQuery()).toBe(KQL_QUERY);
-          expect(await filterBar.getFilterCount()).toBe(1);
-        }
-      );
+    await spaceTest.step('tab 2: create another new tab in ES|QL mode', async () => {
+      await discover.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getEsqlQueryValue()).toBe('FROM logsta*');
+    });
 
-      await spaceTest.step(
-        'a new tab inherits the active data view with an empty query and no filters',
-        async () => {
-          await discover.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-          expect(await discover.getSelectedDataViewName()).toBe('logsta*');
-          expect(await queryBar.getQuery()).toBe('');
-          expect(await filterBar.getFilterCount()).toBe(0);
-        }
-      );
-    }
-  );
+    await spaceTest.step(
+      'switching tabs restores each tab data view, query and filters',
+      async () => {
+        await discover.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getSelectedDataViewName()).toBe('logstash-*');
+        expect(await queryBar.getQuery()).toBe('');
+        expect(await filterBar.getFilterCount()).toBe(0);
 
-  spaceTest('creates a new tab in ES|QL mode', async ({ page, pageObjects }) => {
+        await discover.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getSelectedDataViewName()).toBe('logsta*');
+        expect(await queryBar.getQuery()).toBe(KQL_QUERY);
+        expect(await filterBar.getFilterCount()).toBe(1);
+      }
+    );
+
+    await spaceTest.step(
+      'a new tab inherits the active data view with an empty query and no filters',
+      async () => {
+        await discover.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getSelectedDataViewName()).toBe('logsta*');
+        expect(await queryBar.getQuery()).toBe('');
+        expect(await filterBar.getFilterCount()).toBe(0);
+      }
+    );
+  });
+
+  spaceTest('should create a new tab in ES|QL mode', async ({ page, pageObjects }) => {
     const { discover } = pageObjects;
     const defaultQuery = 'FROM logst*';
     const updatedQuery = 'FROM logst* | LIMIT 1050';
@@ -140,7 +133,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
     });
   });
 
-  spaceTest('completes all tabs that are opened quickly', async ({ pageObjects }) => {
+  spaceTest('should be able to complete all quickly opened tabs', async ({ pageObjects }) => {
     const { discover, datePicker } = pageObjects;
 
     await spaceTest.step(
@@ -165,9 +158,9 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
       // The initial tab plus every rapidly-opened tab should be present.
       await expect(discover.getTabs()).toHaveCount(newTabCount + 1);
 
-      // navigateToTabByIndex asserts each tab becomes active and finishes loading.
+      // selectTab asserts each tab becomes active and finishes loading.
       for (let i = newTabCount - 1; i > 0; i--) {
-        await discover.navigateToTabByIndex(i);
+        await discover.selectTab(i);
       }
     });
   });

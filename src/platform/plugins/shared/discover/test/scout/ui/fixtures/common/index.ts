@@ -10,3 +10,4 @@
 import * as testData from './constants';
 
 export { testData };
+export { setupDiscoverDefaults, teardownDiscoverDefaults } from './setup';

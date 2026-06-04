@@ -43,6 +43,7 @@ const UNIFIED_TABS_TEST_SUBJ = {
   newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
   tabsBar: 'unifiedTabs_tabsBar',
   duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
+  tabPreviewContentPanel: 'unifiedTabs_tabPreview_contentPanel',
 } as const;
 
 export class DiscoverApp {
@@ -144,7 +145,10 @@ export class DiscoverApp {
     const editor = new DataViewEditorPage(this.page);
     await this.page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
 
-    await editor.setTitle(name);
+    // FTR passes the base name and relies on the editor auto-appending `*` as the
+    // user types. Scout sets the title verbatim (`fill`), so append the wildcard
+    // here to preserve that contract (`name`, `* will be added automatically`).
+    await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
 
     if (!hasTimeField) {
       await this.selectNoTimeFieldInDataViewEditor();
@@ -702,10 +706,23 @@ export class DiscoverApp {
   }
 
   /**
+   * Dismisses the hover tab-preview panel. The preview is a portal that overlays
+   * the area below the tab bar (e.g. the data-view switcher) and intercepts
+   * pointer events, so a following click can fail with the preview "subtree
+   * intercepts pointer events"
+   */
+  async hideTabPreview() {
+    await this.page.mouse.move(0, 0);
+    await this.page.testSubj
+      .locator(UNIFIED_TABS_TEST_SUBJ.tabPreviewContentPanel)
+      .waitFor({ state: 'hidden' });
+  }
+
+  /**
    * Switches to the Discover tab at the given 0-based index in the unified tab
    * bar and waits for it to become active and finish loading.
    */
-  async navigateToTabByIndex(index: number) {
+  async selectTab(index: number) {
     const tabs = await this.getTabs().all();
 
     // Fail fast with a clear message instead of letting an out-of-range index
@@ -718,6 +735,7 @@ export class DiscoverApp {
     await tab.click();
     await expect(tab).toHaveAttribute('aria-selected', 'true');
     await this.waitUntilTabIsLoaded();
+    await this.hideTabPreview();
   }
 
   /**
@@ -744,6 +762,7 @@ export class DiscoverApp {
   async createNewTab() {
     await this.clickNewTabButton();
     await this.activeTabLocator.waitFor({ state: 'visible' });
+    await this.hideTabPreview();
   }
 
   /**
