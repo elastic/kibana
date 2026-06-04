@@ -13,10 +13,10 @@ import { LatencyAggregationType } from '@kbn/apm-types';
 import { useServiceFlyoutTransactions } from './use_service_flyout_transactions';
 
 jest.mock('./use_preferred_transaction_data_source', () => ({
-  usePreferredTransactionDataSource: jest.fn(() => ({
+  usePreferredTransactionDataSource: jest.fn().mockReturnValue({
     documentType: 'transactionMetric',
     rollupInterval: '1m',
-  })),
+  }),
 }));
 
 const START = '2024-01-01T00:00:00.000Z';
