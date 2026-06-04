@@ -11,7 +11,6 @@ import { farequoteLuceneFiltersSearchTestData } from './index_test_data';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -112,7 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('field statistics in Dashboard', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.securityUI.loginAsMlPowerUser();
