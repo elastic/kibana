@@ -368,15 +368,6 @@ const ActionsConnectorsList = ({
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>{actionType}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={DEPRECATED_LABEL}
-                tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
-                color="warning"
-                size="s"
-                alignment="middle"
-              />
-            </EuiFlexItem>
             {isLLMConnectorTypeId(item.actionTypeId) && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
@@ -387,6 +378,15 @@ const ActionsConnectorsList = ({
                 />
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={DEPRECATED_LABEL}
+                tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                color="warning"
+                size="s"
+                alignment="middle"
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         );
       },
