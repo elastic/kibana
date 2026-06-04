@@ -40,10 +40,7 @@ export class CollapsibleNav {
     const links = this.page.testSubj.locator('collapsibleNavAppLink');
     // allInnerTexts() is non-waiting; wait for at least one link to be attached
     // after the nav expands to handle async observable-driven rendering.
-    await links
-      .first()
-      .waitFor({ state: 'attached' })
-      .catch(() => {});
+    await links.waitFor({ state: 'attached' }).catch(() => {});
     return links.allInnerTexts();
   }
 }
