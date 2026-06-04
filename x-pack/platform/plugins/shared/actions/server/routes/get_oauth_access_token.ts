@@ -16,44 +16,44 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 
 const oauthJwtBodySchema = schema.object({
-  tokenUrl: schema.string(),
+  tokenUrl: schema.string({ maxLength: 2048 }),
   config: schema.object({
-    clientId: schema.string(),
-    jwtKeyId: schema.string(),
-    userIdentifierValue: schema.string(),
+    clientId: schema.string({ maxLength: 256 }),
+    jwtKeyId: schema.string({ maxLength: 256 }),
+    userIdentifierValue: schema.string({ maxLength: 256 }),
   }),
   secrets: schema.object({
-    clientSecret: schema.string(),
-    privateKey: schema.string(),
-    privateKeyPassword: schema.maybe(schema.string()),
+    clientSecret: schema.string({ maxLength: 4096 }),
+    privateKey: schema.string({ maxLength: 8192 }),
+    privateKeyPassword: schema.maybe(schema.string({ maxLength: 256 })),
   }),
 });
 
 export type OAuthJwtParams = TypeOf<typeof oauthJwtBodySchema>;
 
 const oauthClientCredentialsBodySchema = schema.object({
-  tokenUrl: schema.string(),
-  scope: schema.string(),
+  tokenUrl: schema.string({ maxLength: 2048 }),
+  scope: schema.string({ maxLength: 1024 }),
   config: schema.object({
-    clientId: schema.string(),
+    clientId: schema.string({ maxLength: 256 }),
   }),
   secrets: schema.object({
-    clientSecret: schema.string(),
+    clientSecret: schema.string({ maxLength: 4096 }),
   }),
 });
 
 export type OAuthClientCredentialsParams = TypeOf<typeof oauthClientCredentialsBodySchema>;
 
 const oauthAuthorizationCodeBodySchema = schema.object({
-  connectorId: schema.string(),
-  tokenUrl: schema.string(),
-  scope: schema.maybe(schema.string()),
+  connectorId: schema.string({ maxLength: 36 }),
+  tokenUrl: schema.string({ maxLength: 2048 }),
+  scope: schema.maybe(schema.string({ maxLength: 1024 })),
   config: schema.object({
-    clientId: schema.string(),
-    tokenUrl: schema.string(),
+    clientId: schema.string({ maxLength: 256 }),
+    tokenUrl: schema.string({ maxLength: 2048 }),
   }),
   secrets: schema.object({
-    clientSecret: schema.string(),
+    clientSecret: schema.string({ maxLength: 4096 }),
   }),
 });
 

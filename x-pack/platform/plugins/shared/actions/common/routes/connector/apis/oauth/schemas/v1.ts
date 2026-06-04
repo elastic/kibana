@@ -12,17 +12,17 @@ export const startOAuthFlowRequestBodySchema = schema.object({
 });
 
 export const startOAuthFlowPathParamsSchema = schema.object({
-  connectorId: schema.string(),
+  connectorId: schema.string({ maxLength: 36 }),
 });
 
 export const disconnectOAuthPathParamsSchema = schema.object({
-  connectorId: schema.string(),
+  connectorId: schema.string({ maxLength: 36 }),
 });
 
 export const cancelOAuthPathParamsSchema = schema.object({
-  connectorId: schema.string(),
+  connectorId: schema.string({ maxLength: 36 }),
 });
 
 export const cancelOAuthBodySchema = schema.object({
-  state: schema.string(),
+  state: schema.string({ maxLength: 256 }),
 });

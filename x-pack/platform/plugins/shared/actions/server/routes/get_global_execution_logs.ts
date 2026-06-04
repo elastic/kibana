@@ -25,16 +25,17 @@ const sortFieldSchema = schema.oneOf([
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
   defaultValue: [{ timestamp: { order: 'desc' } }],
+  maxSize: 3,
 });
 
 const bodySchema = schema.object({
-  date_start: schema.string(),
-  date_end: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  per_page: schema.number({ defaultValue: 10, min: 1 }),
-  page: schema.number({ defaultValue: 1, min: 1 }),
+  date_start: schema.string({ maxLength: 64 }),
+  date_end: schema.maybe(schema.string({ maxLength: 64 })),
+  filter: schema.maybe(schema.string({ maxLength: 4096 })),
+  per_page: schema.number({ defaultValue: 10, min: 1, max: 1000 }),
+  page: schema.number({ defaultValue: 1, min: 1, max: 1000 }),
   sort: sortFieldsSchema,
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })),
 });
 
 const rewriteBodyReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({

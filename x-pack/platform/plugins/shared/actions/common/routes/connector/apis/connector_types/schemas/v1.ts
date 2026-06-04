@@ -14,6 +14,7 @@ export const connectorTypesQuerySchema = schema.object({
         description:
           'A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).',
       },
+      maxLength: 64,
     })
   ),
 });

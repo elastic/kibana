@@ -60,7 +60,7 @@ export const registerSecretKeysRoute = ({
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: 36 }),
         }),
       },
       options: {

@@ -15,10 +15,10 @@ import { rewriteNamespaces } from './rewrite_namespaces';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 
 const bodySchema = schema.object({
-  date_start: schema.string(),
-  date_end: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  date_start: schema.string({ maxLength: 64 }),
+  date_end: schema.maybe(schema.string({ maxLength: 64 })),
+  filter: schema.maybe(schema.string({ maxLength: 4096 })),
+  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({
