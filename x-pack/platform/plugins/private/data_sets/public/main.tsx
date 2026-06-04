@@ -10,14 +10,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCallOut,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiOverlayMask,
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { HttpSetup } from '@kbn/core/public';
@@ -53,10 +58,16 @@ export interface MainProps {
 export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) => {
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
+  const confirmDeleteDataSourceTitleId = useGeneratedHtmlId({
+    prefix: 'confirmDeleteDataSourceTitle',
+  });
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
   const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
+  const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
+  const [isDeletingDataSource, setIsDeletingDataSource] = useState(false);
+  const [deleteDataSourceError, setDeleteDataSourceError] = useState<string | null>(null);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
   const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
     kind: 'closed',
@@ -151,6 +162,37 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     });
   }, []);
 
+  const handleDeleteDataSource = useCallback((item: DataSource) => {
+    setPendingDeleteDataSource(item);
+    setDeleteDataSourceError(null);
+  }, []);
+
+  const confirmDeleteDataSource = useCallback(async () => {
+    if (!pendingDeleteDataSource) {
+      return;
+    }
+    setIsDeletingDataSource(true);
+    setDeleteDataSourceError(null);
+    try {
+      await dataClient.delete(pendingDeleteDataSource.name);
+      setItems(await dataClient.get());
+      setSelectedItems([]);
+      setPendingDeleteDataSource(null);
+    } catch (e) {
+      setDeleteDataSourceError(getFlyoutSaveErrorMessage(e));
+    } finally {
+      setIsDeletingDataSource(false);
+    }
+  }, [dataClient, pendingDeleteDataSource]);
+
+  const cancelDeleteDataSource = useCallback(() => {
+    if (isDeletingDataSource) {
+      return;
+    }
+    setPendingDeleteDataSource(null);
+    setDeleteDataSourceError(null);
+  }, [isDeletingDataSource]);
+
   const handleDataSetSave = useCallback(
     async (dataSet: DataSetWithName): Promise<string | null> => {
       try {
@@ -210,10 +252,21 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
             },
             'data-test-subj': 'dataSetsEditButton',
           },
+          {
+            name: mainTranslations.columns.dataSources.deleteAction,
+            description: mainTranslations.columns.dataSources.deleteActionDescription,
+            icon: 'trash',
+            color: 'danger',
+            type: 'icon',
+            onClick: (item) => {
+              handleDeleteDataSource(item);
+            },
+            'data-test-subj': 'dataSetsDeleteIconButton',
+          },
         ],
       },
     ],
-    [handleEditDataSource]
+    [handleDeleteDataSource, handleEditDataSource]
   );
 
   const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
@@ -467,6 +520,44 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
           data-test-subj="dataSetsTabs"
         />
       </EuiPageSection>
+      {pendingDeleteDataSource ? (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={mainTranslations.confirmDeleteDataSource.title}
+            titleProps={{ id: confirmDeleteDataSourceTitleId }}
+            aria-labelledby={confirmDeleteDataSourceTitleId}
+            buttonColor="danger"
+            confirmButtonText={mainTranslations.confirmDeleteDataSource.confirmButton}
+            cancelButtonText={mainTranslations.confirmDeleteDataSource.cancelButton}
+            defaultFocusedButton="cancel"
+            onConfirm={confirmDeleteDataSource}
+            onCancel={cancelDeleteDataSource}
+            confirmButtonDisabled={isDeletingDataSource}
+          >
+            <EuiText size="s">
+              <p>{mainTranslations.confirmDeleteDataSource.prompt}</p>
+              <p>
+                <strong>{pendingDeleteDataSource.name}</strong>
+              </p>
+              <p>{mainTranslations.confirmDeleteDataSource.warning}</p>
+            </EuiText>
+            {deleteDataSourceError ? (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  title={mainTranslations.confirmDeleteDataSource.errorTitle}
+                  color="danger"
+                  iconType="warning"
+                  size="s"
+                  announceOnMount
+                >
+                  <p>{deleteDataSourceError}</p>
+                </EuiCallOut>
+              </>
+            ) : null}
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      ) : null}
       {dataSourceFlyout.kind !== 'closed' ? (
         <CreateDataSourceFlyout
           key={dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource.name : 'create'}

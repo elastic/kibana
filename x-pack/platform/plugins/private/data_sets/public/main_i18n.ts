@@ -28,6 +28,12 @@ export const mainTranslations = {
       editActionDescription: i18n.translate('dataSets.table.editActionDescription', {
         defaultMessage: 'Edit data source',
       }),
+      deleteAction: i18n.translate('dataSets.table.deleteAction', {
+        defaultMessage: 'Delete',
+      }),
+      deleteActionDescription: i18n.translate('dataSets.table.deleteActionDescription', {
+        defaultMessage: 'Delete data source',
+      }),
       caption: i18n.translate('dataSets.table.caption', {
         defaultMessage: 'Data sources',
       }),
@@ -105,6 +111,27 @@ export const mainTranslations = {
     }),
     allDataSources: i18n.translate('dataSets.filters.allDataSources', {
       defaultMessage: 'All data sources',
+    }),
+  },
+
+  confirmDeleteDataSource: {
+    title: i18n.translate('dataSets.confirmDeleteDataSource.title', {
+      defaultMessage: 'Delete data source',
+    }),
+    prompt: i18n.translate('dataSets.confirmDeleteDataSource.prompt', {
+      defaultMessage: 'Are you sure you want to delete this data source?',
+    }),
+    warning: i18n.translate('dataSets.confirmDeleteDataSource.warning', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
+    cancelButton: i18n.translate('dataSets.confirmDeleteDataSource.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    confirmButton: i18n.translate('dataSets.confirmDeleteDataSource.confirmButton', {
+      defaultMessage: 'Delete',
+    }),
+    errorTitle: i18n.translate('dataSets.confirmDeleteDataSource.errorTitle', {
+      defaultMessage: 'Delete failed',
     }),
   },
 } as const;
