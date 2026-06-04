@@ -18,6 +18,14 @@ import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 
+export class GenerateEsqlNoDataError extends Error {
+  readonly code = 'NO_DATA' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'GenerateEsqlNoDataError';
+  }
+}
+
 export interface GenerateEsqlResponse {
   /**
    * The ES|QL query which was generated
@@ -36,11 +44,6 @@ export interface GenerateEsqlResponse {
    * Error message if the query could not be executed
    */
   error?: string;
-  /**
-   * Set when the generator deliberately cannot produce a query (e.g. no relevant index found).
-   * Consumers should surface this to the user rather than treating it as a system error.
-   */
-  rejectionReason?: { code: string; message: string };
 }
 
 export interface GenerateEsqlDeps {
@@ -152,13 +155,9 @@ export const generateEsql = async ({
             logger,
           });
           if (!selectedResource) {
-            return {
-              rejectionReason: {
-                code: 'NO_DATA',
-                message:
-                  'Could not discover a suitable index for the query. Please specify an index explicitly.',
-              },
-            };
+            throw new GenerateEsqlNoDataError(
+              'Could not discover a suitable index for the query. Please specify an index explicitly.'
+            );
           }
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
@@ -190,6 +189,9 @@ export const generateEsql = async ({
           results: outState.results,
         };
       } catch (e) {
+        if (e instanceof GenerateEsqlNoDataError) {
+          throw e;
+        }
         throw new Error(`Could not generate ESQL query: ${e.message}`);
       }
     }

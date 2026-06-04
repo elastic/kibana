@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -77,18 +77,33 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
 
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
-      const esqlResponse = await generateEsql({
-        nlQuery,
-        index,
-        additionalContext: context,
-        executeQuery,
-        disableNamedParams,
-        timeRange,
-        model,
-        esClient: esClient.asCurrentUser,
-        logger,
-        events,
-      });
+      let esqlResponse;
+      try {
+        esqlResponse = await generateEsql({
+          nlQuery,
+          index,
+          additionalContext: context,
+          executeQuery,
+          disableNamedParams,
+          timeRange,
+          model,
+          esClient: esClient.asCurrentUser,
+          logger,
+          events,
+        });
+      } catch (err) {
+        if (err instanceof GenerateEsqlNoDataError) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: { message: err.message },
+              },
+            ],
+          };
+        }
+        throw err;
+      }
 
       const toolResults: ToolHandlerResult[] = [];
 
