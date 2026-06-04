@@ -40,9 +40,10 @@ export async function deleteCompositeSlo(
       { logger }
     );
   } catch (err) {
+    // 404 means the summary doc was never written (e.g. task hasn't run yet) — not an error.
+    // Other failures are best-effort cleanup: log and swallow so the composite delete still succeeds.
     if (err?.statusCode !== 404) {
       logger.debug(`Failed to delete composite summary doc [${docId}]: ${err}`);
-      throw err;
     }
   }
 }
