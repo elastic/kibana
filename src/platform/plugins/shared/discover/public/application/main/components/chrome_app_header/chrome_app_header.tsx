@@ -44,6 +44,7 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
   const appMenu = useMemo(() => {
     return {
       ...menu,
+      isCollapsed,
       items: menu?.items?.map((item) => ({
         ...item,
         // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
@@ -51,7 +52,7 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
         overflow: item.id !== AppMenuActionId.switchLanguageMode,
       })),
     };
-  }, [menu]);
+  }, [isCollapsed, menu]);
 
   if (!isChromeNextProjectHeader) {
     return null;
@@ -62,7 +63,6 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
       title={title}
       back={back}
       menu={appMenu}
-      menuIsCollapsed={isCollapsed}
       sticky={false}
       padding="m"
       titleAppend={titleAppend}
