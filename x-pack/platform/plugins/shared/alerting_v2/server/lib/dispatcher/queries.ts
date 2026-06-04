@@ -143,8 +143,6 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 export const getAlertEpisodeSuppressionsQueries = (
   alertEpisodes: AlertEpisode[]
 ): EsqlRequest[] => {
-  if (alertEpisodes.length === 0) return [];
-
   const minLastEventTimestamp =
     alertEpisodes.reduce<string | undefined>((min, ep) => {
       const parsedTimestamp = new Date(ep.last_event_timestamp);
@@ -198,8 +196,6 @@ export const getAlertEpisodeSuppressionsQueries = (
 export const getLastNotifiedTimestampsQueries = (
   actionGroupIds: ActionGroupId[]
 ): EsqlRequest[] => {
-  if (actionGroupIds.length === 0) return [];
-
   return chunkInClauseLiterals(actionGroupIds).map((chunk) => {
     const values = chunk.map((id) => esql.str(id));
     const whereClause = esql.exp`action_type == "notified" AND action_group_id IN (${values})`;
