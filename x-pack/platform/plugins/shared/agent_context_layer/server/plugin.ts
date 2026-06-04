@@ -113,9 +113,7 @@ export class AgentContextLayerPlugin
           // check inside the SML crawler task. Request-scoped so per-space
           // overrides of the experimental setting are honored.
           if (!this.coreStart) {
-            throw new Error(
-              'Agent Context Layer feature-flag check called before plugin start'
-            );
+            throw new Error('Agent Context Layer feature-flag check called before plugin start');
           }
           const soClient = this.coreStart.savedObjects.getScopedClient(request);
           const uiSettingsClient = this.coreStart.uiSettings.asScopedToClient(soClient);
