@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiSkeletonText } from '@elastic/eui';
 import type { GutterOptions } from 'react-diff-view';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
@@ -55,24 +48,17 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     };
   }, [item]);
 
-  if (!item) {
-    if (isLoading) {
-      return (
-        <EuiPanel data-test-subj="ruleChangesHistoryDiffLoading">
-          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18n.LOADING_LABEL}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      );
-    }
-
+  if (isLoading) {
     return (
-      <EuiPanel data-test-subj="ruleChangesHistoryNothingSelected">
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="ruleChangesHistoryDiffLoading">
+        <EuiSkeletonText lines={10} size="s" isLoading />
+      </EuiPanel>
+    );
+  }
+
+  if (!item) {
+    return (
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="ruleChangesHistoryNothingSelected">
         <EuiEmptyPrompt iconType="inspect" title={<h2>{i18n.NOTHING_TO_COMPARE_TITLE}</h2>} />
       </EuiPanel>
     );
@@ -80,7 +66,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
 
   if (item.old_values && numOfChangedFields === 0) {
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} data-test-subj="ruleChangesHistoryNoChanges">
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="ruleChangesHistoryNoChanges">
         <EuiEmptyPrompt
           iconType="checkInCircleFilled"
           title={<h2>{i18n.NO_VISIBLE_CHANGES_TITLE}</h2>}
@@ -90,7 +76,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
   }
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder hasShadow={false}>
       <DiffView
         viewType="unified"
         oldSource={oldSource}

@@ -88,7 +88,6 @@ export const useRuleDetailsTabs = ({
 
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canReadExceptions = useUserPrivileges().rulesPrivileges.exceptions.read;
-  const isRuleChangesHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangesHistoryEnabled');
 
   useEffect(() => {
     const hiddenTabs = [];
@@ -119,7 +118,6 @@ export const useRuleDetailsTabs = ({
     canReadExceptions,
     canReadAlerts,
     isEndpointExceptionsMovedFFEnabled,
-    isRuleChangesHistoryEnabled,
     rule,
     ruleDetailTabs,
   ]);

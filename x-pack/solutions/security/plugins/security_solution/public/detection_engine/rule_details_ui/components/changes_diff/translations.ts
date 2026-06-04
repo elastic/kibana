@@ -20,10 +20,3 @@ export const NO_VISIBLE_CHANGES_TITLE = i18n.translate(
     defaultMessage: 'No visible field changes',
   }
 );
-
-export const LOADING_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleChangesHistory.diffLoadingLabel',
-  {
-    defaultMessage: 'Loading changes',
-  }
-);
