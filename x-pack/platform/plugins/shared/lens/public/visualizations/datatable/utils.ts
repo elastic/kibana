@@ -198,9 +198,17 @@ export function getProgressBarDomain(
   // don't count as an explicit custom bound and don't leak into the domain.
   const paletteRangeMin = finiteOr(paletteParams?.rangeMin, NaN);
   const paletteRangeMax = finiteOr(paletteParams?.rangeMax, NaN);
+  // `fillStyle.valueRange.mode` is the source of truth: an explicit `auto`
+  // recomputes from the data bounds regardless of any stale `rangeMin/rangeMax`
+  // left on the palette (range retention keeps the last custom bounds around).
+  // Only when no explicit mode is set (legacy / as-code columns) does the mere
+  // presence of a finite palette range read as custom.
+  const rangeMode = fillStyle?.valueRange?.mode;
   const isCustom =
-    fillStyle?.valueRange?.mode === 'custom' ||
-    (usesPalette && (!Number.isNaN(paletteRangeMin) || !Number.isNaN(paletteRangeMax)));
+    rangeMode === 'custom' ||
+    (rangeMode == null &&
+      usesPalette &&
+      (!Number.isNaN(paletteRangeMin) || !Number.isNaN(paletteRangeMax)));
 
   let min: number;
   let max: number;

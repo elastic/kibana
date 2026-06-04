@@ -159,6 +159,48 @@ describe('datatable progress bar utils', () => {
       expect(Number.isFinite(domain.min)).toBe(true);
       expect(Number.isFinite(domain.max)).toBe(true);
     });
+
+    it('uses data bounds for an explicit Auto palette fill, ignoring stale palette range', () => {
+      // Switching Custom -> Auto keeps the last custom bounds on fillStyle (range
+      // retention) and may leave stale rangeMin/rangeMax on the palette. An
+      // explicit Auto mode must win: the domain follows the data bounds (here a
+      // positive-only column spans [0, 108], not the stale [0, 200]).
+      const domain = getProgressBarDomain(
+        {
+          fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto', min: 0, max: 200 } },
+          palette: { params: { rangeMin: 0, rangeMax: 200 } },
+        },
+        { min: 19, max: 108 }
+      );
+      expect(domain).toEqual({ min: 0, max: 108 });
+    });
+
+    it('drops a positive-only palette fill back to [0, max] when switched to Auto', () => {
+      // Mixed-sign custom range, then Auto, on data that is positive-only: the
+      // baseline returns to the left edge (0) and the bar spans the data max.
+      const domain = getProgressBarDomain(
+        {
+          fillStyle: { fillMode: 'gradient', valueRange: { mode: 'auto', min: -24, max: 108 } },
+          palette: { params: { rangeMin: -24, rangeMax: 108 } },
+        },
+        { min: 19, max: 108 }
+      );
+      expect(domain).toEqual({ min: 0, max: 108 });
+    });
+
+    it('honors a palette range only when fillStyle has no explicit mode (legacy/API)', () => {
+      // Backward compatibility: an as-code/legacy column may carry the custom
+      // range solely on the palette with no fillStyle.valueRange.mode. That still
+      // reads as custom so API-configured ranges keep working.
+      const domain = getProgressBarDomain(
+        {
+          fillStyle: { fillMode: 'solid' },
+          palette: { params: { rangeMin: 5, rangeMax: 250 } },
+        },
+        { min: 19, max: 108 }
+      );
+      expect(domain).toEqual({ min: 0, max: 250 });
+    });
   });
 
   describe('getProgressBarPaletteStops', () => {
