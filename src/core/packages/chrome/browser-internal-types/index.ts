@@ -9,15 +9,21 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeBreadcrumbsBadge,
+  ChromeNext,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
+  GlobalSearchConfig,
   AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
@@ -30,6 +36,15 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  /**
+   * Dependencies used by Chrome-owned React components that live outside
+   * `browser-internal`, but still render under `ChromeServiceProvider`.
+   */
+  componentDeps: {
+    readonly basePath: IBasePath;
+    readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+  };
+
   sideNav: ChromeStart['sideNav'] & {
     /**
      * Set the width of the side nav.
@@ -56,6 +71,11 @@ export interface InternalChromeStart extends ChromeStart {
    * converted to extensions. Used by chrome layout components.
    */
   getBreadcrumbsAppendExtensionsWithBadges$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
+
+  /**
+   * Get an observable of the current breadcrumbs badges set via setBreadcrumbsBadges().
+   */
+  getBreadcrumbsBadges$(): Observable<ChromeBreadcrumbsBadge[]>;
 
   /** Set global footer. Used by the developer toolbar. */
   setGlobalFooter(node: ReactNode): void;
@@ -103,5 +123,25 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+  };
+
+  /** @internal Extends public `next` with `get$` for Chrome layout components. */
+  next: InternalChromeNext;
+}
+
+/** @internal */
+export interface InternalChromeNext extends ChromeNext {
+  contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
+  };
+  globalSearch: ChromeNext['globalSearch'] & {
+    get$(): Observable<GlobalSearchConfig | undefined>;
+  };
+  inlineAppHeader: {
+    get$(): Observable<boolean>;
+    set(mounted: boolean): void;
+  };
+  appHeader: ChromeNext['appHeader'] & {
+    get$(): Observable<AppHeaderConfig | undefined>;
   };
 }

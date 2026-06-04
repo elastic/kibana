@@ -101,7 +101,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [euiTheme.size.m, euiTheme.colors.body]
   );
 
-  const { data: actionResultsData } = useActionResults({
+  const {
+    data: actionResultsData,
+    isFetched: actionResultsFetched,
+    isError: actionResultsErrored,
+  } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -238,11 +242,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     executionCount,
   });
 
-  // Publish active filters to the ref-backed context so the page-header export
-  // button and row kebab menu can read them. The store does not re-render this
-  // tree on writes; only subscribers of this `actionId` re-render.
   const exportFiltersStore = useExportFiltersContext();
-  const unfilteredTotal = actionResultsData?.aggregations?.totalRowCount;
+  const unfilteredTotal =
+    actionResultsFetched && !actionResultsErrored
+      ? actionResultsData?.aggregations?.totalRowCount
+      : undefined;
   useEffect(() => {
     exportFiltersStore?.setFilters(actionId, {
       kuery: userKuery,

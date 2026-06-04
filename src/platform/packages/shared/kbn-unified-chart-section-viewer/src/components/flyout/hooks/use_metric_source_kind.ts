@@ -13,12 +13,6 @@ import { useExternalServices } from '../../../context/external_services';
 import { useReportChartSectionError } from '../../chart/hooks/use_report_chart_section_error';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 
-// Tag key emitted by data_views.getIndices() / responseToItemArray for plain
-// indices (vs data streams). Coupled to that plugin's response shape.
-// TODO: import from @kbn/data-views-plugin once exported
-// (https://github.com/elastic/kibana/issues/265126).
-const DATA_VIEWS_INDEX_TAG_KEY = 'index';
-
 export const METRIC_SOURCE_KIND = {
   DATA_STREAM: 'data_stream',
   INDEX: 'index',
@@ -130,7 +124,7 @@ const fetchSourceKind = async (
   });
   const item = matched.find((m) => m.name === name);
   if (!item) return undefined;
-  return item.tags.some((t) => t.key === DATA_VIEWS_INDEX_TAG_KEY)
+  return item.tags.some((t) => t.key === 'index')
     ? METRIC_SOURCE_KIND.INDEX
     : METRIC_SOURCE_KIND.DATA_STREAM;
 };

@@ -89,6 +89,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/cps'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

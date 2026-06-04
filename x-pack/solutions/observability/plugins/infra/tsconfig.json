@@ -8,9 +8,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "test/scenarios/**/*"
   ],
   "kbn_references": [
+    "@kbn/synthtrace",
+    "@kbn/synthtrace-client",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
@@ -137,7 +140,8 @@
     "@kbn/controls-constants",
     "@kbn/cps-utils",
     "@kbn/es-query-constants",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }
