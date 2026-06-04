@@ -141,7 +141,8 @@ describe('filterToolsByNamespace', () => {
 
 describe('registerMCPRoutes', () => {
   const routeKey = `POST:${MCP_SERVER_PATH}`;
-  let routeHandlers: Record<string, { config: any; handler: Function }>;
+  const getRouteKey = `GET:${MCP_SERVER_PATH}`;
+  let routeHandlers: Record<string, { routeConfig: any; config: any; handler: Function }>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -156,18 +157,26 @@ describe('registerMCPRoutes', () => {
       tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
     });
 
+    const captureRoute = (method: string) =>
+      jest.fn().mockImplementation((routeConfig: { path: string }) => {
+        const versionedRoute = { addVersion: jest.fn() };
+        versionedRoute.addVersion = jest
+          .fn()
+          .mockImplementation((vConfig: any, handler: Function) => {
+            routeHandlers[`${method}:${routeConfig.path}`] = {
+              routeConfig,
+              config: vConfig,
+              handler,
+            };
+            return versionedRoute;
+          });
+        return versionedRoute;
+      });
+
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => {
-          const versionedRoute = { addVersion: jest.fn() };
-          versionedRoute.addVersion = jest
-            .fn()
-            .mockImplementation((vConfig: any, handler: Function) => {
-              routeHandlers[`POST:${config.path}`] = { config: vConfig, handler };
-              return versionedRoute;
-            });
-          return versionedRoute;
-        }),
+        post: captureRoute('POST'),
+        get: captureRoute('GET'),
       },
     } as unknown as jest.Mocked<IRouter>;
 
@@ -185,5 +194,31 @@ describe('registerMCPRoutes', () => {
 
     const querySchema = routeConfig?.validate?.request?.query;
     expect(querySchema).toBeDefined();
+  });
+
+  describe('GET (unsupported method)', () => {
+    it('registers a GET handler on the MCP path to shadow the SPA catch-all', () => {
+      expect(routeHandlers[getRouteKey]).toBeDefined();
+    });
+
+    it('is public and skips authn/authz so the UIAM OAuth token is not challenged', () => {
+      // The token must NOT be authenticated here: an authenticated GET on an untagged
+      // route is rejected with a 401, which MCP clients treat as an auth failure and
+      // retry the OAuth flow instead of issuing POST requests.
+      const { routeConfig } = routeHandlers[getRouteKey];
+      expect(routeConfig.access).toBe('public');
+      expect(routeConfig.security.authc.enabled).toBe(false);
+      expect(routeConfig.security.authz.enabled).toBe(false);
+      expect(routeConfig.options.excludeFromOAS).toBe(true);
+    });
+
+    it('responds 405 so MCP clients ignore the stream and use POST', async () => {
+      const { handler } = routeHandlers[getRouteKey];
+      const response = { customError: jest.fn() };
+      await handler({}, {}, response);
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 405 })
+      );
+    });
   });
 });
