@@ -5,67 +5,75 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { NightshiftContextLayerBrandIcon } from './nightshift_context_layer_brand_icon';
-import { ShellSpinner } from './shell_spinner';
+/* ----------------------------------------------------------------------- *
+ * "Connect Slack & Github" panel (replaces the previous Analyze → context
+ * layer flow). Matches the Figma at Project Nightshift / node 1566:90736:
+ *
+ *  - Centered Heading-3: "Draft pull requests. Slack insights. Generate
+ *    post mortem docs."
+ *  - Subtitle: "Connect Slack and Github to get started."
+ *  - A row of two equal-width "Tutorial item" cards, each with a brand
+ *    icon + name on the left and a `Connect` `EuiButtonEmpty` on the
+ *    right.
+ *  - Footer line: "Using other apps? [Go to connectors] or [dismiss]
+ *    this." with both phrases as inline links.
+ *
+ * Dark-mode friendly: every colour resolves through `useEuiTheme()`
+ * semantic tokens, so cards stay readable on the dark surface used by
+ * the Nightshift Healthy page.
+ *
+ * Click handlers (`Connect`, `Go to connectors`) are intentional
+ * no-ops for the prototype; wiring them to the real connector setup
+ * lands in a follow-up. `dismiss` is the only handler that mutates
+ * state — it hides the panel for the rest of the session.
+ * ----------------------------------------------------------------------- */
 
-const ANALYSIS_DURATION_MS = 8_000;
-
-type ContextLayerFlowPhase = 'idle' | 'analyzing' | 'complete';
-
-interface ContextLayerTask {
+interface ConnectorOption {
   id: string;
-  analyzingLabel: string;
-  resultLabel: string;
+  label: string;
+  iconType: IconType;
+  ariaLabel: string;
 }
 
-const CONTEXT_LAYER_TASKS: ContextLayerTask[] = [
+const CONNECTOR_OPTIONS: ConnectorOption[] = [
   {
-    id: 'code',
-    analyzingLabel: i18n.translate(
-      'xpack.observability.nightshift.contextLayerTasks.codeConnect',
-      { defaultMessage: 'Code connect' }
-    ),
-    resultLabel: i18n.translate(
-      'xpack.observability.nightshift.contextLayerTasks.githubConnectionMissing',
-      { defaultMessage: 'Github connection missing' }
+    id: 'slack',
+    label: i18n.translate('xpack.observability.nightshift.contextLayerTasks.slackLabel', {
+      defaultMessage: 'Slack',
+    }),
+    iconType: 'logoSlack',
+    ariaLabel: i18n.translate(
+      'xpack.observability.nightshift.contextLayerTasks.slackConnectAriaLabel',
+      { defaultMessage: 'Connect Slack' }
     ),
   },
   {
-    id: 'wiki',
-    analyzingLabel: i18n.translate(
-      'xpack.observability.nightshift.contextLayerTasks.wikiConnect',
-      { defaultMessage: 'Wiki connect' }
-    ),
-    resultLabel: i18n.translate(
-      'xpack.observability.nightshift.contextLayerTasks.confluenceConnectionMissing',
-      { defaultMessage: 'Confluence connection missing' }
-    ),
-  },
-  {
-    id: 'conversations',
-    analyzingLabel: i18n.translate(
-      'xpack.observability.nightshift.contextLayerTasks.conversationsConnect',
-      { defaultMessage: 'Conversations connect' }
-    ),
-    resultLabel: i18n.translate(
-      'xpack.observability.nightshift.contextLayerTasks.slackConnectionsMissing',
-      { defaultMessage: 'Slack connections missing' }
+    id: 'github',
+    label: i18n.translate('xpack.observability.nightshift.contextLayerTasks.githubLabel', {
+      defaultMessage: 'Github',
+    }),
+    iconType: 'logoGithub',
+    ariaLabel: i18n.translate(
+      'xpack.observability.nightshift.contextLayerTasks.githubConnectAriaLabel',
+      { defaultMessage: 'Connect Github' }
     ),
   },
 ];
@@ -74,44 +82,15 @@ export interface NightshiftContextLayerTasksPanelProps {
   isExiting?: boolean;
 }
 
-/**
- * "Context layer tasks" panel — inner Analyze → loading rows → connector results flow.
- */
 export const NightshiftContextLayerTasksPanel: React.FC<NightshiftContextLayerTasksPanelProps> = ({
   isExiting = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [phase, setPhase] = useState<ContextLayerFlowPhase>('idle');
-  const analysisTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [isDismissed, setIsDismissed] = useState(false);
 
-  const showRows = phase === 'analyzing' || phase === 'complete';
-  const isAnalyzing = phase === 'analyzing';
-  const isComplete = phase === 'complete';
-
-  useEffect(() => {
-    return () => {
-      if (analysisTimerRef.current !== undefined) {
-        clearTimeout(analysisTimerRef.current);
-      }
-    };
-  }, []);
-
-  const startAnalysis = () => {
-    if (phase !== 'idle' || isExiting) {
-      return;
-    }
-
-    setPhase('analyzing');
-
-    if (analysisTimerRef.current !== undefined) {
-      clearTimeout(analysisTimerRef.current);
-    }
-
-    analysisTimerRef.current = setTimeout(() => {
-      setPhase('complete');
-      analysisTimerRef.current = undefined;
-    }, ANALYSIS_DURATION_MS);
-  };
+  if (isDismissed) {
+    return null;
+  }
 
   return (
     <EuiFlexItem
@@ -120,164 +99,193 @@ export const NightshiftContextLayerTasksPanel: React.FC<NightshiftContextLayerTa
         width: 100%;
       `}
       data-test-subj="nightshiftContextLayerTasks"
-      data-nightshift-context-layer-phase={phase}
     >
-      <EuiPanel
-        paddingSize="none"
-        hasShadow={false}
-        hasBorder
-        color="plain"
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
         css={css`
-          overflow: hidden;
-          border-radius: 12px;
-          border-color: ${euiTheme.colors.borderBaseSubdued};
+          width: 100%;
+          /* Figma frame uses 12px padding on the surrounding container. */
+          padding: ${euiTheme.size.s};
         `}
       >
-        <div
+        {/* ---------- Heading + subtitle ---------- */}
+        <EuiFlexItem
+          grow={false}
           css={css`
-            padding: ${euiTheme.size.base};
-            background: ${euiTheme.colors.backgroundBasePlain};
-            border-bottom: ${showRows ? euiTheme.border.thin : 'none'};
+            width: 100%;
           `}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            responsive={false}
-            gutterSize="s"
+          <EuiTitle
+            size="xs"
+            css={css`
+              text-align: center;
+            `}
           >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <div
-                    aria-hidden
-                    css={css`
-                      width: 24px;
-                      height: 24px;
-                      border-radius: 12px;
-                      background: ${euiTheme.colors.backgroundBaseSubdued};
-                      display: inline-flex;
-                      align-items: center;
-                      justify-content: center;
-                    `}
-                  >
-                    <EuiIcon type="plugs" size="s" color={euiTheme.colors.textSubdued} />
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>
-                      {i18n.translate('xpack.observability.nightshift.contextLayerTasks.title', {
-                        defaultMessage: 'Context layer tasks',
-                      })}
-                    </strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                {!isComplete ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      color="text"
-                      data-test-subj="nightshiftContextLayerAnalyze"
-                      isDisabled={isExiting || isAnalyzing}
-                      onClick={startAnalysis}
-                    >
-                      {i18n.translate('xpack.observability.nightshift.contextLayerTasks.analyze', {
-                        defaultMessage: 'Analyze',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                ) : null}
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="boxesHorizontal"
-                    color="text"
-                    size="s"
-                    aria-label={i18n.translate(
-                      'xpack.observability.nightshift.contextLayerTasks.moreAriaLabel',
-                      { defaultMessage: 'More actions for context layer tasks' }
-                    )}
-                    isDisabled={isExiting}
-                    onClick={() => {}}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+            <h3>
+              {i18n.translate('xpack.observability.nightshift.contextLayerTasks.title', {
+                defaultMessage:
+                  'Draft pull requests. Slack insights. Generate post mortem docs.',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiText
+            size="s"
+            color="subdued"
+            textAlign="center"
+            css={css`
+              margin-top: ${euiTheme.size.xs};
+            `}
+          >
+            <p>
+              {i18n.translate('xpack.observability.nightshift.contextLayerTasks.subtitle', {
+                defaultMessage: 'Connect Slack and Github to get started.',
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
 
-        {showRows
-          ? CONTEXT_LAYER_TASKS.map((task, idx) => {
-              const isLast = idx === CONTEXT_LAYER_TASKS.length - 1;
-              const rowLabel = isComplete ? task.resultLabel : task.analyzingLabel;
-
-              return (
-                <div
-                  key={task.id}
+        {/* ---------- Connector cards row ---------- */}
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 100%;
+          `}
+        >
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {CONNECTOR_OPTIONS.map((connector) => (
+              <EuiFlexItem
+                key={connector.id}
+                grow={1}
+                css={css`
+                  min-width: 0;
+                `}
+              >
+                <EuiPanel
+                  hasShadow={false}
+                  hasBorder
+                  color="plain"
+                  paddingSize="m"
+                  data-test-subj={`nightshiftContextLayerConnector-${connector.id}`}
                   css={css`
-                    padding: ${euiTheme.size.s} ${euiTheme.size.base};
-                    background: ${euiTheme.colors.backgroundBaseSubdued};
-                    border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+                    border-color: ${euiTheme.colors.borderBaseSubdued};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    /* Figma height = 56px including 16px vertical padding.
+                     * Letting EUI compute the height keeps the card
+                     * comfortable in dark theme where the body font
+                     * may render slightly taller. */
                   `}
-                  data-test-subj={`nightshiftContextLayerTask-${task.id}`}
                 >
                   <EuiFlexGroup
                     alignItems="center"
                     justifyContent="spaceBetween"
-                    responsive={false}
                     gutterSize="s"
+                    responsive={false}
                   >
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem
+                      grow={false}
+                      css={css`
+                        min-width: 0;
+                      `}
+                    >
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="s"
+                        responsive={false}
+                        css={css`
+                          min-width: 0;
+                        `}
+                      >
                         <EuiFlexItem grow={false}>
-                          {isComplete ? (
-                            <NightshiftContextLayerBrandIcon taskId={task.id} />
-                          ) : (
-                            <ShellSpinner
-                              size={12}
-                              aria-label={i18n.translate(
-                                'xpack.observability.nightshift.contextLayerTasks.analyzingRowAriaLabel',
-                                {
-                                  defaultMessage: 'Analyzing {task}',
-                                  values: { task: task.analyzingLabel },
-                                }
-                              )}
-                            />
-                          )}
+                          <EuiIcon type={connector.iconType} size="l" aria-hidden />
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs">
-                            <strong>{rowLabel}</strong>
+                        <EuiFlexItem
+                          grow={false}
+                          css={css`
+                            min-width: 0;
+                          `}
+                        >
+                          <EuiText
+                            size="s"
+                            css={css`
+                              font-weight: ${euiTheme.font.weight.semiBold};
+                              white-space: nowrap;
+                              overflow: hidden;
+                              text-overflow: ellipsis;
+                            `}
+                          >
+                            {connector.label}
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    {isComplete ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          color="text"
-                          data-test-subj={`nightshiftContextLayerTask-${task.id}-connect`}
-                          isDisabled={isExiting}
-                          onClick={() => {}}
-                        >
-                          {i18n.translate(
-                            'xpack.observability.nightshift.contextLayerTasks.connect',
-                            { defaultMessage: 'Connect' }
-                          )}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        color="primary"                        
+                        aria-label={connector.ariaLabel}
+                        isDisabled={isExiting}
+                        data-test-subj={`nightshiftContextLayerConnector-${connector.id}-connect`}
+                        onClick={() => {}}
+                      >
+                        {i18n.translate(
+                          'xpack.observability.nightshift.contextLayerTasks.connect',
+                          { defaultMessage: 'Connect' }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
-                </div>
-              );
-            })
-          : null}
-      </EuiPanel>
+                </EuiPanel>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        {/* ---------- Footer line: connectors + dismiss ---------- */}
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 100%;
+          `}
+        >
+          <EuiText size="s" color="subdued" textAlign="center">
+            <p>
+              <FormattedMessage
+                id="xpack.observability.nightshift.contextLayerTasks.footer"
+                defaultMessage="Using other apps? {goToConnectors} or {dismiss} this."
+                values={{
+                  goToConnectors: (
+                    <EuiLink
+                      data-test-subj="nightshiftContextLayerGoToConnectors"
+                      disabled={isExiting}
+                      onClick={() => {}}
+                    >
+                      {i18n.translate(
+                        'xpack.observability.nightshift.contextLayerTasks.goToConnectorsLink',
+                        { defaultMessage: 'Go to connectors' }
+                      )}
+                    </EuiLink>
+                  ),
+                  dismiss: (
+                    <EuiLink
+                      data-test-subj="nightshiftContextLayerDismiss"
+                      disabled={isExiting}
+                      onClick={() => setIsDismissed(true)}
+                    >
+                      {i18n.translate(
+                        'xpack.observability.nightshift.contextLayerTasks.dismissLink',
+                        { defaultMessage: 'dismiss' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };

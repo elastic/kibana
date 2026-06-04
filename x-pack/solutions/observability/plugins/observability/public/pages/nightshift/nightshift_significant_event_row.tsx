@@ -135,18 +135,6 @@ export const SignificantEventRow: React.FC<SignificantEventRowProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType="productAgent"
-                color="text"
-                size="xs"
-                aria-label={i18n.translate(
-                  'xpack.observability.nightshift.critical.askAgentAriaLabel',
-                  { defaultMessage: 'Ask Agent about this event' }
-                )}
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
                 iconType="boxesHorizontal"
                 color="text"
                 size="xs"
