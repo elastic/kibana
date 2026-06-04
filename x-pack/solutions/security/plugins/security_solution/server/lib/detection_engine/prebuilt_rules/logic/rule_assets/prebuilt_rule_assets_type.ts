@@ -53,6 +53,8 @@ const securityRuleV3 = schema.object(
   { unknowns: 'allow' }
 );
 
+const securityRuleV4 = securityRuleV3;
+
 const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
@@ -82,6 +84,65 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     deprecated: {
       type: 'boolean',
+    },
+    description: {
+      type: 'text',
+    },
+    type: {
+      type: 'keyword',
+    },
+    index: {
+      type: 'keyword',
+    },
+    threat: {
+      properties: {
+        framework: {
+          type: 'keyword',
+        },
+        tactic: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        technique: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+            subtechnique: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    related_integrations: {
+      properties: {
+        package: {
+          type: 'keyword',
+        },
+        integration: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+      },
     },
   },
 };
@@ -149,6 +210,78 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: securityRuleV3,
         create: securityRuleV3,
+      },
+    },
+    '4': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            description: {
+              type: 'text',
+            },
+            type: {
+              type: 'keyword',
+            },
+            index: {
+              type: 'keyword',
+            },
+            threat: {
+              properties: {
+                framework: {
+                  type: 'keyword',
+                },
+                tactic: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                technique: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'keyword',
+                    },
+                    subtechnique: {
+                      properties: {
+                        id: {
+                          type: 'keyword',
+                        },
+                        name: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            related_integrations: {
+              properties: {
+                package: {
+                  type: 'keyword',
+                },
+                integration: {
+                  type: 'keyword',
+                },
+                version: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: securityRuleV4,
+        create: securityRuleV4,
       },
     },
   },
