@@ -155,6 +155,7 @@ describe('bench E2E', () => {
     capturedOutput = [];
     (activateWorktreeOrUseSourceRepo as jest.Mock).mockReset();
     (activateWorktreeOrUseSourceRepo as jest.Mock).mockResolvedValue(createMockWorkspace());
+    mockedCollectConfigPaths.mockReset();
 
     // Mock collectConfigPaths to return the fast config file
     mockedCollectConfigPaths.mockResolvedValue([fastBenchmarkConfigPath]);
@@ -182,6 +183,46 @@ describe('bench E2E', () => {
     expect(result).toBeUndefined(); // bench() returns void
   }, 10000);
 
+  it('should reject when benchmark setup fails', async () => {
+    const failingModulePath = path.join(tempDir, 'failing_before_all_benchmark.js');
+    fs.writeFileSync(
+      failingModulePath,
+      `
+      exports.beforeAll = async function beforeAll() {
+        throw new Error('benchmark setup failed');
+      };
+
+      exports.run = async function run() {};
+    `
+    );
+
+    const failingConfigPath = path.join(tempDir, 'failing_before_all.config.js');
+    fs.writeFileSync(
+      failingConfigPath,
+      `
+      module.exports = {
+        name: 'failing-before-all-test',
+        runs: 1,
+        benchmarks: [{
+          kind: 'module',
+          name: 'failing_before_all',
+          module: ${JSON.stringify(failingModulePath)},
+        }],
+      };
+    `
+    );
+
+    mockedCollectConfigPaths.mockResolvedValue([failingConfigPath]);
+
+    await expect(
+      bench({
+        log,
+        config: failingConfigPath,
+        runs: 1,
+      })
+    ).rejects.toThrow('benchmark setup failed');
+  }, 10000);
+
   it('should run comparison between left and right when both are provided', async () => {
     // For this test, we'll compare mocked refs using fast benchmarks
     const leftRef = 'mock-left';
@@ -194,6 +235,15 @@ describe('bench E2E', () => {
       right: rightRef,
       runs: 1, // Single run for faster test
     });
+
+    expect(mockedCollectConfigPaths).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ patterns: [fastBenchmarkConfigPath] })
+    );
+    expect(mockedCollectConfigPaths).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ patterns: [fastBenchmarkConfigPath] })
+    );
 
     const output = capturedOutput.join('\n');
 

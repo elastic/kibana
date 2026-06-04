@@ -127,6 +127,7 @@ export async function bench({
   rightLog.info(`Running benchmarks`);
 
   const rightResults = await collectAndRunForRightHandSide({
+    configGlob,
     context: rightContext,
     leftResults,
     configFromCwd,

@@ -139,12 +139,12 @@ async function startKibana({
   log.info(`Starting Kibana via --config ./config/kibana.yml (port ${port}, ES port ${esPort})`);
 
   log.debug(
-    `Spawning "${file} ${cmdArgs.join(' ')}" in ${cwd}, NODE_OPTIONS=${
+    `Spawning "${file} ${cmdArgs.join(' ')}" in ${distDir}, NODE_OPTIONS=${
       process.env.NODE_OPTIONS ?? '(not set)'
     }, pid=${process.pid}`
   );
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd });
+  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd: distDir });
 
   await waitForStdout({
     proc,

@@ -9,10 +9,7 @@
 
 import type { OnCompareCallback } from '@kbn/bench';
 import { getMedianMaxRssBytes } from './median_max_rss';
-import {
-  getAllowedRegressionDeltaBytes,
-  isMemoryRegression,
-} from './memory_regression_threshold';
+import { getAllowedRegressionDeltaBytes, isMemoryRegression } from './memory_regression_threshold';
 import {
   buildWarmStartMemoryRegressionReport,
   getWarmStartMemoryRegressionReportContextFromEnv,
@@ -23,10 +20,7 @@ const formatBytes = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
 };
 
-export const compareWarmStartMemory: OnCompareCallback = async ({
-  leftSummary,
-  rightSummary,
-}) => {
+export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, rightSummary }) => {
   const baselineMedianRssBytes = getMedianMaxRssBytes(leftSummary);
   const targetMedianRssBytes = getMedianMaxRssBytes(rightSummary);
 

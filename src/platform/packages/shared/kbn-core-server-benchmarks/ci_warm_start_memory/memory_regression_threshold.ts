@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MIN_REGRESSION_DELTA_BYTES = 150 * 1024 * 1024;
+export const MIN_REGRESSION_DELTA_BYTES = 150 * 1024 * 1024; // 150MB
 export const RELATIVE_REGRESSION_DELTA_RATIO = 0.08;
 
 export const getAllowedRegressionDeltaBytes = (baselineMedianRssBytes: number): number => {
-  return Math.max(MIN_REGRESSION_DELTA_BYTES, baselineMedianRssBytes * RELATIVE_REGRESSION_DELTA_RATIO);
+  return Math.max(
+    MIN_REGRESSION_DELTA_BYTES,
+    baselineMedianRssBytes * RELATIVE_REGRESSION_DELTA_RATIO
+  );
 };
 
 export const isMemoryRegression = (
