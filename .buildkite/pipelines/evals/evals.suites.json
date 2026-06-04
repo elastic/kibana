@@ -27,7 +27,8 @@
       ],
       "ciLabels": [
         "evals:agent-builder"
-      ]
+      ],
+      "shards": 2
     },
     {
       "id": "esql-generation",
@@ -153,7 +154,8 @@
       "ciLabels": [
         "evals:entity-analytics"
       ],
-      "serverConfigSet": "evals_entity_analytics"
+      "serverConfigSet": "evals_entity_analytics",
+      "shards": 4
     },
     {
       "id": "entity-analytics-v2",
@@ -200,7 +202,8 @@
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
       "tags": ["platform", "workflows"],
       "ciLabels": ["evals:workflows"],
-      "serverConfigSet": "evals_workflows"
+      "serverConfigSet": "evals_workflows",
+      "shards": 2
     },
     {
       "id": "pci-compliance",

@@ -12,6 +12,7 @@ import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites } from '../suites';
 import { promptForSuite, promptForConnector, isTTY } from '../prompts';
+import { buildPlaywrightArgs, parseShard } from './run_args';
 import {
   defaultExportProfile,
   envFromDatasetsProfile,
@@ -67,6 +68,7 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite agent-builder --judge bedrock-claude
     node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
     node scripts/evals run --suite agent-builder --grep "product documentation"
+    node scripts/evals run --suite entity-analytics --shard 1/4
     node scripts/evals run --suite streams --dry-run
   `,
   flags: {
@@ -87,6 +89,7 @@ export const runSuiteCmd: Command<void> = {
       'evaluations-kbn-api-key',
       'phoenix-base-url',
       'phoenix-api-key',
+      'shard',
     ],
     boolean: ['dry-run'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
@@ -208,21 +211,16 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.PHOENIX_API_KEY = phoenixApiKey;
     }
 
-    const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
-    const project = flagsReader.string('project');
-    if (project) {
-      args.push('--project', project);
-    }
+    const rawShard = flagsReader.string('shard');
+    const shard = rawShard ? parseShard(rawShard) : undefined;
 
-    const grep = flagsReader.string('grep');
-    if (grep) {
-      args.push('--grep', grep);
-    }
-
-    const positionals = flagsReader.getPositionals();
-    if (positionals.length > 0) {
-      args.push(...positionals);
-    }
+    const args = buildPlaywrightArgs({
+      configPath: resolvedConfigPath,
+      project: flagsReader.string('project'),
+      grep: flagsReader.string('grep'),
+      shard,
+      positionals: flagsReader.getPositionals(),
+    });
 
     const commandPreview = `${formatEnvPrefix(envOverrides)} node ${args.join(' ')}`.trim();
     log.info(`Running: ${commandPreview}`);
