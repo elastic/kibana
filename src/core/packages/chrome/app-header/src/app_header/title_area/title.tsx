@@ -234,10 +234,6 @@ const useTitleStyles = () => {
       }
     `;
 
-    const editingStatusIcon = css`
-      background: none;
-    `;
-
     // Applied only when there is no back button, so a lone title lines up with where the
     // text sits when a back button precedes it.
     const titleOffsetStyle = css`
@@ -253,7 +249,6 @@ const useTitleStyles = () => {
       readModeTrigger,
       input,
       statusIcon,
-      editingStatusIcon,
       titleSizer,
       titleText,
       placeholderText,
@@ -458,7 +453,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                   </EuiScreenReaderOnly>
                 )}
                 {(isSaving || error) && (
-                  <span css={[styles.statusIcon, styles.editingStatusIcon]}>
+                  <span css={[styles.statusIcon]}>
                     {isSaving ? (
                       <EuiLoadingSpinner size="m" />
                     ) : (
