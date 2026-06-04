@@ -61,7 +61,6 @@ export const registerStreamsAgentBuilder = async ({
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }): Promise<void> => {
-}) => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
