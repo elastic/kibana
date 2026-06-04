@@ -40,12 +40,18 @@ export async function addMonitor(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   monitor: Record<string, unknown>,
-  opts: { gettingStarted?: boolean; savedObjectType?: string; statusCode?: number } = {}
+  opts: {
+    gettingStarted?: boolean;
+    savedObjectType?: string;
+    id?: string;
+    statusCode?: number;
+  } = {}
 ) {
-  const { gettingStarted, savedObjectType, statusCode = 200 } = opts;
+  const { gettingStarted, savedObjectType, id, statusCode = 200 } = opts;
   const qs: string[] = [];
   if (gettingStarted) qs.push('gettingStarted=true');
   if (savedObjectType) qs.push(`savedObjectType=${savedObjectType}`);
+  if (id) qs.push(`id=${id}`);
   const path = `api/synthetics/monitors${qs.length ? `?${qs.join('&')}` : ''}`;
 
   const res = await apiClient.post(path, {
@@ -143,10 +149,11 @@ export async function saveMonitorInternal(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   monitor: Record<string, unknown>,
-  opts: { spaceId?: string; statusCode?: number } = {}
+  opts: { spaceId?: string; savedObjectType?: string; statusCode?: number } = {}
 ) {
-  const { spaceId, statusCode = 200 } = opts;
-  const res = await apiClient.post(`${monitorsPath(spaceId)}?internal=true`, {
+  const { spaceId, savedObjectType, statusCode = 200 } = opts;
+  const query = `?internal=true${savedObjectType ? `&savedObjectType=${savedObjectType}` : ''}`;
+  const res = await apiClient.post(`${monitorsPath(spaceId)}${query}`, {
     headers: withPublicApiVersion(headers),
     body: monitor,
     responseType: 'json',
@@ -326,6 +333,117 @@ export async function testNowMonitor(
   });
   expect(res).toHaveStatusCode(statusCode);
   return res;
+}
+
+/**
+ * `POST /api/synthetics/monitor/test/{id}` is for individual monitors; this is
+ * `PUT /internal/synthetics/private_locations/_cleanup` — triggers the orphaned
+ * package-policy cleanup. Mirrors the FTR `triggerCleanup` helper.
+ */
+export async function triggerPrivateLocationCleanup(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) {
+  const res = await apiClient.put('internal/synthetics/private_locations/_cleanup', {
+    headers,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  return res;
+}
+
+/**
+ * `POST /internal/synthetics/monitors/{id}/_reset` — re-syncs a monitor's Fleet
+ * package policies. Mirrors the FTR `resetMonitor` helper.
+ */
+export async function resetMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitorId: string,
+  opts: { force?: boolean; spaceId?: string; statusCode?: number } = {}
+) {
+  const { force = false, spaceId, statusCode = 200 } = opts;
+  const base = spaceId ? `s/${spaceId}/` : '';
+  const res = await apiClient.post(
+    `${base}internal/synthetics/monitors/${monitorId}/_reset?force=${force}`,
+    { headers, responseType: 'json' }
+  );
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `POST /internal/synthetics/monitors/_bulk_reset` — re-syncs many monitors'
+ * Fleet package policies in a single request. Mirrors the FTR `bulkResetMonitors`
+ * helper.
+ */
+export async function bulkResetMonitors(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  ids: string[],
+  opts: { spaceId?: string; statusCode?: number } = {}
+) {
+  const { spaceId, statusCode = 200 } = opts;
+  const base = spaceId ? `s/${spaceId}/` : '';
+  const res = await apiClient.post(`${base}internal/synthetics/monitors/_bulk_reset`, {
+    headers,
+    body: { ids },
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(statusCode);
+  return res;
+}
+
+/**
+ * `POST /internal/synthetics/service/monitor/inspect` — inspects a monitor and
+ * returns the would-be Fleet policy. Mirrors the FTR
+ * `SyntheticsMonitorTestService.inspectMonitor`: it strips the server-generated
+ * `id` / `config_id` identifiers and per-run secrets (api_key, license info,
+ * stack_version) so callers can assert against a stable shape.
+ */
+export async function inspectMonitor(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  monitor: Record<string, unknown>,
+  opts: { hideParams?: boolean; statusCode?: number } = {}
+) {
+  const { hideParams = true, statusCode = 200 } = opts;
+  const res = await apiClient.post(
+    `internal/synthetics/service/monitor/inspect?hideParams=${hideParams}`,
+    {
+      headers,
+      body: monitor,
+      responseType: 'json',
+    }
+  );
+  expect(res).toHaveStatusCode(statusCode);
+
+  const body = res.body as {
+    result: {
+      publicConfigs?: Array<Record<string, any>>;
+      privateConfig: any;
+    };
+    decodedCode: string;
+    [key: string]: any;
+  };
+
+  const publicConfig = body.result?.publicConfigs?.[0];
+  const monitor0 = publicConfig?.monitors?.[0];
+  if (monitor0) {
+    delete monitor0.id;
+    delete monitor0.streams?.[0]?.id;
+    delete monitor0.streams?.[0]?.config_id;
+    if (monitor0.streams?.[0]?.fields) {
+      delete monitor0.streams[0].fields.config_id;
+    }
+  }
+  if (publicConfig) {
+    delete publicConfig.output?.api_key;
+    delete publicConfig.license_issued_to;
+    delete publicConfig.stack_version;
+  }
+
+  return body;
 }
 
 /**
