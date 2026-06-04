@@ -298,6 +298,18 @@ const THROWABLE_CLASS_NAME_RE = /^(\s*(?:Caused by:\s+|Suppressed:\s+)?)([A-Za-z
 const REMOVE_INNER_FRAMES_RE = /^removeInnerFrames\((\d+)\)$/;
 const THROWS_CONDITION_RE = /^throws\((.*)\)$/;
 
+/**
+ * Retracer implementation for Android R8-obfuscated stacktraces.
+ *
+ * Implements the full R8 retrace algorithm, including inline chain expansion,
+ * outline/outlineCallsite handling, synthesized frame stripping, and
+ * rewriteFrame condition evaluation. Output matches Google's `retrace` CLI tool.
+ *
+ * The fetcher receives a list of obfuscated class names and is expected to
+ * return {@link AndroidClassMap} documents keyed by {@link AndroidClassMap.obfuscated_class}.
+ * A single fetch call is issued per {@link retrace} invocation regardless of how
+ * many unique classes appear in the stacktrace.
+ */
 export class RetracerAndroid extends Retracer<AndroidClassMap> {
   async retrace(): Promise<string | undefined> {
     const lines = this._stackTrace.split('\n');
