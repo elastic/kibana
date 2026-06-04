@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit, pick } from 'lodash';
-import { BehaviorSubject, of, skip } from 'rxjs';
+import { pick } from 'lodash';
+import { BehaviorSubject, of } from 'rxjs';
 
-import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
@@ -27,9 +26,8 @@ import type { DashboardState } from '../../../common';
 import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { initializeLayoutManager } from './layout_manager';
-import type { DashboardLayout } from './types';
 import { deserializeLayout } from './deserialize_layout';
+import { initializeLayoutManager } from './layout_manager';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
