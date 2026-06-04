@@ -50,7 +50,8 @@ const APM_TIME_RANGE = {
   rangeTo: TRACES.DEFAULT_END_TIME,
 };
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/261438
+spaceTest.describe.skip(
   'Traces in Discover - Explore from APM',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],

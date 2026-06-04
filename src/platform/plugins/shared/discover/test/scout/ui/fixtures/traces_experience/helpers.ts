@@ -30,6 +30,9 @@ async function waitForTracesProfileApplied(
       timeout: 30_000,
     });
   }
+
+  // Ensure the in-flight search / column swap finished
+  await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.discover.waitForDocTableRendered();
 }
 

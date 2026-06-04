@@ -17,6 +17,7 @@ import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
+import { initSubscribers } from '../lib/events/init_subscribers';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -35,6 +36,8 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
       logger,
     });
+
+    initSubscribers(container);
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
       logger.error(error as Error, {

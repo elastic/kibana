@@ -66,10 +66,7 @@ const groupTable = () => cy.get(RESOLUTION_GROUP_TAB_CONTENT).find(RESOLUTION_GR
 describe(
   'Entity flyout — Manual Entity Resolution',
   {
-    // Re-add `@serverless` once https://github.com/elastic/kibana/issues/266752
-    // (bulk `refresh: true` requires unauthorized `indices:admin/refresh/unpromotable`
-    // for the `platform_engineer` role) is resolved.
-    tags: ['@ess'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

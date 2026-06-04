@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@elastic/esql';
+import { Parser, PromQLParser } from '@elastic/esql';
+import type { PromQLAstQueryExpression } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
-import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
+import {
+  correctPromqlQuerySyntax,
+  correctQuerySyntax,
+  findAstPosition,
+  removeAutocompleteMarkers,
+} from '../../commands/definitions/utils/ast';
 import { getCursorContext } from './get_cursor_context';
 
 interface ParsedAutocompleteQuery {
   innerText: string;
-  correctedQuery: string;
   root: ESQLAstQueryExpression;
 }
 
@@ -29,8 +34,24 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
 
   return {
     innerText,
+    root: removeAutocompleteMarkers(root),
+  };
+}
+
+/**
+ * PromQL counterpart of {@link parseAutocompleteQuery}: corrects partial PromQL syntax,
+ * parses it, and strips autocomplete markers from the resulting AST.
+ */
+export function parsePromqlAutocompleteQuery(query: string): {
+  correctedQuery: string;
+  root: PromQLAstQueryExpression;
+} {
+  const correctedQuery = correctPromqlQuerySyntax(query);
+  const { root } = PromQLParser.parse(correctedQuery);
+
+  return {
     correctedQuery,
-    root,
+    root: removeAutocompleteMarkers(root),
   };
 }
 

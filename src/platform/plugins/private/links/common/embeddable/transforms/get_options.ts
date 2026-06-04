@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardLink, ExternalLink, LinkOptions } from '../../../server';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
+import type {
+  DashboardLink,
+  ExternalLink,
+  ExternalLinkOptions,
+  LinkOptions,
+  LinksByValueState,
+} from '../../../server';
 import { DASHBOARD_LINK_TYPE, type LinkType } from '../../types';
 
-export function getOptions(type: LinkType, options: LinkOptions) {
-  if (!options) return undefined;
-
+export function getOptions(
+  type: LinkType,
+  options: LinkOptions
+): LinksByValueState['links'][number]['options'] {
   if (type === DASHBOARD_LINK_TYPE) {
-    const dashboardOptions = options as DashboardLink['options'];
+    const dashboardOptions = options as DashboardLink['options'] | undefined;
     return {
       ...(typeof dashboardOptions?.open_in_new_tab === 'boolean' && {
         open_in_new_tab: dashboardOptions.open_in_new_tab,
@@ -39,10 +47,10 @@ export function getOptions(type: LinkType, options: LinkOptions) {
         'boolean' && {
         use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
       }),
-    } as DashboardLink['options'];
+    } as DashboardNavigationOptions;
   }
 
-  const urlOptions = options as Required<ExternalLink>['options'];
+  const urlOptions = options as ExternalLink['options'] | undefined;
   return {
     ...(typeof urlOptions?.open_in_new_tab === 'boolean' && {
       open_in_new_tab: urlOptions.open_in_new_tab,
@@ -58,5 +66,5 @@ export function getOptions(type: LinkType, options: LinkOptions) {
     ...(typeof (urlOptions as { encodeUrl?: boolean })?.encodeUrl === 'boolean' && {
       encode_url: (urlOptions as { encodeUrl?: boolean }).encodeUrl,
     }),
-  };
+  } as ExternalLinkOptions;
 }

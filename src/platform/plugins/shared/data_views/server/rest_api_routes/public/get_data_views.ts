@@ -58,6 +58,7 @@ const getDataViewsRouteFactory =
           }),
           namespaces: schema.maybe(
             schema.arrayOf(schema.string(), {
+              maxSize: 1000,
               meta: {
                 description: 'The Kibana namespaces (spaces) where this data view is available.',
               },
@@ -103,7 +104,8 @@ const getDataViewsRouteFactory =
               meta: { description: 'Indicates whether this data view is managed by Kibana.' },
             })
           ),
-        })
+        }),
+        { maxSize: 10_000 }
       );
       return schema.object({ [serviceKey]: dataViewListSchema });
     };

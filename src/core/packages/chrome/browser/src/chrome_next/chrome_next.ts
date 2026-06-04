@@ -8,6 +8,7 @@
  */
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
+import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { GlobalSearchConfig } from './global_search';
 
@@ -64,6 +65,59 @@ export interface AppHeaderTab {
 }
 
 /** @public */
+export type AppHeaderMetadataItem =
+  | AppHeaderMetadataTextItem
+  | AppHeaderMetadataButtonItem
+  | AppHeaderMetadataHealthItem;
+
+/** @public */
+export type AppHeaderMetadataItems = readonly [
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItem?,
+  AppHeaderMetadataItem?
+];
+
+/** @public */
+export interface AppHeaderMetadataTextItem {
+  type: 'text';
+  label: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export type AppHeaderMetadataButtonItem =
+  | AppHeaderMetadataButtonAction
+  | AppHeaderMetadataButtonLink;
+
+/** @public */
+export interface AppHeaderMetadataButtonBase {
+  type: 'button';
+  label: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export interface AppHeaderMetadataButtonAction extends AppHeaderMetadataButtonBase {
+  onClick: () => void;
+  href?: never;
+}
+
+/** @public */
+export interface AppHeaderMetadataButtonLink extends AppHeaderMetadataButtonBase {
+  href: string;
+  onClick?: never;
+}
+
+/** @public */
+export interface AppHeaderMetadataHealthItem {
+  type: 'health';
+  label: string;
+  color: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
 export interface AppHeaderConfig {
   title?: string;
   back?: AppHeaderBack;
@@ -71,6 +125,7 @@ export interface AppHeaderConfig {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: ReactNode;
+  metadata?: AppHeaderMetadataItems;
 }
 
 /**
@@ -94,6 +149,14 @@ export interface ChromeNext {
      */
     set(config?: GlobalSearchConfig): void;
   };
+  /** Context switcher content. */
+  contextSwitcher: {
+    /**
+     * Set the context switcher content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   appHeader: {
     /**
      * Set the app header configuration for the Chrome Next project header.
@@ -104,4 +167,20 @@ export interface ChromeNext {
      */
     set(config: AppHeaderConfig): () => void;
   };
+  /**
+   * Register a handler that opens the feedback UI in the Chrome Next help menu.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerFeedbackHandler(handler: () => void): () => void;
+  /** Get the currently registered Chrome Next feedback handler. */
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+  /**
+   * Register a handler that opens the newsfeed UI in the Chrome Next help menu.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerNewsfeedHandler(handler: { open: () => void; hasNew$: Observable<boolean> }): () => void;
+  /** Get the currently registered Chrome Next newsfeed handler. */
+  getNewsfeedHandler$(): Observable<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 }
