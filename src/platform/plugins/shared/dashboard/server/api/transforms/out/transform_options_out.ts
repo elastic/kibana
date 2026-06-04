@@ -8,6 +8,7 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
+
 import type { DashboardState } from '../../types';
 
 const savedObjectToAPIOptionsKeys = {

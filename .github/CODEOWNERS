@@ -1922,10 +1922,7 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/common/utils/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/ensemble @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/incident_management/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/actionable-obs-team
 /x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/actionable-obs-team
@@ -3281,6 +3278,7 @@ x-pack/solutions/security/plugins/security_solution/public/entity_analytics/comp
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics

@@ -13,12 +13,15 @@ import {
   LENS_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
 import {
   isMigratedAttachmentType,
   isPersistableType,
+  isUnifiedOnlyAttachmentType,
   toLegacyAttachmentType,
   toUnifiedAttachmentType,
 } from './migration_utils';
@@ -116,6 +119,23 @@ describe('migration_utils', () => {
       expect(toLegacyAttachmentType(INDICATOR_ATTACHMENT_TYPE)).toBe(
         AttachmentType.externalReference
       );
+    });
+  });
+
+  describe('isUnifiedOnlyAttachmentType', () => {
+    it('is true for unified types with no legacy equivalent', () => {
+      expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE)).toBe(true);
+    });
+
+    it('is false for unified types that map back to a legacy type', () => {
+      expect(isUnifiedOnlyAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(FILE_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(LENS_ATTACHMENT_TYPE)).toBe(false);
+    });
+
+    it('is false for legacy and unknown types', () => {
+      expect(isUnifiedOnlyAttachmentType(AttachmentType.user)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType('something-custom')).toBe(false);
     });
   });
 
