@@ -758,7 +758,8 @@ function generateOtelcolExporter(
   exporters: Record<OTelCollectorComponentID, any>;
 } {
   switch (dataOutput.type) {
-    case outputType.Elasticsearch: {
+    case outputType.Elasticsearch:
+    case outputType.RemoteElasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
       const extraExporterConfig = parseOtelExporterConfigYaml(
         dataOutput.otel_exporter_config_yaml,

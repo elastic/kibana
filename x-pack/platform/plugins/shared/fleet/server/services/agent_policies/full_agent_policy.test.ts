@@ -2095,6 +2095,63 @@ describe('getFullAgentPolicy', () => {
       expect(callArgs.proxy).toBeUndefined();
     });
 
+    it('should pass remote_elasticsearch dataOutput to generateOtelcolConfig', async () => {
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'remote-output-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'remote-output',
+            type: 'remote_elasticsearch',
+            hosts: ['https://remote-es.example.com:9200'],
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'remote-output-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'remote-output',
+          type: 'remote_elasticsearch',
+          hosts: ['https://remote-es.example.com:9200'],
+        },
+        monitoringOutput: {
+          id: 'remote-output-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'remote-output',
+          type: 'remote_elasticsearch',
+          hosts: ['https://remote-es.example.com:9200'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.dataOutput).toMatchObject({
+        type: 'remote_elasticsearch',
+        hosts: ['https://remote-es.example.com:9200'],
+      });
+    });
+
     it('should pass packageOutputs with override entry when package policy has output_id', async () => {
       const overrideOutputId = 'override-output-id';
       mockedFetchRelatedSavedObjects.mockResolvedValue({

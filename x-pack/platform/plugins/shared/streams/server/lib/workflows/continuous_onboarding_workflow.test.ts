@@ -6,17 +6,42 @@
  */
 
 import {
+  STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  getManagedWorkflowDefinition,
+} from '@kbn/workflows/managed';
+import {
   COORDINATOR_INTERVAL_MINUTES,
   MAX_SCHEDULED_STREAMS,
   POLL_DELAY_SECONDS,
 } from '../../../common/constants';
-import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
+
+// The continuous onboarding workflow YAML lives in the managed workflow
+// definition (kbn-workflows/managed/definitions/streams_ki/continuous_onboarding.yaml).
+// These tests keep that YAML in sync with the streams constants.
+const definition = getManagedWorkflowDefinition(STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
+
+const getWorkflowYaml = (): string => {
+  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
+    throw new Error('Continuous onboarding managed workflow definition is missing inline YAML');
+  }
+  return definition.yaml;
+};
+
+const WORKFLOW_YAML = getWorkflowYaml();
 
 const assertYamlContains = (expected: string) => {
   expect(WORKFLOW_YAML).toContain(expected);
 };
 
-describe('continuous_extraction_workflow.yaml stays in sync with constants', () => {
+describe('continuous_onboarding.yaml stays in sync with constants', () => {
+  it('is registered as a restorable managed workflow', () => {
+    expect(definition?.management.enablement).toBe('restorable');
+  });
+
+  it('is disabled by default so the user setting controls enablement', () => {
+    assertYamlContains('enabled: false');
+  });
+
   it('uses the correct timeout', () => {
     assertYamlContains(`timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`);
   });
@@ -72,15 +97,26 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     );
   });
 
-  it('calls the onboarding scheduling endpoint', () => {
-    assertYamlContains('onboarding/_execute');
+  it('starts onboarding via workflow.executeAsync for the managed onboarding workflow', () => {
+    assertYamlContains('type: workflow.executeAsync');
+    assertYamlContains('workflow-id: "system-streams-ki-onboarding"');
   });
 
-  it('calls the onboarding status endpoint', () => {
+  it('runs both features identification and queries generation', () => {
+    assertYamlContains('skipFeatures: false');
+    assertYamlContains('skipQueries: false');
+  });
+
+  it('converts the eligibility sampling window from ISO to epoch ms', () => {
+    assertYamlContains(
+      `featuresStart: "\${{ steps.get_eligible.output.timeRange.from | date: '%s' | times: 1000 }}"`
+    );
+    assertYamlContains(
+      `featuresEnd: "\${{ steps.get_eligible.output.timeRange.to | date: '%s' | times: 1000 }}"`
+    );
+  });
+
+  it('polls the onboarding status endpoint to await completion', () => {
     assertYamlContains('onboarding/_status');
-  });
-
-  it('passes features_identification step', () => {
-    assertYamlContains('features_identification');
   });
 });
