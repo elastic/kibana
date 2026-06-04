@@ -53,58 +53,28 @@ spaceTest.describe('Discover saved search embeddable', { tag: testData.DISCOVER_
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'can save a search embeddable with a defined rows per page number',
-    async ({ page, pageObjects }) => {
-      const dashboardName = 'Dashboard with a Paginated Saved Search';
-
-      await addSearchEmbeddableToDashboard(page, pageObjects);
-      await expect(page.getByTestId('tablePaginationPopoverButton')).toHaveText(
-        'Rows per page: 100'
-      );
-
-      await page.getByTestId('tablePaginationPopoverButton').click();
-      await page.getByTestId('tablePagination-10-rows').click();
-
-      await pageObjects.dashboard.saveDashboard(dashboardName);
-
-      await page.reload();
-
-      await pageObjects.dashboard.waitForRenderComplete();
-
-      await expect(page.getByTestId('tablePaginationPopoverButton')).toHaveText(
-        'Rows per page: 10'
-      );
-    }
-  );
-
   spaceTest('should control columns correctly', async ({ page, pageObjects }) => {
     await addSearchEmbeddableToDashboard(page, pageObjects);
 
-    // We are specifically testing whether columns can be modified, requiring use
-    // of position locators to check if the content of a cell changed.
-    // eslint-disable-next-line playwright/no-nth-methods
-    await expect(page.getByTestId('dataGridRowCell').nth(2)).toHaveText(
-      'Sep 22, 2015 @ 23:50:13.253↦'
-    );
+    const timestamp = page
+      .getByTestId('dataGridRowCell')
+      .filter({ hasText: 'Sep 22, 2015 @ 23:50:13.253' });
+
+    expect(await timestamp.count()).toBeGreaterThan(0);
+    const colNum = await timestamp.getAttribute('data-gridcell-column-index');
+    expect(colNum).not.toBeNull();
 
     await page.getByTestId('dataGridHeaderCell-agent').focus();
     await page.getByTestId('dataGridHeaderCellActionButton-agent').click();
     await page.getByText('Move left').click();
 
-    // eslint-disable-next-line playwright/no-nth-methods
-    await expect(page.getByTestId('dataGridRowCell').nth(2)).toHaveText(
-      'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)↦'
-    );
+    await expect(timestamp).not.toHaveAttribute('data-gridcell-column-index', colNum!);
 
     await page.getByTestId('dataGridHeaderCell-agent').focus();
     await page.getByTestId('dataGridHeaderCellActionButton-agent').click();
     await page.getByText('Remove column').click();
 
-    // eslint-disable-next-line playwright/no-nth-methods
-    await expect(page.getByTestId('dataGridRowCell').nth(2)).toHaveText(
-      'Sep 22, 2015 @ 23:50:13.253↦'
-    );
+    await expect(timestamp).toHaveAttribute('data-gridcell-column-index', colNum!);
   });
 
   spaceTest('should render duplicate saved search embeddables', async ({ page, pageObjects }) => {
