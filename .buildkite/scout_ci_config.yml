@@ -27,8 +27,8 @@ plugins:
     - gen_ai_settings
     - global_search
     - graph
-    - grokdebugger
     - home
+    - index_lifecycle_management
     - index_management
     - infra
     - intercepts
