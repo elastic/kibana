@@ -6,7 +6,6 @@
  */
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { episodeAssignedTriggerPublicDefinition } from './triggers/episode_assigned';
 
 /**
  * Registers all alerting-v2 public workflow trigger definitions (UI metadata).
@@ -15,5 +14,12 @@ import { episodeAssignedTriggerPublicDefinition } from './triggers/episode_assig
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
-  workflowsExtensions.registerTriggerDefinition(episodeAssignedTriggerPublicDefinition);
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_assigned').then((m) => m.episodeAssignedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_signals_written').then(
+      (m) => m.ruleSignalsWrittenTriggerPublicDefinition
+    )
+  );
 }
