@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from './client';
-import type { ScopeableRequest, ScopeableUrlRequest } from './types';
+import type { ScopeableRequest } from './types';
 import type { IScopedClusterClient } from './scoped_cluster_client';
 
 /**
@@ -32,9 +32,9 @@ export interface AsScopedOptions {
    * through the scoped client.
    *
    * - `'space'`: Routes requests to the Named Project Routing Expression (NPRE) configured for
-   *   the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`
-   *   so that the space can be extracted from the URL pathname. Use this when the scope of the
-   *   query should match the data boundaries of the active space (e.g. alerting rules).
+   *   the current Kibana space. The active space is read from `request.spaceId`. Use this
+   *   when the scope of the query should match the data boundaries of the active space
+   *   (e.g. alerting rules).
    */
   projectRouting: 'space';
 }
@@ -60,21 +60,15 @@ export interface IClusterClient {
 
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
-   * forwarding the request's authentication headers to Elasticsearch, with CPS space routing.
+   * forwarding the request's authentication headers to Elasticsearch.
    *
-   * Requires a {@link ScopeableUrlRequest} so the space id can be extracted from the URL pathname.
+   * When `opts.projectRouting` is `'space'`, CPS routes to the NPRE for the active space
+   * (read from `request.spaceId`). Without opts, origin-only routing is used.
    *
-   * @param request - The incoming Kibana request.
-   * @param opts - {@link AsScopedOptions} that configure CPS routing behavior.
+   * @param request - A {@link ScopeableRequest} carrying authentication headers (and `spaceId` for space routing).
+   * @param opts - Optional {@link AsScopedOptions} to configure CPS routing behavior.
    */
-  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
-  /**
-   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
-   * forwarding the request's authentication headers to Elasticsearch with origin-only routing.
-   *
-   * @param request - The incoming request whose credentials authenticate Elasticsearch calls.
-   */
-  asScoped(request: ScopeableRequest): IScopedClusterClient;
+  asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient;
 }
 
 /**
