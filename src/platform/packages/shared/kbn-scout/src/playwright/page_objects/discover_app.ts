@@ -124,7 +124,7 @@ export class DiscoverApp {
     // here to preserve that contract (`name`, `* will be added automatically`).
     await editor.setTitle(name.endsWith('*') ? name : `${name}*`);
 
-    // FTR `dataViews.create()` — wait for timestamp options; default @timestamp applies.
+    // wait for timestamp options; default @timestamp applies.
     await editor.timestampField
       .and(this.page.locator('[data-is-loading="0"]'))
       .waitFor({ state: 'visible', timeout: 30_000 });
