@@ -17,7 +17,7 @@ pageLoadAssetSize:
   canvas: 14881
   cases: 213452
   charts: 40269
-  cloud: 10648
+  cloud: 11743
   cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
@@ -181,7 +181,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 32595
-  streamsApp: 29825
+  streamsApp: 340704
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
