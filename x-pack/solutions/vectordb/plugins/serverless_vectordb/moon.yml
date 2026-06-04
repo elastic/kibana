@@ -33,6 +33,11 @@ dependsOn:
   - '@kbn/vectordb-onboarding'
   - '@kbn/react-query'
   - '@kbn/i18n'
+  - '@kbn/core-application-browser'
+  - '@kbn/deeplinks-management'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/management-settings-ids'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

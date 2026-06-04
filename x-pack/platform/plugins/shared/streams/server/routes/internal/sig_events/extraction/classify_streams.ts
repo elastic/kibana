@@ -104,6 +104,14 @@ export const classifyStreams = ({
     }
   }
 
+  // Prioritize streams whose last onboarding finished longest ago, so older
+  // onboarding is retried before more recent onboarding.
+  candidates.sort(
+    (a, b) =>
+      (a.lastCompletedAt ? new Date(a.lastCompletedAt).getTime() : 0) -
+      (b.lastCompletedAt ? new Date(b.lastCompletedAt).getTime() : 0)
+  );
+
   const noExecutionStreams = [...eligibleNames].filter((name) => !streamsWithExecution.has(name));
   const allCandidates = [
     ...noExecutionStreams.map((name) => ({ streamName: name, lastCompletedAt: null })),
