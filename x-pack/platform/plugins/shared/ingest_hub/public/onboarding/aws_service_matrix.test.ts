@@ -14,7 +14,12 @@ import type {
 import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
-const VALID_DELIVERY_METHODS: DeliveryMethod[] = ['agentless', 'firehose', 'cloud_forwarder'];
+const VALID_DELIVERY_METHODS: DeliveryMethod[] = [
+  'agentless',
+  'firehose',
+  'cloud_forwarder',
+  'agent_based',
+];
 const VALID_CATEGORIES: ServiceCategory[] = [
   'Analytics',
   'Application Integration',
