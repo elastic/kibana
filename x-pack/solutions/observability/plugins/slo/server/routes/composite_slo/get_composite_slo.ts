@@ -18,7 +18,7 @@ export const getCompositeSLORoute = createCompositeSloServerRoute({
     },
   },
   params: getCompositeSLOParamsSchema,
-  handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
+  handler: async ({ params, logger, request, getScopedClients }) => {
     const { scopedClusterClient, repository, compositeRepository, spaceId } =
       await getScopedClients({
         request,
