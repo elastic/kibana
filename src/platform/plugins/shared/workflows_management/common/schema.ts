@@ -17,6 +17,7 @@ import type {
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
+  generateLightweightYamlSchema,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
@@ -213,6 +214,10 @@ function convertDynamicConnectorsToContractsInternal(
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
+export interface WorkflowZodSchemaOptions {
+  lightweight?: boolean;
+}
+
 // NOTE: The former `WORKFLOW_ZOD_SCHEMA` / `WORKFLOW_ZOD_SCHEMA_LOOSE`
 // module-level constants were removed in favour of `getWorkflowZodSchema()` /
 // `getWorkflowZodSchemaLoose()`. They were unreferenced and their eager
@@ -406,8 +411,13 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = []
+  registeredTriggerIds: string[] = [],
+  options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
+  if (options.lightweight) {
+    return generateLightweightYamlSchema(registeredTriggerIds);
+  }
+
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
 };

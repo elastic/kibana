@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
+import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -20,6 +22,8 @@ import {
 import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 import { MonochromeIcons } from '../../../shared/ui/step_icons/monochrome_icons';
 import { triggerSchemas } from '../../../trigger_schemas';
+import { collectTechPreviewSuggestAriaPrefixes } from '../lib/autocomplete/suggestions/collect_tech_preview_suggest_aria_prefixes';
+import { setStabilityBadgeThemeContext } from '../lib/get_stability_note';
 import {
   CUSTOM_TRIGGER_INLINE_CLASS,
   triggerTypeToCssClass,
@@ -170,6 +174,7 @@ export function useDynamicTypeIcons(
   onShadowIconsCssReady?: (css: string) => void
 ) {
   const { triggersActionsUi, workflowsExtensions } = useKibana().services;
+  const euiThemeContext = useEuiTheme();
   const { actionTypeRegistry } = triggersActionsUi;
   // Refs so we don't re-run the effect when only these references change (e.g. when opening the
   // actions menu / trigger submenu re-renders the tree). Re-running would re-inject CSS and
@@ -252,10 +257,12 @@ export function useDynamicTypeIcons(
 
     const runInjection = async () => {
       const myRunId = ++injectionRunIdRef.current;
+      setStabilityBadgeThemeContext(euiThemeContext);
       // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
       const editorContainer = editorContainerRef?.current ?? undefined;
       const allTypes = getAllTypes();
       await injectDynamicConnectorIcons(allTypes, editorContainer);
+      injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(
         allTypes,
         editorContainer,
@@ -292,6 +299,7 @@ export function useDynamicTypeIcons(
     contentHasCustomTrigger,
     editorValue,
     editorContainerRef,
+    euiThemeContext,
   ]);
 }
 
@@ -379,6 +387,25 @@ async function injectDynamicConnectorIcons(
     style.textContent = cssToInject;
     appendStyleToEditorScope(style, styleId, editorContainer, targetDoc);
   }
+}
+
+function injectSuggestTechPreviewBadges(
+  editorContainer: HTMLElement | undefined,
+  euiThemeContext: UseEuiTheme
+): void {
+  const styleId = 'dynamic-suggest-tech-preview-badges';
+  const targetDoc = editorContainer?.ownerDocument ?? document;
+  const ariaLabelPrefixes = collectTechPreviewSuggestAriaPrefixes();
+  const cssToInject = buildSuggestTechPreviewBadgeRules(ariaLabelPrefixes, euiThemeContext);
+
+  if (!cssToInject) {
+    return;
+  }
+
+  const style = targetDoc.createElement('style');
+  style.id = styleId;
+  style.textContent = cssToInject;
+  appendStyleToEditorScope(style, styleId, editorContainer, targetDoc);
 }
 
 /* eslint-disable-next-line complexity */
