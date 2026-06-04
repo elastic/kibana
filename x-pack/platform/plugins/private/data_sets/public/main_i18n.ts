@@ -16,6 +16,9 @@ export const mainTranslations = {
       type: i18n.translate('dataSets.table.columnType', {
         defaultMessage: 'Type',
       }),
+      dataSetsCount: i18n.translate('dataSets.table.columnDataSetsCount', {
+        defaultMessage: 'Data sets',
+      }),
       description: i18n.translate('dataSets.table.columnDescription', {
         defaultMessage: 'Description',
       }),

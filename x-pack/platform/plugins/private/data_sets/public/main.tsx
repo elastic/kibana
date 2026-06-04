@@ -107,6 +107,14 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     }));
   }, [dataSetsRaw, items]);
 
+  const dataSetsCountByDataSource = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const ds of dataSetsRaw) {
+      counts.set(ds.data_source, (counts.get(ds.data_source) ?? 0) + 1);
+    }
+    return counts;
+  }, [dataSetsRaw]);
+
   const dataSourceFilterOptions = useMemo(
     () => [
       { value: '', text: mainTranslations.filters.allDataSources },
@@ -217,6 +225,12 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
         'data-test-subj': 'dataSetsColName',
       },
       {
+        name: mainTranslations.columns.dataSources.dataSetsCount,
+        width: '10%',
+        render: (item: DataSource) => dataSetsCountByDataSource.get(item.name) ?? 0,
+        'data-test-subj': 'dataSetsColDataSetsCount',
+      },
+      {
         field: 'type',
         name: mainTranslations.columns.dataSources.type,
         sortable: true,
@@ -259,7 +273,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
         ],
       },
     ],
-    [handleDeleteDataSource, handleEditDataSource]
+    [dataSetsCountByDataSource, handleDeleteDataSource, handleEditDataSource]
   );
 
   const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
