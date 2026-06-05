@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import moment from 'moment';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import type { Locator } from '../../..';
@@ -338,6 +339,23 @@ export class DatePicker {
       await this.refreshIntervalInput.press('Enter');
       await this.quickMenuButton.click();
     }
+  }
+
+  /**
+   * The duration of the picker's current absolute range, in hours.
+   * Mirrors FTR `timePicker.getTimeDurationInHours()` — used by histogram-brush
+   * tests where the assertion is on the *width* of the resulting range rather
+   * than a specific start/end.
+   */
+  async getTimeDurationInHours(): Promise<number> {
+    const { start, end } = await this.getTimeConfig();
+    const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
+    const startMoment = moment(start, format);
+    const endMoment = moment(end, format);
+    if (!startMoment.isValid() || !endMoment.isValid()) {
+      throw new Error(`Could not parse time range as absolute dates: ${start} – ${end}`);
+    }
+    return moment.duration(endMoment.diff(startMoment)).asHours();
   }
 
   /**

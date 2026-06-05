@@ -13,6 +13,15 @@
  */
 export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 
+/**
+ * Saved-objects archive for the `long-window-logstash-*` data view used by
+ * the histogram interval-scaling / DST tests.
+ */
+export const LONG_WINDOW_LOGSTASH_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern';
+
+export const LONG_WINDOW_LOGSTASH_DATA_VIEW = 'long-window-logstash-*';
+
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
 /**

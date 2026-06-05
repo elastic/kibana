@@ -41,6 +41,16 @@ globalSetupHook(
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
 
+    // Long-window logstash data for histogram tests covering DST, multi-year
+    // ranges, and very small/large interval scaling.
+    log.debug(
+      '[setup:long_window_logstash] loading long_window_logstash ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+    );
+    log.debug('[setup:long_window_logstash] long_window_logstash ES data ready');
+
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);

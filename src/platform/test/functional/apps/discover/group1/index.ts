@@ -21,11 +21,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    // `./_discover` was migrated to Scout under
+    // `./_discover` and `./_discover_histogram` were migrated to Scout under
     // `src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/`.
     loadTestFile(require.resolve('./_discover_accessibility'));
     loadTestFile(require.resolve('./_discover_histogram_breakdown'));
-    loadTestFile(require.resolve('./_discover_histogram'));
     loadTestFile(require.resolve('./_doc_accessibility'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_date_nanos'));
