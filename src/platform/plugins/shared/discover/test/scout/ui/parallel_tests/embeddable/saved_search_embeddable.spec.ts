@@ -138,18 +138,12 @@ spaceTest.describe('Discover saved search embeddable', { tag: tags.deploymentAgn
 
   spaceTest('filters are added when a cell filter is clicked', async ({ page, pageObjects }) => {
     await addSearchEmbeddableToDashboard(page, pageObjects);
-    // There are many gridcells, we need to pick one/any to click. The fourth one
-    // is good enough, and replicates the old test.
-    // eslint-disable-next-line playwright/no-nth-methods
-    await page.getByRole('gridcell').nth(4).click();
+    await page.getByRole('gridcell').filter({ hasText: '5,453' }).click();
     await pageObjects.dashboard.waitForRenderComplete();
     await page.getByTestId('filterOutButton').click();
     await pageObjects.dashboard.waitForRenderComplete();
     await expect(page.testSubj.locator('~filter')).toHaveCount(1);
-    // There are many gridcells, we need to pick one/any to click. The fourth one
-    // is good enough, and replicates the old test.
-    // eslint-disable-next-line playwright/no-nth-methods
-    await page.getByRole('gridcell').nth(4).click();
+    await page.getByRole('gridcell').filter({ hasText: '7,124' }).click();
     await pageObjects.dashboard.waitForRenderComplete();
     await page.getByTestId('filterForButton').click();
     await pageObjects.dashboard.waitForRenderComplete();
