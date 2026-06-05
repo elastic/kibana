@@ -647,7 +647,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
           groupBy: 'all',
           threshold: [1000],
           index: ['.kibana'],
-          timeField: '@timestamp',
+          timeField: 'updated_at',
         },
       }),
     ]);
