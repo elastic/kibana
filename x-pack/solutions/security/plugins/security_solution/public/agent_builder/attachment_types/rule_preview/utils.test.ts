@@ -6,60 +6,23 @@
  */
 
 import { ALERT_RULE_TYPE, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
-import { DEFAULT_PREVIEW_INDEX, SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { DEFAULT_PREVIEW_INDEX } from '../../../../common/constants';
 import {
   buildRulePreviewMetadataSearchRequest,
-  createRulePreviewAttachmentDefinition,
   getRulePreviewAttachmentDataTableId,
   getRulePreviewMetadata,
-  registerRulePreviewAttachment,
-} from './rule_preview_attachment';
+} from './utils';
 
-describe('rule preview attachment', () => {
-  const mockAddAttachmentType = jest.fn();
-  const mockAttachments: AttachmentServiceStartContract = {
-    addAttachmentType: mockAddAttachmentType,
-  } as unknown as AttachmentServiceStartContract;
-  const mockServices = {
-    data: {},
-    getServices: jest.fn(),
-    getStore: jest.fn(),
-    spaces: {},
-  } as unknown as Parameters<typeof registerRulePreviewAttachment>[0];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('registers the rule preview attachment type', () => {
-    registerRulePreviewAttachment({ ...mockServices, attachments: mockAttachments });
-
-    expect(mockAddAttachmentType).toHaveBeenCalledWith(
-      SecurityAgentBuilderAttachments.rulePreview,
-      expect.any(Object)
-    );
-  });
-
-  it('uses attachment label when available', () => {
-    const definition = createRulePreviewAttachmentDefinition(mockServices);
-
-    expect(
-      definition.getLabel({
-        id: 'test',
-        type: SecurityAgentBuilderAttachments.rulePreview,
-        data: { previewId: 'preview-1', attachmentLabel: 'Custom preview' },
-      })
-    ).toBe('Custom preview');
-  });
-
-  it('builds a unique data table id for the attachment preview', () => {
+describe('getRulePreviewAttachmentDataTableId', () => {
+  it('generates a unique table id from the preview id', () => {
     expect(getRulePreviewAttachmentDataTableId('preview-1')).toBe(
       'rule-preview-attachment-preview-1'
     );
   });
+});
 
-  it('builds a metadata search request filtered by preview id', () => {
+describe('buildRulePreviewMetadataSearchRequest', () => {
+  it('builds a request filtered by preview id in the correct space index', () => {
     expect(
       buildRulePreviewMetadataSearchRequest({ previewId: 'preview-1', spaceId: 'default' })
     ).toEqual({
@@ -86,8 +49,10 @@ describe('rule preview attachment', () => {
       },
     });
   });
+});
 
-  it('derives preview metadata from aggregations', () => {
+describe('getRulePreviewMetadata', () => {
+  it('derives total, rule type, and padded timeframe from aggregations', () => {
     const metadata = getRulePreviewMetadata({
       hits: {
         total: { value: 1, relation: 'eq' },
@@ -108,15 +73,25 @@ describe('rule preview attachment', () => {
     expect(metadata?.timeframeEnd.valueOf()).toBe(1716800601000);
   });
 
-  it('returns undefined when no preview alerts are found', () => {
+  it('returns undefined when there are no preview alerts', () => {
+    expect(
+      getRulePreviewMetadata({
+        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+        aggregations: {},
+      } as never)
+    ).toBeUndefined();
+  });
+
+  it('falls back to rule type "query" when the aggregated type is not recognised', () => {
     const metadata = getRulePreviewMetadata({
-      hits: {
-        total: { value: 0, relation: 'eq' },
-        hits: [],
+      hits: { total: { value: 5, relation: 'eq' }, hits: [] },
+      aggregations: {
+        minTimestamp: { value: 1000 },
+        maxTimestamp: { value: 2000 },
+        ruleTypes: { buckets: [{ key: 'unknown_type', doc_count: 5 }] },
       },
-      aggregations: {},
     } as never);
 
-    expect(metadata).toBeUndefined();
+    expect(metadata?.ruleType).toBe('query');
   });
 });

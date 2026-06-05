@@ -106,14 +106,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   setSelected,
   pageScope,
   start,
-  tableId,
+  tableId: eventTableId,
   topRightMenuOptions,
   unit = defaultUnit,
 }) => {
-  const reduxTableId = dataTableId ?? tableId;
+  const tableId = (dataTableId ?? eventTableId) as TableId;
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
-  const tableContext = useMemo(() => ({ tableId: reduxTableId }), [reduxTableId]);
+  const tableContext = useMemo(() => ({ tableId }), [tableId]);
   const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
   const selectGlobalQuerySelector = useMemo(() => globalQuerySelector(), []);
   const filters = useSelector(selectGlobalFiltersQuerySelector);
@@ -133,7 +133,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     isSelectAllChecked,
     loadingEventIds,
     title,
-  } = useSelector((state: State) => selectTableById(state, reduxTableId) ?? defaultModel);
+  } = useSelector((state: State) => selectTableById(state, tableId) ?? defaultModel);
 
   const inspectModalTitle = useMemo(() => <span data-test-subj="title">{title}</span>, [title]);
 
@@ -162,7 +162,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         columns,
         dataViewId: selectedDataViewId,
         defaultColumns,
-        id: reduxTableId,
+        id: tableId,
         indexNames: indexNames ?? selectedPatterns,
         itemsPerPage,
         showCheckboxes,
@@ -170,7 +170,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       })
     );
     return () => {
-      dispatch(inputsActions.deleteOneQuery({ id: reduxTableId, inputId: InputsModelId.global }));
+      dispatch(inputsActions.deleteOneQuery({ id: tableId, inputId: InputsModelId.global }));
       if (editorActionsRef.current) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         editorActionsRef.current.closeEditor();
@@ -200,12 +200,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     editorActionsRef,
     upsertColumn: useCallback(
       (column: ColumnHeaderOptions, index: number) =>
-        dispatch(dataTableActions.upsertColumn({ column, id: reduxTableId, index })),
-      [dispatch, reduxTableId]
+        dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+      [dispatch, tableId]
     ),
     removeColumn: useCallback(
-      (columnId: string) => dispatch(dataTableActions.removeColumn({ columnId, id: reduxTableId })),
-      [dispatch, reduxTableId]
+      (columnId: string) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
+      [dispatch, tableId]
     ),
   });
 
@@ -264,7 +264,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       entityType,
       fields,
       filterQuery,
-      id: reduxTableId,
+      id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
       runtimeMappings,
@@ -275,8 +275,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     });
 
   useEffect(() => {
-    dispatch(dataTableActions.updateIsLoading({ id: reduxTableId, isLoading: loading }));
-  }, [dispatch, reduxTableId, loading]);
+    dispatch(dataTableActions.updateIsLoading({ id: tableId, isLoading: loading }));
+  }, [dispatch, tableId, loading]);
 
   const deleteQuery = useCallback(
     ({ id }: { id: string }) =>
@@ -285,7 +285,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   useQueryInspector({
-    queryId: reduxTableId,
+    queryId: tableId,
     loading,
     refetch,
     setQuery,
@@ -317,27 +317,27 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   useEffect(() => {
-    setQuery({ id: reduxTableId, inspect, loading, refetch });
-  }, [inspect, loading, refetch, setQuery, reduxTableId]);
+    setQuery({ id: tableId, inspect, loading, refetch });
+  }, [inspect, loading, refetch, setQuery, tableId]);
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
-    dispatch(dataTableActions.clearSelected({ id: reduxTableId }));
+    dispatch(dataTableActions.clearSelected({ id: tableId }));
     dispatch(
       dataTableActions.setDataTableSelectAll({
-        id: reduxTableId,
+        id: tableId,
         selectAll: false,
       })
     );
-  }, [nonDeletedEvents, dispatch, reduxTableId]);
+  }, [nonDeletedEvents, dispatch, tableId]);
 
   const onChangeItemsPerPage = useCallback(
     (itemsChangedPerPage: number) => {
       dispatch(
-        dataTableActions.updateItemsPerPage({ id: reduxTableId, itemsPerPage: itemsChangedPerPage })
+        dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
       );
     },
-    [reduxTableId, dispatch]
+    [tableId, dispatch]
   );
 
   const onChangePage = useCallback(
@@ -349,16 +349,16 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
 
   const setEventsLoading = useCallback<SetEventsLoading>(
     ({ eventIds, isLoading }) => {
-      dispatch(dataTableActions.setEventsLoading({ id: reduxTableId, eventIds, isLoading }));
+      dispatch(dataTableActions.setEventsLoading({ id: tableId, eventIds, isLoading }));
     },
-    [dispatch, reduxTableId]
+    [dispatch, tableId]
   );
 
   const setEventsDeleted = useCallback<SetEventsDeleted>(
     ({ eventIds, isDeleted }) => {
-      dispatch(dataTableActions.setEventsDeleted({ id: reduxTableId, eventIds, isDeleted }));
+      dispatch(dataTableActions.setEventsDeleted({ id: tableId, eventIds, isDeleted }));
     },
-    [dispatch, reduxTableId]
+    [dispatch, tableId]
   );
 
   const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
@@ -366,20 +366,20 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const onRowSelected: OnRowSelected = useCallback(
     ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
       setSelected({
-        id: reduxTableId,
+        id: tableId,
         eventIds: getEventIdToDataMapping(nonDeletedEvents, eventIds, queryFields, true),
         isSelected,
         isSelectAllChecked: isSelected && selectedCount + 1 === nonDeletedEvents.length,
       });
     },
-    [setSelected, reduxTableId, nonDeletedEvents, queryFields, selectedCount]
+    [setSelected, tableId, nonDeletedEvents, queryFields, selectedCount]
   );
 
   const onSelectPage: OnSelectAll = useCallback(
     ({ isSelected }: { isSelected: boolean }) =>
       isSelected
         ? setSelected({
-            id: reduxTableId,
+            id: tableId,
             eventIds: getEventIdToDataMapping(
               nonDeletedEvents,
               nonDeletedEvents.map((event) => event._id),
@@ -389,8 +389,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
             isSelected,
             isSelectAllChecked: isSelected,
           })
-        : clearSelected({ id: reduxTableId }),
-    [setSelected, reduxTableId, nonDeletedEvents, queryFields, clearSelected]
+        : clearSelected({ id: tableId }),
+    [setSelected, tableId, nonDeletedEvents, queryFields, clearSelected]
   );
 
   // Sync to selectAll so parent components can select all events
@@ -508,7 +508,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
               >
                 <EuiFlexGroup data-test-subj="events-viewer-updated" gutterSize="m">
                   <EuiFlexItem grow={false}>
-                    <InspectButton title={inspectModalTitle} queryId={reduxTableId} />
+                    <InspectButton title={inspectModalTitle} queryId={tableId} />
                   </EuiFlexItem>
                   {topRightMenuOptions && (
                     <EuiFlexItem grow={false}>{topRightMenuOptions}</EuiFlexItem>
@@ -533,7 +533,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     bulkActions={bulkActions}
                     data={nonDeletedEvents}
                     fieldBrowserOptions={fieldBrowserOptions}
-                    id={reduxTableId}
+                    id={tableId}
                     leadingControlColumns={transformedLeadingControlColumns}
                     loadPage={loadPage}
                     // TODO: migrate away from deprecated type

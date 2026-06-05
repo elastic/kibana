@@ -223,7 +223,7 @@ export const registerRulePreviewAttachment = ({
 }): void => {
   void import(
     /* webpackChunkName: "security_rule_preview_attachment" */
-    './rule_preview_attachment'
+    './rule_preview'
   ).then(({ registerRulePreviewAttachment: register }) => {
     register({ attachments, data, spaces, getServices, getStore });
   });
