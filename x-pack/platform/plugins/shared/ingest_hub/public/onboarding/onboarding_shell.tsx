@@ -107,10 +107,15 @@ export function OnboardingShell() {
   }, [currentStepId, currentStepIndex, markStepComplete, needsConnectStep, history, location]);
 
   const onBack = useMemo(() => {
-    const prevStep = currentStepIndex > 0 ? ONBOARDING_STEPS[currentStepIndex - 1] : null;
-    if (!prevStep) return undefined;
+    if (currentStepIndex <= 0) return undefined;
+    // Scan backward, skipping connect when it is not part of the current flow
+    let prevIndex = currentStepIndex - 1;
+    while (prevIndex > 0 && ONBOARDING_STEPS[prevIndex].id === 'connect' && !needsConnectStep) {
+      prevIndex--;
+    }
+    const prevStep = ONBOARDING_STEPS[prevIndex];
     return () => history.push({ ...location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, history, location]);
+  }, [currentStepIndex, needsConnectStep, history, location]);
 
   const horizontalStepsConfig = useMemo(
     () =>

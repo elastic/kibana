@@ -39,9 +39,9 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
     getServiceConfig,
     setServiceTransport,
     setServiceField,
+    setServiceFields,
     isReady,
     handleNext,
-    showValidation,
   } = useServiceSettings({ onNext });
 
   const [activeFlyoutServiceId, setActiveFlyoutServiceId] = useState<string | null>(null);
@@ -59,9 +59,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
   };
 
   const handleFlyoutApply = (serviceId: string) => (fields: Record<string, string>) => {
-    Object.entries(fields).forEach(([fieldName, value]) => {
-      setServiceField(serviceId, fieldName, value);
-    });
+    setServiceFields(serviceId, fields);
     setActiveFlyoutServiceId(null);
   };
 
@@ -98,6 +96,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
               defaultMessage:
                 'Global AWS Region — can be overridden per service in Collection settings',
             })}
+            isInvalid={!globalRegion.trim()}
           >
             <EuiComboBox
               compressed
@@ -106,6 +105,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
               selectedOptions={selectedGlobalRegionOption}
               onChange={(selected) => setGlobalRegion(selected[0]?.label ?? '')}
               onCreateOption={(searchValue) => setGlobalRegion(searchValue)}
+              isInvalid={!globalRegion.trim()}
               customOptionText={i18n.translate(
                 'xpack.ingestHub.serviceSettingsStep.globalRegion.customOption',
                 { defaultMessage: 'Use "{searchValue}" as region' }
@@ -129,7 +129,6 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
               service={service}
               config={config}
               globalRegion={globalRegion}
-              showValidation={showValidation}
               onTransportChange={handleTransportChange(service.id)}
               onFieldChange={handleFieldChange(service.id)}
               onOpenFlyout={() => setActiveFlyoutServiceId(service.id)}

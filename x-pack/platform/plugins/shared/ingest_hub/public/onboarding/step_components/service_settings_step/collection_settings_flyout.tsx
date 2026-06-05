@@ -101,7 +101,7 @@ export function CollectionSettingsFlyout({
   const otherFlyoutFields = flyoutFields.filter((f) => !REGION_FIELD_NAMES.has(f));
   const mandatoryBoolFields = getMandatoryBooleanFields(service, config.activeTransport);
 
-  const regionValue = draft[regionField] ?? globalRegion;
+  const regionValue = draft[regionField]?.trim() || globalRegion;
   const selectedRegionOption = regionValue ? [{ label: regionValue }] : [];
 
   const handleRegionChange = (selected: Array<{ label: string }>) => {
@@ -172,6 +172,7 @@ export function CollectionSettingsFlyout({
           label={i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.regionOverride.label', {
             defaultMessage: 'AWS Region (override)',
           })}
+          isInvalid={!regionValue.trim()}
         >
           <EuiComboBox
             singleSelection={{ asPlainText: true }}
@@ -179,6 +180,7 @@ export function CollectionSettingsFlyout({
             selectedOptions={selectedRegionOption}
             onChange={handleRegionChange}
             onCreateOption={handleRegionCreate}
+            isInvalid={!regionValue.trim()}
             customOptionText={i18n.translate(
               'xpack.ingestHub.serviceSettingsStep.flyout.regionComboBox.customOption',
               { defaultMessage: 'Use "{searchValue}" as region' }
@@ -218,8 +220,7 @@ export function CollectionSettingsFlyout({
                             disableScreenReaderOutput
                           >
                             <EuiButtonIcon
-                              iconType="minusInCircle"
-                              color="danger"
+                              iconType="cross"
                               onClick={() => handleRegionRowRemove(index)}
                               aria-label={i18n.translate(
                                 'xpack.ingestHub.serviceSettingsStep.flyout.regions.removeRow',

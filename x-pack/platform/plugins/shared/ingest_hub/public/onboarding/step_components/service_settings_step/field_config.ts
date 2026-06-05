@@ -167,8 +167,10 @@ export function hasTransportChoice(service: AwsServiceMatrixEntry): boolean {
   return inputs.includes('aws-s3') && inputs.includes('aws-cloudwatch');
 }
 
-export function getDefaultTransport(service: AwsServiceMatrixEntry): TransportType | null {
-  const inputs = service.inputs ?? [];
+export function getDefaultTransport(
+  service: AwsServiceMatrixEntry | undefined
+): TransportType | null {
+  const inputs = service?.inputs ?? [];
   if (inputs.includes('aws-s3')) return 'aws-s3';
   if (inputs.includes('aws-cloudwatch')) return 'aws-cloudwatch';
   return null;

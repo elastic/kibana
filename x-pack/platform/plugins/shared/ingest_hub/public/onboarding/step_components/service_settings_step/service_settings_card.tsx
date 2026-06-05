@@ -30,7 +30,6 @@ interface ServiceSettingsCardProps {
   service: AwsServiceMatrixEntry;
   config: ServiceConfig;
   globalRegion: string;
-  showValidation: boolean;
   onTransportChange: (transport: TransportType) => void;
   onFieldChange: (fieldName: string, value: string) => void;
   onOpenFlyout: () => void;
@@ -54,7 +53,6 @@ const TRANSPORT_OPTIONS = [
 export function ServiceSettingsCard({
   service,
   config,
-  showValidation,
   onTransportChange,
   onFieldChange,
   onOpenFlyout,
@@ -119,7 +117,7 @@ export function ServiceSettingsCard({
         )}
       </EuiFlexGroup>
 
-      {showValidation && hasEmptyInlineFields && (
+      {hasEmptyInlineFields && (
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs" color="danger">
@@ -139,20 +137,13 @@ export function ServiceSettingsCard({
         const meta = FIELD_CONFIG[fieldName];
         if (!meta) return null;
         const value = config.fields[fieldName] ?? '';
-        const isInvalid = showValidation && value.trim() === '';
+        const isInvalid = value.trim() === '';
         return (
           <EuiFormRow
             key={fieldName}
             display="rowCompressed"
             label={getFieldLabel(fieldName)}
             isInvalid={isInvalid}
-            error={
-              isInvalid
-                ? i18n.translate('xpack.ingestHub.serviceSettingsStep.card.fieldRequired', {
-                    defaultMessage: 'This field is required.',
-                  })
-                : undefined
-            }
           >
             <EuiFieldText
               compressed

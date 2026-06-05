@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
@@ -34,8 +34,6 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
     globalRegion: '',
     configs: {},
   });
-
-  const [showValidation, setShowValidation] = useState(false);
 
   const globalRegion = persisted?.globalRegion ?? '';
 
@@ -70,12 +68,11 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
   const setServiceTransport = useCallback(
     (serviceId: string, transport: TransportType) => {
       const current = getServiceConfig(serviceId);
-      const updated: ServiceConfig = { ...current, activeTransport: transport };
       setPersisted({
         ...(persisted ?? { globalRegion: '', configs: {} }),
         configs: {
           ...(persisted?.configs ?? {}),
-          [serviceId]: updated,
+          [serviceId]: { ...current, activeTransport: transport },
         },
       });
     },
@@ -85,15 +82,27 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
   const setServiceField = useCallback(
     (serviceId: string, fieldName: string, value: string) => {
       const current = getServiceConfig(serviceId);
-      const updated: ServiceConfig = {
-        ...current,
-        fields: { ...current.fields, [fieldName]: value },
-      };
       setPersisted({
         ...(persisted ?? { globalRegion: '', configs: {} }),
         configs: {
           ...(persisted?.configs ?? {}),
-          [serviceId]: updated,
+          [serviceId]: { ...current, fields: { ...current.fields, [fieldName]: value } },
+        },
+      });
+    },
+    [persisted, setPersisted, getServiceConfig]
+  );
+
+  // Applies multiple field changes in a single write — avoids stale-closure overwrites
+  // when several fields are committed at once (e.g. from the flyout Apply button).
+  const setServiceFields = useCallback(
+    (serviceId: string, newFields: Record<string, string>) => {
+      const current = getServiceConfig(serviceId);
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', configs: {} }),
+        configs: {
+          ...(persisted?.configs ?? {}),
+          [serviceId]: { ...current, fields: { ...current.fields, ...newFields } },
         },
       });
     },
@@ -101,6 +110,7 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
   );
 
   const isReady = useMemo(() => {
+    if (!globalRegion.trim()) return false;
     return selectedServices.every((service) => {
       const config = getServiceConfig(service.id);
       const inlineFields = getInlineFields(service, config.activeTransport);
@@ -110,14 +120,10 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
         return (config.fields[f] ?? '').trim() !== '';
       });
     });
-  }, [selectedServices, getServiceConfig]);
+  }, [globalRegion, selectedServices, getServiceConfig]);
 
   const handleNext = useCallback(() => {
-    if (!isReady) {
-      setShowValidation(true);
-      return;
-    }
-    onNext();
+    if (isReady) onNext();
   }, [isReady, onNext]);
 
   return {
@@ -127,9 +133,8 @@ export function useServiceSettings({ onNext }: { onNext: () => void }) {
     getServiceConfig,
     setServiceTransport,
     setServiceField,
+    setServiceFields,
     isReady,
     handleNext,
-    showValidation,
-    setShowValidation,
   };
 }
