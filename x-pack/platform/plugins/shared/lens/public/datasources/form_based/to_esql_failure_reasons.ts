@@ -22,6 +22,7 @@ export type EsqlConversionFailureReason =
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
   | 'saved_to_library_not_supported'
+  | 'trendline_not_supported'
   | 'unsupported_settings'
   | 'unknown';
 
@@ -87,6 +88,10 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
         'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
     }
   ),
+  trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {
+    defaultMessage:
+      'Cannot convert to ES|QL: The trendline layer uses a configuration that is not yet supported for conversion.',
+  }),
   unsupported_settings: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip',
     {

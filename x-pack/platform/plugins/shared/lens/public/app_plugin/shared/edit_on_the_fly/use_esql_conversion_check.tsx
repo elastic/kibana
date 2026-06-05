@@ -186,7 +186,7 @@ export const useEsqlConversionCheck = (
     ];
 
     // If there is a trendline layer, attempt to convert it alongside the main layer
-    const trendlineLayer = trendlineLayerId
+    const trendlineResult = trendlineLayerId
       ? tryConvertTrendlineLayer(
           trendlineLayerId,
           layers[trendlineLayerId],
@@ -196,9 +196,18 @@ export const useEsqlConversionCheck = (
           columnRoles
         )
       : undefined;
+
+    // If a trendline layer exists but failed to convert, disable the button
+    // rather than silently dropping the trendline
+    if (trendlineLayerId && trendlineResult && !trendlineResult.success) {
+      return getEsqlConversionDisabledSettings(
+        esqlConversionFailureReasonMessages.trendline_not_supported
+      );
+    }
+
     // Trendline is auto-included in the conversion but not shown in the modal
-    const layersToConvert = trendlineLayer
-      ? [...convertibleLayers, trendlineLayer]
+    const layersToConvert = trendlineResult?.success
+      ? [...convertibleLayers, trendlineResult.layer]
       : convertibleLayers;
 
     const newAttributes = convertFormBasedToTextBasedLayer({
@@ -264,8 +273,8 @@ function tryConvertTrendlineLayer(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
   columnRoles: ColumnRoles
-): ConvertibleLayer | undefined {
-  if (!layer?.columnOrder || !layer?.columns) return undefined;
+): { success: true; layer: ConvertibleLayer } | { success: false; reason?: string } {
+  if (!layer?.columnOrder || !layer?.columns) return { success: false };
 
   // Patch date_histogram columns for trendline conversion:
   // - Strip includeEmptyRows (ES|QL trendlines don't need gap-filling, and this flag blocks conversion)
@@ -316,22 +325,27 @@ function tryConvertTrendlineLayer(
       startDependencies.data.nowProvider.get(),
       columnRoles
     );
-    if (!isEsqlQuerySuccess(esqlLayer)) return undefined;
+    if (!isEsqlQuerySuccess(esqlLayer)) {
+      return { success: false, reason: esqlLayer?.reason };
+    }
 
     return {
-      id: trendlineLayerId,
-      icon: 'layers',
-      name: 'Trendline',
-      type: layerTypes.DATA,
-      query: esqlLayer.esql,
-      isConvertibleToEsql: true,
-      conversionData: {
-        esAggsIdMap: esqlLayer.esAggsIdMap,
-        partialRows: esqlLayer.partialRows,
+      success: true,
+      layer: {
+        id: trendlineLayerId,
+        icon: 'layers',
+        name: 'Trendline',
+        type: layerTypes.DATA,
+        query: esqlLayer.esql,
+        isConvertibleToEsql: true,
+        conversionData: {
+          esAggsIdMap: esqlLayer.esAggsIdMap,
+          partialRows: esqlLayer.partialRows,
+        },
       },
     };
   } catch {
-    return undefined;
+    return { success: false };
   }
 }
 
