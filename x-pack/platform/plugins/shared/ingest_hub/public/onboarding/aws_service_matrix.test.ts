@@ -10,23 +10,27 @@ import type {
   DeliveryMethod,
   SignalType,
   ServiceCategory,
-} from './aws_services_matrix';
-import { AWS_SERVICES_MATRIX } from './aws_services_matrix';
+} from './aws_service_matrix';
+import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
-const VALID_DELIVERY_METHODS: DeliveryMethod[] = ['agentless', 'firehose', 'cloud_forwarder'];
+const VALID_DELIVERY_METHODS: DeliveryMethod[] = [
+  'agentless',
+  'firehose',
+  'cloud_forwarder',
+  'agent_based',
+];
 const VALID_CATEGORIES: ServiceCategory[] = [
-  'AI / ML',
-  'Cost & Billing',
+  'Analytics',
+  'Application Integration',
+  'Cloud Financial Management',
+  'Compute',
+  'Containers',
   'Databases',
-  'Infrastructure',
-  'Messaging',
-  'Monitoring',
-  'Networking',
-  'Networking / CDN',
-  'Security',
-  'Security / Networking',
-  'Serverless & Compute',
+  'Machine Learning',
+  'Management and Governance',
+  'Networking and Content Delivery',
+  'Security, Identity and Compliance',
   'Storage',
 ];
 
@@ -65,9 +69,14 @@ describe('AWS_SERVICES_MATRIX', () => {
     });
 
     it('has only valid delivery method values', () => {
-      entry.deliveryMethods.forEach((method) => {
+      entry.deliveryMethods.forEach(({ method }) => {
         expect(VALID_DELIVERY_METHODS).toContain(method);
       });
+    });
+
+    it('has exactly one preferred delivery method', () => {
+      const preferred = entry.deliveryMethods.filter((dm) => dm.preferred === true);
+      expect(preferred).toHaveLength(1);
     });
 
     it('has a non-empty packageName', () => {
