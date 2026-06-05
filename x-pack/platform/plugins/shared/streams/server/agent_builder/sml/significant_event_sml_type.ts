@@ -112,6 +112,9 @@ export const createSignificantEventSmlType = ({
     },
 
     toAttachment: async (item, context) => {
+      if (!item.origin_id) {
+        return undefined;
+      }
       const { getEventClient } = await getScopedClients({ request: context.request });
       const { hits } = await getEventClient().findByDiscoverySlug(item.origin_id);
       const event = hits.at(-1);
