@@ -29,6 +29,7 @@ const baseCaseEventSchema = z.object({
 
 export const caseCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseCreatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: baseCaseEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.caseCreated.title', {
     defaultMessage: 'Cases - Case created',
@@ -69,6 +70,7 @@ const caseUpdatedEventSchema = baseCaseEventSchema.extend({
 
 export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseUpdatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: caseUpdatedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.caseUpdated.title', {
     defaultMessage: 'Cases - Case updated',
@@ -111,6 +113,7 @@ const caseStatusUpdatedEventSchema = baseCaseEventSchema.extend({
 
 export const caseStatusUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseStatusUpdatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: caseStatusUpdatedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.caseStatusUpdated.title', {
     defaultMessage: 'Cases - Case status updated',
@@ -156,6 +159,7 @@ const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
 
 export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: AttachmentsAddedTriggerId,
+  stability: 'tech_preview',
   eventSchema: attachmentsAddedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.attachmentsAdded.title', {
     defaultMessage: 'Cases - Attachments added',
@@ -213,6 +217,7 @@ const CommentsAddedEventSchema = baseCaseEventSchema.extend({
 
 export const commentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CommentsAddedTriggerId,
+  stability: 'tech_preview',
   eventSchema: CommentsAddedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.commentsAdded.title', {
     defaultMessage: 'Cases - Comments added',
