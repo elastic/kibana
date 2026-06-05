@@ -93,11 +93,16 @@ export const CreateCaseTemplateFields: React.FC = () => {
 
     // Merge with any values already in the form (e.g. from template sync that ran
     // before global defs finished loading) so neither overwrites the other.
+    // Filter out empty-string entries: Controller components register with defaultValue=""
+    // on mount, which would otherwise shadow the real YAML defaults via the spread.
     const current = (innerForm.getValues()?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<
       string,
       unknown
     >;
-    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...defaults, ...current } });
+    const preservedCurrent = Object.fromEntries(
+      Object.entries(current).filter(([, v]) => v !== '' && v !== undefined)
+    );
+    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...defaults, ...preservedCurrent } });
   }, [isLoadingGlobalDefs, globalInlineFields, innerForm]);
 
   const { template, isLoading } = useTemplateFormSync(innerForm, globalFieldKeys);
