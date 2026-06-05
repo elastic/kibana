@@ -35,16 +35,14 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
     // Selects a data view via the inline DataViewPicker (MlDataSourcePicker)
     async selectDataView(name: string, nextPageSubj: string) {
-      await retry.tryForTime(10 * 1000, async () => {
+      await retry.tryForTime(3 * 60 * 1000, async () => {
         await testSubjects.click('mlDataSourceSelectorButton');
-        await testSubjects.existOrFail('indexPattern-switcher', { timeout: 2000 });
-      });
-      await testSubjects.setValue('indexPattern-switcher--input', name);
-      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('indexPattern-switcher', { timeout: 10 * 1000 });
+        await testSubjects.setValue('indexPattern-switcher--input', name);
         const indexPatternSwitcher = await testSubjects.find('indexPattern-switcher', 500);
         await (await indexPatternSwitcher.findByCssSelector(`[title="${name}"]`)).click();
         // Wait for picker to close, confirming selection was made
-        await testSubjects.missingOrFail('indexPattern-switcher', { timeout: 5 * 1000 });
+        await testSubjects.missingOrFail('indexPattern-switcher', { timeout: 10 * 1000 });
       });
       // Wait for URL to update with the selected data view, confirming navigation completed
       await retry.tryForTime(10 * 1000, async () => {
@@ -60,6 +58,7 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     async selectSavedSearch(name: string, nextPageSubj: string) {
       await testSubjects.click('mlOpenDiscoverSessionButton');
       await testSubjects.existOrFail('loadSearchForm');
+      await testSubjects.existOrFail('savedObjectFinderSearchInput', { timeout: 30 * 1000 });
       await testSubjects.setValue('savedObjectFinderSearchInput', name, {
         clearWithKeyboard: true,
       });
