@@ -9,7 +9,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { i18n } from '@kbn/i18n';
 
 import { Main } from './main';
 
@@ -17,17 +16,7 @@ export const mountManagementSection = (
   coreStart: CoreStart,
   { element }: ManagementAppMountParams
 ) => {
-  ReactDOM.render(
-    coreStart.rendering.addContext(
-      <Main
-        pageTitle={i18n.translate('dataSets.pageTitle', {
-          defaultMessage: 'Datasets',
-        })}
-        httpClient={coreStart.http}
-      />
-    ),
-    element
-  );
+  ReactDOM.render(coreStart.rendering.addContext(<Main httpClient={coreStart.http} />), element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);

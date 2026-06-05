@@ -8,10 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const mainTranslations = {
+  pageTitle: i18n.translate('dataSets.pageTitle', {
+    defaultMessage: 'External data sets',
+  }),
+
   columns: {
     dataSources: {
       name: i18n.translate('dataSets.table.columnName', {
-        defaultMessage: 'name',
+        defaultMessage: 'Name',
       }),
       type: i18n.translate('dataSets.table.columnType', {
         defaultMessage: 'Type',
@@ -49,7 +53,7 @@ export const mainTranslations = {
     },
     dataSets: {
       name: i18n.translate('dataSets.setsTable.columnName', {
-        defaultMessage: 'Name',
+        defaultMessage: 'Data set ID',
       }),
       dataSourceId: i18n.translate('dataSets.setsTable.columnDataSourceId', {
         defaultMessage: 'Data source',
@@ -74,6 +78,12 @@ export const mainTranslations = {
       }),
       editActionDescription: i18n.translate('dataSets.setsTable.editActionDescription', {
         defaultMessage: 'Edit data set',
+      }),
+      deleteAction: i18n.translate('dataSets.setsTable.deleteAction', {
+        defaultMessage: 'Delete',
+      }),
+      deleteActionDescription: i18n.translate('dataSets.setsTable.deleteActionDescription', {
+        defaultMessage: 'Delete data set',
       }),
       caption: i18n.translate('dataSets.setsTable.caption', {
         defaultMessage: 'Data sets',
@@ -134,6 +144,27 @@ export const mainTranslations = {
       defaultMessage: 'Delete',
     }),
     errorTitle: i18n.translate('dataSets.confirmDeleteDataSource.errorTitle', {
+      defaultMessage: 'Delete failed',
+    }),
+  },
+
+  confirmDeleteDataSet: {
+    title: i18n.translate('dataSets.confirmDeleteDataSet.title', {
+      defaultMessage: 'Delete data set',
+    }),
+    prompt: i18n.translate('dataSets.confirmDeleteDataSet.prompt', {
+      defaultMessage: 'Are you sure you want to delete this data set?',
+    }),
+    warning: i18n.translate('dataSets.confirmDeleteDataSet.warning', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
+    cancelButton: i18n.translate('dataSets.confirmDeleteDataSet.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    confirmButton: i18n.translate('dataSets.confirmDeleteDataSet.confirmButton', {
+      defaultMessage: 'Delete',
+    }),
+    errorTitle: i18n.translate('dataSets.confirmDeleteDataSet.errorTitle', {
       defaultMessage: 'Delete failed',
     }),
   },

@@ -54,15 +54,16 @@ const settingsToFlyoutFormValues = (
   const format: DatasetFormatFormValue = fileSettings.format ?? DATASET_FORMAT_AUTOMATIC;
 
   return {
+    ...defaults,
     format,
-    errorMode: (fileSettings.errorMode ?? '') as DatasetErrorModeFormValue,
-    maxErrors: fileSettings.maxErrors !== undefined ? String(fileSettings.maxErrors) : '',
-    maxErrorRatio:
-      fileSettings.maxErrorRatio !== undefined ? String(fileSettings.maxErrorRatio) : '',
-    partitionDetection: (fileSettings.partitionDetection ??
+    error_mode: (fileSettings.error_mode ?? '') as DatasetErrorModeFormValue,
+    max_errors: fileSettings.max_errors !== undefined ? String(fileSettings.max_errors) : '',
+    max_error_ratio:
+      fileSettings.max_error_ratio !== undefined ? String(fileSettings.max_error_ratio) : '',
+    partition_detection: (fileSettings.partition_detection ??
       '') as DatasetPartitionDetectionFormValue,
-    partitionPath: fileSettings.partitionPath ?? '',
-    hivePartitioning: fileSettings.hivePartitioning ?? false,
+    partition_path: fileSettings.partition_path ?? '',
+    hive_partitioning: fileSettings.hive_partitioning ?? false,
   };
 };
 

@@ -32,6 +32,7 @@ import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
+import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
@@ -47,11 +48,10 @@ type DataSetFlyoutState =
   | { kind: 'edit'; dataSet: DataSetWithName };
 
 export interface MainProps {
-  pageTitle: string;
   httpClient: HttpSetup;
 }
 
-export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) => {
+export const Main: FunctionComponent<MainProps> = ({ httpClient }) => {
   const dataClient = useMemo(() => new DataSourcesClient(httpClient), [httpClient]);
   const dataSetsClient = useMemo(() => new DatasetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
@@ -61,6 +61,9 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
   const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
   const [isDeletingDataSource, setIsDeletingDataSource] = useState(false);
   const [deleteDataSourceError, setDeleteDataSourceError] = useState<string | null>(null);
+  const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
+  const [isDeletingDataSet, setIsDeletingDataSet] = useState(false);
+  const [deleteDataSetError, setDeleteDataSetError] = useState<string | null>(null);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
   const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
     kind: 'closed',
@@ -215,6 +218,37 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     });
   }, []);
 
+  const handleDeleteDataSet = useCallback((item: DataSetListRow) => {
+    setPendingDeleteDataSet(item);
+    setDeleteDataSetError(null);
+  }, []);
+
+  const confirmDeleteDataSet = useCallback(async () => {
+    if (!pendingDeleteDataSet) {
+      return;
+    }
+    setIsDeletingDataSet(true);
+    setDeleteDataSetError(null);
+    try {
+      await dataSetsClient.delete(pendingDeleteDataSet.name);
+      setDataSetsRaw(await dataSetsClient.get());
+      setSelectedDataSets([]);
+      setPendingDeleteDataSet(null);
+    } catch (e) {
+      setDeleteDataSetError(getFlyoutSaveErrorMessage(e));
+    } finally {
+      setIsDeletingDataSet(false);
+    }
+  }, [dataSetsClient, pendingDeleteDataSet]);
+
+  const cancelDeleteDataSet = useCallback(() => {
+    if (isDeletingDataSet) {
+      return;
+    }
+    setPendingDeleteDataSet(null);
+    setDeleteDataSetError(null);
+  }, [isDeletingDataSet]);
+
   const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
       {
@@ -331,10 +365,21 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
             },
             'data-test-subj': 'dataSetsSetsEditButton',
           },
+          {
+            name: mainTranslations.columns.dataSets.deleteAction,
+            description: mainTranslations.columns.dataSets.deleteActionDescription,
+            icon: 'trash',
+            color: 'danger',
+            type: 'icon',
+            onClick: (item) => {
+              handleDeleteDataSet(item);
+            },
+            'data-test-subj': 'dataSetsSetsDeleteIconButton',
+          },
         ],
       },
     ],
-    [handleEditDataSet]
+    [handleDeleteDataSet, handleEditDataSet]
   );
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
@@ -388,7 +433,6 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
                         compressed
                         data-test-subj="dataSetsSetsDataSourceFilter"
                         aria-label={mainTranslations.filters.dataSource}
-                        prepend={mainTranslations.filters.dataSource}
                         options={dataSourceFilterOptions}
                         value={dataSourceFilter}
                         onChange={(e) => setDataSourceFilter(e.target.value)}
@@ -517,7 +561,7 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
     <>
       <EuiPageSection paddingSize="m">
         <EuiTitle size="l">
-          <h1 data-test-subj="dataSetsPageTitle">{pageTitle}</h1>
+          <h1 data-test-subj="dataSetsPageTitle">{mainTranslations.pageTitle}</h1>
         </EuiTitle>
         <EuiSpacer size="l" />
         <EuiTabbedContent
@@ -534,6 +578,15 @@ export const Main: FunctionComponent<MainProps> = ({ pageTitle, httpClient }) =>
           error={deleteDataSourceError}
           onConfirm={() => void confirmDeleteDataSource()}
           onCancel={cancelDeleteDataSource}
+        />
+      ) : null}
+      {pendingDeleteDataSet ? (
+        <ConfirmDeleteDataSetModal
+          dataSetName={pendingDeleteDataSet.name}
+          isDeleting={isDeletingDataSet}
+          error={deleteDataSetError}
+          onConfirm={() => void confirmDeleteDataSet()}
+          onCancel={cancelDeleteDataSet}
         />
       ) : null}
       {dataSourceFlyout.kind !== 'closed' ? (
