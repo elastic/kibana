@@ -605,6 +605,7 @@
     "@kbn/delete-managed-asset-callout": "link:src/platform/packages/shared/kbn-management/delete_managed_assets_callout",
     "@kbn/dependency-injection-a": "link:examples/dependency_injection_isolation/a",
     "@kbn/dependency-injection-b": "link:examples/dependency_injection_isolation/b",
+    "@kbn/dependency-injection-c": "link:examples/dependency_injection_isolation/c",
     "@kbn/dependency-injection-example-plugin": "link:examples/dependency_injection",
     "@kbn/design-tools": "link:src/platform/packages/shared/kbn-design-tools",
     "@kbn/dev-tools-plugin": "link:src/platform/plugins/shared/dev_tools",
