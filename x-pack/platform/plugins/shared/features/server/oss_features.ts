@@ -231,7 +231,7 @@ export const buildOSSFeatures = ({
     {
       id: 'data_source_management',
       name: i18n.translate('xpack.features.dataSourceManagementFeatureName', {
-        defaultMessage: 'External data sets',
+        defaultMessage: 'External datasets',
       }),
       order: 1601,
       category: DEFAULT_APP_CATEGORIES.management,

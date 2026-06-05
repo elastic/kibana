@@ -243,13 +243,13 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
   const dataSetsTabNoItemsMessage = useMemo(() => {
     if (hasAnyDataSetsInCatalog) {
       return i18n.translate('dataSourceManagement.datasetsTab.noFilteredItemsMessage', {
-        defaultMessage: 'No data sets found',
+        defaultMessage: 'No datasets found',
       });
     }
     return (
       <FormattedMessage
         id="dataSourceManagement.datasetsTab.emptyCatalogPromptMessage"
-        defaultMessage="You don't have any data sets yet. To add them, you first must {connectDataSourceLink}."
+        defaultMessage="You don't have any datasets yet. To add them, you first must {connectDataSourceLink}."
         values={{
           connectDataSourceLink: (
             <EuiLink
@@ -303,7 +303,7 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
           box: {
             incremental: true,
             placeholder: i18n.translate('dataSourceManagement.datasetsTab.search.placeholder', {
-              defaultMessage: 'Search data sets…',
+              defaultMessage: 'Search datasets…',
             }),
             'data-test-subj': 'dataSourceManagementSetsSearch',
             schema: {
@@ -362,7 +362,7 @@ const DataSetsTabPanel: FunctionComponent<DataSetsTabPanelProps> = ({
         }
         data-test-subj="dataSourceManagementSetsTable"
         tableCaption={i18n.translate('dataSourceManagement.datasetsTab.tableCaption', {
-          defaultMessage: 'Data sets',
+          defaultMessage: 'Datasets',
         })}
         noItemsMessage={dataSetsTabNoItemsMessage}
         tableLayout="fixed"
@@ -663,12 +663,12 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       .openConfirm(
         i18n.translate('dataSourceManagement.datasetsTab.bulkDeleteConfirmMessage', {
           defaultMessage:
-            'Delete {count, plural, one {# selected data set} other {# selected data sets}}? This cannot be undone.',
+            'Delete {count, plural, one {# selected dataset} other {# selected datasets}}? This cannot be undone.',
           values: { count: selectedDataSets.length },
         }),
         {
           title: i18n.translate('dataSourceManagement.datasetsTab.bulkDeleteConfirmTitle', {
-            defaultMessage: 'Delete selected data sets',
+            defaultMessage: 'Delete selected datasets',
           }),
           confirmButtonText: i18n.translate('dataSourceManagement.deleteButtonLabel', {
             defaultMessage: 'Delete',
@@ -790,7 +790,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       },
       {
         name: i18n.translate('dataSourceManagement.table.columnDataSets', {
-          defaultMessage: 'Data sets',
+          defaultMessage: 'Datasets',
         }),
         width: '12%',
         render: (record: DataSourceListItem) => {
@@ -913,7 +913,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       {
         field: 'name',
         name: i18n.translate('dataSourceManagement.datasetsTab.columnDataSetId', {
-          defaultMessage: 'Data set ID',
+          defaultMessage: 'Dataset ID',
         }),
         sortable: true,
         width: '18%',
@@ -1060,19 +1060,19 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   }, [items, dataSets]);
 
   const dataSetsTabLabel = i18n.translate('dataSourceManagement.tabs.dataSetsTitle', {
-    defaultMessage: 'Data sets',
+    defaultMessage: 'Datasets',
   });
   const dataSourcesTabLabel = i18n.translate('dataSourceManagement.tabs.dataSourcesTitle', {
     defaultMessage: 'Data sources',
   });
   const pageHeaderDescription = i18n.translate('dataSourceManagement.pageHeaderDescription', {
     defaultMessage:
-      'Register external connections and organize them into data sets for use in ES|QL.',
+      'Register external connections and organize them into datasets for use in ES|QL.',
   });
   const addDataSetTableButtonLabel = i18n.translate(
     'dataSourceManagement.datasetsTab.addDataSetButton',
     {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add dataset',
     }
   );
   const addDataSetTableButtonDisabledTooltip = i18n.translate(

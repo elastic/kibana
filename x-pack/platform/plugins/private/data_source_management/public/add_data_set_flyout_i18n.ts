@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const addDataSetFlyoutStrings = {
   title: (dataSource: string) =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.title', {
-      defaultMessage: 'Add data set from {dataSource}',
+      defaultMessage: 'Add dataset from {dataSource}',
       values: { dataSource },
     }),
 
   titlePickSource: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.titlePickSource', {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add dataset',
     }),
 
   titleEdit: (dataSource: string, dataSetId: string) =>
@@ -103,7 +103,7 @@ export const addDataSetFlyoutStrings = {
 
   saveButton: () =>
     i18n.translate('dataSourceManagement.addDataSetFlyout.saveButton', {
-      defaultMessage: 'Add data set',
+      defaultMessage: 'Add dataset',
     }),
 
   editSaveButton: () =>
