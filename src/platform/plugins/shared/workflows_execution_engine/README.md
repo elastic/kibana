@@ -710,6 +710,10 @@ workflowsExecutionEngine:
   # Configure allowed hosts for HTTP steps
   http:
     allowedHosts: ['*']  # Use specific hosts in production
+
+  # Task Manager intervals for execution backing-index maintenance (e.g. "1d", "12h")
+  executionIndexRolloverTaskInterval: "1d"
+  executionIndexCleanupTaskInterval: "1d"
 ```
 
 ### Event-driven and depth settings

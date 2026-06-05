@@ -88,6 +88,12 @@ import {
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
+import {
+  registerExecutionIndexCleanupTask,
+  registerExecutionIndexRolloverTask,
+  scheduleExecutionIndexCleanupTask,
+  scheduleExecutionIndexRolloverTask,
+} from './tasks';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -626,6 +632,15 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
+    registerExecutionIndexRolloverTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('execution-index-rollover'),
+    });
+    registerExecutionIndexCleanupTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('execution-index-cleanup'),
+    });
+
     return {};
   }
 
@@ -638,6 +653,17 @@ export class WorkflowsExecutionEnginePlugin
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
+    void scheduleExecutionIndexRolloverTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('execution-index-rollover'),
+      interval: this.config.executionIndexRolloverTaskInterval,
+    });
+    void scheduleExecutionIndexCleanupTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger.get('execution-index-cleanup'),
+      interval: this.config.executionIndexCleanupTaskInterval,
+    });
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);

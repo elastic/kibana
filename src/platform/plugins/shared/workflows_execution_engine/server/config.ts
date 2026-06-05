@@ -12,6 +12,10 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
+export const DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL = '1d';
+
+export const DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL = '1d';
+
 const EventTriggersConfigSchema = schema.object({
   /**
    * When false, event-driven workflow execution is disabled: event-triggered runs
@@ -63,6 +67,22 @@ const configSchema = schema.object({
       description:
         'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
         'Useful for observability but adds to document size. Disabled by default for performance.',
+    },
+  }),
+  executionIndexRolloverTaskInterval: schema.string({
+    defaultValue: DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL,
+    meta: {
+      description:
+        'Task Manager schedule interval for the workflow execution index rollover background task. ' +
+        'Uses Elasticsearch duration format (e.g. "1d", "12h"). Changes take effect on next Kibana restart.',
+    },
+  }),
+  executionIndexCleanupTaskInterval: schema.string({
+    defaultValue: DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
+    meta: {
+      description:
+        'Task Manager schedule interval for the workflow execution index cleanup background task. ' +
+        'Uses Elasticsearch duration format (e.g. "1d", "12h"). Changes take effect on next Kibana restart.',
     },
   }),
 });
