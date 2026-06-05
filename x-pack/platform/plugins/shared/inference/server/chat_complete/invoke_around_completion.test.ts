@@ -349,6 +349,58 @@ describe('invokeAroundCompletion', () => {
     });
   });
 
+  describe('dual-channel tokenMap wiring (call_site.proceed)', () => {
+    it('proceedFn receives the tokenMap from call_site.proceed with: input', async () => {
+      const capturedProceedInputs: Array<Record<string, unknown>> = [];
+
+      const proceedFn = async (
+        input: Record<string, unknown>
+      ): Promise<Record<string, unknown>> => {
+        capturedProceedInputs.push(input);
+        return { response: 'restored response' };
+      };
+
+      const token = 'IP_aabbccdd00112233445566778899aabb';
+      const tokenMapFixture = { [token]: { original: '10.0.0.1', entityClass: 'IP' } };
+
+      const hookInvoker = async (
+        _triggerId: string,
+        _payload: Record<string, unknown>,
+        capabilities?: Record<string, unknown>
+      ): Promise<import('@kbn/workflows/server/types').HookResult> => {
+        if (capabilities?.proceedFn) {
+          const fn = capabilities.proceedFn as (
+            input: Record<string, unknown>
+          ) => Promise<Record<string, unknown>>;
+          // Simulate the YAML engine rendering with: { tokenMap } from the step
+          await fn({ system: 'anon-sys', messages: [], tokenMap: tokenMapFixture });
+        }
+        return {
+          status: 'completed',
+          output: { result: 'restored response', tokenMap: tokenMapFixture },
+        };
+      };
+
+      const result = await invokeAroundCompletion({
+        anonymizationHookInvoker: hookInvoker,
+        config: makeConfig(),
+        logger,
+        metadata: { anonymization: { sessionId: 'tc-1' } },
+        system: 'sys',
+        messages,
+        proceedFn,
+      });
+
+      expect(capturedProceedInputs).toHaveLength(1);
+      expect(capturedProceedInputs[0].tokenMap).toEqual(tokenMapFixture);
+
+      expect(result.kind).toBe('buffered');
+      if (result.kind !== 'buffered') throw new Error('Expected buffered result');
+      expect(result.finalResponse).toBe('restored response');
+      expect(result.tokenMap).toEqual(tokenMapFixture);
+    });
+  });
+
   describe('pass_through status', () => {
     it('returns original inputs on pass_through', async () => {
       const hookInvoker = makeHookInvoker({ status: 'pass_through' });

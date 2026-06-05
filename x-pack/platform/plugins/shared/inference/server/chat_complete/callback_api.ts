@@ -27,11 +27,12 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { Observable, OperatorFunction } from 'rxjs';
 import {
+  Subject,
   defer,
   forkJoin,
   from,
   identity,
-  lastValueFrom,
+  merge,
   of,
   share,
   switchMap,
@@ -266,6 +267,9 @@ function createChatCompletePipeline({
           })
         ).pipe(
           switchMap(({ hookSystem, hookMessages, sessionId, tokenMap: beforeTokenMap }) => {
+            // Relay: chunk events pushed in real time by proceedFn are relayed to the caller.
+            const relay$ = new Subject<ChatCompletionEvent>();
+
             const proceedFn = async (
               input: Record<string, unknown>
             ): Promise<Record<string, unknown>> => {
@@ -273,8 +277,12 @@ function createChatCompletePipeline({
               const pMessages = Array.isArray(input.messages)
                 ? (input.messages as ChatCompleteOptions['messages'])
                 : hookMessages;
+              const proceedTokenMap =
+                (input.tokenMap as Record<string, { original: string; entityClass: string }>) ?? {};
 
-              const assembled = await lastValueFrom(
+              let assembledContent = '';
+
+              return new Promise<Record<string, unknown>>((resolveFn, rejectFn) => {
                 chatComplete({
                   system: pSystem,
                   messages: pMessages,
@@ -287,54 +295,63 @@ function createChatCompletePipeline({
                   abortSignal,
                   metadata,
                   timeout,
-                  stream: false,
-                }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
-              );
-              const msg = assembled as ChatCompletionMessageEvent;
-              return { response: msg.content ?? '' };
+                  stream: true,
+                })
+                  .pipe(
+                    chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }),
+                    restoreTokensOperator(proceedTokenMap)
+                  )
+                  .subscribe({
+                    next: (event) => {
+                      relay$.next(event);
+                      if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
+                        assembledContent = event.content ?? '';
+                      }
+                    },
+                    error: (err) => {
+                      relay$.error(err);
+                      rejectFn(err);
+                    },
+                    complete: () => {
+                      relay$.complete();
+                      resolveFn({ response: assembledContent });
+                    },
+                  });
+              });
             };
 
-            return from(
-              invokeAroundCompletion({
-                anonymizationHookInvoker: anonymizationHookInvoker!,
-                config: config!,
-                logger,
-                metadata,
-                system: hookSystem,
-                messages: hookMessages,
-                sessionId,
-                anonymization,
-                proceedFn,
-              })
+            // around$ is deferred so invokeAroundCompletion (and hence proceedFn) only
+            // starts after merge() subscribes — ensuring relay$ has a subscriber before
+            // proceedFn can push any events.
+            const around$ = defer(() =>
+              from(
+                invokeAroundCompletion({
+                  anonymizationHookInvoker: anonymizationHookInvoker!,
+                  config: config!,
+                  logger,
+                  metadata,
+                  system: hookSystem,
+                  messages: hookMessages,
+                  sessionId,
+                  anonymization,
+                  proceedFn,
+                })
+              )
             ).pipe(
               switchMap((aroundResult) => {
                 if (aroundResult.kind === 'buffered') {
-                  const { finalResponse, tokenMap: aroundTokenMap } = aroundResult;
-
-                  const syntheticChunk: ChatCompletionEvent = {
-                    type: ChatCompletionEventType.ChatCompletionChunk,
-                    content: finalResponse,
-                    tool_calls: [],
-                  };
-                  const syntheticMessage: ChatCompletionMessageEvent = {
+                  // The around workflow's pii_restore step has already de-anonymized the
+                  // response; emit it verbatim as the final assembled message. The relay
+                  // already carried the real-time chunks; this is the authoritative close.
+                  const finalMessage: ChatCompletionMessageEvent = {
                     type: ChatCompletionEventType.ChatCompletionMessage,
-                    content: finalResponse,
+                    content: aroundResult.finalResponse,
                     toolCalls: [],
                   };
-
-                  return of(syntheticChunk, syntheticMessage).pipe(
-                    restoreTokensOperator(aroundTokenMap),
-                    applyAfterCompletionHook({
-                      anonymizationHookInvoker: anonymizationHookInvoker!,
-                      config: config!,
-                      logger,
-                      sessionId,
-                      tokenMap: beforeTokenMap,
-                    })
-                  );
+                  return of(finalMessage as ChatCompletionEvent);
                 }
 
-                // Streaming path
+                // Streaming path (no call_site.proceed)
                 const {
                   anonymizedSystem,
                   anonymizedMessages,
@@ -379,6 +396,12 @@ function createChatCompletePipeline({
                 );
               })
             );
+
+            // relay$ carries real-time de-anonymized chunks emitted by proceedFn.
+            // around$ emits the final ChatCompletionMessageEvent after the workflow
+            // completes (i.e. after proceedFn + post-proceed steps finish).
+            // Because around$ is deferred, relay$ is always subscribed first.
+            return merge(relay$, around$);
           }),
           buildTokenUsagePipe({
             tokenUsageLogger,

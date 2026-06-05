@@ -45,6 +45,7 @@ steps:
     with:
       system: '{{ steps.anonymize_system.output.output }}'
       messages: '${{ steps.anonymize_messages.output.output }}'
+      tokenMap: '${{ steps.anonymize_messages.output.tokenMap }}'
 
   - name: restore_result
     type: transform.pii_restore

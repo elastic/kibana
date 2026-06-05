@@ -13,6 +13,13 @@ import { z } from '@kbn/zod/v4';
 export const CallSiteProceedInputSchema = z.object({
   system: z.string().optional().describe('System prompt to pass to the LLM'),
   messages: z.array(z.unknown()).describe('Messages array to pass to the LLM'),
+  tokenMap: z
+    .record(z.string(), z.object({ original: z.string(), entityClass: z.string() }))
+    .optional()
+    .describe(
+      'Anonymization token map for inline de-anonymization of streamed chunks. ' +
+        'When present, the inference plugin applies token restoration per chunk during streaming.'
+    ),
 });
 
 export const CallSiteProceedOutputSchema = z.object({
@@ -38,7 +45,7 @@ export const CallSiteProceedStepCommonDefinition: BaseStepDefinition<
   documentation: {
     details: i18n.translate('inferenceWorkflows.steps.callSiteProceed.documentation.details', {
       defaultMessage:
-        'Opt-in step for the inference.aroundCompletion trigger. When present, the workflow suspends here, the LLM call is made (buffered, not streamed), and execution resumes with the response available as steps.<name>.output.response. Post-processing steps (e.g. transform.pii_restore) can then run against the response. Omitting this step preserves the default streaming path where Kibana performs the LLM call and token restoration automatically.',
+        'Opt-in step for the inference.aroundCompletion trigger. When present, the workflow suspends here, the LLM call is streamed to the caller in real time (with inline token restoration when tokenMap is supplied), and execution resumes with the assembled response available as steps.<name>.output.response. Post-processing steps (e.g. transform.pii_restore) can then run against the assembled response. Omitting this step preserves the default streaming path where Kibana performs the LLM call and token restoration automatically.',
     }),
     examples: [
       `## Full AOP lifecycle with PII anonymization
@@ -46,8 +53,8 @@ export const CallSiteProceedStepCommonDefinition: BaseStepDefinition<
 - name: anonymize_messages
   type: ai.pii
   with:
-    sessionId: '{{ event.sessionId }}'
     input: '\${{ event.messages }}'
+    salt: '{{ event.salt }}'
     entities: [IP, EMAIL, HOST_NAME]
 
 - name: proceed
@@ -55,12 +62,13 @@ export const CallSiteProceedStepCommonDefinition: BaseStepDefinition<
   with:
     system: '{{ event.system }}'
     messages: '\${{ steps.anonymize_messages.output.output }}'
+    tokenMap: '\${{ steps.anonymize_messages.output.tokenMap }}'
 
 - name: restore
   type: transform.pii_restore
   with:
-    sessionId: '{{ event.sessionId }}'
     input: '{{ steps.proceed.output.response }}'
+    tokenMap: '\${{ steps.anonymize_messages.output.tokenMap }}'
 \`\`\``,
     ],
   },

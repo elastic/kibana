@@ -14,18 +14,26 @@ import { z } from '@kbn/zod/v4';
 // ai.pii
 // ---------------------------------------------------------------------------
 
+const TokenEntrySchema = z.object({
+  original: z.string(),
+  entityClass: z.string(),
+});
+
+const TokenMapSchema = z.record(z.string(), TokenEntrySchema);
+
 const CustomPatternSchema = z.object({
   pattern: z.string().describe('Regex pattern to match PII'),
   entityClass: z.string().describe('Entity class label (e.g. EMPLOYEE_ID)'),
 });
 
 export const AiPiiInputSchema = z.object({
-  sessionId: z
-    .string()
-    .describe('Session ID — used to look up the shared AnonymizationContext capability'),
   input: z
     .union([z.string(), z.array(z.unknown())])
     .describe('Text string or messages array to anonymize'),
+  salt: z.string().describe('Per-session salt derived from the session identifier'),
+  tokenMap: TokenMapSchema.nullish().describe(
+    "Token map from a preceding ai.pii step; entries are merged into this step's output"
+  ),
   entities: z
     .array(z.string())
     .optional()
@@ -35,6 +43,9 @@ export const AiPiiInputSchema = z.object({
 
 export const AiPiiOutputSchema = z.object({
   output: z.union([z.string(), z.array(z.unknown())]).describe('Anonymized text or messages array'),
+  tokenMap: TokenMapSchema.describe(
+    'Merged token map including all PII tokens discovered in this and any preceding ai.pii steps'
+  ),
 });
 
 export type AiPiiInputSchemaType = typeof AiPiiInputSchema;
@@ -56,7 +67,7 @@ export const AiPiiStepCommonDefinition: BaseStepDefinition<
   documentation: {
     details: i18n.translate('inferenceWorkflows.steps.aiPii.documentation.details', {
       defaultMessage:
-        'Replaces personally identifiable information (PII) such as IP addresses, email addresses, and hostnames with deterministic anonymization tokens. The token map is stored in an AnonymizationContext keyed by sessionId — it never appears in the YAML workflow event. Use transform.pii_restore to reverse the process.',
+        'Replaces personally identifiable information (PII) such as IP addresses, email addresses, and hostnames with deterministic HMAC tokens. The salt is passed as a step input from the workflow event; the accumulated token map is returned as step output and chained to the next step or workflow output. Use transform.pii_restore to reverse the process.',
     }),
     examples: [
       `## Anonymize messages before sending to LLM
@@ -64,8 +75,8 @@ export const AiPiiStepCommonDefinition: BaseStepDefinition<
 - name: anonymize
   type: ai.pii
   with:
-    sessionId: '{{ event.sessionId }}'
-    input: '{{ event.messages }}'
+    input: '\${{ event.messages }}'
+    salt: '{{ event.salt }}'
     entities: [IP, EMAIL, HOST_NAME]
 \`\`\``,
     ],
@@ -79,12 +90,10 @@ export const AiPiiStepCommonDefinition: BaseStepDefinition<
 // ---------------------------------------------------------------------------
 
 export const TransformPiiRestoreInputSchema = z.object({
-  sessionId: z
-    .string()
-    .describe('Session ID — used to look up the shared AnonymizationContext capability'),
   input: z
     .union([z.string(), z.array(z.unknown())])
     .describe('Anonymized text or messages array containing PII tokens to restore'),
+  tokenMap: TokenMapSchema.describe('Token map produced by ai.pii step(s) in this workflow run'),
 });
 
 export const TransformPiiRestoreOutputSchema = z.object({
@@ -112,7 +121,7 @@ export const TransformPiiRestoreStepCommonDefinition: BaseStepDefinition<
   documentation: {
     details: i18n.translate('inferenceWorkflows.steps.transformPiiRestore.documentation.details', {
       defaultMessage:
-        'Reverses the anonymization performed by ai.pii. Looks up original values for each HMAC token using the AnonymizationContext keyed by sessionId. The token map never appears in the YAML workflow event.',
+        'Reverses the anonymization performed by ai.pii. The token map is passed directly as a step input from the preceding ai.pii step output.',
     }),
     examples: [
       `## Restore PII in LLM response
@@ -120,8 +129,8 @@ export const TransformPiiRestoreStepCommonDefinition: BaseStepDefinition<
 - name: restore
   type: transform.pii_restore
   with:
-    sessionId: '{{ event.sessionId }}'
-    input: '{{ event.response }}'
+    input: '{{ steps.proceed.output.response }}'
+    tokenMap: '\${{ steps.anonymize.output.tokenMap }}'
 \`\`\``,
     ],
   },
