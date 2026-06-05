@@ -76,34 +76,6 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
   });
 
-  it('stamps grouping_fields with the rule grouping fields on breached events', () => {
-    const buildBatch = createAlertEventsBatchBuilder({
-      ruleId: 'rule-123',
-      ruleVersion: 1,
-      spaceId: 'default',
-      ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
-      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
-    });
-
-    const [doc] = buildBatch([{ 'host.name': 'host-a', region: 'us-east' }]);
-
-    expect(doc.grouping_fields).toEqual(['host.name', 'region']);
-  });
-
-  it('omits grouping_fields for ungrouped rules', () => {
-    const buildBatch = createAlertEventsBatchBuilder({
-      ruleId: 'rule-123',
-      ruleVersion: 1,
-      spaceId: 'default',
-      ruleAttributes: { grouping: { fields: [] } },
-      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
-    });
-
-    const [doc] = buildBatch([{ 'host.name': 'host-a' }]);
-
-    expect(doc.grouping_fields).toBeUndefined();
-  });
-
   it('sets space_id on breached alert events from the provided spaceId', () => {
     const buildBatch = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
@@ -328,7 +300,6 @@ describe('buildQueryRecoveryAlertEvents', () => {
       scheduled_timestamp: '2024-12-31T23:59:00.000Z',
       rule: { id: 'rule-123', version: 1 },
       group_hash: activeGroupHash,
-      grouping_fields: ['host.name'],
       data: { 'host.name': 'host-a', status: 'ok' },
       status: 'recovered',
       source: 'internal',

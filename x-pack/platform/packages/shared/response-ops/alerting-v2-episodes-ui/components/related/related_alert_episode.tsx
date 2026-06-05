@@ -14,7 +14,6 @@ import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/ac
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
 import { getNonEmptyGroupingFields, parseEpisodeDataJson } from '../../utils/episode_grouping_data';
-import { normalizeTags } from '../../utils/normalize_tags';
 
 export interface RelatedAlertEpisodeProps {
   episode: AlertEpisode;
@@ -39,11 +38,7 @@ export function RelatedAlertEpisode({
 }: RelatedAlertEpisodeProps) {
   const status = episode['episode.status'];
   const episodeId = episode['episode.id'];
-  // Prefer the field names stamped on the event so labels survive a later change to the
-  // rule's grouping config; fall back to the rule's current fields for pre-v4 events.
-  const eventGroupingFields = normalizeTags(episode.grouping_fields);
-  const groupingFields =
-    eventGroupingFields.length > 0 ? eventGroupingFields : rule.grouping?.fields ?? [];
+  const groupingFields = rule.grouping?.fields ?? [];
   const episodeData = parseEpisodeDataJson(episode.episode_data);
   const showGroupingBadges =
     groupingFields.length > 0 && getNonEmptyGroupingFields(groupingFields, episodeData).length > 0;

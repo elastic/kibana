@@ -46,7 +46,6 @@ export const useFetchEpisodeQuery = ({ episodeId, services }: UseFetchEpisodeQue
       return {
         ...row,
         last_tags: normalizeTags(row.last_tags),
-        grouping_fields: normalizeTags(row.grouping_fields),
       };
     },
     enabled: Boolean(episodeId),

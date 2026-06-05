@@ -48,25 +48,6 @@ describe('RelatedAlertEpisode', () => {
     expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
   });
 
-  it("uses the episode's own grouping_fields over the rule's current config", () => {
-    // Rule now groups by host.name, but this episode was created under [region].
-    render(
-      <RelatedAlertEpisode
-        episode={makeEpisode({
-          'episode.id': 'ep-old',
-          grouping_fields: ['region'],
-          episode_data: JSON.stringify({ region: 'us-east', host: { name: 'server-1' } }),
-        })}
-        rule={rule}
-        href="/x"
-      />
-    );
-
-    expect(screen.getByText('us-east')).toBeInTheDocument();
-    expect(screen.getByLabelText('region: us-east')).toBeInTheDocument();
-    expect(screen.queryByText('server-1')).not.toBeInTheDocument();
-  });
-
   it('omits status badges when episode status is missing', () => {
     const { 'episode.status': _status, ...episodeWithoutStatus } = makeEpisode({
       'episode.id': 'ep-2',

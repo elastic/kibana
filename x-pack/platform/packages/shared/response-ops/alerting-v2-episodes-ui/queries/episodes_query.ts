@@ -35,16 +35,13 @@ export interface AlertEpisode {
   last_tags?: string[];
   /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
   episode_data?: string | null;
-  /** Field names that produced this episode's group_hash, stamped at write time. Absent for pre-v4 events. */
-  grouping_fields?: string[] | null;
 }
 
 /**
  * Raw ES|QL response shape before client-side normalization.
  */
-export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags' | 'grouping_fields'> {
+export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags'> {
   last_tags?: string | string[] | null;
-  grouping_fields?: string | string[] | null;
 }
 
 export const ALERT_EPISODE_FIELDS = [
@@ -64,7 +61,6 @@ export const ALERT_EPISODE_FIELDS = [
   'last_deactivate_action',
   'last_tags',
   'episode_data',
-  'grouping_fields',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -114,7 +110,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", grouping_fields = VALUES(grouping_fields) BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };

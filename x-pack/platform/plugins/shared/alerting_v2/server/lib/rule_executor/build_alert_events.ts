@@ -125,10 +125,6 @@ export function createAlertEventsBatchBuilder({
         space_id: spaceId,
       };
 
-      if (groupingFields.length > 0) {
-        doc.grouping_fields = groupingFields;
-      }
-
       const severity = extractSeverity(rowDoc);
       if (severity !== undefined) {
         doc.severity = severity;
@@ -258,7 +254,6 @@ export function buildQueryRecoveryAlertEvents({
     scheduled_timestamp: scheduledTimestamp,
     rule: { id: ruleId, version: ruleVersion },
     group_hash: groupHash,
-    ...(groupingFields.length > 0 ? { grouping_fields: groupingFields } : {}),
     data,
     status: 'recovered' as const,
     source: 'internal',

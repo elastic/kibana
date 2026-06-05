@@ -23,8 +23,6 @@ export interface BuildSeriesGroupingValuesQueryOptions {
 export interface SeriesGroupingValuesRow {
   group_hash: string;
   episode_data?: string | null;
-  /** Field names that produced this hash, stamped at write time. Absent for pre-v4 events. */
-  grouping_fields?: string | string[] | null;
 }
 
 /**
@@ -62,33 +60,30 @@ export const buildSeriesGroupingValuesEsqlQuery = ({
     .where`rule.id == ${ruleId}`
     .where`group_hash IN (${hashLiterals})`
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`STATS episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", grouping_fields = VALUES(grouping_fields) BY group_hash`
-    .keep('group_hash', 'episode_data', 'grouping_fields');
+    .pipe`STATS episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY group_hash`
+    .keep('group_hash', 'episode_data');
 };
 
 /**
  * Parses ES|QL rows into a per-hash map of grouping field values. Each row's
- * `episode_data` JSON is parsed once, then projected onto the field names that
- * produced the hash. Those names come from the row's own `grouping_fields`
- * (stamped at write time), so labels survive a later change to the rule's
- * grouping config. Pre-v4 events have no `grouping_fields`; for those we fall
- * back to `fallbackFields` (the rule's current config) — best-effort, unchanged
- * from prior behavior. Missing/empty values map to `null`.
+ * `episode_data` JSON is parsed once, then projected onto `groupingFields`.
+ * Missing/empty values map to `null`.
+ *
+ * TODO(https://github.com/elastic/kibana/issues/272899): `groupingFields` is the
+ * rule's current grouping config, so labels for historical series can drift if the
+ * config changed. Resolve per-event field names via rule versioning when available.
  */
 export const parseSeriesGroupingValuesRows = (
   rows: readonly SeriesGroupingValuesRow[],
-  fallbackFields: readonly string[]
+  groupingFields: readonly string[]
 ): SeriesGroupingValuesByHash => {
   const out: SeriesGroupingValuesByHash = {};
 
   for (const row of rows) {
     const data = parseEpisodeDataJson(row.episode_data);
-    const rawGf = row.grouping_fields;
-    const normalizedGf = typeof rawGf === 'string' ? [rawGf] : rawGf ?? [];
-    const rowFields = normalizedGf.length > 0 ? normalizedGf : fallbackFields;
     const fields: Record<string, string | null> = {};
 
-    for (const field of rowFields) {
+    for (const field of groupingFields) {
       const formatted = formatGroupingValueForDisplay(getValueByFieldPath(data, field));
       fields[field] = formatted === '' ? null : formatted;
     }

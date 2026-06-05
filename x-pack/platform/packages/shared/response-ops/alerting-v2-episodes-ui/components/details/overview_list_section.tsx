@@ -12,7 +12,6 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
 import { parseEpisodeDataJson } from '../../utils/episode_grouping_data';
-import { normalizeTags } from '../../utils/normalize_tags';
 import { AlertEpisodeOverviewList } from './overview_list';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -81,12 +80,7 @@ export const AlertEpisodeOverviewListSection = ({
     );
   }
 
-  // Prefer field names stamped on the event at write time so labels survive
-  // a later change to the rule's grouping config; fall back to rule config
-  // for pre-v4 events that don't carry grouping_fields.
-  const eventGroupingFields = normalizeTags(episode?.grouping_fields);
-  const groupingFields =
-    eventGroupingFields.length > 0 ? eventGroupingFields : rule?.grouping?.fields ?? [];
+  const groupingFields = rule?.grouping?.fields ?? [];
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);

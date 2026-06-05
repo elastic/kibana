@@ -81,7 +81,6 @@ describe('useFetchEpisodeEventDataQuery', () => {
     );
     expect(result.current.data).toEqual({
       data: rawData,
-      groupingFields: [],
       dataTimestamp: timestamp,
       isStale: false,
     });
@@ -108,31 +107,9 @@ describe('useFetchEpisodeEventDataQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual({
       data: rawData,
-      groupingFields: [],
       dataTimestamp,
       isStale: true,
     });
-  });
-
-  it('normalizes a single-value grouping_fields keyword into an array', async () => {
-    const rawData = { threshold_met: true };
-    const timestamp = '2026-04-29T10:00:00.000Z';
-    mockRunEsqlAsyncSearch.mockResolvedValue({
-      columns: [...COLUMNS, { name: 'grouping_fields', type: 'keyword' as const }],
-      values: [['ep-1', JSON.stringify(rawData), timestamp, timestamp, 'host.name']],
-    });
-
-    const { result } = renderHook(
-      () =>
-        useFetchEpisodeEventDataQuery({
-          episodeId: 'ep-1',
-          services: { data, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.groupingFields).toEqual(['host.name']);
   });
 
   it('returns null when last_data is null (all events had empty data)', async () => {

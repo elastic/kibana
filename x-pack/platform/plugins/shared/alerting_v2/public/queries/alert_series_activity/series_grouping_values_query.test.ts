@@ -38,9 +38,8 @@ describe('buildSeriesGroupingValuesEsqlQuery', () => {
     expect(queryString).toContain('JSON_EXTRACT(_source, "data")');
     expect(queryString).toContain('LAST(extracted_data, @timestamp)');
     expect(queryString).toContain('extracted_data != "{}"');
-    expect(queryString).toContain('VALUES(grouping_fields)');
     expect(queryString).toContain('BY group_hash');
-    expect(queryString).toContain('KEEP group_hash, episode_data, grouping_fields');
+    expect(queryString).toContain('KEEP group_hash, episode_data');
   });
 
   it('does not constrain the time window (grouping values are hash-invariant)', () => {
@@ -63,7 +62,7 @@ describe('parseSeriesGroupingValuesRows', () => {
     episode_data: data == null ? null : JSON.stringify(data),
   });
 
-  it('projects fallback fields from each hash episode_data when the row has no grouping_fields', () => {
+  it('projects the rule grouping fields from each hash episode_data', () => {
     const rows = [
       row('gh-1', { 'host.name': 'web-01', region: 'us-east' }),
       row('gh-2', { 'host.name': 'web-02', region: 'eu-west' }),
@@ -74,30 +73,6 @@ describe('parseSeriesGroupingValuesRows', () => {
     expect(result).toEqual({
       'gh-1': { 'host.name': 'web-01', region: 'us-east' },
       'gh-2': { 'host.name': 'web-02', region: 'eu-west' },
-    });
-  });
-
-  it("projects each row's own grouping_fields over the fallback, surviving a config change", () => {
-    const rows: SeriesGroupingValuesRow[] = [
-      // Old series stamped under [host.name]; fallback (current rule config) is [region].
-      {
-        group_hash: 'gh-old',
-        episode_data: JSON.stringify({ 'host.name': 'web-01', region: 'us-east' }),
-        grouping_fields: ['host.name'],
-      },
-      // New series stamped under the current [region].
-      {
-        group_hash: 'gh-new',
-        episode_data: JSON.stringify({ region: 'eu-west' }),
-        grouping_fields: ['region'],
-      },
-    ];
-
-    const result = parseSeriesGroupingValuesRows(rows, ['region']);
-
-    expect(result).toEqual({
-      'gh-old': { 'host.name': 'web-01' },
-      'gh-new': { region: 'eu-west' },
     });
   });
 
@@ -121,21 +96,6 @@ describe('parseSeriesGroupingValuesRows', () => {
       'gh-1': { 'host.name': null },
       'gh-2': { 'host.name': null },
     });
-  });
-
-  it('normalizes a single-value grouping_fields keyword string to an array', () => {
-    // ES|QL returns single-value keyword fields as bare strings, not arrays.
-    const rows: SeriesGroupingValuesRow[] = [
-      {
-        group_hash: 'gh-1',
-        episode_data: JSON.stringify({ Carrier: 'JetBeats' }),
-        grouping_fields: 'Carrier' as unknown as string[],
-      },
-    ];
-
-    const result = parseSeriesGroupingValuesRows(rows, ['Carrier']);
-
-    expect(result).toEqual({ 'gh-1': { Carrier: 'JetBeats' } });
   });
 
   it('returns an empty map for no rows', () => {

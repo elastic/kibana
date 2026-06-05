@@ -210,28 +210,6 @@ describe('EpisodeRuleCell', () => {
     expect(screen.getByText('server-1')).toBeInTheDocument();
   });
 
-  it("uses the episode's own grouping_fields over the rule's current config", () => {
-    // Rule now groups by host.name, but this episode was stamped under [region].
-    const row = makeRow({
-      'rule.id': 'r1',
-      grouping_fields: ['region'],
-      episode_data: JSON.stringify({ region: 'us-east', host: { name: 'server-1' } }),
-    });
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByLabelText('region: us-east')).toBeInTheDocument();
-    expect(screen.getByText('us-east')).toBeInTheDocument();
-    expect(screen.queryByText('server-1')).not.toBeInTheDocument();
-  });
-
   it('does not render the query when rowHeight is 1', () => {
     const row = makeRow({ 'rule.id': 'r1' });
     render(

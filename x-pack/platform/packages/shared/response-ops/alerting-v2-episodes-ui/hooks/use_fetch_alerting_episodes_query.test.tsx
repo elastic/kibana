@@ -174,30 +174,6 @@ describe('useFetchAlertingEpisodesQuery', () => {
     expect(result.current.data?.[0].last_tags).toEqual(['solo']);
   });
 
-  it('normalizes a single-value grouping_fields keyword to string[] in select', async () => {
-    const pageSize = 10;
-
-    fetchAlertingEpisodesMock.mockResolvedValue([
-      {
-        ...mockEpisodesData[0],
-        grouping_fields: 'host.name',
-      },
-    ]);
-
-    const { result } = renderHook(
-      () =>
-        useFetchAlertingEpisodesQuery({
-          pageSize,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.[0].grouping_fields).toEqual(['host.name']);
-  });
-
   it('should use keepPreviousData for smooth transitions', async () => {
     const pageSize = 10;
 

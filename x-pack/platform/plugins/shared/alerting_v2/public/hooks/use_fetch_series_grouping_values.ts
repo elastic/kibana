@@ -22,9 +22,8 @@ export interface UseFetchSeriesGroupingValuesOptions {
   /** Group hashes returned by the summary query. */
   groupHashes: readonly string[];
   /**
-   * Field names from the rule's **current** `grouping.fields`. Used to gate the
-   * request and as a fallback when an event predates per-event `grouping_fields`;
-   * post-v4 events carry their own field names so labels survive config changes.
+   * Field names from the rule's `grouping.fields`. Used to gate the request and
+   * to project the grouping values rendered next to each series.
    */
   groupingFields: readonly string[];
   /** Set false to defer the request (e.g. while the summary query is still loading). */

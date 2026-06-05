@@ -13,8 +13,6 @@ export interface EpisodeEventDataRow {
   last_data: string | null;
   last_data_timestamp: string | null;
   last_event_timestamp: string | null;
-  /** Field names that produced this episode's group_hash, stamped at write time. Absent for pre-v4 events. */
-  grouping_fields?: string | string[] | null;
 }
 
 /**
@@ -39,7 +37,6 @@ export const buildEpisodeEventDataQuery = (spaceId: string, episodeId: string) =
     .pipe`INLINE STATS
       last_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}",
       last_data_timestamp = MAX(@timestamp) WHERE extracted_data != "{}",
-      last_event_timestamp = MAX(@timestamp),
-      grouping_fields = VALUES(grouping_fields)
+      last_event_timestamp = MAX(@timestamp)
       BY \`episode.id\``;
 };

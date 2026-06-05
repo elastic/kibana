@@ -27,9 +27,6 @@ const mappings: MappingsDefinition = {
       },
     },
     group_hash: { type: 'keyword' },
-    // Field names that produced `group_hash` at write time. Lets labels survive a
-    // later change to the rule's grouping config (the hash/data still reflect the old fields).
-    grouping_fields: { type: 'keyword' },
     data: { type: 'flattened' },
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
@@ -58,8 +55,6 @@ export const alertEventType = alertEventTypeSchema.enum;
 export const alertEpisodeStatus = alertEpisodeStatusSchema.enum;
 export const alertEventSeverity = alertEventSeveritySchema.enum;
 
-const MAX_STRING_LENGTH = 1024;
-
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
   scheduled_timestamp: z.string().optional(),
@@ -67,8 +62,7 @@ export const alertEventSchema = z.object({
     id: z.string(),
     version: z.number(),
   }),
-  group_hash: z.string().max(MAX_STRING_LENGTH),
-  grouping_fields: z.array(z.string().max(MAX_STRING_LENGTH)).max(10).optional(),
+  group_hash: z.string(),
   data: z.record(z.string(), z.any()),
   status: alertEventStatusSchema,
   source: z.string(),

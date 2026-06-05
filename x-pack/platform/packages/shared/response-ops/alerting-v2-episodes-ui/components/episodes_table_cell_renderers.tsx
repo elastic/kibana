@@ -23,7 +23,6 @@ import type { EpisodeActionState } from '../types/action';
 import type { AlertEpisodeGroupAction } from '../types/action';
 
 import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
-import { normalizeTags } from '../utils/normalize_tags';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { AlertEpisodeTags } from './actions/tags';
@@ -107,13 +106,7 @@ export const EpisodeRuleCell = ({
   }
 
   const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
-  // Prefer the field names stamped on the event so labels survive a later change to the
-  // rule's grouping config; fall back to the rule's current fields for pre-v4 events.
-  const eventGroupingFields = normalizeTags(
-    row.flattened.grouping_fields as string | string[] | null | undefined
-  );
-  const groupingFields =
-    eventGroupingFields.length > 0 ? eventGroupingFields : rule.grouping?.fields ?? [];
+  const groupingFields = rule.grouping?.fields ?? [];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
