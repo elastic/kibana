@@ -22,6 +22,76 @@ interface ReportStepFailureParams {
   workflow_id?: string;
 }
 
+const includesAny = (lower: string, needles: readonly string[]): boolean =>
+  needles.some((needle) => lower.includes(needle));
+
+/**
+ * Ordered failure-category rules. More-specific patterns are listed before
+ * generic ones so that, e.g., "Workflow 'x' is not valid" maps to
+ * `workflow_invalid` rather than the generic `workflow_error` bucket.
+ */
+const CATEGORY_RULES: ReadonlyArray<{
+  category: ErrorCategory;
+  test: (lower: string) => boolean;
+}> = [
+  { category: 'timeout', test: (l) => includesAny(l, ['timeout', 'timed out']) },
+  {
+    category: 'rate_limit',
+    test: (l) => includesAny(l, ['429', 'rate limit', 'too many requests']),
+  },
+  {
+    category: 'network_error',
+    test: (l) =>
+      includesAny(l, ['econnrefused', 'enotfound', 'socket hang up', 'fetch failed', 'etimedout']),
+  },
+  {
+    category: 'permission_error',
+    test: (l) =>
+      includesAny(l, [
+        'forbidden',
+        '403',
+        'unauthorized',
+        '401',
+        'insufficient privileges',
+        'security_exception',
+      ]),
+  },
+  {
+    category: 'concurrent_conflict',
+    test: (l) => includesAny(l, ['409', 'version_conflict', 'conflict', 'was cancelled']),
+  },
+  {
+    category: 'cluster_health',
+    test: (l) =>
+      includesAny(l, [
+        'no_shard_available',
+        'cluster_block',
+        'circuit_breaking_exception',
+        'es_rejected_execution',
+      ]),
+  },
+  { category: 'connector_error', test: (l) => l.includes('connector') },
+  { category: 'anonymization_error', test: (l) => l.includes('anonymization') },
+  {
+    category: 'step_registration_error',
+    test: (l) => includesAny(l, ['not registered', 'unknown step', 'step type']),
+  },
+  { category: 'workflow_disabled', test: (l) => includesAny(l, ['is not enabled', 'is disabled']) },
+  { category: 'workflow_deleted', test: (l) => l.includes('not found') && l.includes('workflow') },
+  {
+    category: 'workflow_invalid',
+    test: (l) =>
+      includesAny(l, [
+        'is not valid',
+        'missing a definition',
+        'has no definition',
+        'no step definitions',
+      ]),
+  },
+  { category: 'validation_error', test: (l) => l.includes('validat') },
+  { category: 'workflow_error', test: (l) => l.includes('workflow') },
+];
+
 export const classifyErrorCategory = (error: unknown): ErrorCategory => {
   if (error instanceof AttackDiscoveryError) {
     return error.errorCategory;
@@ -30,99 +100,7 @@ export const classifyErrorCategory = (error: unknown): ErrorCategory => {
   const message = error instanceof Error ? error.message : String(error);
   const lower = message.toLowerCase();
 
-  if (lower.includes('timeout') || lower.includes('timed out')) {
-    return 'timeout';
-  }
-
-  if (
-    lower.includes('429') ||
-    lower.includes('rate limit') ||
-    lower.includes('too many requests')
-  ) {
-    return 'rate_limit';
-  }
-
-  if (
-    lower.includes('econnrefused') ||
-    lower.includes('enotfound') ||
-    lower.includes('socket hang up') ||
-    lower.includes('fetch failed') ||
-    lower.includes('etimedout')
-  ) {
-    return 'network_error';
-  }
-
-  if (
-    lower.includes('forbidden') ||
-    lower.includes('403') ||
-    lower.includes('unauthorized') ||
-    lower.includes('401') ||
-    lower.includes('insufficient privileges') ||
-    lower.includes('security_exception')
-  ) {
-    return 'permission_error';
-  }
-
-  if (
-    lower.includes('409') ||
-    lower.includes('version_conflict') ||
-    lower.includes('conflict') ||
-    lower.includes('was cancelled')
-  ) {
-    return 'concurrent_conflict';
-  }
-
-  if (
-    lower.includes('no_shard_available') ||
-    lower.includes('cluster_block') ||
-    lower.includes('circuit_breaking_exception') ||
-    lower.includes('es_rejected_execution')
-  ) {
-    return 'cluster_health';
-  }
-
-  if (lower.includes('connector')) {
-    return 'connector_error';
-  }
-
-  if (lower.includes('anonymization')) {
-    return 'anonymization_error';
-  }
-
-  if (
-    lower.includes('not registered') ||
-    lower.includes('unknown step') ||
-    lower.includes('step type')
-  ) {
-    return 'step_registration_error';
-  }
-
-  if (lower.includes('is not enabled') || lower.includes('is disabled')) {
-    return 'workflow_disabled';
-  }
-
-  if (lower.includes('not found') && lower.includes('workflow')) {
-    return 'workflow_deleted';
-  }
-
-  if (
-    lower.includes('is not valid') ||
-    lower.includes('missing a definition') ||
-    lower.includes('has no definition') ||
-    lower.includes('no step definitions')
-  ) {
-    return 'workflow_invalid';
-  }
-
-  if (lower.includes('validat')) {
-    return 'validation_error';
-  }
-
-  if (lower.includes('workflow')) {
-    return 'workflow_error';
-  }
-
-  return 'unknown';
+  return CATEGORY_RULES.find(({ test }) => test(lower))?.category ?? 'unknown';
 };
 
 export const reportStepFailure = ({
