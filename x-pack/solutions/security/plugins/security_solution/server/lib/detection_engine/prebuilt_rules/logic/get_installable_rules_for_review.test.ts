@@ -10,6 +10,7 @@ import type { MlAuthz } from '../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_assets_client';
 import type { RuleSummary } from './rule_objects/prebuilt_rule_objects_client';
 import { getInstallableRulesForReview } from './get_installable_rules_for_review';
+import type { BasicRuleInfo } from './basic_rule_info';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { narrowRuleResponseFields } from '../api/narrow_rule_response_fields';
 
@@ -26,7 +27,7 @@ const permissiveMlAuthz: MlAuthz = {
   validateRuleType: async () => ({ valid: true, message: undefined }),
 };
 
-const version = (ruleId: string, type: string = 'query', v = 1) => ({
+const version = (ruleId: string, type: BasicRuleInfo['type'] = 'query', v = 1) => ({
   rule_id: ruleId,
   version: v,
   type,
