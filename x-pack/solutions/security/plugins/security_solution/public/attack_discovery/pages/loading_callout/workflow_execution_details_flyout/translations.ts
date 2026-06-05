@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const WORKFLOW_EXECUTION_DETAILS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.loadingCallout.workflowExecutionDetailsFlyout.workflowExecutionDetails',
   {
-    defaultMessage: 'Workflow Execution Details',
+    defaultMessage: 'Workflow execution details',
   }
 );
 

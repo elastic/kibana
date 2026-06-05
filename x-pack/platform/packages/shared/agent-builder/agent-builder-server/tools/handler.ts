@@ -102,25 +102,6 @@ export interface ToolHandlerContext {
    */
   spaceId: string;
   /**
-   * The connector ID resolved for this agent execution, if any.
-   *
-   * Resolution mirrors {@link AgentHandlerContext.defaultConnectorId} — it
-   * follows the platform's standard order (explicit per-request override →
-   * `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR` UI setting → feature-registered
-   * inference endpoints → connector-list fallback). This field is opt-in: tools
-   * only use it if they explicitly read it. It is intentionally NOT included in
-   * tool params, telemetry events, APM spans, or LLM-visible serialized
-   * payloads.
-   *
-   * Tools that require an LLM connector for downstream invocations (for
-   * example, kicking off a server-side workflow that itself calls an LLM)
-   * should prefer this field over asking the agent to surface a connector ID
-   * through tool parameters, both to avoid prompt-leakage of connector
-   * identifiers and to keep behavior aligned with the connector the user
-   * selected for the conversation.
-   */
-  defaultConnectorId?: string;
-  /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
    */

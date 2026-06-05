@@ -15,6 +15,7 @@ import { RUN_ATTACK_DISCOVERY_TOOL_ID, getRunAttackDiscoveryTool } from '.';
 
 const mockExecuteGenerationWorkflow = jest.fn();
 const mockResolveConnectorDetails = jest.fn();
+const mockGetDefaultModel = jest.fn();
 
 jest.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => ({
   executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
@@ -49,12 +50,11 @@ const buildToolDeps = () => ({
 const buildContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerContext => ({
   attachments: {} as never,
   callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
-  defaultConnectorId: 'context-connector',
   esClient: elasticsearchClientMock.createScopedClusterClient(),
   events: {} as never,
   filestore: {} as never,
   logger: loggingSystemMock.createLogger(),
-  modelProvider: {} as never,
+  modelProvider: { getDefaultModel: mockGetDefaultModel } as never,
   prompts: {} as never,
   request: FAKE_REQUEST,
   resultStore: {} as never,
@@ -111,6 +111,10 @@ describe('getRunAttackDiscoveryTool', () => {
       connectorName: 'Connector',
     });
 
+    mockGetDefaultModel.mockResolvedValue({
+      connector: { connectorId: 'model-provider-connector' },
+    });
+
     mockExecuteGenerationWorkflow.mockResolvedValue(validationSucceededOutcome);
   });
 
@@ -140,22 +144,40 @@ describe('getRunAttackDiscoveryTool', () => {
     );
   });
 
-  it('falls back to context.defaultConnectorId when args.connector_id is not provided', async () => {
+  it('does not call modelProvider.getDefaultModel when args.connector_id is provided', async () => {
+    await invokeHandler({ connector_id: 'override-connector' });
+
+    expect(mockGetDefaultModel).not.toHaveBeenCalled();
+  });
+
+  it('resolves the connector from modelProvider.getDefaultModel when args.connector_id is not provided', async () => {
     await invokeHandler({});
 
     expect(mockResolveConnectorDetails).toHaveBeenCalledWith(
-      expect.objectContaining({ connectorId: 'context-connector' })
+      expect.objectContaining({ connectorId: 'model-provider-connector' })
     );
   });
 
-  it('returns an error result when neither args.connector_id nor context.defaultConnectorId is available', async () => {
-    const result = await invokeHandler({}, { defaultConnectorId: undefined });
+  it('returns an error result when modelProvider.getDefaultModel throws', async () => {
+    mockGetDefaultModel.mockRejectedValue(new Error('no default model'));
+
+    const result = await invokeHandler({});
+
+    expect(result.type).toBe(ToolResultType.error);
+  });
+
+  it('returns an error result when modelProvider.getDefaultModel resolves an empty connectorId', async () => {
+    mockGetDefaultModel.mockResolvedValue({ connector: { connectorId: '' } });
+
+    const result = await invokeHandler({});
 
     expect(result.type).toBe(ToolResultType.error);
   });
 
   it('does not invoke executeGenerationWorkflow when no connector is resolvable', async () => {
-    await invokeHandler({}, { defaultConnectorId: undefined });
+    mockGetDefaultModel.mockRejectedValue(new Error('no default model'));
+
+    await invokeHandler({});
 
     expect(mockExecuteGenerationWorkflow).not.toHaveBeenCalled();
   });
@@ -165,7 +187,7 @@ describe('getRunAttackDiscoveryTool', () => {
 
     expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
-        apiConfig: { action_type_id: '.gen-ai', connector_id: 'context-connector' },
+        apiConfig: { action_type_id: '.gen-ai', connector_id: 'model-provider-connector' },
       })
     );
   });

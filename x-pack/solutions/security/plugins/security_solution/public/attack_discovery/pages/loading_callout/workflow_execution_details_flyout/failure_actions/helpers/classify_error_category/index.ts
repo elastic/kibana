@@ -10,6 +10,89 @@ import type { ErrorCategory } from '@kbn/discoveries-schemas';
 /** Client-side failure category — alias for the shared ErrorCategory from @kbn/discoveries-schemas. */
 export type FailureCategory = ErrorCategory;
 
+const includesAny = (lower: string, needles: readonly string[]): boolean =>
+  needles.some((needle) => lower.includes(needle));
+
+/**
+ * Ordered failure-category rules. More-specific patterns are listed before
+ * generic ones. The ordering prevents e.g. "Workflow 'x' is not valid" from
+ * matching the generic `workflow_error` bucket instead of `workflow_invalid`.
+ */
+const CATEGORY_RULES: ReadonlyArray<{
+  category: FailureCategory;
+  test: (lower: string) => boolean;
+}> = [
+  // Workflow-specific categories — checked before generic 'workflow' catch-all.
+  { category: 'workflow_disabled', test: (l) => includesAny(l, ['is not enabled', 'is disabled']) },
+  { category: 'workflow_deleted', test: (l) => l.includes('not found') && l.includes('workflow') },
+  {
+    category: 'workflow_invalid',
+    test: (l) =>
+      includesAny(l, [
+        'is not valid',
+        'missing a definition',
+        'has no definition',
+        'no step definitions',
+      ]),
+  },
+  // Rate limiting — checked before permission/network to avoid false positives.
+  {
+    category: 'rate_limit',
+    test: (l) => includesAny(l, ['429', 'rate limit', 'too many requests']),
+  },
+  // Network errors.
+  {
+    category: 'network_error',
+    test: (l) =>
+      includesAny(l, ['econnrefused', 'enotfound', 'socket hang up', 'fetch failed', 'etimedout']),
+  },
+  // Permission errors.
+  {
+    category: 'permission_error',
+    test: (l) =>
+      includesAny(l, [
+        'forbidden',
+        '403',
+        'unauthorized',
+        '401',
+        'insufficient privileges',
+        'security_exception',
+      ]),
+  },
+  // Concurrent conflicts (409, version_conflict, generic conflict, or cancellation).
+  {
+    category: 'concurrent_conflict',
+    test: (l) =>
+      includesAny(l, ['409', 'version_conflict', 'version conflict', 'conflict', 'was cancelled']),
+  },
+  // Cluster health issues.
+  {
+    category: 'cluster_health',
+    test: (l) =>
+      includesAny(l, [
+        'no_shard_available',
+        'cluster_block',
+        'circuit_breaking_exception',
+        'es_rejected_execution',
+      ]),
+  },
+  // Anonymization pipeline errors.
+  { category: 'anonymization_error', test: (l) => l.includes('anonymization') },
+  // Workflow step registration errors.
+  {
+    category: 'step_registration_error',
+    test: (l) => includesAny(l, ['not registered', 'unknown step', 'step type']),
+  },
+  // Timeouts — checked before connector to avoid matching "connector timeout".
+  { category: 'timeout', test: (l) => includesAny(l, ['timeout', 'timed out']) },
+  // Connector errors.
+  { category: 'connector_error', test: (l) => l.includes('connector') },
+  // Validation errors — checked before generic workflow catch-all.
+  { category: 'validation_error', test: (l) => l.includes('validat') },
+  // Generic workflow errors.
+  { category: 'workflow_error', test: (l) => l.includes('workflow') },
+];
+
 /**
  * Maps an error message string to a structured failure category.
  *
@@ -20,110 +103,5 @@ export type FailureCategory = ErrorCategory;
 export const classifyErrorCategory = (reason: string): FailureCategory => {
   const lower = reason.toLowerCase();
 
-  // Workflow-specific categories — checked before generic 'workflow' catch-all.
-  if (lower.includes('is not enabled') || lower.includes('is disabled')) {
-    return 'workflow_disabled';
-  }
-
-  if (lower.includes('not found') && lower.includes('workflow')) {
-    return 'workflow_deleted';
-  }
-
-  if (
-    lower.includes('is not valid') ||
-    lower.includes('missing a definition') ||
-    lower.includes('has no definition') ||
-    lower.includes('no step definitions')
-  ) {
-    return 'workflow_invalid';
-  }
-
-  // Rate limiting — checked before permission/network to avoid false positives.
-  if (
-    lower.includes('429') ||
-    lower.includes('rate limit') ||
-    lower.includes('too many requests')
-  ) {
-    return 'rate_limit';
-  }
-
-  // Network errors.
-  if (
-    lower.includes('econnrefused') ||
-    lower.includes('enotfound') ||
-    lower.includes('socket hang up') ||
-    lower.includes('fetch failed') ||
-    lower.includes('etimedout')
-  ) {
-    return 'network_error';
-  }
-
-  // Permission errors.
-  if (
-    lower.includes('forbidden') ||
-    lower.includes('403') ||
-    lower.includes('unauthorized') ||
-    lower.includes('401') ||
-    lower.includes('insufficient privileges') ||
-    lower.includes('security_exception')
-  ) {
-    return 'permission_error';
-  }
-
-  // Concurrent conflicts (409, version_conflict, generic conflict, or cancellation).
-  if (
-    lower.includes('409') ||
-    lower.includes('version_conflict') ||
-    lower.includes('version conflict') ||
-    lower.includes('conflict') ||
-    lower.includes('was cancelled')
-  ) {
-    return 'concurrent_conflict';
-  }
-
-  // Cluster health issues.
-  if (
-    lower.includes('no_shard_available') ||
-    lower.includes('cluster_block') ||
-    lower.includes('circuit_breaking_exception') ||
-    lower.includes('es_rejected_execution')
-  ) {
-    return 'cluster_health';
-  }
-
-  // Anonymization pipeline errors.
-  if (lower.includes('anonymization')) {
-    return 'anonymization_error';
-  }
-
-  // Workflow step registration errors.
-  if (
-    lower.includes('not registered') ||
-    lower.includes('unknown step') ||
-    lower.includes('step type')
-  ) {
-    return 'step_registration_error';
-  }
-
-  // Timeouts — checked before connector to avoid matching "connector timeout".
-  if (lower.includes('timeout') || lower.includes('timed out')) {
-    return 'timeout';
-  }
-
-  // Connector errors.
-  if (lower.includes('connector')) {
-    return 'connector_error';
-  }
-
-  // Validation errors — checked before generic workflow catch-all.
-  if (lower.includes('validat')) {
-    return 'validation_error';
-  }
-
-  // Generic workflow errors.
-  if (lower.includes('workflow')) {
-    return 'workflow_error';
-  }
-
-  return 'unknown';
+  return CATEGORY_RULES.find(({ test }) => test(lower))?.category ?? 'unknown';
 };

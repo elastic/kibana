@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
+import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 
 jest.mock('./constants', () => ({
   ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS: 25,
@@ -25,12 +26,20 @@ jest.mock('../../helpers/resolve_connector_details', () => ({
   resolveConnectorDetails: jest.fn(),
 }));
 
+jest.mock('../../helpers/resolve_default_connector_id', () => ({
+  resolveDefaultConnectorId: jest.fn(),
+}));
+
 jest.mock('uuid', () => ({
   v4: () => 'test-execution-uuid',
 }));
 
 const mockResolveConnectorDetails = resolveConnectorDetails as jest.MockedFunction<
   typeof resolveConnectorDetails
+>;
+
+const mockResolveDefaultConnectorId = resolveDefaultConnectorId as jest.MockedFunction<
+  typeof resolveDefaultConnectorId
 >;
 
 describe('getRunStepDefinition', () => {
@@ -43,6 +52,8 @@ describe('getRunStepDefinition', () => {
 
   const mockActionsClient = { get: jest.fn() };
 
+  const mockUiSettingsClient = { get: jest.fn() };
+
   const mockGetStartServices = jest.fn().mockResolvedValue({
     coreStart: {
       elasticsearch: {
@@ -51,6 +62,12 @@ describe('getRunStepDefinition', () => {
             asCurrentUser: {},
           }),
         },
+      },
+      savedObjects: {
+        getScopedClient: jest.fn().mockReturnValue({}),
+      },
+      uiSettings: {
+        asScopedToClient: jest.fn().mockReturnValue(mockUiSettingsClient),
       },
     },
     pluginsStart: {
@@ -161,6 +178,8 @@ describe('getRunStepDefinition', () => {
       connectorName: 'Test Connector',
     });
 
+    mockResolveDefaultConnectorId.mockResolvedValue('default-connector');
+
     mockExecuteGenerationWorkflow.mockResolvedValue(mockSuccessOutcome);
   });
 
@@ -185,6 +204,85 @@ describe('getRunStepDefinition', () => {
         logger: mockLogger,
         request: { headers: {} },
       });
+    });
+
+    it('does not resolve a default connector when connector_id is provided', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockResolveDefaultConnectorId).not.toHaveBeenCalled();
+    });
+
+    it('resolves the default connector when connector_id is omitted', async () => {
+      const contextWithoutConnectorId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithoutConnectorId as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith({
+        inference: undefined,
+        logger: mockLogger,
+        request: { headers: {} },
+        uiSettingsClient: mockUiSettingsClient,
+      });
+    });
+
+    it('uses the resolved default connector id for connector details when connector_id is omitted', async () => {
+      const contextWithoutConnectorId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithoutConnectorId as never);
+
+      expect(mockResolveConnectorDetails).toHaveBeenCalledWith({
+        actionsClient: mockActionsClient,
+        connectorId: 'default-connector',
+        inference: undefined,
+        logger: mockLogger,
+        request: { headers: {} },
+      });
+    });
+
+    it('uses the resolved default connector id in the apiConfig passed to the pipeline', async () => {
+      const contextWithoutConnectorId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithoutConnectorId as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          apiConfig: expect.objectContaining({
+            connector_id: 'default-connector',
+          }),
+        })
+      );
     });
   });
 

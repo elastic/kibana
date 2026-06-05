@@ -140,6 +140,32 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
 
   const effectiveGenerationStatus = liveGeneration?.status ?? generationStatus;
 
+  // Merge prop-provided counts with the (potentially fresher) live generation
+  // values. Kept in a memo so the fallback logic does not inflate the
+  // component's cyclomatic complexity.
+  const loadingCalloutCounts = useMemo(
+    () => ({
+      alertsContextCount: alertsContextCount ?? liveGeneration?.alerts_context_count ?? null,
+      discoveries: discoveriesCount ?? liveGeneration?.discoveries,
+      duplicatesDroppedCount: duplicatesDroppedCount ?? liveGeneration?.duplicates_dropped_count,
+      generatedCount: generatedCount ?? liveGeneration?.generated_count,
+      generationEndTime: generationEndTime ?? liveGeneration?.end,
+      hallucinationsFilteredCount:
+        hallucinationsFilteredCount ?? liveGeneration?.hallucinations_filtered_count,
+      persistedCount: persistedCount ?? liveGeneration?.persisted_count,
+    }),
+    [
+      alertsContextCount,
+      discoveriesCount,
+      duplicatesDroppedCount,
+      generatedCount,
+      generationEndTime,
+      hallucinationsFilteredCount,
+      liveGeneration,
+      persistedCount,
+    ]
+  );
+
   const {
     effectiveWorkflowExecutions,
     effectiveWorkflowId,
@@ -298,26 +324,22 @@ const WorkflowExecutionDetailsFlyoutComponent: React.FC<WorkflowExecutionDetails
 
       <EuiFlyoutBody>
         <LoadingCallout
-          alertsContextCount={alertsContextCount ?? liveGeneration?.alerts_context_count ?? null}
+          alertsContextCount={loadingCalloutCounts.alertsContextCount}
           approximateFutureTime={approximateFutureTime ?? null}
           averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
           connectorName={connectorName}
-          discoveries={discoveriesCount ?? liveGeneration?.discoveries}
-          duplicatesDroppedCount={
-            duplicatesDroppedCount ?? liveGeneration?.duplicates_dropped_count
-          }
+          discoveries={loadingCalloutCounts.discoveries}
+          duplicatesDroppedCount={loadingCalloutCounts.duplicatesDroppedCount}
           end={end}
           eventActions={eventActions}
           executionUuid={executionUuid}
-          generatedCount={generatedCount ?? liveGeneration?.generated_count}
-          generationEndTime={generationEndTime ?? liveGeneration?.end}
-          hallucinationsFilteredCount={
-            hallucinationsFilteredCount ?? liveGeneration?.hallucinations_filtered_count
-          }
+          generatedCount={loadingCalloutCounts.generatedCount}
+          generationEndTime={loadingCalloutCounts.generationEndTime}
+          hallucinationsFilteredCount={loadingCalloutCounts.hallucinationsFilteredCount}
           hideActions
           loadingMessage={loadingMessage}
           localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-          persistedCount={persistedCount ?? liveGeneration?.persisted_count}
+          persistedCount={loadingCalloutCounts.persistedCount}
           reason={reason}
           start={start}
           status={effectiveGenerationStatus}

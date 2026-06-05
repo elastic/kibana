@@ -16,6 +16,7 @@ import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/gene
 import { RunStepCommonDefinition } from '../../../../common/step_types/run_step';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
+import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
 import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from './constants';
 
@@ -70,18 +71,29 @@ export const getRunStepDefinition = ({
 
         const executionUuid = uuidv4();
 
-        context.logger.info(
-          `Starting Attack Discovery run step (mode=${mode}, connector=${connectorId})`
-        );
-
-        const { pluginsStart } = await getStartServices();
+        const { coreStart, pluginsStart } = await getStartServices();
         const request = context.contextManager.getFakeRequest();
 
         const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
 
+        const effectiveConnectorId = connectorId
+          ? connectorId
+          : await resolveDefaultConnectorId({
+              inference: pluginsStart.inference,
+              logger,
+              request,
+              uiSettingsClient: coreStart.uiSettings.asScopedToClient(
+                coreStart.savedObjects.getScopedClient(request)
+              ),
+            });
+
+        context.logger.info(
+          `Starting Attack Discovery run step (mode=${mode}, connector=${effectiveConnectorId})`
+        );
+
         const { actionTypeId } = await resolveConnectorDetails({
           actionsClient,
-          connectorId,
+          connectorId: effectiveConnectorId,
           inference: pluginsStart.inference,
           logger,
           request,
@@ -89,7 +101,7 @@ export const getRunStepDefinition = ({
 
         const apiConfig = {
           action_type_id: actionTypeId,
-          connector_id: connectorId,
+          connector_id: effectiveConnectorId,
         };
 
         // Auto-detect 'provided' mode when alerts are pre-supplied

@@ -179,7 +179,7 @@ describe('WorkflowExecutionDetailsFlyout', () => {
         </TestProviders>
       );
 
-      expect(screen.getByText('Workflow Execution Details')).toBeInTheDocument();
+      expect(screen.getByText('Workflow execution details')).toBeInTheDocument();
     });
 
     it('renders WorkflowPipelineMonitor when data is available', () => {
