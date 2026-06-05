@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
-import {
-  createEndpointResponseActionsSkill,
-  ISOLATE_TOOL_ID,
-} from '.';
+import { createEndpointResponseActionsSkill, ISOLATE_TOOL_ID } from '.';
 
 describe('debug mock behavior', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
