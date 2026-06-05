@@ -32,6 +32,7 @@ const schema = z.object({
 export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
   id: AD_GET_JOB_INFO_TOOL_ID,
   type: ToolType.builtin,
+  tags: ['ml', 'anomaly-detection'],
   description:
     'Read ML job and datafeed state, config, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty.',
   schema,

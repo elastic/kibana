@@ -27,6 +27,7 @@ const schema = z.object({
 export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
   id: AD_CREATE_JOB_TOOL_ID,
   type: ToolType.builtin,
+  tags: ['ml', 'anomaly-detection'],
   description:
     'Create an ML anomaly detection job and its datafeed. Also validates a job spec or estimates memory requirement before creation.',
   schema,

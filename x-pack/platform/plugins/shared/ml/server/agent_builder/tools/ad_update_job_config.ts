@@ -47,6 +47,7 @@ const schema = z.object({
 export const adUpdateJobConfigTool: BuiltinToolDefinition<typeof schema> = {
   id: AD_UPDATE_JOB_CONFIG_TOOL_ID,
   type: ToolType.builtin,
+  tags: ['ml', 'anomaly-detection'],
   description:
     'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event.',
   schema,

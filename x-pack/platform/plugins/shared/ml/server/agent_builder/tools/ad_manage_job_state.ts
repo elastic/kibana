@@ -38,6 +38,7 @@ const schema = z.object({
 export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
   id: AD_MANAGE_JOB_STATE_TOOL_ID,
   type: ToolType.builtin,
+  tags: ['ml', 'anomaly-detection'],
   description:
     'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, or preview a datafeed.',
   schema,
