@@ -54,6 +54,24 @@ Pass a title object when the page title can be renamed from the header:
 The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
 saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
+## Title size
+
+The title is `xs` by default and `s` when the header has tabs (an `xs` title looks too small in the
+taller tabbed header). This is automatic — there is no size knob to set.
+
+## Padding
+
+`padding` controls the header's **horizontal** layout only. Vertical padding is standardized
+internally (independent of the `padding` prop and the title size) so the header keeps a consistent
+height — 48px for a single row, regardless of title size or whether only a back button is present.
+
+- `'none'` — no horizontal padding, no bleed.
+- `'m'` — symmetric horizontal padding (default for inline headers).
+- `{ bleed: 'm' | 'l' }` — negative margin on left/right + top, cancelling a padded container so the
+  header spans to its edges and sits flush at the top; content is auto re-inset to stay aligned with
+  the page gutter. Set `bleed` to your container's padding when rendering inline inside a padded page
+  template.
+
 ## Chrome Next flag and runtime checks
 
 Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to

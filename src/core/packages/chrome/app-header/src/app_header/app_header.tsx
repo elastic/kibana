@@ -60,6 +60,10 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
+
+    // Tabs make a taller header where an `xs` title looks too small, so default to `s` there.
+    const titleSize = tabs?.length ? 's' : 'xs';
+
     const show =
       title !== undefined ||
       back !== undefined ||
@@ -79,7 +83,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} />}
+        title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         trailing={
