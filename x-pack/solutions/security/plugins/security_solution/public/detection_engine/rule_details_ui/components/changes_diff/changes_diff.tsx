@@ -6,8 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiPanel, EuiSkeletonText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { GutterOptions } from 'react-diff-view';
+import { EuiCallOut, EuiEmptyPrompt, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { SecurityRuleChangeTrackingAction } from '../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
 import { DiffView } from '../../../rule_management/components/rule_details/json_diff/diff_view';
@@ -75,6 +78,33 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     );
   }
 
+  const noDiffAvailable =
+    RULE_EDIT_CHANGE_TRACKING_ACTIONS.includes(item.action) && !item.old_values;
+
+  if (noDiffAvailable) {
+    return (
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          data-test-subj="ruleChangesHistoryNoDiffCallout"
+        >
+          {i18n.NO_DIFF_AVAILABLE_CALLOUT}
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+        <div css={noInsertionHighlightCss}>
+          <DiffView
+            viewType="unified"
+            oldSource={oldSource}
+            newSource={newSource}
+            renderGutter={renderLineNumberGutter}
+            data-test-subj="ruleChangesHistoryDiff"
+          />
+        </div>
+      </>
+    );
+  }
+
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <DiffView
@@ -87,6 +117,24 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     </EuiPanel>
   );
 }
+
+const RULE_EDIT_CHANGE_TRACKING_ACTIONS: string[] = [
+  RuleChangeTrackingAction.ruleUpdate,
+  SecurityRuleChangeTrackingAction.ruleImport,
+  SecurityRuleChangeTrackingAction.ruleRevert,
+];
+
+const noInsertionHighlightCss = css`
+  .rule-update-diff-code.diff-code-insert {
+    background: transparent;
+  }
+  .rule-update-diff-gutter.diff-gutter-insert {
+    background: transparent;
+  }
+  .rule-update-diff-code.diff-code-insert .diff-code-edit {
+    background: transparent;
+  }
+`;
 
 function renderLineNumberGutter({ change }: GutterOptions): JSX.Element {
   return <span>{change.type === 'normal' ? change.oldLineNumber : change.lineNumber}</span>;

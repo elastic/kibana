@@ -20,3 +20,11 @@ export const NO_VISIBLE_CHANGES_TITLE = i18n.translate(
     defaultMessage: 'No visible field changes',
   }
 );
+
+export const NO_DIFF_AVAILABLE_CALLOUT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleChangesHistory.noDiffAvailableCallout',
+  {
+    defaultMessage:
+      'Change tracking was activated while this rule already existed. Because no prior state was captured, a before/after comparison is unavailable the complete rule state at the time of this update is shown instead.',
+  }
+);
