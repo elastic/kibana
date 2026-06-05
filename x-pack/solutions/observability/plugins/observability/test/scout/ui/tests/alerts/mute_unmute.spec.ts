@@ -23,7 +23,12 @@ import { test } from '../../fixtures';
 const TEST_INDEX = 'mute-test-data';
 const STACK_ALERTS_INDEX = '.alerts-stack.alerts-default';
 const MIN_ALERTS = 2;
-const ASYNC_POLL = { timeout: 60_000, intervals: [3_000] } as const;
+// Not `as const`: `expect.poll` expects `intervals?: number[]`, and `as const`
+// would widen it to a readonly tuple that isn't assignable.
+const ASYNC_POLL: { timeout: number; intervals: number[] } = {
+  timeout: 60_000,
+  intervals: [3_000],
+};
 
 async function countActiveAlerts(esClient: Client, ruleId: string): Promise<number> {
   const response = await esClient.count({
