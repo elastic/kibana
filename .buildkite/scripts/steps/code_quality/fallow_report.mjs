@@ -107,6 +107,12 @@ function gradeEmoji(grade) {
   }
 }
 
+function trendEmoji(direction) {
+  if (direction === 'improving') return '↑';
+  if (direction === 'declining') return '↓';
+  return '→';
+}
+
 // --- Main ---
 
 const args = process.argv.slice(2);
@@ -224,6 +230,41 @@ for (const owner of filteredOwners) {
       2
     )} · ${critical.length} critical`
   );
+}
+
+// Trend (global, from fallow health_trend — present only when --trend was used)
+// metrics is an array: [{ name, label, previous, current, direction }, ...]
+const trend = data.health_trend;
+if (trend) {
+  const prevDate = new Date(trend.compared_to.timestamp).toISOString().slice(0, 10);
+  const arrow = trendEmoji(trend.overall_direction);
+  const direction = trend.overall_direction;
+
+  const findMetric = (name) => trend.metrics?.find((m) => m.name === name);
+
+  lines.push(`\n--- Trend vs ${prevDate}`);
+  lines.push(`  ${arrow} ${direction}`);
+
+  const metricsToShow = ['avg_cyclomatic', 'maintainability_avg', 'unit_size_very_high_pct'];
+  for (const key of metricsToShow) {
+    const m = findMetric(key);
+    if (!m) continue;
+    lines.push(
+      `  ${trendEmoji(m.direction)} ${m.label}: ${m.previous?.toFixed(2) ?? '?'} → ${
+        m.current?.toFixed(2) ?? '?'
+      }`
+    );
+  }
+
+  const trendParts = metricsToShow
+    .map(findMetric)
+    .filter(Boolean)
+    .map(
+      (m) =>
+        `${trendEmoji(m.direction)} ${m.label}: ${m.previous?.toFixed(2)}→${m.current?.toFixed(2)}`
+    );
+
+  annotationLines.push(`\n${arrow} **${direction}** vs ${prevDate} · ${trendParts.join(' · ')}`);
 }
 
 // Print sections
