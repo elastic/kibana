@@ -59,50 +59,32 @@ describe('Transform Health Rule Type', () => {
       expect(thrownError).toBeInstanceOf(AlertsClientError);
     });
 
-    it('marks 404 errors from the transform health service as user errors', async () => {
-      const ruleType = getTransformHealthRuleType(mockGetFieldFormatsStart);
-      const options = createExecutorOptions();
+    it.each([
+      ['statusCode', { statusCode: 404 }],
+      ['meta.statusCode', { meta: { statusCode: 404 } }],
+    ])(
+      'marks 404 errors with `%s` from the transform health service as user errors',
+      async (_, errorProps) => {
+        const ruleType = getTransformHealthRuleType(mockGetFieldFormatsStart);
+        const options = createExecutorOptions();
 
-      const notFoundError = Object.assign(new Error('transform not found'), {
-        statusCode: 404,
-      });
+        const notFoundError = Object.assign(new Error('transform not found'), errorProps);
 
-      const mockEsClient = options.services.scopedClusterClient.asCurrentUser;
-      mockEsClient.transform.getTransform = jest.fn().mockRejectedValue(notFoundError);
+        const mockEsClient = options.services.scopedClusterClient.asCurrentUser;
+        mockEsClient.transform.getTransform = jest.fn().mockRejectedValue(notFoundError);
 
-      let thrownError: any;
-      try {
-        await ruleType.executor(options);
-      } catch (error) {
-        thrownError = error;
+        let thrownError: any;
+        try {
+          await ruleType.executor(options);
+        } catch (error) {
+          thrownError = error;
+        }
+
+        expect(thrownError).toBeDefined();
+        expect(thrownError.message).toContain('transform not found');
+        expect(isUserError(thrownError)).toBe(true);
       }
-
-      expect(thrownError).toBeDefined();
-      expect(thrownError.message).toContain('transform not found');
-      expect(isUserError(thrownError)).toBe(true);
-    });
-
-    it('marks 404 errors with `meta.statusCode` from the transform health service as user errors', async () => {
-      const ruleType = getTransformHealthRuleType(mockGetFieldFormatsStart);
-      const options = createExecutorOptions();
-
-      const notFoundError = Object.assign(new Error('transform not found'), {
-        meta: { statusCode: 404 },
-      });
-
-      const mockEsClient = options.services.scopedClusterClient.asCurrentUser;
-      mockEsClient.transform.getTransform = jest.fn().mockRejectedValue(notFoundError);
-
-      let thrownError: any;
-      try {
-        await ruleType.executor(options);
-      } catch (error) {
-        thrownError = error;
-      }
-
-      expect(thrownError).toBeDefined();
-      expect(isUserError(thrownError)).toBe(true);
-    });
+    );
 
     it('does not mark non-404 errors as user errors', async () => {
       const ruleType = getTransformHealthRuleType(mockGetFieldFormatsStart);
