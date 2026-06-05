@@ -312,6 +312,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
 
+  // recoveryType lives in uiState (not RHF), so toggling it doesn't mark
+  // the form dirty. Track the initial value to detect user changes.
+  const initialRecoveryTypeRef = useRef(hasInitialCustomRecovery ? 'custom' : 'default');
+
   // Tracks whether the close was triggered by the Cancel button ('button')
   // or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
   // EUI path calls closeAllFlyouts() which unregisters the flyout and
@@ -326,12 +330,13 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const handleRequestClose = useCallback(() => {
     const yamlDirty =
       yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
-    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current) {
+    const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
+    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
       setIsConfirmCloseVisible(true);
     } else {
       onClose();
     }
-  }, [onClose]);
+  }, [onClose, uiState.recoveryType]);
 
   const handleConfirmDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
