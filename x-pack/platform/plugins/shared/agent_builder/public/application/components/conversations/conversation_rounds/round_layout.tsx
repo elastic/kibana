@@ -204,10 +204,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           appears below, rather than the error shoving them down. */}
       {displayedSteps.length > 0 && (
         <EuiFlexItem grow={false}>
-          <RoundEvents
-            steps={displayedSteps}
-            isReloadedRound={!(isLoadingCurrentRound || hasBeenLoading)}
-          />
+          <RoundEvents steps={displayedSteps} />
         </EuiFlexItem>
       )}
 
