@@ -52,10 +52,11 @@ test.describe(
 
     test('does not allow a case to be created', async ({ pageObjects }) => {
       const { casesPage } = pageObjects;
-      // Navigating straight to the create route redirects the read-only user
-      // back to the landing page, where neither the form nor the button render.
+      // Navigating straight to the create route renders the in-app "Privileges
+      // required" prompt in place (the Cases app does not redirect), so neither
+      // the create form nor the create button render.
       await casesPage.gotoCreateCase();
-      await expect(casesPage.listTitle).toBeVisible();
+      await expect(casesPage.noPrivilegesPrompt).toBeVisible();
       await expect(casesPage.createCaseForm).toBeHidden();
       await expect(casesPage.createCaseButton).toBeHidden();
     });
