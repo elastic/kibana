@@ -151,6 +151,50 @@ export default function (providerContext: FtrProviderContext) {
       expect(fetched.inputs[0].streams[0].condition).to.eql("${host.name} == 'macbook'");
     });
 
+    it('clears condition fields when null is sent on update', async () => {
+      const created = await createPackagePolicy({
+        name: `cond-clear-${uuidv4()}`,
+        namespace: 'default',
+        policy_id: agentPolicyId,
+        condition: "${host.platform} == 'linux'",
+        inputs: [
+          {
+            type: INPUT_TYPE,
+            enabled: true,
+            condition: "${host.platform} != 'windows'",
+            streams: [makeStream({ condition: "${host.name} == 'mybox'" })],
+          },
+        ],
+        package: { name: PKG_NAME, version: PKG_VERSION },
+      });
+      const id = created.item.id;
+
+      await supertest
+        .put(`/api/fleet/package_policies/${id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: created.item.name,
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          condition: null,
+          inputs: [
+            {
+              type: INPUT_TYPE,
+              enabled: true,
+              condition: null,
+              streams: [makeStream({ condition: null })],
+            },
+          ],
+          package: { name: PKG_NAME, version: PKG_VERSION },
+        })
+        .expect(200);
+
+      const fetched = await getPackagePolicy(id);
+      expect(fetched.condition).to.be(null);
+      expect(fetched.inputs[0].condition).to.be(null);
+      expect(fetched.inputs[0].streams[0].condition).to.be(null);
+    });
+
     it('fans out integration-level condition to inputs in the full agent policy', async () => {
       const integrationCondition = "${host.platform} == 'linux'";
       const inputCondition = "${host.platform} != 'windows'";
