@@ -7,6 +7,7 @@
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
+import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import {
   createEndpointResponseActionsSkill,
   ISOLATE_TOOL_ID,
@@ -44,13 +45,19 @@ describe('createEndpointResponseActionsSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns three inline tools', async () => {
+    it('returns exactly 3 inline tools (isolate_host, unisolate_host, get_endpoint_status)', () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-
-      const inlineTools = await skill.getInlineTools?.();
-
-      expect(inlineTools).toBeDefined();
+      const inlineTools = skill.getInlineTools?.();
       expect(inlineTools).toHaveLength(3);
+      const toolIds = (inlineTools ?? []).map((t) => t.id);
+      expect(toolIds).toContain(ISOLATE_TOOL_ID);
+      expect(toolIds).toContain(UNISOLATE_TOOL_ID);
+      expect(toolIds).toContain(GET_ENDPOINT_STATUS_TOOL_ID);
+    });
+
+    it('satisfies the 7-tool hard cap enforced by validateSkillDefinition', async () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
+      await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
     });
 
     it('includes isolate_host tool', async () => {
