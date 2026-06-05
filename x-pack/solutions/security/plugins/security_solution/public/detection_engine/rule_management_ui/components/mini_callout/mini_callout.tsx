@@ -13,17 +13,17 @@ import {
   EuiLink,
   EuiTextColor,
   useEuiTheme,
+  type EuiCallOutProps,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import type { IconType } from '@elastic/eui/src/components/icon';
-import type { Color } from '@elastic/eui/src/components/call_out/call_out';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import * as i18n from './translations';
 
 export interface MiniCalloutProps {
-  color?: Color;
+  color?: EuiCallOutProps['color'];
   dismissible?: boolean;
   iconType: IconType | undefined;
   title: ReactNode | string;
@@ -98,7 +98,7 @@ export const MiniCallout = memo(function MiniCallout({
   return (
     <EuiCallOut size="s" color={color} data-test-subj={dataTestSubj}>
       <div css={{ display: 'flex' }}>
-        {iconType && <EuiIcon type={iconType} color={color} />}
+        {iconType && <EuiIcon type={iconType} color={color} aria-hidden={true} />}
         {calloutTitle}
       </div>
     </EuiCallOut>

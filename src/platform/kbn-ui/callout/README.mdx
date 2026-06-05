@@ -1,0 +1,80 @@
+# @kbn/ui-callout
+
+A collection of semantic callout components. These are wrappers around the EUI `EuiCallOut` component to ensure expected usage and styles.
+
+## Usage
+
+```tsx
+import { InfoCallout, SuccessCallout, WarningCallout, DangerCallout } from '@kbn/ui-callout';
+
+<InfoCallout title="Informational callout" text="This is an informational callout." />;
+<SuccessCallout title="Success callout" text="This is a success callout." />;
+<WarningCallout title="Warning callout" text="This is a warning callout." />;
+<DangerCallout title="Danger callout" text="This is a danger callout." />;
+```
+
+### Content
+
+In most cases, the `title` and `text` props will be sufficient for callout content. However, if you have a valid use case that requires more complex content, you can use the `children` prop instead.
+
+When using `children`, you're opting out of the default layout and styles expected for callout content. You'll need to handle styles for your custom content manually.
+
+```tsx
+<ErrorCallout title="Some errors occurred.">
+  <ul>
+    <li>Error one</li>
+    <li>Error two</li>
+    <li>Error three</li>
+  </ul>
+</ErrorCallout>
+```
+
+### Actions
+
+If you need to include actions in your callout, use the `actionProps` prop to define primary and secondary actions as needed.
+Avoid passing custom actions via `children`. `actionProps` handles the expected variants and positioning to ensure consistency.
+
+```tsx
+<InfoCallout
+  title="This is an informational callout with actions."
+  actionProps={{
+    primary: {
+      children: 'Primary action',
+      onClick: () => {},
+    },
+    // rendered only if a primary action is provided
+    secondary: {
+      children: 'Secondary action',
+      onClick: () => {},
+    },
+  }}
+/>
+```
+
+## Development
+
+1. Install dependencies:
+
+```bash
+yarn kbn bootstrap
+```
+
+2. Start Storybook:
+
+```bash
+yarn storybook shared_ux
+```
+
+Open [http://localhost:9001](http://localhost:9001) to view the application.
+
+## Testing
+
+The project includes comprehensive test coverage using Jest and RTL.
+
+Run tests with:
+
+```bash
+yarn test:jest src/platform/kbn-ui/callout              # Run all tests
+yarn test:jest src/platform/kbn-ui/callout --watch      # Run in watch mode
+yarn test:jest src/platform/kbn-ui/callout --coverage   # Generate coverage report
+```
