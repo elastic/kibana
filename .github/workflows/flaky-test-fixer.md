@@ -46,7 +46,27 @@ tools:
   github:
     toolsets: [default, search]
   web-fetch:
-  bash: true
+  bash:
+    [
+      'cat',
+      'head',
+      'tail',
+      'grep',
+      'wc',
+      'sort',
+      'uniq',
+      'date',
+      'yq',
+      'jq',
+      'echo',
+      'ls',
+      'pwd',
+      'git:*',
+      'gh:*',
+      'bk:*',
+      'node',
+      'curl',
+    ]
 
 network:
   allowed:

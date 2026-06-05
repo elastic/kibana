@@ -48,7 +48,27 @@ tools:
   github:
     toolsets: [default, actions, search]
   web-fetch:
-  bash: true
+  bash:
+    [
+      'cat',
+      'head',
+      'tail',
+      'grep',
+      'wc',
+      'sort',
+      'uniq',
+      'date',
+      'yq',
+      'jq',
+      'echo',
+      'ls',
+      'pwd',
+      'git:*',
+      'gh:*',
+      'bk:*',
+      'node',
+      'curl',
+    ]
 
 network:
   allowed:
@@ -59,7 +79,6 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - chatgpt.com
     - elastic.litellm-prod.ai
 sandbox:
   agent: awf # Migrated from deprecated network setting
