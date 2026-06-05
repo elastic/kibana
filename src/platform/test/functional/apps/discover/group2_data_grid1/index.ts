@@ -23,7 +23,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./_data_grid'));
     loadTestFile(require.resolve('./_data_grid_context'));
-    loadTestFile(require.resolve('./_data_grid_doc_navigation'));
+    // `./_data_grid_doc_navigation` was migrated to Scout under
+    // `src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_navigation.spec.ts`.
     loadTestFile(require.resolve('./_data_grid_copy_to_clipboard'));
   });
 }
