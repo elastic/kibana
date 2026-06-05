@@ -102,7 +102,7 @@ describe('query_builders', () => {
       const agg = buildStatsAggregation();
       expect(agg.by_dataset.terms.field).toBe('example.dataset.id');
       expect(agg.by_dataset.aggs.example_count).toEqual({
-        cardinality: { field: 'example.id', precision_threshold: 40000 },
+        cardinality: { field: 'example.id' },
       });
       expect(agg.by_dataset.aggs.by_evaluator.terms.field).toBe('evaluator.name');
       expect(agg.by_dataset.aggs.by_evaluator.aggs.score_stats).toEqual({

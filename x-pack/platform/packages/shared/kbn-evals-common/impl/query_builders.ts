@@ -144,7 +144,7 @@ export const buildStatsAggregation = () => ({
     terms: { field: 'example.dataset.id', size: 10000 },
     aggs: {
       dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
-      example_count: { cardinality: { field: 'example.id', precision_threshold: 40000 } },
+      example_count: { cardinality: { field: 'example.id' } },
       by_evaluator: {
         terms: { field: 'evaluator.name', size: 1000 },
         aggs: {
