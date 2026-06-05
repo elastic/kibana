@@ -13,4 +13,4 @@ export * from './composite_slo_update';
 export * from './composite_slo_delete';
 export * from './composite_slo_historical_summary';
 export * from './composite_slo_summary_refresh';
-export * from './get_composite_slo_suggestions';
+export type * from './get_composite_slo_suggestions';
