@@ -11,7 +11,7 @@ import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 
 import type { LinksEmbeddableState } from '../../common';
-import { LINKS_HORIZONTAL_LAYOUT } from '../../common/types';
+import { LINKS_HORIZONTAL_LAYOUT } from '../../common/constants';
 import type { LinksState } from '../../server';
 import { loadFromLibrary } from '../links_client/load_from_library';
 

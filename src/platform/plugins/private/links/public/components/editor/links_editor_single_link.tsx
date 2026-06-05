@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { DASHBOARD_LINK_TYPE } from '../../../common/types';
+import { DASHBOARD_LINK_TYPE } from '../../../common/constants';
 import type { ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { LinksStrings } from '../links_strings';
