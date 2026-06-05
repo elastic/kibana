@@ -11,45 +11,19 @@ REPORT_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_report.mjs"
 SLACK_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_slack_notify.mjs"
 OWNER_SNAPSHOT=".fallow/owner-snapshot.json"
 OWNER_SNAPSHOT_PREV=".fallow/owner-snapshot-prev.json"
+GCS_SNAPSHOT="gs://ci-artifacts.kibana.dev/code-quality/fallow-owner-snapshot.json"
 
 echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
 
 mkdir -p .fallow
 
-# Download previous owner snapshot from last successful build for per-owner trend.
-# Filter by branch so we only search builds that actually ran our code quality step.
-# Loop through candidates because not every passed build on the branch has the artifact.
-if [ -n "${BUILDKITE_TOKEN:-}" ] && [ -n "${BUILDKITE_PIPELINE_SLUG:-}" ]; then
-  echo "Fetching previous owner snapshot for trend analysis..."
-  BRANCH="${BUILDKITE_BRANCH:-main}"
-  PREV_BUILDS=$(curl -sf \
-    -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
-    "https://api.buildkite.com/v2/organizations/elastic/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?state=passed&per_page=20&branch=${BRANCH}" \
-    | node -e "
-      let d='';
-      process.stdin.on('data',c=>d+=c);
-      process.stdin.on('end',()=>{
-        const cur='${BUILDKITE_BUILD_ID:-}';
-        const ids=JSON.parse(d).filter(b=>b.id!==cur).map(b=>b.id);
-        process.stdout.write(ids.join('\n'));
-      });" 2>/dev/null || true)
-
-  SNAPSHOT_LOADED=false
-  while IFS= read -r BUILD_ID && [ -n "$BUILD_ID" ]; do
-    if buildkite-agent artifact download "$OWNER_SNAPSHOT" . \
-        --build "$BUILD_ID" 2>/dev/null; then
-      mv "$OWNER_SNAPSHOT" "$OWNER_SNAPSHOT_PREV"
-      echo "Previous owner snapshot loaded from build ${BUILD_ID}"
-      SNAPSHOT_LOADED=true
-      break
-    fi
-  done <<< "$PREV_BUILDS"
-
-  if [ "$SNAPSHOT_LOADED" = false ]; then
-    echo "No previous owner snapshot found in last 20 passed builds on branch ${BRANCH} — first run without trend"
-  fi
-fi
+echo "Fetching previous owner snapshot for trend analysis..."
+.buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+gsutil cp "$GCS_SNAPSHOT" "$OWNER_SNAPSHOT_PREV" 2>/dev/null \
+  && echo "Previous owner snapshot loaded from GCS" \
+  || echo "No previous owner snapshot found in GCS — first run without trend"
+.buildkite/scripts/common/activate_service_account.sh --unset-impersonation
 
 echo "--- Run fallow analysis"
 echo "Checks: complexity hotspots · per-file health scores"
@@ -86,7 +60,9 @@ echo "--- Post Buildkite annotation"
 buildkite-agent annotate --style info --context fallow-report "$ANNOTATION"
 
 echo "--- Save owner snapshot for next run"
-buildkite-agent artifact upload "$OWNER_SNAPSHOT"
+.buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+gsutil cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT"
+.buildkite/scripts/common/activate_service_account.sh --unset-impersonation
 
 if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
