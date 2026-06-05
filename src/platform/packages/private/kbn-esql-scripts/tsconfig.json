@@ -11,5 +11,8 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/repo-info",
+    "@kbn/esql-language",
+    "@kbn/language-documentation",
   ]
 }

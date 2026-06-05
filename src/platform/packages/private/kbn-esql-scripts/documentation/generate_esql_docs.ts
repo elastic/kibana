@@ -11,11 +11,14 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import type { ESDocsKeywordType } from '@kbn/esql-scripts';
-import { listDocDefinitionFiles, readElasticsearchDefinitions } from '@kbn/esql-scripts';
-import { functions } from '../src/sections/generated/scalar_functions';
-import { getLicenseInfoForFunctions } from '../src/utils/get_license_info';
-import type { FunctionDefinition, MultipleLicenseInfo } from '../src/types';
+import { getLicenseInfoForFunctions } from '@kbn/language-documentation';
+import type { FunctionDefinition, MultipleLicenseInfo } from '@kbn/language-documentation';
+import type { ESDocsKeywordType } from '../lib/elasticsearch_definitions';
+import {
+  listDocDefinitionFiles,
+  readElasticsearchDefinitions,
+} from '../lib/elasticsearch_definitions';
+import { OUTPUT_DIR } from './constants';
 
 interface DocsSectionContent {
   description: string;
@@ -29,16 +32,16 @@ interface DocsSectionContent {
     throw new Error('Path to Elasticsearch must be provided as the first argument.');
   }
 
-  // Define function types and their corresponding output paths
+  // Define function types and their corresponding output files
   const functionTypes = [
-    { fnType: 'scalar', outputFile: '../src/sections/generated/scalar_functions.tsx' },
-    { fnType: 'agg', outputFile: '../src/sections/generated/aggregation_functions.tsx' },
+    { fnType: 'scalar', outputFile: 'scalar_functions.tsx' },
+    { fnType: 'agg', outputFile: 'aggregation_functions.tsx' },
     {
       fnType: 'time_series_agg',
-      outputFile: '../src/sections/generated/timeseries_aggregation_functions.tsx',
+      outputFile: 'timeseries_aggregation_functions.tsx',
     },
-    { fnType: 'grouping', outputFile: '../src/sections/generated/grouping_functions.tsx' },
-    { fnType: 'operator', outputFile: '../src/sections/generated/operators.tsx' },
+    { fnType: 'grouping', outputFile: 'grouping_functions.tsx' },
+    { fnType: 'operator', outputFile: 'operators.tsx' },
   ];
 
   // Process each function type
@@ -49,7 +52,7 @@ interface DocsSectionContent {
       keywordType: fnType === 'operator' ? 'operators' : 'functions',
     });
 
-    writeFunctionDocs(functionDocs, path.join(__dirname, outputFile));
+    writeFunctionDocs(functionDocs, path.join(OUTPUT_DIR, outputFile));
   });
 })();
 
@@ -171,7 +174,7 @@ function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathTo
 function findFunctionsList(ast: any): recast.types.namedTypes.ArrayExpression {
   let foundArray: recast.types.namedTypes.ArrayExpression | null = null;
 
-  const functionsArrayIdentifier = Object.keys({ functions })[0];
+  const functionsArrayIdentifier = 'functions';
 
   recast.visit(ast, {
     visitVariableDeclarator(astPath) {

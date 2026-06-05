@@ -660,7 +660,6 @@
     "@kbn/esql-language": "link:src/platform/packages/shared/kbn-esql-language",
     "@kbn/esql-language-inspector-plugin": "link:examples/esql_ast_inspector",
     "@kbn/esql-resource-browser": "link:src/platform/packages/shared/kbn-esql-resource-browser",
-    "@kbn/esql-scripts": "link:src/platform/packages/private/kbn-esql-scripts",
     "@kbn/esql-server-utils": "link:src/platform/packages/shared/kbn-esql-server-utils",
     "@kbn/esql-types": "link:src/platform/packages/shared/kbn-esql-types",
     "@kbn/esql-utils": "link:src/platform/packages/shared/kbn-esql-utils",
