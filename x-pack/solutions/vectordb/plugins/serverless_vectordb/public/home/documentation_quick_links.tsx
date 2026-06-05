@@ -61,17 +61,17 @@ export const DocumentationQuickLinks = () => {
   ];
 
   return (
-    <div>
+    <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
-            <h4>
+            <h2>
               <EuiTextColor color="subdued">
                 {i18n.translate('xpack.serverlessVectordb.home.docs.heading', {
                   defaultMessage: 'Documentation quick links',
                 })}
               </EuiTextColor>
-            </h4>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -80,7 +80,6 @@ export const DocumentationQuickLinks = () => {
               href={docLinks.links.enterpriseSearch.knnSearch}
               target="_blank"
               external
-              rel="noopener noreferrer"
               data-test-subj="viewDocumentationLink"
               data-telemetry-id="serverlessVectordb-home-viewDocumentation"
             >
@@ -104,6 +103,6 @@ export const DocumentationQuickLinks = () => {
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-    </div>
+    </>
   );
 };
