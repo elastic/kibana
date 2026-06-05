@@ -18,6 +18,7 @@ import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
 const MAX_SESSION_TITLE_LENGTH = 256;
+const MAX_SESSION_DESCRIPTION_LENGTH = 2000;
 const MAX_TAB_LABEL_LENGTH = 120;
 const MAX_CHART_INTERVAL_LENGTH = 64;
 const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
@@ -124,6 +125,7 @@ export const discoverSessionDataSchema = schema.object(
     }),
     description: schema.string({
       defaultValue: '',
+      maxLength: MAX_SESSION_DESCRIPTION_LENGTH,
       meta: { description: 'A short description of the Discover session.' },
     }),
     tabs: schema.arrayOf(discoverSessionApiTabSchema, {
