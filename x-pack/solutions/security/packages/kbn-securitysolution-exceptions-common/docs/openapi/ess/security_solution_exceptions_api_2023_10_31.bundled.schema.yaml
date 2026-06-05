@@ -1500,6 +1500,18 @@ paths:
           schema:
             $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
+        - description: >
+            Controls when changes become visible to search operations. `false`
+            (default) means no immediate refresh; `wait_for` waits for the next
+            scheduled refresh cycle.
+          in: query
+          name: refresh
+          required: false
+          schema:
+            enum:
+              - 'false'
+              - wait_for
+            type: string
       responses:
         '200':
           content:
@@ -1760,6 +1772,19 @@ paths:
 
         > Before creating exception items, you must create an exception list.
       operationId: CreateExceptionListItem
+      parameters:
+        - description: >
+            Controls when changes become visible to search operations. `false`
+            (default) means no immediate refresh; `wait_for` waits for the next
+            scheduled refresh cycle.
+          in: query
+          name: refresh
+          required: false
+          schema:
+            enum:
+              - 'false'
+              - wait_for
+            type: string
       requestBody:
         content:
           application/json:
@@ -2058,6 +2083,19 @@ paths:
     put:
       description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
+      parameters:
+        - description: >
+            Controls when changes become visible to search operations. `false`
+            (default) means no immediate refresh; `wait_for` waits for the next
+            scheduled refresh cycle.
+          in: query
+          name: refresh
+          required: false
+          schema:
+            enum:
+              - 'false'
+              - wait_for
+            type: string
       requestBody:
         content:
           application/json:

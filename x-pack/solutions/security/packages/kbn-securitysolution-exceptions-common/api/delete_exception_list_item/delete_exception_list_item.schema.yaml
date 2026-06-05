@@ -36,6 +36,17 @@ paths:
               value: single
             agnostic:
               value: agnostic
+        - name: refresh
+          in: query
+          required: false
+          description: >
+            Controls when changes become visible to search operations. `false` (default) means no immediate refresh;
+            `wait_for` waits for the next scheduled refresh cycle.
+          schema:
+            type: string
+            enum:
+              - 'false'
+              - wait_for
       responses:
         200:
           description: Successful response
