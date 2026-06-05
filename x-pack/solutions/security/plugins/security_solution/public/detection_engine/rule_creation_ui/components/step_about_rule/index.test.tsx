@@ -360,7 +360,7 @@ describe('StepAboutRuleComponent', () => {
     await userEvent.click(
       within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')
     );
-    await userEvent.click(screen.getByRole('option', { name: /medium/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /medium/i }));
 
     await submitForm();
 
