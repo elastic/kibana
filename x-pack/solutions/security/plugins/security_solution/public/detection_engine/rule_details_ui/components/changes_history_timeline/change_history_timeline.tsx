@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { ChangeHistoryItem } from './change_history_item';
 import { TrackingStartedFooter } from './change_history_footer';
@@ -78,6 +79,27 @@ export function RuleChangesHistoryTimeline({
     return () => observer.disconnect();
   }, [onLoadMore]);
 
+  const styles = useMemo(
+    () => ({
+      changesTimelineWrapper: css`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      `,
+      changesTimeline: css`
+        flex: 1 1 0;
+        overflow-y: auto;
+        min-height: 0;
+        // Extra inset space so item hover shadows/borders aren't clipped by the
+        // overflow container. Setting overflowY forces overflowX to hidden too.
+        padding-top: ${euiTheme.size.s};
+        padding-left: ${euiTheme.size.m};
+        padding-right: ${euiTheme.size.m};
+      `,
+    }),
+    [euiTheme]
+  );
+
   if (items.length === 0 && isLoading) {
     return <Loading />;
   }
@@ -87,21 +109,9 @@ export function RuleChangesHistoryTimeline({
   }
 
   return (
-    <div
-      data-test-subj="ruleChangeHistory"
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-    >
+    <div data-test-subj="ruleChangeHistory" css={styles.changesTimelineWrapper}>
       <div
-        style={{
-          flex: '1 1 0',
-          overflowY: 'auto',
-          minHeight: 0,
-          // Extra inset space so item hover shadows/borders aren't clipped by the
-          // overflow container. Setting overflowY forces overflowX to hidden too.
-          paddingTop: euiTheme.size.s,
-          paddingLeft: euiTheme.size.m,
-          paddingRight: euiTheme.size.m,
-        }}
+        css={styles.changesTimeline}
         aria-label={i18n.TIMELINE_ARIA_LABEL}
         data-test-subj="ruleChangeHistoryList"
       >
