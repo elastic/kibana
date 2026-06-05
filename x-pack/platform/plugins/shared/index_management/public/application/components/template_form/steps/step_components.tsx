@@ -25,6 +25,7 @@ interface Props {
   esDocsBase: string;
   onChange: (content: Forms.Content) => void;
   defaultValue?: string[];
+  createsDataStream?: boolean;
 }
 
 const i18nTexts = {
@@ -42,7 +43,12 @@ const i18nTexts = {
   ),
 };
 
-export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) => {
+export const StepComponents = ({
+  defaultValue,
+  onChange,
+  esDocsBase,
+  createsDataStream = false,
+}: Props) => {
   const [state, setState] = useState<{
     isLoadingComponents: boolean;
     components: ComponentTemplateListItem[];
@@ -116,6 +122,7 @@ export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) =>
         onChange={onComponentSelectionChange}
         onComponentsLoaded={onComponentsLoaded}
         docUri={docUri}
+        createsDataStream={createsDataStream}
         emptyPrompt={{
           text: i18nTexts.description,
           showCreateButton: false,

@@ -37,6 +37,7 @@ interface Props {
   onComponentsLoaded: (components: ComponentTemplateListItem[]) => void;
   defaultValue?: string[];
   docUri: string;
+  createsDataStream?: boolean;
   emptyPrompt?: {
     text?: string | JSX.Element;
     showCreateButton?: boolean;
@@ -47,8 +48,16 @@ const useStyles = ({ hasSelection }: { hasSelection: boolean }) => {
   const { euiTheme } = useEuiTheme();
 
   return {
-    selector: css`
+    selectorWrapper: css`
+      width: 100%;
       height: 480px;
+    `,
+    selector: css`
+      width: 100%;
+      height: 100%;
+    `,
+    column: css`
+      min-width: 0;
     `,
     selection: css`
       border: ${euiTheme.border.thin};
@@ -102,6 +111,7 @@ export const ComponentTemplatesSelector = ({
   defaultValue,
   onComponentsLoaded,
   docUri,
+  createsDataStream = true,
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
@@ -210,86 +220,95 @@ export const ComponentTemplatesSelector = ({
   );
 
   const renderSelector = () => (
-    <EuiFlexGroup css={styles.selector}>
-      <EuiFlexItem css={styles.selection} data-test-subj="componentTemplatesSelection">
-        {hasSelection ? (
-          <>
-            <div css={styles.selectionHeader}>
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplatesSelector.selectionHeader.componentsSelectedLabel"
-                defaultMessage="Components selected: {count}"
-                values={{
-                  count: <span css={styles.selectionHeaderCount}>{componentsSelected.length}</span>,
-                }}
-              />
-            </div>
-            <div css={styles.selectionContent} className="eui-yScrollWithShadows">
-              <ComponentTemplatesSelection
-                components={componentsSelected}
-                onReorder={onSelectionReorder}
-                listItemProps={{
-                  onViewDetail: (component: ComponentTemplateListItem) => {
-                    setSelectedComponent(component.name);
-                  },
-                  actions: [
-                    {
-                      label: i18nTexts.icons.remove,
-                      icon: 'minusCircle',
-                      handler: (component: ComponentTemplateListItem) => {
-                        setComponentsSelected((prev) => {
-                          return prev.filter(({ name }) => component.name !== name);
-                        });
-                      },
+    <div css={styles.selectorWrapper}>
+      <EuiFlexGroup css={styles.selector}>
+        <EuiFlexItem
+          grow
+          css={[styles.column, styles.selection]}
+          data-test-subj="componentTemplatesSelection"
+        >
+          {hasSelection ? (
+            <>
+              <div css={styles.selectionHeader}>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplatesSelector.selectionHeader.componentsSelectedLabel"
+                  defaultMessage="Components selected: {count}"
+                  values={{
+                    count: (
+                      <span css={styles.selectionHeaderCount}>{componentsSelected.length}</span>
+                    ),
+                  }}
+                />
+              </div>
+              <div css={styles.selectionContent} className="eui-yScrollWithShadows">
+                <ComponentTemplatesSelection
+                  components={componentsSelected}
+                  onReorder={onSelectionReorder}
+                  listItemProps={{
+                    onViewDetail: (component: ComponentTemplateListItem) => {
+                      setSelectedComponent(component.name);
                     },
-                  ],
-                }}
-              />
-            </div>
-          </>
-        ) : (
-          <EuiText textAlign="center" data-test-subj="emptyPrompt">
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-1"
-                defaultMessage="Add component template building blocks to this template."
-              />
-              <br />
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-2"
-                defaultMessage="Component templates are applied in the order specified."
-              />
-            </p>
-          </EuiText>
-        )}
-      </EuiFlexItem>
+                    actions: [
+                      {
+                        label: i18nTexts.icons.remove,
+                        icon: 'minusCircle',
+                        handler: (component: ComponentTemplateListItem) => {
+                          setComponentsSelected((prev) => {
+                            return prev.filter(({ name }) => component.name !== name);
+                          });
+                        },
+                      },
+                    ],
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <EuiText textAlign="center" data-test-subj="emptyPrompt">
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-1"
+                  defaultMessage="Add component template building blocks to this template."
+                />
+                <br />
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-2"
+                  defaultMessage="Component templates are applied in the order specified."
+                />
+              </p>
+            </EuiText>
+          )}
+        </EuiFlexItem>
 
-      {/* List of components */}
-      <EuiFlexItem>
-        <ComponentTemplates
-          isLoading={isLoading}
-          components={components ?? []}
-          listItemProps={{
-            onViewDetail: (component: ComponentTemplateListItem) => {
-              setSelectedComponent(component.name);
-            },
-            actions: [
-              {
-                label: i18nTexts.icons.select,
-                icon: 'plusCircle',
-                handler: (component: ComponentTemplateListItem) => {
-                  setComponentsSelected((prev) => {
-                    return [...prev, component];
-                  });
-                },
+        {/* List of components */}
+        <EuiFlexItem grow css={styles.column}>
+          <ComponentTemplates
+            isLoading={isLoading}
+            components={components ?? []}
+            listItemProps={{
+              onViewDetail: (component: ComponentTemplateListItem) => {
+                setSelectedComponent(component.name);
               },
-            ],
-            isSelected: (component: ComponentTemplateListItem) => {
-              return componentsSelected.find(({ name }) => component.name === name) !== undefined;
-            },
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+              actions: [
+                {
+                  label: i18nTexts.icons.select,
+                  icon: 'plusCircle',
+                  handler: (component: ComponentTemplateListItem) => {
+                    setComponentsSelected((prev) => {
+                      return [...prev, component];
+                    });
+                  },
+                },
+              ],
+              isSelected: (component: ComponentTemplateListItem) => {
+                return componentsSelected.find(({ name }) => component.name === name) !== undefined;
+              },
+              createsDataStream,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 
   if (isLoading) {
