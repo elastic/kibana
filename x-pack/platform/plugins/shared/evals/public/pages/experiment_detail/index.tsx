@@ -255,6 +255,8 @@ export const ExperimentDetailPage: React.FC = () => {
         continue;
       }
 
+      // example_count is identical for all evaluators in a dataset (comes from the outer
+      // by_dataset cardinality bucket), so we only need to capture it from the first stat.
       groupedStats.set(stat.dataset_id, {
         datasetId: stat.dataset_id,
         datasetName: stat.dataset_name,

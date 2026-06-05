@@ -480,6 +480,41 @@ describe('query_builders', () => {
       expect(result[0].stats.mean).toBe(0);
     });
 
+    it('assigns the same example_count to all evaluators in a dataset', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 7 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'Cached Tokens',
+                    score_stats: {},
+                    score_median: { values: {} },
+                  },
+                  {
+                    key: 'Criteria',
+                    score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 7 },
+                    score_median: { values: { '50.0': 0.85 } },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result).toHaveLength(2);
+      expect(result[0].example_count).toBe(7);
+      expect(result[1].example_count).toBe(7);
+      expect(result[0].evaluator_name).toBe('Cached Tokens');
+      expect(result[1].evaluator_name).toBe('Criteria');
+    });
+
     it('defaults example_count to 0 when cardinality value is null', () => {
       const aggs = {
         by_dataset: {
