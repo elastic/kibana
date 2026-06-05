@@ -215,45 +215,52 @@ export function useDynamicTypeIcons(
     if (!hasConnectorTypes && !hasTriggerDefinitions && !hasEditorMounted) {
       return;
     }
-    const registry = actionTypeRegistryRef.current;
-    const connectorTypes = Object.values(connectorTypesData ?? {}).map((connector) => {
-      // API can list types not registered in the UI registry => get() throws if missing.
-      const icon = registry.has(connector.actionTypeId)
-        ? registry.get(connector.actionTypeId)?.iconClass
-        : undefined;
-      return {
-        actionTypeId: connector.actionTypeId,
-        displayName: connector.displayName,
-        ...(icon !== undefined && { icon }),
-      };
-    });
+    const getAllTypes = (): ConnectorTypeInfoMinimal[] => {
+      const registry = actionTypeRegistryRef.current;
+      const connectorTypes = Object.values(connectorsDataRef.current?.connectorTypes ?? {}).map(
+        (connector) => {
+          // API can list types not registered in the UI registry => get() throws if missing.
+          const icon = registry.has(connector.actionTypeId)
+            ? registry.get(connector.actionTypeId)?.iconClass
+            : undefined;
+          return {
+            actionTypeId: connector.actionTypeId,
+            displayName: connector.displayName,
+            ...(icon !== undefined && { icon }),
+          };
+        }
+      );
 
-    const registeredTypes = workflowsExtensionsRef.current.getAllStepDefinitions().map((step) => ({
-      actionTypeId: step.id,
-      displayName: step.label,
-      fromRegistry: true,
-      icon: step.icon,
-    }));
+      const registeredTypes = workflowsExtensionsRef.current
+        .getAllStepDefinitions()
+        .map((step) => ({
+          actionTypeId: step.id,
+          displayName: step.label,
+          fromRegistry: true,
+          icon: step.icon,
+        }));
 
-    const registeredTriggerTypes = triggerSchemas.getTriggerDefinitions().map((t) => ({
-      actionTypeId: t.id,
-      displayName: t.title ?? t.id,
-      isTrigger: true,
-      ...(t.icon !== undefined && { icon: t.icon }),
-    }));
+      const registeredTriggerTypes = triggerSchemas.getTriggerDefinitions().map((t) => ({
+        actionTypeId: t.id,
+        displayName: t.title ?? t.id,
+        isTrigger: true,
+        ...(t.icon !== undefined && { icon: t.icon }),
+      }));
 
-    const allTypes = [
-      ...predefinedStepTypes,
-      ...connectorTypes,
-      ...registeredTypes,
-      ...registeredTriggerTypes,
-    ];
+      return [
+        ...predefinedStepTypes,
+        ...connectorTypes,
+        ...registeredTypes,
+        ...registeredTriggerTypes,
+      ];
+    };
 
     const runInjection = async () => {
       const myRunId = ++injectionRunIdRef.current;
       setStabilityBadgeThemeContext(euiThemeContext);
       // Use ref at injection time so retries (150ms, 500ms, etc.) see the current DOM and find the iframe if it appeared.
       const editorContainer = editorContainerRef?.current ?? undefined;
+      const allTypes = getAllTypes();
       await injectDynamicConnectorIcons(allTypes, editorContainer);
       injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(
