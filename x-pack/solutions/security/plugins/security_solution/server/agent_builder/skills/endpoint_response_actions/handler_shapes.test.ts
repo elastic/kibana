@@ -171,7 +171,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       // Mock the agent service to return an agent
 
-      const mockAgentService = {
+      const mockAgentServiceInner = {
         asInternalUser: {
           list: jest.fn().mockResolvedValue({
             items: [
@@ -189,7 +189,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agentService: mockAgentServiceInner,
       }));
 
       // Mock metadata service to return valid data
