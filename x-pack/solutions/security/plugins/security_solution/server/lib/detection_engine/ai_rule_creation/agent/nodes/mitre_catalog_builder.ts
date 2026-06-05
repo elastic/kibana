@@ -15,6 +15,47 @@ import type {
 } from '../../../../../../common/detection_engine/mitre/types';
 
 /**
+ * Curated set of high-value techniques used in the original static MITRE catalog.
+ * Prevents context-window overflow from the full ~721-technique database.
+ */
+const CATALOG_TECHNIQUE_IDS = new Set([
+  'T1003',
+  'T1005',
+  'T1021',
+  'T1027',
+  'T1041',
+  'T1053',
+  'T1059',
+  'T1068',
+  'T1070',
+  'T1071',
+  'T1098',
+  'T1105',
+  'T1114',
+  'T1136',
+  'T1140',
+  'T1190',
+  'T1195',
+  'T1204',
+  'T1210',
+  'T1218',
+  'T1219',
+  'T1486',
+  'T1528',
+  'T1543',
+  'T1547',
+  'T1548',
+  'T1550',
+  'T1560',
+  'T1562',
+  'T1566',
+  'T1574',
+  'T1609',
+  'T1611',
+  'T1647',
+]);
+
+/**
  * Terms that appear in nearly every detection request and should not be
  * treated as meaningful keywords.
  */
@@ -285,6 +326,9 @@ function buildCatalogText(
 
   const techniqueMap = new Map<string, MitreTechnique[]>();
   allTechniques.forEach((tech) => {
+    if (!CATALOG_TECHNIQUE_IDS.has(tech.id)) {
+      return;
+    }
     tech.tactics.forEach((tacticValue) => {
       // Find tactic ID by matching value
       const tactic = allTactics.find(
