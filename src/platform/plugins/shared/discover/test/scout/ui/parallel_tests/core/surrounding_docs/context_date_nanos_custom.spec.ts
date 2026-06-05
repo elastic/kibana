@@ -43,17 +43,13 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         await pageObjects.contextPage.navigateTo(dataViewId, '1');
 
-        const rows = await pageObjects.contextPage.getRowsText(true);
-        const expectedTimestamps = [
+        const rows = await pageObjects.discover.getDataGridRows();
+        const timestamps = rows.map((row) => row[0]);
+        expect(timestamps).toStrictEqual([
           'Oct 21, 2019 @ 08:30:04.828733000',
           'Oct 21, 2019 @ 00:30:04.828740000',
           'Oct 21, 2019 @ 00:30:04.828723000',
-        ];
-
-        expect(rows).toHaveLength(expectedTimestamps.length);
-        for (let i = 0; i < expectedTimestamps.length; i++) {
-          expect.soft(rows[i]).toContain(expectedTimestamps[i]);
-        }
+        ]);
       }
     );
   }

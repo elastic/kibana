@@ -40,17 +40,13 @@ spaceTest.describe('Discover context - date_nanos', { tag: testData.CONTEXT_STAT
     async ({ pageObjects }) => {
       await pageObjects.contextPage.navigateTo(dataViewId, 'AU_x3-TaGFA8no6Qj999Z');
 
-      const rows = await pageObjects.contextPage.getRowsText(true);
-      const expectedTimestamps = [
+      const rows = await pageObjects.discover.getDataGridRows();
+      const timestamps = rows.map((row) => row[0]);
+      expect(timestamps).toStrictEqual([
         'Sep 18, 2019 @ 06:50:13.000000000',
         'Sep 18, 2019 @ 06:50:12.999999999',
         'Sep 19, 2015 @ 06:50:13.000100001',
-      ];
-
-      expect(rows).toHaveLength(expectedTimestamps.length);
-      for (let i = 0; i < expectedTimestamps.length; i++) {
-        expect.soft(rows[i]).toContain(expectedTimestamps[i]);
-      }
+      ]);
     }
   );
 
@@ -61,8 +57,9 @@ spaceTest.describe('Discover context - date_nanos', { tag: testData.CONTEXT_STAT
       await pageObjects.contextPage.clickPredecessorLoadMoreButton();
       await pageObjects.contextPage.clickSuccessorLoadMoreButton();
 
-      const rows = await pageObjects.contextPage.getRowsText(true);
-      const expectedTimestamps = [
+      const rows = await pageObjects.discover.getDataGridRows();
+      const timestamps = rows.map((row) => row[0]);
+      expect(timestamps).toStrictEqual([
         'Sep 22, 2019 @ 23:50:13.253123345',
         'Sep 18, 2019 @ 06:50:13.000000104',
         'Sep 18, 2019 @ 06:50:13.000000103',
@@ -72,12 +69,7 @@ spaceTest.describe('Discover context - date_nanos', { tag: testData.CONTEXT_STAT
         'Sep 18, 2019 @ 06:50:13.000000000',
         'Sep 18, 2019 @ 06:50:12.999999999',
         'Sep 19, 2015 @ 06:50:13.000100001',
-      ];
-
-      expect(rows).toHaveLength(expectedTimestamps.length);
-      for (let i = 0; i < expectedTimestamps.length; i++) {
-        expect.soft(rows[i]).toContain(expectedTimestamps[i]);
-      }
+      ]);
     }
   );
 });

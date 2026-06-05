@@ -94,15 +94,6 @@ export class ContextPage {
     await this.waitUntilContextLoadingHasFinished();
   }
 
-  async getRowsText(includeAnchor = false): Promise<string[]> {
-    const selector = includeAnchor
-      ? '[data-test-subj="discoverDocTable"] [data-grid-row-index]'
-      : '[data-test-subj="discoverDocTable"] [data-grid-row-index]:not([class*="anchorRow"])';
-    const rows = this.page.locator(selector);
-    await this.page.locator(`${selector} >> nth=0`).waitFor({ state: 'visible', timeout: 30_000 });
-    return rows.allInnerTexts();
-  }
-
   async getDocumentNumber(): Promise<number> {
     const attr = await this.docTable.getAttribute('data-document-number');
     return Number(attr);
