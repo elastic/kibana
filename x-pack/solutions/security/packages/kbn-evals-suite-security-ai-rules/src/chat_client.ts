@@ -9,7 +9,7 @@ import type { ReferenceRule } from '../datasets/sample_rules';
 
 // These string literals mirror the constants defined in security_solution/common/constants.
 // They are inlined here to avoid a package→plugin import boundary violation.
-const THREAT_HUNTING_AGENT_ID = 'security.agent';
+const THREAT_HUNTING_AGENT_ID = 'elastic-ai-agent';
 const SECURITY_RULE_ATTACHMENT_TYPE = 'security.rule';
 
 const AGENT_BUILDER_CONVERSE_API_PATH = '/api/agent_builder/converse';
