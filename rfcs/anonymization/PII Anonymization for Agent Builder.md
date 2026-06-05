@@ -34,7 +34,7 @@ By keeping the connector call in TypeScript, the Inference plugin de-anonymizes 
 
 ## Option 2: `aroundCompletion` hook with `call_site.proceed` 
 
-A single YAML workflow owns the full pipeline. It anonymizes the prompt, then signals the Inference plugin to make the LLM call via `proceedFn` (a capability injected by the Inference plugin). The Inference plugin buffers the full response and returns it as a step output before the workflow continues with restore.
+A single YAML workflow owns the full pipeline. It anonymizes the prompt, then signals the Inference plugin to make the LLM call via a `call_site.proceed` step. The Inference plugin streams de-anonymized chunks to the caller in real time while simultaneously buffering the assembled response as step output, allowing the workflow to continue with post-LLM steps such as token restoration.
 
 | ![][image2] |
 | :---- |
@@ -49,8 +49,7 @@ A single YAML workflow owns the full pipeline. It anonymizes the prompt, then si
 
 **Cons**
 
-- **Breaks streaming** \- the workflow must buffer the entire LLM response before any post-proceed step can run; the caller receives nothing until the full pipeline completes  
-- TTFT equals the full pipeline duration \- bad for real-time UX  
+- After some earlier concerns on how to handle streaming within the around hook we have confirmed streaming is still viable \- a streaming proceed prototype shows `call_site.proceed` can stream de-anonymized chunks to the caller inline while buffering the assembled response as step output. The open question is how additional workflows on the same hook (telemetry, output transforms) access the LLM response without triggering a second call. Solution paths exist (first-call-wins caching, phased execution, sequential result forwarding) but each adds engine complexity and affects the mental model for workflow authors reasoning about proceed ownership  
 - Runs synchronously on the LLM call path \- hard per-workflow timeout (default 30s) applies; workflow complexity directly increases latency  
 - Requires `call_site.proceed` step support in the workflow engine  
 - `proceedFn` capability adds a more complex mental model than simple before/after
@@ -100,9 +99,9 @@ Agent Builder is the AI agent platform for all of Elastic. Every prompt sent thr
 
 # Technical proposal
 
-## Proposed solution: Inference-Layer Lifecycle Hooks
+## Technical Approaches: Inference-Layer Lifecycle Hooks
 
-Agent Builder (and every other Kibana LLM consumer) will be protected through **synchronous lifecycle hooks added at the `inference` plugin's `chatComplete` boundary** — the single function every LLM call in Kibana, that leverages the inference plugin, passes through today. A new `beforeCompletion` hook scans the full prompt for PII using configurable regex patterns, replaces every match with a deterministic HMAC token (e.g., `IP_a1b2c3d4`), and appends a short anonymization context note to the system prompt. The LLM reasons over tokens instead of real data — and because the tokens are deterministic within a session, it can still correlate entities across events ("this IP appeared in all five alerts"). After the model responds, an `afterCompletion` hook (also new) restores original values so the analyst sees real names, real IPs, and real hostnames in the chat.
+Both options protect Agent Builder (and every other Kibana LLM consumer) through **synchronous lifecycle hooks added at the `inference` plugin's `chatComplete` boundary** — the single function every LLM call in Kibana passes through today. In both cases, PII in the prompt is replaced with deterministic HMAC tokens (e.g., `IP_a1b2c3d4`) before the LLM sees the data; the LLM reasons over tokens and can still correlate entities across events ("this IP appeared in all five alerts"); original values are restored in the response before the analyst sees them. The two options differ in how hooks are structured around the LLM call — see the comparison in the one-pager above and the hook models section below.
 
 The token map lives in-memory for the duration of a single `chatComplete` call and is discarded when the call returns. No PII is persisted. No new indices. No encryption infrastructure. Admins enable anonymization for a space by activating the seeded default workflow in the Workflows UI (`app/workflows`), which are triggered synchronously by these hooks rather than by asynchronous background events. Admins can also add custom regex patterns for organization-specific identifiers via the workflow YAML. This is the "bare bones" approach: solve the compliance problem for LLM-bound data, nothing more.
 
@@ -127,22 +126,38 @@ The fundamental problem the global solution ran into was that field-level anonym
 
 ![][image3]
 
-### Two Hook Points
+### Hook Models
 
-Two synchronous lifecycle hooks sit at the `inference.chatComplete` boundary. Every LLM call in Kibana passes through both.
+Two hook structures are under consideration. Both sit at the `inference.chatComplete` boundary and share the same token format, session identity, failure policy, and streaming de-anonymization mechanism.
 
-| Hook | Purpose | Failure Policy | Timeout |
-| :---- | :---- | :---- | :---- |
-| inference.beforeCompletion | Anonymization: scan prompt for PII, replace with deterministic tokens, inject anonymization context into system prompt | Fail-closed by default (admin-configurable to fail-open) | 15s |
-| inference.afterCompletion | De-anonymization: restore original values in the LLM response | Fail-closed by default (admin-configurable to fail-open) | 15s |
-
-### Why not a single aroundCompletion hook?
-
-We evaluated a single `aroundCompletion` hook as an alternative — it would mean one workflow to configure and maintain rather than two. The problem is that it breaks streaming: the workflow must buffer the entire LLM response before any post-proceed step can run, so the caller receives nothing until the full pipeline completes. Since streaming is non-negotiable for conversational AI, this approach was ruled out.
+**Option 1 — before/after hooks**
 
 | Hook | Purpose | Failure Policy | Timeout |
 | :---- | :---- | :---- | :---- |
-| inference.aroundCompletion (alternative approach) | Any custom logic that needs to run both before and after completion, with access to the full prompt and response | Fail-closed by default (admin-configurable to fail-open) | 30s |
+| inference.beforeCompletion | Anonymize: scan prompt for PII, replace with HMAC tokens, inject anonymization context | Fail-closed by default (admin-configurable to fail-open) | 15s |
+| inference.afterCompletion | De-anonymize: restore original values in the assembled response | Fail-closed by default (admin-configurable to fail-open) | 15s |
+
+**Option 2 — aroundCompletion hook**
+
+| Hook | Purpose | Failure Policy | Timeout |
+| :---- | :---- | :---- | :---- |
+| inference.aroundCompletion | Full pipeline: anonymize prompt, trigger LLM call via `call_site.proceed`, restore tokens in response | Fail-closed by default (admin-configurable to fail-open) | 30s |
+
+### Multi-workflow composition — the key trade-off
+
+Option 1 composes cleanly when multiple workflows register to the same trigger. No workflow owns the LLM call; the TypeScript pipeline makes it exactly once, and any number of workflows run in sequence around it.
+
+Option 2's challenge appears when multiple workflows register to `aroundCompletion`. Exactly one workflow must own `call_site.proceed` — the step that triggers the LLM call. A second workflow on the same hook (telemetry, output transformation, a custom guard) has no clean path to the LLM response without triggering a second call, unless the engine explicitly provides one. Three candidate solutions exist:
+
+- **First-call-wins caching** — the engine makes the LLM call only once per hook invocation; subsequent `call_site.proceed` calls in the same context receive the cached result. Low authoring overhead; semantically opaque (workflow authors cannot tell if their proceed triggered a live call or a cache hit).  
+- **Phased execution** — the engine splits `aroundCompletion` into explicit pre-proceed, proceed, and post-proceed phases; all registered workflows participate in each phase sequentially. Cleanest model; largest engine change.  
+- **Sequential result forwarding** — after the proceed-owning workflow completes, its `output.result` is injected into subsequent workflows' event context as `event.proceedResult`. Minimal engine change; the prior workflow's output shape becomes an implicit interface contract.
+
+Note that both models share the same limitation for post-LLM response mutations: per-chunk streaming carries only what can be applied inline (token restoration against a known map); any workflow step that mutates the assembled response after the fact can only affect the final `ChatCompletionMessageEvent`, not already-emitted chunks. This is a property of streaming itself, not a differentiator between the two approaches.
+
+Streaming has been confirmed viable for Option 2: a streaming proceed prototype shows `call_site.proceed` streaming de-anonymized chunks to the caller inline while buffering the assembled response as step output for post-proceed YAML steps.
+
+The technical details in the sections below describe **Option 1 as the reference implementation**. The token format, session identity, failure policy, tool call coverage, and streaming de-anonymization mechanism apply equally to both options; the primary difference is where in the YAML the LLM call is wired and how additional workflows access the response.
 
 ### Deterministic Tokenization
 
@@ -312,6 +327,25 @@ Each workflow belongs to exactly one space. Enabling a workflow in space A has n
 | Design for hooks UX | Design (\#16705) | Open, assigned to @r4zr32d3k1l | Needed for admin toggle, entity configuration, centralized management |
 | Removal of existing anonymization implementation | Security / Inference | Disabled in codebase (`ANONYMIZATION_FEATURE_ACTIVE = false`) | Should be removed to avoid confusion and dead code |
 | NER model deployment | ML team | Existing (.ner\_model\_1) | Phase 2 only — must be available via inference API |
+
+Dependencies above are written for Option 1\. Option 2 would substitute `inference.aroundCompletion` hook registration for `beforeCompletion`/`afterCompletion`, and would additionally require `call_site.proceed` step support in the workflow engine plus whichever multi-workflow composition solution is chosen.
+
+## Feedback Requested
+
+Both options are technically viable. Neither is committed to — we are seeking input before deciding which to build.
+
+**Which hook model should we build?**
+
+Both options require the same new infrastructure that does not yet exist: synchronous hook invocation, an inline workflow executor, and the `ai.pii` / `transform.pii_restore` step types. That shared base is the bulk of the work.
+
+- **Option 1 (before/after)** — two paired workflows. Multi-workflow composition works out of the box on the shared base. Main downside: two workflows must be kept in sync operationally.  
+- **Option 2 (aroundCompletion)** — single workflow, co-located pre/post logic, better admin experience. Requires the `call_site.proceed` suspend/resume mechanism and additional engine work to handle multi-workflow composition cleanly, on top of the shared base. Streaming proceed has been validated as feasible.
+
+**Specific questions:**
+
+1. Is the single-workflow admin experience of Option 2 a meaningful differentiator for the customers we are targeting, or is managing two paired workflows acceptable?  
+2. Do we expect other teams to register workflows on `aroundCompletion` (telemetry, guards, custom transforms) in the same spaces where anonymization runs? If yes, how important is clean composition to us?  
+3. Of the three composition solutions for Option 2, does any align naturally with the workflow engine roadmap already in flight?
 
 ## What We Are Not Building
 

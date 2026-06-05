@@ -7,18 +7,21 @@ sequenceDiagram
     participant L as LLM
 
     C->>I: chatComplete
-    I->>H: invokeHook — blocks until complete
+    I->>H: invokeHook — full prompt
     H->>W: execute
-    W-->>W: anonymize
-    W->>H: call_site.proceed step
-    H->>I: invoke proceedFn
-    I->>L: connector call (buffered)
-    Note over I,L: Stream buffered — response assembled<br/>before step output resolves
-    L-->>I: full assembled response
+    W-->>W: ai.pii — anonymize + build tokenMap
+    W->>H: call_site.proceed — anonymized prompt + tokenMap
+    Note over H,W: Workflow suspended
+    H->>I: proceedFn — anonymized prompt + tokenMap
+    I->>L: connector call (stream)
+    loop each chunk
+        L-->>I: chunk
+        I-->>C: de-anonymized chunk (inline restore)
+    end
     I-->>H: assembled response
-    H-->>W: step output
-    W-->>W: restore (expressions resolve)
-    W-->>W: workflow.output
+    Note over H,W: Workflow resumes
+    H->>W: step output — response
+    W-->>W: transform.pii_restore
     W-->>H: result
     H-->>I: hook result
-    I-->>C: result (no streaming — TTFT = full pipeline)
+    I-->>C: final result
