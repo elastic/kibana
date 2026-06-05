@@ -31,7 +31,6 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
   keys,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -733,7 +732,7 @@ function GraphInner({
                         color="text"
                         size="s"
                         iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
+                        onClick={() => fitOrCenterView()}
                         aria-label={fitViewLabel}
                         data-test-subj="serviceMapFitViewButton"
                         css={mapToolbarControlIconCss}
@@ -833,7 +832,7 @@ function GraphInner({
                 </EuiPanel>
               </Panel>
             )}
-            {!isEmbedded && <ServiceMapMinimap />}
+            {!isEmbedded && <ServiceMapMinimap nodes={nodes} />}
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
