@@ -10,9 +10,12 @@ import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
+const WORKFLOW_ID = 'wf-1';
+const WORKFLOW_SPACE_ID = '*';
+
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
-    id: 'wf-1',
+    id: WORKFLOW_ID,
     name: 'workflow',
     enabled: true,
     definition: {},
@@ -27,7 +30,11 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => (
 
 const createService = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
-  const service = new WorkflowExecutionService({ managementApi: managementApi as never });
+  const service = new WorkflowExecutionService({
+    managementApi: managementApi as never,
+    workflowId: WORKFLOW_ID,
+    workflowSpaceId: WORKFLOW_SPACE_ID,
+  });
   return { service, managementApi };
 };
 
@@ -47,55 +54,185 @@ describe('WorkflowExecutionService', () => {
     ])('maps %s to %s', (executionStatus, expected) => {
       expect(WorkflowExecutionService.classifyExecutionStatus(executionStatus)).toBe(expected);
     });
+
+    it('throws on an unhandled status', () => {
+      expect(() =>
+        WorkflowExecutionService.classifyExecutionStatus('unknown' as ExecutionStatus)
+      ).toThrow(/Unhandled ExecutionStatus/);
+    });
   });
 
   describe('getFailureMessage', () => {
     it('returns the provided timeout message for TIMED_OUT executions', () => {
       expect(
-        WorkflowExecutionService.getFailureMessage(
-          { status: ExecutionStatus.TIMED_OUT, error: { message: 'ignored' } } as never,
-          'It timed out'
-        )
+        WorkflowExecutionService.getFailureMessage({
+          execution: { status: ExecutionStatus.TIMED_OUT, error: { message: 'ignored' } } as never,
+          timedOutMessage: 'It timed out',
+        })
       ).toBe('It timed out');
     });
 
     it('returns the execution error message for non-timeout failures', () => {
       expect(
-        WorkflowExecutionService.getFailureMessage(
-          { status: ExecutionStatus.FAILED, error: { message: 'boom' } } as never,
-          'It timed out'
-        )
+        WorkflowExecutionService.getFailureMessage({
+          execution: { status: ExecutionStatus.FAILED, error: { message: 'boom' } } as never,
+          timedOutMessage: 'It timed out',
+        })
       ).toBe('boom');
     });
 
     it('falls back to "Unknown error" when no error message is present', () => {
       expect(
-        WorkflowExecutionService.getFailureMessage(
-          { status: ExecutionStatus.FAILED } as never,
-          'It timed out'
-        )
+        WorkflowExecutionService.getFailureMessage({
+          execution: { status: ExecutionStatus.FAILED } as never,
+          timedOutMessage: 'It timed out',
+        })
       ).toBe('Unknown error');
     });
   });
 
+  describe('getStatus', () => {
+    it('returns NotStarted when there are no executions', async () => {
+      const { service } = createService();
+
+      const result = await service.getStatus({ spaceId: 'space-a' });
+
+      expect(result).toEqual({ status: SigEventsWorkflowStatus.NotStarted, executionId: null });
+    });
+
+    it('returns InProgress with executionId for a running execution', async () => {
+      const { service } = createService({
+        getWorkflowExecutions: jest
+          .fn()
+          .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
+      });
+
+      const result = await service.getStatus({ spaceId: 'space-a' });
+
+      expect(result).toEqual({
+        status: SigEventsWorkflowStatus.InProgress,
+        executionId: 'exec-1',
+      });
+    });
+
+    it('returns Completed with executionId for a completed execution', async () => {
+      const { service } = createService({
+        getWorkflowExecutions: jest
+          .fn()
+          .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }] }),
+      });
+
+      const result = await service.getStatus({ spaceId: 'space-a' });
+
+      expect(result).toEqual({
+        status: SigEventsWorkflowStatus.Completed,
+        executionId: 'exec-1',
+      });
+    });
+
+    it('returns Failed with error message for a failed execution', async () => {
+      const { service } = createService({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [{ id: 'exec-1', status: ExecutionStatus.FAILED, error: { message: 'boom' } }],
+        }),
+      });
+
+      const result = await service.getStatus({ spaceId: 'space-a' });
+
+      expect(result).toEqual({
+        status: SigEventsWorkflowStatus.Failed,
+        executionId: 'exec-1',
+        error: 'boom',
+      });
+    });
+
+    it('returns Failed with the caller-supplied message for a timed-out execution', async () => {
+      const { service } = createService({
+        getWorkflowExecutions: jest
+          .fn()
+          .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT }] }),
+      });
+
+      const result = await service.getStatus({
+        spaceId: 'space-a',
+        timedOutMessage: 'It timed out',
+      });
+
+      expect(result).toEqual({
+        status: SigEventsWorkflowStatus.Failed,
+        executionId: 'exec-1',
+        error: 'It timed out',
+      });
+    });
+
+    it('always fetches exactly one execution', async () => {
+      const { service, managementApi } = createService();
+
+      await service.getStatus({ spaceId: 'space-a' });
+
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1 }),
+        'space-a'
+      );
+    });
+
+    it('caller-supplied queryParams cannot override size: 1', async () => {
+      const { service, managementApi } = createService();
+
+      await service.getStatus({ spaceId: 'space-a', queryParams: { size: 99 } });
+
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 1 }),
+        'space-a'
+      );
+    });
+
+    it('forwards optional queryParams (e.g. concurrencyGroupKey)', async () => {
+      const { service, managementApi } = createService();
+
+      await service.getStatus({
+        spaceId: 'space-a',
+        queryParams: { concurrencyGroupKey: 'group-1' },
+      });
+
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ concurrencyGroupKey: 'group-1' }),
+        'space-a'
+      );
+    });
+  });
+
   describe('execute', () => {
-    it('fetches the definition from the global space and runs it in the execution space', async () => {
+    it('fetches the definition from the constructor workflow space and runs it in the execution space', async () => {
       const { service, managementApi } = createService();
       const request = httpServerMock.createKibanaRequest();
 
       const executionId = await service.execute({
-        workflowId: 'wf-1',
         executionSpaceId: 'space-a',
         inputs: { foo: 'bar' },
         request,
       });
 
       expect(executionId).toBe('execution-id');
-      expect(managementApi.getWorkflow).toHaveBeenCalledWith('wf-1', '*');
+      expect(managementApi.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, WORKFLOW_SPACE_ID);
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'wf-1' }),
+        expect.objectContaining({ id: WORKFLOW_ID }),
         'space-a',
         { foo: 'bar' },
+        request
+      );
+    });
+
+    it('passes an empty object when inputs are omitted', async () => {
+      const { service, managementApi } = createService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.execute({ executionSpaceId: 'space-a', request });
+
+      expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'space-a',
+        {},
         request
       );
     });
@@ -105,27 +242,23 @@ describe('WorkflowExecutionService', () => {
 
       await expect(
         service.execute({
-          workflowId: 'wf-1',
           executionSpaceId: 'space-a',
-          inputs: {},
           request: httpServerMock.createKibanaRequest(),
         })
-      ).rejects.toThrow(/Workflow wf-1 not found/);
+      ).rejects.toThrow(new RegExp(`Workflow ${WORKFLOW_ID} not found`));
     });
 
     it('throws when the workflow has no definition', async () => {
       const { service } = createService({
-        getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', definition: null }),
+        getWorkflow: jest.fn().mockResolvedValue({ id: WORKFLOW_ID, definition: null }),
       });
 
       await expect(
         service.execute({
-          workflowId: 'wf-1',
           executionSpaceId: 'space-a',
-          inputs: {},
           request: httpServerMock.createKibanaRequest(),
         })
-      ).rejects.toThrow(/Workflow wf-1 not found/);
+      ).rejects.toThrow(new RegExp(`Workflow ${WORKFLOW_ID} not found`));
     });
 
     it('throws the caller-supplied message when the workflow is not found', async () => {
@@ -133,13 +266,11 @@ describe('WorkflowExecutionService', () => {
 
       await expect(
         service.execute({
-          workflowId: 'wf-1',
           executionSpaceId: 'space-a',
-          inputs: {},
           request: httpServerMock.createKibanaRequest(),
-          notFoundMessage: 'Onboarding workflow wf-1 not found',
+          notFoundMessage: 'Onboarding workflow not found',
         })
-      ).rejects.toThrow(/Onboarding workflow wf-1 not found/);
+      ).rejects.toThrow(/Onboarding workflow not found/);
     });
   });
 
@@ -152,11 +283,7 @@ describe('WorkflowExecutionService', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const result = await service.cancelLatest({
-        workflowId: 'wf-1',
-        spaceId: 'space-a',
-        request,
-      });
+      const result = await service.cancelLatest({ spaceId: 'space-a', request });
 
       expect(result).toBe('exec-1');
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
@@ -174,7 +301,6 @@ describe('WorkflowExecutionService', () => {
       });
 
       const result = await service.cancelLatest({
-        workflowId: 'wf-1',
         spaceId: 'space-a',
         request: httpServerMock.createKibanaRequest(),
       });
@@ -187,7 +313,6 @@ describe('WorkflowExecutionService', () => {
       const { service } = createService();
 
       const result = await service.cancelLatest({
-        workflowId: 'wf-1',
         spaceId: 'space-a',
         request: httpServerMock.createKibanaRequest(),
       });
@@ -199,16 +324,41 @@ describe('WorkflowExecutionService', () => {
       const { service, managementApi } = createService();
 
       await service.cancelLatest({
-        workflowId: 'wf-1',
         spaceId: 'space-a',
         request: httpServerMock.createKibanaRequest(),
         concurrencyGroupKey: 'group-1',
       });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({ workflowId: 'wf-1', concurrencyGroupKey: 'group-1', size: 1 }),
+        expect.objectContaining({
+          workflowId: WORKFLOW_ID,
+          concurrencyGroupKey: 'group-1',
+          size: 1,
+        }),
         'space-a'
       );
+    });
+  });
+
+  describe('getLastExecution', () => {
+    it('returns the first result when executions exist', async () => {
+      const { service } = createService({
+        getWorkflowExecutions: jest
+          .fn()
+          .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
+      });
+
+      const result = await service.getLastExecution('space-a');
+
+      expect(result).toEqual({ id: 'exec-1', status: ExecutionStatus.RUNNING });
+    });
+
+    it('returns null when there are no executions', async () => {
+      const { service } = createService();
+
+      const result = await service.getLastExecution('space-a');
+
+      expect(result).toBeNull();
     });
   });
 });

@@ -38,13 +38,13 @@ describe('SignificantEventsDiscoveryClient', () => {
       const { client, managementApi } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
-      const result = await client.run({ request, spaceId: 'space-a', triggeredBy: 'manual' });
+      const result = await client.run({ request, spaceId: 'space-a' });
 
-      expect(result).toEqual({ executionId: 'execution-id' });
+      expect(result).toEqual({ executionId: 'execution-id', isNew: true });
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID }),
         'space-a',
-        { triggeredBy: 'manual' },
+        {},
         request
       );
     });
@@ -59,10 +59,9 @@ describe('SignificantEventsDiscoveryClient', () => {
       const result = await client.run({
         request: httpServerMock.createKibanaRequest(),
         spaceId: 'space-a',
-        triggeredBy: 'scheduled',
       });
 
-      expect(result).toEqual({ executionId: 'execution-id' });
+      expect(result).toEqual({ executionId: 'execution-id', isNew: true });
       expect(managementApi.runWorkflow).toHaveBeenCalled();
     });
 
@@ -76,10 +75,9 @@ describe('SignificantEventsDiscoveryClient', () => {
       const result = await client.run({
         request: httpServerMock.createKibanaRequest(),
         spaceId: 'space-a',
-        triggeredBy: 'manual',
       });
 
-      expect(result).toEqual({ executionId: 'in-flight' });
+      expect(result).toEqual({ executionId: 'in-flight', isNew: false });
       expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });
