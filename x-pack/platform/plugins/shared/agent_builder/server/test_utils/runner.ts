@@ -155,7 +155,7 @@ export const createToolManagerMock = (): ToolManagerMock => {
     list: jest.fn(),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
-    getToolOrigin: jest.fn(),
+    getToolMeta: jest.fn(),
     getDynamicToolIds: jest.fn(),
     getSummarizer: jest.fn(),
   };

@@ -35,8 +35,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   let adminInteractiveCookieHeader: Record<string, string>;
   let sysEsClient: Client;
 
-  // Shared search-test chunk: indexed once and reused by autocomplete,
-  // wildcard, and skip_content assertions so the index is never empty
+  // Shared search-test chunk: indexed once and reused by hit, wildcard,
+  // and compact-shape assertions so the index is never empty
   const searchRunId = randomUUID();
   const searchChunkId = `sml-autocomplete-${searchRunId}`;
   const searchOriginId = `sml-origin-${searchRunId}`;
@@ -63,12 +63,13 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         id: searchChunkId,
         type: 'visualization',
         title: searchIndexedTitle,
-        origin_id: searchOriginId,
+        origin: { uri: `visualization://${searchOriginId}` },
         content: 'pacific bluefin tuna content for sml scout',
         created_at: now,
         updated_at: now,
         spaces: ['default'],
         permissions: [],
+        ingestion_method: 'crawled',
       },
     });
   });
@@ -94,16 +95,15 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     });
     expect(response).toHaveStatusCode(200);
     const body = response.body as SmlSearchHttpResponse;
-    expect(body.total).toBeGreaterThan(0);
     const match = body.results.find((r) => r.id === searchChunkId);
     expect(match).toBeDefined();
     expect(match?.title).toContain('pacific');
-    expect(match?.origin_id).toBe(searchOriginId);
+    expect(match?.origin?.uri).toBe(`visualization://${searchOriginId}`);
     expect(match?.type).toBe('visualization');
   });
 
   apiTest(
-    'POST /internal/agent_builder/sml/_search wildcard returns expected item fields',
+    'POST /internal/agent_builder/sml/_search wildcard returns item fields',
     async ({ apiClient }) => {
       const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
         headers: ih(),
@@ -112,32 +112,12 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       });
       expect(response).toHaveStatusCode(200);
       const body = response.body as SmlSearchHttpResponse;
-      expect(typeof body.total).toBe('number');
       expect(Array.isArray(body.results)).toBe(true);
       for (const item of body.results) {
         expect(typeof item.id).toBe('string');
-        expect(typeof item.origin_id).toBe('string');
+        expect(typeof item.origin?.uri).toBe('string');
         expect(typeof item.type).toBe('string');
         expect(typeof item.title).toBe('string');
-        expect(typeof item.content).toBe('string');
-        expect(typeof item.score).toBe('number');
-      }
-    }
-  );
-
-  apiTest(
-    'POST /internal/agent_builder/sml/_search omits content when skip_content is true',
-    async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
-        headers: ih(),
-        body: { query: '*', size: 10, skip_content: true },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      const body = response.body as SmlSearchHttpResponse;
-      expect(body.results.length).toBeGreaterThan(0);
-      for (const item of body.results) {
-        expect('content' in item).toBe(false);
       }
     }
   );
@@ -189,12 +169,13 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
           id: chunkId,
           type: 'connector',
           title: indexedTitle,
-          origin_id: connectorId,
+          origin: { uri: `connector://${connectorId}` },
           content: `attach content for ${runId}`,
           created_at: now,
           updated_at: now,
           spaces: ['default'],
           permissions: [],
+          ingestion_method: 'crawled',
         },
       });
 
