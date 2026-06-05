@@ -19,9 +19,9 @@ Each platform owns its directory under `server/platforms/` and
 
 ## Retracing
 
-This feature allows users understand their app's errors by converting them to human-readable ones with the help of a
-previously provided map. Client apps tend to provide error obfuscated, due to optimization and security reasons, which
-makes them not useful for debugging.
+This feature allows users to understand their app's errors by converting obfuscated stacktraces into human-readable
+ones using a pre-uploaded mapping file. Client apps tend to emit obfuscated errors for optimization and security
+reasons, making them difficult to debug.
 
 Two things must be in place before the plugin can retrace a stacktrace:
 
@@ -101,10 +101,10 @@ For example, an Android crash dashboard drills down to:
 
 ```bash
 # Unit tests
-yarn test:jest x-pack/solutions/observability/plugins/client_apps
+node scripts/jest x-pack/solutions/observability/plugins/client_apps
 
 # Type checking
-yarn test:type_check --project x-pack/solutions/observability/plugins/client_apps/tsconfig.json
+node scripts/type_check --project x-pack/solutions/observability/plugins/client_apps/tsconfig.json
 ```
 
 ## Configuration
