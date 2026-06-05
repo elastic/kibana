@@ -119,8 +119,37 @@ export interface AppHeaderMetadataHealthItem {
 }
 
 /** @public */
+export type AppHeaderTitleSaveResult = string | void;
+
+/** @public */
+export interface AppHeaderEditableTitle {
+  /** Current title text rendered in the header. */
+  text: string;
+  /**
+   * Commits a rename. Receives the trimmed new title. Return nothing on success; return an
+   * error string to reject the value -- it is shown inline and the editor stays open.
+   * Thrown or rejected errors are caught and surfaced as a generic error.
+   */
+  onSave: (nextTitle: string) => AppHeaderTitleSaveResult | Promise<AppHeaderTitleSaveResult>;
+  /**
+   * Accessible label for the edit input, naming what is being renamed (the title is the
+   * dashboard/case/etc. name, not a generic "page title"). Prefer a context-specific label
+   * such as "Edit dashboard name". Falls back to a generic label when omitted.
+   */
+  ariaLabel?: string;
+  /**
+   * Hint shown when the title is empty: muted text in read mode and the input placeholder
+   * in edit mode. Name the entity being created, e.g. "Untitled dashboard".
+   */
+  placeholder?: string;
+}
+
+/** @public */
+export type AppHeaderTitle = string | AppHeaderEditableTitle;
+
+/** @public */
 export interface AppHeaderConfig {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];

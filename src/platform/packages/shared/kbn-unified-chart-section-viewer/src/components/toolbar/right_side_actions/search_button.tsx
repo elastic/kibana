@@ -30,7 +30,7 @@ interface RightSideActionsProps {
 }
 
 const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
-  defaultMessage: 'Search',
+  defaultMessage: 'Search metrics',
 });
 
 const DEBOUNCE_TIME = 300;
