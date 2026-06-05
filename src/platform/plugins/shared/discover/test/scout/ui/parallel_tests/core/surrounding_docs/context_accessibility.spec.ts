@@ -8,7 +8,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
+import {
+  spaceTest,
+  testData,
+  loginAndGoToDiscover,
+  navigateToFirstDocContext,
+} from '../../../fixtures/surrounding_docs';
 
 spaceTest.describe(
   'Discover context - accessibility',
@@ -20,8 +25,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsViewer();
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await loginAndGoToDiscover({ browserAuth, pageObjects });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -32,13 +37,7 @@ spaceTest.describe(
     spaceTest(
       'should give focus to the Load link when Tab is pressed',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+        await navigateToFirstDocContext(pageObjects);
 
         // Skip to main content via Tab + Enter, then Tab to first focusable element
         await page.keyboard.press('Tab');

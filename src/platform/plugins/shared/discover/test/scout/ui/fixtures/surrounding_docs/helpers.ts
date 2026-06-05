@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { ScoutPage, ScoutParallelTestFixtures, PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { ContextPage } from './page_objects';
 
 /**
  * Adds a filter via the filter bar popover without asserting a single filter badge exists afterward.
@@ -44,3 +45,29 @@ export async function addFilters(page: ScoutPage, filters: Array<[string, string
     await addFilterWithoutStrictCheck(page, field, value);
   }
 }
+
+/**
+ * Logs in as viewer and navigates to the Discover app in classic query mode,
+ * waiting for the search to complete and the doc table to render.
+ */
+export const loginAndGoToDiscover = async ({
+  browserAuth,
+  pageObjects,
+}: Pick<ScoutParallelTestFixtures, 'browserAuth' | 'pageObjects'>) => {
+  await browserAuth.loginAsViewer();
+  await pageObjects.discover.goto({ queryMode: 'classic' });
+  await pageObjects.discover.waitUntilSearchingHasFinished();
+  await pageObjects.discover.waitForDocTableRendered();
+};
+
+/**
+ * Opens the first document's details in Discover, clicks "View surrounding documents",
+ * and waits for the context view to finish loading.
+ */
+export const navigateToFirstDocContext = async (
+  pageObjects: PageObjects & { contextPage: ContextPage }
+) => {
+  await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+  await pageObjects.contextPage.clickRowAction(1);
+  await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+};

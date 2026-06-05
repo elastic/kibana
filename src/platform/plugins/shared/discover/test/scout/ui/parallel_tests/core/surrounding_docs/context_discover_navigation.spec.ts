@@ -8,7 +8,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, addFilters } from '../../../fixtures/surrounding_docs';
+import {
+  spaceTest,
+  testData,
+  addFilters,
+  loginAndGoToDiscover,
+  navigateToFirstDocContext,
+} from '../../../fixtures/surrounding_docs';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
@@ -33,12 +39,8 @@ spaceTest.describe(
 
     spaceTest(
       'should open context view with the same columns',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
+      async ({ page, pageObjects, browserAuth }) => {
+        await loginAndGoToDiscover({ browserAuth, pageObjects });
         for (const columnName of TEST_COLUMN_NAMES) {
           await page.testSubj.fill('fieldListFiltersFieldSearch', columnName);
           await page.testSubj.click(`fieldToggle-${columnName}`);
@@ -55,21 +57,15 @@ spaceTest.describe(
 
     spaceTest(
       'should open context view with selected document as anchor and allow selecting next anchor',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
+      async ({ page, pageObjects, browserAuth }) => {
+        await loginAndGoToDiscover({ browserAuth, pageObjects });
         const firstRowText = await page
           .locator('[data-grid-visible-row-index="0"] [data-gridcell-column-index="0"]')
           .innerText();
         const firstTimestamp = firstRowText.split('\t')[0] || firstRowText.split('\n')[0];
 
         await spaceTest.step('verify initial anchor matches selected document', async () => {
-          await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-          await pageObjects.contextPage.clickRowAction(1);
-          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+          await navigateToFirstDocContext(pageObjects);
 
           const anchorExpandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
           await expect(anchorExpandButton).toBeVisible();
@@ -100,18 +96,12 @@ spaceTest.describe(
 
     spaceTest(
       'should open context view with filters disabled',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
+      async ({ page, pageObjects, browserAuth }) => {
+        await loginAndGoToDiscover({ browserAuth, pageObjects });
         await addFilters(page, TEST_FILTER_COLUMN_NAMES);
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+        await navigateToFirstDocContext(pageObjects);
 
         for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
           expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: false })).toBe(
@@ -123,15 +113,9 @@ spaceTest.describe(
 
     spaceTest(
       'should navigate to doc view and back to discover',
-      async ({ browserAuth, page, pageObjects }) => {
-        await browserAuth.loginAsViewer();
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+      async ({ page, pageObjects, browserAuth }) => {
+        await loginAndGoToDiscover({ browserAuth, pageObjects });
+        await navigateToFirstDocContext(pageObjects);
 
         await pageObjects.contextPage.openRowActions(0);
         await pageObjects.contextPage.clickRowAction(0);

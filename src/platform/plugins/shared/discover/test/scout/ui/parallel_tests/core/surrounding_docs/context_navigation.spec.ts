@@ -8,7 +8,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, addFilters } from '../../../fixtures/surrounding_docs';
+import {
+  spaceTest,
+  testData,
+  addFilters,
+  loginAndGoToDiscover,
+  navigateToFirstDocContext,
+} from '../../../fixtures/surrounding_docs';
 
 const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
   [
@@ -31,19 +37,14 @@ spaceTest.describe(
     let initialHitCount: number;
 
     spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.waitForDocTableRendered();
+      await loginAndGoToDiscover({ browserAuth, pageObjects });
 
       await addFilters(page, TEST_FILTER_COLUMN_NAMES);
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       initialHitCount = await pageObjects.discover.getHitCountInt();
 
-      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-      await pageObjects.contextPage.clickRowAction(1);
-      await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+      await navigateToFirstDocContext(pageObjects);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
