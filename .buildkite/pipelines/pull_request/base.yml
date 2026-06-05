@@ -54,7 +54,6 @@ steps:
     agents:
       machineType: n4-standard-16
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -70,7 +69,6 @@ steps:
     agents:
       machineType: n4-standard-32
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
