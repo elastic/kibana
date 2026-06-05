@@ -145,3 +145,53 @@ export const EPISODES_HISTOGRAM_RETRY = i18n.translate(
   'xpack.alertingV2.alertEpisodesListPage.episodesHistogram.retry',
   { defaultMessage: 'Retry' }
 );
+
+export const EPISODES_KPIS_ALERTS_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.alertsPanelTitle',
+  { defaultMessage: 'Alerts' }
+);
+
+export const EPISODES_KPIS_ALERT_ACTIONS_PANEL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.alertActionsPanelTitle',
+  { defaultMessage: 'Alert actions' }
+);
+
+export const EPISODES_KPIS_ALERTS_COUNT = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.alertsCount',
+  { defaultMessage: 'Alerts count' }
+);
+
+export const EPISODES_KPIS_FIRING_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.firingRules',
+  { defaultMessage: 'Firing rules' }
+);
+
+export const EPISODES_KPIS_ASSIGNED_TO_ME = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.assignedToMe',
+  { defaultMessage: 'Assigned to me' }
+);
+
+export const EPISODES_KPIS_UNASSIGNED_ALERTS = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.unassignedAlerts',
+  { defaultMessage: 'Unassigned alerts' }
+);
+
+export const EPISODES_KPIS_ACKNOWLEDGED = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.acknowledged',
+  { defaultMessage: 'Acknowledged' }
+);
+
+export const EPISODES_KPIS_SNOOZED = i18n.translate('xpack.alertingV2.episodes.kpis.snoozed', {
+  defaultMessage: 'Snoozed',
+});
+
+export const EPISODES_KPIS_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.errorTitle',
+  {
+    defaultMessage: 'Unable to load alert statistics',
+  }
+);
+
+export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpis.error', {
+  defaultMessage: 'An error occurred while fetching the alert statistics. Try refreshing the page.',
+});

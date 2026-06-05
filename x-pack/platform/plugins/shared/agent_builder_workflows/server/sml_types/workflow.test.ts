@@ -41,11 +41,13 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   type: 'workflow',
   title: 'My Workflow',
   origin_id: 'workflow-abc',
+  origin: { uri: 'workflow://workflow-abc' },
   content: 'My Workflow\nA test workflow',
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z',
   spaces: ['default'],
   permissions: [],
+  ingestion_method: 'crawled',
   ...overrides,
 });
 

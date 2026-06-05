@@ -75,6 +75,7 @@ import {
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
+import { registerAssetInventoryUsageCollector } from './lib/asset_inventory/telemetry/collectors/register';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
@@ -276,9 +277,11 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.logger.error(`Error registering security tools: ${error}`);
       }
     );
-    registerAttachments(agentBuilder).catch((error) => {
+
+    registerAttachments(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
+
     registerSkills({
       agentBuilder,
       experimentalFeatures,
@@ -540,7 +543,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
       telemetry: core.analytics,
-      httpServiceSetup: core.http,
     });
 
     initUsageCollectors({
@@ -556,6 +558,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       legacySignalsIndex: config.signalsIndex,
     });
+
+    registerAssetInventoryUsageCollector(
+      this.logger,
+      core.getStartServices(),
+      plugins.usageCollection
+    );
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
@@ -923,7 +931,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures('management', features);
 
     const manifestManager = new ManifestManager({
-      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),
+      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects),
       savedObjectsClient,
       exceptionListClient,
       artifactClient: new EndpointArtifactClient(

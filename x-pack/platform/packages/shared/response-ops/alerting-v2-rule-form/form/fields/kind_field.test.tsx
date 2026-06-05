@@ -12,53 +12,64 @@ import { KindField } from './kind_field';
 import { createFormWrapper } from '../../test_utils';
 
 describe('KindField', () => {
-  it('renders the checkbox label', () => {
+  it('renders the Mode label', () => {
     render(<KindField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText('Track active and recovered state over time')).toBeInTheDocument();
+    expect(screen.getByText('Mode')).toBeInTheDocument();
   });
 
-  it('renders the description text', () => {
-    render(<KindField />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByText(/Enables lifecycle management/)).toBeInTheDocument();
-  });
-
-  it('is checked when kind is alert (default)', () => {
+  it('shows Alert selected when kind is alert (default)', () => {
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'alert' }) });
 
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).toBeChecked();
+    expect(screen.getByTestId('kindField')).toHaveTextContent('Alert');
   });
 
-  it('is unchecked when kind is signal', () => {
+  it('shows Signal selected when kind is signal', () => {
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'signal' }) });
 
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).not.toBeChecked();
+    expect(screen.getByTestId('kindField')).toHaveTextContent('Signal');
   });
 
-  it('changes kind from alert to signal when unchecked', async () => {
+  it('shows Building block selected when kind is building_block', () => {
+    render(<KindField />, { wrapper: createFormWrapper({ kind: 'building_block' }) });
+
+    expect(screen.getByTestId('kindField')).toHaveTextContent('Building block');
+  });
+
+  it('shows all option descriptions in the dropdown', async () => {
     const user = userEvent.setup();
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'alert' }) });
 
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).toBeChecked();
+    await user.click(screen.getByTestId('kindField'));
 
-    await user.click(checkbox);
-
-    expect(checkbox).not.toBeChecked();
+    expect(screen.getByText(/Tracks a problem across state changes/)).toBeInTheDocument();
+    expect(screen.getByText(/Records each match as a data point/)).toBeInTheDocument();
+    expect(screen.getByText(/Runs silently and produces signals/)).toBeInTheDocument();
   });
 
-  it('changes kind from signal to alert when checked', async () => {
-    const user = userEvent.setup();
-    render(<KindField />, { wrapper: createFormWrapper({ kind: 'signal' }) });
+  it('changes kind from alert to signal when Signal is selected', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    render(<KindField />, { wrapper: createFormWrapper({ kind: 'alert' }) });
 
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).not.toBeChecked();
+    await user.click(screen.getByTestId('kindField'));
+    await user.click(screen.getByText('Signal'));
 
-    await user.click(checkbox);
+    expect(screen.getByTestId('kindField')).toHaveTextContent('Signal');
+  });
 
-    expect(checkbox).toBeChecked();
+  it('changes kind from alert to building_block when Building block is selected', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    render(<KindField />, { wrapper: createFormWrapper({ kind: 'alert' }) });
+
+    await user.click(screen.getByTestId('kindField'));
+    await user.click(screen.getByText('Building block'));
+
+    expect(screen.getByTestId('kindField')).toHaveTextContent('Building block');
+  });
+
+  it('disables the select when disabled', () => {
+    render(<KindField disabled />, { wrapper: createFormWrapper({ kind: 'alert' }) });
+
+    expect(screen.getByTestId('kindField')).toBeDisabled();
   });
 });

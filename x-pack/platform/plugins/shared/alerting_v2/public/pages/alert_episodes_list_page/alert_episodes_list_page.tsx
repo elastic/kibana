@@ -50,6 +50,7 @@ import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
+import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
 import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
@@ -142,7 +143,6 @@ export const AlertEpisodesListPage = () => {
     data: episodesData,
     dataView,
     isLoading,
-    refetch,
   } = useFetchAlertingEpisodesQuery({
     pageSize: PAGE_SIZE,
     services,
@@ -346,7 +346,7 @@ export const AlertEpisodesListPage = () => {
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
             assigneeUids={assigneeUids}
-            onRefresh={() => refetch()}
+            onRefresh={invalidateEpisodeQueries}
             isLoading={isLoading}
             services={services}
             includeBuildingBlocks={filterState.includeBuildingBlocks ?? false}
@@ -354,6 +354,9 @@ export const AlertEpisodesListPage = () => {
               setFilterState((prev) => ({ ...prev, includeBuildingBlocks: value }))
             }
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EpisodesHistogram

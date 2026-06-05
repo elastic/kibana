@@ -31,8 +31,11 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 import type { PreQueryFilterProvider } from './lib/rule_executor/pre_query_filter_registry';
+import type { ActionPolicyClient } from './lib/action_policy_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export interface AlertingServerSetup {
   /**
@@ -46,12 +49,19 @@ export interface AlertingServerSetup {
   registerPreQueryFilterProvider(name: string, provider: PreQueryFilterProvider): void;
 }
 
+
 export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
     spaceId: string
   ): Promise<RulesClientApi>;
+
+  getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
+  getActionPolicyClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<ActionPolicyClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {
