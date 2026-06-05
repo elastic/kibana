@@ -11,12 +11,12 @@ import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React, { useMemo } from 'react';
 
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
 import {
+  DEFAULT_EXTERNAL_LINK_OPTIONS,
   EXTERNAL_LINK_TYPE,
   LINKS_VERTICAL_LAYOUT,
-  type LinksLayoutType,
-} from '../../../common/types';
+} from '../../../common/constants';
+import type { LinksLayoutType } from '../../../common/types';
 import type { ExternalLinkOptions } from '../../../server';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';

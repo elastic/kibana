@@ -7,44 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useMemo } from 'react';
-import { isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, map, merge, skip } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import { isUndefined, omitBy } from 'lodash';
+import React, { createContext, useMemo } from 'react';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 
+import { css } from '@emotion/react';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
-  initializeTitleManager,
-  useBatchedPublishingSubjects,
-  titleComparators,
   apiIsPresentationContainer,
   initializeStateApi,
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
+import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
+import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import type { LinksState } from '../../server';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
-import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
-import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 
-import { hasLibraryItemWithTitle, linksClient } from '../links_client';
-import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
-import { isParentApiCompatible } from '../actions/add_links_panel_action';
-import { coreServices } from '../services/kibana_services';
-import { loadFromLibrary } from '../links_client/load_from_library';
-import { getPlacementHints } from './get_placement_hints';
 import {
   DASHBOARD_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
-} from '../../common/types';
+} from '../../common/constants';
+import { isParentApiCompatible } from '../actions/add_links_panel_action';
+import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
+import { hasLibraryItemWithTitle, linksClient } from '../links_client';
+import { loadFromLibrary } from '../links_client/load_from_library';
+import { coreServices } from '../services/kibana_services';
+import { getPlacementHints } from './get_placement_hints';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 

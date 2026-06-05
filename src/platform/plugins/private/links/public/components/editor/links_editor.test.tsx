@@ -10,12 +10,11 @@
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/types';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 import type { ResolvedLink } from '../../types';
 import { LinksStrings } from '../links_strings';
 import type { LinksEditorProps } from './links_editor';

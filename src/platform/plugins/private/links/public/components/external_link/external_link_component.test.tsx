@@ -15,8 +15,7 @@ import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/types';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {

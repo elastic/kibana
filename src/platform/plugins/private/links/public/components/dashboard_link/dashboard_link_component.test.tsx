@@ -8,20 +8,21 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+
+import { LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import { getMockLinksParentApi } from '../../mocks';
+import type { ResolvedLink } from '../../types';
 import type { DashboardLinkProps } from './dashboard_link_component';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { getMockLinksParentApi } from '../../mocks';
-import type { ResolvedLink } from '../../types';
-import { BehaviorSubject } from 'rxjs';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { EuiThemeProvider } from '@elastic/eui';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/types';
 
 function createMockLinksParent({
   initialQuery,
