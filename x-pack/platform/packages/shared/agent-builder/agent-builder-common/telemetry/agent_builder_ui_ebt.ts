@@ -31,6 +31,8 @@ const ebtAction = {
     OPEN_CONVERSATION_MENU: 'open_conversation_menu',
     RENAME_CONVERSATION: 'rename_conversation',
     DELETE_CONVERSATION: 'delete_conversation',
+    MARK_AS_READ: 'mark_as_read',
+    MARK_AS_UNREAD: 'mark_as_unread',
   },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
@@ -168,6 +170,8 @@ const ebtAction = {
     ATTACHMENT_CLOSE: 'attachment_close',
     CONFIRM_PROMPT_CONFIRM: 'confirm_prompt_confirm',
     CONFIRM_PROMPT_CANCEL: 'confirm_prompt_cancel',
+    AUTH_PROMPT_AUTHORIZE: 'auth_prompt_authorize',
+    AUTH_PROMPT_CANCEL: 'auth_prompt_cancel',
     DELETE_CONFIRM: 'delete_confirm',
     DELETE_CANCEL: 'delete_cancel',
     EXTERNAL_LINK_CONFIRM: 'external_link_confirm',

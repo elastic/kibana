@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';

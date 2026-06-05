@@ -11,7 +11,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { agentPolicyService, appContextService } from '..';
 import { runWithCache } from '../epm/packages/cache';
