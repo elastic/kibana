@@ -4731,6 +4731,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-api-shared@link:x-pack/platform/packages/shared/kbn-apm-api-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-common@link:x-pack/platform/packages/shared/kbn-apm-common":
   version "0.0.0"
   uid ""
@@ -6100,6 +6104,10 @@
   uid ""
 
 "@kbn/core-server-benchmarks@link:src/platform/packages/shared/kbn-core-server-benchmarks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-spaces-common@link:src/core/packages/spaces/common":
   version "0.0.0"
   uid ""
 
@@ -9320,10 +9328,6 @@
   uid ""
 
 "@kbn/spaces-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin":
-  version "0.0.0"
-  uid ""
-
-"@kbn/spaces-utils@link:src/platform/packages/shared/kbn-spaces-utils":
   version "0.0.0"
   uid ""
 

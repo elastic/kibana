@@ -315,6 +315,7 @@ src/core/packages/security/common @elastic/kibana-core @elastic/kibana-security
 src/core/packages/security/server @elastic/kibana-core
 src/core/packages/security/server-internal @elastic/kibana-core
 src/core/packages/security/server-mocks @elastic/kibana-core
+src/core/packages/spaces/common @elastic/kibana-core
 src/core/packages/status/common @elastic/kibana-core
 src/core/packages/status/server @elastic/kibana-core
 src/core/packages/status/server-internal @elastic/kibana-core
@@ -676,7 +677,6 @@ src/platform/packages/shared/kbn-shared-svg @elastic/obs-presentation-team
 src/platform/packages/shared/kbn-shared-url-state @elastic/appex-sharedux
 src/platform/packages/shared/kbn-shared-ux-utility @elastic/appex-sharedux
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
 src/platform/packages/shared/kbn-sse-utils @elastic/obs-ai-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-ai-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-ai-team
@@ -1024,6 +1024,7 @@ x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
+x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-rule-management
