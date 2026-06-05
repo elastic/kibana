@@ -243,7 +243,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     projectRouting: string,
     jobIds?: string[],
     jobGroups?: string[],
-    auto?: boolean,
+    autoDetectDatafeeds: boolean = false,
     simulate?: boolean,
     restartRunningJobs: boolean = true
   ) {
@@ -256,7 +256,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     const hasJobIds = jobIds !== undefined && jobIds.length > 0;
     const hasJobGroups = jobGroups !== undefined;
 
-    if (auto === false && (hasJobIds || hasJobGroups)) {
+    if (autoDetectDatafeeds === false && (hasJobIds || hasJobGroups)) {
       let jobIdsMatchingSelection: Set<string> | undefined;
 
       if (hasJobGroups) {
@@ -289,7 +289,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       }
     }
 
-    if (auto === true) {
+    if (autoDetectDatafeeds === true) {
       for (const df of datafeeds) {
         // @ts-expect-error @elastic-elasticsearch datafeed_config type incorrect, missing project_routing
         if (df.project_routing === undefined || df.project_routing === '') {
