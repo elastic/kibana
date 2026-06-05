@@ -16,7 +16,13 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../fixtures';
+import {
+  test,
+  CONNECTORS_APP_PATH,
+  CONNECTORS_LIST_SELECTORS,
+  defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
+} from '../fixtures';
 
 interface MonacoBridge {
   MonacoEnvironment?: {
@@ -75,17 +81,6 @@ const closeFlyoutIfOpen = async (page: ScoutPage) => {
   }
 };
 
-const fillIndexThresholdForm = async (page: ScoutPage) => {
-  await page.testSubj.click('selectIndexExpression');
-  const indexInput = page.testSubj.locator('thresholdIndexesComboBox').locator('input');
-  await indexInput.fill('.kibana');
-  await page.locator('[role="listbox"]').waitFor();
-  await page.locator('[role="listbox"] [role="option"]:first-child').click();
-  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
-  await timeFieldSelect.locator('option:nth-child(2)').waitFor();
-  await timeFieldSelect.selectOption({ index: 1 });
-  await page.testSubj.click('closePopover');
-};
 
 const cancelRuleCreation = async (page: ScoutPage) => {
   const cancelBtn = page.testSubj.locator('rulePageFooterCancelButton');
@@ -105,7 +100,20 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
   let testPageConnectorId: string;
   let alertsConnectorName: string;
 
-  test.beforeAll(async ({ apiServices }) => {
+  test.beforeAll(async ({ apiServices, esClient }) => {
+    await esClient.indices.create(
+      {
+        index: THRESHOLD_TEST_INDEX,
+        mappings: { properties: { '@timestamp': { type: 'date' } } },
+      },
+      { ignore: [400] }
+    );
+    await esClient.index({
+      index: THRESHOLD_TEST_INDEX,
+      document: { '@timestamp': new Date().toISOString() },
+    });
+    await esClient.indices.refresh({ index: THRESHOLD_TEST_INDEX });
+
     // Connector for test-page tests
     const testConnector = await apiServices.alerting.connectors.create({
       name: `jsm-test-page-${Date.now()}`,
@@ -136,11 +144,12 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     await closeFlyoutIfOpen(page);
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, esClient }) => {
     await Promise.allSettled(
       createdConnectorIds.map((id) => apiServices.alerting.connectors.delete(id))
     );
     createdConnectorIds.length = 0;
+    await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
   });
 
   // ── connector page ────────────────────────────────────────────────────────
@@ -422,10 +431,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
 
   test('alerts page - should default to the create alert action', async ({ page }) => {
     await page.gotoApp('rules');
-    await page.testSubj.click('createRuleButton');
-    await page.testSubj.click('.index-threshold-SelectOption');
-    await page.testSubj.locator('ruleDetailsNameInput').fill(`jsm-alert-${Date.now()}`);
-    await fillIndexThresholdForm(page);
+    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -443,10 +449,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     page,
   }) => {
     await page.gotoApp('rules');
-    await page.testSubj.click('createRuleButton');
-    await page.testSubj.click('.index-threshold-SelectOption');
-    await page.testSubj.locator('ruleDetailsNameInput').fill(`jsm-alert-${Date.now()}`);
-    await fillIndexThresholdForm(page);
+    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -468,10 +471,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     page,
   }) => {
     await page.gotoApp('rules');
-    await page.testSubj.click('createRuleButton');
-    await page.testSubj.click('.index-threshold-SelectOption');
-    await page.testSubj.locator('ruleDetailsNameInput').fill(`jsm-alert-${Date.now()}`);
-    await fillIndexThresholdForm(page);
+    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -494,10 +494,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     page,
   }) => {
     await page.gotoApp('rules');
-    await page.testSubj.click('createRuleButton');
-    await page.testSubj.click('.index-threshold-SelectOption');
-    await page.testSubj.locator('ruleDetailsNameInput').fill(`jsm-alert-${Date.now()}`);
-    await fillIndexThresholdForm(page);
+    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -524,10 +521,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     page,
   }) => {
     await page.gotoApp('rules');
-    await page.testSubj.click('createRuleButton');
-    await page.testSubj.click('.index-threshold-SelectOption');
-    await page.testSubj.locator('ruleDetailsNameInput').fill(`jsm-alert-${Date.now()}`);
-    await fillIndexThresholdForm(page);
+    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
