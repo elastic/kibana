@@ -34,4 +34,37 @@ export class Toasts {
     await this.waitFor();
     await this.toast.closeAllToasts();
   }
+
+  /**
+   * Number of toasts currently visible. Returns `0` when none are present
+   * (no implicit wait, unlike {@link waitFor}). Mirrors FTR
+   * `toasts.getCount()`.
+   */
+  async getCount(): Promise<number> {
+    return this.toast.getCount();
+  }
+
+  /**
+   * The visible text of every toast currently displayed, in DOM order.
+   * Mirrors FTR `toasts.getAll()` which returns toast element wrappers;
+   * Scout returns the (already-extracted) text since no caller of
+   * `getAll()` reads anything other than the body text.
+   */
+  async getAllText(): Promise<string[]> {
+    const wrappers = await this.toast.getWrapper().all();
+    const texts = await Promise.all(
+      wrappers.map(async (wrapper) => ((await wrapper.textContent()) ?? '').trim())
+    );
+    return texts;
+  }
+
+  /**
+   * Close every visible toast without first waiting for one to appear.
+   * Mirrors FTR `toasts.dismissAll()` and is the right helper when the
+   * caller wants a known-clean toast region before triggering an action,
+   * or when zero toasts is a valid post-condition.
+   */
+  async dismissAll(): Promise<void> {
+    await this.toast.closeAllToasts();
+  }
 }

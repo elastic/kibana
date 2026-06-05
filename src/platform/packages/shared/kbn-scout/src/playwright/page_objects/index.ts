@@ -15,7 +15,10 @@ import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_fly
 import { DashboardApp } from './dashboard_app';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DashboardLinks } from './dashboard_links';
+import { DataGrid } from './data_grid';
 import { DataViewEditorPage } from './data_view_editor_page';
+import { DataViews } from './data_views';
+import { DataViewsFieldEditor } from './data_views_field_editor';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -25,6 +28,7 @@ import { RenderablePage } from './renderable_page';
 import { SavedObjectsManagementPage } from './saved_objects_management_page';
 import { SavedQueryManagementMenu } from './saved_query_management_menu';
 import { Toasts } from './toasts';
+import { UnifiedFieldList } from './unified_field_list';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
@@ -66,6 +70,9 @@ export interface PageObjects {
   dashboard: DashboardApp;
   dashboardLinks: DashboardLinks;
   dataViewEditor: DataViewEditorPage;
+  dataViews: DataViews;
+  dataViewsFieldEditor: DataViewsFieldEditor;
+  dataGrid: DataGrid;
   filterBar: FilterBar;
   listingTable: ListingTable;
   home: HomePage;
@@ -77,6 +84,7 @@ export interface PageObjects {
   savedQueryManagementMenu: SavedQueryManagementMenu;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
+  unifiedFieldList: UnifiedFieldList;
   inspector: Inspector;
   lens: LensApp;
   login: LoginPage;
@@ -94,9 +102,12 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
     dataViewEditor: createLazyPageObject(DataViewEditorPage, fixtures.page),
+    dataViews: createLazyPageObject(DataViews, fixtures.page),
+    dataViewsFieldEditor: createLazyPageObject(DataViewsFieldEditor, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
+    dataGrid: createLazyPageObject(DataGrid, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
     listingTable: createLazyPageObject(ListingTable, fixtures.page),
@@ -116,6 +127,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
+    unifiedFieldList: createLazyPageObject(UnifiedFieldList, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),

@@ -21,7 +21,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_adhoc_data_views'));
+    // `./_adhoc_data_views` was migrated to Scout under
+    // `src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/adhoc_data_views.spec.ts`.
     loadTestFile(require.resolve('./_date_nested'));
     loadTestFile(require.resolve('./_context_encoded_url_params'));
     loadTestFile(require.resolve('./_data_view_edit'));

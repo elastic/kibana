@@ -30,6 +30,7 @@ const UNIFIED_TABS_TEST_SUBJ = {
   newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
   tabsBar: 'unifiedTabs_tabsBar',
   duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
+  inspectMenuItem: 'unifiedTabs_tabMenuItem_inspect',
 } as const;
 
 export class DiscoverApp {
@@ -143,11 +144,24 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
-  async saveSearch(name: string) {
+  async saveSearch(name: string, saveAsNew?: boolean) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
+    if (saveAsNew !== undefined) {
+      // The "Save as new" switch only appears when editing an already-
+      // saved search; setting it changes whether the save creates a copy or
+      // overwrites the original. Read aria-checked rather than the EUI
+      // class so this stays decoupled from EUI internals.
+      const toggle = this.page.testSubj.locator('saveAsNewCheckbox');
+      const desired = saveAsNew ? 'true' : 'false';
+      if ((await toggle.getAttribute('aria-checked')) !== desired) {
+        await toggle.click();
+        await expect(toggle).toHaveAttribute('aria-checked', desired);
+      }
+    }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
   }
 
   /**
@@ -216,6 +230,27 @@ export class DiscoverApp {
   async getHitCountInt(): Promise<number> {
     const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
     return parseInt(hitCount.replace(/,/g, ''), 10);
+  }
+
+  /**
+   * Locator for the formatted Discover hit count (e.g. `"14,004"`). Prefer
+   * `expect(discover.hitCountLocator()).toHaveText(expected, { timeout: 30_000 })`
+   * over polling `getHitCount()` — the hit count can render the *previous*
+   * value past Playwright's default 5s after a query swap, since
+   * `waitUntilSearchingHasFinished` doesn't sync the chart suggestion or the
+   * hit-count update path.
+   */
+  hitCountLocator(): Locator {
+    return this.page.testSubj.locator('discoverQueryHits');
+  }
+
+  /**
+   * Read the formatted Discover hit count as a string (e.g. `"14,004"`).
+   * For assertions, prefer `expect(hitCountLocator()).toHaveText(...)` to
+   * avoid stale-value races.
+   */
+  async getHitCount(): Promise<string> {
+    return await this.page.testSubj.innerText('discoverQueryHits');
   }
 
   async getChartTimespan(): Promise<string> {
@@ -322,6 +357,40 @@ export class DiscoverApp {
   }
 
   /**
+   * Click a row-action link inside an open document-viewer flyout. Action ids
+   * come from `use_flyout_actions.tsx` in the discover plugin: each action
+   * carries a `docTableRowAction docTableRowAction-<id>` test-subj pair, so the
+   * generic `docTableRowAction` subj still works for legacy callers (e.g. FTR
+   * `dataGrid.getRowActions()`) while specs target a specific action by id.
+   */
+  async clickRowActionInFlyout(actionId: 'singleDocument' | 'surroundingDocument') {
+    // `~` = CSS whole-word match against the space-separated test-subj list.
+    const action = this.page.testSubj.locator(`~docTableRowAction-${actionId}`);
+    await expect(action).toBeVisible();
+    await action.click();
+  }
+
+  /**
+   * Inside an open document-viewer flyout, click a per-field cell action
+   * (e.g. `addFilterButton`, `addExistsFilterButton`, `toggleColumnButton`).
+   * The cell-action buttons are revealed on hover, so this hovers the field
+   * row name first.
+   */
+  async clickFieldActionInFlyout(fieldName: string, actionTestSubj: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await expect(async () => {
+      const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameCell.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameCell.hover();
+      const actionButton = flyout.locator(`[data-test-subj="${actionTestSubj}-${fieldName}"]`);
+      await actionButton.waitFor({ state: 'visible' });
+      await actionButton.click();
+    }).toPass({ timeout: 15_000 });
+  }
+
+  /**
    * Hover the given data-grid cell and click its "expand" action, opening the
    * cell-value popover (which embeds a Monaco editor with the row JSON).
    *
@@ -412,9 +481,187 @@ export class DiscoverApp {
   }
 
   /**
+   * `true` if the histogram chart is currently visible. Mirrors FTR
+   * `discover.isChartVisible()` — chart visibility is controlled by
+   * `dscShowHistogramButton` / `dscHideHistogramButton` toggles which
+   * mount/unmount the `unifiedHistogramChart` test-subject.
+   */
+  async isChartVisible(): Promise<boolean> {
+    return this.page.testSubj.isVisible('unifiedHistogramChart');
+  }
+
+  /**
+   * Toggle the histogram chart on/off. Mirrors FTR `discover.toggleChartVisibility()`.
+   */
+  async toggleChartVisibility(): Promise<void> {
+    if (await this.isChartVisible()) {
+      await this.page.testSubj.click('dscHideHistogramButton');
+      await this.page.testSubj.locator('unifiedHistogramChart').waitFor({ state: 'detached' });
+    } else {
+      await this.page.testSubj.click('dscShowHistogramButton');
+      await this.page.testSubj.locator('unifiedHistogramChart').waitFor({ state: 'visible' });
+    }
+  }
+
+  /**
+   * `true` if the histogram is showing the "interval truncated" warning
+   * tooltip (e.g. when the requested interval is finer than the bucketing
+   * resolution allows).
+   */
+  async getChartIntervalWarningIcon(): Promise<boolean> {
+    return this.page
+      .locator('[data-test-subj="unifiedHistogramRendered"] .euiToolTipAnchor')
+      .count()
+      .then((c) => c > 0);
+  }
+
+  /**
+   * `true` if the histogram chart has rendered a `<canvas>` element — the
+   * Scout equivalent of FTR `elasticChart.canvasExists()` scoped to the
+   * Discover unified histogram. Returns `false` when the chart is hidden
+   * or still loading.
+   */
+  async chartCanvasExists(): Promise<boolean> {
+    return (
+      (await this.page
+        .locator('[data-test-subj="unifiedHistogramChart"] .echCanvasRenderer')
+        .count()) > 0
+    );
+  }
+
+  /**
+   * Drag-select a window on the histogram canvas. Mirrors FTR
+   * `discover.brushHistogram()` — same offsets so the resulting time-range
+   * width matches what FTR asserts (~23h on the long_window archive).
+   */
+  async brushHistogram(): Promise<void> {
+    // Same canvas the FTR `elasticChart.getCanvas()` picks: the per-chart
+    // renderer canvas (`.echCanvasRenderer`) inside the unified histogram.
+    const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] .echCanvasRenderer');
+    await canvas.waitFor({ state: 'visible' });
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('histogram canvas has no bounding box');
+    // FTR uses canvas-element relative offsets: start at (-300, 20) from the
+    // canvas right edge, end at (-100, 30). Translate that to viewport coords.
+    const startX = box.x + box.width - 300;
+    const startY = box.y + box.height / 2 + 20;
+    const endX = box.x + box.width - 100;
+    const endY = box.y + box.height / 2 + 30;
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + (endX - startX) / 2, startY + (endY - startY) / 2, {
+      steps: 5,
+    });
+    await this.page.mouse.move(endX, endY, { steps: 5 });
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Wait for Discover's error-callout to surface. Mirrors FTR
+   * `discover.showsErrorCallout()`.
+   */
+  async showsErrorCallout(): Promise<void> {
+    await expect(this.page.testSubj.locator('discoverErrorCalloutTitle')).toBeVisible();
+  }
+
+  /**
+   * Click the "New search" button in the Discover top nav menu. Mirrors
+   * FTR `discover.clickNewSearchButton()`.
+   */
+  async clickNewSearchButton(): Promise<void> {
+    await this.page.testSubj.click('discoverNewButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Switch the active data view via the data-view picker. Mirrors FTR
+   * `discover.selectIndexPattern(name)`.
+   */
+  async selectIndexPattern(name: string): Promise<void> {
+    await this.page.testSubj.click('*dataView-switch-link');
+    await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'visible' });
+    await this.page.testSubj.fill('indexPattern-switcher--input', name);
+    await this.page.locator(`[data-test-subj="indexPattern-switcher"] [title="${name}"]`).click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Wait until the Discover doc table has finished rendering. Mirrors FTR
+   * `discover.waitForDocTableLoadingComplete()` — the doc table flips its
+   * `data-render-complete` attribute to `'true'` after the last paint.
+   */
+  async waitForDocTableLoadingComplete(): Promise<void> {
+    await expect(this.page.testSubj.locator('discoverDocTable')).toHaveAttribute(
+      'data-render-complete',
+      'true',
+      { timeout: 30_000 }
+    );
+  }
+
+  /**
+   * Assert that running `cb` triggers exactly `expectedCount` matching
+   * search requests, observed via the browser's `performance` resource
+   * timing buffer. Mirrors FTR `discover.expectSearchRequestCount(type,
+   * count, cb)`.
+   *
+   * `type`:
+   *   - `'ese'`  → standard data view search (`/internal/search/ese`)
+   *   - `'esql'` → ES|QL async search (`/internal/search/esql_async`)
+   *
+   * The perf API is page-scoped and survives navigations only within the
+   * same document, so callers should not navigate between the reset and
+   * the assertion. A 5×500 ms retry is used (same as FTR) to absorb
+   * late-firing responses.
+   */
+  async expectSearchRequestCount(
+    type: 'ese' | 'esql',
+    expectedCount: number,
+    cb?: () => Promise<void>
+  ): Promise<void> {
+    const searchPath = type === 'esql' ? 'esql_async' : 'ese';
+    const endpointSuffix = `/internal/search/${searchPath}`;
+
+    if (cb) {
+      await this.page.evaluate(() => {
+        performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
+        performance.clearResourceTimings();
+      });
+      await cb();
+    }
+
+    await expect
+      .poll(
+        async () => {
+          await this.waitUntilSearchingHasFinished();
+          return this.page.evaluate((suffix) => {
+            return performance
+              .getEntries()
+              .filter(
+                (entry) =>
+                  ['fetch', 'xmlhttprequest'].includes(
+                    (entry as PerformanceResourceTiming).initiatorType
+                  ) && entry.name.endsWith(suffix)
+              ).length;
+          }, endpointSuffix);
+        },
+        {
+          message: `expected ${expectedCount} request(s) to ${endpointSuffix}`,
+          timeout: 3000,
+          intervals: [500, 500, 500, 500, 500],
+        }
+      )
+      .toBe(expectedCount);
+  }
+
+  /**
    * Click the histogram breakdown selector and pick `field` (or `"No breakdown"`).
    */
-  async chooseBreakdownField(field: string) {
+  /**
+   * Choose a histogram breakdown field by display name. Pass `value` to
+   * select an option whose `value` attribute differs from the field name
+   * (used by `clearBreakdownField()` for the special `__EMPTY_SELECTOR_OPTION__`).
+   */
+  async chooseBreakdownField(field: string, value: string = field) {
     await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
       state: 'visible',
@@ -422,7 +669,7 @@ export class DiscoverApp {
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
@@ -434,6 +681,89 @@ export class DiscoverApp {
     const button = this.page.testSubj.locator('discoverNoResultsViewAllMatches');
     await button.click();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Whether Discover is currently showing the empty-state "no results" panel.
+   * Mirrors FTR `discover.hasNoResults()`.
+   */
+  async hasNoResults(): Promise<boolean> {
+    return await this.page.testSubj.isVisible('discoverNoResults');
+  }
+
+  /**
+   * Whether the "no results" panel includes the time-range suggestion (the
+   * "expand the time range" hint that only renders for time-based data views).
+   * Mirrors FTR `discover.hasNoResultsTimepicker()`.
+   */
+  async hasNoResultsTimepicker(): Promise<boolean> {
+    return await this.page.testSubj.isVisible('discoverNoResultsTimefilter');
+  }
+
+  /**
+   * Assert there is no "unsaved changes" notification indicator on the
+   * Discover save button. The indicator is rendered by the EUI split-button
+   * with `data-test-subj="split-button-notification-indicator"`.
+   */
+  async ensureNoUnsavedChangesIndicator(): Promise<void> {
+    await expect(this.page.testSubj.locator('split-button-notification-indicator')).toBeHidden();
+  }
+
+  /**
+   * Assert the Discover save button currently shows the "unsaved changes"
+   * notification indicator.
+   */
+  async ensureHasUnsavedChangesIndicator(): Promise<void> {
+    await expect(this.page.testSubj.locator('split-button-notification-indicator')).toBeVisible();
+  }
+
+  /**
+   * Click the Discover save button on a saved search that already has unsaved
+   * changes (i.e. with the notification indicator showing) and confirm the
+   * save modal. Mirrors FTR `discover.saveUnsavedChanges()`.
+   */
+  async saveUnsavedChanges(): Promise<void> {
+    await this.page.testSubj.hover('discoverSaveButton');
+    await this.page.testSubj.click('discoverSaveButton');
+    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', {
+      state: 'visible',
+    });
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Reset the histogram breakdown field back to "No breakdown". Mirrors FTR
+   * `discover.clearBreakdownField()` which delegates to `chooseBreakdownField`
+   * with the empty-selector option.
+   */
+  async clearBreakdownField(): Promise<void> {
+    await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
+  }
+
+  /**
+   * Extract the data view id from the current Discover URL. The URL embeds
+   * `dataViewId:<id>` in both `_g` and `_a` (sometimes the saved-search id
+   * carries it too); this returns that id and throws if the URL holds
+   * conflicting ids — mirroring FTR `discover.getCurrentDataViewId()`.
+   */
+  async getCurrentDataViewId(): Promise<string> {
+    const url = this.page.url();
+    const ids = Array.from(url.matchAll(/dataViewId:[^,)]*/g)).map(([match]) =>
+      decodeURIComponent(match).replace('dataViewId:', '').replaceAll("'", '')
+    );
+    const first = ids[0];
+    if (!first) {
+      throw new Error(`Discover URL has no dataViewId: ${url}`);
+    }
+    if (!ids.every((id) => id === first)) {
+      throw new Error(
+        `Discover URL state contains different data view ids; expected all to match ${first}: ${ids.join(
+          ', '
+        )}`
+      );
+    }
+    return first;
   }
 
   async revertUnsavedChanges() {
@@ -596,6 +926,23 @@ export class DiscoverApp {
    * Clicks the "New tab" button in the Discover tab bar and waits for the
    * newly created tab to become the active one.
    */
+  /**
+   * Open the Inspector flyout from the currently active Discover tab's menu.
+   * Mirrors FTR `discover.openInspectorFromTabMenu()` — the inspector is
+   * scoped to the per-tab menu in the unified tabs UI rather than to the
+   * global app menu.
+   */
+  async openInspectorFromTabMenu() {
+    if (await this.page.testSubj.isVisible('inspectorPanel')) {
+      return;
+    }
+    const activeTabTestSubj = await this.getActiveTabTestSubj();
+    const tabId = activeTabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+    await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.inspectMenuItem);
+    await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'visible' });
+  }
+
   async createNewTab() {
     await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
     await this.activeTabLocator.waitFor({ state: 'visible' });
