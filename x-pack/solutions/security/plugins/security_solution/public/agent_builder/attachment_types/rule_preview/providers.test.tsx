@@ -35,10 +35,7 @@ jest.mock('react-redux', () => ({
   useDispatch: jest.fn(() => jest.fn()),
 }));
 
-const renderProviders = (
-  getServices: () => Promise<unknown>,
-  getStore: () => Promise<unknown>
-) =>
+const renderProviders = (getServices: () => Promise<unknown>, getStore: () => Promise<unknown>) =>
   render(
     <I18nProvider>
       <RulePreviewAttachmentSecurityProviders

@@ -12,7 +12,11 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { RulePreviewAlertsTable } from '../../../detection_engine/rule_creation_ui/components/rule_preview/rule_preview_alerts_table';
-import type { RulePreviewAttachment, PreviewMetadataState, RulePreviewAttachmentServices } from './types';
+import type {
+  RulePreviewAttachment,
+  PreviewMetadataState,
+  RulePreviewAttachmentServices,
+} from './types';
 import {
   buildRulePreviewMetadataSearchRequest,
   getRulePreviewAttachmentDataTableId,

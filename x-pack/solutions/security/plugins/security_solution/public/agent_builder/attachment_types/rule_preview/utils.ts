@@ -35,8 +35,7 @@ const RULE_PREVIEW_TYPES: readonly Type[] = [
   'new_terms',
 ];
 
-const isRuleType = (value: string): value is Type =>
-  RULE_PREVIEW_TYPES.includes(value as Type);
+const isRuleType = (value: string): value is Type => RULE_PREVIEW_TYPES.includes(value as Type);
 
 export const getRulePreviewAttachmentDataTableId = (previewId: string): string =>
   `rule-preview-attachment-${previewId}`;
