@@ -30,7 +30,7 @@ export function transformOut(
       ? { links: latestState.links.map(({ order, id, ...link }) => link) }
       : {}),
   };
-  // mke anboter change
+
   /** Inject saved object reference when by-reference */
   const savedObjectRef = (references ?? []).find(
     ({ name, type }) => name === 'savedObjectRef' && type === LINKS_SAVED_OBJECT_TYPE
