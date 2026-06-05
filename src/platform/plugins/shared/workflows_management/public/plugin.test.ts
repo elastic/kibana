@@ -146,7 +146,7 @@ describe('WorkflowsPlugin', () => {
         plugin.start(coreStart, startDeps as any);
 
         expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'home', 'kibanaOverview', 'sideNav']);
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'projectSideNav']);
       });
 
       it('should hide the app from sideNav when the user lacks read capability', () => {
@@ -158,7 +158,8 @@ describe('WorkflowsPlugin', () => {
 
         expect(updates).toHaveLength(1);
         expect(updates[0].visibleIn).toEqual(['globalSearch']);
-        expect(updates[0].visibleIn).not.toContain('sideNav');
+        expect(updates[0].visibleIn).not.toContain('classicSideNav');
+        expect(updates[0].visibleIn).not.toContain('projectSideNav');
       });
 
       it('should keep the app in sideNav and globalSearch when authorized but unavailable', () => {
@@ -169,7 +170,7 @@ describe('WorkflowsPlugin', () => {
         plugin.start(coreStart, startDeps as any);
 
         expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'classicSideNav', 'projectSideNav']);
       });
 
       it('should hide the app from sideNav for unauthorized users even when unavailable', () => {
@@ -180,7 +181,7 @@ describe('WorkflowsPlugin', () => {
         plugin.start(coreStart, startDeps as any);
 
         expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'sideNav']);
+        expect(updates[0].visibleIn).toEqual(['globalSearch', 'classicSideNav', 'projectSideNav']);
       });
     });
   });
