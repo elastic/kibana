@@ -22,7 +22,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -31,6 +30,7 @@ import type { ComposeFormValues } from '../../compose_form_types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
+import { ModeSelect } from '../../../../form/fields/mode_select';
 import type { RuleBuilderStepProps } from '../types';
 import { useBuilderState } from '../builder_state_context';
 import type {
@@ -297,9 +297,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [thresholdValues, onThresholdValuesChange]
   );
 
-  const handleTrackingToggle = useCallback(() => {
-    setValue('kind', isAlert ? 'signal' : 'alert');
-  }, [isAlert, setValue]);
+  const handleModeChange = useCallback(
+    (kind: 'signal' | 'alert') => {
+      setValue('kind', kind);
+    },
+    [setValue]
+  );
 
   return (
     <>
@@ -812,16 +815,13 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         />
       </EuiButtonEmpty>
 
-      {/* ── Tracking toggle ── */}
+      {/* ── Mode select ── */}
       <EuiSpacer size="m" />
-      <EuiSwitch
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={handleModeChange}
         compressed
-        label={i18n.translate('xpack.alertingV2.ruleBuilder.trackingToggleLabel', {
-          defaultMessage: 'Track active and recovered state over time',
-        })}
-        checked={isAlert}
-        onChange={handleTrackingToggle}
-        data-test-subj="ruleBuilderTrackingToggle"
+        data-test-subj="ruleBuilderModeSelect"
       />
 
       {/* ── Schedule and lookback ── */}

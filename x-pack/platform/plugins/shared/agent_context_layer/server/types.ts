@@ -16,12 +16,14 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
   SmlTypeDefinition,
   SmlSearchResult,
   SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
+  SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
   SmlIndexAttachmentContentMode,
 } from './services/sml/types';
@@ -30,6 +32,7 @@ import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_it
 export interface AgentContextLayerSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgentContextLayerStartDependencies {
@@ -80,6 +83,7 @@ export interface AgentContextLayerPluginStart {
   }) => Promise<SmlResolvedItemResult[]>;
 
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
+  deleteAttachment: (params: SmlDeleteAttachmentParams) => Promise<void>;
 }
 
 /**
@@ -109,7 +113,27 @@ export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
  * Discriminated union — `content` selects the mode:
  * - omitted → origin mode (calls `getSmlData`, marks `'crawled'`)
  * - provided → content mode (skips `getSmlData`, marks `'manual'`)
+ *
+ * `action: 'delete'` is valid on either variant; the indexer ignores
+ * `content` and `force` when deleting and removes only `'crawled'` chunks.
  */
 export type SmlIndexAttachmentParams =
   | SmlIndexAttachmentOriginParams
   | SmlIndexAttachmentContentParams;
+
+/**
+ * Params for `AgentContextLayerPluginStart.deleteAttachment`.
+ *
+ * Distinct from `indexAttachment({ action: 'delete' })` only in that callers
+ * can choose to wipe `'manual'` or `'all'` chunks via `ingestionMethod`. With
+ * the default (`'crawled'`) the two are equivalent.
+ */
+export interface SmlDeleteAttachmentParams {
+  request: KibanaRequest;
+  originId: string;
+  attachmentType: string;
+  /** Defaults to `'crawled'`. Pass `'all'` to fully retire the origin. */
+  ingestionMethod?: SmlDeleteScope;
+  spaceId?: string;
+  includedHiddenTypes?: string[];
+}

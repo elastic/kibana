@@ -12,7 +12,6 @@ import type {
   FakeRawRequest,
   Headers,
   HttpServiceSetup,
-  IBasePath,
   KibanaRequest,
 } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
@@ -24,7 +23,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { Logger } from '@kbn/logging';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -38,7 +37,6 @@ import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
 export interface BaseExportTypeSetupDeps {
-  basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
 }
 
@@ -148,20 +146,14 @@ export abstract class ExportType<
     spaceId: string | undefined,
     logger = this.logger
   ): KibanaRequest {
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      logger.info(`Generating request for space: ${spaceId}`);
+    }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
+      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
     };
-    const fakeRequest = kibanaRequestFactory(rawRequest);
-
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
+    return kibanaRequestFactory(rawRequest);
   }
 
   /*
