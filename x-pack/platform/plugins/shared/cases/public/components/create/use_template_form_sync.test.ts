@@ -317,6 +317,40 @@ describe('useTemplateFormSync', () => {
       expect(resetCall[CASE_EXTENDED_FIELDS]).toHaveProperty(GLOBAL_KEY, GLOBAL_VALUE);
       expect(resetCall[CASE_EXTENDED_FIELDS]).not.toHaveProperty('template_only_key');
     });
+
+    it('preserved global value wins over template default when the same key appears in both', () => {
+      // The template has a field with the same key as the global field and provides its own default.
+      // After { ...nextExtended, ...preserved }, the already-set global value must win so that
+      // switching templates does not silently overwrite the user's (or global-default's) value.
+      const SHARED_KEY = 'priority_as_keyword';
+      const templateWithSharedField = {
+        templateId: 'template-shared',
+        templateVersion: 1,
+        definition: {
+          name: 'Shared Field Template',
+          fields: [
+            {
+              name: 'priority',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              metadata: { default: 'from-template' },
+            },
+          ],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'template-shared' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSharedField, isLoading: false });
+      (innerForm.getValues as jest.Mock).mockReturnValue({
+        [CASE_EXTENDED_FIELDS]: { [SHARED_KEY]: 'from-global' },
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set([SHARED_KEY])));
+
+      const resetCall = (innerForm.reset as jest.Mock).mock.calls[0][0];
+      // Preserved global value must win over the template's 'from-template' default.
+      expect(resetCall[CASE_EXTENDED_FIELDS]).toHaveProperty(SHARED_KEY, 'from-global');
+    });
   });
 
   describe('extended fields', () => {
