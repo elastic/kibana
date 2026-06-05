@@ -293,7 +293,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
@@ -308,7 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           repository: REPO_NAME,
           snapshot: SNAPSHOT_NAME,
           wait_for_completion: true,
-          indices: 'logs.otel*,.streams*',
+          indices: 'logs.otel*,.streams*,.significant_events*',
           include_global_state: true,
         });
 
