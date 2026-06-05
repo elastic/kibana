@@ -372,7 +372,12 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await refreshRulesList(page);
     await searchRules(page, r2.data.name as string);
 
-    await page.testSubj.click('collapsedItemActions');
+    // Scope the action menu to r2's row so that other rules matching the
+    // OR-tokenized search (e.g. r1) don't intercept the click.
+    const r2Row = page
+      .locator('[data-test-subj^="rule-row"]')
+      .filter({ has: page.locator(`[title="${r2.data.name}"]`) });
+    await r2Row.locator('[data-test-subj="collapsedItemActions"]').click();
     await page.testSubj.click('deleteRule');
     await expect(page.testSubj.locator('rulesDeleteConfirmation')).toBeVisible();
     await page.testSubj.click('confirmModalConfirmButton');
@@ -383,8 +388,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     const idx = createdRuleIds.indexOf(r2.data.id);
     if (idx !== -1) createdRuleIds.splice(idx, 1);
 
-    await searchRules(page, r2.data.name as string);
-    await expect(getTableRows(page)).toHaveCount(0);
+    await expect(
+      page.testSubj.locator('rulesList').locator(`[title="${r2.data.name}"]`)
+    ).toBeHidden();
   });
 
   test('should disable all selection', async ({ page, apiServices }) => {
