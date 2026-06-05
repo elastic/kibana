@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -19,7 +19,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -35,11 +34,7 @@ import {
   type AttachmentRenderProps,
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
-import type {
-  EsqlToolParam,
-  EsqlToolParamValue,
-  ToolResult,
-} from '@kbn/agent-builder-common';
+import type { EsqlToolParam, EsqlToolParamValue, ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
@@ -79,10 +74,87 @@ const lackManageToolsPermissionDescription = i18n.translate(
 );
 const runTestButtonLabel = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.tool.runTestButtonLabel',
-  { defaultMessage: 'Run' }
+  { defaultMessage: 'Run test' }
 );
 
 const renderBoldChunks = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
+
+const formatParamLabel = (name: string): string =>
+  name
+    .split('_')
+    .filter(Boolean)
+    .map((word) =>
+      word.length <= 2
+        ? word.toUpperCase()
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join(' ');
+
+const numericTestInputStyles = css`
+  max-width: 80px;
+`;
+
+const textTestInputStyles = css`
+  max-width: 280px;
+`;
+
+const RESULTS_GRID_DEFAULT_PAGE_SIZE = 10;
+const RESULTS_GRID_COMPACT_ROW_HEIGHT = 28;
+const RESULTS_GRID_HEADER_HEIGHT = 32;
+const RESULTS_GRID_PAGINATION_HEIGHT = 48;
+const RESULTS_GRID_MAX_HEIGHT = 400;
+
+const resultsGridContainerStyles = css`
+  overflow: hidden;
+`;
+
+const renderInlineTestParamInput = ({
+  name,
+  param,
+  value,
+  setValues,
+}: {
+  name: string;
+  param: EsqlToolParam;
+  value: string | boolean | undefined;
+  setValues: React.Dispatch<React.SetStateAction<Record<string, string | boolean>>>;
+}) => {
+  const label = formatParamLabel(name);
+
+  if (param.type === 'boolean') {
+    return (
+      <EuiSwitch
+        label={label}
+        checked={value === true}
+        onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.checked }))}
+      />
+    );
+  }
+
+  if (param.type === 'integer' || param.type === 'float') {
+    return (
+      <EuiFieldNumber
+        compressed
+        prepend={label}
+        css={numericTestInputStyles}
+        aria-label={label}
+        value={String(value ?? '')}
+        onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
+      />
+    );
+  }
+
+  return (
+    <EuiFieldText
+      compressed
+      prepend={label}
+      css={textTestInputStyles}
+      aria-label={label}
+      value={String(value ?? '')}
+      onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
+    />
+  );
+};
 
 interface ToolCardProps extends AttachmentRenderProps<ToolAttachment> {
   isCanvas?: boolean;
@@ -178,13 +250,14 @@ const parseParamValue = (
   }
 };
 
-interface TestSectionProps {
+interface CanvasTestSectionProps {
   data: ToolAttachmentData;
   http: HttpStart;
 }
 
-const TestSection: React.FC<TestSectionProps> = ({ data, http }) => {
+const CanvasTestSection: React.FC<CanvasTestSectionProps> = ({ data, http }) => {
   const params = data.configuration.params;
+  const paramEntries = Object.entries(params);
   const [values, setValues] = useState<Record<string, string | boolean>>(() => {
     const initial: Record<string, string | boolean> = {};
     for (const [name, p] of Object.entries(params)) {
@@ -236,7 +309,9 @@ const TestSection: React.FC<TestSectionProps> = ({ data, http }) => {
       });
       setResults(response.results);
     } catch (error) {
-      const message = (error as { body?: { message?: string }; message?: string }).body?.message ?? (error as Error).message;
+      const message =
+        (error as { body?: { message?: string }; message?: string }).body?.message ??
+        (error as Error).message;
       setErrorMessage(message);
     } finally {
       setIsRunning(false);
@@ -261,69 +336,51 @@ const TestSection: React.FC<TestSectionProps> = ({ data, http }) => {
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {Object.entries(params).map(([name, param]) => {
-        const value = values[name];
-        if (param.type === 'boolean') {
-          return (
-            <EuiFormRow key={name} label={`${name} (${param.type})`} helpText={param.description}>
-              <EuiSwitch
-                label={String(value === true)}
-                checked={value === true}
-                onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.checked }))}
-              />
-            </EuiFormRow>
-          );
-        }
-        if (param.type === 'integer' || param.type === 'float') {
-          return (
-            <EuiFormRow
-              key={name}
-              label={`${name} (${param.type})${param.optional ? ' — optional' : ''}`}
-              helpText={param.description}
+      <EuiPanel color="subdued">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+          {paramEntries.map(([name, param]) => (
+            <EuiFlexItem grow={false} key={name}>
+              {renderInlineTestParamInput({
+                name,
+                param,
+                value: values[name],
+                setValues,
+              })}
+            </EuiFlexItem>
+          ))}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="play"
+              onClick={handleRun}
+              isLoading={isRunning}
+              data-test-subj="agentBuilderToolDraftRunButton"
             >
-              <EuiFieldNumber
-                value={String(value ?? '')}
-                onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
-              />
-            </EuiFormRow>
-          );
-        }
-        return (
-          <EuiFormRow
-            key={name}
-            label={`${name} (${param.type})${param.optional ? ' — optional' : ''}`}
-            helpText={param.description}
-          >
-            <EuiFieldText
-              value={String(value ?? '')}
-              onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
-            />
-          </EuiFormRow>
-        );
-      })}
-      <EuiSpacer size="m" />
-      <EuiButton fill onClick={handleRun} isLoading={isRunning} iconType="play">
-        {runTestButtonLabel}
-      </EuiButton>
-      {errorMessage && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiCallOut
-            color="danger"
-            title={i18n.translate('xpack.agentBuilderPlatform.attachments.tool.testErrorTitle', {
-              defaultMessage: 'Test run failed',
-            })}
-          >
-            <EuiText size="s">{errorMessage}</EuiText>
-          </EuiCallOut>
-        </>
-      )}
-      {results && (
-        <>
-          <EuiSpacer size="m" />
-          <ToolResultsView results={results} />
-        </>
-      )}
+              {runTestButtonLabel}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {errorMessage && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              title={i18n.translate('xpack.agentBuilderPlatform.attachments.tool.testErrorTitle', {
+                defaultMessage: 'Test run failed',
+              })}
+            >
+              <EuiText size="s">{errorMessage}</EuiText>
+            </EuiCallOut>
+          </>
+        )}
+        {results && (
+          <>
+            <EuiSpacer size="m" />
+            <ToolResultsView results={results} />
+          </>
+        )}
+      </EuiPanel>
     </>
   );
 };
@@ -336,11 +393,11 @@ const ToolResultsView: React.FC<{ results: ToolResult[] }> = ({ results }) => {
     const data = errorResult.data as { message: string };
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
-        title={i18n.translate(
-          'xpack.agentBuilderPlatform.attachments.tool.testErrorResultTitle',
-          { defaultMessage: 'Tool returned an error' }
-        )}
+        title={i18n.translate('xpack.agentBuilderPlatform.attachments.tool.testErrorResultTitle', {
+          defaultMessage: 'Tool returned an error',
+        })}
       >
         <EuiText size="s">{data.message}</EuiText>
       </EuiCallOut>
@@ -372,9 +429,39 @@ const EsqlResultsTable: React.FC<{
     () => columns.map((c) => ({ id: c.name })),
     [columns]
   );
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
-    columns.map((c) => c.name)
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => columns.map((c) => c.name));
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: RESULTS_GRID_DEFAULT_PAGE_SIZE,
+  });
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [columns, values]);
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize: number) => setPagination((prev) => ({ ...prev, pageSize, pageIndex: 0 })),
+    []
   );
+
+  const onChangePage = useCallback(
+    (pageIndex: number) => setPagination((prev) => ({ ...prev, pageIndex })),
+    []
+  );
+
+  const gridHeight = useMemo(() => {
+    const startRow = pagination.pageIndex * pagination.pageSize;
+    const rowsOnPage = Math.min(pagination.pageSize, Math.max(values.length - startRow, 0));
+    const paginationHeight =
+      values.length > pagination.pageSize ? RESULTS_GRID_PAGINATION_HEIGHT : 0;
+
+    return Math.min(
+      RESULTS_GRID_MAX_HEIGHT,
+      RESULTS_GRID_HEADER_HEIGHT +
+        Math.max(rowsOnPage, 1) * RESULTS_GRID_COMPACT_ROW_HEIGHT +
+        paginationHeight
+    );
+  }, [pagination.pageIndex, pagination.pageSize, values.length]);
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
@@ -388,14 +475,23 @@ const EsqlResultsTable: React.FC<{
   );
 
   return (
-    <EuiDataGrid
-      aria-label="Tool test results"
-      columns={gridColumns}
-      columnVisibility={{ visibleColumns, setVisibleColumns }}
-      rowCount={values.length}
-      renderCellValue={renderCellValue}
-      gridStyle={{ border: 'horizontal', stripes: true }}
-    />
+    <div css={resultsGridContainerStyles}>
+      <EuiDataGrid
+        aria-label="Tool test results"
+        columns={gridColumns}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        rowCount={values.length}
+        renderCellValue={renderCellValue}
+        gridStyle={{ border: 'horizontal', stripes: false, cellPadding: 's', fontSize: 's' }}
+        height={gridHeight}
+        pagination={{
+          ...pagination,
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+        toolbarVisibility={false}
+      />
+    </div>
   );
 };
 
@@ -451,21 +547,32 @@ const ToolCard: React.FC<ToolCardProps> = ({ attachment, isCanvas, http }) => {
 
       <EuiHorizontalRule margin="m" />
 
-      <EuiText size="xs" color="subdued">
-        <strong>
-          <FormattedMessage
-            id="xpack.agentBuilderPlatform.attachments.tool.parametersLabel"
-            defaultMessage="Parameters"
-          />
-        </strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <ParameterList params={configuration.params} />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        css={css`
+          flex-grow: 0;
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              <FormattedMessage
+                id="xpack.agentBuilderPlatform.attachments.tool.parametersLabel"
+                defaultMessage="Parameters"
+              />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ParameterList params={configuration.params} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {showCanvasExtras && (
         <>
           <EuiHorizontalRule margin="m" />
-          <TestSection data={attachment.data} http={http} />
+          <CanvasTestSection data={attachment.data} http={http} />
         </>
       )}
     </EuiPanel>
@@ -496,10 +603,10 @@ interface CreateToolDeps {
  *    references the persisted tool and the card flips to "Created".
  * 4. On failure, surfaces the agent_builder error message via core toasts.
  *
- * Canvas mode also renders an inline Test section that POSTs the draft +
- * parameter values to `/internal/agent_builder/tools/_execute_draft` and
- * displays results. The Test affordance is canvas-only by design — the
- * inline card stays compact for read-at-a-glance and reserves "create vs.
+ * Canvas mode renders a separate Test section below Parameters that POSTs the
+ * draft and parameter values to `/internal/agent_builder/tools/_execute_draft`
+ * and displays results inline. The test affordance is canvas-only by design —
+ * the inline card stays compact for read-at-a-glance and reserves "create vs.
  * test" choice to the larger surface.
  */
 export const createToolAttachmentDefinition = ({
