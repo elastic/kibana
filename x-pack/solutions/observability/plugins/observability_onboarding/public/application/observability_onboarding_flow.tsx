@@ -22,7 +22,6 @@ import {
   OtelApmPage,
   CloudForwarderPage,
   KubernetesOtelPage,
-  KubernetesElasticAgentPage,
 } from './pages';
 import {
   HostLinuxAutoDetectPage,
@@ -85,9 +84,6 @@ export function ObservabilityOnboardingFlow() {
     ? [
         <Route key="kubernetes-v2-otel" exact path="/kubernetes">
           <KubernetesOtelPage />
-        </Route>,
-        <Route key="kubernetes-v2-elastic-agent" exact path="/kubernetes/elastic-agent">
-          <KubernetesElasticAgentPage />
         </Route>,
         <Route key="otel-kubernetes-v2-redirect" exact path="/otel-kubernetes">
           <Redirect to={`/kubernetes${search}`} />

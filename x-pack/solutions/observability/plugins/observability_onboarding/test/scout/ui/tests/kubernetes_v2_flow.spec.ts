@@ -33,62 +33,13 @@ test.describe.serial(
       });
     });
 
-    test('Kubernetes tile navigates to /kubernetes with OTel as the selected collection method', async ({
-      pageObjects,
-      page,
-    }) => {
+    test('Kubernetes tile navigates to the OTel Kubernetes flow', async ({ pageObjects, page }) => {
       await pageObjects.kubernetesV2.gotoLanding();
       await pageObjects.kubernetesV2.kubernetesTile().click();
 
       await expect(pageObjects.kubernetesV2.layout('otel')).toBeVisible();
       await expect(page).toHaveURL(/\/kubernetes(\?|$|#)/);
-      await expect(pageObjects.kubernetesV2.collectionMethodSelector()).toBeVisible();
-      await expect(pageObjects.kubernetesV2.collectionMethodCard('otel')).toHaveAttribute(
-        'data-selected',
-        'true'
-      );
-    });
-
-    test('Kubernetes collection method selector toggles between OTel and Elastic Agent', async ({
-      pageObjects,
-      page,
-    }) => {
-      await pageObjects.kubernetesV2.gotoPath('/kubernetes');
-
-      await pageObjects.kubernetesV2.collectionMethodCard('elastic-agent').click();
-      await expect(page).toHaveURL(/\/kubernetes\/elastic-agent/);
-
-      await pageObjects.kubernetesV2.collectionMethodCard('otel').click();
-      // Anchored so /kubernetes/elastic-agent and /kubernetes/foo do not match.
-      await expect(page).toHaveURL(/\/kubernetes(\?|$|#)/);
-    });
-
-    test('Kubernetes ingestion mode persists across the collection method toggle', async ({
-      pageObjects,
-      page,
-    }) => {
-      await pageObjects.kubernetesV2.gotoPath('/kubernetes');
-      await pageObjects.kubernetesV2.ingestionSelector().waitFor({ state: 'visible' });
-
-      await test.step('select Wired Streams ingestion', async () => {
-        await pageObjects.onboarding.selectWiredStreams();
-        await pageObjects.onboarding.confirmEnableWiredStreamsModalIfPresent();
-        await expect(page).toHaveURL(/ingestion=wired/);
-      });
-
-      await test.step('switch collection method to Elastic Agent', async () => {
-        await pageObjects.kubernetesV2.collectionMethodCard('elastic-agent').click();
-        await expect(page).toHaveURL(/\/kubernetes\/elastic-agent.*ingestion=wired/);
-      });
-
-      await test.step('ingestion mode survives the collection method switch', async () => {
-        await pageObjects.kubernetesV2.elasticAgentDeploymentTab('standalone').click();
-        await pageObjects.kubernetesV2.ingestionSelector().waitFor({ state: 'visible' });
-        await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
-          'aria-pressed',
-          'true'
-        );
-      });
+      await expect(pageObjects.kubernetesV2.collectionMethodSelector()).toHaveCount(0);
     });
 
     test('navigating to /otel-kubernetes?ingestion=wired redirects to /kubernetes?ingestion=wired', async ({
@@ -127,35 +78,6 @@ test.describe.serial(
         await expect(pageObjects.kubernetesV2.otelInstrumentationNamespaceSnippet()).toBeVisible();
         await expect(pageObjects.kubernetesV2.otelInstrumentationPodsSnippet()).toHaveCount(0);
       });
-
-      await test.step('navigate to Elastic Agent page and select deployment tabs', async () => {
-        await pageObjects.kubernetesV2.collectionMethodCard('elastic-agent').click();
-        await expect(pageObjects.kubernetesV2.layout('elastic-agent')).toBeVisible();
-
-        await pageObjects.kubernetesV2.elasticAgentDeploymentTab('fleet-managed').click();
-        await expect(pageObjects.kubernetesV2.elasticAgentFleetManagedStep()).toBeVisible();
-
-        await pageObjects.kubernetesV2.elasticAgentDeploymentTab('standalone').click();
-        await expect(pageObjects.kubernetesV2.elasticAgentFleetManagedStep()).toHaveCount(0);
-      });
-
-      await test.step('select Elastic Agent app instrumentation Yes and No branches', async () => {
-        await pageObjects.kubernetesV2.clickElasticAgentAppInstrumentationCard('yes');
-        await expect(
-          pageObjects.kubernetesV2.elasticAgentAppInstrumentationCard('yes')
-        ).toHaveAttribute('data-selected', 'true');
-        await expect(
-          pageObjects.kubernetesV2.elasticAgentAppInstrumentationApmServerUrlInput()
-        ).toBeVisible();
-
-        await pageObjects.kubernetesV2.clickElasticAgentAppInstrumentationCard('no');
-        await expect(
-          pageObjects.kubernetesV2.elasticAgentAppInstrumentationCard('no')
-        ).toHaveAttribute('data-selected', 'true');
-        await expect(
-          pageObjects.kubernetesV2.elasticAgentAppInstrumentationApmServerUrlInput()
-        ).toHaveCount(0);
-      });
     });
 
     test('navigating to /kubernetes renders the V1 experience when V2 is disabled', async ({
@@ -169,7 +91,6 @@ test.describe.serial(
       await pageObjects.kubernetesV2.gotoPath('/kubernetes');
 
       await expect(pageObjects.kubernetesV2.layout('otel')).toHaveCount(0);
-      await expect(pageObjects.kubernetesV2.layout('elastic-agent')).toHaveCount(0);
       await expect(pageObjects.kubernetesV2.collectionMethodSelector()).toHaveCount(0);
       await expect(page).toHaveURL(/\/kubernetes/);
       await expect(pageObjects.onboarding.kubernetesCodeSnippet).toBeVisible();

@@ -7,8 +7,6 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 
-type KubernetesCollectionMethodId = 'otel' | 'elastic-agent';
-
 export class KubernetesV2Page {
   constructor(private readonly page: ScoutPage) {}
 
@@ -30,16 +28,12 @@ export class KubernetesV2Page {
     return this.page.getByTestId('observabilityOnboardingIntegrationTile-kubernetes');
   }
 
-  layout(method: KubernetesCollectionMethodId) {
+  layout(method: 'otel') {
     return this.page.getByTestId(`observabilityOnboardingKubernetesV2Layout-${method}`);
   }
 
   collectionMethodSelector() {
     return this.page.getByTestId('collectionMethodSelector');
-  }
-
-  collectionMethodCard(id: KubernetesCollectionMethodId) {
-    return this.page.getByTestId(`collectionMethodSelectorCard-${id}`);
   }
 
   ingestionSelector() {
@@ -94,33 +88,7 @@ export class KubernetesV2Page {
     );
   }
 
-  elasticAgentDeploymentTab(id: 'fleet-managed' | 'standalone') {
-    return this.page.getByTestId(
-      `observabilityOnboardingKubernetesV2ElasticAgentDeploymentTab-${id}`
-    );
-  }
-
-  elasticAgentFleetManagedStep() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesV2FleetManagedStep');
-  }
-
-  elasticAgentAppInstrumentationCard(id: 'yes' | 'no') {
-    return this.page.getByTestId(
-      `observabilityOnboardingKubernetesV2ElasticAgentAppInstrumentation-${id}`
-    );
-  }
-
-  elasticAgentAppInstrumentationApmServerUrlInput() {
-    return this.page.getByTestId(
-      'observabilityOnboardingKubernetesV2ElasticAgentAppInstrumentationApmServerUrlInput'
-    );
-  }
-
   async clickOtelAnnotationCard(id: 'pods' | 'namespace') {
     await this.otelAnnotationCard(id).getByRole('radio').click();
-  }
-
-  async clickElasticAgentAppInstrumentationCard(id: 'yes' | 'no') {
-    await this.elasticAgentAppInstrumentationCard(id).getByRole('radio').click();
   }
 }

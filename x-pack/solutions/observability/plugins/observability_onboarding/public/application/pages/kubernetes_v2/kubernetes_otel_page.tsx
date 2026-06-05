@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiStepStatus, EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useLocation } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -19,7 +18,6 @@ import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { OnboardingFlowLayout } from '../../shared/onboarding_flow_layout';
-import { CollectionMethodSelector } from '../../shared/collection_method_selector';
 import { usePreExistingDataCheck } from '../../quickstart_flows/shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
@@ -44,11 +42,6 @@ import { buildOtelKubernetesActionLinks } from '../../quickstart_flows/otel_kube
 import { OtelKubernetesVisualizeStep } from '../../quickstart_flows/otel_kubernetes/steps';
 import { OtelCollectorSetupStep } from './otel_collector_setup_step';
 import { OtelInstrumentationStep } from './otel_instrumentation_step';
-import {
-  buildKubernetesCollectionMethodOptions,
-  KUBERNETES_SELECTOR_LEGEND,
-  KUBERNETES_SELECTOR_STEP_TITLE,
-} from './kubernetes_collection_method_options';
 
 const SET_UP_OTEL_COLLECTOR_TITLE = i18n.translate(
   'xpack.observability_onboarding.kubernetesV2.otel.collectorSetupStepTitle',
@@ -71,7 +64,6 @@ export const KubernetesOtelPage: React.FC = () => {
     })
   );
 
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const ingestionMode = parseIngestionMode(searchParams.get('ingestion'));
   const setIngestionMode = useCallback(
@@ -147,10 +139,6 @@ export const KubernetesOtelPage: React.FC = () => {
     [isMetricsOnboardingEnabled, dashboardLocator, apmLocator, logsLocator, logsLocatorParams]
   );
 
-  const search = location.search;
-  const otelNavigateTo = `/kubernetes${search}`;
-  const elasticAgentNavigateTo = `/kubernetes/elastic-agent${search}`;
-
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const otelKubeStackValuesFileUrl = data
     ? buildValuesFileUrl({
@@ -173,20 +161,6 @@ export const KubernetesOtelPage: React.FC = () => {
     : undefined;
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
-    const collectionMethodStep = {
-      title: KUBERNETES_SELECTOR_STEP_TITLE,
-      children: (
-        <CollectionMethodSelector
-          legend={KUBERNETES_SELECTOR_LEGEND}
-          selectedId="otel"
-          options={buildKubernetesCollectionMethodOptions({
-            otelNavigateTo,
-            elasticAgentNavigateTo,
-          })}
-        />
-      ),
-    };
-
     const collectorSetupStep = error
       ? {
           title: SET_UP_OTEL_COLLECTOR_TITLE,
@@ -218,7 +192,7 @@ export const KubernetesOtelPage: React.FC = () => {
         };
 
     if (error) {
-      return [collectionMethodStep, collectorSetupStep];
+      return [collectorSetupStep];
     }
 
     const instrumentStep = isMetricsOnboardingEnabled
@@ -248,15 +222,8 @@ export const KubernetesOtelPage: React.FC = () => {
       ),
     };
 
-    return [
-      collectionMethodStep,
-      collectorSetupStep,
-      ...(instrumentStep ? [instrumentStep] : []),
-      visualizeStep,
-    ];
+    return [collectorSetupStep, ...(instrumentStep ? [instrumentStep] : []), visualizeStep];
   }, [
-    otelNavigateTo,
-    elasticAgentNavigateTo,
     addRepoCommand,
     error,
     refetch,

@@ -150,14 +150,9 @@ describe('KubernetesOtelPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the collection method selector with OTel selected', () => {
+  it('does not render the collection method selector', () => {
     renderPage();
-    expect(
-      screen.getByTestId('collectionMethodSelectorCard-otel').getAttribute('data-selected')
-    ).toBe('true');
-    expect(
-      screen.getByTestId('collectionMethodSelectorCard-elastic-agent').getAttribute('data-selected')
-    ).toBe('false');
+    expect(screen.queryByTestId('collectionMethodSelector')).toBeNull();
   });
 
   it('passes wired ingestion mode into the collector setup step when the URL says so', () => {
@@ -226,7 +221,7 @@ describe('KubernetesOtelPage', () => {
     const emptyPrompt = screen.getByTestId('emptyPromptStub');
     expect(emptyPrompt.getAttribute('data-onboarding-flow-type')).toBe('kubernetes_otel');
     expect(emptyPrompt.getAttribute('data-inline')).toBe('true');
-    expect(screen.getByTestId('collectionMethodSelector')).toBeInTheDocument();
+    expect(screen.queryByTestId('collectionMethodSelector')).toBeNull();
     expect(screen.queryByTestId('otelInstrumentationStep')).toBeNull();
     expect(screen.queryByTestId('otelK8sVisualizeStep')).toBeNull();
   });

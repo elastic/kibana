@@ -6,4 +6,3 @@
  */
 
 export { KubernetesOtelPage } from './kubernetes_otel_page';
-export { KubernetesElasticAgentPage } from './kubernetes_elastic_agent_page';

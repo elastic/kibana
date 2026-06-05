@@ -13,4 +13,4 @@ export { OtelLogsPage } from './otel_logs';
 export { FirehosePage } from './firehose';
 export { OtelApmPage } from './otel_apm';
 export { CloudForwarderPage } from './cloudforwarder';
-export { KubernetesOtelPage, KubernetesElasticAgentPage } from './kubernetes_v2';
+export { KubernetesOtelPage } from './kubernetes_v2';

@@ -39,7 +39,6 @@ jest.mock('../..', () => ({
   OtelApmPage: () => null,
   CloudForwarderPage: () => null,
   KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,
-  KubernetesElasticAgentPage: () => <div data-test-subj="kubernetesElasticAgentPageStub" />,
 }));
 
 jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
@@ -128,7 +127,6 @@ describe('Feature-flag gate on Kubernetes routes', () => {
       renderFlow(false, '/kubernetes/elastic-agent');
       expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
       expect(screen.queryByTestId('kubernetesPageStub')).toBeNull();
-      expect(screen.queryByTestId('kubernetesElasticAgentPageStub')).toBeNull();
     });
   });
 
@@ -139,10 +137,11 @@ describe('Feature-flag gate on Kubernetes routes', () => {
       expect(screen.queryByTestId('kubernetesPageStub')).toBeNull();
     });
 
-    it('renders KubernetesElasticAgentPage at /kubernetes/elastic-agent', () => {
+    it('falls through to the landing page at /kubernetes/elastic-agent', () => {
       renderFlow(true, '/kubernetes/elastic-agent');
-      expect(screen.getByTestId('kubernetesElasticAgentPageStub')).toBeInTheDocument();
+      expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
       expect(screen.queryByTestId('kubernetesPageStub')).toBeNull();
+      expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
     });
 
     it('redirects /otel-kubernetes to /kubernetes preserving search params', () => {

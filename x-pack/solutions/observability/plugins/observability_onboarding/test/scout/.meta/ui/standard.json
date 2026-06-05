@@ -152,38 +152,6 @@
       }
     },
     {
-      "id": "e1ab92206d8acec-0e80c07f0161c16",
-      "title": "Wired Streams - Elastic Agent Kubernetes Flow shows ingestion selector with correct options",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
-        "line": 28,
-        "column": 9
-      }
-    },
-    {
-      "id": "e1ab92206d8acec-99b05466d3c6123",
-      "title": "Wired Streams - Elastic Agent Kubernetes Flow command includes wired streams config when Wired Streams mode is selected",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
-        "line": 52,
-        "column": 9
-      }
-    },
-    {
       "id": "6e7ab256b5ad810-445ce2ae56d207b",
       "title": "Wired Streams - Enable Modal Confirmation Flow shows confirmation modal when selecting Wired Streams for the first time",
       "expectedStatus": "passed",
