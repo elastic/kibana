@@ -285,6 +285,7 @@ describe('createDetectionRuleTool', () => {
           data: {
             text: JSON.stringify(mockRule),
             attachmentLabel: 'Test Rule',
+            intent: 'create',
           },
         })
       );
@@ -329,6 +330,7 @@ describe('createDetectionRuleTool', () => {
           data: {
             text: JSON.stringify(mockRule),
             attachmentLabel: 'Test Rule',
+            intent: 'create',
           },
         })
       );

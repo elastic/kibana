@@ -169,18 +169,21 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
         const existingAttachment = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
         const isUpdate = existingAttachment !== undefined;
 
-        // Preserve stored intent so a query rewrite on a saved rule doesn't regress it to 'create'.
+        // Carry forward ruleId and intent from the previous version so a query rewrite on a
+        // saved rule doesn't lose the saved-rule id (which drives the 'update' button label).
         const existingVersionData = isUpdate
           ? (existingAttachment.versions[existingAttachment.current_version - 1]?.data as
               | Record<string, unknown>
               | undefined)
           : undefined;
+        const existingRuleId = existingVersionData?.ruleId as string | undefined;
         const existingIntent = existingVersionData?.intent as string | undefined;
 
         const attachmentData: Record<string, unknown> = {
           text: JSON.stringify(ruleWithoutIds),
           attachmentLabel: result.rule.name,
           intent: existingIntent ?? 'create',
+          ...(existingRuleId !== undefined && { ruleId: existingRuleId }),
         };
 
         let resultAttachmentId: string;

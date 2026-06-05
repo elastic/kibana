@@ -46,6 +46,13 @@ describe('AiRuleCreationService', () => {
       service.clearSession();
       expect(service.getSession()).toBeNull();
     });
+
+    it('clearSession resets savedRuleId so the duplicate-save warning does not leak into the next session', () => {
+      service.setSavedRuleId('rule-123');
+      expect(service.getSavedRuleId()).toBe('rule-123');
+      service.clearSession();
+      expect(service.getSavedRuleId()).toBeUndefined();
+    });
   });
 
   describe('reset', () => {

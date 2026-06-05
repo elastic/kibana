@@ -84,6 +84,7 @@ export class AiRuleCreationService {
 
   public clearSession = (): void => {
     this.session = null;
+    this.savedRuleIdSubject.next(undefined);
   };
 
   public reset = (): void => {
