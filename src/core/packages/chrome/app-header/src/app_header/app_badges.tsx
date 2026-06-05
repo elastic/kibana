@@ -22,7 +22,7 @@ const useBadgesStyle = () => {
 
   return useMemo(() => {
     const badgesContainer = css`
-      margin-left: ${euiTheme.size.s};
+      margin-left: ${euiTheme.size.xs};
 
       &:not(:has(.euiFlexItem:not(:empty))) {
         display: none;

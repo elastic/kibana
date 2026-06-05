@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import type { AppHeaderBack } from '../types';
-import { useBackNavTargets } from './hooks';
-import { BackButton } from './back_button';
+import type { AppHeaderBack, AppHeaderTitle } from '../../types';
+import { useBackNavTargets } from '../hooks';
+import { BackButton } from '../back_button';
+import { Title, isEditableTitle } from './title';
 
 export interface TitleAreaProps {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack | AppHeaderBack[];
 }
 
@@ -23,36 +24,28 @@ export const TitleArea = React.memo<TitleAreaProps>(({ title, back }) => {
   const { euiTheme } = useEuiTheme();
   const backTargets = useBackNavTargets(back);
   const hasBack = backTargets.length > 0;
+  const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
 
-  const styles = useMemo(() => {
-    const wrapper = css`
+  const wrapper = useMemo(
+    () => css`
       display: flex;
       align-items: center;
-      gap: ${euiTheme.size.m};
+      gap: ${euiTheme.size.s};
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
-    `;
+    `,
+    [euiTheme]
+  );
 
-    const titleOffset = css`
-      padding-left: ${euiTheme.size.xs};
-    `;
-
-    return { wrapper, titleOffset };
-  }, [euiTheme]);
-
-  if (!title && !hasBack) {
+  if (!showTitle && !hasBack) {
     return null;
   }
 
   return (
-    <div css={styles.wrapper}>
+    <div css={wrapper}>
       {hasBack && <BackButton targets={backTargets} />}
-      {title && (
-        <EuiTitle size="s" css={!hasBack ? styles.titleOffset : undefined}>
-          <h1 className="eui-textTruncate">{title}</h1>
-        </EuiTitle>
-      )}
+      {title && <Title title={title} titleOffset={!hasBack} />}
     </div>
   );
 });

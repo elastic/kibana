@@ -16,7 +16,7 @@ import {
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../fixtures';
 import type { ScoutPrivateLocation } from '../services/synthetics_private_location_api_service';
-import { deleteMonitors } from '../fixtures/monitors';
+import { deleteMonitors, omitMonitorKeys, parseMonitorResponse } from '../fixtures/monitors';
 import { getPackagePolicyForMonitor } from '../fixtures/fleet';
 import { httpMonitorFixture } from '../fixtures/data/http_monitor';
 import { browserMonitorFixture } from '../fixtures/data/browser_monitor';
@@ -25,6 +25,7 @@ interface ServiceLocation {
   id: string;
   isInvalid?: boolean;
   isServiceManaged?: boolean;
+  spaces?: string[];
 }
 
 /**
@@ -75,6 +76,11 @@ apiTest.describe('PrivateLocationAddMonitor', { tag: ['@local-stateful-classic']
     const added = locations.find((location) => location.id === privateLocation.id);
     expect(added).toBeDefined();
     expect(added?.isInvalid).toBe(false);
+    // The location was created in both the default space and the test space; the
+    // service-locations response reflects both (FTR asserted the exact
+    // `spaces: ['default', SPACE_ID]` membership on the listed location).
+    expect(added?.spaces).toContain('default');
+    expect(added?.spaces).toContain(spaceId);
     // A service-managed (public) location is still listed alongside private ones.
     expect(locations.some((location) => location.isServiceManaged)).toBe(true);
   });
@@ -132,9 +138,29 @@ apiTest.describe('PrivateLocationAddMonitor', { tag: ['@local-stateful-classic']
       responseType: 'json',
     });
     expect(res).toHaveStatusCode(200);
-    const created = res.body as { id: string; namespace: string; spaces: string[] };
+    const created = res.body as {
+      id: string;
+      namespace: string;
+      spaces: string[];
+      created_at: string;
+      updated_at: string;
+    };
     expect(created.namespace).toBe(formatKibanaNamespace(spaceId));
     expect(created.spaces).toStrictEqual([spaceId]);
+
+    // Server-generated timestamps are present and parseable (FTR asserted both).
+    expect(Number.isNaN(Date.parse(created.created_at))).toBe(false);
+    expect(Number.isNaN(Date.parse(created.updated_at))).toBe(false);
+
+    // Full body parity: the created monitor round-trips to the submitted config
+    // with the Kibana-space namespace applied and scoped to the test space.
+    expect(parseMonitorResponse(res.body as Record<string, unknown>)).toStrictEqual(
+      omitMonitorKeys({
+        ...monitor,
+        namespace: formatKibanaNamespace(spaceId),
+        spaces: [spaceId],
+      })
+    );
 
     // The Fleet package policy is generated with the current spaceless id
     // (`${monitorId}-${locationId}`) and named `${monitorName}-${locationLabel}`.
