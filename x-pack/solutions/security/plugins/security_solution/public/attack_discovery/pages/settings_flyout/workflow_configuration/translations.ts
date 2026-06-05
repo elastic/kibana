@@ -266,6 +266,13 @@ export const CREATE_NEW_WORKFLOW = i18n.translate(
   }
 );
 
+export const VIEW_EXAMPLE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowConfiguration.viewExample',
+  {
+    defaultMessage: 'View example',
+  }
+);
+
 export const CANCEL_GENERATION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.cancelGeneration',
   {

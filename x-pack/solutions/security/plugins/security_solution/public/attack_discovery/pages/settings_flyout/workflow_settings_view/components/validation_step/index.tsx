@@ -5,60 +5,28 @@
  * 2.0.
  */
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-
-import { useWorkflowEditorLink } from '../../../../use_workflow_editor_link';
+import React from 'react';
 
 export interface ValidationStepProps {
   validationPanel: React.ReactNode;
 }
 
-const CUSTOM_VALIDATION_EXAMPLE_ALIAS = 'attack-discovery-custom-validation-example';
-
-const ValidationStepComponent: React.FC<ValidationStepProps> = ({ validationPanel }) => {
-  const { editorUrl } = useWorkflowEditorLink({
-    workflowId: CUSTOM_VALIDATION_EXAMPLE_ALIAS,
-    workflowRunId: null,
-  });
-
-  const description = useMemo(
-    () => (
+const ValidationStepComponent: React.FC<ValidationStepProps> = ({ validationPanel }) => (
+  <>
+    <EuiText color="subdued" data-test-subj="validationStepDescription" size="s">
       <FormattedMessage
         id="xpack.discoveries.components.validationSectionDescription"
-        defaultMessage="Choose how discoveries are {validated} or enriched before they are saved as attacks."
-        values={{
-          validated:
-            editorUrl != null ? (
-              <EuiLink
-                data-test-subj="validationCustomExampleLink"
-                href={editorUrl}
-                target="_blank"
-              >
-                {'validated'}
-              </EuiLink>
-            ) : (
-              'validated'
-            ),
-        }}
+        defaultMessage="Choose how discoveries are validated or enriched before they are saved as attacks."
       />
-    ),
-    [editorUrl]
-  );
+    </EuiText>
 
-  return (
-    <>
-      <EuiText color="subdued" data-test-subj="validationStepDescription" size="s">
-        {description}
-      </EuiText>
+    <EuiSpacer size="m" />
 
-      <EuiSpacer size="m" />
-
-      {validationPanel}
-    </>
-  );
-};
+    {validationPanel}
+  </>
+);
 
 ValidationStepComponent.displayName = 'ValidationStep';
 

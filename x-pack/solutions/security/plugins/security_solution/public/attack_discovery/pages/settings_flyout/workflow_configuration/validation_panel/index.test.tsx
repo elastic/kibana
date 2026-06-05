@@ -12,6 +12,7 @@ import { ValidationPanel } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
+import { SYSTEM_VALIDATE_WORKFLOW_ID } from '../constants';
 import { useListWorkflows } from '../hooks/use_list_workflows';
 import type { WorkflowItem } from '../types';
 import * as i18n from '../translations';
@@ -22,13 +23,21 @@ jest.mock('../hooks/use_list_workflows');
 
 const MOCK_WORKFLOWS_APP_URL = '/app/workflows';
 
-/** The real UUID that the validation workflow gets after registration. */
-const REAL_VALIDATION_WORKFLOW_ID = 'workflow-real-validation-uuid';
+/** The real (well-known) ID that the validation workflow has after registration. */
+const REAL_VALIDATION_WORKFLOW_ID = SYSTEM_VALIDATE_WORKFLOW_ID;
+
+/** The alias used to resolve the custom validation example workflow link. */
+const CUSTOM_VALIDATION_EXAMPLE_ALIAS = 'attack-discovery-custom-validation-example';
+
+/** The resolved editor URL for the custom validation example workflow. */
+const MOCK_CUSTOM_VALIDATION_EXAMPLE_URL =
+  'http://localhost:5601/s/default/app/workflows/workflow-custom-validation-example';
 
 const mockWorkflows: WorkflowItem[] = [
   {
     description: 'Validates generated attack discoveries to the Elasticsearch index',
     id: REAL_VALIDATION_WORKFLOW_ID,
+    managed: true,
     name: 'Attack Discovery - Default Validation',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
   },
@@ -42,21 +51,31 @@ const mockWorkflows: WorkflowItem[] = [
 const mockWorkflowsWithAllPredefined: WorkflowItem[] = [
   {
     description: 'Default alert retrieval',
-    id: 'default-alert-retrieval-id',
+    id: 'system-attack-discovery-alert-retrieval',
+    managed: true,
     name: 'Attack discovery - Default alert retrieval',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:default_alert_retrieval'],
   },
   {
     description: 'Generation workflow',
-    id: 'generation-id',
+    id: 'system-attack-discovery-generation',
+    managed: true,
     name: 'Attack discovery - Generation',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:generation'],
   },
   {
     description: 'Validates generated attack discoveries',
     id: REAL_VALIDATION_WORKFLOW_ID,
+    managed: true,
     name: 'Attack Discovery - Default Validation',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
+  },
+  {
+    description: 'Orchestrates KI feature identification',
+    id: 'system-streams-ki-onboarding',
+    managed: true,
+    name: '.streams-ki-onboarding',
+    tags: ['Streams'],
   },
   {
     description: 'Custom validation workflow',
@@ -149,10 +168,20 @@ describe('ValidationPanel', () => {
 
     mockUseListWorkflows.mockReturnValue(mockSuccessResult(mockWorkflows));
 
-    mockUseWorkflowEditorLink.mockReturnValue({
-      editorUrl: null,
-      navigateToEditor: jest.fn(),
-      resolvedWorkflowId: REAL_VALIDATION_WORKFLOW_ID,
+    mockUseWorkflowEditorLink.mockImplementation(({ workflowId }: { workflowId: string }) => {
+      if (workflowId === CUSTOM_VALIDATION_EXAMPLE_ALIAS) {
+        return {
+          editorUrl: MOCK_CUSTOM_VALIDATION_EXAMPLE_URL,
+          navigateToEditor: jest.fn(),
+          resolvedWorkflowId: 'workflow-custom-validation-example',
+        };
+      }
+
+      return {
+        editorUrl: null,
+        navigateToEditor: jest.fn(),
+        resolvedWorkflowId: REAL_VALIDATION_WORKFLOW_ID,
+      };
     });
   });
 
@@ -464,6 +493,57 @@ describe('ValidationPanel', () => {
     expect(link).toHaveAttribute('href', `${MOCK_WORKFLOWS_APP_URL}/create`);
   });
 
+  it('renders the View example link with the custom validation example href', () => {
+    render(
+      <TestProviders>
+        <ValidationPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    const link = screen.getByTestId('viewValidationExampleWorkflow');
+
+    expect(link).toHaveAttribute('href', MOCK_CUSTOM_VALIDATION_EXAMPLE_URL);
+  });
+
+  it('opens the View example link in a new tab', () => {
+    render(
+      <TestProviders>
+        <ValidationPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('viewValidationExampleWorkflow')).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders the View example link before the Create a new workflow link', () => {
+    render(
+      <TestProviders>
+        <ValidationPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    const viewExample = screen.getByTestId('viewValidationExampleWorkflow');
+    const createNew = screen.getByTestId('createNewValidationWorkflow');
+
+    expect(viewExample.compareDocumentPosition(createNew)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('does NOT render the View example link when the example workflow is not available', () => {
+    mockUseWorkflowEditorLink.mockReturnValue({
+      editorUrl: null,
+      navigateToEditor: jest.fn(),
+      resolvedWorkflowId: null,
+    });
+
+    render(
+      <TestProviders>
+        <ValidationPanel {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('viewValidationExampleWorkflow')).not.toBeInTheDocument();
+  });
+
   it('does NOT render the create new workflow link when getUrlForApp throws', () => {
     mockUseKibana.mockReturnValue({
       services: {
@@ -594,6 +674,25 @@ describe('ValidationPanel', () => {
         },
         { timeout: 3000 }
       );
+    });
+
+    it('excludes managed workflows owned by other plugins', async () => {
+      render(
+        <TestProviders>
+          <ValidationPanel {...defaultProps} value="" />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('validationWorkflowPicker'));
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Attack Discovery - Default Validation')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+
+      expect(screen.queryByText('.streams-ki-onboarding')).not.toBeInTheDocument();
     });
 
     it('includes custom (user-created) workflows without AD tags', async () => {

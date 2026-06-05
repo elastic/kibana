@@ -11,10 +11,17 @@ import React from 'react';
 
 import { WorkflowSettingsView } from '.';
 import { TestProviders } from '../../../../common/mock';
+import { useWorkflowEditorLink } from '../../use_workflow_editor_link';
 import type { WorkflowConfiguration } from '../workflow_configuration/types';
 import type { UseFetchDefaultEsqlQueryResult } from '../workflow_configuration/hooks/use_fetch_default_esql_query';
 import * as workflowI18n from '../workflow_configuration/translations';
 import type { ValidationItem } from '../types';
+
+jest.mock('../../use_workflow_editor_link');
+
+const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
+
+const MOCK_RUN_EXAMPLE_URL = 'http://localhost:5601/s/default/app/workflows/workflow-run-example';
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -23,7 +30,9 @@ jest.mock('./alert_retrieval_step', () => ({
 }));
 
 jest.mock('../alert_selection/connector_field', () => ({
-  ConnectorField: () => <div data-test-subj="connectorField" />,
+  ConnectorField: ({ helpText }: { helpText?: React.ReactNode }) => (
+    <div data-test-subj="connectorField">{helpText}</div>
+  ),
 }));
 
 jest.mock('../workflow_configuration', () => ({
@@ -82,6 +91,25 @@ const defaultProps = {
 describe('WorkflowSettingsView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseWorkflowEditorLink.mockReturnValue({
+      editorUrl: MOCK_RUN_EXAMPLE_URL,
+      navigateToEditor: jest.fn(),
+      resolvedWorkflowId: 'workflow-run-example',
+    });
+  });
+
+  it('renders the run example link', () => {
+    render(
+      <TestProviders>
+        <WorkflowSettingsView {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('viewRunExampleWorkflow')).toHaveAttribute(
+      'href',
+      MOCK_RUN_EXAMPLE_URL
+    );
   });
 
   it('renders the alert retrieval step', () => {

@@ -5,40 +5,60 @@
  * 2.0.
  */
 
+import {
+  SYSTEM_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+  SYSTEM_VALIDATE_WORKFLOW_ID,
+} from '../../constants';
 import type { WorkflowItem } from '../../types';
 import { filterWorkflowsForAlertRetrieval, filterWorkflowsForValidation } from '.';
 
 const defaultAlertRetrieval: WorkflowItem = {
   description: 'Default alert retrieval',
-  id: 'default-alert-retrieval-id',
+  id: 'system-attack-discovery-alert-retrieval',
+  managed: true,
   name: 'Attack discovery - Default alert retrieval',
   tags: ['Attack discovery', 'Security', 'attackDiscovery:default_alert_retrieval'],
 };
 
 const generation: WorkflowItem = {
   description: 'Generation workflow',
-  id: 'generation-id',
+  id: 'system-attack-discovery-generation',
+  managed: true,
   name: 'Attack discovery - Generation',
   tags: ['Attack discovery', 'Security', 'attackDiscovery:generation'],
 };
 
 const defaultValidation: WorkflowItem = {
   description: 'Default validation',
-  id: 'default-validation-id',
+  id: SYSTEM_VALIDATE_WORKFLOW_ID,
+  managed: true,
   name: 'Attack discovery - Default validation',
   tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
 };
 
 const customValidationExample: WorkflowItem = {
   description: 'Custom validation example',
-  id: 'system-attack-discovery-custom-validation-example',
+  id: SYSTEM_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+  managed: true,
   name: 'Attack discovery - Custom validation example',
   tags: ['Attack discovery', 'Security', 'Example', 'attackDiscovery:custom_validation_example'],
+};
+
+// A managed (system) workflow owned by another plugin. It carries no
+// `attackDiscovery:*` tag, which is exactly why the previous tag-based filter
+// allowed it to leak into both dropdowns.
+const streamsKiOnboarding: WorkflowItem = {
+  description: 'Orchestrates KI feature identification',
+  id: 'system-streams-ki-onboarding',
+  managed: true,
+  name: '.streams-ki-onboarding',
+  tags: ['Streams'],
 };
 
 const customWorkflow: WorkflowItem = {
   description: 'A user-created custom workflow',
   id: 'custom-workflow-id',
+  managed: false,
   name: 'My Custom Workflow',
   tags: ['custom-tag'],
 };
@@ -55,6 +75,7 @@ const allWorkflows: WorkflowItem[] = [
   defaultAlertRetrieval,
   defaultValidation,
   generation,
+  streamsKiOnboarding,
   workflowWithNoTags,
 ];
 
@@ -83,13 +104,19 @@ describe('filterWorkflowsForAlertRetrieval', () => {
     expect(result.find((w) => w.id === customValidationExample.id)).toBeUndefined();
   });
 
+  it('excludes managed workflows owned by other plugins', () => {
+    const result = filterWorkflowsForAlertRetrieval(allWorkflows);
+
+    expect(result.find((w) => w.id === streamsKiOnboarding.id)).toBeUndefined();
+  });
+
   it('includes custom (user-created) workflows', () => {
     const result = filterWorkflowsForAlertRetrieval(allWorkflows);
 
     expect(result.find((w) => w.id === customWorkflow.id)).toBeDefined();
   });
 
-  it('includes workflows without tags', () => {
+  it('includes workflows without an explicit managed flag', () => {
     const result = filterWorkflowsForAlertRetrieval(allWorkflows);
 
     expect(result.find((w) => w.id === workflowWithNoTags.id)).toBeDefined();
@@ -113,6 +140,12 @@ describe('filterWorkflowsForValidation', () => {
     expect(result.find((w) => w.id === generation.id)).toBeUndefined();
   });
 
+  it('excludes managed workflows owned by other plugins', () => {
+    const result = filterWorkflowsForValidation(allWorkflows);
+
+    expect(result.find((w) => w.id === streamsKiOnboarding.id)).toBeUndefined();
+  });
+
   it('includes the default validation workflow', () => {
     const result = filterWorkflowsForValidation(allWorkflows);
 
@@ -131,7 +164,7 @@ describe('filterWorkflowsForValidation', () => {
     expect(result.find((w) => w.id === customWorkflow.id)).toBeDefined();
   });
 
-  it('includes workflows without tags', () => {
+  it('includes workflows without an explicit managed flag', () => {
     const result = filterWorkflowsForValidation(allWorkflows);
 
     expect(result.find((w) => w.id === workflowWithNoTags.id)).toBeDefined();

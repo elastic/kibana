@@ -17,12 +17,14 @@ import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 
 interface Props {
   connectorId: string | undefined;
+  helpText?: React.ReactNode;
   onConnectorIdSelected?: (connectorId: string) => void;
   showDescription?: boolean;
 }
 
 const ConnectorFieldComponent: React.FC<Props> = ({
   connectorId,
+  helpText,
   onConnectorIdSelected,
   showDescription = true,
 }) => {
@@ -53,6 +55,7 @@ const ConnectorFieldComponent: React.FC<Props> = ({
             block-size: ${euiTheme.size.xxl};
           }
         `}
+        helpText={helpText}
         label={i18n.CONNECTOR}
       >
         <ConnectorSelectorInline

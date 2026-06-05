@@ -9,7 +9,12 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 
 import { AlertRetrievalStep } from './alert_retrieval_step';
-import { GenerationStep, ValidationStep, WorkflowSettingsViewLayout } from './components';
+import {
+  GenerationStep,
+  RunExampleLink,
+  ValidationStep,
+  WorkflowSettingsViewLayout,
+} from './components';
 import { ConnectorField } from '../alert_selection/connector_field';
 import { ValidationPanel } from '../workflow_configuration';
 import * as workflowI18n from '../workflow_configuration/translations';
@@ -95,6 +100,7 @@ const WorkflowSettingsViewComponent: React.FC<WorkflowSettingsViewProps> = ({
               showConnectorSelector ? (
                 <ConnectorField
                   connectorId={connectorId}
+                  helpText={<RunExampleLink />}
                   onConnectorIdSelected={onConnectorIdSelected}
                   showDescription={false}
                 />

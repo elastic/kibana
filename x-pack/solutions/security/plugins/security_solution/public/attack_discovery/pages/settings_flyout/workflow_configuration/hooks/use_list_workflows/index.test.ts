@@ -63,6 +63,39 @@ describe('useListWorkflows', () => {
     });
   });
 
+  it('passes the managed flag through onto each workflow item', async () => {
+    const workflows = [
+      {
+        description: 'A managed (system) workflow',
+        enabled: true,
+        id: 'system-workflow',
+        managed: true,
+        name: 'System Workflow',
+      },
+      {
+        description: 'A user-created workflow',
+        enabled: true,
+        id: 'user-workflow',
+        managed: false,
+        name: 'User Workflow',
+      },
+    ];
+
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({ results: workflows, total: workflows.length }),
+    } as unknown as HttpSetup;
+
+    mockUseKibana.mockReturnValue({ services: { http: mockHttp } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { result } = renderHook(() => useListWorkflows(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.data?.map((w) => w.managed)).toEqual([true, false]);
+    });
+  });
+
   it('calls the workflows list API', async () => {
     const mockHttp = {
       get: jest.fn().mockResolvedValue({ results: [], total: 0 }),

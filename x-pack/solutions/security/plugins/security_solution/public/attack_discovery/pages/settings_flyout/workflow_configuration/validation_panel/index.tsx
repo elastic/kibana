@@ -6,11 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryEventTypes } from '../../../../../common/lib/telemetry';
 import { useWorkflowEditorLink } from '../../../use_workflow_editor_link';
+import { SYSTEM_VALIDATE_WORKFLOW_ID } from '../constants';
 import { filterWorkflowsForValidation } from '../helpers/filter_workflows_for_step';
 import { useListWorkflows } from '../hooks/use_list_workflows';
 import { NoWorkflowsAvailable } from '../no_workflows_available';
@@ -32,11 +33,10 @@ const DEFAULT_VALIDATION_WORKFLOW_ID = 'default';
 const VALIDATE_WORKFLOW_ALIAS = 'attack-discovery-validate';
 
 /**
- * The well-known ID of the system-managed default validation workflow.
- * Used as a fallback to identify the real default entry before the
- * `useWorkflowEditorLink` alias resolves.
+ * The alias used by `useWorkflowEditorLink` to resolve the custom validation
+ * example workflow, surfaced as a "View example" link so users can discover it.
  */
-const SYSTEM_VALIDATE_WORKFLOW_ID = 'system-attack-discovery-validate';
+const CUSTOM_VALIDATION_EXAMPLE_ALIAS = 'attack-discovery-custom-validation-example';
 
 export interface ValidationPanelProps {
   isInvalid?: boolean;
@@ -53,6 +53,10 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
   const { data: workflows = [], isLoading } = useListWorkflows();
   const { resolvedWorkflowId: defaultValidateRealId } = useWorkflowEditorLink({
     workflowId: VALIDATE_WORKFLOW_ALIAS,
+    workflowRunId: null,
+  });
+  const { editorUrl: customValidationExampleUrl } = useWorkflowEditorLink({
+    workflowId: CUSTOM_VALIDATION_EXAMPLE_ALIAS,
     workflowRunId: null,
   });
 
@@ -84,6 +88,7 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
       enabled: workflow.enabled,
       id: workflow.id,
       isDefault: workflow.id === defaultId,
+      managed: workflow.managed,
       name: workflow.name,
       tags: workflow.tags,
     }));
@@ -145,7 +150,7 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
 
   const helpText = useMemo(() => <>{i18n.VALIDATION_WORKFLOW_HELP}</>, []);
 
-  const labelAppend = createWorkflowUrl !== '' && (
+  const createWorkflowLink = createWorkflowUrl !== '' && (
     <EuiText size="xs">
       <EuiLink
         data-test-subj="createNewValidationWorkflow"
@@ -156,6 +161,26 @@ const ValidationPanelComponent: React.FC<ValidationPanelProps> = ({
         {i18n.CREATE_NEW_WORKFLOW}
       </EuiLink>
     </EuiText>
+  );
+
+  const viewExampleLink = customValidationExampleUrl != null && (
+    <EuiText size="xs">
+      <EuiLink
+        data-test-subj="viewValidationExampleWorkflow"
+        external
+        href={customValidationExampleUrl}
+        target="_blank"
+      >
+        {i18n.VIEW_EXAMPLE}
+      </EuiLink>
+    </EuiText>
+  );
+
+  const labelAppend = (createWorkflowLink || viewExampleLink) && (
+    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" responsive={false} wrap>
+      {viewExampleLink && <EuiFlexItem grow={false}>{viewExampleLink}</EuiFlexItem>}
+      {createWorkflowLink && <EuiFlexItem grow={false}>{createWorkflowLink}</EuiFlexItem>}
+    </EuiFlexGroup>
   );
 
   return (
