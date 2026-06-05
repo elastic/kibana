@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
+import type { WorkflowExecutionState } from './get_execution_state';
 
 export type WorkflowExecutionResult =
   | { success: true; execution: WorkflowExecutionState }
