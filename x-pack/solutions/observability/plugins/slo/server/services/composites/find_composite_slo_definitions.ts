@@ -7,39 +7,28 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Paginated } from '@kbn/slo-schema';
+import type { FindCompositeSLODefinitionsParams, Paginated } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import type { CompositeSLODefinition } from '../../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
 
-interface FindCompositeSloParams {
-  spaceId: string;
-  search: string | undefined;
-  tags: string[];
-  statusFilter: string[];
-  sortBy: 'name' | 'createdAt' | 'updatedAt' | undefined;
-  sortDirection: 'asc' | 'desc' | undefined;
-  page: number;
-  perPage: number;
-}
-
 interface Dependencies {
+  spaceId: string;
   compositeRepository: CompositeSLORepository;
   esClient: ElasticsearchClient;
 }
 
 export async function findCompositeSloDefinitions(
   {
-    spaceId,
     search,
-    tags,
-    statusFilter,
-    sortBy,
-    sortDirection,
-    page,
-    perPage,
-  }: FindCompositeSloParams,
-  { compositeRepository, esClient }: Dependencies
+    tags = [],
+    status = [],
+    sortBy = 'createdAt',
+    sortDirection = 'desc',
+    page = 1,
+    perPage = 25,
+  }: FindCompositeSLODefinitionsParams,
+  { spaceId, compositeRepository, esClient }: Dependencies
 ): Promise<Paginated<CompositeSLODefinition>> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];
   if (search) {
@@ -51,11 +40,13 @@ export async function findCompositeSloDefinitions(
       },
     });
   }
+
   if (tags.length > 0) {
     filters.push({ terms: { 'compositeSlo.tags': tags } });
   }
-  if (statusFilter.length > 0) {
-    filters.push({ terms: { status: statusFilter } });
+
+  if (status.length > 0) {
+    filters.push({ terms: { status } });
   }
 
   const sortField =
