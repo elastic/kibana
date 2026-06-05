@@ -27,7 +27,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
-  apiHasUseGlobalFiltersSetting,
+  panelIsRelatedByGlobalFilters,
   initializeRelatedPanels,
   initializeStateApi,
   type PublishingSubject,
@@ -277,12 +277,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const relatedPanelsApi = initializeRelatedPanels({
         uuid,
         parentApi,
-        isRelated: (sibling) =>
-          apiHasUseGlobalFiltersSetting(sibling)
-            ? Boolean(sibling.useGlobalFilters$.value) &&
-              dataControlManager.api.useGlobalFilters$.value
-            : true,
-        relatedSiblingObservables: ['useGlobalFilters$'],
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);

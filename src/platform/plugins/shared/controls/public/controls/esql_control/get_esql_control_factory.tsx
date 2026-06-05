@@ -121,10 +121,10 @@ export const getESQLControlFactory = <
 
           return false;
         },
-        relatedObservables: [
+        dependentObservables: [
           selections.api.query$?.pipe(map((query) => query?.esql)) ?? of(undefined),
         ],
-        relatedSiblingObservables: ['query$'],
+        siblingDependentObservables: ['query$'],
       });
 
       const api = finalizeApi({

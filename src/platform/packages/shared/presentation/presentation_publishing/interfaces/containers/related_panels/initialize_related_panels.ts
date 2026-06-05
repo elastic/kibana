@@ -31,21 +31,21 @@ import { apiHasSections, apiPublishesChildren } from '../presentation_container'
  * Initializes the subject that publishes which sibling panels in the parent container are related to panel `uuid`
  * @param uuid - The panel uuid to compute relations from
  * @param parentApi - The container parent parentApi
- * @param relatedObservables - Observables that should trigger a recompute whenever they emit
- * @param relatedSiblingObservables - Observable names to pull from siblings; recompute that sibling's relation whenever they emit
+ * @param dependentObservables - Observables that should trigger a recompute whenever they emit
+ * @param siblingDependentObservables - Observable names to pull from siblings; recompute that sibling's relation whenever they emit
  * @param isRelated - Comparator to use to check if a sibling within compatible scope is actually related to the panel
  */
 export const initializeRelatedPanels = ({
   uuid,
   parentApi,
-  relatedObservables,
-  relatedSiblingObservables,
+  dependentObservables,
+  siblingDependentObservables,
   isRelated,
 }: {
   uuid: string;
   parentApi: unknown;
-  relatedObservables?: Observable<any>[];
-  relatedSiblingObservables?: string[];
+  dependentObservables?: Observable<any>[];
+  siblingDependentObservables?: string[];
   isRelated: (sibling: unknown) => boolean;
 }): { relatedPanels$: BehaviorSubject<string[]> } => {
   const relatedPanels$ = new BehaviorSubject<string[]>([]);
@@ -77,8 +77,8 @@ export const initializeRelatedPanels = ({
       skipWhile(([viewMode, childrenLoading]) => childrenLoading || viewMode !== 'edit'),
       distinctUntilChanged(),
       switchMap(() => {
-        // Combine the relatedObservables so that the result recomputes when they change, even though we never use their values
-        return combineLatest([parentApi.children$, section$, ...(relatedObservables ?? [])]).pipe(
+        // Combine the dependentObservables so that the result recomputes when they change, even though we never use their values
+        return combineLatest([parentApi.children$, section$, ...(dependentObservables ?? [])]).pipe(
           switchMap(([children, section]) => {
             // Get all this panel's siblings from the observed children by filtering out its own uuid
             const siblingEntries = Object.entries(children).filter(
@@ -92,7 +92,7 @@ export const initializeRelatedPanels = ({
                   ? parentApi.panelSection$(siblingUuid)
                   : of(undefined);
                 const recomputeSiblingsOnUpdateObservables: Observable<unknown>[] = (
-                  relatedSiblingObservables ?? []
+                  siblingDependentObservables ?? []
                 ).reduce(
                   (prev, key) =>
                     Object.hasOwn(sibling as object, key)

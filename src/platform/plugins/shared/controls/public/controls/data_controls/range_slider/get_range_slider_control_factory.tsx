@@ -13,7 +13,7 @@ import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } fr
 import {
   apiHasPinnedPanels,
   apiHasSections,
-  apiHasUseGlobalFiltersSetting,
+  panelIsRelatedByGlobalFilters,
   apiPublishesViewMode,
   fetch$,
   initializeRelatedPanels,
@@ -106,12 +106,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
       const relatedPanelsApi = initializeRelatedPanels({
         uuid,
         parentApi,
-        isRelated: (sibling) => {
-          return apiHasUseGlobalFiltersSetting(sibling)
-            ? Boolean(sibling.useGlobalFilters$.getValue())
-            : true;
-        },
-        relatedSiblingObservables: ['useGlobalFilters$'],
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
       const api = finalizeApi({
