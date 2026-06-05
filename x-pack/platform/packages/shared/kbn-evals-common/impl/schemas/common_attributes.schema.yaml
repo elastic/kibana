@@ -196,7 +196,8 @@ components:
           maxLength: 256
         example_count:
           type: integer
-          description: Number of unique examples in this dataset (from cardinality aggregation on example.id)
+          minimum: 0
+          description: Number of unique examples evaluated in this dataset
         stats:
           type: object
           properties:
