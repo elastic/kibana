@@ -29,6 +29,7 @@ import {
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
+import { corpusEntrySmlType } from './sml_types/corpus_entry';
 
 export class AgentContextLayerPlugin
   implements
@@ -59,6 +60,11 @@ export class AgentContextLayerPlugin
     registerFeatures({ features: setupDeps.features });
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
+
+    // Register the neutral 'corpus_entry' SML type so workflow authors can sink
+    // ad-hoc / eval documents (e.g. the BrowseComp-Plus corpus) via the
+    // contextEngine.addEntry step without reusing a solution-owned type.
+    smlSetup.registerType(corpusEntrySmlType);
 
     registerSmlCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,
