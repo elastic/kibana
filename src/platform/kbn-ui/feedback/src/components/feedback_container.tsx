@@ -18,7 +18,7 @@ import { FeedbackFooter } from './footer/feedback_footer';
 import { FeedbackContainerSkeleton } from './feedback_container_skeleton';
 import { useQuestionsForApp } from '../hooks/use_questions_for_app';
 
-interface Props {
+export interface FeedbackContainerProps {
   getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
@@ -34,7 +34,7 @@ export const FeedbackContainer = ({
   sendFeedback,
   showToast,
   hideFeedbackContainer,
-}: Props) => {
+}: FeedbackContainerProps) => {
   const { euiTheme } = useEuiTheme();
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>({});
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');

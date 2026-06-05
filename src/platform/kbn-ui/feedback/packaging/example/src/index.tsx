@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackTriggerButton, FeedbackContainer } from './components';
-export type { FeedbackTriggerButtonProps, FeedbackContainerProps } from './components';
+import React from 'react';
+import { render } from 'react-dom';
+import App from './app';
+
+const container = document.getElementById('root');
+
+if (!container) {
+  throw new Error('Root element not found');
+}
+
+render(<App />, container);

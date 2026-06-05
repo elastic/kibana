@@ -17,7 +17,7 @@ const LazyFeedbackContainer = lazy(() =>
   import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
 );
 
-interface Props {
+export interface FeedbackTriggerButtonProps {
   getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
   getAppDetails: () => { title: string; id: string; url: string };
   getCurrentUserEmail: () => Promise<string | undefined>;
@@ -33,7 +33,7 @@ export const FeedbackTriggerButton = ({
   sendFeedback,
   showToast,
   checkTelemetryOptIn,
-}: Props) => {
+}: FeedbackTriggerButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isOptedIn, setIsOptedIn] = useState<boolean | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

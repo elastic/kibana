@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackTriggerButton, FeedbackContainer } from './components';
-export type { FeedbackTriggerButtonProps, FeedbackContainerProps } from './components';
+// Build-time type validation — causes build failure if types diverge.
+import './type_validation';
+
+export { FeedbackTriggerButton, FeedbackContainer } from '../../src';
+export type { FeedbackTriggerButtonProps, FeedbackContainerProps } from '../../src';
+export type {
+  FeedbackRegistryEntry,
+  FeedbackSubmittedData,
+  FeedbackQuestion,
+  FeedbackFormData,
+} from '../../src/types';

@@ -8,6 +8,7 @@
  */
 
 export { FeedbackTriggerButton } from './feedback_trigger_button';
+export type { FeedbackTriggerButtonProps } from './feedback_trigger_button';
 
 export { FeedbackHeader } from './header';
 
@@ -24,3 +25,4 @@ export { FeedbackFooter } from './footer';
 
 export { FeedbackContainerSkeleton } from './feedback_container_skeleton';
 export { FeedbackContainer } from './feedback_container';
+export type { FeedbackContainerProps } from './feedback_container';
