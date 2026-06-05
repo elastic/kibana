@@ -51,67 +51,81 @@ describe('registerSearchRoute', () => {
     expect(mockSmlService.search).not.toHaveBeenCalled();
   });
 
-  it('returns 200 with search results when enabled', async () => {
+  it('returns 200 with the hit body when enabled', async () => {
     const mockResults: SmlSearchResult[] = [
       {
         id: 'chunk-1',
         type: 'visualization',
         title: 'Test Viz',
-        origin_id: 'viz-1',
-        content: 'some content',
-        created_at: '2024-01-01',
-        updated_at: '2024-01-02',
-        spaces: ['test-space'],
-        permissions: [],
-        ingestion_method: 'crawled',
-        score: 1.5,
+        origin: { uri: 'viz-1' },
+        content: 'test content',
+        description: 'A test viz',
+        tags: ['demo'],
+        references: [{ uri: 'dashboard://abc' }],
       },
     ];
-    mockSmlService.search.mockResolvedValue({ results: mockResults, total: 1 });
+    mockSmlService.search.mockResolvedValue({ results: mockResults });
 
     const response = await callHandler({ query: 'test', size: 10 });
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        total: 1,
         results: [
           {
             id: 'chunk-1',
             type: 'visualization',
-            origin_id: 'viz-1',
+            origin: { uri: 'viz-1' },
             title: 'Test Viz',
-            score: 1.5,
-            content: 'some content',
+            content: 'test content',
+            description: 'A test viz',
+            tags: ['demo'],
+            references: [{ uri: 'dashboard://abc' }],
           },
         ],
       },
     });
   });
 
-  it('omits content field when skip_content is true', async () => {
+  it('passes fields param to sml.search and omits unrequested fields from the response', async () => {
     const mockResults: SmlSearchResult[] = [
       {
         id: 'chunk-1',
         type: 'visualization',
         title: 'Test Viz',
-        origin_id: 'viz-1',
-        created_at: '2024-01-01',
-        updated_at: '2024-01-02',
-        spaces: ['test-space'],
-        permissions: [],
-        ingestion_method: 'crawled',
-        score: 1.5,
+        origin: { uri: 'viz-1' },
       },
     ];
-    mockSmlService.search.mockResolvedValue({ results: mockResults, total: 1 });
+    mockSmlService.search.mockResolvedValue({ results: mockResults });
 
-    const response = await callHandler({ query: 'test', size: 10, skip_content: true });
+    const response = await callHandler({
+      query: 'test',
+      size: 10,
+      fields: ['description'],
+    });
+    expect(mockSmlService.search).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['description'] })
+    );
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     const results = (body as any).results;
     expect(results[0]).not.toHaveProperty('content');
   });
 
+  it('passes constraints and agent-supplied filters through to sml.search', async () => {
+    mockSmlService.search.mockResolvedValue({ results: [] });
+    await callHandler({
+      query: 'test',
+      constraints: { connector: { ids: ['gh-1'] } },
+      filters: { types: ['dashboard'], tags: ['production'] },
+    });
+    expect(mockSmlService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        constraints: { connector: { ids: ['gh-1'] } },
+        filters: { types: ['dashboard'], tags: ['production'] },
+      })
+    );
+  });
+
   it('passes spaceId from spaces plugin to sml.search', async () => {
-    mockSmlService.search.mockResolvedValue({ results: [], total: 0 });
+    mockSmlService.search.mockResolvedValue({ results: [] });
     await callHandler({ query: 'test' });
     expect(mockSmlService.search).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'test-space' })
@@ -131,7 +145,7 @@ describe('registerSearchRoute', () => {
     const request = httpServerMock.createKibanaRequest({ body: { query: 'test' } });
     const response = httpServerMock.createResponseFactory();
 
-    mockSmlService.search.mockResolvedValue({ results: [], total: 0 });
+    mockSmlService.search.mockResolvedValue({ results: [] });
     await localHandler(buildMockContext(true), request, response);
     expect(mockSmlService.search).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })

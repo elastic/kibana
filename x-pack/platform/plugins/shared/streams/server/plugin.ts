@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -82,9 +82,9 @@ import { PatternExtractionService } from './lib/pattern_extraction/pattern_extra
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
 import {
-  createContinuousKiExtractionWorkflowService,
-  type ContinuousKiExtractionWorkflowService,
-} from './lib/workflows/continuous_extraction_workflow';
+  createContinuousKiOnboardingWorkflowService,
+  type ContinuousKiOnboardingWorkflowService,
+} from './lib/workflows/continuous_onboarding_workflow';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -327,6 +327,7 @@ export class StreamsPlugin
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
+        agentContextLayer: plugins.agentContextLayer,
         getScopedClients,
         server: this.server,
         logger: this.logger,
@@ -349,10 +350,10 @@ export class StreamsPlugin
         });
     }
 
-    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
+    let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
+      continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         streamsKIsOnboardingClient,
@@ -435,7 +436,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflowService,
+        continuousKiOnboardingWorkflowService,
         streamsKIsOnboardingClient,
       },
       core,
