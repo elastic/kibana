@@ -27,30 +27,19 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
-const createDetectionRuleSchema = z
-  .object({
-    user_query: z
-      .string()
-      .describe(
-        'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
-      ),
-    existing_rule: z
-      .record(z.string(), z.unknown())
-      .optional()
-      .describe(
-        'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved. Requires attachment_id to be provided as well.'
-      ),
-    attachment_id: z
-      .string()
-      .optional()
-      .describe(
-        'ID of the existing rule attachment to update in place. Should be provided together with existing_rule so non-query fields are preserved; if omitted, the rule regenerates from scratch.'
-      ),
-  })
-  .refine((val) => !val.existing_rule || val.attachment_id !== undefined, {
-    message: 'attachment_id is required when existing_rule is provided',
-    path: ['attachment_id'],
-  });
+const createDetectionRuleSchema = z.object({
+  user_query: z
+    .string()
+    .describe(
+      'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
+    ),
+  existing_rule: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe(
+      'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved.'
+    ),
+});
 
 export function createDetectionRuleTool(
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
@@ -104,7 +93,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
       },
     },
     handler: async (
-      { user_query: userQuery, existing_rule: existingRule, attachment_id: existingAttachmentId },
+      { user_query: userQuery, existing_rule: existingRule },
       { esClient, modelProvider, request, events, attachments }
     ) => {
       try {
@@ -166,26 +155,44 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         logger.debug(`Successfully created detection rule: ${result.rule.name}`);
 
-        // New attachments are always 'create' intent (frozen — never flips even after saving).
-        // When updating an existing attachment, keep whatever intent was already stored so
-        // an 'update' attachment doesn't regress to 'create' after a query rewrite.
-        const attachmentData: Record<string, unknown> = {
-          text: JSON.stringify(result.rule),
-          attachmentLabel: result.rule.name,
-          ...(!existingAttachmentId && { intent: 'create' }),
+        // Strip server-assigned identity fields — `id`/`rule_id` must not appear in the stored draft.
+        const {
+          id: _id,
+          rule_id: _ruleId,
+          ...ruleWithoutIds
+        } = result.rule as typeof result.rule & {
+          id?: string;
+          rule_id?: string;
         };
-        const attachmentDescription = `Rule: ${result.rule.name}`;
 
-        let resultAttachmentId: string | undefined;
+        const attachmentDescription = `Rule: ${result.rule.name}`;
+        const existingAttachment = attachments.getAttachmentRecord(SECURITY_RULE_ATTACHMENT_ID);
+        const isUpdate = existingAttachment !== undefined;
+
+        // Preserve stored intent so a query rewrite on a saved rule doesn't regress it to 'create'.
+        const existingVersionData = isUpdate
+          ? (existingAttachment.versions[existingAttachment.current_version - 1]?.data as
+              | Record<string, unknown>
+              | undefined)
+          : undefined;
+        const existingIntent = existingVersionData?.intent as string | undefined;
+
+        const attachmentData: Record<string, unknown> = {
+          text: JSON.stringify(ruleWithoutIds),
+          attachmentLabel: result.rule.name,
+          intent: existingIntent ?? 'create',
+        };
+
+        let resultAttachmentId: string;
         let version: number | undefined;
 
         try {
-          if (existingAttachmentId) {
-            const updated = await attachments.update(existingAttachmentId, {
+          if (isUpdate) {
+            const updated = await attachments.update(SECURITY_RULE_ATTACHMENT_ID, {
               data: attachmentData,
               description: attachmentDescription,
             });
-            resultAttachmentId = updated?.id ?? existingAttachmentId;
+            resultAttachmentId = updated?.id ?? SECURITY_RULE_ATTACHMENT_ID;
             version = updated?.current_version;
             logger.debug(`Updated rule attachment ${resultAttachmentId} v${version}`);
           } else {
@@ -215,7 +222,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               data: {
                 success: true,
                 rule: result.rule,
-                ...(resultAttachmentId && { attachmentId: resultAttachmentId }),
+                attachmentId: resultAttachmentId,
                 ...(version !== undefined && { version }),
               },
             },

@@ -115,8 +115,10 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
   const intent = getRuleAttachmentIntent(attachment);
-  const ruleId = getRuleIdFromAttachment(attachment);
-  const willDuplicateOnSave = intent === 'create' && ruleId !== undefined;
+  // aiRuleCreation.savedRuleId is set synchronously before clearSaving(), so this read
+  // on the saving$ re-render always sees the current value without an extra observable.
+  const savedRuleId = aiRuleCreation.savedRuleId ?? getRuleIdFromAttachment(attachment);
+  const willDuplicateOnSave = intent === 'create' && savedRuleId !== undefined;
 
   if (!rule) {
     return null;

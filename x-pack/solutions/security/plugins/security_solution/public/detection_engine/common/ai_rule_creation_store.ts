@@ -21,6 +21,7 @@ export class AiRuleCreationService {
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
   private session: AiRuleCreationSession | null = null;
+  public savedRuleId: string | undefined = undefined;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
@@ -79,6 +80,7 @@ export class AiRuleCreationService {
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
+    this.savedRuleId = undefined;
     this.session = null;
   };
 }

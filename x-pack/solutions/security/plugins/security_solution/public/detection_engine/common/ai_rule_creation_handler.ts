@@ -119,15 +119,18 @@ export const createAiRuleCreationHandler = ({
         });
       }
 
+      if (!isUpdate) {
+        aiRuleCreation.savedRuleId = saved.id;
+      }
       aiRuleCreation.clearSaving();
 
       const convId = activeConversationId;
       if (convId) {
-        // Persist ruleId + intent:'update' into the attachment so they survive subsequent
-        // agent edits and the button label never flips back to "Save rule".
         agentBuilder
           ?.updateAttachment(convId, SECURITY_RULE_ATTACHMENT_ID, {
-            data: { ruleId: saved.id, intent: 'update' },
+            data: isUpdate
+              ? { ruleId: saved.id, intent: 'update' }
+              : { ruleId: saved.id, intent: 'create' },
           })
           .catch(() => {
             // Non-fatal: the addAttachment call below keeps the UI consistent locally.
@@ -166,7 +169,9 @@ export const createAiRuleCreationHandler = ({
           text: JSON.stringify(saved),
           attachmentLabel: saved.name,
           ruleId: saved.id,
-          intent: 'update',
+          // Preserve 'create' intent on first save so the duplicate-save warning appears.
+          // Only flip to 'update' when this was already an update-intent rule.
+          intent: isUpdate ? 'update' : 'create',
         },
       });
     } catch (err) {
