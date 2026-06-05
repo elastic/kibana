@@ -79,7 +79,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
   }
 
   const noDiffAvailable =
-    RULE_EDIT_CHANGE_TRACKING_ACTIONS.includes(item.action) && !item.old_values;
+    EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) && !item.old_values;
 
   if (noDiffAvailable) {
     return (
@@ -119,7 +119,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
   );
 }
 
-const RULE_EDIT_CHANGE_TRACKING_ACTIONS: string[] = [
+const EDIT_ACTIONS_REQUIRING_PRIOR_STATE: string[] = [
   RuleChangeTrackingAction.ruleUpdate,
   SecurityRuleChangeTrackingAction.ruleImport,
   SecurityRuleChangeTrackingAction.ruleRevert,
