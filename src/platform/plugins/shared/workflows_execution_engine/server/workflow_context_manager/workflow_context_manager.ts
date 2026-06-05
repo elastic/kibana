@@ -26,6 +26,11 @@ import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
+import {
+  callKibanaApi,
+  type CallKibanaApiParams,
+  type CallKibanaApiResult,
+} from '../lib/call_kibana_api';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { generateEncodedStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
@@ -277,6 +282,29 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart {
     return this.coreStart;
+  }
+
+  /**
+   * Calls a Kibana API route on the running Kibana instance, using the workflow's fake
+   * request for authentication and propagating event-chain headers so the receiving handler
+   * keeps the same chain-depth context.
+   *
+   * The transport (currently `fetch`) is an implementation detail; the public surface is
+   * intentionally narrow so it can be swapped to an in-process call later without affecting
+   * callers. Throws on non-2xx responses.
+   */
+  public async callKibanaApi<T = unknown>(
+    params: CallKibanaApiParams
+  ): Promise<CallKibanaApiResult<T>> {
+    return callKibanaApi<T>(
+      {
+        fakeRequest: this.fakeRequest,
+        coreStart: this.coreStart,
+        cloudSetup: this.dependencies.cloudSetup,
+        workflowRunId: this.workflowExecutionState.getWorkflowExecution().id,
+      },
+      params
+    );
   }
 
   /**

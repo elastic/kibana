@@ -20,7 +20,7 @@ import {
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/streams-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
@@ -374,7 +374,7 @@ export class StreamsKIsOnboardingClient {
 
   /**
    * Cancels every non-terminal onboarding execution across all streams.
-   * Used during teardown of the continuous KI extraction workflow.
+   * Used during teardown of the continuous KI onboarding workflow.
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
     const { results } = await this.managementApi.getWorkflowExecutions(

@@ -13,6 +13,7 @@ import { useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
+import { getIconBase64 } from '../../../shared/ui/step_icons/get_icon_base64';
 
 jest.mock('../../../shared/ui/step_icons/get_icon_base64', () => ({
   getIconBase64: jest.fn().mockResolvedValue('data:image/png;base64,xx'),
@@ -72,6 +73,41 @@ describe('useDynamicTypeIcons', () => {
 
     expect(get).toHaveBeenCalledWith(registeredId);
     expect(has).toHaveBeenCalledWith(unregisteredId);
+
+    unmount();
+  });
+
+  it('injects inline icon CSS for connector v2 base types', async () => {
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.notion': connectorTypeStub('.notion'),
+        '.sharepoint-server': connectorTypeStub('.sharepoint-server'),
+      },
+    };
+    const onShadowIconsCssReady = jest.fn();
+
+    const { unmount } = renderHook(
+      () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
+
+    await waitFor(() => {
+      expect(onShadowIconsCssReady).toHaveBeenCalled();
+    });
+
+    const css = onShadowIconsCssReady.mock.calls.at(-1)?.[0] ?? '';
+    expect(css).toContain('.type-inline-highlight.type-notion::after');
+    expect(css).toContain('.type-inline-highlight.type-sharepoint-server::after');
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.notion', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.sharepoint-server', kind: 'step' })
+    );
 
     unmount();
   });
