@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { LatencyAggregationType } from '@kbn/apm-types';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import type { TransactionGroup } from '../../../transactions_table/types';
 import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
 
@@ -51,26 +52,18 @@ export function useServiceFlyoutTransactions({
 
   const dataSource = usePreferredTransactionDataSource({ http, start, end });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<MainStatisticsResponse | undefined>(undefined);
+  const [maxCountExceeded, setMaxCountExceeded] = useState(false);
+  const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
-  // When the server returns fewer groups than the limit, all data is already in memory —
-  // pass an empty searchQuery to avoid re-fetching on every keystroke.
-  // When maxCountExceeded is true the full list is truncated, so the server must filter.
-  const serverSearchQuery = response?.maxCountExceeded ? searchQuery : '';
-
-  useEffect(() => {
-    if (!enabled || !dataSource) return;
-
-    let cancelled = false;
-    setIsLoading(true);
-
-    http
-      .get<MainStatisticsResponse>(
+  const { value: response, loading: isLoading } = useAbortableAsync(
+    async ({ signal }) => {
+      if (!enabled || !dataSource) return undefined;
+      const result = await http.get<MainStatisticsResponse>(
         `/internal/apm/services/${encodeURIComponent(
           serviceName
         )}/transactions/groups/main_statistics`,
         {
+          signal,
           query: {
             environment,
             kuery: '',
@@ -84,30 +77,23 @@ export function useServiceFlyoutTransactions({
             searchQuery: serverSearchQuery,
           },
         }
-      )
-      .then((data) => {
-        if (!cancelled) setResponse(data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    http,
-    serviceName,
-    environment,
-    start,
-    end,
-    transactionType,
-    latencyAggregationType,
-    serverSearchQuery,
-    enabled,
-    dataSource,
-  ]);
+      );
+      setMaxCountExceeded(result.maxCountExceeded);
+      return result;
+    },
+    [
+      http,
+      serviceName,
+      environment,
+      start,
+      end,
+      transactionType,
+      latencyAggregationType,
+      serverSearchQuery,
+      enabled,
+      dataSource,
+    ]
+  );
 
   const items: TransactionGroup[] = useMemo(() => {
     const groups = response?.transactionGroups ?? [];
