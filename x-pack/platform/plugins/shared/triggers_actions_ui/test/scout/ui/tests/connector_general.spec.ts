@@ -470,7 +470,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
           excludeHitsFromPreviousRun: false,
           sourceFields: [],
           index: ['.kibana'],
-          timeField: '@timestamp',
+          timeField: 'updated_at',
         },
         schedule: { interval: '1m' },
         tags: ['scout-exec-log'],
@@ -507,9 +507,9 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
         }
       }
 
-      // Navigate to rule details and click Logs tab
+      // Navigate to rule details and click Execution log tab
       await pageObjects.ruleDetailsPage.gotoById(ruleId);
-      await page.testSubj.click('logsTab');
+      await page.testSubj.click('eventLogListTab');
 
       // Guard: if tabbed content is not present, the test cannot proceed (matches FTR guard)
       if (

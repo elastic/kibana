@@ -240,9 +240,9 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       await ccInput.fill('cc@example.com');
       await ccInput.press('Enter');
 
-      await expect(page.locator('.euiFormErrorText')).not.toContainText(
-        'At least one recipient is required.'
-      );
+      await expect(
+        page.locator('.euiFormErrorText', { hasText: 'At least one recipient is required.' })
+      ).toHaveCount(0);
 
       await closeFlyout(page);
     } finally {

@@ -18,7 +18,12 @@
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule } from '../fixtures';
+import {
+  test,
+  makeEsQueryRule,
+  defineIndexThresholdRule,
+  THRESHOLD_TEST_INDEX,
+} from '../fixtures';
 
 const searchRules = async (page: ScoutPage, query: string) => {
   const field = page.testSubj.locator('ruleSearchField');
@@ -36,10 +41,14 @@ const defineEsQueryAlert = async (page: ScoutPage, alertName: string) => {
   await page.testSubj.locator('ruleDetailsNameInput').fill(alertName);
   await page.testSubj.click('queryFormType_esQuery');
   await page.testSubj.click('selectIndexExpression');
-  const indexInput = page.testSubj.locator('thresholdIndexesComboBox').locator('input');
-  await indexInput.fill('.kibana');
-  await page.locator('[role="listbox"]').waitFor();
-  await page.locator('[role="listbox"] [role="option"]:first-child').click();
+  const indexCombo = page.testSubj.locator('thresholdIndexesComboBox');
+  await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
+  await indexCombo
+    .locator('[data-test-subj="comboBoxSearchInput"]')
+    .pressSequentially('scout-threshold-rule', { delay: 50 });
+  const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
+  await indexOption.waitFor({ state: 'visible', timeout: 30_000 });
+  await indexOption.click();
   const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
   await timeFieldSelect.locator('option:nth-child(2)').waitFor();
   await timeFieldSelect.selectOption({ index: 1 });
@@ -68,24 +77,9 @@ const cancelRuleCreation = async (page: ScoutPage) => {
   }
 };
 
-// Equivalent of FTR rules.common.defineIndexThresholdAlert
-const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => {
-  await page.gotoApp('rules');
-  await page.testSubj.click('createRuleButton');
-  await page.testSubj.click('.index-threshold-SelectOption');
-  await page.testSubj.locator('selectIndexExpression').scrollIntoViewIfNeeded();
-  await page.testSubj.click('selectIndexExpression');
-  const indexInput = page.testSubj.locator('thresholdIndexesComboBox').locator('input');
-  await indexInput.fill('.kibana');
-  await page.locator('[role="listbox"]').waitFor();
-  await page.locator('[role="listbox"] [role="option"]:first-child').click();
-  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
-  await timeFieldSelect.locator('option:nth-child(2)').waitFor();
-  await timeFieldSelect.selectOption({ index: 1 });
-  await page.testSubj.click('closePopover');
-  await page.testSubj.locator('ruleDetailsNameInput').scrollIntoViewIfNeeded();
-  await page.testSubj.locator('ruleDetailsNameInput').fill(alertName);
-};
+// Uses the shared fixture which handles the index combobox correctly.
+const defineIndexThresholdAlert = (page: ScoutPage, alertName: string) =>
+  defineIndexThresholdRule(page, alertName);
 
 // Find and delete a rule by name via API
 const deleteRuleByName = async (kbnClient: KbnClient, name: string) => {
@@ -122,7 +116,20 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
   let slackConnectorId: string;
   let slackConnectorName: string;
 
-  test.beforeAll(async ({ apiServices }) => {
+  test.beforeAll(async ({ apiServices, esClient }) => {
+    await esClient.indices.create(
+      {
+        index: THRESHOLD_TEST_INDEX,
+        mappings: { properties: { '@timestamp': { type: 'date' } } },
+      },
+      { ignore: [400] }
+    );
+    await esClient.index({
+      index: THRESHOLD_TEST_INDEX,
+      document: { '@timestamp': new Date().toISOString() },
+    });
+    await esClient.indices.refresh({ index: THRESHOLD_TEST_INDEX });
+
     const rule = makeEsQueryRule('scout-alert-flyout');
     const resp = await apiServices.alerting.rules.create(rule);
     esQueryRuleId = resp.data.id;
@@ -148,9 +155,10 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await cancelRuleCreation(page);
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, esClient }) => {
     if (esQueryRuleId) await apiServices.alerting.rules.delete(esQueryRuleId);
     if (slackConnectorId) await apiServices.alerting.connectors.delete(slackConnectorId);
+    await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
   });
 
   test('should delete the right action when the same action has been added twice', async ({
