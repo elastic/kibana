@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { load } from 'cheerio';
+import { load, type CheerioAPI } from 'cheerio';
+
+import { icon as EuiLogoElasticIcon } from '@elastic/eui/lib/components/icon/assets/logo_elastic';
 
 import { Logo } from './logo';
 
@@ -35,12 +37,26 @@ describe('Logo (boot splash)', () => {
     expect(render()('svg').attr('aria-hidden')).toBe('true');
   });
 
-  it('uses the modern logoElastic palette (matches @elastic/eui)', () => {
-    const $ = render();
-    const fills = $('svg > path')
-      .map((_, el) => $(el).attr('fill'))
-      .get();
+  // Drift guard: rather than hard-coding the palette, compare our inlined
+  // SSR copy of the logo against the actual `logoElastic` asset shipped
+  // by `@elastic/eui` (the same one `<EuiLoadingElastic />` uses under
+  // the hood, see node_modules/@elastic/eui/lib/components/icon/assets/
+  // logo_elastic.js). If EUI rebrands the logo, this test fails and the
+  // next person knows to re-copy the SVG paths into logo.tsx.
+  it('stays byte-for-byte in sync with @elastic/eui logoElastic', () => {
+    const collect = ($: CheerioAPI) =>
+      $('path')
+        .map((_, el) => ({
+          fill: $(el).attr('fill'),
+          stroke: $(el).attr('stroke'),
+          'stroke-width': $(el).attr('stroke-width'),
+          d: $(el).attr('d'),
+        }))
+        .get();
 
-    expect(fills).toEqual(['#0B64DD', '#9ADC30', '#1BA9F5', '#F04E98', '#02BCB7', '#FEC514']);
+    const ours = render();
+    const eui = load(renderToStaticMarkup(<EuiLogoElasticIcon />));
+
+    expect(collect(ours)).toEqual(collect(eui));
   });
 });

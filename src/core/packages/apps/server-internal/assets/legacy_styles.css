@@ -75,10 +75,14 @@ body, html {
 
 /*
  * Sized to match <EuiLoadingElastic size="xxl" /> (euiTheme.size.xxl,
- * i.e. 2.5 * 16px = 40px on the Borealis base). Kept in sync with the
- * SSR-safe `Logo` SVG defined in views/logo.tsx.
+ * i.e. 2.5 * 16px = 40px on the Borealis base). This rule is the
+ * single source of truth for the splash-logo size: it applies to both
+ * the default `Logo` SVG (views/logo.tsx) and the `<img>` rendered by
+ * `template.tsx` when an operator configures `customBranding.logo`, so
+ * default and custom-branded splashes always render at the same size.
  */
-.kbnLoaderWrap svg {
+.kbnLoaderWrap > svg,
+.kbnLoaderWrap > img {
   width: 40px;
   height: 40px;
   margin: auto;
