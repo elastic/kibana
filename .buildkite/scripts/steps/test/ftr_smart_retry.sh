@@ -5,12 +5,13 @@
 FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
 retry_recovered=false
 
-# Called after attempt 1: stores failing test names so the retry can verify recovery.
-store_failing_tests() {
-  [[ -n "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] && return
-  [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]] && return
-  [[ "$exitCode" == "0" ]] && return
+smart_retry_applicable() {
+  [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] \
+    && [[ "$exitCode" != 0 ]] \
+    && [[ "${FTR_SMART_RETRY_ENABLED:-}" =~ ^(1|true)$ ]]
+}
 
+store_failing_tests() {
   local junitDir="target/junit/$JOB"
   [[ -d "$junitDir" ]] || return
 
@@ -22,20 +23,13 @@ store_failing_tests() {
   fi
 }
 
-# Called after attempt 2: marks the step green if all previously-failing tests explicitly passed.
-# On a third-or-later manual retry, logs that smart-retry is inactive.
 apply_smart_retry() {
-  [[ -n "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] && return
-  [[ "$exitCode" == "0" ]] && return
-
   local retryCount="${BUILDKITE_RETRY_COUNT:-0}"
 
   if [[ "$retryCount" -ge "2" ]]; then
     echo "--- [smart-retry] inactive on attempt $((retryCount + 1)) — only applies to the first automatic retry"
     return
   fi
-
-  [[ "$retryCount" != "1" ]] && return
 
   local prevFailedTests
   prevFailedTests=$(buildkite-agent meta-data get "$FAILED_TESTS_KEY" --default '' 2>/dev/null || true)
