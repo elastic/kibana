@@ -692,11 +692,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
             id: slackConnector.id,
             group: 'query matched',
             params: { message: 'scout test' },
-            frequency: {
-              summary: false,
-              notify_when: 'onActionGroupChange',
-              throttle: undefined,
-            },
+            // Scout type uses notifyWhen but the REST API requires notify_when (no transform).
+            frequency: { summary: false, notify_when: 'onActionGroupChange' } as any,
           },
         ],
       }),
@@ -867,11 +864,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
           id: slackConnector.id,
           group: 'query matched',
           params: { message: 'scout test' },
-          frequency: {
-            summary: false,
-            notify_when: 'onActionGroupChange',
-            throttle: null,
-          },
+          // Scout type uses notifyWhen but the REST API requires notify_when (no transform).
+          frequency: { summary: false, notify_when: 'onActionGroupChange' } as any,
         },
       ],
     });
