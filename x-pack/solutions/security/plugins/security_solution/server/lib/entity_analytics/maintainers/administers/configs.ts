@@ -31,8 +31,13 @@ import type { RelationshipIntegrationConfig } from '../engine/types';
  */
 function buildAdministersEsqlQuery(namespace: string, lastProcessedTimestamp?: string): string {
   const entityIndex = getLatestEntityIndexPattern(namespace);
+  // Watermark on entity.lifecycle.last_seen, not @timestamp. The entity index is a
+  // "latest" snapshot whose @timestamp tracks the transform's write time, which can
+  // churn for reasons unrelated to the entity's source data changing. last_seen is
+  // derived from the newest source-document @timestamp, so it advances only when the
+  // entity actually had new activity — the correct incremental signal for this maintainer.
   const watermarkClause = lastProcessedTimestamp
-    ? `\n    AND @timestamp > "${lastProcessedTimestamp}"`
+    ? `\n    AND entity.lifecycle.last_seen > "${lastProcessedTimestamp}"`
     : '';
 
   return `FROM ${entityIndex}
@@ -67,17 +72,35 @@ export function buildAdministersConfigs(
       customActor: {
         fields: ['entity.id'],
       },
+      // This config reads the entity index, not a log index. The engine's
+      // default `@timestamp >= now-30d` lookback tracks the transform's write
+      // time on entity docs (not event recency) and would silently drop
+      // entities, so we disable it and gate freshness on
+      // `entity.lifecycle.last_seen` (see watermark below + the override query).
+      disableLookbackWindow: true,
       compositeAggAdditionalFilters: [
-        // Step 1: narrow to entities that actually have administers raw_identifiers.
+        // Step 1: narrow to entities that actually carry administers raw_identifiers.
+        // The AD pipeline (user.yml / device.yml `buildHostRel`) writes the parsed
+        // managedObjects DN into both `host.id` (the full DN) and `host.name` (the
+        // CN/FQDN), which the entity transform collects into
+        // `raw_identifiers.host.{id,name}`. We gate on *either* existing so an actor
+        // whose DN parsed an `host.id` but no CN (no `host.name`) is still surfaced —
+        // Step 2 resolves EUIDs from `host.name` only, but the broader gate keeps the
+        // actor set complete and consistent with what the pipeline can emit.
         {
-          exists: {
-            field: 'entity.relationships.administers.raw_identifiers.host.name',
+          bool: {
+            should: [
+              { exists: { field: 'entity.relationships.administers.raw_identifiers.host.name' } },
+              { exists: { field: 'entity.relationships.administers.raw_identifiers.host.id' } },
+            ],
+            minimum_should_match: 1,
           },
         },
-        // When a watermark exists, Step 1 also filters by @timestamp so it
-        // surfaces only actors that changed since the last run.
+        // When a watermark exists, Step 1 also filters by entity.lifecycle.last_seen
+        // (see buildAdministersEsqlQuery for why last_seen, not @timestamp) so it
+        // surfaces only actors whose source data changed since the last run.
         ...(lastProcessedTimestamp
-          ? [{ range: { '@timestamp': { gt: lastProcessedTimestamp } } }]
+          ? [{ range: { 'entity.lifecycle.last_seen': { gt: lastProcessedTimestamp } } }]
           : []),
       ],
       esqlQueryOverride: (ns) => buildAdministersEsqlQuery(ns, lastProcessedTimestamp),

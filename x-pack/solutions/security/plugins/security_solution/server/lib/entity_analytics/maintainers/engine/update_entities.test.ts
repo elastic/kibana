@@ -99,6 +99,60 @@ describe('writeEntityIds', () => {
     ]);
   });
 
+  it('deduplicates repeated target EUIDs within a single record', async () => {
+    const crudClient = makeCrudClient();
+    const records: EntityRelationshipRecord[] = [
+      {
+        entityId: 'host:admin-01.corp.com',
+        entityType: 'user',
+        relationships: {
+          administers: [
+            'host:server-01.corp.com',
+            'host:server-01.corp.com',
+            'host:server-02.corp.com',
+          ],
+        },
+      },
+    ];
+    await writeEntityIds(crudClient, loggerMock.create(), records);
+    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const { ids } = call[0].objects[0].doc.entity.relationships.administers;
+    expect(ids.sort()).toEqual(['host:server-01.corp.com', 'host:server-02.corp.com']);
+    expect(ids).toHaveLength(2);
+  });
+
+  it('deduplicates target EUIDs across multiple records for the same actor (e.g. multiple agg pages)', async () => {
+    const crudClient = makeCrudClient();
+    const records: EntityRelationshipRecord[] = [
+      {
+        entityId: 'host:admin-01.corp.com',
+        entityType: 'user',
+        relationships: {
+          administers: ['host:server-01.corp.com', 'host:server-02.corp.com'],
+        },
+      },
+      {
+        entityId: 'host:admin-01.corp.com',
+        entityType: 'user',
+        relationships: {
+          // server-02 overlaps with the first record; server-03 is new.
+          administers: ['host:server-02.corp.com', 'host:server-03.corp.com'],
+        },
+      },
+    ];
+    await writeEntityIds(crudClient, loggerMock.create(), records);
+    const [call] = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls;
+    const { objects } = call[0];
+    expect(objects).toHaveLength(1);
+    const { ids } = objects[0].doc.entity.relationships.administers;
+    expect(ids.sort()).toEqual([
+      'host:server-01.corp.com',
+      'host:server-02.corp.com',
+      'host:server-03.corp.com',
+    ]);
+    expect(ids).toHaveLength(3);
+  });
+
   it('returns updated/notFound/errors counts and counts only successfully updated entities in `updated`', async () => {
     const crudClient = makeCrudClient([{ status: 404 }]);
     const records: EntityRelationshipRecord[] = [

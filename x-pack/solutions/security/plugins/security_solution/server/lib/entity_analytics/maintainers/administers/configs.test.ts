@@ -96,33 +96,76 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  describe('watermark behaviour', () => {
-    it('with no watermark: query does NOT contain a @timestamp filter', () => {
-      const config = buildAdministersConfigs()[0] as OverrideRelationshipIntegrationConfig;
-      const query = config.esqlQueryOverride('default');
-      expect(query).not.toContain('@timestamp >');
+  describe('lookback window', () => {
+    it('declares disableLookbackWindow on every config (entity-index source)', () => {
+      for (const config of ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS) {
+        expect(config.disableLookbackWindow).toBe(true);
+      }
     });
 
-    it('with watermark: query contains a @timestamp filter after the watermark value', () => {
+    it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: Step 1 actor discovery query omits the @timestamp lookback range',
+      (config) => {
+        const query = buildActorDiscoveryQuery(config, undefined) as {
+          query: { bool: { filter: unknown[] } };
+        };
+        const hasTimestampRange = query.query.bool.filter.some((f) =>
+          JSON.stringify(f).includes('"@timestamp"')
+        );
+        expect(hasTimestampRange).toBe(false);
+      }
+    );
+  });
+
+  describe('actor existence gate', () => {
+    it('captures actors that carry administers raw_identifiers under host.name OR host.id', () => {
+      const config = buildAdministersConfigs()[0];
+      const filters = config.compositeAggAdditionalFilters ?? [];
+      const existenceGate = filters.find((f) =>
+        JSON.stringify(f).includes('raw_identifiers.host.name')
+      );
+      expect(existenceGate).toBeDefined();
+      const serialized = JSON.stringify(existenceGate);
+      expect(serialized).toContain('entity.relationships.administers.raw_identifiers.host.name');
+      expect(serialized).toContain('entity.relationships.administers.raw_identifiers.host.id');
+      expect(serialized).toContain('minimum_should_match');
+    });
+  });
+
+  describe('watermark behaviour', () => {
+    const WATERMARK_FIELD = 'entity.lifecycle.last_seen';
+
+    it('with no watermark: query does NOT contain a last_seen filter', () => {
+      const config = buildAdministersConfigs()[0] as OverrideRelationshipIntegrationConfig;
+      const query = config.esqlQueryOverride('default');
+      expect(query).not.toContain(`${WATERMARK_FIELD} >`);
+    });
+
+    it('with watermark: query filters on entity.lifecycle.last_seen after the watermark value', () => {
       const ts = '2026-06-01T00:00:00.000Z';
       const config = buildAdministersConfigs(ts)[0] as OverrideRelationshipIntegrationConfig;
       const query = config.esqlQueryOverride('default');
-      expect(query).toContain(`@timestamp > "${ts}"`);
+      expect(query).toContain(`${WATERMARK_FIELD} > "${ts}"`);
+      // The entity index @timestamp must NOT be used as the incremental signal.
+      expect(query).not.toContain('@timestamp >');
     });
 
-    it('with watermark: composite agg filters include @timestamp range', () => {
+    it('with watermark: composite agg filters include an entity.lifecycle.last_seen range', () => {
       const ts = '2026-06-01T00:00:00.000Z';
       const config = buildAdministersConfigs(ts)[0];
       const filters = config.compositeAggAdditionalFilters ?? [];
-      const rangeFilters = filters.filter((f) => JSON.stringify(f).includes('@timestamp'));
+      const rangeFilters = filters.filter((f) => JSON.stringify(f).includes(WATERMARK_FIELD));
       expect(rangeFilters.length).toBe(1);
       expect(JSON.stringify(rangeFilters[0])).toContain(ts);
+      // Guard against a regression back to @timestamp on the entity index.
+      const tsFilters = filters.filter((f) => JSON.stringify(f).includes('@timestamp'));
+      expect(tsFilters.length).toBe(0);
     });
 
-    it('with no watermark: composite agg filters do NOT include @timestamp range', () => {
+    it('with no watermark: composite agg filters do NOT include a last_seen range', () => {
       const config = buildAdministersConfigs()[0];
       const filters = config.compositeAggAdditionalFilters ?? [];
-      const rangeFilters = filters.filter((f) => JSON.stringify(f).includes('@timestamp'));
+      const rangeFilters = filters.filter((f) => JSON.stringify(f).includes(WATERMARK_FIELD));
       expect(rangeFilters.length).toBe(0);
     });
   });

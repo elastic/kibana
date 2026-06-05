@@ -135,6 +135,23 @@ interface BaseRelationshipIntegrationFields {
    * and Step 2 EUID expression describe the same actor — they cannot drift.
    */
   customActor?: CustomActorBinding;
+  /**
+   * When true, the engine omits its default `@timestamp >= now-30d` lookback
+   * filter from both Step 1 (composite agg) and Step 2 (ES|QL wrapper).
+   *
+   * The lookback is a *log-index* assumption: log-based maintainers only care
+   * about recent events, and a 30-day window bounds the scan. But configs whose
+   * `indexPattern` targets the **entity index** (`.entities.v2.latest`) read
+   * one snapshot doc per entity, whose `@timestamp` tracks the transform's
+   * write time, not event recency — applying the lookback there silently drops
+   * entities the maintainer must process. Such configs set this flag and rely
+   * on their own freshness gate instead (e.g. an `entity.lifecycle.last_seen`
+   * watermark in `compositeAggAdditionalFilters` / the override query).
+   *
+   * Default (false/undefined): the lookback is applied, preserving existing
+   * log-based maintainer behavior.
+   */
+  disableLookbackWindow?: boolean;
 }
 
 /**

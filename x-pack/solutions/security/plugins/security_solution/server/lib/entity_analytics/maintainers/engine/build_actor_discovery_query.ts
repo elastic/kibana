@@ -54,8 +54,13 @@ export const buildActorDiscoveryQuery = (
     ? buildAnyActorFieldNonEmptyDsl(config.customActor.fields)
     : euid.dsl.getEuidDocumentsContainsIdFilter('user');
 
+  // The @timestamp lookback is a log-index assumption. Entity-index configs
+  // (e.g. administers) opt out via `disableLookbackWindow` and gate freshness
+  // on `entity.lifecycle.last_seen` instead. See `disableLookbackWindow` docs.
   const baseFilters: QueryDslQueryContainer[] = [
-    { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
+    ...(config.disableLookbackWindow
+      ? []
+      : [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }]),
     actorPresenceFilter,
   ];
 

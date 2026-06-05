@@ -23,6 +23,7 @@ import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
+import { inspect } from 'util';
 
 interface CompositeAggregations {
   users: {
@@ -101,10 +102,15 @@ async function fetchTargetsForActors(
   transportOpts: { signal: AbortSignal } | undefined,
   abortController: AbortController | undefined
 ): Promise<EsqlQueryResult | null> {
+  // The @timestamp lookback is a log-index assumption; entity-index configs
+  // opt out via `disableLookbackWindow` (see its docs in types.ts) and gate
+  // freshness on `entity.lifecycle.last_seen` in their override query instead.
   const esqlFilter = {
     bool: {
       filter: [
-        { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
+        ...(config.disableLookbackWindow
+          ? []
+          : [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }]),
         buildActorPageFilter(config, buckets),
       ],
     },
@@ -125,6 +131,7 @@ async function fetchTargetsForActors(
       );
       return null;
     }
+
     return { columns: typed.columns, values: typed.values };
   } catch (err) {
     if (abortController?.signal.aborted) {
@@ -192,7 +199,6 @@ async function runIntegration(
     logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
     totalBuckets += buckets.length;
     if (buckets.length === 0) break;
-
     const esqlResult = await fetchTargetsForActors(
       config,
       esClient,
@@ -203,7 +209,6 @@ async function runIntegration(
       abortController
     );
     if (esqlResult === null) break;
-
     const { columns, values } = esqlResult;
     const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
     records.push(...pageRecords);
@@ -216,7 +221,6 @@ async function runIntegration(
     // filters that drop bucket candidates).
     afterKey = newAfterKey;
   } while (afterKey);
-
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
   const write = await writeEntityIds(crudClient, logger, records);
