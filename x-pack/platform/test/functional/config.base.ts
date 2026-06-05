@@ -167,9 +167,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       apm: {
         pathname: '/app/apm',
       },
-      watcher: {
-        pathname: '/app/management/insightsAndAlerting/watcher/watches',
-      },
       transform: {
         pathname: '/app/management/data/transform',
       },

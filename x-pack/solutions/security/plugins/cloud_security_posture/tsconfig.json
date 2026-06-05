@@ -77,7 +77,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-query",
     "@kbn/kql",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }
