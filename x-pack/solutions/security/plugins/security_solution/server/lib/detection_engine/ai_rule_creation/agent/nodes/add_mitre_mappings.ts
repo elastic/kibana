@@ -9,7 +9,8 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { RuleCreationState } from '../state';
-import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
+import { getMitreMappingPrompt } from './prompts';
+import { buildRelevanceFilteredMitreCatalog } from './mitre_catalog_builder';
 import {
   tactics,
   techniques,
@@ -72,7 +73,7 @@ const formatMitreMapping = (response: MitreMappingSelectionResponse): Array<Thre
           }
           // Check if technique belongs to this tactic
           const belongsToTactic = techData.tactics.some(
-            (t: string) => t.toLowerCase().replaceAll('-', '') === tacticData.value.toLowerCase()
+            (t: string) => t.toLowerCase().replace(/-/g, '') === tacticData.value.toLowerCase()
           );
           if (!belongsToTactic) {
             return null;
@@ -141,7 +142,17 @@ export const addMitreMappingsNode = ({ model, events }: AddMitreMappingsNodePara
     );
 
     try {
-      const mitreSelectionChain = MITRE_MAPPING_SELECTION_PROMPT.pipe(model).pipe(jsonParser);
+      const { catalogText, isFiltered, tacticIds } = buildRelevanceFilteredMitreCatalog(
+        state.userQuery
+      );
+
+      if (isFiltered) {
+        events?.reportProgress(
+          `Filtering MITRE catalog to ${tacticIds.length} relevant tactic(s) based on query context`
+        );
+      }
+
+      const mitreSelectionChain = getMitreMappingPrompt(catalogText).pipe(model).pipe(jsonParser);
 
       const ruleTags = Array.isArray(state?.rule?.tags) ? state.rule.tags.join(', ') : '';
 

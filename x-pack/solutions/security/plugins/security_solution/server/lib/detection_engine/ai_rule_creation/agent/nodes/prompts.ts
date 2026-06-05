@@ -169,31 +169,14 @@ Respond with ONLY a JSON object in this exact format:
   ],
 ]);
 
-export const MITRE_MAPPING_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
+export const getMitreMappingPrompt = (mitreCatalog: string) => ChatPromptTemplate.fromMessages([
   [
     'system',
     `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
 
 AVAILABLE MITRE ATT&CK TECHNIQUES — select ONLY from this list. Do NOT invent IDs.
 
-TA0001 Initial Access: T1190 Exploit Public-Facing Application, T1195 Supply Chain Compromise, T1566 Phishing
-TA0002 Execution: T1053 Scheduled Task/Job, T1059 Command and Scripting Interpreter, T1204 User Execution, T1609 Container Administration Command
-  T1059.001 PowerShell, T1070.001 Clear Windows Event Logs (under T1070)
-TA0003 Persistence: T1098 Account Manipulation, T1136 Create Account, T1543 Create or Modify System Process, T1547 Boot or Logon Autostart Execution, T1574 Hijack Execution Flow
-  T1098.004 Device Registration, T1548.002 Bypass User Account Control
-TA0004 Privilege Escalation: T1068 Exploitation for Privilege Escalation, T1548 Abuse Elevation Control Mechanism, T1611 Escape to Host
-  T1548.002 Bypass User Account Control
-TA0005 Defense Evasion: T1027 Obfuscated Files or Information, T1070 Indicator Removal, T1140 Deobfuscate/Decode Files or Information, T1218 System Binary Proxy Execution, T1550 Use Alternate Authentication Material, T1562 Impair Defenses, T1574 Hijack Execution Flow, T1647 Plist File Modification
-  T1070.001 Clear Windows Event Logs, T1562.001 Disable or Modify Tools
-TA0006 Credential Access: T1003 OS Credential Dumping, T1528 Steal Application Access Token
-  T1003.001 LSASS Memory
-TA0007 Discovery: (use only when the rule detects system enumeration/reconnaissance)
-TA0008 Lateral Movement: T1021 Remote Services, T1210 Exploitation of Remote Services, T1550 Use Alternate Authentication Material
-TA0009 Collection: T1005 Data from Local System, T1114 Email Collection, T1560 Archive Collected Data
-  T1560.001 Archive via Utility
-TA0010 Exfiltration: T1041 Exfiltration Over C2 Channel
-TA0011 Command and Control: T1071 Application Layer Protocol, T1105 Ingress Tool Transfer, T1219 Remote Access Tools
-TA0040 Impact: T1486 Data Encrypted for Impact
+${mitreCatalog}
 
 RULES for selection:
 1. Pick 1-3 relevant tactics from the TA codes above
@@ -214,7 +197,7 @@ Expected output: {{
 }}
 
 User query: Detect when PowerShell scripts are obfuscated or encoded using unusual character sets
-ES|QL query: FROM logs-endpoint.events.* | WHERE process.name LIKE "powershell*" AND process.command_line RLIKE ".*(FromBase64String|enc|encodedcommand).*
+ES|QL query: FROM logs-endpoint.events.* | WHERE process.name LIKE "powershell*" AND process.command_line RLIKE ".*(FromBase64String|enc|encodedcommand).*"
 Expected output: {{
   "tactics": ["TA0005", "TA0002"],
   "techniques": [
