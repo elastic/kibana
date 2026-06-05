@@ -1,9 +1,8 @@
 # Client Apps Plugin
 
-Kibana plugin for resolving obfuscated or minified client application stacktraces back to
-human-readable source code references. Currently supports Android (R8), and is designed to
-accommodate additional platforms (JavaScript, iOS, and others) within the same plugin, with
-each platform defining its own backend services and UI independently.
+Plugin that complements client applications' UX. It currently allows retracing obfuscated
+errors back to human-readable source code references. It is designed to accommodate multiple platforms (Android,
+JavaScript, iOS) within the same plugin, with each platform defining its own backend services and UI independently.
 
 ## Plugin structure
 
@@ -12,26 +11,17 @@ The plugin is organized into three top-level areas:
 - **`common/`** — Types and API path constants shared between client and server.
 - **`public/`** — Client-side code: the Kibana app registration, a router, and one view
   component per platform action.
-- **`server/`** — Server-side code: route registration, the retrace libraries in
+- **`server/`** — Server-side code: route registration, the libraries in
   `lib/`, and shared utilities.
 
-Each platform (Android, JavaScript, …) owns a dedicated subdirectory under both
-`server/platforms/` and `public/platforms/`. Platform code does not import across platforms.
+Each platform owns its directory under `server/platforms/` and
+`public/platforms/`. Platform code does not import from other platforms.
 
-### Design principles
+## Retracing
 
-- **Platform isolation** — Each platform owns its directory under `server/platforms/` and
-  `public/platforms/`. Platform code does not import from other platforms.
-- **Shared shell** — The top-level `plugin.ts` on both sides is a thin shell that wires up
-  each platform. Shared utilities live in `server/lib/` and `common/`.
-- **Common response contract** — All retrace APIs return `{ original, retraced }`
-  (defined in `common/types.ts`), so the UI can treat all platforms uniformly.
-- **Storage-agnostic retrace algorithm** — Retracer libraries in `server/lib/` are decoupled
-  from Elasticsearch via a `RetraceMapFetcher` interface. Route handlers inject an ES-backed
-  fetcher; tests inject in-memory documents, keeping the core algorithm independently
-  testable without a running cluster.
-
-## Prerequisites for retracing
+This feature allows users understand their app's errors by converting them to human-readable ones with the help of a
+previously provided map. Client apps tend to provide error obfuscated, due to optimization and security reasons, which
+makes them not useful for debugging.
 
 Two things must be in place before the plugin can retrace a stacktrace:
 
@@ -41,11 +31,14 @@ Two things must be in place before the plugin can retrace a stacktrace:
 
 2. **Build identifier present in the log event.** Each crash or error document must carry a
    platform-specific build identifier field that the plugin uses to locate the correct mapping
-   index (for Android this is `attributes.app.build_id`). The platform's agent or SDK is
-   responsible for populating this field at runtime. Without it the plugin cannot determine
+   index (preferably using
+   OpenTelemetry's [app.build_id](https://opentelemetry.io/docs/specs/semconv/registry/attributes/app/#app-build-id)
+   attribute).
+   The platform's agent or SDK is
+   responsible for populating this field at runtime. Without it, the plugin cannot determine
    which mapping to use and will return an error.
 
-## Adding a new platform
+### Adding a new platform
 
 Each platform needs four structural pieces:
 
@@ -74,13 +67,13 @@ The route handler then wires everything together: it receives `{ stacktrace, bui
 constructs the ES fetcher (scoped to the correct index for that build), creates the retracer,
 calls `retrace()`, and returns `RetraceResponse` (`{ original, retraced }`).
 
-## Adding backend services to a platform
+### Adding backend services to a platform
 
 Each `server/platforms/<platform>/` directory can contain as many modules as needed. Add
 new modules there and wire them into the platform's route handler, or add a new route file
 if the service needs its own endpoint. Add any new API path constants to `common/index.ts`.
 
-## Adding shared utilities
+### Adding shared utilities
 
 Utilities needed by more than one platform belong in:
 
@@ -88,7 +81,7 @@ Utilities needed by more than one platform belong in:
   wrappers)
 - `common/` for types and constants shared between server and client
 
-## URL drilldown integration
+### URL drilldown integration
 
 The plugin registers with `visibleIn: []` — it does not appear in Kibana's navigation menu.
 Users reach platform views via URL drilldowns configured on dashboard panels:
