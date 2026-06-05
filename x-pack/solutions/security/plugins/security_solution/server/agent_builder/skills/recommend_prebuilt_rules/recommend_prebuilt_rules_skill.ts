@@ -38,7 +38,7 @@ This skill only covers **not-yet-installed** prebuilt rules. Route elsewhere whe
 - Triaging a specific alert (alert id) -> \`alert-analysis\`
 - ES|QL hunting over raw events -> \`threat-hunting\`
 - Authoring a brand-new custom rule -> \`rule-creation\`
-- Finding or listing ML jobs -> \`find-security-ml-jobs\`
+- Finding or listing ML **jobs** (the anomaly-detection jobs themselves) -> \`find-security-ml-jobs\`. Installable ML *detection rules* (rule type \`machine_learning\`) are in scope here — recommend them with \`ruleType: ["machine_learning"]\`.
 
 The backing search only ever sees rules that are **not yet installed** — the \`installation/_review\` endpoint excludes installed and deprecated rules. So any question about what is *currently installed, enabled, or running* belongs to \`find-security-rules\`, not this skill.
 
@@ -65,7 +65,7 @@ When a request is broad or underspecified, still give a useful recommendation gr
 | \`security.find_prebuilt_rules\` | The workhorse — search installable rules by structured filters | Triage rows (rule_id, name, severity, risk_score, tags, MITRE tactics, related_integrations.package) + total + \`space_url_prefix\` (for building install links) |
 | \`security.get_user_data_inventory\` | Learn which Fleet integrations exist, for data-source reasoning + integration coverage | \`{ integrations: [{ package }] }\` |
 | \`security.get_installable_catalog_overview\` | Enumerate valid tag values + size the catalog | \`{ total_installable_count, tags: [{ value, count }] }\` |
-| \`security.get_installed_rules_mitre_coverage\` | What MITRE tactics/techniques the installed rules already cover | tactics + techniques (+ subtechniques) with counts |
+| \`security.get_installed_rules_mitre_coverage\` | What MITRE tactics/techniques the installed rules already cover | \`total_installed_rules\`, \`total_with_mitre_mapping\`, and per-tactic + per-technique (with nested subtechniques) counts |
 
 \`security.get_user_data_inventory\`, \`security.get_installable_catalog_overview\`, and \`security.get_installed_rules_mitre_coverage\` are **session-cached** — call each at most once per conversation and reuse the result on later turns.
 
@@ -76,6 +76,8 @@ When a request is broad or underspecified, still give a useful recommendation gr
 **Before any \`security.find_prebuilt_rules\` call that uses a \`tags\` filter, you MUST call \`security.get_installable_catalog_overview\` first, in the same turn**, and pick \`tags\` values only from its result. Do not pass a \`tags\` value you have not seen in a catalog-overview result this conversation. Exception: once you have retrieved the overview earlier in the conversation, reuse the cached result instead of calling it again — it is session-cached.
 
 The overview is **not** required for searches that use no \`tags\` filter (e.g. pure \`mitreTactic\`, \`mitreTechnique\`, \`relatedIntegrations\`, \`severity\`, \`ruleType\`, or \`searchTerm\` searches).
+
+\`excludeTags\` is the negative counterpart of \`tags\` — use it to peel a category out of a result ("not the deprecated/beta ones", "everything except the cloud rules", or dropping a group during a refinement). Draw its values from the catalog overview too, but excluding a tag that isn't in the catalog is harmless: it simply removes nothing.
 
 For **install recommendations**, also call \`security.get_user_data_inventory\` before recommending, so you can reason about data sources and integration coverage.
 
@@ -92,10 +94,8 @@ Every tag value, rule name, \`rule_id\`, count, total, and MITRE tactic/techniqu
 **Install intent** ("recommend rules to install", "what should I add for X"):
 1. Call \`security.get_user_data_inventory\` (once). Derive data-source categories from the package names (see Data Sources).
 2. Optionally call \`security.get_installed_rules_mitre_coverage\` to find coverage gaps to prioritize.
-3. **Survey** the candidate landscape with a triage-only \`security.find_prebuilt_rules\` scoped to the user's data (\`relatedIntegrations\` for their packages, and/or \`mitreTactic\`/\`tags\`), sorted by \`risk_score\`/\`severity\`. You survey these rows; you do not display them all. Read \`total\`: your rows are a sample of it — if \`total\` is large, tighten the filter with the user's situation rather than taking the top page (see Precision: Narrow, Then Deepen). If you use \`tags\`, run the catalog overview first.
-4. For each candidate, compare \`related_integrations.package\` with the inventory to see whether the integrations the rule relies on are installed — a *likely-has-data* signal, not a guarantee (see Integration Coverage).
-5. **Pick a candidate shortlist larger than your final list (~10–20)** from the triage signals (severity, MITRE spread vs. the user's gaps, integration match, diversity), then **deepen and cut**: re-query the shortlist by \`ruleIds\` with \`fields\` (start with \`description\`), read the detail, and winnow to the best-fit final set. Dropping candidates is the expected outcome — justify keeps from what the rule actually does, not from its name.
-6. Recommend the cut-down set — rules whose related integrations are already installed first, best-fit first; justify each from the deep detail. Surface high-value rules whose related integrations are missing separately as "add integration X to start collecting the data these need." Append the **Selection notes** block (kept vs dropped).
+3. Run the **survey -> shortlist -> deepen -> cut** passes from *Precision: Narrow, Then Deepen*, scoping the survey to the user's data (\`relatedIntegrations\` for their packages, and/or \`mitreTactic\`/\`tags\` — catalog overview first if you use \`tags\`) and sorting by \`risk_score\`/\`severity\`. Justify keeps from what the rule actually does, not from its name.
+4. Recommend the cut-down set: rules whose related integrations are already installed first, best-fit first, each justified from the deep detail (see Integration Coverage). Surface high-value rules whose related integrations are missing separately as "add integration X to start collecting the data these need." Append the **Selection notes** block (kept vs dropped).
 
 **Browse / count intent** ("what LLM rules can I install?", "how many critical ES|QL rules?"):
 1. If filtering by \`tags\`, call \`security.get_installable_catalog_overview\` first; choose matching tag values.
@@ -103,9 +103,10 @@ Every tag value, rule name, \`rule_id\`, count, total, and MITRE tactic/techniqu
 3. Still characterize integration coverage against the cached inventory in your narrative — as a likelihood, not a guarantee.
 
 **Coverage intent** ("which MITRE tactics am I missing?"):
-1. Call \`security.get_installed_rules_mitre_coverage\`.
+1. Call \`security.get_installed_rules_mitre_coverage\`. Frame the answer with \`total_with_mitre_mapping\` out of \`total_installed_rules\` (e.g. "of your 320 installed rules, 290 carry MITRE mappings") so the user knows how much of their estate the coverage reflects.
 2. Diff its \`tactics\` against the canonical 14 below — any tactic not present has zero installed coverage.
-3. To recommend rules that fill the gaps, call \`security.find_prebuilt_rules\` with \`mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...]\` for the missing tactics in one call — or one call per tactic when you want balanced coverage of each.
+3. Subtechniques are nested under their parent technique. A technique's \`count\` can be **larger** than the sum of its listed subtechnique counts — the difference is rules that map the technique generically without naming a variant. Don't report that as missing, inconsistent, or a data error.
+4. To recommend rules that fill the gaps, call \`security.find_prebuilt_rules\` with \`mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...]\` for the missing tactics in one call — or one call per tactic when you want balanced coverage of each.
 
 ## Precision: Narrow, Then Deepen
 
@@ -116,8 +117,8 @@ The default triage fields (severity, tags, MITRE tactics, related_integrations.p
    - **Read \`total\`** (the count is also in \`get_installable_catalog_overview\` for tags) — it is the size of the whole matching population, and the rows you fetched are only a **sample of \`total\`**, not the field. Frame results as "the best fits out of \`total\`," never as "all of them," and don't assume better rules aren't ranked below your page.
    - **Pick \`perPage\` deliberately**, not reflexively the max. If \`total\` is large (more than a few dozen), don't just take the top page — **tighten the filter** with the user's situation (severity, the tactics they're missing, a sub-domain) and survey that smaller, sharper set instead. A focused 30 beats a generic 50. Keep \`perPage\` modest when the filter is already specific.
 3. **Pre-rank and pick a candidate shortlist.** From the triage signals (severity, MITRE spread vs. the user's gaps, integration match, diversity across tactics), choose a shortlist that is **larger than your final recommendation** — e.g. ~10–20 candidates — so the deepen pass has something to cut.
-4. **Deepen the candidates, then cut.** Re-query the shortlist by \`ruleIds\` with \`fields\` — start with \`description\` (cheapest, highest-signal); add \`query\`, \`investigation_fields\`, \`false_positives\`, \`references\`, or full \`mitre\` only where the decision is close. In your reasoning for this call, briefly state which candidates you're drilling into and why (it's recorded with the call). Read the detail and **winnow to the best-fit final set** (within the list caps: at most 10 flat / 5 per category). The final set must be a **strict subset** of what you deepened — dropping candidates is the expected outcome. If you kept every rule you deepened, you did not narrow; widen the candidate pool or look harder for the weaker fits.
-5. **Recommend + Selection notes.** Present the cut-down set, justified from the deep detail. End with a short, clearly-labeled **Selection notes** block: which candidates you kept, which you dropped after reading the detail, and a one-line reason each. It should show real drops — a recommendation where nothing was dropped is a red flag that you confirmed instead of choosing.
+4. **Deepen the candidates, then cut.** Re-query the shortlist by \`ruleIds\` with \`fields\` — start with \`description\` (cheapest, highest-signal); add \`query\`, \`investigation_fields\`, \`false_positives\`, \`references\`, or full \`mitre\` only where the decision is close. In your reasoning for this call, briefly state which candidates you're drilling into and why (it's recorded with the call). Read the detail and **winnow to the best-fit final set** (within the list caps: at most 10 flat / 5 per category). Because you deepen a wider pool than you'll keep, the final set is normally a subset — expect to drop the weaker fits once the detail shows them to be redundant, noisy, or off-target. Don't pad the list with rules you'd otherwise cut; equally, don't drop a genuinely strong rule just to hit a smaller number. If nothing was worth dropping, that's a sign the candidate pool was too narrow — widen it next pass so there are real alternatives to weigh against.
+5. **Recommend + Selection notes.** Present the cut-down set, justified from the deep detail. End with a short, clearly-labeled **Selection notes** block: which candidates you kept, which you dropped after reading the detail, and a one-line reason each. Drops are the norm when you deepen a wide pool — if you ended up keeping everything, say briefly why the field was already tight rather than manufacturing a cut.
 
 Keep it proportional: the survey pass is triage-only (cheap); deepen a bounded candidate pool (~10–20, never the whole match set) and pull the minimum fields that change your decision. Skip the survey-and-deepen passes for browse and count questions — there triage fields (or just \`total\`) are enough.
 
