@@ -150,7 +150,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: VegaThemeColors.borealis.light.default },
-        area: { fillOpacity: 0.2 },
+        area: { fillOpacity: 0.2, line: true },
         view: { stroke: null },
         style: {
           'group-title': {
@@ -183,7 +183,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: VegaThemeColors.borealis.light.default },
-        area: { fill: VegaThemeColors.borealis.light.default, fillOpacity: 0.2 },
+        area: { fill: VegaThemeColors.borealis.light.default, fillOpacity: 0.2, line: true },
         line: { stroke: VegaThemeColors.borealis.light.default },
         path: { stroke: VegaThemeColors.borealis.light.default },
         rect: { fill: VegaThemeColors.borealis.light.default },
