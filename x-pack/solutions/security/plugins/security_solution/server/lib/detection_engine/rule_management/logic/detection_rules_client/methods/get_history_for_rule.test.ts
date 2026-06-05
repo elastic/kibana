@@ -25,10 +25,6 @@ describe('getHistoryForRule', () => {
       .mockResolvedValueOnce({
         total: items.length,
         items: [items[items.length - 1]],
-      })
-      .mockResolvedValueOnce({
-        total: items.length,
-        items: [items[0]],
       });
   };
 
@@ -42,6 +38,7 @@ describe('getHistoryForRule', () => {
       ruleId: 'rule-1',
       from: 0,
       size: 3,
+      sort: [{ '@timestamp': { order: 'desc' } }],
     });
   });
 
@@ -55,6 +52,7 @@ describe('getHistoryForRule', () => {
       ruleId: 'rule-1',
       from: 6,
       size: 3,
+      sort: [{ '@timestamp': { order: 'desc' } }],
     });
   });
 
