@@ -116,6 +116,7 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-utility",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/std",
     "@kbn/task-manager-plugin",
     "@kbn/test-jest-helpers",
