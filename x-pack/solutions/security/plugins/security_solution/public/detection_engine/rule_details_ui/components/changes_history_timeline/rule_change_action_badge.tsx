@@ -22,14 +22,10 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
 }: RuleChangeActionBadgeProps): JSX.Element | null {
   switch (item.action) {
     case RuleChangeTrackingAction.ruleEnable:
-      return (
-        <ChangeActionBadge icon="dot" iconColor="success" text={i18n.ACTION_LABEL_ENABLED} />
-      );
+      return <ChangeActionBadge icon="dot" iconColor="success" text={i18n.ACTION_LABEL_ENABLED} />;
 
     case RuleChangeTrackingAction.ruleDisable:
-      return (
-        <ChangeActionBadge icon="dot" iconColor="danger" text={i18n.ACTION_LABEL_DISABLED} />
-      );
+      return <ChangeActionBadge icon="dot" iconColor="danger" text={i18n.ACTION_LABEL_DISABLED} />;
 
     case RuleChangeTrackingAction.ruleSnooze:
       return <ChangeActionBadge icon="bellSlash" text={i18n.ACTION_LABEL_SNOOZED} />;
