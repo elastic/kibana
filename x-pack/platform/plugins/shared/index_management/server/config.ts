@@ -38,6 +38,8 @@ const schemaLatest = schema.object(
       enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
       // deprecate as unused after semantic text is enabled everywhere
       enableSemanticText: schema.boolean({ defaultValue: true }),
+      // gate for the new `semantic` field type; default false until validated end-to-end
+      enableSemanticField: schema.boolean({ defaultValue: false }),
     }),
     enableSizeAndDocCount: offeringBasedSchema({
       // Size and document count information is enabled in serverless; refer to the serverless.yml file as the source of truth
@@ -89,6 +91,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     dev: {
       enableSemanticText: true,
+      enableSemanticField: true,
     },
     enableIndexActions: true,
     enableLegacyTemplates: true,

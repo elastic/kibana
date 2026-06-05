@@ -113,6 +113,93 @@ describe('useCompatibleInferenceEndpoints', () => {
     });
   });
 
+  describe('embedding task type', () => {
+    it('should return undefined defaultInferenceId when only sparse/text endpoints are present', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+        {
+          inference_id: 'custom-text',
+          task_type: 'text_embedding',
+          service: 'openai',
+          service_settings: { model_id: 'text-embedding-3-large' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, ['embedding'])
+      );
+      expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBeUndefined();
+    });
+
+    it('should return empty endpointDefinitions when only sparse/text endpoints are present', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, ['embedding'])
+      );
+      expect(result.current?.compatibleEndpoints?.endpointDefinitions).toEqual([]);
+    });
+
+    it('should set defaultInferenceId to the compatible embedding endpoint when one exists', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+        {
+          inference_id: 'my-embedding-endpoint',
+          task_type: 'embedding',
+          service: 'elasticsearch',
+          service_settings: { model_id: 'my-model' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, ['embedding'])
+      );
+      expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe('my-embedding-endpoint');
+      expect(result.current?.compatibleEndpoints?.endpointDefinitions).toHaveLength(1);
+      expect(result.current?.compatibleEndpoints?.endpointDefinitions?.[0].inference_id).toBe(
+        'my-embedding-endpoint'
+      );
+    });
+
+    it('should not include ELSER in endpointDefinitions for embedding task type', () => {
+      const endpoints: InferenceAPIConfigResponse[] = [
+        {
+          inference_id: defaultInferenceEndpoints.ELSER,
+          task_type: 'sparse_embedding',
+          service: 'elastic',
+          service_settings: { model_id: 'elser' },
+        },
+        {
+          inference_id: 'my-embedding-endpoint',
+          task_type: 'embedding',
+          service: 'elasticsearch',
+          service_settings: { model_id: 'my-model' },
+        },
+      ];
+      const { result } = renderHook(() =>
+        useCompatibleInferenceEndpoints(endpoints, false, ['embedding'])
+      );
+      const ids = result.current?.compatibleEndpoints?.endpointDefinitions?.map(
+        (e) => e.inference_id
+      );
+      expect(ids).not.toContain(defaultInferenceEndpoints.ELSER);
+    });
+  });
+
   describe('endpoint definitions', () => {
     it('should filter out incompatible endpoints and only include compatible ones', () => {
       const endpoints: InferenceAPIConfigResponse[] = [

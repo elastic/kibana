@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useMemo, lazy, Suspense, useEffect } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -35,14 +36,18 @@ import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { documentationService, UseField } from '../../../shared_imports';
 
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
+const DEFAULT_TASK_TYPES: InferenceTaskType[] = ['text_embedding', 'sparse_embedding'];
+
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
+  taskTypes?: InferenceTaskType[];
 }
 
-type SelectInferenceIdContentProps = SelectInferenceIdProps & {
-  setValue: (value: string) => void;
-  value: string;
-};
+type SelectInferenceIdContentProps = Required<Pick<SelectInferenceIdProps, 'taskTypes'>> &
+  Omit<SelectInferenceIdProps, 'taskTypes'> & {
+    setValue: (value: string) => void;
+    value: string;
+  };
 
 interface EndpointOptionData {
   description: string;
@@ -50,6 +55,7 @@ interface EndpointOptionData {
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
+  taskTypes = DEFAULT_TASK_TYPES,
 }: SelectInferenceIdProps) => {
   const config = getFieldConfig('inference_id');
   return (
@@ -60,6 +66,7 @@ export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
             data-test-subj={dataTestSubj}
             value={field.value as string}
             setValue={field.setValue}
+            taskTypes={taskTypes}
           />
         );
       }}
@@ -71,6 +78,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   'data-test-subj': dataTestSubj,
   setValue,
   value,
+  taskTypes = DEFAULT_TASK_TYPES,
 }) => {
   const {
     core: { application, http },
@@ -88,7 +96,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   } = useLoadInferenceEndpoints();
   const { euiTheme } = useEuiTheme();
   const { compatibleEndpoints, isLoading: isCompatibleEndpointsLoading } =
-    useCompatibleInferenceEndpoints(endpoints, endpointsLoading);
+    useCompatibleInferenceEndpoints(endpoints, endpointsLoading, taskTypes);
   const [isSelectInferenceIdOpen, setIsSelectInferenceIdOpen] = useState(false);
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
@@ -354,7 +362,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
-                allowedTaskTypes={['text_embedding', 'sparse_embedding']}
+                allowedTaskTypes={taskTypes}
               />
             </Suspense>
           )}

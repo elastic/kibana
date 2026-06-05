@@ -121,6 +121,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       enableTogglingDataRetention: true,
       enableProjectLevelRetentionChecks: true,
       enableSemanticText: true,
+      enableSemanticField: false,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
       isServerless: false,

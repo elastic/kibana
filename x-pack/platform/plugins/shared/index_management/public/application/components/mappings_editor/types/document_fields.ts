@@ -61,6 +61,7 @@ export type MainType =
   | 'search_as_you_type'
   | 'sparse_vector'
   | 'semantic_text'
+  | 'semantic'
   | 'date'
   | 'date_nanos'
   | 'geo_point'
@@ -200,6 +201,8 @@ type FieldParams = {
 export type Field = FieldBasic & Partial<FieldParams>;
 
 export type SemanticTextField = Field & { inference_id: string; reference_field: string };
+
+export type SemanticField = Field & { inference_id: string };
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;

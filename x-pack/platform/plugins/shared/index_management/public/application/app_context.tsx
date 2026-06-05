@@ -79,6 +79,7 @@ export interface AppDependencies {
     enableTogglingDataRetention: boolean;
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
+    enableSemanticField: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
     isServerless: boolean;

@@ -926,6 +926,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  semantic: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.semanticDescription', {
+      defaultMessage: 'Semantic',
+    }),
+    value: 'semantic',
+    documentation: {
+      main: 'semantic',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.semanticLongDescription"
+          defaultMessage="Semantic fields enable semantic search using an embedding inference endpoint."
+        />
+      </p>
+    ),
+  },
   point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
       defaultMessage: 'Point',
@@ -1035,6 +1052,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'semantic_text',
+  'semantic',
   'shape',
   'sparse_vector',
   'text',

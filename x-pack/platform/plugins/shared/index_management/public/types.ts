@@ -73,5 +73,6 @@ export interface ClientConfigType {
   enableFailureStoreRetentionDisabling?: boolean;
   dev: {
     enableSemanticText?: boolean;
+    enableSemanticField?: boolean;
   };
 }

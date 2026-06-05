@@ -22,7 +22,7 @@ import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import React, { useEffect, useRef } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
+import { getFieldByPathName, isSemanticTextField, isSemanticField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import type { Field, MainType, NormalizedFields } from '../../../../types';
@@ -62,6 +62,7 @@ export interface InferenceToModelIdMap {
 
 export interface SemanticTextInfo {
   isSemanticTextEnabled?: boolean;
+  isSemanticFieldEnabled?: boolean;
   indexName?: string;
   ml?: MlPluginStart;
   setErrorsInTrainedModelDeployment: React.Dispatch<
@@ -89,7 +90,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   semanticTextInfo,
   createFieldFormRef,
 }: Props) {
-  const { isSemanticTextEnabled } = semanticTextInfo ?? {};
+  const { isSemanticTextEnabled, isSemanticFieldEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
@@ -101,7 +102,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
     id: 'create-field',
   });
 
-  const [{ type, subType }] = useFormData({ form, watch: ['type', 'subType'] });
+  const [{ type, subType, inference_id: inferenceId }] = useFormData({
+    form,
+    watch: ['type', 'subType', 'inference_id'],
+  });
 
   const { subscribe } = form;
 
@@ -120,7 +124,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const isSemanticText = form.getFormData().type === 'semantic_text';
+  const isSemanticText = type?.[0]?.value === 'semantic_text';
+  const isSemantic = type?.[0]?.value === 'semantic';
+  // TODO: Check if this is fine.
+  const isAddDisabled = form.getErrors().length > 0 || (isSemantic && !inferenceId);
 
   useEffect(() => {
     if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
@@ -150,6 +157,25 @@ export const CreateField = React.memo(function CreateFieldComponent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSemanticText]);
 
+  useEffect(() => {
+    if (isSemantic) {
+      const allSemanticFields = {
+        byId: {
+          ...fields.byId,
+          ...mappingViewFields.byId,
+        },
+        rootLevelFields: [],
+        aliases: {},
+        maxNestedDepth: 0,
+      };
+      const defaultName = getFieldByPathName(allSemanticFields, 'semantic') ? '' : 'semantic';
+      if (!form.getFormData().name) {
+        form.setFieldValue('name', defaultName);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSemantic]);
+
   const submitForm = async (
     e?: React.FormEvent,
     exitAfter: boolean = false,
@@ -162,8 +188,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      if (isSemanticTextField(data) && !data.inference_id) {
-        const { inference_id: inferenceId, ...rest } = data;
+      if ((isSemanticTextField(data) || isSemanticField(data)) && !data.inference_id) {
+        const { inference_id: _dismissInferenceId, ...rest } = data;
         dispatch({ type: 'field.add', value: rest });
       } else {
         dispatch({ type: 'field.add', value: data });
@@ -201,6 +227,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           isMultiField={isMultiField}
           showDocLink
           isSemanticTextEnabled={isSemanticTextEnabled}
+          isSemanticFieldEnabled={isSemanticFieldEnabled}
           fieldTypeInputRef={fieldTypeInputRef}
         />
       </EuiFlexItem>
@@ -215,7 +242,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         />
       )}
 
-      {/* Field reference_field for semantic_text field type */}
+      {/* Field reference_field for semantic_text field type (not for semantic) */}
       {isSemanticText && (
         <EuiFlexItem grow={false}>
           <ReferenceFieldSelects />
@@ -275,7 +302,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onClick={submitForm}
           type="submit"
           data-test-subj="addButton"
-          isDisabled={form.getErrors().length > 0}
+          isDisabled={isAddDisabled}
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
@@ -306,6 +333,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {renderRequiredParametersForm()}
 
               {isSemanticText && <SelectInferenceId />}
+              {isSemantic && <SelectInferenceId taskTypes={['embedding']} />}
               {renderFormActions()}
             </div>
           </EuiPanel>

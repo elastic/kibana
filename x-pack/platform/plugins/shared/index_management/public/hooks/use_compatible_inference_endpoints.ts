@@ -10,8 +10,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 
-const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
-type CompatibleTaskType = (typeof COMPATIBLE_TASK_TYPES)[number];
+const DEFAULT_COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
 
 interface EndpointDefinition {
   /** The inference id of the endpoint. */
@@ -37,24 +36,17 @@ const defaultEndpointsPriorityList = [
  */
 export const useCompatibleInferenceEndpoints = (
   endpoints: InferenceAPIConfigResponse[] | null | undefined,
-  endpointsLoading: boolean
+  endpointsLoading: boolean,
+  taskTypes: readonly string[] = DEFAULT_COMPATIBLE_TASK_TYPES
 ) => {
   const compatibleEndpoints = useMemo<CompatibleEndpointsData | undefined>(() => {
     if (endpointsLoading) {
       return;
     }
-    const availableDefaultEndpoints = defaultEndpointsPriorityList.filter((defaultEndpoint) =>
-      endpoints?.some((endpoint) => endpoint.inference_id === defaultEndpoint)
-    );
-    // If no compatible endpoints are found, default to the ELSER endpoint which is always available
-    const defaultInferenceId =
-      availableDefaultEndpoints.length > 0
-        ? availableDefaultEndpoints[0]
-        : defaultInferenceEndpoints.ELSER;
     const endpointDefinitions: EndpointDefinition[] = [];
     endpoints?.forEach((endpoint) => {
       // Skip incompatible endpoints
-      if (!COMPATIBLE_TASK_TYPES.includes(endpoint.task_type as CompatibleTaskType)) {
+      if (!taskTypes.includes(endpoint.task_type)) {
         return;
       }
       const provider = SERVICE_PROVIDERS[endpoint.service];
@@ -67,11 +59,23 @@ export const useCompatibleInferenceEndpoints = (
         description,
       });
     });
+    const compatibleIds = new Set(endpointDefinitions.map((e) => e.inference_id));
+    const priorityDefault = defaultEndpointsPriorityList.find((id) => compatibleIds.has(id));
+    let defaultInferenceId: string | undefined;
+    if (priorityDefault) {
+      defaultInferenceId = priorityDefault;
+    } else if (taskTypes.includes('sparse_embedding')) {
+      // Preserve existing semantic_text behaviour: fall back to ELSER even if not in the list
+      defaultInferenceId = defaultInferenceEndpoints.ELSER;
+    } else if (endpointDefinitions.length > 0) {
+      defaultInferenceId = endpointDefinitions[0].inference_id;
+    }
+    // else undefined — user must pick or create a compatible endpoint
     return {
       defaultInferenceId,
       endpointDefinitions,
     };
-  }, [endpointsLoading, endpoints]);
+  }, [endpointsLoading, endpoints, taskTypes]);
 
   return {
     compatibleEndpoints,
