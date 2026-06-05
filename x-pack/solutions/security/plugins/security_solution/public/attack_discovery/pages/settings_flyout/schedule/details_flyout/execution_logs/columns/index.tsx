@@ -10,17 +10,18 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common';
 
+import type { ScheduleRunRow } from '../types';
 import * as i18n from '../translations';
 
-const hasWorkflowData = (generation: AttackDiscoveryGeneration): boolean =>
-  generation.workflow_id != null || generation.workflow_executions != null;
+const hasWorkflowData = (generation: AttackDiscoveryGeneration | undefined): boolean =>
+  generation != null && (generation.workflow_id != null || generation.workflow_executions != null);
 
 export const getColumns = (
-  onViewDetails: (item: AttackDiscoveryGeneration) => void
-): EuiBasicTableColumn<AttackDiscoveryGeneration>[] => [
+  onViewDetails: (item: ScheduleRunRow) => void
+): Array<EuiBasicTableColumn<ScheduleRunRow>> => [
   {
-    render: (item: AttackDiscoveryGeneration) =>
-      hasWorkflowData(item) ? (
+    render: (item: ScheduleRunRow) =>
+      hasWorkflowData(item.generation) ? (
         <EuiToolTip
           content={i18n.EXECUTION_LOGS_VIEW_DETAILS}
           disableScreenReaderOutput
@@ -28,7 +29,7 @@ export const getColumns = (
         >
           <EuiButtonIcon
             aria-label={i18n.EXECUTION_LOGS_VIEW_DETAILS}
-            data-test-subj={`inspect-${item.execution_uuid}`}
+            data-test-subj={`inspect-${item.executionUuid}`}
             iconType="inspect"
             onClick={() => onViewDetails(item)}
           />
