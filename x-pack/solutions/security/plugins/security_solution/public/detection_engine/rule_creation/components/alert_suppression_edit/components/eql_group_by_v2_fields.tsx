@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -178,14 +179,16 @@ export const EqlGroupByV2Fields: React.FC<{
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow hasEmptyLabelSpace>
-                    <EuiButtonIcon
-                      data-test-subj="eqlGroupByV2RemoveRow"
-                      display="empty"
-                      iconType="trash"
-                      isDisabled={isDisabled}
-                      aria-label={EQL_V2_REMOVE_ROW}
-                      onClick={() => onRemoveRow(index)}
-                    />
+                    <EuiToolTip content={EQL_V2_REMOVE_ROW} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        data-test-subj="eqlGroupByV2RemoveRow"
+                        display="empty"
+                        iconType="trash"
+                        isDisabled={isDisabled}
+                        aria-label={EQL_V2_REMOVE_ROW}
+                        onClick={() => onRemoveRow(index)}
+                      />
+                    </EuiToolTip>
                   </EuiFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
