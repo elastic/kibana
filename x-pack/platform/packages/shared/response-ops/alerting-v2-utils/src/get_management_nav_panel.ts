@@ -44,7 +44,7 @@ export const getAlertingV2ManagementNavPanel = (core: CoreStart): NodeDefinition
     {
       id: PANEL_ID,
       title: i18n.translate('xpack.alertingV2.nav.title', {
-        defaultMessage: 'Alerting V2',
+        defaultMessage: 'Alerting V2 Preview',
       }),
       renderAs: 'panelOpener',
       children: [

@@ -59,7 +59,7 @@ export const module = new ContainerModule(({ bind }) => {
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
-      title: 'V2 Alerting Preview',
+      title: 'Alerting V2 Preview',
       tip: 'Start exploring our latest alerts experience',
       order: 1,
     });
