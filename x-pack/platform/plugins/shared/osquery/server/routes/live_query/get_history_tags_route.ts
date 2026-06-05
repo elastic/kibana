@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { API_VERSIONS, ACTIONS_INDEX } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';

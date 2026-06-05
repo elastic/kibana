@@ -163,6 +163,7 @@ function convertDynamicConnectorsToContractsInternal(
 
           connectorContracts.push({
             actionTypeId: connectorType.actionTypeId,
+            displayName: connectorType.displayName,
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
@@ -180,6 +181,7 @@ function convertDynamicConnectorsToContractsInternal(
 
         connectorContracts.push({
           actionTypeId: connectorType.actionTypeId,
+          displayName: connectorType.displayName,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -194,6 +196,7 @@ function convertDynamicConnectorsToContractsInternal(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         actionTypeId: connectorType.actionTypeId,
+        displayName: connectorType.displayName,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
