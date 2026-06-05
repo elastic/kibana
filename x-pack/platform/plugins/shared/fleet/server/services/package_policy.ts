@@ -30,8 +30,9 @@ import { parse } from 'yaml';
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 import semverGt from 'semver/functions/gt';
 
-import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';

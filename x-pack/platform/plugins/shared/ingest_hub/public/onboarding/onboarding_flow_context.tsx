@@ -9,6 +9,8 @@ import React, { createContext, useContext, useCallback, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials, AwsTemporaryKeyCredentials } from '@kbn/fleet-plugin/public';
 
+import { AWS_SERVICES_MATRIX, AWS_SERVICES_MAP } from './aws_service_matrix';
+
 export interface ConnectStepState {
   connectorId?: string;
   staticKeys?: AwsStaticKeyCredentials;
@@ -22,11 +24,25 @@ interface PersistedConnectStep {
   accessKeyId?: string;
 }
 
+export interface ServicesStepState {
+  selectedServiceIds: string[];
+}
+
+interface PersistedServicesStep {
+  selectedServiceIds: string[];
+}
+
+const DEFAULT_SELECTED_IDS = AWS_SERVICES_MATRIX.filter((s) => s.showInUI && s.defaultEnabled).map(
+  (s) => s.id
+);
+
 interface OnboardingFlowState {
   connectStep: ConnectStepState;
   setConnectorId: (id: string | undefined) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
   setTemporaryKeys: (keys: AwsTemporaryKeyCredentials | undefined) => void;
+  servicesStep: ServicesStepState;
+  setSelectedServiceIds: (ids: string[]) => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -35,6 +51,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const [persistedConnectStep, setPersistedConnectStep] = useSessionStorage<PersistedConnectStep>(
     'onboarding.aws.connectStep',
     {}
+  );
+
+  const [persistedServices, setPersistedServices] = useSessionStorage<PersistedServicesStep>(
+    'onboarding.aws.servicesStep',
+    { selectedServiceIds: DEFAULT_SELECTED_IDS }
   );
 
   // Sensitive fields (secret_access_key, session_token) live in memory only.
@@ -92,15 +113,35 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedConnectStep]
   );
 
+  const setSelectedServiceIds = useCallback(
+    (ids: string[]) => {
+      setPersistedServices({ ...persistedServices, selectedServiceIds: ids });
+    },
+    [persistedServices, setPersistedServices]
+  );
+
   const connectStep: ConnectStepState = {
     connectorId: persistedConnectStep?.connectorId,
     staticKeys,
     temporaryKeys,
   };
 
+  const servicesStep: ServicesStepState = {
+    selectedServiceIds: (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
+      (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
+    ),
+  };
+
   return (
     <OnboardingFlowContext.Provider
-      value={{ connectStep, setConnectorId, setStaticKeys, setTemporaryKeys }}
+      value={{
+        connectStep,
+        setConnectorId,
+        setStaticKeys,
+        setTemporaryKeys,
+        servicesStep,
+        setSelectedServiceIds,
+      }}
     >
       {children}
     </OnboardingFlowContext.Provider>
