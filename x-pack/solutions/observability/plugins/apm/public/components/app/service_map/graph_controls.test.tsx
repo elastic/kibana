@@ -81,6 +81,7 @@ jest.mock('./popover', () => ({
 
 jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes: unknown) => nodes),
+  applyServiceMapLayout: jest.fn((nodes: unknown) => nodes),
 }));
 
 jest.mock('./service_map_minimap', () => ({

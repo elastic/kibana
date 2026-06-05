@@ -13,7 +13,6 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
-  useStore,
   ReactFlowProvider,
   type NodeTypes,
   type EdgeTypes,
@@ -38,9 +37,8 @@ import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
-import { applyDagreLayout } from '../../shared/service_map/layout';
+import { applyServiceMapLayout } from '../../shared/service_map/layout';
 import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
-import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
@@ -164,9 +162,7 @@ function GraphInner({
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
-  const { fitView, zoomIn, zoomOut, setCenter, getNodes } = useReactFlow<ServiceMapNode>();
-  const viewportWidth = useStore((state) => state.width);
-  const viewportHeight = useStore((state) => state.height);
+  const { fitView, zoomIn, zoomOut } = useReactFlow<ServiceMapNode>();
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
@@ -239,42 +235,17 @@ function GraphInner({
 
   const { getAnimationDuration } = useReducedMotion();
   const getFitViewOptions = useCallback(
-    (): FitViewOptions<ServiceMapNode> => ({
+    (animate = true): FitViewOptions<ServiceMapNode> => ({
       padding: FIT_VIEW_PADDING,
-      duration: getAnimationDuration(FIT_VIEW_DURATION),
+      duration: animate ? getAnimationDuration(FIT_VIEW_DURATION) : 0,
     }),
     [getAnimationDuration]
   );
 
-  // Camera placement used for both the initial load and the "fit view" control. For graphs that fit,
-  // this is just fitView; for large/sprawling graphs (where fitView would clamp to MIN_ZOOM and center
-  // on empty space) it centers on the median node so the user lands on the dense cluster of services
-  // instead of nothing.
-  const fitOrCenterView = useCallback(() => {
-    const target = getServiceMapViewTarget({
-      nodes: getNodes(),
-      viewportWidth,
-      viewportHeight,
-    });
-
-    if (target.kind === 'center') {
-      setCenter(target.x, target.y, {
-        zoom: target.zoom,
-        duration: getAnimationDuration(FIT_VIEW_DURATION),
-      });
-      return;
-    }
-
-    fitView(getFitViewOptions());
-  }, [
-    getNodes,
-    viewportWidth,
-    viewportHeight,
-    setCenter,
-    fitView,
-    getFitViewOptions,
-    getAnimationDuration,
-  ]);
+  // The first time nodes appear we fit the viewport once, without animation, to avoid the
+  // visible "hunt for center" caused by multiple animated fits on mount. Subsequent fits
+  // (filter/data updates, the user "Fit view" button) animate.
+  const hasPerformedInitialFitRef = useRef(false);
 
   // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
   // not strictly once per page visit—intentional for measuring failure frequency.
@@ -288,7 +259,7 @@ function GraphInner({
 
   const layoutedNodes = useMemo(
     () =>
-      applyDagreLayout(
+      applyServiceMapLayout(
         initialNodes,
         initialEdges,
         {
@@ -345,7 +316,9 @@ function GraphInner({
     setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
     if (nodesAfterFilters.length > 0) {
-      const timer = setTimeout(() => fitOrCenterView(), FIT_VIEW_DEFER_MS);
+      const isInitialFit = !hasPerformedInitialFitRef.current;
+      hasPerformedInitialFitRef.current = true;
+      const timer = setTimeout(() => fitView(getFitViewOptions(!isInitialFit)), FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
@@ -353,7 +326,8 @@ function GraphInner({
     edgesAfterFilters,
     setNodes,
     setEdges,
-    fitOrCenterView,
+    fitView,
+    getFitViewOptions,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
     highlightedServiceName,
@@ -617,12 +591,6 @@ function GraphInner({
     [euiTheme]
   );
 
-  const onInit = useCallback(() => {
-    if (layoutedNodes.length > 0) {
-      fitOrCenterView();
-    }
-  }, [fitOrCenterView, layoutedNodes.length]);
-
   const screenReaderInstructions = i18n.translate('xpack.apm.serviceMap.screenReaderInstructions', {
     defaultMessage:
       'This is an interactive service map showing application services and their dependencies. ' +
@@ -664,9 +632,6 @@ function GraphInner({
             onPaneClick={handlePaneClick}
             onMoveStart={handleDragStart}
             onNodeDragStart={handleDragStart}
-            onInit={onInit}
-            fitView
-            fitViewOptions={getFitViewOptions()}
             minZoom={0.2}
             maxZoom={3}
             proOptions={{ hideAttribution: true }}
@@ -726,18 +691,20 @@ function GraphInner({
                         css={mapToolbarControlIconCss}
                       />
                     </EuiToolTip>
-                    <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType="crosshair"
-                        onClick={() => fitOrCenterView()}
-                        aria-label={fitViewLabel}
-                        data-test-subj="serviceMapFitViewButton"
-                        css={mapToolbarControlIconCss}
-                      />
-                    </EuiToolTip>
+                    {!isEmbedded && (
+                      <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType="crosshair"
+                          onClick={() => fitView(getFitViewOptions())}
+                          aria-label={fitViewLabel}
+                          data-test-subj="serviceMapFitViewButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
+                    )}
                     {fullMapHref && (
                       <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
@@ -832,7 +799,7 @@ function GraphInner({
                 </EuiPanel>
               </Panel>
             )}
-            {!isEmbedded && <ServiceMapMinimap nodes={nodes} />}
+            {!isEmbedded && <ServiceMapMinimap />}
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
