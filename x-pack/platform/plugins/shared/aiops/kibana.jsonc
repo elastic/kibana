@@ -29,13 +29,18 @@
       "cases",
       "observabilityAIAssistant",
       "usageCollection",
-      "cps"
+      "cps",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "contentManagement"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "cases"
+      "cases",
+      "savedSearch",
+      "savedObjectsFinder"
     ]
   }
 }

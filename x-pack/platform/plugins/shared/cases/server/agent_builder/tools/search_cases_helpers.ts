@@ -8,7 +8,7 @@
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { CoreStart } from '@kbn/core/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Case, RelatedCase } from '../../../common/types/domain';

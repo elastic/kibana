@@ -192,6 +192,7 @@ export class CasesUiPlugin
     return {
       config: {
         templatesEnabled: config?.templates?.enabled ?? false,
+        attachmentsEnabled: config?.attachments?.enabled ?? false,
         casesRedesign: {
           list: config?.casesRedesign?.list ?? false,
           details: config?.casesRedesign?.details ?? false,
