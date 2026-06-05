@@ -683,8 +683,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
             params: { message: 'scout test' },
             frequency: {
               summary: false,
-              notifyWhen: 'onActionGroupChange' as const,
-              throttle: undefined,
+              notify_when: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -703,6 +703,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await expect(
       page.testSubj.locator('rulesList').locator(`[title="${rWithSlack.data.name}"]`)
     ).toBeVisible();
+
+    // Navigate away and back (matching FTR pattern) so the dropdown re-opens fresh.
+    await refreshRulesList(page);
 
     // De-select the action type filter
     await page.testSubj.click('actionTypeFilterButton');
