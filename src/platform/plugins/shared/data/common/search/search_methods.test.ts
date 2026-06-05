@@ -439,21 +439,21 @@ describe('SearchMethodsService', () => {
         });
       });
 
-      it('calls requestResponder.stats with getRequestMetadata before search when provided', async () => {
+      it('calls requestResponder.stats with getRequestStats before search when provided', async () => {
         const mockResponse = { hits: { hits: [], total: 0 } };
         mockSearch.mockReturnValue(createMockResponse(mockResponse));
         const requestResponder = createMockRequestResponder();
-        const inspector = createMockInspector(requestResponder);
-        const getRequestMetadata = jest.fn().mockReturnValue({
+        const getRequestStats = jest.fn().mockReturnValue({
           customStat: { label: 'Custom', value: 'test' },
         });
+        const inspector = {
+          ...createMockInspector(requestResponder),
+          getRequestStats,
+        };
 
-        await service.dsl(
-          { index: 'logs-*', query: { match_all: {} } },
-          { inspector, getRequestMetadata }
-        );
+        await service.dsl({ index: 'logs-*', query: { match_all: {} } }, { inspector });
 
-        expect(getRequestMetadata).toHaveBeenCalled();
+        expect(getRequestStats).toHaveBeenCalled();
         expect(requestResponder.stats).toHaveBeenCalledWith({
           customStat: { label: 'Custom', value: 'test' },
         });

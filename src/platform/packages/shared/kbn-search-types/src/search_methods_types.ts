@@ -46,6 +46,14 @@ export interface IBaseSearchOptions {
     title: string;
     description?: string;
     id?: string;
+    /**
+     * Callback to provide pre-request metadata stats (e.g., index pattern name)
+     */
+    getRequestStats?: () => RequestStatistics;
+    /**
+     * Callback to provide post-request statistics from the response
+     */
+    getResponseStats?: (response: { rawResponse: any }) => RequestStatistics;
   };
 }
 
@@ -116,11 +124,6 @@ export interface IDslSearchOptions extends IBaseSearchOptions {
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
-
-  /**
-   * Callback to provide pre-request metadata stats (e.g., index pattern name)
-   */
-  getRequestMetadata?: () => RequestStatistics;
 }
 
 export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
@@ -282,11 +285,6 @@ export interface IEqlSearchOptions extends IBaseSearchOptions {
    * Field to use for tiebreaking
    */
   tiebreakerField?: string;
-
-  /**
-   * Callback to provide pre-request metadata stats (e.g., index pattern name)
-   */
-  getRequestMetadata?: () => RequestStatistics;
 }
 
 /**
