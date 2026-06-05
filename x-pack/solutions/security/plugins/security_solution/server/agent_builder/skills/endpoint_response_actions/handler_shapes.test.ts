@@ -16,9 +16,18 @@ import {
 
 describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
+  let mockAgentService: { asInternalUser: { list: jest.Mock } };
 
   beforeEach(() => {
     mockEndpointAppContextService = createMockEndpointAppContext().service;
+    mockAgentService = {
+      asInternalUser: {
+        list: jest.fn().mockResolvedValue({ items: [] }),
+      },
+    };
+    mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+      agentService: mockAgentService,
+    })) as jest.Mock;
   });
 
   describe('FR-020: endpoint-not-found returns distinguishable shape', () => {
