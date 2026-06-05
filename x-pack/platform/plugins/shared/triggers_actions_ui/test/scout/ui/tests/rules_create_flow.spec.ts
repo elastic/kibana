@@ -81,8 +81,12 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     await defineIndexThresholdRule(page, ruleName);
     await page.testSubj.click('rulePageFooterSaveButton');
 
-    const confirmButton = page.testSubj.locator('confirmModalConfirmButton');
-    await confirmButton.click({ timeout: 3000 }).catch(() => {});
+    await page.testSubj
+      .locator('confirmModalConfirmButton')
+      .click({ timeout: 3000 })
+      .catch((e: Error) => {
+        if (!e.message.includes('Timeout')) throw e;
+      });
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created rule "${ruleName}"`
@@ -104,8 +108,12 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     await defineIndexThresholdRule(page, ruleName);
     await page.testSubj.click('rulePageFooterSaveButton');
 
-    const confirmButton = page.testSubj.locator('confirmModalConfirmButton');
-    await confirmButton.click({ timeout: 3000 }).catch(() => {});
+    await page.testSubj
+      .locator('confirmModalConfirmButton')
+      .click({ timeout: 3000 })
+      .catch((e: Error) => {
+        if (!e.message.includes('Timeout')) throw e;
+      });
 
     // After save Kibana redirects to the rule details page automatically.
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible({ timeout: 15000 });
