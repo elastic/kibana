@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import * as alertsShared from '@kbn/alerts-ui-shared';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { selectMaintenanceWindowsState } from '../../../state/maintenance_windows';

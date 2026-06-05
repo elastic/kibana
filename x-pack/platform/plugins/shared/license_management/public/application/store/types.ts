@@ -10,7 +10,7 @@ import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import type { ThunkAction } from 'redux-thunk';
-import type { Action as ReduxAction } from 'redux';
+import type { Action as ReduxAction } from 'redux-v4';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { BreadcrumbService } from '../breadcrumbs';
 

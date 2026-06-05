@@ -9,7 +9,7 @@
 
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { useWorkflowIdDecorations } from './use_workflow_id_decorations';

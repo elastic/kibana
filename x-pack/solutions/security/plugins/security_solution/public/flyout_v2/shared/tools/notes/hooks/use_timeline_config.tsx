@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { TimelineModel } from '../../../../..';
 import type { State } from '../../../../../common/store';
 import { timelineSelectors } from '../../../../../timelines/store';

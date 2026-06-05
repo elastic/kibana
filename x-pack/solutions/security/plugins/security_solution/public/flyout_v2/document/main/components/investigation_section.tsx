@@ -12,7 +12,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';

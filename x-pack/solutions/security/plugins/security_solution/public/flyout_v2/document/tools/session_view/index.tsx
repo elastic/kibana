@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../../../common/types/session_view';

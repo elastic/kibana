@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnhancedStore } from '@reduxjs/toolkit';
+import type { EnhancedStore } from 'redux-toolkit-v1';
 import type { WorkflowDetailState } from './workflow_detail/types';
 
 export interface RootState {

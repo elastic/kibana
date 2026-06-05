@@ -45,7 +45,7 @@ jest.mock('./use_remote_monitor', () => ({
   useRemoteMonitor: jest.fn(),
 }));
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import {
   getMonitorAction,
   selectEncryptedSyntheticsSavedMonitors,

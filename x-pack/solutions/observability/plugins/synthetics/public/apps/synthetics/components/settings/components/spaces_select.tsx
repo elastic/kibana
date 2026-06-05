@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { FieldValues, Path, PathValue } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import usePrevious from 'react-use/lib/usePrevious';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { ALL_SPACES_LABEL } from '../../monitor_add_edit/fields/monitor_spaces';

@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';

@@ -13,7 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { Node, NodeTypes } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 import React, { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import { ExecutionGraphEdge, ExecutionGraphNode } from './nodes';
 import { atomicNodes, mainScopeNodes, secondaryScopeNodes } from './nodes/types';

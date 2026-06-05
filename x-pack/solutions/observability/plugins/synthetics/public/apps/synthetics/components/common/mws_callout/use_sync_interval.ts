@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants/settings_defaults';

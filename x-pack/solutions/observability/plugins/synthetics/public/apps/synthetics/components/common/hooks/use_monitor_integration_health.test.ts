@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 

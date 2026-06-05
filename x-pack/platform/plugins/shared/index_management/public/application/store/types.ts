@@ -6,7 +6,7 @@
  */
 
 import type { Query } from '@elastic/eui';
-import type { AnyAction } from 'redux';
+import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk';
 import type { Error as EsUiError } from '@kbn/es-ui-shared-plugin/public';
 import type { Index } from '../../../common';

@@ -10,7 +10,7 @@
 import type { Decorator, StoryContext, StoryObj } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { WorkflowDetailDto } from '@kbn/workflows';

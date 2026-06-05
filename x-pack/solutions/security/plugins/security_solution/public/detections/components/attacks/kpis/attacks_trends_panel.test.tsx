@@ -33,7 +33,7 @@ jest.mock('react-redux', () => ({
 }));
 
 import { useUserData } from '../../user_info';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 describe('AttacksTrendsPanel', () => {
   const mockSetStackBy0 = jest.fn();

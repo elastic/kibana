@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { unset } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {

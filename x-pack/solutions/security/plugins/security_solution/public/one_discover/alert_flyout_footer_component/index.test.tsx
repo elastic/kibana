@@ -8,7 +8,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutFooter } from '.';
 import type { StartServices } from '../../types';
 import { SECURITY_FEATURE_ID } from '../../../common/constants';

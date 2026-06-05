@@ -11,7 +11,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import useMount from 'react-use/lib/useMount';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import React, { useMemo } from 'react';
-import type { SerializedError } from '@reduxjs/toolkit';
+import type { SerializedError } from 'redux-toolkit-v1';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { useInternalStateSelector } from '../../state_management/redux';

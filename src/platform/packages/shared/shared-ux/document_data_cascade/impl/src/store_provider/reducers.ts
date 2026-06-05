@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castDraft, produce } from 'immer';
+import { castDraft, produce } from 'immer-v9';
 import type { TableState, ExpandedState, RowSelectionState } from '@tanstack/react-table';
 import { getLeafIdFromCacheKey } from '../lib/utils';
 

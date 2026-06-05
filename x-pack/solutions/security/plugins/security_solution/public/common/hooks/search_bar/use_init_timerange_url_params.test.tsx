@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useInitTimerangeFromUrlParam } from './use_init_timerange_url_params';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
 

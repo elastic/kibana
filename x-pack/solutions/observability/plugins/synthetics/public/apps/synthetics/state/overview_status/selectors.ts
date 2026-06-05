@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 import { MONITOR_STATUS_ENUM } from '../../../../../common/constants/monitor_management';
 import type {
   OverviewStatusMetaData,

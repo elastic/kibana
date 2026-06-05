@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { screen, render, waitFor } from '@testing-library/react';
 
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';

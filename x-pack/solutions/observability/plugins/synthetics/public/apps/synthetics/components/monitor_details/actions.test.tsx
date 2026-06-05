@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Actions } from './actions';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({

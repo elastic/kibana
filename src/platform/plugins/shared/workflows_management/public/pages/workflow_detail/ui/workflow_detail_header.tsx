@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';

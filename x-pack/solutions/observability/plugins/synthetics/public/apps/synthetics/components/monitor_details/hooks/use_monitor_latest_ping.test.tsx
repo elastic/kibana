@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { useMonitorLatestPing } from './use_monitor_latest_ping';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';

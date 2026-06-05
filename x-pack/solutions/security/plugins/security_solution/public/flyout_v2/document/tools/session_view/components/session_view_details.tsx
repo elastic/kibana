@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiPanel, EuiTabbedContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import type { CellActionRenderer } from '../../../../shared/components/cell_actions';
 import { DocumentFlyoutWrapper } from '../../../main/document_flyout_wrapper';

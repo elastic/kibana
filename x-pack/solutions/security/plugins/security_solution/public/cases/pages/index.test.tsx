@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { useUserPrivileges } from '../../common/components/user_privileges';

@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
