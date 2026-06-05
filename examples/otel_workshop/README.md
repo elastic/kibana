@@ -44,20 +44,24 @@ folder; you'll mount it into the container next):
 
 ```yaml
 receivers:
-  # Receiver for logs, traces, and metrics from SDKs
   otlp/fromsdk:
     protocols:
       grpc: { endpoint: 0.0.0.0:4317 }
       http: { endpoint: 0.0.0.0:4318 }
 
+connectors:
+  elasticapm:
+
 processors:
+  elasticapm:
   filter/workshop:
     metrics:
       metric:
         - not(IsMatch(name, "kibana\\.otel_workshop\\..*"))
     traces:
       span:
-        - 'not(IsMatch(name, "process_order") or IsMatch(name, "grind_beans") or IsMatch(name, "brew") or IsMatch(name, "garnish") or IsMatch(attributes["http.route"], ".*otel_workshop.*"))'
+        - 'not(IsMatch(name, "open_coffee_shop") or IsMatch(name, "process_order") or IsMatch(name, "grind_beans") or IsMatch(name, "brew") or IsMatch(name, "garnish") or IsMatch(attributes["http.route"], ".*otel_workshop.*"))'
+
 exporters:
   debug: { verbosity: detailed }
   elasticsearch/otel:
@@ -67,6 +71,7 @@ exporters:
     password: changeme
     mapping:
       mode: otel
+
 service:
   pipelines:
     metrics:
@@ -75,7 +80,7 @@ service:
       exporters: [debug, elasticsearch/otel]
     traces:
       receivers: [otlp/fromsdk]
-      processors: [filter/workshop]
+      processors: [filter/workshop, elasticapm]
       exporters: [debug, elasticsearch/otel]
 ```
 

@@ -8,6 +8,7 @@
  */
 
 import { performance } from 'perf_hooks';
+import { metrics, ValueType } from '@opentelemetry/api';
 import type { DrinkType, DrinkSize, OrderRequest, OrderResult, OrderOutcome } from '../../common';
 import { MENU, SIZE_MULTIPLIER } from './menu';
 
@@ -98,3 +99,19 @@ export async function processOrder(order: OrderRequest): Promise<OrderResult> {
     //               (Must run on success AND failure — that is why it lives in `finally`.)
   }
 }
+
+// We might control this dynamically in the plugin in the future,
+// so that the utilization varies as well based on the number of baristas.
+const baristas = 1;
+
+// Report the number of baristas actively working in the Coffee shop
+metrics
+  .getMeter('kibana.otel_workshop')
+  .createObservableUpDownCounter('kibana.otel_workshop.baristas.active', {
+    description: 'Number of baristas currently working.',
+    unit: '{barista}',
+    valueType: ValueType.INT,
+  })
+  .addCallback((result) => {
+    result.observe(baristas);
+  });

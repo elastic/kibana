@@ -8,12 +8,16 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import { registerRoutes } from './routes/register_routes';
 
 export class OtelWorkshopPlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-    registerRoutes(router);
+    withActiveSpan('open_coffee_shop', { root: true }, (span) => {
+      span?.setAttribute('coffeeshop.name', 'The Open Coffee Shop');
+      const router = core.http.createRouter();
+      registerRoutes(router);
+    });
     return {};
   }
 
