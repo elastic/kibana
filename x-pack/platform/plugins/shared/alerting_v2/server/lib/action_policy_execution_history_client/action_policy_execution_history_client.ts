@@ -91,7 +91,6 @@ export class ActionPolicyExecutionHistoryClient {
 
     const searchIds = await this.resolveSearchIds(search);
 
-
     if (search !== undefined && !searchIds.hasMatches) {
       return { items: [], page, perPage, totalEvents: 0 };
     }
