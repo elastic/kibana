@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { INTERNAL_TIMELINE_BY_IDS_URL } from '../../../../../../common/constants';
+import { INTERNAL_TIMELINES_BY_IDS_URL } from '../../../../../../common/constants';
 import {
   SortDirection,
   SortFieldTimeline,
@@ -27,7 +27,7 @@ const MAX_ID_LENGTH = 100;
 const MAX_SEARCH_LENGTH = 256;
 
 /**
- * Body schema for `POST /internal/timeline/_by_ids`. Internal-only
+ * Body schema for `POST /internal/timelines/_by_ids`. Internal-only
  */
 export const GetTimelinesByIdsRequestBody = z.object({
   ids: z.array(z.string().min(1).max(MAX_ID_LENGTH)).min(1).max(MAX_IDS_PER_REQUEST),
@@ -46,7 +46,7 @@ export type GetTimelinesByIdsRequestBody = z.infer<typeof GetTimelinesByIdsReque
 export const getTimelinesByIdsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
-      path: INTERNAL_TIMELINE_BY_IDS_URL,
+      path: INTERNAL_TIMELINES_BY_IDS_URL,
       access: 'internal',
       security: {
         authz: {

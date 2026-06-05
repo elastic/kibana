@@ -279,7 +279,7 @@ export const getAllTimeline = async (
 };
 
 /**
- * Sibling of `getAllTimeline` used by the internal `GET /internal/timeline/_by_ids` route
+ * Sibling of `getAllTimeline` used by the internal `POST /internal/timelines/_by_ids` route
  * to power the case-attachments timeline tab. Loads the requested saved objects via
  * `bulkGet`, enriches them with notes/pinned events the same way the find-based path does,
  * and applies the supplied filters (timeline type, status, only-user-favorite, search)

@@ -13,12 +13,12 @@ import {
 import { getAllTimelineByIds } from '../../../saved_object/timelines';
 import { getTimelinesByIdsRoute, MAX_IDS_PER_REQUEST } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
-import { INTERNAL_TIMELINE_BY_IDS_URL } from '../../../../../../common/constants';
+import { INTERNAL_TIMELINES_BY_IDS_URL } from '../../../../../../common/constants';
 
 const postRequest = (body: Record<string, unknown>) =>
   requestMock.create({
     method: 'post',
-    path: INTERNAL_TIMELINE_BY_IDS_URL,
+    path: INTERNAL_TIMELINES_BY_IDS_URL,
     body,
   });
 
@@ -26,7 +26,7 @@ jest.mock('../../../saved_object/timelines', () => ({
   getAllTimelineByIds: jest.fn(),
 }));
 
-describe('POST /internal/timeline/_by_ids', () => {
+describe('POST /internal/timelines/_by_ids', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
 

@@ -17,7 +17,7 @@ import type {
   TimelineResponse,
 } from '../../../../common/api/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
-import { INTERNAL_TIMELINE_BY_IDS_URL } from '../../../../common/constants';
+import { INTERNAL_TIMELINES_BY_IDS_URL } from '../../../../common/constants';
 import { getTimelineQueryTypes } from '../../../timelines/containers/helpers';
 import type { OpenTimelineResult } from '../../../timelines/components/open_timeline/types';
 import { TIMELINE_ERROR_TITLE } from './translations';
@@ -81,7 +81,7 @@ export interface UseGetTimelinesByIdsResult {
 }
 
 /**
- * Fetches timelines by saved-object id via the internal `POST /internal/timeline/_by_ids`
+ * Fetches timelines by saved-object id via the internal `POST /internal/timelines/_by_ids`
  * route. Used by the case attachments timeline tab; intentionally lighter weight than
  * `useGetAllTimeline` (no Redux/global inputs / refresh registration).
  */
@@ -140,7 +140,7 @@ export const useGetTimelinesByIds = ({
 
     try {
       const response = await KibanaServices.get().http.post<GetTimelinesResponse>(
-        INTERNAL_TIMELINE_BY_IDS_URL,
+        INTERNAL_TIMELINES_BY_IDS_URL,
         {
           body: JSON.stringify(body),
           version: '1',

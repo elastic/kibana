@@ -8,7 +8,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
-import { INTERNAL_TIMELINE_BY_IDS_URL } from '../../../../common/constants';
+import { INTERNAL_TIMELINES_BY_IDS_URL } from '../../../../common/constants';
 
 const mockPost = jest.fn();
 jest.mock('../../../common/lib/kibana', () => ({
@@ -68,7 +68,7 @@ describe('useGetTimelinesByIds', () => {
 
     expect(mockPost).toHaveBeenCalledTimes(1);
     const [path, options] = mockPost.mock.calls[0];
-    expect(path).toBe(INTERNAL_TIMELINE_BY_IDS_URL);
+    expect(path).toBe(INTERNAL_TIMELINES_BY_IDS_URL);
     expect(options.version).toBe('1');
     expect(JSON.parse(options.body)).toMatchObject({
       ids: ['timeline-1'],
