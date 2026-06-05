@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { episodeAckedTriggerCommonDefinition } from '../../../../common/workflows/triggers';
-
-const EpisodeAckedIcon = React.lazy(() =>
-  import('@elastic/eui/es/components/icon/assets/check').then(({ icon }) => ({
-    default: icon,
-  }))
-);
+import { AlertingTriggerIcon } from './alerting_trigger_icon';
 
 export const episodeAckedTriggerPublicDefinition: PublicTriggerDefinition = {
   ...episodeAckedTriggerCommonDefinition,
-  icon: EpisodeAckedIcon,
+  icon: AlertingTriggerIcon,
 };
