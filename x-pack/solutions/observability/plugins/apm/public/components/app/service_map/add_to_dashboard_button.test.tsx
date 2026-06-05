@@ -96,7 +96,10 @@ describe('capturePageFilters', () => {
     const result = capturePageFilters({
       urlKuery: '',
       urlServiceName: undefined,
-      filterManagerFilters: [existsFilter('error.id'), existsFilter('labels.tier', { negate: true })],
+      filterManagerFilters: [
+        existsFilter('error.id'),
+        existsFilter('labels.tier', { negate: true }),
+      ],
       controlSelections: {},
     });
     expect(result.kuery).toBe('error.id: * and not labels.tier: *');
