@@ -17,7 +17,10 @@ const baseProps = {
   job_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 1000 }), {
     minSize: 1,
     maxSize: 10000,
-    meta: { description: 'Anomaly detection job IDs whose results are shown in the swim lane.' },
+    meta: {
+      description:
+        'IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.',
+    },
   }),
   per_page: schema.maybe(
     schema.number({
