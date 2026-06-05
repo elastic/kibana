@@ -146,7 +146,9 @@ export const createContextEngineAddEntryStepDefinition = ({
             content: chunk.content,
             ...(chunk.description !== undefined ? { description: chunk.description } : {}),
             ...(chunk.user_id !== undefined ? { user_id: chunk.user_id } : {}),
-            ...(chunk.references !== undefined ? { references: chunk.references } : {}),
+            ...(chunk.references !== undefined
+              ? { references: chunk.references.map((uri) => ({ uri })) }
+              : {}),
             ...(chunk.permissions !== undefined ? { permissions: chunk.permissions } : {}),
           }));
 

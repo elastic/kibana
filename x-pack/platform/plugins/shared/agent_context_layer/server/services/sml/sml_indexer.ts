@@ -213,7 +213,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // helper — that's the way `SmlIndexer.deleteChunks` distinguishes "wipe
     // everything for this origin" from "wipe a single method".
     await this.deleteChunks({
-      originId,
+      originUri: `${attachmentType}://${originId}`,
       esClient,
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
@@ -299,6 +299,17 @@ class SmlIndexerImpl implements SmlIndexer {
     if (chunk.description !== undefined) {
       document.description = chunk.description;
     }
+    if (chunk.tags !== undefined) {
+      document.tags = chunk.tags;
+    }
+    document.discovery_labels = [
+      { value: chunk.title, kind: 'title' },
+      { value: chunk.type, kind: 'type' },
+      ...(chunk.discovery_labels ?? []),
+    ];
+    if (chunk.extended_attrs !== undefined) {
+      document.extended_attrs = chunk.extended_attrs;
+    }
     if (chunk.user_id !== undefined) {
       document.user_id = chunk.user_id;
     }
@@ -380,7 +391,10 @@ class SmlIndexerImpl implements SmlIndexer {
         terminate_after: 1,
         query: {
           bool: {
-            filter: [{ term: { 'origin.uri': originUri } }, { term: { ingestion_method: 'manual' } }],
+            filter: [
+              { term: { 'origin.uri': originUri } },
+              { term: { ingestion_method: 'manual' } },
+            ],
           },
         },
       });

@@ -40,6 +40,7 @@ jest.mock('uuid', () => ({ v4: () => `mock-uuid-${++mockUuidCounter}` }));
 const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    count: jest.fn().mockResolvedValue({ count: 0 }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
@@ -136,7 +137,10 @@ describe('createSmlIndexer', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            filter: [{ term: { 'origin.uri': 'lens://att-1' } }, { term: { ingestion_method: 'crawled' } }],
+            filter: [
+              { term: { 'origin.uri': 'lens://att-1' } },
+              { term: { ingestion_method: 'crawled' } },
+            ],
           },
         },
         refresh: false,
@@ -258,7 +262,7 @@ describe('createSmlIndexer', () => {
       expect(bulkMock).toHaveBeenCalledTimes(1);
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.operations[0].index.document).toEqual({
-        id: 'dashboard:dash-100:mock-uuid',
+        id: 'mock-uuid-1',
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dashboard://dash-100' },
@@ -435,7 +439,9 @@ describe('createSmlIndexer', () => {
       );
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to delete crawled chunks'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('failed to delete crawled chunks')
+      );
     });
 
     it('bulk index errors are logged', async () => {
@@ -557,7 +563,7 @@ describe('createSmlIndexer', () => {
             query: expect.objectContaining({
               bool: expect.objectContaining({
                 filter: expect.arrayContaining([
-                  { term: { origin_id: 'att-protected' } },
+                  { term: { 'origin.uri': 'lens://att-protected' } },
                   { term: { ingestion_method: 'manual' } },
                 ]),
               }),
@@ -719,7 +725,6 @@ describe('createSmlIndexer', () => {
           expect.objectContaining({
             id: 'mock-uuid-1',
             title: 'First',
-            origin_id: 'att-manual',
             content: 'one',
             permissions: ['p1'],
             ingestion_method: 'manual',
@@ -805,7 +810,7 @@ describe('createSmlIndexer', () => {
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
         const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
         expect(callArgs.query.bool.filter).toEqual([
-          { term: { origin_id: 'att-delete-with-content' } },
+          { term: { 'origin.uri': 'lens://att-delete-with-content' } },
           { term: { ingestion_method: 'crawled' } },
         ]);
       });
@@ -848,7 +853,9 @@ describe('createSmlIndexer', () => {
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       // Filter must contain ONLY the origin_id term — no ingestion_method
       // term means deleteByQuery removes manual + crawled.
-      expect(callArgs.query.bool.filter).toEqual([{ term: { origin_id: 'att-wipe-all' } }]);
+      expect(callArgs.query.bool.filter).toEqual([
+        { term: { 'origin.uri': 'lens://att-wipe-all' } },
+      ]);
     });
 
     it('filters on ingestion_method=manual when ingestionMethod is "manual"', async () => {
@@ -864,7 +871,7 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { origin_id: 'att-wipe-manual' } },
+        { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
       ]);
     });
@@ -885,7 +892,7 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { origin_id: 'att-default-scope' } },
+        { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
       ]);
     });
