@@ -69,7 +69,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
 
-  const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
 
   const onOnboardingFailed = useCallback(
     (error: string) => {
@@ -186,10 +186,10 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/" />;
   }
 
-  if (!isAvailable) {
+  if (availability && !availability.available) {
     return (
       <StreamsAppPageTemplate.Body grow>
-        <SignificantEventsNotEnabledPrompt />
+        <SignificantEventsNotEnabledPrompt reason={availability.reason} />
       </StreamsAppPageTemplate.Body>
     );
   }

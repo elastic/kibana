@@ -6,13 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { SignificantEventsAvailabilityResponse } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
-import { isSignificantEventsAvailable } from '../../../utils/assert_significant_events_access';
-
-export interface SignificantEventsAvailabilityResponse {
-  available: boolean;
-}
+import { getSignificantEventsAvailability } from '../../../utils/assert_significant_events_access';
 
 const significantEventsAvailabilityRoute = createServerRoute({
   endpoint: 'GET /internal/sig_events/availability',
@@ -35,9 +32,7 @@ const significantEventsAvailabilityRoute = createServerRoute({
   }): Promise<SignificantEventsAvailabilityResponse> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
 
-    const available = await isSignificantEventsAvailable({ server, licensing, uiSettingsClient });
-
-    return { available };
+    return getSignificantEventsAvailability({ server, licensing, uiSettingsClient });
   },
 });
 

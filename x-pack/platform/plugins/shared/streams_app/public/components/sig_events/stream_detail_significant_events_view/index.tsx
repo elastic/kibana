@@ -58,7 +58,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     },
   } = useKibana();
   const queryClient = useQueryClient();
-  const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
     .trim()
@@ -205,8 +205,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return <LoadingPanel size="xxl" />;
   }
 
-  if (!isAvailable) {
-    return <SignificantEventsNotEnabledPrompt />;
+  if (availability && !availability.available) {
+    return <SignificantEventsNotEnabledPrompt reason={availability.reason} />;
   }
 
   if (isEmpty) {

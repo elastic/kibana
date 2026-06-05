@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { SecurityError } from '../../lib/streams/errors/security_error';
 import { FeatureNotEnabledError } from '../../lib/streams/errors/feature_not_enabled_error';
-import { assertSignificantEventsAccess } from './assert_significant_events_access';
+import { MissingDependencyError } from '../../lib/streams/errors/missing_dependency_error';
+import {
+  assertSignificantEventsAccess,
+  getSignificantEventsAvailability,
+} from './assert_significant_events_access';
 
 interface ContextOverrides {
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
   uiSettingEnabled?: boolean;
-  workflowsPlugin?: boolean;
+  workflowsExtensionsPlugin?: boolean;
+  workflowsManagementPlugin?: boolean;
   inferencePlugin?: boolean;
   agentBuilderPlugin?: boolean;
 }
@@ -23,7 +27,8 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     tierAvailable = true,
     hasEnterpriseLicense = true,
     uiSettingEnabled = true,
-    workflowsPlugin = true,
+    workflowsExtensionsPlugin = true,
+    workflowsManagementPlugin = true,
     inferencePlugin = true,
     agentBuilderPlugin = true,
   } = overrides;
@@ -32,7 +37,8 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     core: {
       pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
     },
-    workflowsExtensions: workflowsPlugin ? {} : undefined,
+    workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
+    workflowsManagement: workflowsManagementPlugin ? {} : undefined,
     searchInferenceEndpoints: inferencePlugin ? {} : undefined,
     agentBuilder: agentBuilderPlugin ? {} : undefined,
   };
@@ -57,47 +63,67 @@ describe('assertSignificantEventsAccess', () => {
     await expect(assertSignificantEventsAccess(buildArgs())).resolves.toBeUndefined();
   });
 
-  it('throws a SecurityError (403) when the pricing tier is unavailable', async () => {
+  it('throws a FeatureNotEnabledError (403) when the pricing tier is unavailable', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ tierAvailable: false }))
-    ).rejects.toBeInstanceOf(SecurityError);
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
-  it('throws a boom forbidden error when the license is insufficient', async () => {
+  it('throws a FeatureNotEnabledError (403) when the license is insufficient', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ hasEnterpriseLicense: false }))
-    ).rejects.toEqual(expect.objectContaining({ isBoom: true }));
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
-  it('throws a FeatureNotEnabledError when the UI setting is disabled', async () => {
+  it('throws a FeatureNotEnabledError (403) when the UI setting is disabled', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ uiSettingEnabled: false }))
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
-  it('throws a FeatureNotEnabledError when workflows is unavailable', async () => {
+  it('throws a MissingDependencyError (409) when workflows extensions is unavailable', async () => {
     await expect(
-      assertSignificantEventsAccess(buildArgs({ workflowsPlugin: false }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+      assertSignificantEventsAccess(buildArgs({ workflowsExtensionsPlugin: false }))
+    ).rejects.toBeInstanceOf(MissingDependencyError);
   });
 
-  it('throws a FeatureNotEnabledError when inference endpoints are unavailable', async () => {
+  it('throws a MissingDependencyError (409) when workflows management is unavailable', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ workflowsManagementPlugin: false }))
+    ).rejects.toBeInstanceOf(MissingDependencyError);
+  });
+
+  it('throws a MissingDependencyError (409) when inference endpoints are unavailable', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ inferencePlugin: false }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+    ).rejects.toBeInstanceOf(MissingDependencyError);
   });
 
-  it('throws a FeatureNotEnabledError when agent builder is unavailable', async () => {
+  it('throws a MissingDependencyError (409) when agent builder is unavailable', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ agentBuilderPlugin: false }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+    ).rejects.toBeInstanceOf(MissingDependencyError);
+  });
+});
+
+describe('getSignificantEventsAvailability', () => {
+  it('reports available when all requirements are met', async () => {
+    await expect(getSignificantEventsAvailability(buildArgs())).resolves.toEqual({
+      available: true,
+    });
   });
 
-  it('throws the first unmet requirement in registry order (tier before license)', async () => {
+  it('returns the unmet reason id', async () => {
     await expect(
-      assertSignificantEventsAccess(
+      getSignificantEventsAvailability(buildArgs({ inferencePlugin: false }))
+    ).resolves.toEqual({ available: false, reason: 'searchInferenceEndpoints' });
+  });
+
+  it('returns the first unmet reason in registry order (tier before license)', async () => {
+    await expect(
+      getSignificantEventsAvailability(
         buildArgs({ tierAvailable: false, hasEnterpriseLicense: false })
       )
-    ).rejects.toBeInstanceOf(SecurityError);
+    ).resolves.toEqual({ available: false, reason: 'pricing_tier' });
   });
 });

@@ -19,7 +19,7 @@ export const useSignificantEventsAvailability = () => {
     },
   } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  const { data: availability, isLoading } = useQuery({
     queryKey: SIGNIFICANT_EVENTS_AVAILABILITY_QUERY_KEY,
     queryFn: ({ signal }: QueryFunctionContext) =>
       streamsRepositoryClient.fetch('GET /internal/sig_events/availability', {
@@ -27,5 +27,5 @@ export const useSignificantEventsAvailability = () => {
       }),
   });
 
-  return { isAvailable: data?.available, isLoading };
+  return { availability, isLoading };
 };

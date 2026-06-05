@@ -127,6 +127,9 @@ export class StreamsPlugin
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
+    // workflowsManagement is only available as a setup dependency; capture its
+    // presence here so significant events availability checks can read it.
+    this.server.workflowsManagement = plugins.workflowsManagement;
 
     this.patternExtractionService = new PatternExtractionService(
       this.config.workers.patternExtraction,

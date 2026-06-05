@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { forbidden } from '@hapi/boom';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../../../common';
+import type { SignificantEventsAvailabilityResponse } from '../../../common';
+import {
+  SIGNIFICANT_EVENTS_REQUIRED_PLUGINS,
+  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+  type SignificantEventsRequiredPlugin,
+  type SignificantEventsUnavailableReason,
+} from '../../../common';
 import { FeatureNotEnabledError } from '../../lib/streams/errors/feature_not_enabled_error';
-import { SecurityError } from '../../lib/streams/errors/security_error';
+import { MissingDependencyError } from '../../lib/streams/errors/missing_dependency_error';
 import type { StreamsServer } from '../../types';
 
 interface SignificantEventsAccessContext {
@@ -23,33 +28,24 @@ interface SignificantEventsAccessContext {
 type RequirementCheckResult = { met: true } | { met: false; errorMessage: string };
 
 interface SignificantEventsRequirement {
+  /** Stable id surfaced to the UI to explain why significant events is unavailable. */
+  id: SignificantEventsUnavailableReason;
   /** Resolves whether the requirement is satisfied for the given context. */
   check: (context: SignificantEventsAccessContext) => Promise<RequirementCheckResult>;
   /** Builds the error thrown when the requirement is unmet. */
   toError: (errorMessage: string) => Error;
 }
 
-/**
- * Significant events depends on a handful of optional plugins simply being
- * present. To require a new plugin, add its name to this array.
- */
-const requiredPlugins = [
-  'workflowsExtensions',
-  'searchInferenceEndpoints',
-  'agentBuilder',
-] as const satisfies ReadonlyArray<keyof StreamsServer>;
-
-type RequiredPlugin = (typeof requiredPlugins)[number];
-
-const requirePlugin = (plugin: RequiredPlugin): SignificantEventsRequirement => ({
+const requirePlugin = (plugin: SignificantEventsRequiredPlugin): SignificantEventsRequirement => ({
+  id: plugin,
   check: async ({ server }) =>
     server[plugin]
       ? { met: true }
       : {
           met: false,
-          errorMessage: `The "${plugin}" plugin is not available in this environment. Significant events relies on it.`,
+          errorMessage: `Significant events requires the "${plugin}" plugin to be enabled first.`,
         },
-  toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
+  toError: (errorMessage) => new MissingDependencyError(errorMessage),
 });
 
 /**
@@ -59,6 +55,7 @@ const requirePlugin = (plugin: RequiredPlugin): SignificantEventsRequirement => 
  */
 const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
   {
+    id: 'pricing_tier',
     check: async ({ server }) =>
       server.core.pricing.isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
         ? { met: true }
@@ -66,9 +63,10 @@ const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
             met: false,
             errorMessage: 'Significant events is not available on the current pricing tier.',
           },
-    toError: (errorMessage) => new SecurityError(errorMessage),
+    toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
   },
   {
+    id: 'license',
     check: async ({ licensing }) =>
       (await licensing.getLicense()).hasAtLeast('enterprise')
         ? { met: true }
@@ -76,9 +74,10 @@ const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
             met: false,
             errorMessage: 'An Enterprise license or higher is required to use significant events.',
           },
-    toError: (errorMessage) => forbidden(errorMessage),
+    toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
   },
   {
+    id: 'ui_setting',
     check: async ({ uiSettingsClient }) =>
       (await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS))
         ? { met: true }
@@ -88,16 +87,31 @@ const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
           },
     toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
   },
-  ...requiredPlugins.map(requirePlugin),
+  ...SIGNIFICANT_EVENTS_REQUIRED_PLUGINS.map(requirePlugin),
 ];
 
-const evaluateRequirements = (context: SignificantEventsAccessContext) =>
-  Promise.all(
+/**
+ * Evaluates every requirement in parallel and returns the first unmet one (in
+ * registry order), or `undefined` when significant events is fully available.
+ */
+const findFirstUnmetRequirement = async (
+  context: SignificantEventsAccessContext
+): Promise<{ requirement: SignificantEventsRequirement; errorMessage: string } | undefined> => {
+  const results = await Promise.all(
     significantEventsRequirements.map(async (requirement) => ({
       requirement,
       result: await requirement.check(context),
     }))
   );
+
+  for (const { requirement, result } of results) {
+    if (!result.met) {
+      return { requirement, errorMessage: result.errorMessage };
+    }
+  }
+
+  return undefined;
+};
 
 /**
  * Asserts that every significant events requirement is met. Throws the
@@ -107,22 +121,19 @@ const evaluateRequirements = (context: SignificantEventsAccessContext) =>
 export async function assertSignificantEventsAccess(
   context: SignificantEventsAccessContext
 ): Promise<void> {
-  const results = await evaluateRequirements(context);
-
-  for (const { requirement, result } of results) {
-    if (!result.met) {
-      throw requirement.toError(result.errorMessage);
-    }
+  const unmet = await findFirstUnmetRequirement(context);
+  if (unmet) {
+    throw unmet.requirement.toError(unmet.errorMessage);
   }
 }
 
 /**
- * Returns whether every significant events requirement is met, without
- * throwing. Used by the availability endpoint that the UI calls.
+ * Resolves significant events availability without throwing, returning the id
+ * of the first unmet requirement. Used by the availability endpoint the UI calls.
  */
-export async function isSignificantEventsAvailable(
+export async function getSignificantEventsAvailability(
   context: SignificantEventsAccessContext
-): Promise<boolean> {
-  const results = await evaluateRequirements(context);
-  return results.every(({ result }) => result.met);
+): Promise<SignificantEventsAvailabilityResponse> {
+  const unmet = await findFirstUnmetRequirement(context);
+  return unmet ? { available: false, reason: unmet.requirement.id } : { available: true };
 }

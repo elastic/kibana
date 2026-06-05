@@ -63,6 +63,7 @@ export interface StreamsServer {
   ensureMemoryTasksScheduled?: () => Promise<void>;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
 }
 
