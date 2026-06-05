@@ -12,9 +12,9 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
 import { getWorkflowToolType } from './tool_type';
 import { isEnabledDefinition, isDisabledDefinition } from '../definitions';
-import { executeWorkflow } from '../../../workflow';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 
-jest.mock('../../../workflow', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   executeWorkflow: jest.fn(),
 }));
 
