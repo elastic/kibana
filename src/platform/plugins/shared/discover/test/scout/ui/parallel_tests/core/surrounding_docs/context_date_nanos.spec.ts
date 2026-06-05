@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrounding_docs';
 
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
@@ -18,9 +18,7 @@ spaceTest.describe('Discover context - date_nanos', { tag: testData.CONTEXT_STAT
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_DATE_NANOS);
-    dataViewId =
-      imported.find((so: { title: string }) => so.title === testData.DATE_NANOS_INDEX_PATTERN)
-        ?.id ?? testData.DATE_NANOS_INDEX_PATTERN;
+    dataViewId = resolveDataViewId(imported, testData.DATE_NANOS_INDEX_PATTERN);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATE_NANOS_INDEX_PATTERN);
     await scoutSpace.uiSettings.set({
       'context:defaultSize': String(TEST_DEFAULT_CONTEXT_SIZE),

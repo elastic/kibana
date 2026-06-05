@@ -38,3 +38,7 @@ export const DEFAULT_TIME_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
   to: '2015-09-23T18:31:44.000Z',
 };
+
+export const FILTER_FIELD_GEO_SRC = 'geo.src';
+export const FILTER_VALUE_GEO_SRC_IN = 'IN';
+export const FILTER_COLUMNS = ['extension', 'geo.src'];

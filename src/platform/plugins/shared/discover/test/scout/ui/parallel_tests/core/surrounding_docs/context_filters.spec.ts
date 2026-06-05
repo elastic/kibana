@@ -12,11 +12,12 @@ import {
   spaceTest,
   testData,
   addFilterWithoutStrictCheck,
+  resolveDataViewId,
 } from '../../../fixtures/surrounding_docs';
 
-const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
-const TEST_ANCHOR_FILTER_VALUE = 'IN';
-const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
+const TEST_ANCHOR_FILTER_FIELD = testData.FILTER_FIELD_GEO_SRC;
+const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
+const TEST_COLUMN_NAMES = testData.FILTER_COLUMNS;
 
 spaceTest.describe(
   'Discover context - filters (basic)',
@@ -28,9 +29,7 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
-      dataViewId =
-        imported.find((so: { title: string }) => so.title === testData.LOGSTASH_DATA_VIEW)?.id ??
-        testData.LOGSTASH_DATA_VIEW;
+      dataViewId = resolveDataViewId(imported, testData.LOGSTASH_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
       await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
     });
@@ -50,18 +49,9 @@ spaceTest.describe(
     spaceTest(
       'inclusive filter should be addable via expanded data grid rows',
       async ({ page, pageObjects }) => {
-        const anchorExpandBtn = page.testSubj.locator('docTableExpandToggleColumnAnchor');
-        await anchorExpandBtn.click();
-
-        const flyout = page.testSubj.locator('docViewerFlyout');
-        // flyout renders after row expansion + data fetch
-        await expect(flyout).toBeVisible({ timeout: 10_000 });
-
-        // In serverless, the flyout may default to "Log overview" tab; switch to "Table" if needed
-        await flyout.locator('[data-test-subj="docViewerTab-doc_view_table"]').click();
-
-        const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
-        await searchInput.fill(TEST_ANCHOR_FILTER_FIELD);
+        const flyout = await pageObjects.contextPage.openAnchorFlyoutAndSearchField(
+          TEST_ANCHOR_FILTER_FIELD
+        );
 
         const valueCell = flyout.locator(
           `[data-test-subj="tableDocViewRow-${TEST_ANCHOR_FILTER_FIELD}-value"]`
@@ -126,18 +116,9 @@ spaceTest.describe(
     spaceTest(
       'filter for presence should be addable via expanded data grid rows',
       async ({ page, pageObjects }) => {
-        const anchorExpandBtn = page.testSubj.locator('docTableExpandToggleColumnAnchor');
-        await anchorExpandBtn.click();
-
-        const flyout = page.testSubj.locator('docViewerFlyout');
-        // flyout renders after row expansion + data fetch
-        await expect(flyout).toBeVisible({ timeout: 10_000 });
-
-        // In serverless, the flyout may default to "Log overview" tab; switch to "Table" if needed
-        await flyout.locator('[data-test-subj="docViewerTab-doc_view_table"]').click();
-
-        const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
-        await searchInput.fill(TEST_ANCHOR_FILTER_FIELD);
+        const flyout = await pageObjects.contextPage.openAnchorFlyoutAndSearchField(
+          TEST_ANCHOR_FILTER_FIELD
+        );
 
         const nameCell = flyout.locator(
           '[data-gridcell-column-id="name"][data-gridcell-visible-row-index="0"]'

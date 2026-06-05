@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrounding_docs';
 
-const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
-const TEST_ANCHOR_FILTER_VALUE = 'IN';
-const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
+const TEST_ANCHOR_FILTER_FIELD = testData.FILTER_FIELD_GEO_SRC;
+const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
+const TEST_COLUMN_NAMES = testData.FILTER_COLUMNS;
+
+const verifyFilterPreview = async (page: ScoutPage, expectedText: string) => {
+  const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
+  await filterBadge.click();
+  await page.testSubj.click('editFilter');
+  const preview = page.testSubj.locator('filter-preview');
+  await expect(preview).toContainText(expectedText);
+};
 
 spaceTest.describe(
   'Discover context - filters (advanced)',
@@ -22,9 +31,7 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
-      dataViewId =
-        imported.find((so: { title: string }) => so.title === testData.LOGSTASH_DATA_VIEW)?.id ??
-        testData.LOGSTASH_DATA_VIEW;
+      dataViewId = resolveDataViewId(imported, testData.LOGSTASH_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
       await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
     });
@@ -103,11 +110,7 @@ spaceTest.describe(
       await expect(filterBadges).toHaveCount(1);
 
       await spaceTest.step('verify filter preview text', async () => {
-        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
-        await filterBadge.click();
-        await page.testSubj.click('editFilter');
-        const preview = page.testSubj.locator('filter-preview');
-        await expect(preview).toContainText('extension: png OR bytes: 1,000B to 2KB');
+        await verifyFilterPreview(page, 'extension: png OR bytes: 1,000B to 2KB');
       });
     });
 
@@ -149,13 +152,7 @@ spaceTest.describe(
       await expect(filterBadges).toHaveCount(1);
 
       await spaceTest.step('verify filter preview text', async () => {
-        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
-        await filterBadge.click();
-        await page.testSubj.click('editFilter');
-        const preview = page.testSubj.locator('filter-preview');
-        await expect(preview).toContainText(
-          'extension: is one of png, jpeg AND bytes: 1,000B to 2KB'
-        );
+        await verifyFilterPreview(page, 'extension: is one of png, jpeg AND bytes: 1,000B to 2KB');
       });
     });
 
@@ -212,11 +209,8 @@ spaceTest.describe(
       await expect(filterBadges).toHaveCount(1);
 
       await spaceTest.step('verify filter preview text', async () => {
-        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
-        await filterBadge.click();
-        await page.testSubj.click('editFilter');
-        const preview = page.testSubj.locator('filter-preview');
-        await expect(preview).toContainText(
+        await verifyFilterPreview(
+          page,
           '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
         );
       });
@@ -284,11 +278,7 @@ spaceTest.describe(
       await expect(filterBadges).toHaveCount(1);
 
       await spaceTest.step('verify filter preview text', async () => {
-        const filterBadge = page.testSubj.locator('~filter & ~filter-id-0');
-        await filterBadge.click();
-        await page.testSubj.click('editFilter');
-        const preview = page.testSubj.locator('filter-preview');
-        await expect(preview).toContainText('extension: is one of png, jpeg');
+        await verifyFilterPreview(page, 'extension: is one of png, jpeg');
       });
     });
   }

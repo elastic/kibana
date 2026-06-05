@@ -47,6 +47,15 @@ export async function addFilters(page: ScoutPage, filters: Array<[string, string
 }
 
 /**
+ * Finds the data view ID from an array of imported saved objects by matching the title.
+ * Falls back to the title itself if no matching object is found.
+ */
+export const resolveDataViewId = (
+  imported: Array<{ title: string; id?: string }>,
+  title: string
+): string => imported.find((so) => so.title === title)?.id ?? title;
+
+/**
  * Logs in as viewer and navigates to the Discover app in classic query mode,
  * waiting for the search to complete and the doc table to render.
  */

@@ -23,6 +23,7 @@ export class ContextPage {
   public readonly predecessorsCountPicker: Locator;
   public readonly successorsCountPicker: Locator;
   public readonly docTable: Locator;
+  public readonly rows: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.predecessorsLoadMoreButton = page.testSubj.locator('predecessorsLoadMoreButton');
@@ -30,6 +31,7 @@ export class ContextPage {
     this.predecessorsCountPicker = page.testSubj.locator('predecessorsCountPicker');
     this.successorsCountPicker = page.testSubj.locator('successorsCountPicker');
     this.docTable = page.testSubj.locator('discoverDocTable');
+    this.rows = this.docTable.locator('[data-grid-row-index]');
   }
 
   async navigateTo(dataViewId: string, anchorId: string, overrideInitialState = {}) {
@@ -114,6 +116,21 @@ export class ContextPage {
     await expect(expandButton).toBeVisible();
     await expandButton.scrollIntoViewIfNeeded();
     await expandButton.click();
+  }
+
+  async openAnchorFlyoutAndSearchField(fieldName: string) {
+    const anchorExpandBtn = this.page.testSubj.locator('docTableExpandToggleColumnAnchor');
+    await anchorExpandBtn.click();
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await expect(flyout).toBeVisible({ timeout: 10_000 });
+
+    await flyout.locator('[data-test-subj="docViewerTab-doc_view_table"]').click();
+
+    const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
+    await searchInput.fill(fieldName);
+
+    return flyout;
   }
 
   async openRowActionsForAnchor() {

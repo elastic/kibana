@@ -46,4 +46,5 @@ export {
   addFilters,
   loginAndGoToDiscover,
   navigateToFirstDocContext,
+  resolveDataViewId,
 } from './helpers';

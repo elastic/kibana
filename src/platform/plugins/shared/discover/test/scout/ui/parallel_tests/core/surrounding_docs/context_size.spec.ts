@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrounding_docs';
 
 const TEST_DEFAULT_CONTEXT_SIZE = 2;
 const TEST_STEP_SIZE = 2;
@@ -21,9 +21,7 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_VISUALIZE);
-      dataViewId =
-        imported.find((so: { title: string }) => so.title === testData.LOGSTASH_DATA_VIEW)?.id ??
-        testData.LOGSTASH_DATA_VIEW;
+      dataViewId = resolveDataViewId(imported, testData.LOGSTASH_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultIndex(testData.LOGSTASH_DATA_VIEW);
       await scoutSpace.uiSettings.set({
         'context:defaultSize': String(TEST_DEFAULT_CONTEXT_SIZE),
@@ -41,50 +39,48 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest(
-      'should default to the context:defaultSize setting',
-      async ({ page, pageObjects }) => {
-        const expectedRowCount = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-        const rows = page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]');
-        // context data grid renders after anchor + surrounding doc queries
-        await expect(rows).toHaveCount(expectedRowCount, { timeout: 30_000 });
+    spaceTest('should default to the context:defaultSize setting', async ({ pageObjects }) => {
+      const expectedRowCount = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
+      // context data grid renders after anchor + surrounding doc queries
+      await expect(pageObjects.contextPage.rows).toHaveCount(expectedRowCount, {
+        timeout: 30_000,
+      });
 
-        const predecessorValue = await pageObjects.contextPage.getPredecessorCountPickerValue();
-        expect(predecessorValue).toBe(String(TEST_DEFAULT_CONTEXT_SIZE));
-      }
-    );
+      const predecessorValue = await pageObjects.contextPage.getPredecessorCountPickerValue();
+      expect(predecessorValue).toBe(String(TEST_DEFAULT_CONTEXT_SIZE));
+    });
 
-    spaceTest(
-      'should increase rows when clicking load newer button',
-      async ({ page, pageObjects }) => {
-        const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-        const rows = page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]');
-        // context data grid renders after anchor + surrounding doc queries
-        await expect(rows).toHaveCount(initialExpected, { timeout: 30_000 });
+    spaceTest('should increase rows when clicking load newer button', async ({ pageObjects }) => {
+      const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
+      // context data grid renders after anchor + surrounding doc queries
+      await expect(pageObjects.contextPage.rows).toHaveCount(initialExpected, {
+        timeout: 30_000,
+      });
 
-        await pageObjects.contextPage.clickPredecessorLoadMoreButton();
+      await pageObjects.contextPage.clickPredecessorLoadMoreButton();
 
-        const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
-        // new rows fetched and appended after load-more query
-        await expect(rows).toHaveCount(expectedAfterLoad, { timeout: 30_000 });
-      }
-    );
+      const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
+      // new rows fetched and appended after load-more query
+      await expect(pageObjects.contextPage.rows).toHaveCount(expectedAfterLoad, {
+        timeout: 30_000,
+      });
+    });
 
-    spaceTest(
-      'should increase rows when clicking load older button',
-      async ({ page, pageObjects }) => {
-        const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-        const rows = page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]');
-        // context data grid renders after anchor + surrounding doc queries
-        await expect(rows).toHaveCount(initialExpected, { timeout: 30_000 });
+    spaceTest('should increase rows when clicking load older button', async ({ pageObjects }) => {
+      const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
+      // context data grid renders after anchor + surrounding doc queries
+      await expect(pageObjects.contextPage.rows).toHaveCount(initialExpected, {
+        timeout: 30_000,
+      });
 
-        await pageObjects.contextPage.clickSuccessorLoadMoreButton();
+      await pageObjects.contextPage.clickSuccessorLoadMoreButton();
 
-        const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
-        // new rows fetched and appended after load-more query
-        await expect(rows).toHaveCount(expectedAfterLoad, { timeout: 30_000 });
-      }
-    );
+      const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
+      // new rows fetched and appended after load-more query
+      await expect(pageObjects.contextPage.rows).toHaveCount(expectedAfterLoad, {
+        timeout: 30_000,
+      });
+    });
 
     spaceTest(
       'should show 101 records when 50 newer and 50 older are requested',
