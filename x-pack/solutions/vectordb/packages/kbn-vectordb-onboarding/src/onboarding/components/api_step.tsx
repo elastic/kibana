@@ -29,11 +29,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { useKibana } from '../services';
+import { useKibana } from '../../services';
 import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
 import { fillPlaceholders } from './snippets';
-import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
-import type { VectorPath, WizardStep } from './types';
+import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
+import type { VectorPath, WizardStep } from '../types';
 
 const SNIPPET_OVERFLOW_HEIGHT = 420;
 
@@ -92,6 +92,7 @@ export const ApiStep = ({
         defaultMessage: 'Change language to {language}',
         values: { language: lang.label },
       })}
+      data-test-subj={`vectordbWizardLanguageOption-${lang.id}`}
       data-telemetry-id={`${telemetryPrefix}-selectLanguage-${lang.id}`}
     >
       {lang.label}
@@ -249,6 +250,7 @@ export const ApiStep = ({
           href={infoPanel.docsHref}
           external
           target="_blank"
+          data-test-subj="vectordbWizardInfoPanelDocLink"
           data-telemetry-id={`${telemetryPrefix}-infoPanelDocLink`}
         >
           {infoPanel.docsLabel}

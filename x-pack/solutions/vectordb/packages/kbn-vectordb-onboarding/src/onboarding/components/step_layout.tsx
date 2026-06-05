@@ -21,9 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { useKibana } from '../services';
+import { useKibana } from '../../services';
 import { StepRail } from './step_rail';
-import type { VectorPath, WizardStep } from './types';
+import type { VectorPath, WizardStep } from '../types';
 
 interface StepLayoutProps {
   currentStep: 1 | 2;
@@ -90,6 +90,7 @@ export const StepLayout = ({
               href={docsHref}
               external
               target="_blank"
+              data-test-subj="stepLayoutDocsLink"
               data-telemetry-id={`${telemetryIdPrefix}-docsLink`}
             >
               {docsLabel}

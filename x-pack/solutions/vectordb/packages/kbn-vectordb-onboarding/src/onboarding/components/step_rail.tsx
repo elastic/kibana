@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { WizardStep, VectorPath } from './types';
+import type { WizardStep, VectorPath } from '../types';
 
 interface StepConfig {
   label: string;

@@ -7,7 +7,6 @@
 
 import React, { type ReactNode } from 'react';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -18,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-export interface OnboardingPanelProps {
+interface OnboardingPathPanelProps {
   icon: string;
   title: string;
   description: ReactNode;
@@ -27,14 +26,14 @@ export interface OnboardingPanelProps {
   telemetryId: string;
 }
 
-export const OnboardingPanel = ({
+export const OnboardingPathPanel = ({
   icon,
   title,
   description,
   onClick,
   dataTestSubj,
   telemetryId,
-}: OnboardingPanelProps) => {
+}: OnboardingPathPanelProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -77,19 +76,3 @@ export const OnboardingPanel = ({
     </EuiPanel>
   );
 };
-
-interface FeatureTagsProps {
-  tags: string[];
-}
-
-export const FeatureTags = ({ tags }: FeatureTagsProps) => (
-  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-    {tags.map((tag) => (
-      <EuiFlexItem key={tag} grow={false}>
-        <EuiBadge iconType="check" color="default">
-          {tag}
-        </EuiBadge>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-);
