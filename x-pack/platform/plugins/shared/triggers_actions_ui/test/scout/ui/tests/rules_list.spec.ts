@@ -340,22 +340,19 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await ensureRuleStatus(page, rule.data.name as string, 'disabled');
   });
 
-  test('should re-enable single alert', async ({ page, apiServices }) => {
+  test('should re-enable single alert', async ({ page, apiServices, kbnClient }) => {
     const rule = await apiServices.alerting.rules.create(makeEsQueryRule('reenable-single'));
     createdRuleIds.push(rule.data.id);
 
+    // Disable via API so we can focus on testing the re-enable UI path without
+    // the UntrackAlertsModal timing interfering.
+    await disableRule(kbnClient, rule.data.id);
+
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
-
-    // Disable via UI
-    await page.testSubj.click('collapsedItemActions');
-    await page.testSubj.click('disableButton');
-    await expect(page.testSubj.locator('confirmModalConfirmButton')).toBeVisible();
-    await page.testSubj.click('confirmModalConfirmButton');
-
     await ensureRuleStatus(page, rule.data.name as string, 'disabled');
 
-    // Re-enable via UI (no confirmation modal when enabling)
+    // Re-enable via UI — no confirmation modal when enabling a disabled rule.
     await page.testSubj.click('collapsedItemActions');
     await page.testSubj.click('disableButton');
 
