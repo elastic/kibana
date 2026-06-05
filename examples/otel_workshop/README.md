@@ -118,6 +118,10 @@ yarn kbn bootstrap          # first time only (or after switching branches)
 yarn start --run-examples
 ```
 
+The `no-base-path` warning at start-up is **expected and safe to ignore**: `--run-examples`
+intentionally disables dev mode's base-path proxy so example apps get stable URLs. It
+disables nothing the workshop needs.
+
 Open Kibana → **Developer examples → "Coffee Shop (OTel Workshop)"**. Place an order and brew
 a batch to confirm the app works. It emits **no** telemetry yet — that's the exercise.
 
