@@ -206,7 +206,7 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
                 <EuiSpacer size="m" />
                 <RuleExecutionFieldGroup />
                 <EuiSpacer size="m" />
-                <KindField disabled compact />
+                <KindField disabled />
                 <EuiSpacer size="m" />
                 <AlertConditionsFieldGroup />
               </EuiForm>
