@@ -6,7 +6,7 @@
  */
 
 import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
-import { resolveProviderPermissions } from './cloud_formation/resolve_provider_permissions';
+import { resolveProviderPermissions } from './resolve_provider_permissions';
 
 export interface AwsServicePermissions {
   id: string;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AWS_SERVICES_MATRIX } from '../aws_service_matrix';
-import type { ProviderPermissions } from '../aws_provider_permissions';
+import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
+import type { ProviderPermissions } from './aws_provider_permissions';
 
 export interface ResolvedProviderPermissions {
   actions: string[];

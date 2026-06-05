@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { formatIamPolicyDocument, getIntegrationSid } from '../cloud_formation/iam_policy_document';
+import { formatIamPolicyDocument, getIntegrationSid } from '../iam_policy_document';
 import type { AwsServicePermissions } from '../service_permissions';
 
 export const AWS_PERMISSIONS_VIEWER_TEST_SUBJ = 'awsPermissionsViewer';
