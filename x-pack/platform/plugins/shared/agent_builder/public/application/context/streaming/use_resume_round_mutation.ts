@@ -126,7 +126,6 @@ export const useResumeRoundMutation = ({
     (conversationId: string) => {
       const entry = controllersRef.current.get(conversationId);
       if (entry) {
-        // Stop the run server-side, then tear down the local subscription.
         chatService.abort(entry.executionId).catch(() => {});
         entry.controller.abort();
       }
