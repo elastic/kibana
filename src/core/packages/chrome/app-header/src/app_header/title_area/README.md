@@ -7,7 +7,8 @@ user can rename inline.
 - `title_area.tsx` — `TitleArea`: thin layout orchestrator (back button + title in a
   flex row). Holds no edit state.
 - `title.tsx` — `Title`: the editable/read-only title itself. All the styling, width
-  model, save flow, and a11y live here. Also exports the `isEditableTitle` type guard.
+  model, save flow, and a11y live here. Takes a `size` (`xs` | `s`) for the `EuiTitle`.
+  Also exports the `isEditableTitle` type guard.
 - `title_area.stories.tsx` — every scenario, rendered inside the full app header.
 - `title.test.tsx` — behavior/a11y tests for the save, validation, and cancel flows.
 - `index.ts` — public barrel (`TitleArea`, `TitleAreaProps`).
@@ -33,6 +34,10 @@ A `string` title renders as a non-editable heading. An object title renders the
 inline editor. `onSave` returns nothing on success, or an **error string** to reject
 the value (also thrown errors are caught and surfaced). The component owns all edit
 state (`draft`, `error`, `isSaving`); the caller only owns the committed `text`.
+
+The `size` (`xs` | `s`) is decided upstream in `AppHeaderView`: `s` when tabs are
+present, otherwise `xs`. The size applies uniformly to read and edit, so it does not
+affect the pixel-parity below.
 
 ## The one hard requirement: read and edit must be pixel-identical
 
