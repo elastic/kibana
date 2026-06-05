@@ -141,7 +141,24 @@ You'll add **two** instruments to the order pipeline:
 | `UpDownCounter` | `kibana.otel_workshop.order.active` | Orders **currently** in the pipeline (goes up, then down). |
 | `Histogram` | `kibana.otel_workshop.order.duration` | How long each order took, split by `coffee.drink` + `outcome`. |
 
-### Step 1 — Create the meter and instruments
+### Recommended: let the `kibana-otel-instrumentation` skill wire it up
+
+The pipeline already carries the `// @otel:` markers this skill reads. In Claude Code, trigger
+the **`kibana-otel-instrumentation`** skill and ask it to **instrument the markers in
+`server/pipeline/process_order.ts`** — it re-reads the `@kbn/metrics` rules, creates the
+meter, picks the right instrument types/units, and writes the emit calls for you. Then ask it
+to **review** its own output against the skill's checklist.
+
+Two things to confirm in what it produces:
+- the in-flight metric is emitted **twice** — `+1` where the order enters, `-1` in the
+  `finally` block (so it still fires when an order fails);
+- the duration histogram carries `coffee.drink` + `outcome`, while the UpDownCounter stays
+  attribute-free (the callouts below explain *why*).
+
+<details>
+<summary><strong>Prefer to wire it by hand? Manual steps</strong></summary>
+
+#### Step 1 — Create the meter and instruments
 
 Create a new file `server/metrics.ts`. Get the meter **once** at module scope, and pass the
 **fully-qualified** metric name to each `create*` call (the meter name is *not* auto-prefixed):
@@ -164,7 +181,7 @@ export const orderDuration = meter.createHistogram('kibana.otel_workshop.order.d
 });
 ```
 
-### Step 2 — Emit at the markers in `process_order.ts`
+#### Step 2 — Emit at the markers in `process_order.ts`
 
 Import them: `import { activeOrders, orderDuration } from '../metrics';` then replace the
 three `// @otel:` markers:
@@ -179,6 +196,8 @@ activeOrders.add(-1);
 ```
 
 (You can delete the `void durationMs;` line once you're using `durationMs`.)
+
+</details>
 
 > **Why an UpDownCounter has two emit sites.** An order *enters* the pipeline (`+1`) and
 > later *leaves* it (`-1`). The `-1` lives in `finally` so it runs whether the order
@@ -197,6 +216,17 @@ Restart `yarn start`, open the app, and click **Brew a batch of 25**. Within ~10
 - `kibana.otel_workshop.order.active` rising above 1 during the batch, then settling to 0.
 - `kibana.otel_workshop.order.duration` as a histogram carrying the `coffee.drink` and
   `outcome` (`success` / `failure`) attributes.
+
+---
+
+## Tier 2 — Observable metrics *(skipped — see Appendix)*
+
+Tier 2 in the curriculum is **observable / pull-based** metrics: values sampled on a timer
+(`createObservableGauge` / `Observable*Counter`) instead of pushed on each event, plus
+batching them with `addBatchObservableCallback`. It's intentionally left out of the
+60-minute flow to keep things tight — the write-up is in the **[Appendix](#appendix--going-further-not-part-of-the-60-minute-flow)** below.
+The tier numbers stay aligned with the workshop slides: Tier 1 was the *push* side of
+metrics, Tier 2 is the *pull* side, and Tier 3 moves on to traces.
 
 ---
 
