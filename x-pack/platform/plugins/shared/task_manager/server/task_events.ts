@@ -43,19 +43,26 @@ export function startTaskTimer(): () => TaskTiming {
   return () => ({ start, stop: Date.now() });
 }
 
+export interface TaskTimer {
+  startTime: number;
+  stopTaskTimer: () => TaskTiming;
+}
+
 export function startTaskTimerWithEventLoopMonitoring(
   eventLoopDelayConfig: EventLoopDelayConfig
-): () => TaskTiming {
-  const stopTaskTimer = startTaskTimer();
+): TaskTimer {
+  const start = Date.now();
   const eldHistogram = eventLoopDelayConfig.monitor ? monitorEventLoopDelay() : null;
   eldHistogram?.enable();
 
-  return () => {
-    const { start, stop } = stopTaskTimer();
-    eldHistogram?.disable();
-    const eldMax = eldHistogram?.max ?? 0;
-    const eventLoopBlockMs = Math.round(eldMax / 1000 / 1000); // original in nanoseconds
-    return { start, stop, eventLoopBlockMs };
+  return {
+    startTime: start,
+    stopTaskTimer: () => {
+      eldHistogram?.disable();
+      const eldMaxNs = eldHistogram?.max ?? 0;
+      const eventLoopBlockMs = Math.round(eldMaxNs / 1000 / 1000);
+      return { start, stop: Date.now(), eventLoopBlockMs };
+    },
   };
 }
 
