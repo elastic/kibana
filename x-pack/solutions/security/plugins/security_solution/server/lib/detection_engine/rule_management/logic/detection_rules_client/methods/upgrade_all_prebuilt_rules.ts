@@ -31,7 +31,7 @@ interface UpgradeAllPrebuiltRulesDeps {
 
 interface UpgradeAllPrebuiltRulesParams {
   filter?: PrebuiltRulesFilter;
-  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   defaultPickVersion: PickVersionValues;
   isDryRun: boolean;
   deps: UpgradeAllPrebuiltRulesDeps;

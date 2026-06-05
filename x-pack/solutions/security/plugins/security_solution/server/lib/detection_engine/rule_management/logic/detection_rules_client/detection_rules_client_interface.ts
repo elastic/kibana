@@ -108,14 +108,14 @@ export interface InstallPrebuiltRulesResult {
 
 export interface UpgradePrebuiltRulesArgs {
   ruleSpecifiers: RuleUpgradeSpecifier[];
-  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   defaultPickVersion: PickVersionValues;
   isDryRun: boolean;
 }
 
 export interface UpgradeAllPrebuiltRulesArgs {
   filter?: PrebuiltRulesFilter;
-  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   defaultPickVersion: PickVersionValues;
   isDryRun: boolean;
 }

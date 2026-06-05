@@ -51,8 +51,8 @@ export const performRuleUpgradeHandler = async (
 
     const { mode, dry_run: isDryRun, on_conflict: conflictResolutionStrategy } = request.body;
     const sharedArgs = {
-      conflictResolutionStrategy: conflictResolutionStrategy ?? 'UPGRADE_SOLVABLE',
-      defaultPickVersion,
+      conflictResolutionStrategy,
+      defaultPickVersion: request.body.pick_version ?? defaultPickVersion,
       isDryRun: isDryRun ?? false,
     } as const;
 

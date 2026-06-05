@@ -49,7 +49,7 @@ interface UpgradePrebuiltRulesDeps {
 
 interface UpgradePrebuiltRulesParams {
   ruleSpecifiers: RuleUpgradeSpecifier[];
-  conflictResolutionStrategy: UpgradeConflictResolutionStrategy;
+  conflictResolutionStrategy?: UpgradeConflictResolutionStrategy;
   defaultPickVersion: PickVersionValues;
   isDryRun: boolean;
   deps: UpgradePrebuiltRulesDeps;
@@ -62,7 +62,15 @@ export async function upgradePrebuiltRules({
   isDryRun,
   deps: { actionsClient, rulesClient, mlAuthz, ruleAssetsClient, ruleObjectsClient },
 }: UpgradePrebuiltRulesParams): Promise<UpgradePrebuiltRulesResult> {
-  const upgradeSpecifiers = new Map(ruleSpecifiers.map((r) => [r.rule_id, r]));
+  // Only include specifiers that carry actual per-rule configuration (pick_version or fields).
+  // Specifiers without these (e.g. plain RuleVersionSpecifier items from ALL_RULES mode)
+  // are excluded so that createModifiedPrebuiltRuleAssets receives `undefined` and correctly
+  // falls into the ALL_RULES code path (conflict detection, globalPickVersion, etc.).
+  const upgradeSpecifiers = new Map(
+    ruleSpecifiers
+      .filter((r) => r.pick_version !== undefined || r.fields !== undefined)
+      .map((r) => [r.rule_id, r])
+  );
   const ruleUpgradeQueue = [...ruleSpecifiers];
 
   const skippedRules: SkippedRuleUpgrade[] = [];
@@ -154,7 +162,7 @@ export async function upgradePrebuiltRules({
       upgradeableRules,
       globalPickVersion: defaultPickVersion,
       conflictResolutionStrategy,
-      upgradeSpecifiers,
+      upgradeSpecifiers: upgradeSpecifiers.size > 0 ? upgradeSpecifiers : undefined,
     });
 
     errors.push(...processingErrors);
