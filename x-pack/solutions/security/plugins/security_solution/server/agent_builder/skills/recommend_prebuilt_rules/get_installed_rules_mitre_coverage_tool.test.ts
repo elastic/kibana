@@ -13,6 +13,7 @@ import {
 } from '../../__mocks__/test_helpers';
 import {
   GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID,
+  buildMitreCoverageFromRules,
   createGetInstalledRulesMitreCoverageTool,
 } from './get_installed_rules_mitre_coverage_tool';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
@@ -23,29 +24,34 @@ jest.mock('../../../lib/detection_engine/rule_management/logic/search/find_rules
 
 const mockFindRules = jest.mocked(findRules);
 
-const makeTacticBucket = (id: string, name: string, count: number) => ({
-  key: id,
-  doc_count: count,
-  name: { buckets: [{ key: name }] },
-});
+// ---- Threat fixture builders (mirror the structured `params.threat` shape) ----
 
-const makeTechniqueBucket = (
+const sub = (id: string, name: string) => ({ id, name, reference: `https://attack/${id}` });
+
+const tech = (
   id: string,
   name: string,
-  count: number,
-  subtechniques: Array<{ id: string; name: string; count: number }> = []
+  subtechnique: Array<{ id: string; name: string }> = []
 ) => ({
-  key: id,
-  doc_count: count,
-  name: { buckets: [{ key: name }] },
-  subtechniques: {
-    buckets: subtechniques.map((s) => ({
-      key: s.id,
-      doc_count: s.count,
-      name: { buckets: [{ key: s.name }] },
-    })),
-  },
+  id,
+  name,
+  reference: `https://attack/${id}`,
+  subtechnique,
 });
+
+const mitre = (
+  tacticId: string,
+  tacticName: string,
+  technique: Array<ReturnType<typeof tech>> = []
+) => ({
+  framework: 'MITRE ATT&CK',
+  tactic: { id: tacticId, name: tacticName, reference: `https://attack/${tacticId}` },
+  technique,
+});
+
+type Rules = Parameters<typeof buildMitreCoverageFromRules>[0];
+const rule = (threat: unknown) => ({ params: { threat } });
+const rules = (...list: unknown[]): Rules => list as Rules;
 
 const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -65,6 +71,162 @@ const createMockDeps = () => {
   return { getStartServices: mockCore.getStartServices, mockLogger, mockRequest };
 };
 
+describe('buildMitreCoverageFromRules', () => {
+  it('keeps each technique paired with its own name and its own subtechnique (regression: the flattened-agg bug)', () => {
+    // One rule mapping to two techniques, each with one subtechnique. The old aggregation-based
+    // implementation cross-contaminated names and duplicated subtechniques across both parents.
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([
+          mitre('TA0040', 'Impact', [
+            tech('T1491', 'Defacement', [sub('T1491.002', 'External Defacement')]),
+            tech('T1565', 'Data Manipulation', [sub('T1565.001', 'Stored Data Manipulation')]),
+          ]),
+        ])
+      ),
+      1
+    );
+
+    expect(result).toEqual({
+      total_installed_rules: 1,
+      total_with_mitre_mapping: 1,
+      tactics: [{ id: 'TA0040', name: 'Impact', count: 1 }],
+      techniques: [
+        {
+          id: 'T1491',
+          name: 'Defacement',
+          count: 1,
+          subtechniques: [{ id: 'T1491.002', name: 'External Defacement', count: 1 }],
+        },
+        {
+          id: 'T1565',
+          name: 'Data Manipulation',
+          count: 1,
+          subtechniques: [{ id: 'T1565.001', name: 'Stored Data Manipulation', count: 1 }],
+        },
+      ],
+    });
+  });
+
+  it('counts each rule once per id and sorts by count desc then id', () => {
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([
+          mitre('TA0001', 'Initial Access', [
+            tech('T1059', 'Command and Scripting Interpreter', [sub('T1059.001', 'PowerShell')]),
+          ]),
+        ]),
+        rule([
+          mitre('TA0001', 'Initial Access', [
+            tech('T1059', 'Command and Scripting Interpreter', [
+              sub('T1059.003', 'Windows Command Shell'),
+            ]),
+          ]),
+        ]),
+        rule([mitre('TA0002', 'Execution', [tech('T1059', 'Command and Scripting Interpreter')])])
+      ),
+      3
+    );
+
+    expect(result.total_with_mitre_mapping).toBe(3);
+    expect(result.tactics).toEqual([
+      { id: 'TA0001', name: 'Initial Access', count: 2 },
+      { id: 'TA0002', name: 'Execution', count: 1 },
+    ]);
+    expect(result.techniques).toEqual([
+      {
+        id: 'T1059',
+        name: 'Command and Scripting Interpreter',
+        count: 3,
+        subtechniques: [
+          { id: 'T1059.001', name: 'PowerShell', count: 1 },
+          { id: 'T1059.003', name: 'Windows Command Shell', count: 1 },
+        ],
+      },
+    ]);
+  });
+
+  it('de-duplicates ids within a single rule (technique referenced under two tactics counts once)', () => {
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([
+          mitre('TA0001', 'Initial Access', [tech('T1059', 'Command and Scripting Interpreter')]),
+          mitre('TA0002', 'Execution', [tech('T1059', 'Command and Scripting Interpreter')]),
+        ])
+      ),
+      1
+    );
+
+    expect(result.total_with_mitre_mapping).toBe(1);
+    expect(result.techniques).toEqual([
+      { id: 'T1059', name: 'Command and Scripting Interpreter', count: 1 },
+    ]);
+    expect(result.tactics).toEqual([
+      { id: 'TA0001', name: 'Initial Access', count: 1 },
+      { id: 'TA0002', name: 'Execution', count: 1 },
+    ]);
+  });
+
+  it('omits the subtechniques field when a technique has none covered', () => {
+    const result = buildMitreCoverageFromRules(
+      rules(rule([mitre('TA0005', 'Defense Evasion', [tech('T1055', 'Process Injection')])])),
+      1
+    );
+
+    expect(result.techniques).toHaveLength(1);
+    expect('subtechniques' in result.techniques[0]).toBe(false);
+  });
+
+  it('ignores non-MITRE-ATT&CK frameworks', () => {
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([
+          {
+            framework: 'Some Other Framework',
+            tactic: { id: 'XX', name: 'X', reference: 'https://x' },
+            technique: [],
+          },
+        ])
+      ),
+      1
+    );
+
+    expect(result).toEqual({
+      total_installed_rules: 1,
+      total_with_mitre_mapping: 0,
+      tactics: [],
+      techniques: [],
+    });
+  });
+
+  it('falls back to the id as the name when a name is missing', () => {
+    const result = buildMitreCoverageFromRules(
+      rules(
+        rule([
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: 'TA0001', name: '', reference: 'https://x' },
+            technique: [],
+          },
+        ])
+      ),
+      1
+    );
+
+    expect(result.tactics).toEqual([{ id: 'TA0001', name: 'TA0001', count: 1 }]);
+  });
+
+  it('treats rules without threat as having no MITRE mapping', () => {
+    const result = buildMitreCoverageFromRules(rules(rule(undefined)), 1);
+    expect(result).toEqual({
+      total_installed_rules: 1,
+      total_with_mitre_mapping: 0,
+      tactics: [],
+      techniques: [],
+    });
+  });
+});
+
 describe('createGetInstalledRulesMitreCoverageTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -79,42 +241,28 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       });
 
       expect(tool.id).toBe(GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID);
+      expect(tool.id).toBe('security.get_installed_rules_mitre_coverage');
       expect(tool.type).toBe(ToolType.builtin);
-    });
-
-    it('has the correct tool id constant', () => {
-      expect(GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID).toBe(
-        'security.get_installed_rules_mitre_coverage'
-      );
     });
   });
 
   describe('handler — happy path', () => {
-    it('returns full coverage data with tactics, techniques, and subtechniques', async () => {
+    it('reads structured params.threat and returns coverage', async () => {
       const { getStartServices, mockLogger, mockRequest } = createMockDeps();
       mockFindRules.mockResolvedValue({
-        total: 100,
+        total: 2,
         page: 1,
-        perPage: 0,
-        data: [],
-        aggregations: {
-          by_tactic: {
-            buckets: [
-              makeTacticBucket('TA0001', 'Initial Access', 25),
-              makeTacticBucket('TA0002', 'Execution', 15),
-            ],
-          },
-          by_technique: {
-            buckets: [
-              makeTechniqueBucket('T1059', 'Command and Scripting Interpreter', 8, [
-                { id: 'T1059.001', name: 'PowerShell', count: 5 },
-                { id: 'T1059.003', name: 'Windows Command Shell', count: 2 },
-              ]),
-              makeTechniqueBucket('T1055', 'Process Injection', 3),
-            ],
-          },
-          with_mitre_mapping: { doc_count: 80 },
-        },
+        perPage: 10000,
+        data: [
+          rule([
+            mitre('TA0001', 'Initial Access', [
+              tech('T1566', 'Phishing', [sub('T1566.001', 'Spearphishing Attachment')]),
+            ]),
+          ]),
+          rule([
+            mitre('TA0001', 'Initial Access', [tech('T1190', 'Exploit Public-Facing Application')]),
+          ]),
+        ],
       } as never);
 
       const tool = createGetInstalledRulesMitreCoverageTool({
@@ -128,108 +276,29 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       if ('results' in result) {
         expect(result.results[0].type).toBe(ToolResultType.other);
         expect(result.results[0].data).toEqual({
-          total_installed_rules: 100,
-          total_with_mitre_mapping: 80,
-          tactics: [
-            { id: 'TA0001', name: 'Initial Access', count: 25 },
-            { id: 'TA0002', name: 'Execution', count: 15 },
-          ],
+          total_installed_rules: 2,
+          total_with_mitre_mapping: 2,
+          tactics: [{ id: 'TA0001', name: 'Initial Access', count: 2 }],
           techniques: [
             {
-              id: 'T1059',
-              name: 'Command and Scripting Interpreter',
-              count: 8,
-              subtechniques: [
-                { id: 'T1059.001', name: 'PowerShell', count: 5 },
-                { id: 'T1059.003', name: 'Windows Command Shell', count: 2 },
-              ],
+              id: 'T1190',
+              name: 'Exploit Public-Facing Application',
+              count: 1,
             },
             {
-              id: 'T1055',
-              name: 'Process Injection',
-              count: 3,
+              id: 'T1566',
+              name: 'Phishing',
+              count: 1,
+              subtechniques: [{ id: 'T1566.001', name: 'Spearphishing Attachment', count: 1 }],
             },
           ],
         });
       }
     });
 
-    it('omits subtechniques field entirely when a technique has none covered', async () => {
+    it('reads up to 10k rules by structured field and does NOT aggregate the flattened params', async () => {
       const { getStartServices, mockLogger, mockRequest } = createMockDeps();
-      mockFindRules.mockResolvedValue({
-        total: 10,
-        page: 1,
-        perPage: 0,
-        data: [],
-        aggregations: {
-          by_tactic: { buckets: [] },
-          by_technique: {
-            buckets: [makeTechniqueBucket('T1055', 'Process Injection', 3)],
-          },
-          with_mitre_mapping: { doc_count: 10 },
-        },
-      } as never);
-
-      const tool = createGetInstalledRulesMitreCoverageTool({
-        getStartServices,
-        logger: mockLogger,
-      });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      const result = await tool.handler({}, context);
-
-      expect('results' in result).toBe(true);
-      if ('results' in result) {
-        const technique = (
-          result.results[0].data as { techniques: Array<{ subtechniques?: unknown }> }
-        ).techniques[0];
-        expect('subtechniques' in technique).toBe(false);
-      }
-    });
-
-    it('uses the id as name fallback when name sub-agg has no buckets', async () => {
-      const { getStartServices, mockLogger, mockRequest } = createMockDeps();
-      mockFindRules.mockResolvedValue({
-        total: 5,
-        page: 1,
-        perPage: 0,
-        data: [],
-        aggregations: {
-          by_tactic: {
-            buckets: [{ key: 'TA0001', doc_count: 5, name: { buckets: [] } }],
-          },
-          by_technique: { buckets: [] },
-          with_mitre_mapping: { doc_count: 5 },
-        },
-      } as never);
-
-      const tool = createGetInstalledRulesMitreCoverageTool({
-        getStartServices,
-        logger: mockLogger,
-      });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      const result = await tool.handler({}, context);
-
-      expect('results' in result).toBe(true);
-      if ('results' in result) {
-        expect(
-          (result.results[0].data as { tactics: Array<{ name: string }> }).tactics[0].name
-        ).toBe('TA0001');
-      }
-    });
-
-    it('passes perPage=0 and correct aggregation fields to findRules', async () => {
-      const { getStartServices, mockLogger, mockRequest } = createMockDeps();
-      mockFindRules.mockResolvedValue({
-        total: 0,
-        page: 1,
-        perPage: 0,
-        data: [],
-        aggregations: {
-          by_tactic: { buckets: [] },
-          by_technique: { buckets: [] },
-          with_mitre_mapping: { doc_count: 0 },
-        },
-      } as never);
+      mockFindRules.mockResolvedValue({ total: 0, page: 1, perPage: 10000, data: [] } as never);
 
       const tool = createGetInstalledRulesMitreCoverageTool({
         getStartServices,
@@ -240,41 +309,19 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
 
       expect(mockFindRules).toHaveBeenCalledWith(
         expect.objectContaining({
-          perPage: 0,
-          aggregations: expect.objectContaining({
-            by_tactic: expect.objectContaining({
-              terms: expect.objectContaining({ field: 'alert.attributes.params.threat.tactic.id' }),
-            }),
-            by_technique: expect.objectContaining({
-              terms: expect.objectContaining({
-                field: 'alert.attributes.params.threat.technique.id',
-              }),
-            }),
-            with_mitre_mapping: expect.objectContaining({
-              filter: expect.objectContaining({
-                exists: { field: 'alert.attributes.params.threat.tactic.id' },
-              }),
-            }),
-          }),
+          fields: ['params.threat'],
+          page: 1,
+          perPage: 10000,
         })
       );
+      expect(mockFindRules.mock.calls[0][0].aggregations).toBeUndefined();
     });
   });
 
   describe('handler — no rules installed', () => {
-    it('returns zero counts and empty arrays when no rules are installed', async () => {
+    it('returns zero counts and empty arrays', async () => {
       const { getStartServices, mockLogger, mockRequest } = createMockDeps();
-      mockFindRules.mockResolvedValue({
-        total: 0,
-        page: 1,
-        perPage: 0,
-        data: [],
-        aggregations: {
-          by_tactic: { buckets: [] },
-          by_technique: { buckets: [] },
-          with_mitre_mapping: { doc_count: 0 },
-        },
-      } as never);
+      mockFindRules.mockResolvedValue({ total: 0, page: 1, perPage: 10000, data: [] } as never);
 
       const tool = createGetInstalledRulesMitreCoverageTool({
         getStartServices,
@@ -283,41 +330,10 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
-      expect('results' in result).toBe(true);
       if ('results' in result) {
         expect(result.results[0].type).toBe(ToolResultType.other);
         expect(result.results[0].data).toEqual({
           total_installed_rules: 0,
-          total_with_mitre_mapping: 0,
-          tactics: [],
-          techniques: [],
-        });
-      }
-    });
-  });
-
-  describe('handler — missing aggregations', () => {
-    it('returns zero/empty values when aggregations are absent from findRules result', async () => {
-      const { getStartServices, mockLogger, mockRequest } = createMockDeps();
-      mockFindRules.mockResolvedValue({
-        total: 10,
-        page: 1,
-        perPage: 0,
-        data: [],
-      } as never);
-
-      const tool = createGetInstalledRulesMitreCoverageTool({
-        getStartServices,
-        logger: mockLogger,
-      });
-      const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
-      const result = await tool.handler({}, context);
-
-      expect('results' in result).toBe(true);
-      if ('results' in result) {
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        expect(result.results[0].data).toEqual({
-          total_installed_rules: 10,
           total_with_mitre_mapping: 0,
           tactics: [],
           techniques: [],
@@ -338,7 +354,6 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
-      expect('results' in result).toBe(true);
       if ('results' in result) {
         expect(result.results[0].type).toBe(ToolResultType.error);
         expect((result.results[0].data as { message: string }).message).toContain(
@@ -361,7 +376,6 @@ describe('createGetInstalledRulesMitreCoverageTool', () => {
       const context = createToolHandlerContext(mockRequest, {} as never, mockLogger);
       const result = await tool.handler({}, context);
 
-      expect('results' in result).toBe(true);
       if ('results' in result) {
         expect(result.results[0].type).toBe(ToolResultType.error);
         expect((result.results[0].data as { message: string }).message).toContain('string error');

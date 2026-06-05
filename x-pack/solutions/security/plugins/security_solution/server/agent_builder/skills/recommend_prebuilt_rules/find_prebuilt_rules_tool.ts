@@ -85,20 +85,23 @@ export const findPrebuiltRulesSchema = z
       .optional()
       .describe('Exclude rules with any of these tags.'),
     mitreTechnique: z
-      .string()
-      .regex(/^T\d{4}(\.\d{3})?$/i)
-      .max(MAX_STRING_LENGTH)
+      .array(
+        z
+          .string()
+          .regex(/^T\d{4}(\.\d{3})?$/i)
+          .max(MAX_STRING_LENGTH)
+      )
       .optional()
-      .describe('MITRE technique ID, e.g. "T1059" or "T1059.001".'),
+      .describe('MITRE technique IDs to include (OR), e.g. ["T1059", "T1059.001"].'),
     mitreTactic: z
-      .string()
-      .min(1)
-      .max(MAX_STRING_LENGTH)
+      .array(z.string().min(1).max(MAX_STRING_LENGTH))
       .optional()
       .describe(
-        'MITRE tactic, either ID (e.g. "TA0001") or display name (e.g. "Initial Access"). ' +
-          'Queries the structured threat field, so it finds rules whose tactic is in rule ' +
-          'metadata even when no "Tactic: X" tag is present. Prefer IDs.'
+        'MITRE tactics to include (OR), each either an ID (e.g. "TA0001") or display name ' +
+          '(e.g. "Initial Access"). Queries the structured threat field, so it finds rules whose ' +
+          'tactic is in rule metadata even when no "Tactic: X" tag is present. Prefer IDs. Pass ' +
+          'several to gather candidates across tactics in one call; use separate single-tactic ' +
+          'calls when you need balanced per-tactic coverage or a count per tactic.'
       ),
     relatedIntegrations: z
       .array(z.string().min(1).max(MAX_STRING_LENGTH))
@@ -131,9 +134,10 @@ export const findPrebuiltRulesSchema = z
       .max(50)
       .default(10)
       .describe(
-        'Number of results to return (default 10, max 50). Keep the default unless the user ' +
-          'explicitly asks for a specific count. Never increase it on follow-up turns just ' +
-          'because a previous result was truncated — narrow the filter instead.'
+        'Number of results to return (default 10, max 50). Use a larger value (e.g. 30–50) for a ' +
+          'triage-only survey pass that maps the candidate landscape; keep it small for results ' +
+          'you actually present, and do not paginate just to show the user more — narrow the ' +
+          'filter instead.'
       ),
     sortField: z
       .enum(SORT_FIELDS)
@@ -227,18 +231,37 @@ export const buildPrebuiltRulesToolFilter = (
     parts.push(excludeClauses.join(' AND '));
   }
 
-  if (params.mitreTechnique) {
-    const techniqueField = params.mitreTechnique.includes('.')
-      ? SUBTECHNIQUE_ID_FIELD
-      : TECHNIQUE_ID_FIELD;
-    parts.push(`${techniqueField}: ${params.mitreTechnique}`);
+  if (params.mitreTechnique?.length) {
+    // Sub-technique IDs (e.g. T1059.001) live in a different field than technique IDs.
+    const techniqueIds = params.mitreTechnique.filter((value) => !value.includes('.'));
+    const subtechniqueIds = params.mitreTechnique.filter((value) => value.includes('.'));
+    const clauses: string[] = [];
+    if (techniqueIds.length) {
+      clauses.push(`${TECHNIQUE_ID_FIELD}: (${techniqueIds.join(' OR ')})`);
+    }
+    if (subtechniqueIds.length) {
+      clauses.push(`${SUBTECHNIQUE_ID_FIELD}: (${subtechniqueIds.join(' OR ')})`);
+    }
+    if (clauses.length) {
+      parts.push(clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`);
+    }
   }
 
-  if (params.mitreTactic) {
-    if (/^TA\d{4}$/i.test(params.mitreTactic)) {
-      parts.push(`${TACTIC_ID_FIELD}: ${params.mitreTactic}`);
-    } else {
-      parts.push(`${TACTIC_NAME_FIELD}: ${prepareKQLStringParam(params.mitreTactic)}`);
+  if (params.mitreTactic?.length) {
+    // Each value is routed by shape: a TA-ID hits threat.tactic.id, a display name hits
+    // threat.tactic.name (quoted). Values of both kinds are OR-ed across the two fields.
+    const tacticIds = params.mitreTactic.filter((value) => /^TA\d{4}$/i.test(value));
+    const tacticNames = params.mitreTactic.filter((value) => !/^TA\d{4}$/i.test(value));
+    const clauses: string[] = [];
+    if (tacticIds.length) {
+      clauses.push(`${TACTIC_ID_FIELD}: (${tacticIds.join(' OR ')})`);
+    }
+    if (tacticNames.length) {
+      const quoted = tacticNames.map((name) => prepareKQLStringParam(name));
+      clauses.push(`${TACTIC_NAME_FIELD}: (${quoted.join(' OR ')})`);
+    }
+    if (clauses.length) {
+      parts.push(clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`);
     }
   }
 
@@ -356,9 +379,10 @@ export const createFindPrebuiltRulesInlineTool = ({
     'Search the catalog of installable (not-yet-installed, non-deprecated) Elastic prebuilt ' +
     'detection rules using structured filters. Returns a compact triage shape per rule by ' +
     'default — rule_id, name, severity, risk_score, tags, MITRE tactics, and ' +
-    'related_integrations.package — plus the total match count. Compare `related_integrations.package` ' +
-    'against the cached user inventory to reason about which rules likely have data to run on — an ' +
-    'installed integration is a signal, not a guarantee that data is flowing. ' +
+    "related_integrations.package — plus the total match count. A rule's related_integrations are the " +
+    'Fleet packages it is built to query (they supply its source events); compare them against the ' +
+    'cached user inventory to reason about which rules likely have data to run on — a related ' +
+    'integration being installed is a signal, not a guarantee that the right data is flowing. ' +
     'The response also includes `space_url_prefix`: prepend it to ' +
     '`/app/security/rules/add_rules/<rule_id>` to build a deep link that opens a rule install flyout. ' +
     'Opt into deeper detail (description, query, full MITRE, etc.) via `fields`, and deep-fetch ' +

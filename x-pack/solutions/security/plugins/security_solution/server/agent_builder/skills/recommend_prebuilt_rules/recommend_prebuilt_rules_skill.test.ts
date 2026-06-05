@@ -142,4 +142,39 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     // And it should not assert flat, unqualified runnability to the user.
     expect(skill.content).not.toMatch(/\brunnable on your (current )?data\b/i);
   });
+
+  it('frames the skill as a personalized, customer-tailored recommender', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toContain('## Tailor to the Customer');
+    expect(skill.content).toMatch(/personalized recommender, not a generic/i);
+  });
+
+  it('teaches progressive deepening of finalists via fields and ruleIds', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toContain('## Precision: Narrow, Then Deepen');
+    expect(skill.content).toMatch(/\bfields\b/);
+    expect(skill.content).toMatch(/\bruleIds\b/);
+  });
+
+  it('requires a wide survey pass and cutting the candidate pool to a strict subset', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    // A wide, thin survey pass before deepening.
+    expect(skill.content).toMatch(/wide, thin net|survey pass|candidate landscape/i);
+    // The shortlist must be larger than the final list, and the final set a strict subset.
+    expect(skill.content).toMatch(/larger than your final/i);
+    expect(skill.content).toMatch(/strict subset/i);
+    // Population awareness: survey rows are a sample of total; narrow instead of maxing perPage.
+    expect(skill.content).toMatch(/sample of `total`/i);
+    expect(skill.content).toMatch(/not reflexively the max|tighten the filter/i);
+  });
+
+  it('asks for a Selection notes block recording kept/dropped after a deepen pass', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toContain('**Selection notes**');
+    expect(skill.content).toMatch(/kept|dropped/i);
+  });
 });
