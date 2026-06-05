@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { WorkflowExecutionState } from './get_execution_state';
 
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Maintenance Windows', function () {
-    loadTestFile(require.resolve('./maintenance_windows_table'));
-  });
-};
+export type WorkflowExecutionResult =
+  | { success: true; execution: WorkflowExecutionState }
+  | { success: false; error: string };
