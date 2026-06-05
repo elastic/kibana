@@ -104,10 +104,6 @@ test.describe('Rule Details - Legacy notify values', { tag: tags.stateful.classi
     await page.testSubj.click('openEditRuleFlyoutButton');
 
     // Legacy rule-level notify values are surfaced as action-level frequency.
-    await page.testSubj
-      .locator('ruleActionsItem')
-      .getByRole('button', { name: 'Settings' })
-      .click();
     await expect(page.testSubj.locator('notifyWhenSelect')).toContainText(
       'On custom action intervals'
     );
