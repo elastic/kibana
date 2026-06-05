@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Home page', function () {
-    loadTestFile(require.resolve('./feature_controls'));
-  });
-};
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

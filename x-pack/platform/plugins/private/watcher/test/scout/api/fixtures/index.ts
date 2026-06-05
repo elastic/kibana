@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Watcher', () => {
-    loadTestFile(require.resolve('./watcher'));
-  });
-}
+export { apiTest } from '@kbn/scout';
+export * as testData from './constants';
