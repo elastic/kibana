@@ -10,14 +10,14 @@
 /* eslint-disable no-console */
 
 import * as fs from 'fs';
-import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
+import { getLicenseInfoForCommand } from '@kbn/language-documentation';
+import type { CommandDefinition, MultipleLicenseInfo } from '@kbn/language-documentation';
 import {
   processingCommandsIntro,
   processingCommandsItems,
 } from './resources/commands/processing_data';
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
-import type { CommandDefinition, MultipleLicenseInfo } from '../src/types';
-import { getLicenseInfoForCommand } from '../src/utils/get_license_info';
+import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
 import { OUTPUT_DIR } from './constants';
 
 interface CommandItemMetadata {

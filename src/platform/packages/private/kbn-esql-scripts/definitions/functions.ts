@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { FunctionDefinition } from '../src/commands/definitions/types';
-import { FunctionDefinitionTypes } from '../src/commands/definitions/types';
+import type { FunctionDefinition } from '@kbn/esql-language';
+import { FunctionDefinitionTypes } from '@kbn/esql-language';
 import {
   defaultScalarFunctionLocations,
   dateDiffSuggestions,
