@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { copyToClipboard } from '@elastic/eui';
 import {
   LifecycleTabLabel,
@@ -155,10 +156,16 @@ describe('LifecycleTabLabel', () => {
       toasts: { addSuccess: jest.fn() },
     } as unknown as CoreStart['notifications']);
 
-  const createApplication = () =>
+  const createShare = (
+    locatorGetUrl = jest.fn(async () => '/app/management/data/index_management')
+  ) =>
     ({
-      navigateToApp: jest.fn(),
-    } as unknown as CoreStart['application']);
+      url: {
+        locators: {
+          get: jest.fn(() => ({ getUrl: locatorGetUrl })),
+        },
+      },
+    } as unknown as SharePublicStart);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -166,14 +173,13 @@ describe('LifecycleTabLabel', () => {
 
   it('copies the lifecycle API request and shows a success toast', async () => {
     const notifications = createNotifications();
-    const application = createApplication();
 
     render(
       <LifecycleTabLabel
         definition={createDefinition()}
         showActions
         notifications={notifications}
-        application={application}
+        share={createShare()}
       />
     );
 
@@ -195,7 +201,7 @@ describe('LifecycleTabLabel', () => {
         definition={createDefinition()}
         showActions
         notifications={notifications}
-        application={createApplication()}
+        share={createShare()}
       />
     );
 
@@ -205,8 +211,10 @@ describe('LifecycleTabLabel', () => {
     expect(notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
-  it('navigates to index management with the encoded template name', async () => {
-    const application = createApplication();
+  it('opens the index template edit page in a new tab via the index management locator', async () => {
+    const editUrl = '/app/management/data/index_management/templates/edit/logs@stream';
+    const locatorGetUrl = jest.fn(async () => editUrl);
+    const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
 
     render(
       <LifecycleTabLabel
@@ -214,16 +222,19 @@ describe('LifecycleTabLabel', () => {
         showActions
         indexTemplateName="logs@stream"
         notifications={createNotifications()}
-        application={application}
+        share={createShare(locatorGetUrl)}
       />
     );
 
     await openActionsMenu();
     await clickMenuItem('streamsLifecycleTabEditIndexTemplate');
 
-    expect(application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: 'data/index_management/templates/logs%40stream',
-      openInNewTab: true,
+    expect(locatorGetUrl).toHaveBeenCalledWith({
+      page: 'index_template_edit',
+      indexTemplate: 'logs@stream',
     });
+    expect(windowOpenSpy).toHaveBeenCalledWith(editUrl, '_blank', 'noopener,noreferrer');
+
+    windowOpenSpy.mockRestore();
   });
 });

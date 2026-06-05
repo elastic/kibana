@@ -58,7 +58,10 @@ export function WiredStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
-    core: { notifications, application },
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
   } = useKibana();
   const {
     path: { key, tab },
@@ -184,7 +187,7 @@ export function WiredStreamDetailManagement({
                 showActions={tab === 'lifecycle'}
                 indexTemplateName={`${definition.stream.name}@stream`}
                 notifications={notifications}
-                application={application}
+                share={share}
               />
             ),
           },

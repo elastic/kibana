@@ -60,7 +60,10 @@ export function ClassicStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
-    core: { notifications, application },
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
   } = useKibana();
   const {
     path: { key, tab },
@@ -121,7 +124,7 @@ export function ClassicStreamDetailManagement({
         showActions={tab === 'lifecycle'}
         indexTemplateName={definition.elasticsearch_assets?.indexTemplate}
         notifications={notifications}
-        application={application}
+        share={share}
       />
     ),
   };
