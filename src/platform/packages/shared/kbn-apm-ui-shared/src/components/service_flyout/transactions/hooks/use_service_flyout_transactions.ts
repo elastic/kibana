@@ -50,7 +50,11 @@ export function useServiceFlyoutTransactions({
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
-  const dataSource = usePreferredTransactionDataSource({ http, start, end });
+  const { dataSource, isLoading: isDataSourceLoading } = usePreferredTransactionDataSource({
+    http,
+    start,
+    end,
+  });
 
   const [maxCountExceeded, setMaxCountExceeded] = useState(false);
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
@@ -114,7 +118,7 @@ export function useServiceFlyoutTransactions({
 
   return {
     items,
-    isLoading,
+    isLoading: isLoading || isDataSourceLoading,
     maxCountExceeded: response?.maxCountExceeded ?? false,
     hasActiveAlerts: response?.hasActiveAlerts ?? false,
   };

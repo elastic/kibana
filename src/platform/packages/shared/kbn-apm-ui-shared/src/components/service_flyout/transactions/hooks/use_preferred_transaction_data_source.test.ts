@@ -41,8 +41,8 @@ describe('usePreferredTransactionDataSource', () => {
         { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current?.documentType).toBe('transactionMetric');
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource?.documentType).toBe('transactionMetric');
     });
 
     it('prefers coarser rollup interval that fits within the bucket size', async () => {
@@ -57,8 +57,11 @@ describe('usePreferredTransactionDataSource', () => {
         END_24H
       );
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current).toEqual({ documentType: 'transactionMetric', rollupInterval: '60m' });
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource).toEqual({
+        documentType: 'transactionMetric',
+        rollupInterval: '60m',
+      });
     });
 
     it('falls back to finest rollup when all rollups are coarser than the bucket size', async () => {
@@ -68,8 +71,11 @@ describe('usePreferredTransactionDataSource', () => {
         { documentType: 'transactionMetric', rollupInterval: '60m', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current).toEqual({ documentType: 'transactionMetric', rollupInterval: '10m' });
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource).toEqual({
+        documentType: 'transactionMetric',
+        rollupInterval: '10m',
+      });
     });
 
     it('skips sources with hasDocs: false', async () => {
@@ -78,8 +84,8 @@ describe('usePreferredTransactionDataSource', () => {
         { documentType: 'transactionEvent', rollupInterval: 'none', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current?.documentType).toBe('transactionEvent');
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource?.documentType).toBe('transactionEvent');
     });
 
     it('falls back to transactionMetric/1m when all sources have hasDocs: false', async () => {
@@ -87,8 +93,11 @@ describe('usePreferredTransactionDataSource', () => {
         { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: false },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current).toEqual({ documentType: 'transactionMetric', rollupInterval: '1m' });
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource).toEqual({
+        documentType: 'transactionMetric',
+        rollupInterval: '1m',
+      });
     });
 
     it('falls back to transactionMetric/1m when only ineligible document types are present', async () => {
@@ -96,8 +105,11 @@ describe('usePreferredTransactionDataSource', () => {
         { documentType: 'serviceTransactionMetric', rollupInterval: '1m', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current).toEqual({ documentType: 'transactionMetric', rollupInterval: '1m' });
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource).toEqual({
+        documentType: 'transactionMetric',
+        rollupInterval: '1m',
+      });
     });
 
     it('ignores serviceTransactionMetric sources', async () => {
@@ -106,8 +118,8 @@ describe('usePreferredTransactionDataSource', () => {
         { documentType: 'transactionMetric', rollupInterval: '1m', hasDocs: true },
       ]);
       const { result } = renderHook(() => usePreferredTransactionDataSource({ http, start, end }));
-      await waitFor(() => expect(result.current).not.toBeNull());
-      expect(result.current?.documentType).toBe('transactionMetric');
+      await waitFor(() => expect(result.current.dataSource).toBeDefined());
+      expect(result.current.dataSource?.documentType).toBe('transactionMetric');
     });
   });
 
@@ -142,11 +154,14 @@ describe('usePreferredTransactionDataSource', () => {
       usePreferredTransactionDataSource({ http, start: START_1H, end: END_1H })
     );
 
-    await waitFor(() => expect(result.current).not.toBeNull());
-    expect(result.current).toEqual({ documentType: 'transactionMetric', rollupInterval: '1m' });
+    await waitFor(() => expect(result.current.dataSource).toBeDefined());
+    expect(result.current.dataSource).toEqual({
+      documentType: 'transactionMetric',
+      rollupInterval: '1m',
+    });
   });
 
-  it('returns null before the metadata response arrives', () => {
+  it('returns undefined dataSource with isLoading true before the response arrives', () => {
     const http = {
       get: jest.fn(() => new Promise(() => {})),
     } as unknown as HttpStart;
@@ -155,6 +170,7 @@ describe('usePreferredTransactionDataSource', () => {
       usePreferredTransactionDataSource({ http, start: START_1H, end: END_1H })
     );
 
-    expect(result.current).toBeNull();
+    expect(result.current.dataSource).toBeUndefined();
+    expect(result.current.isLoading).toBe(true);
   });
 });

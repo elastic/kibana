@@ -14,8 +14,8 @@ import { useServiceFlyoutTransactions } from './use_service_flyout_transactions'
 
 jest.mock('./use_preferred_transaction_data_source', () => ({
   usePreferredTransactionDataSource: jest.fn().mockReturnValue({
-    documentType: 'transactionMetric',
-    rollupInterval: '1m',
+    dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
+    isLoading: false,
   }),
 }));
 

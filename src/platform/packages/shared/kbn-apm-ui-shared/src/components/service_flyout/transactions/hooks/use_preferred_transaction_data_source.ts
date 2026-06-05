@@ -10,8 +10,8 @@
 // This file re-implements the data source selection logic from
 // apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts.
 // That module lives in an x-pack plugin and should not be imported from a platform package.
-import { useEffect, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
+import { useAbortableAsync } from '@kbn/react-hooks';
 
 interface TimeRangeMetadataSource {
   documentType: string;
@@ -89,32 +89,26 @@ export function usePreferredTransactionDataSource({
   http: HttpStart;
   start: string;
   end: string;
-}): PreferredTransactionDataSource | null {
-  const [dataSource, setDataSource] = useState<PreferredTransactionDataSource | null>(null);
+}): { dataSource: PreferredTransactionDataSource | undefined; isLoading: boolean } {
+  const { value: dataSource, loading: isLoading } = useAbortableAsync(
+    async ({ signal }) => {
+      const bucketSizeInSeconds =
+        (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS;
+      try {
+        const meta = await http.get<TimeRangeMetadataResponse>(
+          '/internal/apm/time_range_metadata',
+          {
+            signal,
+            query: { start, end, kuery: '', useSpanName: false },
+          }
+        );
+        return pickPreferredTransactionSource(meta.sources, bucketSizeInSeconds);
+      } catch {
+        return FALLBACK;
+      }
+    },
+    [http, start, end]
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const bucketSizeInSeconds =
-      (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS;
-
-    // TODO: replace with typed callApmApi once it lives in a package outside of APM (https://github.com/elastic/kibana/issues/271155)
-    http
-      .get<TimeRangeMetadataResponse>('/internal/apm/time_range_metadata', {
-        query: { start, end, kuery: '', useSpanName: false },
-      })
-      .then((meta) => {
-        if (!cancelled)
-          setDataSource(pickPreferredTransactionSource(meta.sources, bucketSizeInSeconds));
-      })
-      .catch(() => {
-        if (!cancelled) setDataSource(FALLBACK);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [http, start, end]);
-
-  return dataSource;
+  return { dataSource, isLoading };
 }
