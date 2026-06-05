@@ -29,27 +29,25 @@ Almost everything you touch is in **one file**:
 
 ## Setup
 
-### 1. Run Kibana with example plugins
+Configure the telemetry backend **first**, so Kibana exports from the moment it boots.
 
-```bash
-yarn kbn bootstrap          # if you haven't already
-yarn start --run-examples
-```
+### 1. Choose and configure a telemetry backend
 
-Open Kibana → **Developer examples** → **Coffee Shop (OTel Workshop)**. Place an order and
-brew a batch to confirm the app works. (It emits no telemetry yet — that's the point.)
-
-### 2. Point Kibana at a telemetry backend
-
-You need somewhere to send the metrics/traces. Pick **one** of the following and add it to
-`config/kibana.dev.yml`, then restart `yarn start`. Both signals share the same endpoint.
+All telemetry config goes in **`config/kibana.dev.yml`** — your personal, git-ignored dev
+config that Kibana automatically merges on top of `config/kibana.yml` when started with
+`--dev` (which `yarn start` does). Create the file if it doesn't exist yet. Pick **one** of
+the options below and paste its YAML in. Both signals (metrics + traces) go to the same place.
 
 <details open>
 <summary><strong>Option A — Elastic Cloud Managed OTLP endpoint (recommended)</strong></summary>
 
-Easiest path, and you view **metrics in Discover** + **traces in Observability → APM**.
-In your ECH deployment's Kibana, go to **Observability → Add data → Application →
-OpenTelemetry** to copy the OTLP URL and API key, then:
+Easiest path: no local infra, and you view **metrics in Discover** + **traces in
+Observability → APM** in the same deployment.
+
+**Where to get the URL + API key:** in the Kibana of an [Elastic Cloud Hosted](https://cloud.elastic.co)
+deployment, go to **Observability → Add data** (top-right) **→ Application → OpenTelemetry**.
+The section **"Configure the OpenTelemetry SDK"** shows the managed OTLP endpoint URL and an
+API key. Copy them into `config/kibana.dev.yml`:
 
 ```yaml
 telemetry.metrics:
@@ -57,7 +55,7 @@ telemetry.metrics:
   interval: 10s
   exporters:
     - proto:
-        url: '<MANAGED_OTLP_URL>/v1/metrics'
+        url: '<MANAGED_OTLP_URL>/v1/metrics' # e.g. https://<id>.ingest.<region>.cloud.es.io
         headers:
           authorization: 'ApiKey <YOUR_API_KEY>'
 
@@ -70,15 +68,21 @@ telemetry.tracing:
         headers:
           authorization: 'ApiKey <YOUR_API_KEY>'
 ```
+
+> The local Elasticsearch you start in step 2 is **only** what your local Kibana runs
+> against — it is unrelated to where telemetry is shipped. With Option A, your metrics and
+> traces land in the **ECH** deployment, not your local ES.
 </details>
 
 <details>
-<summary><strong>Option B — Local OTLP collector (offline / no cloud)</strong></summary>
+<summary><strong>Option B — Local OTLP collector via Docker (offline / no cloud)</strong></summary>
 
-Run a collector locally and point Kibana at `localhost`. The quickest "did it work?" check
-is the collector's `debug` exporter, which prints every metric and span to its own logs.
+Run a collector on your laptop and point Kibana at `localhost`. The quickest "did it work?"
+check is the collector's `debug` exporter, which prints every metric and span to its own logs.
 
-`otel-collector-config.yaml`:
+**1. Save this as `otel-collector-config.yaml`** (anywhere — e.g. your home dir or a scratch
+folder; you'll mount it into the container in the next step):
+
 ```yaml
 receivers:
   otlp:
@@ -90,18 +94,22 @@ exporters:
 service:
   pipelines:
     metrics: { receivers: [otlp], exporters: [debug] }
-    traces:  { receivers: [otlp], exporters: [debug] }
+    traces: { receivers: [otlp], exporters: [debug] }
 ```
+
+**2. Run the collector** from the directory where you saved that file (so `$(pwd)` resolves
+to it), and leave it running:
 
 ```bash
 docker run --rm -p 4317:4317 -p 4318:4318 \
   -v "$(pwd)/otel-collector-config.yaml:/etc/otelcol/config.yaml" \
   otel/opentelemetry-collector:latest
-# then: docker logs -f <container>   ← your metrics + spans appear here
-# (add a Jaeger service + an `otlp/jaeger` exporter if you want a trace UI at :16686)
+# this terminal now streams your metrics + spans (the `debug` exporter).
+# Want a real trace UI? Add a Jaeger service on :16686 and an `otlp/jaeger` exporter.
 ```
 
-`config/kibana.dev.yml`:
+**3. Point Kibana at it** in `config/kibana.dev.yml`:
+
 ```yaml
 telemetry.metrics:
   enabled: true
@@ -118,6 +126,26 @@ telemetry.tracing:
         url: 'http://localhost:4317'
 ```
 </details>
+
+### 2. Start Elasticsearch
+
+Kibana needs an Elasticsearch to boot. The workshop plugin itself never touches ES, but
+Kibana won't start without one — so in a **separate terminal**, start a local snapshot and
+leave it running:
+
+```bash
+yarn es snapshot --license trial
+```
+
+### 3. Start Kibana with the example plugins
+
+```bash
+yarn kbn bootstrap          # first time only (or after switching branches)
+yarn start --run-examples
+```
+
+Open Kibana → **Developer examples → "Coffee Shop (OTel Workshop)"**. Place an order and brew
+a batch to confirm the app works. It emits **no** telemetry yet — that's the exercise.
 
 ---
 
