@@ -60,21 +60,12 @@ export class SearchMethodsService implements ISearchMethods {
   async esql(params: IEsqlSearchParams, options?: IEsqlSearchOptions): Promise<IEsqlSearchResult> {
     const request = this.buildEsqlRequest(params, options);
 
-    // Enhance inspector config with response stats
-    const inspector = options?.inspector
-      ? {
-          ...options.inspector,
-          getResponseStats:
-            options.inspector.getResponseStats ??
-            ((result: any) => getEsqlInspectorStats(result.rawResponse)),
-        }
-      : undefined;
-
     const response = await this.executeSearch(
       request,
       this.mapEsqlOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY),
-      inspector,
-      (req) => (req.params ?? {}) as Record<string, unknown>
+      options?.inspector,
+      (req) => (req.params ?? {}) as Record<string, unknown>,
+      (result: any) => getEsqlInspectorStats(result.rawResponse)
     );
     return {
       rawResponse: response.rawResponse,
@@ -87,21 +78,12 @@ export class SearchMethodsService implements ISearchMethods {
   async dsl(params: IDslSearchParams, options?: IDslSearchOptions): Promise<IDslSearchResult> {
     const request = this.buildDslRequest(params, options);
 
-    // Enhance inspector config with response stats
-    const inspector = options?.inspector
-      ? {
-          ...options.inspector,
-          getResponseStats:
-            options.inspector.getResponseStats ??
-            ((result: any) => getResponseInspectorStats(result.rawResponse)),
-        }
-      : undefined;
-
     const response = await this.executeSearch(
       request,
       this.mapDslOptions(options, params),
-      inspector,
-      (req) => (req.params?.body ?? {}) as Record<string, unknown>
+      options?.inspector,
+      (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+      (result: any) => getResponseInspectorStats(result.rawResponse)
     );
     return {
       rawResponse: response.rawResponse,
@@ -125,7 +107,8 @@ export class SearchMethodsService implements ISearchMethods {
       request,
       this.mapDslOptions(options, params),
       undefined,
-      () => ({})
+      () => ({}),
+      undefined
     );
 
     return {
@@ -156,45 +139,36 @@ export class SearchMethodsService implements ISearchMethods {
   async sql(params: ISqlSearchParams, options?: ISqlSearchOptions): Promise<ISqlSearchResult> {
     const request = this.buildSqlRequest(params, options);
 
-    // Enhance inspector config with response stats
-    const inspector = options?.inspector
-      ? {
-          ...options.inspector,
-          getResponseStats:
-            options.inspector.getResponseStats ??
-            ((result: any) => ({
-              hits: {
-                label: i18n.translate('data.search.es_search.hitsLabel', {
-                  defaultMessage: 'Hits',
-                }),
-                value: `${result.rawResponse.rows?.length ?? 0}`,
-                description: i18n.translate('data.search.es_search.hitsDescription', {
-                  defaultMessage: 'The number of documents returned by the query.',
-                }),
-              },
-              queryTime: {
-                label: i18n.translate('data.search.es_search.queryTimeLabel', {
-                  defaultMessage: 'Query time',
-                }),
-                value: i18n.translate('data.search.es_search.queryTimeValue', {
-                  defaultMessage: '{queryTime}ms',
-                  values: { queryTime: result.took },
-                }),
-                description: i18n.translate('data.search.es_search.queryTimeDescription', {
-                  defaultMessage:
-                    'The time it took to process the query. ' +
-                    'Does not include the time to send the request or parse it in the browser.',
-                }),
-              },
-            })),
-        }
-      : undefined;
-
     const response = await this.executeSearch(
       request,
       this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY),
-      inspector,
-      (req) => (req.params?.body ?? {}) as Record<string, unknown>
+      options?.inspector,
+      (req) => (req.params?.body ?? {}) as Record<string, unknown>,
+      (result: any) => ({
+        hits: {
+          label: i18n.translate('data.search.es_search.hitsLabel', {
+            defaultMessage: 'Hits',
+          }),
+          value: `${result.rawResponse.rows?.length ?? 0}`,
+          description: i18n.translate('data.search.es_search.hitsDescription', {
+            defaultMessage: 'The number of documents returned by the query.',
+          }),
+        },
+        queryTime: {
+          label: i18n.translate('data.search.es_search.queryTimeLabel', {
+            defaultMessage: 'Query time',
+          }),
+          value: i18n.translate('data.search.es_search.queryTimeValue', {
+            defaultMessage: '{queryTime}ms',
+            values: { queryTime: result.took },
+          }),
+          description: i18n.translate('data.search.es_search.queryTimeDescription', {
+            defaultMessage:
+              'The time it took to process the query. ' +
+              'Does not include the time to send the request or parse it in the browser.',
+          }),
+        },
+      })
     );
     return {
       rawResponse: response.rawResponse,
@@ -213,7 +187,8 @@ export class SearchMethodsService implements ISearchMethods {
     request: T,
     options: ISearchOptions,
     inspector: IBaseSearchOptions['inspector'],
-    getRequestBody: (request: T) => Record<string, unknown>
+    getRequestBody: (request: T) => Record<string, unknown>,
+    getResponseStats?: (result: any) => any
   ): Promise<any> {
     const requestResponder = inspector?.adapter?.start(inspector.title, {
       id: inspector.id,
@@ -237,8 +212,8 @@ export class SearchMethodsService implements ISearchMethods {
       );
 
       if (requestResponder) {
-        if (inspector?.getResponseStats) {
-          requestResponder.stats(inspector.getResponseStats(result));
+        if (getResponseStats) {
+          requestResponder.stats(getResponseStats(result));
         }
         requestResponder.ok({
           json: { rawResponse: result.rawResponse },

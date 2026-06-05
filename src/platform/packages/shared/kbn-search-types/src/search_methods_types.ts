@@ -50,10 +50,6 @@ export interface IBaseSearchOptions {
      * Callback to provide pre-request metadata stats (e.g., index pattern name)
      */
     getRequestStats?: () => RequestStatistics;
-    /**
-     * Callback to provide post-request statistics from the response
-     */
-    getResponseStats?: (response: { rawResponse: any }) => RequestStatistics;
   };
 }
 
