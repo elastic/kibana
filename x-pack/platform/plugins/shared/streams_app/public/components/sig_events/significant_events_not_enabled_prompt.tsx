@@ -29,48 +29,51 @@ export function SignificantEventsNotEnabledPrompt({
       }
       body={
         <EuiText>
-          <p>{getBodyMessage(reason)}</p>
+          <p>{NOT_ENABLED_BODY_MESSAGES[reason]()}</p>
         </EuiText>
       }
     />
   );
 }
 
-function getBodyMessage(reason: SignificantEventsUnavailableReason): string {
-  switch (reason) {
-    case 'pricing_tier':
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.pricingTierBody', {
-        defaultMessage: 'Significant events is not available on the current pricing tier.',
-      });
-    case 'license':
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.licenseBody', {
-        defaultMessage: 'An Enterprise license or higher is required to use significant events.',
-      });
-    case 'ui_setting':
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.uiSettingBody', {
-        defaultMessage:
-          'Significant events is disabled. Enable it in Advanced Settings to start using it.',
-      });
-    case 'workflowsExtensions':
-    case 'workflowsManagement':
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.workflowsBody', {
-        defaultMessage:
-          'Significant events relies on Workflows, which is not available in this environment.',
-      });
-    case 'searchInferenceEndpoints':
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.inferenceBody', {
-        defaultMessage:
-          'Significant events requires inference connectors, which are not available in this environment.',
-      });
-    case 'agentBuilder':
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.agentBuilderBody', {
-        defaultMessage:
-          'Significant events relies on Agent Builder, which is not available in this environment.',
-      });
-    default:
-      return i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.genericBody', {
-        defaultMessage:
-          'Significant events is not available in this environment. Check that your license, pricing tier, settings and required features are enabled.',
-      });
-  }
-}
+/**
+ * The body message shown for each reason significant events can be unavailable.
+ * Keying by reason makes this exhaustive: TypeScript errors if any
+ * `SignificantEventsUnavailableReason` lacks a message here. Factories are lazy
+ * so `i18n.translate` runs at render time.
+ */
+const NOT_ENABLED_BODY_MESSAGES: Record<SignificantEventsUnavailableReason, () => string> = {
+  pricing_tier: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.pricingTierBody', {
+      defaultMessage: 'Significant events is not available on the current pricing tier.',
+    }),
+  license: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.licenseBody', {
+      defaultMessage: 'An Enterprise license or higher is required to use significant events.',
+    }),
+  ui_setting: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.uiSettingBody', {
+      defaultMessage:
+        'Significant events is disabled. Enable it in Advanced Settings to start using it.',
+    }),
+  workflowsExtensions: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.workflowsBody', {
+      defaultMessage:
+        'Significant events relies on Workflows, which is not available in this environment.',
+    }),
+  workflowsManagement: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.workflowsBody', {
+      defaultMessage:
+        'Significant events relies on Workflows, which is not available in this environment.',
+    }),
+  searchInferenceEndpoints: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.inferenceBody', {
+      defaultMessage:
+        'Significant events requires inference connectors, which are not available in this environment.',
+    }),
+  agentBuilder: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.agentBuilderBody', {
+      defaultMessage:
+        'Significant events relies on Agent Builder, which is not available in this environment.',
+    }),
+};

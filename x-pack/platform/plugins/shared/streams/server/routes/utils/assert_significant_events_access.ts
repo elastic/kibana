@@ -25,88 +25,82 @@ interface SignificantEventsAccessContext {
   uiSettingsClient: IUiSettingsClient;
 }
 
-type RequirementCheckResult = { met: true } | { met: false; errorMessage: string };
+/**
+ * Resolves to the error to throw when the requirement is unmet, or `undefined`
+ * when it is satisfied. The error is built lazily, so the happy path allocates
+ * nothing.
+ */
+type RequirementCheck = (context: SignificantEventsAccessContext) => Promise<Error | undefined>;
 
-interface SignificantEventsRequirement {
-  /** Stable id surfaced to the UI to explain why significant events is unavailable. */
-  id: SignificantEventsUnavailableReason;
-  /** Resolves whether the requirement is satisfied for the given context. */
-  check: (context: SignificantEventsAccessContext) => Promise<RequirementCheckResult>;
-  /** Builds the error thrown when the requirement is unmet. */
-  toError: (errorMessage: string) => Error;
-}
-
-const requirePlugin = (plugin: SignificantEventsRequiredPlugin): SignificantEventsRequirement => ({
-  id: plugin,
-  check: async ({ server }) =>
-    server[plugin]
-      ? { met: true }
-      : {
-          met: false,
-          errorMessage: `Significant events requires the "${plugin}" plugin to be enabled first.`,
-        },
-  toError: (errorMessage) => new MissingDependencyError(errorMessage),
-});
+// One "plugin must be present" requirement per entry in the shared list, so
+// adding a required plugin there is the only change needed on the server.
+const pluginRequirements = Object.fromEntries(
+  SIGNIFICANT_EVENTS_REQUIRED_PLUGINS.map(
+    (plugin): [SignificantEventsRequiredPlugin, RequirementCheck] => [
+      plugin,
+      async ({ server }) =>
+        server[plugin]
+          ? undefined
+          : new MissingDependencyError(
+              `Significant events requires the "${plugin}" plugin to be enabled first.`
+            ),
+    ]
+  )
+) as Record<SignificantEventsRequiredPlugin, RequirementCheck>;
 
 /**
  * The single source of truth for everything that must be true for significant
- * events to work. Order matters: `assertSignificantEventsAccess` throws on the
- * first unmet requirement.
+ * events to work. Keying by reason makes this exhaustive: TypeScript errors if
+ * any `SignificantEventsUnavailableReason` lacks a check here. The declaration
+ * order is the evaluation order: it only decides which reason surfaces first
+ * when several are unmet, so cheaper / more-likely-to-fail gates (pricing tier,
+ * license) come before plugin presence.
  */
-const significantEventsRequirements: readonly SignificantEventsRequirement[] = [
+const significantEventsRequirements: Record<SignificantEventsUnavailableReason, RequirementCheck> =
   {
-    id: 'pricing_tier',
-    check: async ({ server }) =>
+    pricing_tier: async ({ server }) =>
       server.core.pricing.isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
-        ? { met: true }
-        : {
-            met: false,
-            errorMessage: 'Significant events is not available on the current pricing tier.',
-          },
-    toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
-  },
-  {
-    id: 'license',
-    check: async ({ licensing }) =>
+        ? undefined
+        : new FeatureNotEnabledError(
+            'Significant events is not available on the current pricing tier.'
+          ),
+    license: async ({ licensing }) =>
       (await licensing.getLicense()).hasAtLeast('enterprise')
-        ? { met: true }
-        : {
-            met: false,
-            errorMessage: 'An Enterprise license or higher is required to use significant events.',
-          },
-    toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
-  },
-  {
-    id: 'ui_setting',
-    check: async ({ uiSettingsClient }) =>
+        ? undefined
+        : new FeatureNotEnabledError(
+            'An Enterprise license or higher is required to use significant events.'
+          ),
+    ui_setting: async ({ uiSettingsClient }) =>
       (await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS))
-        ? { met: true }
-        : {
-            met: false,
-            errorMessage: `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`,
-          },
-    toError: (errorMessage) => new FeatureNotEnabledError(errorMessage),
-  },
-  ...SIGNIFICANT_EVENTS_REQUIRED_PLUGINS.map(requirePlugin),
-];
+        ? undefined
+        : new FeatureNotEnabledError(
+            `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`
+          ),
+    ...pluginRequirements,
+  };
 
 /**
  * Evaluates every requirement in parallel and returns the first unmet one (in
- * registry order), or `undefined` when significant events is fully available.
+ * declaration order), or `undefined` when significant events is fully available.
+ *
+ * Parallel (rather than sequential short-circuit) is deliberate: only the
+ * license and UI-setting checks are async, and the common "available" path has
+ * to run all checks anyway, so parallel keeps that hot path at the latency of
+ * the single slowest check instead of summing them.
  */
-const findFirstUnmetRequirement = async (
-  context: SignificantEventsAccessContext
-): Promise<{ requirement: SignificantEventsRequirement; errorMessage: string } | undefined> => {
+const findFirstUnmetRequirement = async (context: SignificantEventsAccessContext) => {
+  // `Object.entries` widens keys to `string`; the keys are exactly the reasons.
+  const entries = Object.entries(significantEventsRequirements) as Array<
+    [SignificantEventsUnavailableReason, RequirementCheck]
+  >;
+
   const results = await Promise.all(
-    significantEventsRequirements.map(async (requirement) => ({
-      requirement,
-      result: await requirement.check(context),
-    }))
+    entries.map(async ([reason, check]) => ({ reason, error: await check(context) }))
   );
 
-  for (const { requirement, result } of results) {
-    if (!result.met) {
-      return { requirement, errorMessage: result.errorMessage };
+  for (const { reason, error } of results) {
+    if (error) {
+      return { reason, error };
     }
   }
 
@@ -123,7 +117,7 @@ export async function assertSignificantEventsAccess(
 ): Promise<void> {
   const unmet = await findFirstUnmetRequirement(context);
   if (unmet) {
-    throw unmet.requirement.toError(unmet.errorMessage);
+    throw unmet.error;
   }
 }
 
@@ -135,5 +129,5 @@ export async function getSignificantEventsAvailability(
   context: SignificantEventsAccessContext
 ): Promise<SignificantEventsAvailabilityResponse> {
   const unmet = await findFirstUnmetRequirement(context);
-  return unmet ? { available: false, reason: unmet.requirement.id } : { available: true };
+  return unmet ? { available: false, reason: unmet.reason } : { available: true };
 }
