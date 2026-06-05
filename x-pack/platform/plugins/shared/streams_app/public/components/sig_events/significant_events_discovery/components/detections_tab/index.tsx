@@ -10,6 +10,7 @@ import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
@@ -128,7 +129,7 @@ export const DetectionsTab = () => {
     wasRunningRef.current = isRunning;
   }, [isRunning, refreshAbsoluteRange]);
 
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
+  const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchDetections({
     from: absoluteRange.from,
     to: absoluteRange.to,
   });
@@ -180,6 +181,19 @@ export const DetectionsTab = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.detectionsTab.fetchError', {
+              defaultMessage: 'Failed to load detections',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {

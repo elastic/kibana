@@ -318,7 +318,10 @@ export {
   StreamsKIsOnboardingStep,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
 } from './src/onboarding';
-export type { SigEventsWorkflowStatusResult } from './src/workflows';
+export type {
+  SigEventsWorkflowStatusResult,
+  SigEventsWorkflowServerStatusResult,
+} from './src/workflows';
 export { SigEventsWorkflowStatus } from './src/workflows';
 
 export { streamsOasDefinitions } from './src/oas_definitions';

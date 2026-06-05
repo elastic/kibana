@@ -141,9 +141,13 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     return { status, executionId: lastExecution.id };
   }
 
+  /**
+   * `TInput` is cast to `Record<string, unknown>` at the wire boundary — it
+   * enforces the input shape for callers but not the underlying management API call.
+   */
   async execute({
     executionSpaceId,
-    inputs = {},
+    inputs,
     request,
     notFoundMessage,
   }: {
@@ -161,7 +165,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     return this.managementApi.runWorkflow(
       { ...workflow, definition: workflow.definition },
       executionSpaceId,
-      inputs,
+      inputs ?? {},
       request
     );
   }

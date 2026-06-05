@@ -10,6 +10,7 @@ import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
@@ -125,10 +126,11 @@ export const DiscoveriesTab = () => {
     wasRunningRef.current = isRunning;
   }, [isRunning, refreshAbsoluteRange]);
 
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
-    from: absoluteRange.from,
-    to: absoluteRange.to,
-  });
+  const { data, isLoading, isError, refetch, pagination, setPagination } =
+    useFetchDiscoveriesEntities({
+      from: absoluteRange.from,
+      to: absoluteRange.to,
+    });
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
@@ -181,6 +183,19 @@ export const DiscoveriesTab = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.discoveriesTab.fetchError', {
+              defaultMessage: 'Failed to load discoveries',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
