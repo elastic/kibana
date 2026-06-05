@@ -18,12 +18,7 @@
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  test,
-  makeEsQueryRule,
-  defineIndexThresholdRule,
-  THRESHOLD_TEST_INDEX,
-} from '../fixtures';
+import { test, makeEsQueryRule, defineIndexThresholdRule, THRESHOLD_TEST_INDEX } from '../fixtures';
 
 const searchRules = async (page: ScoutPage, query: string) => {
   const field = page.testSubj.locator('ruleSearchField');
