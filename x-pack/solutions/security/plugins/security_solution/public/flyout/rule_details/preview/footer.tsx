@@ -9,11 +9,13 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { isEsqlRule } from '../../../../common/detection_engine/utils';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_OPEN_RULE_FLYOUT_TEST_ID } from './test_ids';
 import { useRuleDetailsLink } from '../../../flyout_v2/rule/main/hooks/use_rule_details_link';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { AddRuleAttachmentToChatButton } from '../../../detection_engine/rule_creation_ui/components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
+import { NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP } from '../../../agent_builder/components/translations';
 
 interface PreviewFooterProps {
   rule: RuleResponse;
@@ -42,6 +44,8 @@ export const PreviewFooter = memo(({ rule, isPreviewMode }: PreviewFooterProps) 
             <AddRuleAttachmentToChatButton
               rule={rule}
               pathway={isPreviewMode ? 'alerts_flyout_rule_summary' : 'alerts_table_rule_flyout'}
+              disabled={!isEsqlRule(rule.type)}
+              disabledTooltip={NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP}
             />
           </EuiFlexItem>
         ) : null}

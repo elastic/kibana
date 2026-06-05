@@ -87,6 +87,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP } from '../../../../agent_builder/components/translations';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useRuleCreationTelemetry } from './hooks/use_rule_creation_telemetry';
@@ -863,10 +864,13 @@ const CreateRulePageComponent: React.FC<{}> = () => {
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
           pathway="rule_creation"
+          disabled={!isEsqlRuleValue}
+          disabledTooltip={NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP}
         />
       ) : null,
     [
       isAgentChatExperienceEnabled,
+      isEsqlRuleValue,
       defineStepData,
       aboutStepData,
       scheduleStepData,

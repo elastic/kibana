@@ -18,8 +18,9 @@ import {
   getEditRuleUrl,
   getRuleDetailsUrl,
 } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { shouldShowViewRuleButton, type RuleAttachmentIntent } from './helpers';
+import { shouldShowViewRuleButton, type RuleAttachmentIntent, getRuleTypeLabel } from './helpers';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import { getNonEsqlRuleActionDisabledReason } from '../../components/translations';
 
 interface BuildRuleActionButtonsParams {
   rule: RuleResponse | null;
@@ -48,6 +49,10 @@ export const buildRuleActionButtons = ({
 
   // 'create' always creates a new rule, even if one was already saved from this attachment.
   const isUpdate = intent === 'update';
+  const isEsql = rule.type === 'esql';
+  const disabledReason = isEsql
+    ? undefined
+    : getNonEsqlRuleActionDisabledReason(getRuleTypeLabel(rule.type));
 
   const buttons: ActionButton[] = [
     {
@@ -70,6 +75,8 @@ export const buildRuleActionButtons = ({
           }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
+          disabled: !isEsql,
+          disabledReason,
           handler: () => {
             // getActionButtons is not reactive to saving$, so guard against double-submit here.
             if (aiRuleCreation.getIsSaving()) {
@@ -84,6 +91,8 @@ export const buildRuleActionButtons = ({
           }),
           icon: 'plusInCircle',
           type: ActionButtonType.PRIMARY,
+          disabled: !isEsql,
+          disabledReason,
           handler: () => {
             if (aiRuleCreation.getIsSaving()) {
               return;

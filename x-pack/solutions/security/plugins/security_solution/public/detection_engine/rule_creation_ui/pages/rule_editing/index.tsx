@@ -78,6 +78,7 @@ import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_mana
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP } from '../../../../agent_builder/components/translations';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
 import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
@@ -567,6 +568,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
           existingRuleId={rule?.id}
           pathway="rule_editing"
+          disabled={!isEsqlRule(defineStepData.ruleType)}
+          disabledTooltip={NON_ESQL_RULE_ADD_TO_CHAT_DISABLED_TOOLTIP}
         />
       ) : null,
     [

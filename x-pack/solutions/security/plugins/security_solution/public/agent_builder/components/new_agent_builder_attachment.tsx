@@ -34,6 +34,11 @@ export interface NewAgentBuilderAttachmentProps {
    */
   disabled?: boolean;
   /**
+   * Tooltip shown when the button is disabled for a caller-controlled reason (not license).
+   * When omitted and the button is disabled only due to `disabled=true`, no tooltip is shown.
+   */
+  disabledTooltip?: string;
+  /**
    * Telemetry data for tracking "Add to Chat" clicks
    */
   telemetry?: AgentBuilderAddToChatTelemetry;
@@ -48,6 +53,7 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   onClick,
   size = 'm',
   disabled = false,
+  disabledTooltip,
   telemetry: telemetryData,
 }: NewAgentBuilderAttachmentProps) {
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
@@ -65,7 +71,11 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
   }, [onClick, reportAddToChatClick, telemetryData]);
 
   const isDisabled = disabled || !hasValidAgentBuilderLicense;
-  const shouldShowLicenseTooltip = !hasValidAgentBuilderLicense;
+  const tooltipContent = !hasValidAgentBuilderLicense
+    ? i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT
+    : disabled && disabledTooltip
+    ? disabledTooltip
+    : undefined;
 
   if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
     return null;
@@ -85,11 +95,9 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     </AiButton>
   );
 
-  if (!shouldShowLicenseTooltip) {
+  if (!tooltipContent) {
     return button;
   }
 
-  return (
-    <EuiToolTip content={i18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>{button}</EuiToolTip>
-  );
+  return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
 });

@@ -52,10 +52,16 @@ export type AddRuleAttachmentToChatButtonProps = (
   | AddRuleAttachmentFromRuleResponseProps
 ) & {
   pathway: AgentBuilderAddToChatTelemetry['pathway'];
+  /** When true the button is rendered but non-interactive (e.g. non-ES|QL rule type selected). */
+  disabled?: boolean;
+  /** Tooltip shown when the button is disabled. */
+  disabledTooltip?: string;
 };
 
 export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = ({
   pathway,
+  disabled,
+  disabledTooltip,
   ...props
 }) => {
   const {
@@ -144,6 +150,8 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   return (
     <NewAgentBuilderAttachment
       onClick={handleClick}
+      disabled={disabled}
+      disabledTooltip={disabledTooltip}
       telemetry={{
         pathway,
         attachments: ['rule'],
