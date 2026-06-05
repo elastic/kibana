@@ -10,8 +10,8 @@ import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-b
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import { roundToActions } from './round_to_actions';
+import type { AgentExecution } from '@kbn/agent-builder-common';
+import { executionToActions } from './round_to_actions';
 import { AgentActionType } from '../actions';
 import type { ToolCallAction, ExecuteToolAction } from '../actions';
 
@@ -42,10 +42,8 @@ const makeReasoningStep = (
   ...(toolCallGroupId ? { tool_call_group_id: toolCallGroupId } : {}),
 });
 
-const makeRound = (steps: ConversationRoundStep[]): ConversationRound => ({
-  id: 'round-1',
+const makeExecution = (steps: ConversationRoundStep[]): AgentExecution => ({
   status: ConversationRoundStatus.completed,
-  input: { message: 'test' },
   steps,
   response: { message: 'done' },
   started_at: new Date().toISOString(),
@@ -65,12 +63,12 @@ const someResult: ToolResult = {
   data: { some: 'data' },
 };
 
-describe('roundToActions', () => {
+describe('executionToActions', () => {
   it('returns tool call and execute actions for completed steps without reasoning', () => {
     const steps: ConversationRoundStep[] = [
       makeToolCallStep('c1', 'search', { results: [someResult] }),
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     expect(actions).toHaveLength(2);
     const toolCallAction = actions[0] as ToolCallAction;
@@ -85,7 +83,7 @@ describe('roundToActions', () => {
       makeReasoningStep('I should search for this', { toolCallGroupId: groupId }),
       makeToolCallStep('c1', 'search', { groupId, results: [someResult] }),
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     const toolCallAction = actions[0] as ToolCallAction;
     expect(toolCallAction.message).toBe('I should search for this');
@@ -99,7 +97,7 @@ describe('roundToActions', () => {
       makeReasoningStep('reasoning for c2', { toolCallId: 'c2', toolCallGroupId: groupId }),
       makeToolCallStep('c2', 'lookup', { groupId, results: [someResult] }),
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     const toolCallAction = actions[0] as ToolCallAction;
     expect(toolCallAction.tool_calls[0].reasoning).toBe('reasoning for c1');
@@ -115,7 +113,7 @@ describe('roundToActions', () => {
       makeReasoningStep('reasoning for c2', { toolCallId: 'c2', toolCallGroupId: groupId }),
       makeToolCallStep('c2', 'lookup', { groupId, results: [someResult] }),
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     const toolCallAction = actions[0] as ToolCallAction;
     expect(toolCallAction.message).toBe('group level thought');
@@ -130,7 +128,7 @@ describe('roundToActions', () => {
       makeReasoningStep('reasoning for c1', { toolCallId: 'c1', toolCallGroupId: groupId }),
       makeToolCallStep('c1', 'search', { groupId }), // no results = pending
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     expect(actions).toHaveLength(1); // only tool call, no execute
     const toolCallAction = actions[0] as ToolCallAction;
@@ -147,7 +145,7 @@ describe('roundToActions', () => {
       makeReasoningStep('r-c2', { toolCallId: 'c2', toolCallGroupId: 'g2' }),
       makeToolCallStep('c2', 'lookup', { groupId: 'g2', results: [someResult] }),
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     // 2 groups × (toolCall + execute) = 4 actions
     expect(actions).toHaveLength(4);
@@ -168,7 +166,7 @@ describe('roundToActions', () => {
       makeToolCallStep('c1', 'search', { groupId, results: [someResult] }), // completed
       makeToolCallStep('c2', 'lookup', { groupId }), // pending
     ];
-    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+    const actions = executionToActions({ execution: makeExecution(steps), toolIdMapping });
 
     // completed: toolCall + execute, pending: toolCall
     expect(actions).toHaveLength(3);

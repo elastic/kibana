@@ -11,7 +11,12 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   agentBuilderDefaultAgentId,
   ConversationRoundStatus,
+  mergeLegacyRoundsWithPersistedEvents,
+  timelineEventsToRoundEntries,
+  timelineEventsToActivityEntries,
   type Conversation,
+  type ConversationActivityEntry,
+  type ConversationRoundEntry,
 } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -152,24 +157,42 @@ export const useConversationTitle = () => {
 };
 
 export const useConversationRounds = () => {
+  return useConversationRoundEntries().map(({ round }) => round);
+};
+
+export const useConversationRoundEntries = (): ConversationRoundEntry[] => {
+  return useConversationActivityEntries().flatMap((entry) =>
+    entry.type === 'round' ? [{ round: entry.round, author: entry.author }] : []
+  );
+};
+
+export const useConversationActivityEntries = (): ConversationActivityEntry[] => {
   const { conversation } = useConversation();
   const conversationId = useConversationId();
   const { pendingMessage, error, errorSteps } = useStreamRecord(conversationId);
 
-  const conversationRounds = useMemo(() => {
-    const rounds = conversation?.rounds ?? [];
+  return useMemo(() => {
+    let entries: ConversationActivityEntry[] = conversation
+      ? timelineEventsToActivityEntries(
+          mergeLegacyRoundsWithPersistedEvents({
+            legacyRounds: conversation.rounds ?? [],
+            persistedEvents: conversation.events ?? [],
+            user: conversation.user,
+            agentId: conversation.agent_id,
+          })
+        )
+      : [];
+
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
         roundId: '',
         steps: errorSteps,
       });
-      return [...rounds, pendingRound];
+      entries = [...entries, { type: 'round', round: pendingRound }];
     }
-    return rounds;
-  }, [conversation?.rounds, error, errorSteps, pendingMessage]);
-
-  return conversationRounds;
+    return entries;
+  }, [conversation, error, errorSteps, pendingMessage]);
 };
 
 // Returns a flattened list of all steps across all rounds.

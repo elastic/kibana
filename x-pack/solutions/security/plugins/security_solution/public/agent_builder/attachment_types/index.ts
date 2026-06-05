@@ -18,6 +18,7 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import { buildAlertAttachmentSourceLink } from './alert_attachment_source_link';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -54,6 +55,23 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getIcon: () => icon,
 });
 
+const createAlertAttachmentDefinition = ({
+  application,
+}: {
+  application?: ApplicationStart;
+} = {}) => ({
+  ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
+  ...(application
+    ? {
+        getSourceLink: ({
+          attachment,
+        }: {
+          attachment: UnknownAttachmentWithLabel;
+        }) => buildAlertAttachmentSourceLink({ attachment, application }),
+      }
+    : {}),
+});
+
 /**
  * Registers the baseline attachment UI definitions that do not require Security Solution runtime
  * context:
@@ -63,10 +81,16 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  * {@link registerEntityAttachment} entry point so the plugin's `start()` can supply
  * `application`, `chrome`, `agentBuilder`, and the lazy Redux/services bundle.
  */
-export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
+export const registerAttachmentUiDefinitions = ({
+  attachments,
+  application,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application?: ApplicationStart;
+}) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
-    createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
+    createAlertAttachmentDefinition({ application })
   );
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(

@@ -8,7 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { getConversationAttachmentsSection } from '../utils/attachment_presentation';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { convertPreviousEvents } from '../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
@@ -38,7 +38,7 @@ export const getStructuredAnswerPrompt = async (
 
   // Generate messages from the conversation's rounds, with optional compaction summary
   // sourced from processedConversation.compactionSummary (set during compaction phase).
-  const previousRoundsAsMessages = await convertPreviousRounds({
+  const previousRoundsAsMessages = await convertPreviousEvents({
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,

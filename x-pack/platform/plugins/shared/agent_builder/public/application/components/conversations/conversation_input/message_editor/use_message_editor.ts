@@ -8,7 +8,7 @@
 import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult, CommandBadgeData } from './command_menu';
-import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
+import { CommandId, useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
 import { serializeEditorContent } from './serialize';
 import {
@@ -51,16 +51,18 @@ const useMessageEditorInstance = ({
   ref,
   syncIsEmpty,
   onEditorFocus,
+  excludeCommandIds,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   onEditorFocus?: () => void;
+  excludeCommandIds?: readonly CommandId[];
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
     dismiss: dismissCommandMenu,
     checkInputForCommand,
-  } = useCommandMenu();
+  } = useCommandMenu({ excludeCommandIds });
   const prefetchCommandMenus = useCommandMenuPrefetch();
 
   const messageEditor = useMemo(
@@ -210,12 +212,12 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: { onEditorFocus?: () => void } = {}
+  options: { onEditorFocus?: () => void; excludeCommandIds?: readonly CommandId[] } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
 } => {
-  const { onEditorFocus } = options;
+  const { onEditorFocus, excludeCommandIds } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -233,7 +235,7 @@ export const useMessageEditor = (
     setIsEmpty(nextIsEmpty);
   }, []);
 
-  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus });
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, excludeCommandIds });
   const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
   const messageEditor = useMemo(
     () => ({

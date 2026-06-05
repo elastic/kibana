@@ -18,6 +18,9 @@ import type {
 import type { PromptRequest, PromptResponse, PromptStorageState } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { RoundState } from './round_state';
+import type { ConversationMetadataFields } from './conversation_metadata';
+import type { ConversationCollaborationFields } from './collaboration';
+import type { UserActionEvent } from './user_action_events';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -283,33 +286,39 @@ export enum ConversationDisplayStatus {
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
-export interface ConversationRound {
-  /** unique id for this round */
-  id: string;
-  /** current status of the round */
+/**
+ * Common fields shared between ConversationRound and AgentExecutionEvent.
+ */
+export interface AgentExecution {
+  /** Current status of the execution */
   status: ConversationRoundStatus;
-  /** persisted state to resume interrupted states */
+  /** Persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt requests */
+  /** If status is awaiting_prompt, contains the current prompt requests */
   pending_prompts?: PromptRequest[];
-  /** The user input that initiated the round */
-  input: RoundInput;
-  /** List of intermediate steps before the end result, such as tool calls */
+  /** List of intermediate steps (tool calls, reasoning, compaction) */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
-  /** when the round was started */
+  /** When the execution was started */
   started_at: string;
-  /** time it took to first token, in ms */
+  /** Time it took to first token, in ms */
   time_to_first_token: number;
-  /** time it took to last token, in ms */
+  /** Time it took to last token, in ms */
   time_to_last_token: number;
-  /** Model Usage statistics for this round */
+  /** Model usage statistics */
   model_usage: RoundModelUsageStats;
-  /** when tracing is enabled, contains the traceId associated with this round */
+  /** When tracing is enabled, contains the traceId */
   trace_id?: string | string[];
-  /** Runtime configuration overrides that were applied to this round */
+  /** Runtime configuration overrides applied to this execution */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+}
+
+export interface ConversationRound extends AgentExecution {
+  /** unique id for this round */
+  id: string;
+  /** The user input that initiated the round */
+  input: RoundInput;
 }
 
 export interface RoundModelUsageStats {
@@ -338,7 +347,7 @@ export interface RoundModelUsageStats {
 /**
  * Main structure representing a conversation with an agent.
  */
-export interface Conversation {
+export interface Conversation extends ConversationMetadataFields, ConversationCollaborationFields {
   /** unique id for this conversation */
   id: string;
   /** id of the agent this conversation is bound to */
@@ -426,6 +435,121 @@ export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
 
 export type ConversationAction = 'regenerate';
 
+// ---------------------------------------------------------------------------
+// Timeline data model
+// ---------------------------------------------------------------------------
+
+/**
+ * All possible timeline event types.
+ */
+export enum TimelineEventType {
+  user_message = 'user_message',
+  agentExecution = 'agent_execution',
+  /** Investigation metadata / workflow audit (POC; B3 federates Cases UserActions). */
+  user_action = 'user_action',
+}
+
+export type TimelineEventTypeValue = `${TimelineEventType}`;
+
+/**
+ * Base shape shared by all timeline events.
+ */
+export interface BaseTimelineEvent<
+  EventType extends TimelineEventTypeValue = TimelineEventTypeValue
+> {
+  /** Server-generated UUID */
+  id: string;
+  /** ISO8601 timestamp, used for ordering and catch-up */
+  timestamp: string;
+  /** Discriminant for the event type */
+  type: EventType;
+}
+
+/**
+ * A user message appended to the timeline.
+ */
+export interface UserMessageEvent extends BaseTimelineEvent<'user_message'> {
+  /** The user who sent the message */
+  user: UserIdAndName;
+  /** Text content of the message */
+  message: string;
+  /** @deprecated Use attachment_refs with conversation-level attachments instead */
+  attachments?: Attachment[];
+  /** References to versioned conversation-level attachments */
+  attachment_refs?: AttachmentVersionRef[];
+}
+
+/**
+ * An agent execution event appended to the timeline.
+ * Contains the same data as a ConversationRound except for the `input` field.
+ */
+export interface AgentExecutionEvent extends BaseTimelineEvent<'agent_execution'>, AgentExecution {
+  /** Id of the agent that produced this response */
+  agent_id: string;
+}
+
+export type {
+  UserActionEvent,
+  FieldChangedUserActionPayload,
+  AttachmentAddedUserActionPayload,
+} from './user_action_events';
+export {
+  UserActionType,
+  createFieldChangedUserActionEvents,
+  createAttachmentAddedUserActionEvent,
+  serializeAuditValue,
+  deserializeAuditValue,
+} from './user_action_events';
+
+/**
+ * Union of all timeline event types.
+ */
+export type TimelineEvent = UserMessageEvent | AgentExecutionEvent | UserActionEvent;
+
+/**
+ * Type guard: is this event a UserMessageEvent?
+ */
+export const isUserMessageEvent = (event: TimelineEvent): event is UserMessageEvent => {
+  return event.type === TimelineEventType.user_message;
+};
+
+/**
+ * Type guard: is this event an AgentExecutionEvent?
+ */
+export const isAgentExecutionEvent = (event: TimelineEvent): event is AgentExecutionEvent => {
+  return event.type === TimelineEventType.agentExecution;
+};
+
+export const isUserActionEvent = (event: TimelineEvent): event is UserActionEvent => {
+  return event.type === TimelineEventType.user_action;
+};
+
+/**
+ * Returns the last AgentExecutionEvent from a list of timeline events, or undefined.
+ */
+export const getLastExecutionEvent = (events: TimelineEvent[]): AgentExecutionEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i--) {
+    if (isAgentExecutionEvent(events[i])) {
+      return events[i] as AgentExecutionEvent;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Event-stream conversation format for agent execution.
+ * Same `events` field as persisted on {@link Conversation}; omits legacy `rounds`.
+ */
+export type TimelineConversation = Omit<Conversation, 'rounds' | 'events'> & {
+  /** Ordered chat events — canonical for execution and persistence */
+  events: TimelineEvent[];
+};
+
+export const isTimelineConversation = (
+  conversation: Conversation | TimelineConversation
+): conversation is TimelineConversation => {
+  return !('rounds' in conversation);
+};
 // Compaction summary types
 
 /** Compact representation of a tool call in a compaction summary */

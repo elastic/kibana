@@ -13,7 +13,13 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type {
   ConversationInternalState,
   ConversationRoundStatus,
+  TimelineEvent,
 } from '@kbn/agent-builder-common/chat';
+import type {
+  ConversationChatMode,
+  TemplateSnapshot,
+} from '@kbn/agent-builder-common/chat/conversation_metadata';
+import type { ConversationMode } from '@kbn/agent-builder-common/chat/collaboration';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -32,6 +38,14 @@ const storageSettings = {
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
+      template_id: types.keyword({}),
+      template_snapshot: types.object({ dynamic: false, properties: {} }),
+      /** Denormalized from template_snapshot for list queries (collaborative ⇒ team-visible). */
+      chat_mode: types.keyword({}),
+      // Stored as opaque JSON in _source; dynamic mapping would hit ES total_fields limit.
+      custom_fields: types.object({ dynamic: false, properties: {} }),
+      events: types.object({ dynamic: false, properties: {} }),
+      conversation_mode: types.keyword({}),
       status: types.keyword({}),
       read: types.boolean({}),
     },
@@ -49,6 +63,13 @@ export interface ConversationProperties {
   conversation_rounds: PersistentConversationRound[];
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
+  template_id?: string;
+  template_snapshot?: TemplateSnapshot;
+  /** Denormalized from template_snapshot.chat_mode for list queries. */
+  chat_mode?: ConversationChatMode;
+  custom_fields?: Record<string, unknown>;
+  events?: TimelineEvent[] | Record<string, TimelineEvent>;
+  conversation_mode?: ConversationMode;
   status?: ConversationRoundStatus;
   read?: boolean;
   // legacy field

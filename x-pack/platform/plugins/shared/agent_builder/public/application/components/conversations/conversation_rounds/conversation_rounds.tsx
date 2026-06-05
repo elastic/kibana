@@ -7,8 +7,9 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useConversation, useConversationRounds } from '../../../hooks/use_conversation';
+import React, { useMemo } from 'react';
+import { useConversation, useConversationActivityEntries } from '../../../hooks/use_conversation';
+import { ActivityAuditRow } from './activity_audit_row';
 import { RoundLayout } from './round_layout';
 
 const CONVERSATION_ROUNDS_ID = 'agentBuilderConversationRoundsContainer';
@@ -21,7 +22,16 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   scrollContainerHeight,
 }) => {
   const { conversation } = useConversation();
-  const conversationRounds = useConversationRounds();
+  const conversationActivityEntries = useConversationActivityEntries();
+  const roundEntries = useMemo(
+    () =>
+      conversationActivityEntries.filter(
+        (activityEntry): activityEntry is Extract<typeof activityEntry, { type: 'round' }> =>
+          activityEntry.type === 'round'
+      ),
+    [conversationActivityEntries]
+  );
+  const allRounds = useMemo(() => roundEntries.map(({ round }) => round), [roundEntries]);
 
   return (
     <EuiFlexGroup
@@ -32,19 +42,32 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
         defaultMessage: 'Conversation messages',
       })}
     >
-      {conversationRounds.map((round, index) => {
-        const isCurrentRound = index === conversationRounds.length - 1;
+      {conversationActivityEntries.map((entry, index) => {
+        const entryKey =
+          entry.type === 'user_action'
+            ? `user-action-${entry.event.id}`
+            : `round-${entry.round.id || index}-${index}`;
+
+        if (entry.type === 'user_action') {
+          return <ActivityAuditRow key={entryKey} event={entry.event} />;
+        }
+
+        const roundIndex = roundEntries.findIndex(
+          (roundEntry) => roundEntry.round === entry.round
+        );
+        const isCurrentRound = index === conversationActivityEntries.length - 1;
 
         return (
           <RoundLayout
-            key={index}
+            key={entryKey}
             scrollContainerHeight={scrollContainerHeight}
             isCurrentRound={isCurrentRound}
-            rawRound={round}
+            rawRound={entry.round}
+            author={entry.author}
             conversationId={conversation?.id}
             conversationAttachments={conversation?.attachments}
-            allRounds={conversationRounds}
-            roundIndex={index}
+            allRounds={allRounds}
+            roundIndex={roundIndex >= 0 ? roundIndex : index}
           />
         );
       })}

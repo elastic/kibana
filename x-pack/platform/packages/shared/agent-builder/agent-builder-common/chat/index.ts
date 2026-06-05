@@ -46,6 +46,15 @@ export {
   isReasoningStep,
   isCompactionStep,
 } from './conversation';
+export type { ConversationMode, ConversationCollaborationFields } from './collaboration';
+export type {
+  ConversationTemplateProfile,
+  ConversationChatMode,
+  ConversationTemplateDefinition,
+  TemplateSnapshot,
+  ConversationMetadataFields,
+  ConversationMetadataUpdate,
+} from './conversation_metadata';
 export {
   ChatEventType,
   type ChatEventBase,
@@ -107,4 +116,53 @@ export {
   type TodosUpdatedUiEventData,
 } from './events';
 export type { RoundState } from './round_state';
+export {
+  TimelineEventType,
+  type TimelineEventTypeValue,
+  type BaseTimelineEvent,
+  type UserMessageEvent,
+  type AgentExecution,
+  type AgentExecutionEvent,
+  type TimelineEvent,
+  type TimelineConversation,
+  isUserMessageEvent,
+  isAgentExecutionEvent,
+  isUserActionEvent,
+  getLastExecutionEvent,
+  isTimelineConversation,
+  UserActionType,
+  createFieldChangedUserActionEvents,
+  createAttachmentAddedUserActionEvent,
+  serializeAuditValue,
+  deserializeAuditValue,
+  type UserActionEvent,
+  type FieldChangedUserActionPayload,
+  type AttachmentAddedUserActionPayload,
+} from './conversation';
+export { shouldInvokeAgentForCollaborativeMessage } from './collaborative_triggers';
+export {
+  type ConversationMemberRef,
+  getConversationMemberKey,
+  userIdAndNameToMemberRef,
+  getConversationParticipantsFromEvents,
+  mergeConversationMemberRefs,
+  getConversationMembers,
+} from './conversation_members';
+export { canDeleteConversation, isCollaborativeConversation, isConversationOwner } from './conversation_access';
+export {
+  mergeLegacyRoundsWithPersistedEvents,
+  mergeTimelineEventsById,
+  roundsToTimelineEvents,
+  sortTimelineEventsChronologically,
+  timelineEventsToRounds,
+  timelineEventsToRoundEntries,
+  timelineEventsToActivityEntries,
+  isHumanNoteRound,
+  type ConversationRoundEntry,
+  type ConversationActivityEntry,
+  conversationToTimelineConversation,
+  resolveConversationEvents,
+  timelineConversationToConversation,
+  agentExecutionEventToRound,
+} from './timeline_converters';
 export type { ConversationListOptions } from './conversation_list';

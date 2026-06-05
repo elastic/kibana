@@ -14,8 +14,14 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
-import { ToolOrigin } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, AgentExecutionMode } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  resolveConversationEvents,
+  getLastExecutionEvent,
+  ToolOrigin,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -29,14 +35,14 @@ import {
   prepareConversation,
   selectSkills,
   selectTools,
-  getPendingRound,
+  getPendingExecution,
   evictInternalEvents,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
-import { roundToActions } from './utils/round_to_actions';
+import { executionToActions } from './utils/round_to_actions';
 import { computeContextBudget } from './utils/context_budget';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
@@ -104,15 +110,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     todoStateManager,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation, action });
+  // Resolve chat events at entry — canonical format for the pipeline
+  const timelineEvents = conversation ? resolveConversationEvents(conversation) : [];
 
-  const pendingRound = getPendingRound(conversation);
+  ensureValidInput({ input: nextInput, timelineEvents, action });
+
+  const pendingExecution = getPendingExecution(timelineEvents);
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
-  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
+  const conversationTimestamp = pendingExecution?.started_at ?? startTime.toISOString();
 
   // Only clear access tracking for a brand new round; keep it when resuming (HITL).
-  if (!pendingRound) {
+  if (!pendingExecution) {
     context.attachmentStateManager.clearAccessTracking();
   }
 
@@ -146,10 +155,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
   toolManager.setEventEmitter(eventEmitter);
 
-  // Pass action so regenerate uses the last round's original input instead of request input
+  // Pass action so regenerate uses the last event's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousEvents: timelineEvents,
     context,
     action,
   });
@@ -302,7 +311,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       toolManager,
       logger,
       startTime,
-      pendingRound,
+      pendingExecution,
       structuredOutput,
     }),
     finalize(() => manualEvents$.complete())
@@ -313,12 +322,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
-  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
-  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+  // Use provided overrides, or fall back to pending agent response's overrides (for HITL resume)
+  const effectiveOverrides = configurationOverrides ?? pendingExecution?.configuration_overrides;
+  const effectiveAgentId = agentId ?? conversation?.agent_id ?? agentBuilderDefaultAgentId;
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      agentId: effectiveAgentId,
       getConversationState: () =>
         getConversationState({
           promptManager,
@@ -327,7 +338,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           backgroundExecutionService,
           todoStateManager,
         }),
-      pendingRound,
+      pendingExecution,
       startTime,
       modelProvider,
       stateManager,
@@ -349,9 +360,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-  return {
-    round,
-  };
+
+  return { round };
 };
 
 const getConversationState = ({
@@ -390,22 +400,21 @@ const createInitializerCommand = ({
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
-  const lastRound = conversation.previousRounds.length
-    ? conversation.previousRounds[conversation.previousRounds.length - 1]
-    : undefined;
+  // Find the last AgentExecutionEvent in previousEvents for HITL resumption
+  const lastAgentResponse = getLastExecutionEvent(conversation.previousEvents);
 
-  if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    initialState.mainActions = roundToActions({
-      round: lastRound,
+  if (lastAgentResponse?.status === ConversationRoundStatus.awaitingPrompt) {
+    initialState.mainActions = executionToActions({
+      execution: lastAgentResponse,
       toolIdMapping: agentBuilderToLangchainIdMap,
     });
 
     startAt = steps.executeTool;
   }
 
-  if (lastRound?.state) {
-    initialState.currentCycle = lastRound.state.agent.current_cycle;
-    initialState.errorCount = lastRound.state.agent.error_count;
+  if (lastAgentResponse?.state) {
+    initialState.currentCycle = lastAgentResponse.state.agent.current_cycle;
+    initialState.errorCount = lastAgentResponse.state.agent.error_count;
   }
 
   return new Command({

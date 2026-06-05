@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import { isCollaborativeConversation } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -18,11 +19,17 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
   useAgentId,
+  useConversation,
   useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
-import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import {
+  MessageEditor,
+  useMessageEditor,
+  CommandBadgeSerializationError,
+} from './message_editor';
+import { CommandId } from './message_editor/command_menu';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -68,6 +75,12 @@ const enabledPlaceholder = i18n.translate(
     defaultMessage: 'Ask anything',
   }
 );
+const collaborativePlaceholder = i18n.translate(
+  'xpack.agentBuilder.conversationInput.textArea.collaborativePlaceholder',
+  {
+    defaultMessage: 'Add a note for the team, or type @agent to invoke the agent',
+  }
+);
 
 const getMessageEditorAriaLabel = ({
   isNewConversation,
@@ -96,9 +109,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
+  const { conversation } = useConversation();
+
+  const isCollaborative = isCollaborativeConversation(conversation);
 
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
     onEditorFocus,
+    excludeCommandIds: isCollaborative ? [CommandId.Sml] : undefined,
   });
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
@@ -115,7 +132,11 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isSubmitDisabled =
     messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
 
-  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isAgentDeleted
+    ? disabledPlaceholder(agentId)
+    : isCollaborative
+      ? collaborativePlaceholder
+      : enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;

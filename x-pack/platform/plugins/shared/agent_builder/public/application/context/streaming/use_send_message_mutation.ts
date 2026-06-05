@@ -16,8 +16,17 @@ import type {
   ConversationAction,
   ConversationRoundStep,
   Conversation,
+  UserMessageEvent,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { AppendConversationMessageResponse } from '../../../common/http_api/conversations';
+import {
+  ConversationRoundStatus,
+  isCollaborativeConversation,
+  shouldInvokeAgentForCollaborativeMessage,
+  sortTimelineEventsChronologically,
+  timelineEventsToRounds,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ConversationAttachment,
@@ -56,6 +65,8 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /** When false, collaborative human note — no agent stream UI. Defaults to true. */
+  invokesAgent?: boolean;
 }
 
 export interface SendMessageMutationBindings {
@@ -67,6 +78,119 @@ export interface SendMessageMutationBindings {
 }
 
 type UseSendMessageMutationProps = SendMessageMutationBindings;
+
+const OPTIMISTIC_HUMAN_NOTE_EVENT_ID_PREFIX = 'optimistic-human-note-';
+
+const isOptimisticHumanNoteEventId = (eventId: string): boolean =>
+  eventId.startsWith(OPTIMISTIC_HUMAN_NOTE_EVENT_ID_PREFIX) ||
+  eventId.startsWith(`msg-${OPTIMISTIC_HUMAN_NOTE_EVENT_ID_PREFIX}`);
+
+const applyHumanNoteCacheUpdate = ({
+  queryClient,
+  conversationQueryKey,
+  updater,
+}: {
+  queryClient: ReturnType<typeof useQueryClient>;
+  conversationQueryKey: ReturnType<typeof queryKeys.conversations.byId>;
+  updater: (previous: Conversation) => Conversation;
+}): void => {
+  queryClient.setQueryData<Conversation>(conversationQueryKey, (previous) => {
+    if (!previous) {
+      return previous;
+    }
+    return updater(previous);
+  });
+};
+
+const buildConversationFromEvents = (
+  previous: Conversation,
+  events: NonNullable<Conversation['events']>
+): Conversation => {
+  const sortedEvents = sortTimelineEventsChronologically(events);
+
+  return {
+    ...previous,
+    events: sortedEvents,
+    rounds: timelineEventsToRounds(sortedEvents),
+    updated_at: sortedEvents.at(-1)?.timestamp ?? previous.updated_at,
+  };
+};
+
+const buildConversationWithMergedEvents = (
+  previous: Conversation,
+  events: Conversation['events'],
+  { stripOptimisticNotes = false }: { stripOptimisticNotes?: boolean } = {}
+): Conversation => {
+  const persistedEvents = stripOptimisticNotes
+    ? (events ?? []).filter((event) => !isOptimisticHumanNoteEventId(event.id))
+    : events ?? [];
+
+  return buildConversationFromEvents(previous, persistedEvents);
+};
+
+export const mergeAppendMessageResponseIntoConversation = (
+  previous: Conversation | undefined,
+  response: AppendConversationMessageResponse
+): Conversation | undefined => {
+  if (!previous) {
+    return previous;
+  }
+
+  const persistedEvents = (previous.events ?? []).filter(
+    (event) => !isOptimisticHumanNoteEventId(event.id)
+  );
+
+  if (persistedEvents.some((event) => event.id === response.event.id)) {
+    return buildConversationWithMergedEvents(previous, persistedEvents, {
+      stripOptimisticNotes: true,
+    });
+  }
+
+  return buildConversationWithMergedEvents(previous, [...persistedEvents, response.event], {
+    stripOptimisticNotes: true,
+  });
+};
+
+export const appendOptimisticHumanNoteToConversation = (
+  previous: Conversation | undefined,
+  message: string
+): Conversation | undefined => {
+  if (!previous) {
+    return previous;
+  }
+
+  const optimisticEvent: UserMessageEvent = {
+    id: `${OPTIMISTIC_HUMAN_NOTE_EVENT_ID_PREFIX}${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    type: TimelineEventType.user_message,
+    user: previous.user,
+    message,
+  };
+
+  const withoutStaleOptimistic = (previous.events ?? []).filter(
+    (event) => !isOptimisticHumanNoteEventId(event.id)
+  );
+
+  return buildConversationWithMergedEvents(previous, [...withoutStaleOptimistic, optimisticEvent]);
+};
+
+export const shouldInvokeAgentForSend = ({
+  message,
+  action,
+  conversation,
+}: {
+  message?: string;
+  action?: ConversationAction;
+  conversation?: Conversation;
+}): boolean => {
+  const isRegenerate = action === 'regenerate';
+  return (
+    isRegenerate ||
+    !message ||
+    !isCollaborativeConversation(conversation) ||
+    shouldInvokeAgentForCollaborativeMessage(message)
+  );
+};
 
 const buildScreenContextData = async ({
   services,
@@ -175,11 +299,13 @@ export const useSendMessageMutation = ({
       const controller = new AbortController();
       controllersRef.current.set(vars.conversationId, controller);
 
+      const isHumanNoteOnly = !isRegenerate && vars.invokesAgent === false;
+
       let hasInsertedOptimisticListRow = false;
       if (isRegenerate) {
         // Clear the existing response immediately so UI shows empty state.
         streamActions.clearLastRoundResponse();
-      } else {
+      } else if (!isHumanNoteOnly) {
         if (!vars.message) {
           throw new Error('Message is required');
         }
@@ -195,10 +321,41 @@ export const useSendMessageMutation = ({
           attachments: flattenAttachments(vars.attachments ?? []),
           agentId: vars.agentId,
         });
+      } else if (!vars.message) {
+        throw new Error('Message is required');
+      } else if (isHumanNoteOnly) {
+        const conversationQueryKey = queryKeys.conversations.byId(vars.conversationId);
+        await queryClient.cancelQueries({ queryKey: conversationQueryKey });
+        applyHumanNoteCacheUpdate({
+          queryClient,
+          conversationQueryKey,
+          updater: (previous) =>
+            appendOptimisticHumanNoteToConversation(previous, vars.message!) ?? previous,
+        });
       }
 
       let succeeded = false;
       try {
+        if (isHumanNoteOnly) {
+          const conversationQueryKey = queryKeys.conversations.byId(vars.conversationId);
+          const appendResponse = await conversationsService.appendMessage({
+            conversationId: vars.conversationId,
+            message: vars.message!,
+          });
+          await queryClient.cancelQueries({ queryKey: conversationQueryKey });
+          applyHumanNoteCacheUpdate({
+            queryClient,
+            conversationQueryKey,
+            updater: (previous) =>
+              mergeAppendMessageResponseIntoConversation(previous, appendResponse) ?? previous,
+          });
+          await queryClient.fetchQuery({
+            queryKey: conversationQueryKey,
+            queryFn: () => conversationsService.get({ conversationId: vars.conversationId }),
+          });
+          vars.resetAttachments?.();
+          succeeded = true;
+        } else {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
 
         const events$ = isRegenerate
@@ -238,6 +395,7 @@ export const useSendMessageMutation = ({
           vars.resetAttachments?.();
         }
         succeeded = true;
+        }
       } catch (err) {
         // Snapshot the failing round's accumulated steps from the cache BEFORE
         // we tear down the optimistic round below. Without this, the in-progress
@@ -248,10 +406,24 @@ export const useSendMessageMutation = ({
         );
         const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
         setError(vars.conversationId, err, inProgressSteps);
-        if (!isRegenerate) {
+        if (!isRegenerate && !isHumanNoteOnly) {
           // Remove the optimistic round immediately so the error round and the optimistic
           // round are not both visible.
           streamActions.removeOptimisticRound();
+        } else if (isHumanNoteOnly) {
+          applyHumanNoteCacheUpdate({
+            queryClient,
+            conversationQueryKey: queryKeys.conversations.byId(vars.conversationId),
+            updater: (previous) => {
+              const events = (previous.events ?? []).filter(
+                (event) => !isOptimisticHumanNoteEventId(event.id)
+              );
+
+              return buildConversationWithMergedEvents(previous, events, {
+                stripOptimisticNotes: true,
+              });
+            },
+          });
         }
         throw err;
       } finally {
@@ -265,7 +437,7 @@ export const useSendMessageMutation = ({
         );
         const endedInAwaitingPrompt =
           cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
-        if (succeeded && !endedInAwaitingPrompt) {
+        if (succeeded && !endedInAwaitingPrompt && !isHumanNoteOnly) {
           streamActions.invalidateConversation();
         }
         if (!succeeded && hasInsertedOptimisticListRow) {

@@ -42,8 +42,12 @@ import {
   createConversation$,
   resolveServices,
   convertErrors,
+  appendHumanMessage$,
+  updateCollaborativeConversation$,
+  shouldInvokeAgentForMessage,
   type ConversationWithOperation,
 } from './utils';
+import { isCollaborativeConversation } from '../conversation/client/conversation_access';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
@@ -133,6 +137,10 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
+  const connectorProvider = getConnectorProvider(
+    (await modelProvider.getDefaultModel()).chatModel.getConnector()
+  );
+
   // Get conversation
   const conversation = await getConversation({
     agentId,
@@ -146,6 +154,34 @@ const handleConversationExecution = async ({
     storeConversation && conversation.operation === 'CREATE'
       ? of(createConversationIdSetEvent(conversation.id))
       : EMPTY;
+
+  // Collaborative investigation: append-only when message does not invoke @agent
+  if (
+    storeConversation &&
+    conversation.operation === 'UPDATE' &&
+    isCollaborativeConversation(conversation) &&
+    !shouldInvokeAgentForMessage(nextInput.message ?? '')
+  ) {
+    const appendOnly$ = appendHumanMessage$({
+      conversationClient,
+      conversationId: conversation.id,
+      message: nextInput.message ?? '',
+      attachment_refs: nextInput.attachment_refs,
+    });
+
+    return merge(conversationIdEvent$, appendOnly$).pipe(
+      handleCancellation(abortSignal),
+      convertErrors({
+        agentId,
+        logger,
+        analyticsService,
+        trackingService,
+        modelProvider: connectorProvider,
+        conversationId: conversation.id,
+        executionId: execution.executionId,
+      })
+    );
+  }
 
   // Execute agent
   const agentEvents$ = executeAgent$({
@@ -191,9 +227,6 @@ const handleConversationExecution = async ({
   // Merge all event streams
   const effectiveConversationId =
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
-
-  const chatModel = (await modelProvider.getDefaultModel()).chatModel;
-  const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
   const { headers } = request;
   const opikTraceId = headers.opik_trace_id as string | undefined;
@@ -399,6 +432,17 @@ const buildPersistenceEvents = ({
       conversationId: conversationId || conversation.id,
       title$,
       roundCompletedEvents$,
+    });
+  }
+
+  if (isCollaborativeConversation(conversation)) {
+    return updateCollaborativeConversation$({
+      conversation,
+      conversationClient,
+      title$,
+      roundCompletedEvents$,
+      currentUser: conversationClient.getCurrentUser(),
+      action,
     });
   }
 

@@ -20,7 +20,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -36,7 +36,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -52,7 +52,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity

@@ -15,7 +15,7 @@ import { createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
 import { runDefaultAgentMode } from './run_chat_agent';
-import { prepareConversation, selectTools, extractRound, getPendingRound } from './utils';
+import { prepareConversation, selectTools, extractRound, getPendingExecution } from './utils';
 import { createAgentGraph } from './graph';
 
 jest.mock('./utils', () => ({
@@ -23,7 +23,8 @@ jest.mock('./utils', () => ({
   selectSkills: jest.fn().mockResolvedValue([]),
   selectTools: jest.fn(),
   extractRound: jest.fn(),
-  getPendingRound: jest.fn(),
+  extractAgentResponse: jest.fn(),
+  getPendingExecution: jest.fn().mockReturnValue(undefined),
   addRoundCompleteEvent: jest.fn(() => (source$: any) => source$),
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
 }));
@@ -51,7 +52,7 @@ jest.mock('./convert_graph_events', () => ({
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
-const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
+const getPendingExecutionMock = getPendingExecution as jest.MockedFn<typeof getPendingExecution>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
 
 describe('runDefaultAgentMode', () => {
@@ -70,7 +71,7 @@ describe('runDefaultAgentMode', () => {
     context.toolManager.getToolIdMapping.mockReturnValue(new Map());
     context.toolManager.getDynamicToolIds.mockReturnValue([]);
 
-    getPendingRoundMock.mockReturnValue(undefined);
+    getPendingExecutionMock.mockReturnValue(undefined);
 
     const staticTools: ExecutableToolWithOrigin[] = [
       { ...createMockedExecutableTool({ id: 'static-tool-1' }), origin: ToolOrigin.registry },
@@ -85,7 +86,7 @@ describe('runDefaultAgentMode', () => {
     } as any);
 
     prepareConversationMock.mockResolvedValue({
-      previousRounds: [],
+      previousEvents: [],
       nextInput: { message: 'hello', attachments: [] },
       attachments: [],
       attachmentTypes: [],

@@ -20,3 +20,8 @@ export {
 } from './conversations';
 export { convertErrors } from './convert_errors';
 export { resolveServices } from './resolve_services';
+export { shouldInvokeAgentForMessage } from './trigger_hooks';
+export {
+  appendHumanMessage$,
+  updateCollaborativeConversation$,
+} from './collaborative_persistence';

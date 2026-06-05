@@ -8,11 +8,18 @@
 import type {
   CompactionSummary,
   ConversationAction,
-  ConversationRound,
   ConverseInput,
-  RoundInput,
+  TimelineEvent,
+  UserMessageEvent,
+  AgentExecutionEvent,
 } from '@kbn/agent-builder-common';
-import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
+import {
+  createBadRequestError,
+  createInternalError,
+  isUserMessageEvent,
+  isUserActionEvent,
+  isAgentExecutionEvent,
+} from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
@@ -39,19 +46,46 @@ export interface ProcessedAttachmentType {
   description?: string;
 }
 
-export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
-  input: ProcessedRoundInput;
+/**
+ * A processed user message event with formatted attachments.
+ */
+export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'attachments'> & {
+  processedInput: ProcessedRoundInput;
+};
+
+/**
+ * Union type for processed timeline events.
+ */
+export type ProcessedTimelineEvent = ProcessedUserMessageEvent | AgentExecutionEvent;
+
+/**
+ * Type guard for ProcessedUserMessageEvent.
+ */
+export const isProcessedUserMessageEvent = (
+  event: ProcessedTimelineEvent
+): event is ProcessedUserMessageEvent => {
+  return event.type === 'user_message';
+};
+
+/**
+ * Type guard for AgentExecutionEvent within ProcessedTimelineEvent.
+ */
+export const isProcessedAgentExecutionEvent = (
+  event: ProcessedTimelineEvent
+): event is AgentExecutionEvent => {
+  return event.type === 'agent_execution';
 };
 
 export interface ProcessedConversation {
-  previousRounds: ProcessedConversationRound[];
+  /** Previous timeline events (processed user messages + agent responses) */
+  previousEvents: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
   attachments: ProcessedAttachment[];
   attachmentStateManager: AttachmentStateManager;
   /** Presentation configuration for versioned attachments (inline vs summary mode) */
   versionedAttachmentPresentation?: AttachmentPresentation;
-  /** Compaction summary covering older rounds that were replaced by this summary */
+  /** Compaction summary covering older events that were replaced by this summary */
   compactionSummary?: CompactionSummary;
 }
 
@@ -132,45 +166,63 @@ const mergeInputAttachmentsIntoAttachmentState = async (
 };
 
 /**
- * Prepare conversation rounds and input based on the action.
- * - 'regenerate': Strip the last round and use its input for re-execution
- * - Default: Use rounds and input as provided
+ * Prepare timeline events and input based on the action.
+ * - 'regenerate': Strip the last agent response + its user message and re-use
+ * - Default: Use events and input as provided
  */
 const prepareForAction = ({
   action,
-  previousRounds,
+  previousEvents,
   nextInput,
 }: {
   action?: ConversationAction;
-  previousRounds: ConversationRound[];
+  previousEvents: TimelineEvent[];
   nextInput: ConverseInput;
-}): { effectiveRounds: ConversationRound[]; effectiveNextInput: ConverseInput } => {
-  // Regenerate: strip the last round and use its original input
+}): { effectiveEvents: TimelineEvent[]; effectiveNextInput: ConverseInput } => {
   if (action === 'regenerate') {
-    if (previousRounds.length === 0) {
-      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
+    // Find the last AgentExecutionEvent
+    let lastAgentIdx = -1;
+    for (let i = previousEvents.length - 1; i >= 0; i--) {
+      if (isAgentExecutionEvent(previousEvents[i])) {
+        lastAgentIdx = i;
+        break;
+      }
     }
-    const lastRound = previousRounds[previousRounds.length - 1];
-    // Faithfully replay the original request by copying the full stored input shape
-    const regenerateInput: ConverseInput = { ...lastRound.input };
-    // Strip the last round from previous rounds
+    if (lastAgentIdx === -1) {
+      throw createBadRequestError('Cannot regenerate: conversation has no agent responses');
+    }
+    // Find the UserMessageEvent that precedes this agent response
+    let userMsgIdx = -1;
+    for (let i = lastAgentIdx - 1; i >= 0; i--) {
+      if (isUserMessageEvent(previousEvents[i])) {
+        userMsgIdx = i;
+        break;
+      }
+    }
+    const userMsg = userMsgIdx >= 0 ? (previousEvents[userMsgIdx] as UserMessageEvent) : undefined;
+    const regenerateInput: ConverseInput = {
+      message: userMsg?.message,
+      attachments: userMsg?.attachments as AttachmentInput[] | undefined,
+      attachment_refs: userMsg?.attachment_refs,
+    };
+    // Strip from the user message onward (or just the agent response if no user message found)
+    const stripFrom = userMsgIdx >= 0 ? userMsgIdx : lastAgentIdx;
     return {
-      effectiveRounds: previousRounds.slice(0, -1),
+      effectiveEvents: previousEvents.slice(0, stripFrom),
       effectiveNextInput: regenerateInput,
     };
   }
 
-  // Default: use rounds and input as provided
-  return { effectiveRounds: previousRounds, effectiveNextInput: nextInput };
+  return { effectiveEvents: previousEvents, effectiveNextInput: nextInput };
 };
 
 export const prepareConversation = async ({
-  previousRounds,
+  previousEvents,
   nextInput,
   context,
   action,
 }: {
-  previousRounds: ConversationRound[];
+  previousEvents: TimelineEvent[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
   action?: ConversationAction;
@@ -186,18 +238,17 @@ export const prepareConversation = async ({
         }
       : undefined;
 
-  // Handle regenerate action: use last round's input and strip it from previous rounds
-  const { effectiveRounds, effectiveNextInput } = prepareForAction({
+  // Handle regenerate action: strip last agent response + user message
+  const { effectiveEvents, effectiveNextInput } = prepareForAction({
     action,
-    previousRounds,
+    previousEvents,
     nextInput,
   });
 
-  // Promote any legacy per-round attachments into conversation-level versioned attachments.
-  // We merge both previous rounds and next input, then strip per-round attachments so the LLM
-  // only sees the v2 conversation-level attachments (via attachment presentation/tools).
-  const previousAttachments = effectiveRounds.flatMap(
-    (round) => round.input.attachments ?? []
+  // Promote any legacy per-event attachments into conversation-level versioned attachments.
+  const userMessages = effectiveEvents.filter(isUserMessageEvent);
+  const previousAttachments = userMessages.flatMap(
+    (msg) => msg.attachments ?? []
   ) as AttachmentInput[];
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
 
@@ -211,25 +262,42 @@ export const prepareConversation = async ({
   });
 
   const strippedNextInput: ConverseInput = { ...effectiveNextInput, attachments: [] };
-  const processedNextInput = await prepareRoundInput({
+  const processedNextInput = await prepareInput({
     input: strippedNextInput,
     attachmentsService,
     formatContext,
   });
 
-  const processedRounds = await Promise.all(
-    effectiveRounds.map((round) => {
-      const strippedRound: ConversationRound = {
-        ...round,
-        input: { ...round.input, attachments: [] },
-      };
-      return prepareRound({ round: strippedRound, attachmentsService, formatContext });
+  const executionEvents = effectiveEvents.filter(
+    (event) => !isUserActionEvent(event)
+  );
+
+  // Process each event: UserMessageEvent → ProcessedUserMessageEvent, AgentExecutionEvent → pass through
+  const processedEvents: ProcessedTimelineEvent[] = await Promise.all(
+    executionEvents.map(async (event) => {
+      if (isUserMessageEvent(event)) {
+        const strippedEvent: UserMessageEvent = { ...event, attachments: [] };
+        const processedInput = await prepareInput({
+          input: { message: strippedEvent.message, attachments: strippedEvent.attachments },
+          attachmentsService,
+          formatContext,
+        });
+        return {
+          ...strippedEvent,
+          processedInput,
+        } as ProcessedUserMessageEvent;
+      }
+      // AgentExecutionEvent passes through as-is
+      return event as AgentExecutionEvent;
     })
   );
 
+  // Collect all attachments from processed user messages
   const allAttachments = [
     ...processedNextInput.attachments,
-    ...processedRounds.flatMap((round) => round.input.attachments),
+    ...processedEvents
+      .filter(isProcessedUserMessageEvent)
+      .flatMap((event) => event.processedInput.attachments),
   ];
 
   const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
@@ -292,7 +360,7 @@ export const prepareConversation = async ({
 
   return {
     nextInput: processedNextInput,
-    previousRounds: processedRounds,
+    previousEvents: processedEvents,
     attachmentTypes,
     attachments: allAttachments,
     attachmentStateManager,
@@ -300,27 +368,12 @@ export const prepareConversation = async ({
   };
 };
 
-const prepareRound = async ({
-  round,
-  attachmentsService,
-  formatContext,
-}: {
-  round: ConversationRound;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedConversationRound> => {
-  return {
-    ...round,
-    input: await prepareRoundInput({ input: round.input, attachmentsService, formatContext }),
-  };
-};
-
-const prepareRoundInput = async ({
+const prepareInput = async ({
   input,
   attachmentsService,
   formatContext,
 }: {
-  input: RoundInput | ConverseInput;
+  input: ConverseInput | { message: string; attachments?: Attachment[] };
   attachmentsService: AttachmentsService;
   formatContext: AttachmentFormatContext;
 }): Promise<ProcessedRoundInput> => {
