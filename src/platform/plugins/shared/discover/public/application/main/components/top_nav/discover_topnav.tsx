@@ -18,7 +18,6 @@ import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
@@ -44,76 +43,9 @@ import {
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { DiscoverSessionSaveModalContainer } from './save_discover_session';
-import {
-  isDiscoverInspectorInTabMenu,
-  useDiscoverTopNavWithInspector,
-  useDiscoverTopNavWithoutInspector,
-} from './use_discover_topnav';
+import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
-
-function DiscoverTopNavMenuSection({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const services = useDiscoverServices();
-  const customizationContext = useDiscoverCustomizationContext();
-  if (isDiscoverInspectorInTabMenu(services, customizationContext)) {
-    return (
-      <DiscoverTopNavMenuNoInspector
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenSaveAsModal={onOpenSaveAsModal}
-        persistedDiscoverSession={persistedDiscoverSession}
-      />
-    );
-  }
-  return (
-    <DiscoverTopNavMenuWithInspector
-      onOpenSaveModal={onOpenSaveModal}
-      onOpenSaveAsModal={onOpenSaveAsModal}
-      persistedDiscoverSession={persistedDiscoverSession}
-    />
-  );
-}
-
-function DiscoverTopNavMenuWithInspector({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithInspector({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
-    persistedDiscoverSession,
-  });
-  return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
-}
-
-function DiscoverTopNavMenuNoInspector({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithoutInspector({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
-    persistedDiscoverSession,
-  });
-  return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
-}
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -197,7 +129,7 @@ export const DiscoverTopNav = ({
 
   const onOpenQueryInNewTab = useCallback(
     async (tabName: string, esqlQuery: string) => {
-      dispatch(
+      await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
           appState: { query: { esql: esqlQuery } },
@@ -416,16 +348,18 @@ export const DiscoverTopNav = ({
     [esqlModeErrors]
   );
 
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+    persistedDiscoverSession,
+  });
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
     <span>
-      <DiscoverTopNavMenuSection
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenSaveAsModal={onOpenSaveAsModal}
-        persistedDiscoverSession={persistedDiscoverSession}
-      />
+      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
           customizationContext.displayMode !== 'embedded' &&

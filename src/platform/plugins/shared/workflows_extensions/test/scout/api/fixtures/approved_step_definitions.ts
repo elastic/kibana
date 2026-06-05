@@ -25,12 +25,16 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
+    id: 'contextEngine.addEntry',
+    handlerHash: '27344216178a96568fc8bcaf53701928a274b598b297a9b39bfbae6eb8b5b8ff',
+  },
+  {
     id: 'ai.agent',
     handlerHash: 'ee8c280a01262305768e617ba97723d50c1c13fd01f620825bece394aaf48ee6',
   },
   {
     id: 'ai.classify',
-    handlerHash: 'c6aaf7022e4bb119ed9ce083913cf714093814fcdc670c7314ec326ec7dc7384',
+    handlerHash: '0dcc5fb63038d1cb5fe73dd7ae7744d3eb3dda9d95d7e1dd860e587926177553',
   },
   {
     id: 'ai.prompt',
@@ -62,7 +66,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
+    handlerHash: '2eda52d265fc8683f625974f6909a5e0fb5ad6ee1eadd4ee89737ac5c8b4c8e1',
   },
   {
     id: 'data.parseJson',

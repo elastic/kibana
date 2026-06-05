@@ -28,6 +28,10 @@ jest.mock('./utils', () => ({
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
 }));
 
+jest.mock('./tools/register_internal_tools', () => ({
+  registerInternalTools: jest.fn(),
+}));
+
 jest.mock('./utils/create_result_transformer', () => ({
   createResultTransformer: jest.fn(() => ({})),
 }));

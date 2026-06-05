@@ -52,6 +52,13 @@ const listQueriesRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'List of queries linked to the stream.',
@@ -180,6 +187,13 @@ const deleteQueryRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'The query was removed successfully.',

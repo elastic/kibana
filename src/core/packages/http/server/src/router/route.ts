@@ -475,7 +475,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    */
   availability?: {
     /** @default stable */
-    stability?: 'experimental' | 'beta' | 'stable';
+    stability?: 'experimental' | 'beta' | 'stable' | 'tech_preview';
     /**
      * The stack version in which the route was introduced (eg: 8.15.0).
      */

@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268785
+issues:
+- https://github.com/elastic/kibana/issues/262503
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Discover and ES|QL
+- AI and machine Learning
+title: Add sparkline charts to the Discover table

@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { pick } from 'lodash';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -26,6 +27,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -34,7 +36,7 @@ const localStorage = new Storage(window.localStorage);
  */
 export interface LogRateAnalysisAppStateProps {
   /** The data view to analyze. */
-  dataView: DataView;
+  dataView: DataView | undefined;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
   /** App context value */
@@ -52,12 +54,22 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   showContextualInsights = false,
   showFrozenDataTierChoice = true,
 }) => {
-  if (!dataView) return null;
+  if (!dataView) {
+    return null;
+  }
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_rate_analysis');
 
   if (warning !== null) {
-    return <>{warning}</>;
+    return (
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          <AiopsDataSourcePicker currentDataView={dataView} />
+          <EuiSpacer size="m" />
+          {warning}
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    );
   }
   const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
   const casesPermissions = appContextValue.cases?.helpers.canUseCases();
@@ -80,7 +92,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
     <AiopsAppContext.Provider value={appContextValue}>
       <CasesContext permissions={casesPermissions!} owner={[]}>
         <UrlStateProvider>
-          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <LogRateAnalysisReduxProvider>
               <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                 <DatePickerContextProvider {...datePickerDeps}>

@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
@@ -25,6 +25,7 @@ import {
   buildSetFieldsByCondition,
   type PaginationParams,
   type PaginationFields,
+  type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
@@ -32,12 +33,14 @@ import {
   ENTITY_NAME_FIELD,
   ENTITY_TYPE_FIELD,
   TIMESTAMP_FIELD,
+  MAX_COLLECTED_VALUES_PER_FIELD,
   aggregationStats,
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
   hasFieldEvaluations,
   mapPostAggFilterFieldsToRecentForEsql,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -67,8 +70,8 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
   recoveryId?: string;
   pagination?: PaginationParams;
-  logsPageCursorStart?: PaginationParams;
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -76,9 +79,10 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  logsPageCursorStart?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationParams;
 }): string {
   return (
+    `${NULLIFY_UNMAPPED_FIELDS_SETTING}\n` +
     buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
@@ -100,6 +104,8 @@ export function buildLogsExtractionEsqlQuery({
   const { fields, type, entityTypeFallback } = entityDefinition;
 
   const parts = [];
+
+  parts.push(`${NULLIFY_UNMAPPED_FIELDS_SETTING}`);
 
   // FROM and WHERE
   parts.push(
@@ -230,7 +236,7 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
       switch (retention.operation) {
         case 'collect_values':
           return `${dest} = MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
-            retention.maxLength - 1
+            MAX_COLLECTED_VALUES_PER_FIELD - 1
           })`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
