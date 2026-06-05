@@ -127,8 +127,3 @@ components:
           type: object
           additionalProperties: true
           description: Optional event metadata that is not part of the ECS schema.
-        last:
-          type: boolean
-          description: |
-            Present and true for the most recently recorded change (the HEAD
-            revision). Absent on all other items.

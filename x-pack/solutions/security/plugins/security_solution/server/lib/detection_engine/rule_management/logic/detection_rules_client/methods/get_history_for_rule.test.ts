@@ -118,20 +118,6 @@ describe('getHistoryForRule', () => {
     expect(result.items[0].rule.name).toBe('rule-1');
   });
 
-  it('sets last: true only on the first item of page 1', async () => {
-    mockRuleChangesHistory(buildItems(3));
-
-    const result = await getHistoryForRule({
-      rulesClient,
-      ruleId: 'rule-1',
-      page: 1,
-      perPage: 2,
-    });
-
-    expect(result.items[0].last).toBe(true);
-    expect(result.items[1].last).toBeUndefined();
-  });
-
   it('sets tracking_started_at from the oldest item timestamp', async () => {
     const changeHistoryItems = buildItems(3);
 

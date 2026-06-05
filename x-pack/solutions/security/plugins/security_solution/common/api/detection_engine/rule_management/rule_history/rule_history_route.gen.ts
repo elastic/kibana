@@ -69,12 +69,6 @@ exists.
      * Optional event metadata that is not part of the ECS schema.
      */
     metadata: z.object({}).catchall(z.unknown()).optional(),
-    /**
-      * Present and true for the most recently recorded change (the HEAD
-revision). Absent on all other items.
-
-      */
-    last: z.boolean().optional(),
   })
 );
 export type RuleHistoryItem = z.infer<typeof RuleHistoryItem>;

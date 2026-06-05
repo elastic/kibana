@@ -111,7 +111,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
         </EuiFlexGroup>
 
         <EuiFlexItem grow={false}>
-          <RuleChangeActionBadge item={item} isCurrent={item.last} />
+          <RuleChangeActionBadge item={item} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

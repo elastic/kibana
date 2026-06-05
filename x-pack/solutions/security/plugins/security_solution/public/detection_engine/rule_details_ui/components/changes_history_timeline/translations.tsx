@@ -34,11 +34,6 @@ export const TIMELINE_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const CURRENT_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.currentVersion',
-  { defaultMessage: 'Current version' }
-);
-
 export const N_CHANGES = (count: number): string =>
   i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.nChanges', {
     defaultMessage: '{count, plural, one {# change} other {# changes}}',

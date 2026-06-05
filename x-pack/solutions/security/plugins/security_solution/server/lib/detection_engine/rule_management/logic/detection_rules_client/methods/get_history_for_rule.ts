@@ -33,8 +33,7 @@ export const getHistoryForRule = async ({
   // - main: the requested page (newest-first, +1 extra for old_values computation)
   // - oldest: single item ascending by timestamp to get tracking_started_at (page 1 only —
   //   the oldest item never changes, so subsequent pages skip this query)
-  // - newest: single item descending to identify the HEAD revision for the `last` flag
-  const [result, oldestResult, newestResult] = await Promise.all([
+  const [result, oldestResult] = await Promise.all([
     rulesClient.getHistory({
       module: 'security',
       ruleId,
@@ -50,24 +49,13 @@ export const getHistoryForRule = async ({
           sort: [{ '@timestamp': { order: 'asc' } }],
         })
       : Promise.resolve(undefined),
-    rulesClient.getHistory({
-      module: 'security',
-      ruleId,
-      from: 0,
-      size: 1,
-      sort: [{ '@timestamp': { order: 'desc' } }],
-    }),
   ]);
 
   const fetchedItems = result.items;
   const resultItems: RuleHistoryItem[] = [];
-  const latestItemId = newestResult.items[0]?.event.id;
 
   for (let i = 0; i < Math.min(perPage, fetchedItems.length); ++i) {
-    const isLatest = fetchedItems[i].event.id === latestItemId;
-
-    const item = mapRuleHistoryItem(fetchedItems[i], fetchedItems[i + 1]);
-    resultItems.push(isLatest ? { ...item, last: true } : item);
+    resultItems.push(mapRuleHistoryItem(fetchedItems[i], fetchedItems[i + 1]));
   }
 
   return {

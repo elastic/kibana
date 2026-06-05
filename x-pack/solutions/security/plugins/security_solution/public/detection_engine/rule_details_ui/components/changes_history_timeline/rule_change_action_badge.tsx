@@ -15,91 +15,51 @@ import * as i18n from './translations';
 
 interface RuleChangeActionBadgeProps {
   item: RuleHistoryItem;
-  isCurrent?: boolean;
 }
 
 export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
   item,
-  isCurrent,
 }: RuleChangeActionBadgeProps): JSX.Element | null {
   switch (item.action) {
     case RuleChangeTrackingAction.ruleEnable:
       return (
-        <ChangeActionBadge
-          icon="dot"
-          iconColor="success"
-          text={i18n.ACTION_LABEL_ENABLED}
-          isCurrent={isCurrent}
-        />
+        <ChangeActionBadge icon="dot" iconColor="success" text={i18n.ACTION_LABEL_ENABLED} />
       );
 
     case RuleChangeTrackingAction.ruleDisable:
       return (
-        <ChangeActionBadge
-          icon="dot"
-          iconColor="danger"
-          text={i18n.ACTION_LABEL_DISABLED}
-          isCurrent={isCurrent}
-        />
+        <ChangeActionBadge icon="dot" iconColor="danger" text={i18n.ACTION_LABEL_DISABLED} />
       );
 
     case RuleChangeTrackingAction.ruleSnooze:
-      return (
-        <ChangeActionBadge
-          icon="bellSlash"
-          text={i18n.ACTION_LABEL_SNOOZED}
-          isCurrent={isCurrent}
-        />
-      );
+      return <ChangeActionBadge icon="bellSlash" text={i18n.ACTION_LABEL_SNOOZED} />;
 
     case RuleChangeTrackingAction.ruleUnsnooze:
-      return (
-        <ChangeActionBadge icon="bell" text={i18n.ACTION_LABEL_UNSNOOZED} isCurrent={isCurrent} />
-      );
+      return <ChangeActionBadge icon="bell" text={i18n.ACTION_LABEL_UNSNOOZED} />;
 
     case RuleChangeTrackingAction.ruleUpdateApiKey:
-      return <ChangeActionBadge text={i18n.ACTION_LABEL_API_KEY_UPDATED} isCurrent={isCurrent} />;
+      return <ChangeActionBadge text={i18n.ACTION_LABEL_API_KEY_UPDATED} />;
 
     case RuleChangeTrackingAction.ruleCreate:
-      return <ChangeActionBadge text={i18n.ACTION_LABEL_CREATED} isCurrent={isCurrent} />;
+      return <ChangeActionBadge text={i18n.ACTION_LABEL_CREATED} />;
 
     case RuleChangeTrackingAction.ruleDelete:
-      return (
-        <ChangeActionBadge icon="trash" text={i18n.ACTION_LABEL_DELETED} isCurrent={isCurrent} />
-      );
+      return <ChangeActionBadge icon="trash" text={i18n.ACTION_LABEL_DELETED} />;
 
     case SecurityRuleChangeTrackingAction.ruleInstall:
-      return (
-        <ChangeActionBadge icon="plus" text={i18n.ACTION_LABEL_INSTALLED} isCurrent={isCurrent} />
-      );
+      return <ChangeActionBadge icon="plus" text={i18n.ACTION_LABEL_INSTALLED} />;
 
     case SecurityRuleChangeTrackingAction.ruleUpgrade:
-      return (
-        <ChangeActionBadge icon="refresh" text={i18n.ACTION_LABEL_UPGRADED} isCurrent={isCurrent} />
-      );
+      return <ChangeActionBadge icon="refresh" text={i18n.ACTION_LABEL_UPGRADED} />;
 
     case SecurityRuleChangeTrackingAction.ruleDuplicate:
-      return (
-        <ChangeActionBadge icon="copy" text={i18n.ACTION_LABEL_DUPLICATED} isCurrent={isCurrent} />
-      );
+      return <ChangeActionBadge icon="copy" text={i18n.ACTION_LABEL_DUPLICATED} />;
 
     case SecurityRuleChangeTrackingAction.ruleImport:
-      return (
-        <ChangeActionBadge
-          icon="download"
-          text={i18n.ACTION_LABEL_IMPORTED}
-          isCurrent={isCurrent}
-        />
-      );
+      return <ChangeActionBadge icon="download" text={i18n.ACTION_LABEL_IMPORTED} />;
 
     case SecurityRuleChangeTrackingAction.ruleRevert:
-      return (
-        <ChangeActionBadge
-          icon="framePrevious"
-          text={i18n.ACTION_LABEL_REVERTED}
-          isCurrent={isCurrent}
-        />
-      );
+      return <ChangeActionBadge icon="framePrevious" text={i18n.ACTION_LABEL_REVERTED} />;
 
     default: {
       const isPrebuiltRule = item.rule.rule_source.type === 'external';
@@ -111,7 +71,6 @@ export const RuleChangeActionBadge = memo(function RuleChangeActionBadge({
               ? `R${item.rule.revision} • V${item.rule.version}`
               : `R${item.rule.revision}`
           }
-          isCurrent={isCurrent}
         />
       );
     }
@@ -122,19 +81,12 @@ interface ChangeActionBadgeProps {
   icon?: IconType;
   iconColor?: IconColor;
   text: string;
-  isCurrent?: boolean;
 }
 
-function ChangeActionBadge({
-  icon,
-  iconColor,
-  text,
-  isCurrent,
-}: ChangeActionBadgeProps): JSX.Element {
+function ChangeActionBadge({ icon, iconColor, text }: ChangeActionBadgeProps): JSX.Element {
   return (
     <EuiBadge color="hollow">
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {isCurrent && <EuiText size="xs">{`${i18n.CURRENT_VERSION} • `}</EuiText>}
         {icon && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={icon} color={iconColor} size="s" aria-hidden={true} />
