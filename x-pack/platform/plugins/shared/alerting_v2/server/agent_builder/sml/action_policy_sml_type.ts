@@ -92,7 +92,7 @@ export const createActionPolicySmlType = ({
   toAttachment: async (item, context) => {
     try {
       const client = getScopedActionPolicyClient(context.request);
-      const policy = await client.getActionPolicy({ id: item.origin_id });
+      const policy = await client.getActionPolicy({ id: item.origin_id ?? '' });
       return {
         type: ACTION_POLICY_ATTACHMENT_TYPE,
         data: actionPolicyAttachmentDataSchema.parse(policy),
