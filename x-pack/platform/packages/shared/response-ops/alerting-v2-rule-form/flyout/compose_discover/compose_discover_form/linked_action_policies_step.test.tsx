@@ -117,14 +117,14 @@ describe('LinkedActionPoliciesStep', () => {
     );
   });
 
-  it('ignores form values and passes ruleId when ruleId is provided', () => {
+  it('passes current form name and tags alongside ruleId so unsaved changes are reflected', () => {
     mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({ isLoading: false, error: null, items: [] });
 
     renderComponent({ ruleId: 'rule-abc' });
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ ruleId: 'rule-abc', name: undefined, tags: undefined })
+      expect.objectContaining({ ruleId: 'rule-abc', name: 'My Rule', tags: ['env:prod'] })
     );
   });
 });
