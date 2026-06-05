@@ -232,6 +232,13 @@ async function runIntegration(
 
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
+  //
+  // Dual write, latest index first: the metadata append is at-least-once.
+  // If it throws after writeEntityIds succeeds, the whole run propagates and
+  // the next run re-emits these observations under a fresh scan_id, so a
+  // retry can produce duplicate metadata docs (distinguishable by scan_id).
+  // Acceptable for an append-only observation log; readers must not assume
+  // one doc per (entity, kind, target).
   const write = await writeEntityIds(crudClient, logger, records);
   const metadata = await writeRelationshipMetadatas(entityMetadataClient, logger, records, {
     scanId: metadataContext.scanId,

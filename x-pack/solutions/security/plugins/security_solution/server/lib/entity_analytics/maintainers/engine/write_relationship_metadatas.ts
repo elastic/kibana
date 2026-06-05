@@ -7,9 +7,15 @@
 
 import type { Logger } from '@kbn/logging';
 import type { EntityMetadataClient } from '@kbn/entity-store/server';
-import type { RelationshipMetadataDoc } from '@kbn/entity-store/common';
+import type { RelationshipKind, RelationshipMetadataDoc } from '@kbn/entity-store/common';
 
 import type { EntityRelationshipRecord } from './types';
+
+// The dynamic, one-per-kind target field on RelationshipMetadataDoc. relType
+// flows in as a plain string (the engine stays generic over relationship
+// kinds — the metadata mapping pins `entity.relationships.*.target` via a
+// dynamic_template), so we assert just the key, keeping the doc fully typed.
+type RelationshipTargetKey = `entity.relationships.${RelationshipKind}.target`;
 
 interface WriteRelationshipMetadataContext {
   scanId: string;
@@ -51,8 +57,7 @@ function buildRelationshipMetadata(
       lookback_window: context.lookbackWindow,
     },
   };
-  // Cast to satisfy the dynamic-keyed mapped portion of RelationshipMetadataDoc.
-  (doc as Record<string, unknown>)[`entity.relationships.${relType}.target`] = target;
+  doc[`entity.relationships.${relType}.target` as RelationshipTargetKey] = target;
 
   const username = parseUsername(record.entityId);
   if (username) {
