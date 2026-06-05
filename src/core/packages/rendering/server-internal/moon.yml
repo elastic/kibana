@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-user-storage-server'
   - '@kbn/core-user-storage-server-mocks'
   - '@kbn/repo-info'
+  - '@kbn/logging'
 tags:
   - shared-server
   - package
