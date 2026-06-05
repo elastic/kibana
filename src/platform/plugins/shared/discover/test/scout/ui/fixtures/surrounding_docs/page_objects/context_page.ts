@@ -118,6 +118,42 @@ export class ContextPage {
     await expandButton.click();
   }
 
+  async viewSurroundingDocs(rowIndex: number) {
+    await this.openRowActions(rowIndex);
+    await this.clickRowAction(1);
+    await this.waitUntilContextLoadingHasFinished();
+  }
+
+  async viewSingleDocument(rowIndex: number) {
+    await this.openRowActions(rowIndex);
+    await this.clickRowAction(0);
+    await this.page.testSubj
+      .locator('doc-hit')
+      .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });
+  }
+
+  async goBackToDiscover() {
+    await this.page.testSubj.click('~breadcrumb-deepLinkId-discover');
+    await this.page.testSubj
+      .locator('dscPage')
+      .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });
+  }
+
+  async getAnchorRowData(): Promise<string[]> {
+    const anchorCellSelector =
+      '.euiDataGridRowCell.unifiedDataTable__cell--highlight:not(.euiDataGridRowCell--controlColumn)';
+    await this.page
+      .locator(`${anchorCellSelector} >> nth=0`)
+      .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });
+    return this.page.locator(anchorCellSelector).evaluateAll((cells) =>
+      cells.map((cell) => {
+        const content =
+          cell.querySelector<HTMLElement>('.euiDataGridRowCell__content') ?? (cell as HTMLElement);
+        return content.innerText.trim();
+      })
+    );
+  }
+
   async openAnchorFlyoutAndSearchField(fieldName: string) {
     const anchorExpandBtn = this.page.testSubj.locator('docTableExpandToggleColumnAnchor');
     await anchorExpandBtn.click();

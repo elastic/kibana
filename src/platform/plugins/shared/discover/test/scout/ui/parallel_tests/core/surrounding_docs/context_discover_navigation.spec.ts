@@ -47,6 +47,8 @@ spaceTest.describe(
         }
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
+        await navigateToFirstDocContext(pageObjects);
+
         const headerColumns = await pageObjects.discover.getDocHeader();
         expect(headerColumns).toContain('@timestamp');
         for (const col of TEST_COLUMN_NAMES) {
@@ -57,39 +59,26 @@ spaceTest.describe(
 
     spaceTest(
       'should open context view with selected document as anchor and allow selecting next anchor',
-      async ({ page, pageObjects, browserAuth }) => {
+      async ({ pageObjects, browserAuth }) => {
         await loginAndGoToDiscover({ browserAuth, pageObjects });
-        const firstRowText = await page
-          .locator('[data-grid-visible-row-index="0"] [data-gridcell-column-index="0"]')
-          .innerText();
-        const firstTimestamp = firstRowText.split('\t')[0] || firstRowText.split('\n')[0];
+        const discoverRows = await pageObjects.discover.getDataGridRows();
+        const firstTimestamp = discoverRows[0][0];
 
         await spaceTest.step('verify initial anchor matches selected document', async () => {
           await navigateToFirstDocContext(pageObjects);
 
-          const anchorExpandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
-          await expect(anchorExpandButton).toBeVisible();
-          const anchorRow = anchorExpandButton.locator('xpath=ancestor::*[@data-grid-row-index]');
-          const anchorText = await anchorRow.innerText();
-          expect(anchorText).toContain(firstTimestamp.trim());
+          const anchorData = await pageObjects.contextPage.getAnchorRowData();
+          expect(anchorData[0]).toBe(firstTimestamp);
         });
 
         await spaceTest.step('select next anchor from context view', async () => {
-          const contextRows = await pageObjects.contextPage.getRowsText(false);
-          const timestampRegex = /\w{3}\s+\d{1,2},\s+\d{4}\s+@\s+[\d:.]+/;
-          const match = contextRows[0]?.match(timestampRegex);
-          const firstContextTimestamp = match ? match[0] : '';
-          expect(firstContextTimestamp).toBeTruthy();
+          const surroundingRows = await pageObjects.discover.getDataGridRows();
+          const firstSurroundingTimestamp = surroundingRows[0][0];
 
-          await pageObjects.contextPage.openRowActions(0);
-          await pageObjects.contextPage.clickRowAction(1);
-          await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+          await pageObjects.contextPage.viewSurroundingDocs(0);
 
-          const anchorExpandButton = page.testSubj.locator('docTableExpandToggleColumnAnchor');
-          await expect(anchorExpandButton).toBeVisible();
-          const anchorRow = anchorExpandButton.locator('xpath=ancestor::*[@data-grid-row-index]');
-          const anchorText = await anchorRow.innerText();
-          expect(anchorText).toContain(firstContextTimestamp);
+          const anchorData = await pageObjects.contextPage.getAnchorRowData();
+          expect(anchorData[0]).toBe(firstSurroundingTimestamp);
         });
       }
     );
@@ -113,20 +102,12 @@ spaceTest.describe(
 
     spaceTest(
       'should navigate to doc view and back to discover',
-      async ({ page, pageObjects, browserAuth }) => {
+      async ({ pageObjects, browserAuth }) => {
         await loginAndGoToDiscover({ browserAuth, pageObjects });
         await navigateToFirstDocContext(pageObjects);
 
-        await pageObjects.contextPage.openRowActions(0);
-        await pageObjects.contextPage.clickRowAction(0);
-
-        // doc view load can be slow with large logstash dataset
-        await expect(page.testSubj.locator('doc-hit')).toBeVisible({ timeout: 30_000 });
-
-        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        // full Discover re-render after breadcrumb navigation
-        await expect(page.testSubj.locator('dscPage')).toBeVisible({ timeout: 30_000 });
+        await pageObjects.contextPage.viewSingleDocument(0);
+        await pageObjects.contextPage.goBackToDiscover();
       }
     );
 
@@ -144,16 +125,8 @@ spaceTest.describe(
         await pageObjects.dashboard.addSavedSearch(savedSearchName);
         await pageObjects.dashboard.waitForRenderComplete();
 
-        const rowToggle = page.locator(
-          '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-        );
-        await rowToggle.click();
-
-        const flyout = page.testSubj.locator('docViewerFlyout');
-        // flyout renders after row expansion + data fetch
-        await expect(flyout).toBeVisible({ timeout: 10_000 });
-        const viewDocAction = flyout.locator('[data-test-subj="docTableRowAction"] >> nth=0');
-        await viewDocAction.click();
+        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+        await pageObjects.contextPage.clickRowAction(0);
 
         // dashboard may prompt "unsaved changes" confirmation on navigation
         const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
@@ -161,9 +134,8 @@ spaceTest.describe(
           await confirmBtn.click();
         }
 
-        // doc view load can be slow with large logstash dataset
         await expect(page).toHaveURL(/#\/doc/, { timeout: 30_000 });
-        await expect(page.testSubj.locator('doc-hit')).toBeVisible({ timeout: 30_000 });
+        expect(await pageObjects.discover.isShowingDocViewer()).toBe(true);
       }
     );
   }

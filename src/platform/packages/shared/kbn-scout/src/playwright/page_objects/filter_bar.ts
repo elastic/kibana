@@ -65,6 +65,16 @@ export class FilterBar {
     ).toBeVisible();
   }
 
+  async removeFilter(field: string) {
+    const filterBadge = this.page.testSubj.locator(`~filter & ~filter-key-${field}`);
+    await filterBadge.click();
+    await this.page.testSubj.click('deleteFilter');
+  }
+
+  async getFilterCount(): Promise<number> {
+    return this.page.testSubj.locator('^filter-badge').count();
+  }
+
   async hasFilter(options: FilterStateOptions) {
     const testSubjLocator = [
       '~filter',

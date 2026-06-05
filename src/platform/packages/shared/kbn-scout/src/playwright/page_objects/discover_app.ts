@@ -825,4 +825,15 @@ export class DiscoverApp {
     // Return the mode that is currently visible
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
   }
+
+  async isShowingDocViewer(): Promise<boolean> {
+    try {
+      await this.page.testSubj
+        .locator('kbnDocViewer')
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }

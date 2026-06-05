@@ -68,22 +68,17 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'should go back via breadcrumbs with preserved state',
-      async ({ page, pageObjects }) => {
-        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
+    spaceTest('should go back via breadcrumbs with preserved state', async ({ pageObjects }) => {
+      await pageObjects.contextPage.goBackToDiscover();
 
-        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
-        }
-
-        const timeRange = await pageObjects.datePicker.getTimeConfig();
-        expect(timeRange.start).toContain('2015-09-19');
-        expect(timeRange.end).toContain('2015-09-23');
+      for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+        expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
       }
-    );
+
+      const timeRange = await pageObjects.datePicker.getTimeConfig();
+      expect(timeRange.start).toContain('2015-09-19');
+      expect(timeRange.end).toContain('2015-09-23');
+    });
 
     spaceTest(
       'should go back via breadcrumbs with preserved state after page refresh',
@@ -91,9 +86,7 @@ spaceTest.describe(
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
+        await pageObjects.contextPage.goBackToDiscover();
 
         for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
           expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
@@ -105,18 +98,14 @@ spaceTest.describe(
       'should preserve state when navigating back after URL state changes',
       async ({ page, pageObjects }) => {
         await spaceTest.step('remove a filter in context view to change URL state', async () => {
-          const agentFilter = page.testSubj.locator('~filter & ~filter-key-agent');
-          await agentFilter.click();
-          await page.testSubj.click('deleteFilter');
+          await pageObjects.filterBar.removeFilter('agent');
           await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
         });
 
         await spaceTest.step(
           'navigate to discover via breadcrumbs and verify original filters',
           async () => {
-            await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-            await pageObjects.discover.waitUntilSearchingHasFinished();
-            await pageObjects.discover.waitForDocTableRendered();
+            await pageObjects.contextPage.goBackToDiscover();
 
             for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
               expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
@@ -130,8 +119,7 @@ spaceTest.describe(
           await page.goBack();
           await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-          const filterBadges = page.testSubj.locator('^filter-badge');
-          await expect(filterBadges).toHaveCount(1);
+          expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
           const [, extensionValue] = TEST_FILTER_COLUMN_NAMES[1];
           expect(
             await pageObjects.filterBar.hasFilter({
@@ -145,8 +133,7 @@ spaceTest.describe(
         await spaceTest.step(
           'return to discover and verify original filters are restored',
           async () => {
-            await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-            await pageObjects.discover.waitUntilSearchingHasFinished();
+            await pageObjects.contextPage.goBackToDiscover();
 
             for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
               expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
