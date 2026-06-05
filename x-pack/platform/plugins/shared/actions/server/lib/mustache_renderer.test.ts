@@ -175,6 +175,14 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString(logger, '{{{dq}}}', variables, 'html')).toBe(variables.dq);
     });
 
+    it('passes through null', () => {
+      expect(renderMustacheString(logger, null, variables, 'none')).toBeNull();
+    });
+
+    it('passes through undefined', () => {
+      expect(renderMustacheString(logger, undefined, variables, 'none')).toBeUndefined();
+    });
+
     it('handles errors', () => {
       expect(renderMustacheString(logger, '{{a}', variables, 'none')).toMatchInlineSnapshot(
         `"error rendering mustache template \\"{{a}\\": Unclosed tag at 4"`

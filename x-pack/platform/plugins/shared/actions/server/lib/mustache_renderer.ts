@@ -35,7 +35,26 @@ export function renderMustacheString(
   string: string,
   variables: Variables,
   escape: Escape
-): string {
+): string;
+export function renderMustacheString(
+  logger: Logger,
+  string: string | null,
+  variables: Variables,
+  escape: Escape
+): string | null;
+export function renderMustacheString(
+  logger: Logger,
+  string: string | undefined,
+  variables: Variables,
+  escape: Escape
+): string | undefined;
+export function renderMustacheString(
+  logger: Logger,
+  string: string | null | undefined,
+  variables: Variables,
+  escape: Escape
+): string | null | undefined {
+  if (string == null) return string;
   const augmentedVariables = augmentObjectVariables(variables);
   return renderMustacheStringWithAugmentedVariables(logger, string, augmentedVariables, escape);
 }
