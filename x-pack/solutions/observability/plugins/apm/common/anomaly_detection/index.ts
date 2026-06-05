@@ -7,8 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
-import { getSeverityColor as mlGetSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import type { EuiThemeComputed, RecursivePartial } from '@elastic/eui';
+import type { PointStyle } from '@elastic/charts';
 export type { ServiceAnomalyStats } from '@kbn/apm-types';
 
 export function getSeverity(score: number | undefined) {
@@ -19,8 +21,24 @@ export function getSeverity(score: number | undefined) {
   return getSeverityType(score);
 }
 
-export function getSeverityColor(score: number) {
-  return mlGetSeverityColor(score);
+export function getSeverityColor(score: number, uiTheme: EuiThemeComputed) {
+  return getThemeResolvedSeverityColor(score, uiTheme);
+}
+
+export function getSeverityPointStyle(
+  score: number,
+  uiTheme: EuiThemeComputed
+): RecursivePartial<PointStyle> {
+  const color = getSeverityColor(score, uiTheme);
+  const radius = score >= ML_ANOMALY_THRESHOLD.MINOR ? 4 : 3;
+
+  return {
+    visible: 'always',
+    opacity: 1,
+    radius,
+    fill: color,
+    shape: 'triangle',
+  };
 }
 
 export const ML_ERRORS = {

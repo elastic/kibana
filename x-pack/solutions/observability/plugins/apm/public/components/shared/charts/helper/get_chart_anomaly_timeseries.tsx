@@ -12,7 +12,7 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { getSeverityColor } from '../../../../../common/anomaly_detection';
+import { getSeverityColor, getSeverityPointStyle } from '../../../../../common/anomaly_detection';
 import type { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import type { APMChartSpec } from '../../../../../typings/timeseries';
 
@@ -58,17 +58,29 @@ export function getChartAnomalyTimeseries({
 
   const severities = [
     {
+      severity: ML_ANOMALY_SEVERITY.CRITICAL,
+      threshold: ML_ANOMALY_THRESHOLD.CRITICAL,
+    },
+    {
       severity: ML_ANOMALY_SEVERITY.MAJOR,
       threshold: ML_ANOMALY_THRESHOLD.MAJOR,
     },
     {
-      severity: ML_ANOMALY_SEVERITY.CRITICAL,
-      threshold: ML_ANOMALY_THRESHOLD.CRITICAL,
+      severity: ML_ANOMALY_SEVERITY.MINOR,
+      threshold: ML_ANOMALY_THRESHOLD.MINOR,
+    },
+    {
+      severity: ML_ANOMALY_SEVERITY.WARNING,
+      threshold: ML_ANOMALY_THRESHOLD.WARNING,
+    },
+    {
+      severity: ML_ANOMALY_SEVERITY.LOW,
+      threshold: ML_ANOMALY_THRESHOLD.LOW,
     },
   ];
 
   const scores: APMChartSpec[] = severities.map(({ severity, threshold }) => {
-    const color = getSeverityColor(threshold);
+    const color = getSeverityColor(threshold, euiTheme);
 
     const style: RecursivePartial<AreaSeriesStyle> = {
       line: {
@@ -77,14 +89,7 @@ export function getChartAnomalyTimeseries({
       area: {
         fill: color,
       },
-      point: {
-        visible: 'always',
-        opacity: 0.75,
-        radius: 3,
-        strokeWidth: 1,
-        fill: color,
-        stroke: rgba(0, 0, 0, 0.1),
-      },
+      point: getSeverityPointStyle(threshold, euiTheme),
     };
 
     const data = anomalyTimeseries.anomalies.map((anomaly) => ({
@@ -100,16 +105,16 @@ export function getChartAnomalyTimeseries({
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
-          '{severity, select, minor {Minor} major {Major} critical {Critical} other {unknown severity}} anomaly',
+          '{severity, select, low {Low} warning {Warning} minor {Minor} major {Major} critical {Critical} other {Unknown severity}} anomaly',
         values: {
           severity,
         },
       }),
       type: 'line',
-      hideLegend: !hasAnomalies,
       lineSeriesStyle: style,
       data,
       color,
+      hideLegend: !hasAnomalies,
     };
   });
 
