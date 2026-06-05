@@ -21,9 +21,13 @@ describe('workflowAuthoringSkill', () => {
   });
 
   describe('getRegistryTools', () => {
-    it('includes all surviving workflow tools and generate_workflow', () => {
+    it('includes all surviving workflow tools, generate_workflow, and execute_workflow', () => {
       const tools = workflowAuthoringSkill.getRegistryTools!();
-      expect(tools).toEqual([...Object.values(workflowTools), platformCoreTools.generateWorkflow]);
+      expect(tools).toEqual([
+        ...Object.values(workflowTools),
+        platformCoreTools.generateWorkflow,
+        platformCoreTools.executeWorkflow,
+      ]);
     });
 
     it('does not include the deleted low-level edit tools', () => {

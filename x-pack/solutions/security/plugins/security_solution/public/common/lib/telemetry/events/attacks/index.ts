@@ -162,6 +162,26 @@ export const attacksScheduleDetailsFlyoutOpenedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksSettingsFlyoutOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.SettingsFlyoutOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: { description: 'The source of the settings flyout open', optional: false },
+    },
+  },
+};
+
+export const attacksGenerateClickedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.GenerateClicked,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: { description: 'The source of the generate button click', optional: false },
+    },
+  },
+};
+
 export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.FeaturePromotionCalloutAction,
   schema: {
@@ -193,6 +213,8 @@ export const attacksTelemetryEvents = [
   attacksDetailsFlyoutOpenedEvent,
   attacksExpandedViewTabClickedEvent,
   attacksScheduleFlyoutOpenedEvent,
+  attacksSettingsFlyoutOpenedEvent,
+  attacksGenerateClickedEvent,
   attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
   attacksWorkflowRunTriggeredEvent,

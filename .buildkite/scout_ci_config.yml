@@ -8,6 +8,7 @@ plugins:
     - apm
     - automatic_import
     - banners
+    - canvas
     - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
