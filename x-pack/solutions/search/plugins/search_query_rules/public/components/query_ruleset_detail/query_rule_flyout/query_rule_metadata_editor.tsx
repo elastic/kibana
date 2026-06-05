@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiSelect,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FieldError } from 'react-hook-form';
@@ -302,18 +303,28 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="searchQueryRulesQueryRuleMetadataEditorDeleteButton"
-            iconType="minusCircle"
-            color="danger"
-            onClick={onRemove}
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.search.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
               {
                 defaultMessage: 'Remove criteria',
               }
             )}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="searchQueryRulesQueryRuleMetadataEditorDeleteButton"
+              iconType="minusCircle"
+              color="danger"
+              onClick={onRemove}
+              aria-label={i18n.translate(
+                'xpack.search.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
+                {
+                  defaultMessage: 'Remove criteria',
+                }
+              )}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
