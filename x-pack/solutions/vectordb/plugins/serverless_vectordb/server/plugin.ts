@@ -17,6 +17,7 @@ import { VECTORDB_PROJECT_SETTINGS } from '@kbn/serverless-vectordb-settings';
 
 import type { ServerlessVectordbConfig } from './config';
 import { registerCreateApiKeyRoute } from './routes/api_key';
+import { registerAgentsCountRoute } from './routes/agents_count';
 import { registerDeploymentStatsRoute } from './routes/deployment_stats';
 import type {
   ServerlessVectordbPluginSetup,
@@ -48,6 +49,7 @@ export class ServerlessVectordbPlugin
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger);
+    registerAgentsCountRoute(router, this.logger, core.getStartServices);
     registerCreateApiKeyRoute(router, this.logger);
 
     return {};
