@@ -134,6 +134,28 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
     });
   });
 
+  describe('illegal_argument_exception with known user-driven reason substrings', () => {
+    it('should mark as user error when reason contains "is not an IP string literal"', () => {
+      const errorMessage = `index: ".ds-logs-fortinet_fortigate.log-default-2026.05.29-000027" reason: "failed to create query: ' 115.77.100.113' is not an IP string literal." type: "query_shard_exception" caused by reason: "' 115.77.100.113' is not an IP string literal." caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark as user error when reason contains "is not supported for aggregation"', () => {
+      const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "[bytes_counter] of type [long][counter] is not supported for aggregation" caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark as user error when reason contains "of type [text]"', () => {
+      const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "Fielddata is not supported on field [host.name] of type [text]" caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should not mark as user error when illegal_argument_exception has no known user-driven reason', () => {
+      const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "some unexpected framework error" caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
+    });
+  });
+
   describe('non user errors', () => {
     it('should not mark as user error shard exception', () => {
       const errorResponse = {
