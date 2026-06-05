@@ -152,7 +152,7 @@ export interface AttachmentFramework {
 }
 
 /** A payload with `attachmentId` is a reference attachment; otherwise it's value. */
-type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId: string }
+type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId: unknown }
   ? true
   : false;
 
