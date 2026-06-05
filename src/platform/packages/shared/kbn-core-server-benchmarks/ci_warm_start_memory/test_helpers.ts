@@ -10,6 +10,10 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import type { OnCompareContext } from '@kbn/bench';
 import {
+  TAIL_ARRAY_BUFFERS_METRIC_KEY,
+  TAIL_EXTERNAL_MEMORY_METRIC_KEY,
+  TAIL_HEAP_TOTAL_METRIC_KEY,
+  TAIL_HEAP_USED_METRIC_KEY,
   MAX_RSS_METRIC_KEY,
   TAIL_RSS_METRIC_KEY,
   WARM_START_BENCHMARK_NAME,
@@ -37,9 +41,17 @@ const makeMetricSummary = (values: number[]) => {
 const makeWarmStartSummary = ({
   maxRssValues,
   tailRssValues,
+  tailHeapUsedValues,
+  tailHeapTotalValues,
+  tailExternalValues,
+  tailArrayBuffersValues,
 }: {
   maxRssValues: number[];
   tailRssValues: number[];
+  tailHeapUsedValues?: number[];
+  tailHeapTotalValues?: number[];
+  tailExternalValues?: number[];
+  tailArrayBuffersValues?: number[];
 }): OnCompareContext['leftSummary']['benchmarks'][number] => {
   return {
     name: WARM_START_BENCHMARK_NAME,
@@ -61,6 +73,42 @@ const makeWarmStartSummary = ({
         format: 'size',
         summary: makeMetricSummary(tailRssValues),
       },
+      ...(tailHeapUsedValues
+        ? {
+            [TAIL_HEAP_USED_METRIC_KEY]: {
+              title: 'Tail heap used',
+              format: 'size' as const,
+              summary: makeMetricSummary(tailHeapUsedValues),
+            },
+          }
+        : {}),
+      ...(tailHeapTotalValues
+        ? {
+            [TAIL_HEAP_TOTAL_METRIC_KEY]: {
+              title: 'Tail heap total',
+              format: 'size' as const,
+              summary: makeMetricSummary(tailHeapTotalValues),
+            },
+          }
+        : {}),
+      ...(tailExternalValues
+        ? {
+            [TAIL_EXTERNAL_MEMORY_METRIC_KEY]: {
+              title: 'Tail external memory',
+              format: 'size' as const,
+              summary: makeMetricSummary(tailExternalValues),
+            },
+          }
+        : {}),
+      ...(tailArrayBuffersValues
+        ? {
+            [TAIL_ARRAY_BUFFERS_METRIC_KEY]: {
+              title: 'Tail array buffers',
+              format: 'size' as const,
+              summary: makeMetricSummary(tailArrayBuffersValues),
+            },
+          }
+        : {}),
     },
   };
 };
@@ -70,11 +118,27 @@ export const makeWarmStartMemoryCompareContext = ({
   baselineTailRssValues = baselineMaxRssValues,
   targetMaxRssValues,
   targetTailRssValues = targetMaxRssValues,
+  baselineTailHeapUsedValues,
+  targetTailHeapUsedValues,
+  baselineTailHeapTotalValues,
+  targetTailHeapTotalValues,
+  baselineTailExternalValues,
+  targetTailExternalValues,
+  baselineTailArrayBuffersValues,
+  targetTailArrayBuffersValues,
 }: {
   baselineMaxRssValues: number[];
   baselineTailRssValues?: number[];
   targetMaxRssValues: number[];
   targetTailRssValues?: number[];
+  baselineTailHeapUsedValues?: number[];
+  targetTailHeapUsedValues?: number[];
+  baselineTailHeapTotalValues?: number[];
+  targetTailHeapTotalValues?: number[];
+  baselineTailExternalValues?: number[];
+  targetTailExternalValues?: number[];
+  baselineTailArrayBuffersValues?: number[];
+  targetTailArrayBuffersValues?: number[];
 }): OnCompareContext => {
   const leftSummary: OnCompareContext['leftSummary'] = {
     name: 'kibana_ci_warm_start_memory',
@@ -82,6 +146,10 @@ export const makeWarmStartMemoryCompareContext = ({
       makeWarmStartSummary({
         maxRssValues: baselineMaxRssValues,
         tailRssValues: baselineTailRssValues,
+        tailHeapUsedValues: baselineTailHeapUsedValues,
+        tailHeapTotalValues: baselineTailHeapTotalValues,
+        tailExternalValues: baselineTailExternalValues,
+        tailArrayBuffersValues: baselineTailArrayBuffersValues,
       }),
     ],
   };
@@ -91,6 +159,10 @@ export const makeWarmStartMemoryCompareContext = ({
       makeWarmStartSummary({
         maxRssValues: targetMaxRssValues,
         tailRssValues: targetTailRssValues,
+        tailHeapUsedValues: targetTailHeapUsedValues,
+        tailHeapTotalValues: targetTailHeapTotalValues,
+        tailExternalValues: targetTailExternalValues,
+        tailArrayBuffersValues: targetTailArrayBuffersValues,
       }),
     ],
   };

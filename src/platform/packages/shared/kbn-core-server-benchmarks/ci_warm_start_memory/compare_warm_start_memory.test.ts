@@ -81,6 +81,14 @@ describe('compareWarmStartMemory', () => {
       ],
       targetMaxRssValues: [baselineMedianRssBytes, baselineMedianRssBytes, baselineMedianRssBytes],
       targetTailRssValues: [targetMedianRssBytes, targetMedianRssBytes, targetMedianRssBytes],
+      baselineTailHeapUsedValues: [100, 200, 300],
+      targetTailHeapUsedValues: [150, 250, 350],
+      baselineTailHeapTotalValues: [400, 500, 600],
+      targetTailHeapTotalValues: [450, 550, 650],
+      baselineTailExternalValues: [700, 800, 900],
+      targetTailExternalValues: [750, 850, 950],
+      baselineTailArrayBuffersValues: [1000, 1100, 1200],
+      targetTailArrayBuffersValues: [1050, 1150, 1250],
     });
 
     try {
@@ -105,6 +113,28 @@ describe('compareWarmStartMemory', () => {
             deltaBytes: 0,
             allowedDeltaBytes: MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
             regressed: false,
+          },
+        },
+        diagnosticMetrics: {
+          tailHeapUsed: {
+            baselineBytes: 200,
+            targetBytes: 250,
+            deltaBytes: 50,
+          },
+          tailHeapTotal: {
+            baselineBytes: 500,
+            targetBytes: 550,
+            deltaBytes: 50,
+          },
+          tailExternal: {
+            baselineBytes: 800,
+            targetBytes: 850,
+            deltaBytes: 50,
+          },
+          tailArrayBuffers: {
+            baselineBytes: 1100,
+            targetBytes: 1150,
+            deltaBytes: 50,
           },
         },
         triggeredMetrics: ['tailRss'],

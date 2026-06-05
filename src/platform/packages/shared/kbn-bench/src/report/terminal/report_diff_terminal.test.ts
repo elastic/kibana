@@ -48,8 +48,8 @@ describe('reportDiff', () => {
       right: right
       benchA
       added
-                  left        right   Δ   CI 
-       Duration      -   1.1s ±4.8%   -    — 
+                  left        right   Δ   CI
+       Duration      -   1.1s ±4.8%   -    —
        x             -     11 ±9.1%   -    —"
     `);
   });
@@ -74,8 +74,8 @@ describe('reportDiff', () => {
       right: right
       benchA
       removed
-                         left   right   Δ   CI 
-       Duration   950ms ±5.3%       -   -    — 
+                         left   right   Δ   CI
+       Duration   950ms ±5.3%       -   -    —
        x             9 ±11.1%       -   -    —"
     `);
   });
@@ -124,23 +124,23 @@ describe('reportDiff', () => {
       right: right
       benchA
       -
-                         left        right                Δ                    CI 
-       Duration   950ms ±5.3%   1.1s ±9.1%   150ms (+15.8%)   Run 1086 more times 
-       x             9 ±11.1%    10 ±10.0%       1 (+11.1%)   Run 1937 more times 
-       y            5.5 ±9.1%     6 ±16.7%      0.5 (+9.1%)   Run 3243 more times 
+                         left        right                Δ                    CI
+       Duration   950ms ±5.3%   1.1s ±9.1%   150ms (+15.8%)   Run 1086 more times
+       x             9 ±11.1%    10 ±10.0%       1 (+11.1%)   Run 1937 more times
+       y            5.5 ±9.1%     6 ±16.7%      0.5 (+9.1%)   Run 3243 more times
 
 
       benchB
       removed
-                         left   right   Δ   CI 
-       Duration   500ms ±0.0%       -   -    — 
-       x              3 ±0.0%       -   -    — 
+                         left   right   Δ   CI
+       Duration   500ms ±0.0%       -   -    —
+       x              3 ±0.0%       -   -    —
 
 
       benchC
       added
-                  left         right   Δ   CI 
-       Duration      -   700ms ±0.0%   -    — 
+                  left         right   Δ   CI
+       Duration      -   700ms ±0.0%   -    —
        z             -       4 ±0.0%   -    —"
     `);
   });
@@ -200,12 +200,16 @@ describe('reportDiff', () => {
       right: right
       benchA
       -
-                            left           right                  Δ                    CI 
-       Duration         1s ±0.0%       1s ±20.0%        0ms (+0.0%)   Run 3139 more times 
-       CPU Usage       31s ±3.2%       39s ±2.6%        8s (+25.8%)    95%, +16.1%–+36.4% 
-       Max RSS     1.20 KB ±0.8%   1.30 KB ±0.8%   100.00 B (+8.1%)     95%, +5.8%–+10.5% 
-       Tail RSS    1.01 KB ±1.0%   1.10 KB ±0.9%   100.00 B (+9.7%)     95%, +6.9%–+12.6% 
-       GC time        4ms ±14.3%       7ms ±7.7%       3ms (+85.7%)   95%, +38.5%–+156.2%"
+                                         left             right                   Δ                    CI
+       Duration                      1s ±0.0%         1s ±20.0%         0ms (+0.0%)   Run 3139 more times
+       CPU Usage                    31s ±3.2%         39s ±2.6%         8s (+25.8%)    95%, +16.1%–+36.4%
+       Max RSS                  1.20 KB ±0.8%     1.30 KB ±0.8%    100.00 B (+8.1%)     95%, +5.8%–+10.5%
+       Tail RSS                 1.01 KB ±1.0%     1.10 KB ±0.9%    100.00 B (+9.7%)     95%, +6.9%–+12.6%
+       Tail heap used         207.52 KB ±1.2%   249.02 KB ±2.0%   41.50 KB (+20.0%)    95%, +14.9%–+25.3%
+       Tail heap total        415.04 KB ±1.2%   498.05 KB ±2.0%   83.01 KB (+20.0%)    95%, +14.9%–+25.3%
+       Tail external memory         0 B ±0.0%         0 B ±0.0%           0 B (n/a)                     -
+       Tail array buffers           0 B ±0.0%         0 B ±0.0%           0 B (n/a)                     -
+       GC time                     4ms ±14.3%         7ms ±7.7%        3ms (+85.7%)   95%, +38.5%–+156.2%"
     `);
   });
 });

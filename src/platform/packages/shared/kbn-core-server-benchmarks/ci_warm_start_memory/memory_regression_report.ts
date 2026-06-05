@@ -22,6 +22,11 @@ export interface WarmStartMemoryRegressionReportContext {
 }
 
 export type WarmStartMemoryRegressionMetricName = 'tailRss' | 'maxRss';
+export type WarmStartMemoryDiagnosticMetricName =
+  | 'tailHeapUsed'
+  | 'tailHeapTotal'
+  | 'tailExternal'
+  | 'tailArrayBuffers';
 
 export interface WarmStartMemoryRegressionMetricReport {
   readonly baselineRssBytes: number;
@@ -31,10 +36,19 @@ export interface WarmStartMemoryRegressionMetricReport {
   readonly regressed: boolean;
 }
 
+export interface WarmStartMemoryDiagnosticMetricReport {
+  readonly baselineBytes: number;
+  readonly targetBytes: number;
+  readonly deltaBytes: number;
+}
+
 export interface WarmStartMemoryRegressionReport {
   readonly metrics: Record<
     WarmStartMemoryRegressionMetricName,
     WarmStartMemoryRegressionMetricReport
+  >;
+  readonly diagnosticMetrics?: Partial<
+    Record<WarmStartMemoryDiagnosticMetricName, WarmStartMemoryDiagnosticMetricReport>
   >;
   readonly triggeredMetrics: WarmStartMemoryRegressionMetricName[];
   readonly context?: WarmStartMemoryRegressionReportContext;
@@ -44,6 +58,7 @@ export const buildWarmStartMemoryRegressionReport = ({
   metrics,
   triggeredMetrics,
   context,
+  diagnosticMetrics,
 }: {
   metrics: Record<
     WarmStartMemoryRegressionMetricName,
@@ -51,6 +66,12 @@ export const buildWarmStartMemoryRegressionReport = ({
   >;
   triggeredMetrics: WarmStartMemoryRegressionMetricName[];
   context?: WarmStartMemoryRegressionReportContext;
+  diagnosticMetrics?: Partial<
+    Record<
+      WarmStartMemoryDiagnosticMetricName,
+      Omit<WarmStartMemoryDiagnosticMetricReport, 'deltaBytes'>
+    >
+  >;
 }): WarmStartMemoryRegressionReport => {
   const report: WarmStartMemoryRegressionReport = {
     metrics: Object.fromEntries(
@@ -64,15 +85,43 @@ export const buildWarmStartMemoryRegressionReport = ({
     ) as WarmStartMemoryRegressionReport['metrics'],
     triggeredMetrics,
   };
+  const definedDiagnosticMetrics = diagnosticMetrics
+    ? (Object.fromEntries(
+        Object.entries(diagnosticMetrics)
+          .filter(
+            (
+              entry
+            ): entry is [
+              WarmStartMemoryDiagnosticMetricName,
+              Omit<WarmStartMemoryDiagnosticMetricReport, 'deltaBytes'>
+            ] => entry[1] !== undefined
+          )
+          .map(([metricName, metric]) => [
+            metricName,
+            {
+              ...metric,
+              deltaBytes: metric.targetBytes - metric.baselineBytes,
+            },
+          ])
+      ) as WarmStartMemoryRegressionReport['diagnosticMetrics'])
+    : undefined;
+
+  const reportWithDiagnosticMetrics =
+    definedDiagnosticMetrics && Object.keys(definedDiagnosticMetrics).length > 0
+      ? {
+          ...report,
+          diagnosticMetrics: definedDiagnosticMetrics,
+        }
+      : report;
 
   if (context && Object.keys(context).length > 0) {
     return {
-      ...report,
+      ...reportWithDiagnosticMetrics,
       context,
     };
   }
 
-  return report;
+  return reportWithDiagnosticMetrics;
 };
 
 export const getWarmStartMemoryRegressionReportPath = (): string => {

@@ -8,7 +8,15 @@
  */
 
 import type { OnCompareCallback } from '@kbn/bench';
-import { getMedianMaxRssBytes, getMedianTailRssBytes } from './median_max_rss';
+import {
+  getMedianMaxRssBytes,
+  getMedianTailRssBytes,
+  getOptionalMedianMemoryMetricBytes,
+  TAIL_ARRAY_BUFFERS_METRIC_KEY,
+  TAIL_EXTERNAL_MEMORY_METRIC_KEY,
+  TAIL_HEAP_TOTAL_METRIC_KEY,
+  TAIL_HEAP_USED_METRIC_KEY,
+} from './median_max_rss';
 import {
   getAllowedRegressionDeltaBytes,
   isMemoryRegression,
@@ -19,12 +27,23 @@ import {
   buildWarmStartMemoryRegressionReport,
   getWarmStartMemoryRegressionReportContextFromEnv,
   type WarmStartMemoryRegressionMetricName,
+  type WarmStartMemoryDiagnosticMetricName,
   writeWarmStartMemoryRegressionReport,
 } from './memory_regression_report';
 
 const formatBytes = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
 };
+
+const DIAGNOSTIC_METRICS: Array<{
+  readonly name: WarmStartMemoryDiagnosticMetricName;
+  readonly metricKey: string;
+}> = [
+  { name: 'tailHeapUsed', metricKey: TAIL_HEAP_USED_METRIC_KEY },
+  { name: 'tailHeapTotal', metricKey: TAIL_HEAP_TOTAL_METRIC_KEY },
+  { name: 'tailExternal', metricKey: TAIL_EXTERNAL_MEMORY_METRIC_KEY },
+  { name: 'tailArrayBuffers', metricKey: TAIL_ARRAY_BUFFERS_METRIC_KEY },
+];
 
 export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, rightSummary }) => {
   const baselineMedianTailRssBytes = getMedianTailRssBytes(leftSummary);
@@ -60,6 +79,19 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
     return;
   }
 
+  const diagnosticMetrics = Object.fromEntries(
+    DIAGNOSTIC_METRICS.flatMap(({ name, metricKey }) => {
+      const baselineBytes = getOptionalMedianMemoryMetricBytes(leftSummary, metricKey);
+      const targetBytes = getOptionalMedianMemoryMetricBytes(rightSummary, metricKey);
+
+      if (baselineBytes === undefined || targetBytes === undefined) {
+        return [];
+      }
+
+      return [[name, { baselineBytes, targetBytes }]];
+    })
+  );
+
   const report = buildWarmStartMemoryRegressionReport({
     metrics: {
       tailRss: {
@@ -75,6 +107,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
         regressed: maxRssRegressed,
       },
     },
+    diagnosticMetrics,
     triggeredMetrics,
     context: getWarmStartMemoryRegressionReportContextFromEnv(),
   });

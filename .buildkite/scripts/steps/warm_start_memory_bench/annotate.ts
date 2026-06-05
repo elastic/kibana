@@ -62,6 +62,30 @@ const formatMetricSection = (
   ].join('\n');
 };
 
+const DIAGNOSTIC_METRIC_LABELS = {
+  tailHeapUsed: 'Tail heap used',
+  tailHeapTotal: 'Tail heap total',
+  tailExternal: 'Tail external memory',
+  tailArrayBuffers: 'Tail array buffers',
+} as const;
+
+type DiagnosticMetricName = keyof typeof DIAGNOSTIC_METRIC_LABELS;
+type DiagnosticMetricReport = NonNullable<
+  NonNullable<WarmStartMemoryRegressionReport['diagnosticMetrics']>[DiagnosticMetricName]
+>;
+
+const formatDiagnosticMetricSection = (
+  metricName: DiagnosticMetricName,
+  metric: DiagnosticMetricReport
+): string => {
+  return [
+    `**${DIAGNOSTIC_METRIC_LABELS[metricName]}**`,
+    `- baseline: ${formatBytes(metric.baselineBytes)}`,
+    `- target: ${formatBytes(metric.targetBytes)}`,
+    `- delta: ${formatBytes(metric.deltaBytes)}`,
+  ].join('\n');
+};
+
 export const buildRegressionAnnotation = (report: WarmStartMemoryRegressionReport): string => {
   const contextLines = report.context
     ? [
@@ -82,6 +106,18 @@ export const buildRegressionAnnotation = (report: WarmStartMemoryRegressionRepor
       ]
     : [];
 
+  const diagnosticMetricLines = report.diagnosticMetrics
+    ? (
+        Object.entries(report.diagnosticMetrics) as Array<
+          [DiagnosticMetricName, DiagnosticMetricReport | undefined]
+        >
+      )
+        .filter((entry): entry is [DiagnosticMetricName, DiagnosticMetricReport] => {
+          return entry[1] !== undefined;
+        })
+        .flatMap(([metricName, metric]) => ['', formatDiagnosticMetricSection(metricName, metric)])
+    : [];
+
   return [
     '### Warm-start memory regression detected',
     '',
@@ -90,6 +126,9 @@ export const buildRegressionAnnotation = (report: WarmStartMemoryRegressionRepor
     formatMetricSection('Tail RSS', report.metrics.tailRss),
     '',
     formatMetricSection('Max RSS', report.metrics.maxRss),
+    ...(diagnosticMetricLines.length
+      ? ['', '**Diagnostic memory context**', ...diagnosticMetricLines]
+      : []),
     ...contextLines,
   ].join('\n');
 };

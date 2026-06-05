@@ -52,19 +52,23 @@ describe('reportResults', () => {
       "
       Benchmark config: config1
       benchA (1 run)
-                   Avg    Min    Max   Std dev 
-       Duration   1.2s   1.2s   1.2s      0.0% 
-       x            50     50     50      0.0% 
-       y           100    100    100      0.0% 
+                   Avg    Min    Max   Std dev
+       Duration   1.2s   1.2s   1.2s      0.0%
+       x            50     50     50      0.0%
+       y           100    100    100      0.0%
 
 
       benchB (1 run)
-                       Avg       Min       Max   Std dev 
-       Duration       2.3s      2.3s      2.3s      0.0% 
-       CPU Usage       30s       30s       30s      0.0% 
-       Max RSS     1.27 KB   1.27 KB   1.27 KB      0.0% 
-       Tail RSS    1.03 KB   1.03 KB   1.03 KB      0.0% 
-       GC time         2ms       2ms       2ms      0.0% 
+                                    Avg         Min         Max   Std dev
+       Duration                    2.3s        2.3s        2.3s      0.0%
+       CPU Usage                    30s         30s         30s      0.0%
+       Max RSS                  1.27 KB     1.27 KB     1.27 KB      0.0%
+       Tail RSS                 1.03 KB     1.03 KB     1.03 KB      0.0%
+       Tail heap used         205.08 KB   205.08 KB   205.08 KB      0.0%
+       Tail heap total        410.16 KB   410.16 KB   410.16 KB      0.0%
+       Tail external memory         0 B         0 B         0 B      0.0%
+       Tail array buffers           0 B         0 B         0 B      0.0%
+       GC time                      2ms         2ms         2ms      0.0%
 
       "
     `);
@@ -96,18 +100,22 @@ describe('reportResults', () => {
       "
       Benchmark config: config1
       benchA (3 runs)
-                   Avg   Min    Max   Std dev 
-       Duration   1.2s    1s   1.4s     13.6% 
-       x            20    10     30     40.8% 
+                   Avg   Min    Max   Std dev
+       Duration   1.2s    1s   1.4s     13.6%
+       x            20    10     30     40.8%
 
 
       benchB (2 runs)
-                       Avg       Min       Max   Std dev 
-       Duration       2.1s        2s      2.2s      4.8% 
-       CPU Usage     23.5s       15s       32s     36.2% 
-       Max RSS     1.24 KB   1.20 KB   1.28 KB      3.1% 
-       Tail RSS    1.04 KB   1.01 KB   1.08 KB      3.7% 
-       GC time         5ms       3ms       7ms     40.0% 
+                                    Avg         Min         Max   Std dev
+       Duration                    2.1s          2s        2.2s      4.8%
+       CPU Usage                  23.5s         15s         32s     36.2%
+       Max RSS                  1.24 KB     1.20 KB     1.28 KB      3.1%
+       Tail RSS                 1.04 KB     1.01 KB     1.08 KB      3.7%
+       Tail heap used         222.17 KB   200.20 KB   244.14 KB      9.9%
+       Tail heap total        444.34 KB   400.39 KB   488.28 KB      9.9%
+       Tail external memory         0 B         0 B         0 B      0.0%
+       Tail array buffers           0 B         0 B         0 B      0.0%
+       GC time                      5ms         3ms         7ms     40.0%
 
       "
     `);

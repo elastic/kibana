@@ -27,6 +27,14 @@ const makeSample = ({
     rss,
     rssMax: rss + 100,
     tailRss: 0,
+    heapUsed: rss + 200,
+    heapTotal: rss + 300,
+    external: rss + 400,
+    arrayBuffers: rss + 500,
+    tailHeapUsed: 0,
+    tailHeapTotal: 0,
+    tailExternal: 0,
+    tailArrayBuffers: 0,
     heapUsage: 0.5,
     gcTotal: 0,
     gcMajor: 0,
@@ -48,10 +56,29 @@ describe('aggregateProcStatSamples', () => {
 
     expect(aggregateProcStatSamples(samples).tailRss).toBe(650);
   });
+
+  it('uses the median of the last 8 heap and external samples as tail context', () => {
+    const samples = Array.from({ length: 10 }, (_, index) =>
+      makeSample({
+        pid: 100,
+        time: index + 1,
+        rss: (index + 1) * 100,
+      })
+    );
+
+    expect(aggregateProcStatSamples(samples)).toEqual(
+      expect.objectContaining({
+        tailHeapUsed: 850,
+        tailHeapTotal: 950,
+        tailExternal: 1050,
+        tailArrayBuffers: 1150,
+      })
+    );
+  });
 });
 
 describe('aggregateProcStats', () => {
-  it('sums tail RSS across monitored processes', () => {
+  it('sums tail memory metrics across monitored processes', () => {
     const firstProcess = aggregateProcStatSamples([
       makeSample({ pid: 100, time: 1, rss: 100 }),
       makeSample({ pid: 100, time: 2, rss: 200 }),
@@ -61,6 +88,14 @@ describe('aggregateProcStats', () => {
       makeSample({ pid: 200, time: 2, rss: 400 }),
     ]);
 
-    expect(aggregateProcStats([firstProcess, secondProcess]).tailRss).toBe(500);
+    expect(aggregateProcStats([firstProcess, secondProcess])).toEqual(
+      expect.objectContaining({
+        tailRss: 500,
+        tailHeapUsed: 900,
+        tailHeapTotal: 1100,
+        tailExternal: 1300,
+        tailArrayBuffers: 1500,
+      })
+    );
   });
 });

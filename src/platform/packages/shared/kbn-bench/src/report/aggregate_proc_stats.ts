@@ -33,13 +33,21 @@ export const median = (values: readonly number[]): number => {
 export function aggregateProcStatSamples(samples: ProcStatSample[]): ProcStats {
   // all metrics are cumulative, except for heap usage
   const aggregated = last(samples)!;
-  const tailRssSamples = samples
-    .slice(-TAIL_RSS_SAMPLE_COUNT)
-    .map((sample) => sample.rss)
-    .filter((rss) => rss !== undefined);
+  const tailSamples = samples.slice(-TAIL_RSS_SAMPLE_COUNT);
+  const getTailMedian = (metricName: keyof ProcStatSample): number => {
+    return median(
+      tailSamples
+        .map((sample) => sample[metricName])
+        .filter((value): value is number => value !== undefined)
+    );
+  };
 
   aggregated.heapUsage = mean(samples.map((sample) => sample.heapUsage));
-  aggregated.tailRss = median(tailRssSamples);
+  aggregated.tailRss = getTailMedian('rss');
+  aggregated.tailHeapUsed = getTailMedian('heapUsed');
+  aggregated.tailHeapTotal = getTailMedian('heapTotal');
+  aggregated.tailExternal = getTailMedian('external');
+  aggregated.tailArrayBuffers = getTailMedian('arrayBuffers');
   return aggregated;
 }
 
@@ -57,5 +65,13 @@ export function aggregateProcStats(stats: ProcStats[]): RunProcStats {
     rss: sumBy(stats, (stat) => stat.rss),
     rssMax: sumBy(stats, (stat) => stat.rssMax),
     tailRss: sumBy(stats, (stat) => stat.tailRss),
+    heapUsed: sumBy(stats, (stat) => stat.heapUsed),
+    heapTotal: sumBy(stats, (stat) => stat.heapTotal),
+    external: sumBy(stats, (stat) => stat.external),
+    arrayBuffers: sumBy(stats, (stat) => stat.arrayBuffers),
+    tailHeapUsed: sumBy(stats, (stat) => stat.tailHeapUsed),
+    tailHeapTotal: sumBy(stats, (stat) => stat.tailHeapTotal),
+    tailExternal: sumBy(stats, (stat) => stat.tailExternal),
+    tailArrayBuffers: sumBy(stats, (stat) => stat.tailArrayBuffers),
   };
 }

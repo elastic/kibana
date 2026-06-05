@@ -41,6 +41,9 @@ export function makeStats(
     rssMax: number;
     tailRss?: number;
     heapUsed: number;
+    heapTotal?: number;
+    external?: number;
+    arrayBuffers?: number;
     gcTotal: number;
     gcMajor?: number;
     gcMinor?: number;
@@ -49,6 +52,10 @@ export function makeStats(
   }>
 ): ProcStats[] {
   return samples.map((s): ProcStatSample => {
+    const heapTotal = s.heapTotal ?? s.heapUsed * 2;
+    const external = s.external ?? 0;
+    const arrayBuffers = s.arrayBuffers ?? 0;
+
     return {
       pid,
       argv: ['node', 'bench.js'],
@@ -57,7 +64,15 @@ export function makeStats(
       rss: s.rss ?? s.rssMax, // bytes
       rssMax: s.rssMax, // bytes
       tailRss: s.tailRss ?? s.rss ?? s.rssMax, // bytes
-      heapUsage: s.heapUsed / (s.heapUsed || 1), // not used in aggregation except mean; keep ratio simplistic
+      heapUsed: s.heapUsed,
+      heapTotal,
+      external,
+      arrayBuffers,
+      tailHeapUsed: s.heapUsed,
+      tailHeapTotal: heapTotal,
+      tailExternal: external,
+      tailArrayBuffers: arrayBuffers,
+      heapUsage: s.heapUsed / heapTotal,
       gcTotal: s.gcTotal,
       gcMajor: s.gcMajor ?? 0,
       gcMinor: s.gcMinor ?? 0,

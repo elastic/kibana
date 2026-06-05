@@ -14,6 +14,15 @@ import { aggregateProcStats } from './aggregate_proc_stats';
 import { toMetricSummary } from './to_metric_summary';
 import type { MetricSummary } from './types';
 
+const getNumberValues = (
+  runProcStats: RunProcStats[],
+  metricName: keyof RunProcStats
+): number[] => {
+  return runProcStats
+    .map((stat) => stat[metricName])
+    .filter((value): value is number => value !== undefined);
+};
+
 export interface BenchmarkSummary {
   name: string;
   completed: number;
@@ -101,6 +110,46 @@ export function toBenchmarkSummary(result: BenchmarkResult): BenchmarkSummary {
       metrics.tailRssSize = {
         values: compact(runProcStats.map((stat) => stat.tailRss)),
         title: 'Tail RSS',
+        format: 'size',
+      };
+    }
+
+    const tailHeapUsedValues = getNumberValues(runProcStats, 'tailHeapUsed');
+
+    if (tailHeapUsedValues.length) {
+      metrics.tailHeapUsedSize = {
+        values: tailHeapUsedValues,
+        title: 'Tail heap used',
+        format: 'size',
+      };
+    }
+
+    const tailHeapTotalValues = getNumberValues(runProcStats, 'tailHeapTotal');
+
+    if (tailHeapTotalValues.length) {
+      metrics.tailHeapTotalSize = {
+        values: tailHeapTotalValues,
+        title: 'Tail heap total',
+        format: 'size',
+      };
+    }
+
+    const tailExternalValues = getNumberValues(runProcStats, 'tailExternal');
+
+    if (tailExternalValues.length) {
+      metrics.tailExternalMemorySize = {
+        values: tailExternalValues,
+        title: 'Tail external memory',
+        format: 'size',
+      };
+    }
+
+    const tailArrayBuffersValues = getNumberValues(runProcStats, 'tailArrayBuffers');
+
+    if (tailArrayBuffersValues.length) {
+      metrics.tailArrayBuffersSize = {
+        values: tailArrayBuffersValues,
+        title: 'Tail array buffers',
         format: 'size',
       };
     }

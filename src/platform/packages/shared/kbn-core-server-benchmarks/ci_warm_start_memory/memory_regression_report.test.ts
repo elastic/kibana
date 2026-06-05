@@ -33,6 +33,12 @@ describe('buildWarmStartMemoryRegressionReport', () => {
           regressed: false,
         },
       },
+      diagnosticMetrics: {
+        tailHeapUsed: {
+          baselineBytes: 400,
+          targetBytes: 450,
+        },
+      },
       triggeredMetrics: ['tailRss'],
       context: {
         baselineCommit: 'baseline-sha',
@@ -55,6 +61,13 @@ describe('buildWarmStartMemoryRegressionReport', () => {
           deltaBytes: 100,
           allowedDeltaBytes: 300,
           regressed: false,
+        },
+      },
+      diagnosticMetrics: {
+        tailHeapUsed: {
+          baselineBytes: 400,
+          targetBytes: 450,
+          deltaBytes: 50,
         },
       },
       triggeredMetrics: ['tailRss'],

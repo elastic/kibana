@@ -53,6 +53,18 @@ const regressionReport = (): WarmStartMemoryRegressionReport => ({
       regressed: true,
     },
   },
+  diagnosticMetrics: {
+    tailHeapUsed: {
+      baselineBytes: 300_000_000,
+      targetBytes: 350_000_000,
+      deltaBytes: 50_000_000,
+    },
+    tailExternal: {
+      baselineBytes: 100_000_000,
+      targetBytes: 120_000_000,
+      deltaBytes: 20_000_000,
+    },
+  },
   triggeredMetrics: ['tailRss', 'maxRss'],
   context: {
     baselineCommit: 'baseline-sha',
@@ -85,6 +97,9 @@ describe('warm start memory bench annotations', () => {
     expect(body).toContain('Warm-start memory regression detected');
     expect(body).toContain('Tail RSS');
     expect(body).toContain('Max RSS');
+    expect(body).toContain('Diagnostic memory context');
+    expect(body).toContain('Tail heap used');
+    expect(body).toContain('Tail external memory');
     expect(body).toContain('tailRss, maxRss');
     expect(body).toContain('baseline-sha');
     expect(body).toContain('target-sha');

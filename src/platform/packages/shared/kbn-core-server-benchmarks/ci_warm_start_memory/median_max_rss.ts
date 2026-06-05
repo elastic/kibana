@@ -12,6 +12,10 @@ import type { OnCompareContext } from '@kbn/bench';
 export const WARM_START_BENCHMARK_NAME = 'warm_start';
 export const MAX_RSS_METRIC_KEY = 'maxRssSize';
 export const TAIL_RSS_METRIC_KEY = 'tailRssSize';
+export const TAIL_HEAP_USED_METRIC_KEY = 'tailHeapUsedSize';
+export const TAIL_HEAP_TOTAL_METRIC_KEY = 'tailHeapTotalSize';
+export const TAIL_EXTERNAL_MEMORY_METRIC_KEY = 'tailExternalMemorySize';
+export const TAIL_ARRAY_BUFFERS_METRIC_KEY = 'tailArrayBuffersSize';
 
 export const median = (values: readonly number[]): number => {
   if (values.length === 0) {
@@ -48,6 +52,17 @@ export const getMedianRssMetricBytes = (
   }
 
   return median(values);
+};
+
+export const getOptionalMedianMemoryMetricBytes = (
+  summary: OnCompareContext['leftSummary'],
+  metricKey: string,
+  benchmarkName: string = WARM_START_BENCHMARK_NAME
+): number | undefined => {
+  const benchmark = summary.benchmarks.find(({ name }) => name === benchmarkName);
+  const values = benchmark?.metrics[metricKey]?.summary?.values;
+
+  return values?.length ? median(values) : undefined;
 };
 
 export const getMedianMaxRssBytes = (
