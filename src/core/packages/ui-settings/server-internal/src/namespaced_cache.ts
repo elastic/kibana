@@ -48,6 +48,8 @@ export class NamespacedCache<T = unknown> {
     const timer = setTimeout(() => {
       this.entries.delete(namespace);
     }, ttl);
+    // The eviction timer must not keep the Node process (or a Jest worker) alive on its own.
+    timer.unref();
 
     this.entries.set(namespace, { value, timer });
   }
