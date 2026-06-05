@@ -117,5 +117,6 @@
     "@kbn/inference-connectors",
     "@kbn/safer-lodash-set",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
   ]
 }
