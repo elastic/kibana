@@ -15,7 +15,8 @@ spaceTest.describe(
   'Attack details flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
       await apiServices.attackDiscovery.seedAttackSchedule();
     });
@@ -42,6 +43,10 @@ spaceTest.describe(
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest('shows Insights section in attack details flyout', async ({ pageObjects }) => {
