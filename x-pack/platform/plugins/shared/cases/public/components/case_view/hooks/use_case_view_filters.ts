@@ -23,6 +23,7 @@ export interface CaseViewFiltersResult extends CaseViewFiltersParams {
   isTypeFilterActive: boolean;
   isAuthorFilterActive: boolean;
   hasActiveFilter: boolean;
+  clearFilters: () => void;
 }
 
 /**
@@ -54,6 +55,11 @@ export const useCaseViewFilters = (caseData: CaseUI): CaseViewFiltersResult => {
     [selectedAttachmentTypes, isTypeFilterActive]
   );
 
+  const clearFilters = useCallback(() => {
+    setSelectedAttachmentTypes([]);
+    setSelectedAuthors([]);
+  }, []);
+
   return {
     selectedAttachmentTypes,
     setSelectedAttachmentTypes,
@@ -64,5 +70,6 @@ export const useCaseViewFilters = (caseData: CaseUI): CaseViewFiltersResult => {
     isTypeFilterActive,
     isAuthorFilterActive,
     hasActiveFilter,
+    clearFilters,
   };
 };

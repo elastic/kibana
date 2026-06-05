@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexItem,
@@ -36,6 +37,7 @@ import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
 import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY } from '../translations';
+import { CLEAR_FILTERS } from './translations';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -58,8 +60,14 @@ export const CaseViewAttachments = ({
 
   const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
 
-  const filters = useCaseViewFilters(caseData);
-  const { filteredCaseData: authorFilteredCaseData, isTypeVisible, isAuthorFilterActive } = filters;
+  const {
+    filteredCaseData: authorFilteredCaseData,
+    isTypeVisible,
+    isAuthorFilterActive,
+    hasActiveFilter,
+    clearFilters,
+    ...filters
+  } = useCaseViewFilters(caseData);
 
   const countsByType = useMemo(() => {
     const counts = new Map<string, number>();
@@ -174,7 +182,28 @@ export const CaseViewAttachments = ({
             <CaseViewAttachButton caseId={caseData.id} fill />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        {hasActiveFilter ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup gutterSize="none" justifyContent="flexStart">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={clearFilters}
+                  size="xs"
+                  iconSide="left"
+                  iconType="cross"
+                  flush="left"
+                  data-test-subj="case-view-filters-clear-filters"
+                >
+                  {CLEAR_FILTERS}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+          </>
+        ) : (
+          <EuiSpacer size="m" />
+        )}
         {showNoResults ? (
           <EuiEmptyPrompt
             data-test-subj="case-view-attachments-no-search-results"

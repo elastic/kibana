@@ -42,6 +42,9 @@ interface AuthorFilterProps {
 
 export const AuthorFilter = React.memo<AuthorFilterProps>(
   ({ caseData, selectedAuthors, onAuthorsChange, isLoading = false }) => {
+    // TODO: derive the available authors (and apply the filter) on the server so
+    // we don't depend on the full comments list being present on the client.
+    // Tracked by https://github.com/elastic/kibana/issues/207797.
     const options = useMemo(() => buildAuthorFilterOptions(caseData.comments), [caseData.comments]);
 
     const onChange = useCallback(

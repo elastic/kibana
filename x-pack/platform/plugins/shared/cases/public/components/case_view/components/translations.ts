@@ -34,3 +34,7 @@ export const OBSERVABLE = i18n.translate('xpack.cases.attachmentTypeFilter.obser
 export const AUTHOR = i18n.translate('xpack.cases.authorFilter.buttonLabel', {
   defaultMessage: 'Author',
 });
+
+export const CLEAR_FILTERS = i18n.translate('xpack.cases.caseViewFilters.clearFilters', {
+  defaultMessage: 'Clear filters',
+});

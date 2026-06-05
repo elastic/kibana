@@ -41,6 +41,9 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
     const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
 
     const excluded = useMemo(() => new Set(excludedTypes ?? []), [excludedTypes]);
+    // TODO: derive the available types (and apply the filter) on the server so
+    // we don't depend on the full comments list being present on the client.
+    // Tracked by https://github.com/elastic/kibana/issues/207797.
     const availableTypes = useMemo(() => {
       const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
       const types = new Set<string>();
@@ -75,7 +78,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
       availableTypes,
       observablesAuthorized,
       isObservablesFeatureEnabled,
-      caseData.observables.length,
+      caseData.observables,
       excluded,
     ]);
 

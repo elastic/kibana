@@ -145,6 +145,24 @@ describe('useCaseViewFilters', () => {
     });
   });
 
+  it('clearFilters resets every active filter in a single call', () => {
+    const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
+
+    act(() => {
+      result.current.setSelectedAttachmentTypes(['user']);
+      result.current.setSelectedAuthors([elasticUser.username]);
+    });
+    expect(result.current.hasActiveFilter).toBe(true);
+
+    act(() => {
+      result.current.clearFilters();
+    });
+
+    expect(result.current.selectedAttachmentTypes).toEqual([]);
+    expect(result.current.selectedAuthors).toEqual([]);
+    expect(result.current.hasActiveFilter).toBe(false);
+  });
+
   it('type and author filters compose: hasActiveFilter reflects either being active', () => {
     const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
 

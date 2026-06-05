@@ -567,6 +567,65 @@ describe('Case View Attachments tab', () => {
     expect(screen.getByTestId('case-view-attachment-accordion-security.alert')).toBeInTheDocument();
   });
 
+  describe('clear filters button', () => {
+    it('does not render when no filter is active', () => {
+      const unifiedAttachmentTypeRegistry = buildRegistry();
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseData}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+      );
+
+      expect(screen.queryByTestId('case-view-filters-clear-filters')).not.toBeInTheDocument();
+    });
+
+    it('renders when a filter is active and resets every filter when clicked', async () => {
+      const unifiedAttachmentTypeRegistry = buildRegistry();
+      const caseWithAlerts: CaseUI = {
+        ...basicCase,
+        comments: [alertComment, { ...eventComment, id: 'evt-1' }],
+      };
+
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseWithAlerts}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />,
+        { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+      );
+
+      // Activate the type filter.
+      await userEvent.click(screen.getByTestId('options-filter-popover-button-attachmentType'));
+      await userEvent.click(
+        await screen.findByTestId('options-filter-popover-item-security.alert')
+      );
+
+      const clearButton = await screen.findByTestId('case-view-filters-clear-filters');
+      expect(clearButton).toBeInTheDocument();
+      // Other-type accordion is hidden while the filter is active.
+      expect(
+        screen.queryByTestId('case-view-attachment-accordion-security.event')
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(clearButton);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('case-view-filters-clear-filters')).not.toBeInTheDocument();
+      });
+      // Both accordions are back.
+      expect(
+        screen.getByTestId('case-view-attachment-accordion-security.alert')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('case-view-attachment-accordion-security.event')
+      ).toBeInTheDocument();
+    });
+  });
+
   it('renders accordions in alphabetical order by display name', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
     // 2 alerts + 1 event so all three registry-driven accordions render
