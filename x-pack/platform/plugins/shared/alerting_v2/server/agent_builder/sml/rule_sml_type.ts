@@ -71,7 +71,10 @@ export const createRuleSmlType = ({
             type: RULE_SML_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
+            permissions: {
+              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -86,7 +89,7 @@ export const createRuleSmlType = ({
   toAttachment: async (item, context) => {
     try {
       const rulesClient = getScopedRulesClient(context.request);
-      const rule = await rulesClient.getRule({ id: item.origin_id });
+      const rule = await rulesClient.getRule({ id: item.origin_id ?? '' });
       return {
         type: RULE_ATTACHMENT_TYPE,
         data: ruleAttachmentDataSchema.parse(rule),
