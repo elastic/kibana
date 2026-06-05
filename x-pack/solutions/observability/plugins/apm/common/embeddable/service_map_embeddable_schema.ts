@@ -49,10 +49,12 @@ function literalsOf<T extends string>(values: readonly T[]): Type<T> {
 }
 
 export const serviceMapCustomStateSchema = schema.object({
-  environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value }),
-  kuery: schema.maybe(schema.string()),
-  service_name: schema.maybe(schema.string()),
-  service_group_id: schema.maybe(schema.string()),
+  // maxLength bounds keep the schema safe against unbounded string input (CodeQL). Environment /
+  // service identifiers are short; `kuery` allows a longer KQL expression.
+  environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value, maxLength: 1024 }),
+  kuery: schema.maybe(schema.string({ maxLength: 2048 })),
+  service_name: schema.maybe(schema.string({ maxLength: 1024 })),
+  service_group_id: schema.maybe(schema.string({ maxLength: 1024 })),
   map_orientation: schema.maybe(literalsOf(MAP_ORIENTATION_VALUES)),
   // True = panel follows the dashboard's global filters / KQL / Controls. False (default)
   // = panel uses only its own captured filters. Time-range customization is separate:
