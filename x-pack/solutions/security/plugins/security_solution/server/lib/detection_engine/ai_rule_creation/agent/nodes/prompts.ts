@@ -138,25 +138,25 @@ Severity Levels and Risk Scores:
 - low (21): Script obfuscation, reconnaissance, ML anomaly detection, buffer overflow/segfault detection, benign account creation events, or audit events with limited immediate security impact.
 
 EXACT MAPPING RULES — apply these in order:
-1. If the request involves credential dumping, credential access, or theft of credentials → severity: high, riskScore: 73
-2. If the request involves OAuth phishing, device registration abuse, or stolen sessions → severity: high, riskScore: 73
-3. If the request involves threat intel indicator matching or multi-datasource alert correlation → severity: high, riskScore: 73
-4. If the request involves active exploitation, RCE, or authentication bypass (CVE exploitation) → severity: critical, riskScore: 99
-5. If the request involves UAC bypass, privilege escalation attempts, or container escapes → severity: medium, riskScore: 47
-6. If the request involves persistence (plist modification, login hooks, scheduled tasks) → severity: medium, riskScore: 47
-7. If the request involves defense evasion (log deletion, sink deletion, DNS config deletion) → severity: medium, riskScore: 47
-8. If the request involves ransomware, email route hijacking, or data collection abuse → severity: medium, riskScore: 47
-9. If the request involves suspicious network traffic (VNC, C2, unusual ports) → severity: medium, riskScore: 47
-10. If the request involves multiple sessions, unusual user behavior, or policy violations → severity: medium, riskScore: 47
-11. If the request involves script obfuscation, PowerShell encoding, or payload concealment → severity: low, riskScore: 21
-12. If the request involves ML anomaly detection, reconnaissance, or benign audit events → severity: low, riskScore: 21
-13. If the request involves account creation (service principals, users) without explicit compromise → severity: low, riskScore: 21
-14. If the request involves crash/segfault detection or vulnerability scanning → severity: low, riskScore: 21
+1. If the request involves credential dumping, credential access, or theft of credentials → severity: high, risk_score: 73
+2. If the request involves OAuth phishing, device registration abuse, or stolen sessions → severity: high, risk_score: 73
+3. If the request involves threat intel indicator matching or multi-datasource alert correlation → severity: high, risk_score: 73
+4. If the request involves active exploitation, RCE, or authentication bypass (CVE exploitation) → severity: critical, risk_score: 99
+5. If the request involves UAC bypass, privilege escalation attempts, or container escapes → severity: medium, risk_score: 47
+6. If the request involves persistence (plist modification, login hooks, scheduled tasks) → severity: medium, risk_score: 47
+7. If the request involves defense evasion (log deletion, sink deletion, DNS config deletion) → severity: medium, risk_score: 47
+8. If the request involves ransomware, email route hijacking, or data collection abuse → severity: medium, risk_score: 47
+9. If the request involves suspicious network traffic (VNC, C2, unusual ports) → severity: medium, risk_score: 47
+10. If the request involves multiple sessions, unusual user behavior, or policy violations → severity: medium, risk_score: 47
+11. If the request involves script obfuscation, PowerShell encoding, or payload concealment → severity: low, risk_score: 21
+12. If the request involves ML anomaly detection, reconnaissance, or benign audit events → severity: low, risk_score: 21
+13. If the request involves account creation (service principals, users) without explicit compromise → severity: low, risk_score: 21
+14. If the request involves crash/segfault detection or vulnerability scanning → severity: low, risk_score: 21
 
 Respond with ONLY a JSON object in this exact format:
 {{
   "severity": "medium",
-  "riskScore": 47
+  "risk_score": 47
 }}`,
   ],
   [

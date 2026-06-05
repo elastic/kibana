@@ -13,7 +13,7 @@ import { SEVERITY_INFERENCE_PROMPT } from './prompts';
 
 export interface SeverityInferenceResponse {
   severity: 'low' | 'medium' | 'high' | 'critical';
-  riskScore: number;
+  risk_score: number;
 }
 
 interface InferSeverityNodeParams {
@@ -39,13 +39,13 @@ const validateSeverityMapping = (response: SeverityInferenceResponse): SeverityI
 
   if (!expectedRiskScore) {
     // Invalid severity — default to low
-    return { severity: 'low', riskScore: 21 };
+    return { severity: 'low', risk_score: 21 };
   }
 
   // Always use the canonical risk score for the severity level.
   // The model may hallucinate arbitrary risk scores; we enforce the
   // exact mapping: low=21, medium=47, high=73, critical=99.
-  return { severity: normalizedSeverity as SeverityInferenceResponse['severity'], riskScore: expectedRiskScore };
+  return { severity: normalizedSeverity as SeverityInferenceResponse['severity'], risk_score: expectedRiskScore };
 };
 
 export const inferSeverityNode = ({ model, events }: InferSeverityNodeParams) => {
@@ -65,14 +65,14 @@ export const inferSeverityNode = ({ model, events }: InferSeverityNodeParams) =>
       const validatedResult = validateSeverityMapping(severityInferenceResult);
 
       events?.reportProgress(
-        `Severity inferred: ${validatedResult.severity} (risk score: ${validatedResult.riskScore})`
+        `Severity inferred: ${validatedResult.severity} (risk score: ${validatedResult.risk_score})`
       );
 
       return {
         ...state,
         rule: {
           severity: validatedResult.severity,
-          riskScore: validatedResult.riskScore,
+          risk_score: validatedResult.risk_score,
         },
       };
     } catch (error) {
