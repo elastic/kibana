@@ -40,6 +40,12 @@ export function createBaseHandlerContext(
       getFakeRequest: () => {
         return stepExecutionRuntime.contextManager.getFakeRequest();
       },
+      callKibanaApi: (params) => {
+        return stepExecutionRuntime.contextManager.callKibanaApi({
+          ...params,
+          signal: stepExecutionRuntime.abortController.signal,
+        });
+      },
     },
     logger: {
       debug: (message, meta) => workflowLogger.logDebug(message, meta),
