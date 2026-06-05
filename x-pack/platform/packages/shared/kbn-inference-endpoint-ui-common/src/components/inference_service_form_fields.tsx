@@ -81,6 +81,8 @@ export const accordionCss = css`
   }
 `;
 
+const PROVIDER_SELECT_BOX_ID = 'providerSelectBox';
+
 const providerConfigConfig = {
   validations: [
     {
@@ -437,6 +439,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           placeholder={LABELS.SELECT_PROVIDER}
           icon={{ type: 'chevronSingleDown', side: 'right' }}
           aria-expanded={isProviderPopoverOpen}
+          aria-describedby={isInvalid ? `${PROVIDER_SELECT_BOX_ID}-error-0` : undefined}
           role="combobox"
           onChange={() => {
             /* Intentionally left blank as onChange is required to avoid console error
@@ -595,7 +598,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           const selectInput = providerSuperSelect(isInvalid);
           const formRow = (
             <EuiFormRow
-              id="providerSelectBox"
+              id={PROVIDER_SELECT_BOX_ID}
               fullWidth
               label={
                 <FormattedMessage
