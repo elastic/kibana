@@ -1,5 +1,7 @@
 [
+  "alerting_api_key_pending_invalidation",
   "alerting_notification_policy",
+  "alerting_rule",
   "apm-services-telemetry",
   "application_usage_transactional",
   "background-session",
