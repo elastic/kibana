@@ -111,7 +111,9 @@ test.describe('Rule Details - Edit rule button', { tag: tags.stateful.classic },
     await page.testSubj.click('ruleActionsButton');
     await page.testSubj.click('openEditRuleFlyoutButton');
 
-    await page.testSubj.locator('ruleDetailsNameInput').fill(uuidv4());
+    const nameInput = page.testSubj.locator('ruleDetailsNameInput');
+    await nameInput.click();
+    await nameInput.pressSequentially(uuidv4().slice(0, 8));
     await page.testSubj.click('rulePageFooterCancelButton');
 
     await expect(page.testSubj.locator('confirmRuleCloseModal')).toBeVisible();

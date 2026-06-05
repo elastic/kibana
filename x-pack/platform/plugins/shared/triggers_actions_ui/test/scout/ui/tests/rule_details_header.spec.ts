@@ -52,7 +52,7 @@ test.describe('Rule Details - Header', { tag: tags.stateful.classic }, () => {
 
   test('renders the rule details', async ({ page }) => {
     await expect(page.testSubj.locator('ruleDetailsTitle')).toContainText('header-test-rule');
-    await expect(page.testSubj.locator('ruleSummaryRuleType')).toHaveText('ES query');
+    await expect(page.testSubj.locator('ruleSummaryRuleType')).toHaveText('Elasticsearch query');
     await expect(page.testSubj.locator('apiKeyOwnerLabel')).toContainText('elastic');
   });
 

@@ -533,7 +533,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('createRuleButton');
     await page.testSubj.click('.es-query-SelectOption');
-    await page.testSubj.locator('ruleDetailsNameInput').fill('alertName');
+    const nameInput = page.testSubj.locator('ruleDetailsNameInput');
+    await nameInput.click();
+    await nameInput.pressSequentially('alertName');
     await page.testSubj.click('rulePageFooterCancelButton');
     await expect(page.testSubj.locator('confirmRuleCloseModal')).toBeVisible();
     await page.testSubj
