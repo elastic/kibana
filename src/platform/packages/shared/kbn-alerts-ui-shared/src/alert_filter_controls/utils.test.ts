@@ -131,11 +131,11 @@ describe('utils', () => {
       expect(Object.prototype.hasOwnProperty.call(item, 'title')).toBe(false);
 
       // Simulates what rison decodes back from the URL (no `title` key)
-      const urlDecoded: FilterControlConfig[] = [{ field_name: item.field_name }];
+      const urlDecoded: FilterControlConfig[] = [{ fieldName: item.fieldName }];
       const fromStorage: FilterControlConfig[] = [item];
 
       // The comparator used by FilterGroup to decide whether to show the "controls changed" banner
-      const comparator = getFilterControlsComparator('field_name', 'title');
+      const comparator = getFilterControlsComparator('fieldName', 'title');
       expect(isEqualWith(fromStorage, urlDecoded, comparator)).toBe(true);
     });
   });
