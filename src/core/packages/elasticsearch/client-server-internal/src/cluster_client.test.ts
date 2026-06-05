@@ -333,7 +333,7 @@ describe('ClusterClient', () => {
           onRequestHandlerFactory: mockOnRequestHandlerFactory,
         });
 
-        const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+        const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
         client = clusterClient.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
 
         const params = makeSearchParams();
@@ -1357,7 +1357,7 @@ describe('ClusterClient', () => {
 
         // Even when the scoped client is created with 'space' routing, asSecondaryAuthUser
         // is always a child of asInternalUser, which uses origin-only routing.
-        const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
+        const request = httpServerMock.createKibanaRequest({ spaceId: 'my-space' });
         client = clusterClient.asScoped(request, {
           projectRouting: 'space',
         }).asSecondaryAuthUser;
