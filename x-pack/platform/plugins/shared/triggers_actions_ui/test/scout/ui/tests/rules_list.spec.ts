@@ -178,7 +178,12 @@ const ensureRuleStatus = async (
 ) => {
   await expect(async () => {
     await searchRules(page, ruleName);
-    await expect(page.testSubj.locator('statusDropdown')).toHaveAttribute(
+    // Scope statusDropdown to the specific rule's row so that other rules
+    // matching the tokenized OR search don't cause a strict-mode violation.
+    const ruleRow = page
+      .locator('[data-test-subj^="rule-row"]')
+      .filter({ has: page.locator(`[title="${ruleName}"]`) });
+    await expect(ruleRow.locator('[data-test-subj="statusDropdown"]')).toHaveAttribute(
       'title',
       new RegExp(status, 'i'),
       { timeout: 5_000 }
