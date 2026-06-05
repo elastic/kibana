@@ -35,7 +35,11 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-service'
+  - '@kbn/content-management-plugin'
+  - '@kbn/data-view-editor-plugin'
+  - '@kbn/data-view-field-editor-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/saved-objects-finder-plugin'
   - '@kbn/datemath'
   - '@kbn/ebt-tools'
   - '@kbn/embeddable-plugin'
@@ -89,6 +93,7 @@ dependsOn:
   - '@kbn/unified-data-table'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/cps'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
