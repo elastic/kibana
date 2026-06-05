@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
-import { DISCOVER_LARGE_STRING_ALL_ROLE } from '../../fixtures/common/custom_roles';
 
 const EXPECTED_TEXT =
   'Project Gutenberg EBook of Hamlet, by William Shakespeare' +
@@ -22,7 +20,7 @@ const EXPECTED_TEXT =
   ' you’ll have to check the laws of the country where you are' +
   ' located before using this ebook.';
 
-spaceTest.describe('Discover large strings', { tag: testData.DISCOVER_STATEFUL_TAGS }, () => {
+spaceTest.describe('Discover large strings', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(
       'src/platform/test/functional/fixtures/kbn_archiver/testlargestring.json'
@@ -30,11 +28,9 @@ spaceTest.describe('Discover large strings', { tag: testData.DISCOVER_STATEFUL_T
     await scoutSpace.uiSettings.setDefaultIndex('testlargestring');
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(DISCOVER_LARGE_STRING_ALL_ROLE);
-    await pageObjects.discover.setQueryMode('classic');
-    await page.gotoApp('discover');
-    await page.testSubj.locator('dscPage').waitFor({ state: 'visible', timeout: 60_000 });
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.discover.waitForDocTableRendered();
   });

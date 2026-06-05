@@ -24,6 +24,7 @@ import { QueryBar } from './query_bar';
 import { RenderablePage } from './renderable_page';
 import { SavedObjectsManagementPage } from './saved_objects_management_page';
 import { SavedQueryManagementMenu } from './saved_query_management_menu';
+import { Share } from './share';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
@@ -75,6 +76,7 @@ export interface PageObjects {
   savedObjectsManagement: SavedObjectsManagementPage;
   copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
   savedQueryManagementMenu: SavedQueryManagementMenu;
+  share: Share;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   inspector: Inspector;
@@ -114,6 +116,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
       fixtures.page
     ),
     savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
+    share: createLazyPageObject(Share, fixtures.page, fixtures.kbnUrl),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),

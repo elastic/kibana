@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { DISCOVER_LOGSTASH_ALL_ROLE } from '../../fixtures/common/custom_roles';
 import {
   closeFieldStatsPopover,
   fieldStatsBucketRows,
@@ -21,7 +20,7 @@ import {
 
 spaceTest.describe(
   'Discover sidebar field stats in classic mode',
-  { tag: testData.DISCOVER_STATEFUL_TAGS },
+  { tag: tags.stateful.all },
   () => {
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
@@ -48,11 +47,9 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(DISCOVER_LOGSTASH_ALL_ROLE);
-      await pageObjects.discover.setQueryMode('classic');
-      await page.gotoApp('discover');
-      await page.testSubj.locator('dscPage').waitFor({ state: 'visible', timeout: 60_000 });
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

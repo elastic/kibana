@@ -8,10 +8,9 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { DISCOVER_LOGSTASH_ALL_ROLE } from '../../fixtures/common/custom_roles';
 
 const openInspectorFromTabMenu = async (page: ScoutPage) => {
   if (await page.testSubj.locator('inspectorPanel').isVisible()) {
@@ -42,7 +41,7 @@ const getInspectorTableData = async (page: ScoutPage): Promise<string[][]> =>
 const getHitCount = (requestStats: string[][]): string | undefined =>
   requestStats.find(([name]) => name === 'Hits')?.[1];
 
-spaceTest.describe('Discover inspector', { tag: testData.DISCOVER_STATEFUL_TAGS }, () => {
+spaceTest.describe('Discover inspector', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(
       'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
@@ -51,11 +50,9 @@ spaceTest.describe('Discover inspector', { tag: testData.DISCOVER_STATEFUL_TAGS 
     await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(DISCOVER_LOGSTASH_ALL_ROLE);
-    await pageObjects.discover.setQueryMode('classic');
-    await page.gotoApp('discover');
-    await page.testSubj.locator('dscPage').waitFor({ state: 'visible', timeout: 60_000 });
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   spaceTest.afterEach(async ({ pageObjects }) => {

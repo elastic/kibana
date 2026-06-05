@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { test } from '@kbn/scout';
 
 test.describe('Short URLs', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {

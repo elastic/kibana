@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { DISCOVER_LOGSTASH_ALL_ROLE } from '../../fixtures/common/custom_roles';
-import { closeSidebar, openSidebar } from '../../fixtures/common/discover_panels';
+import { DISCOVER_LOGSTASH_ONLY_ROLE } from '../../fixtures/common/custom_roles';
 
 const NO_TIME_DATA_VIEW = 'log*';
 const DEFAULT_TIME_RANGE = `{ "from": "${testData.DEFAULT_TIME_RANGE.from}", "to": "${testData.DEFAULT_TIME_RANGE.to}"}`;
@@ -19,7 +18,7 @@ const DEFAULT_TIME_RANGE = `{ "from": "${testData.DEFAULT_TIME_RANGE.from}", "to
 test.describe(
   'Discover panel toggles in ESQL without a time field',
   {
-    tag: testData.DISCOVER_STATEFUL_TAGS,
+    tag: tags.stateful.all,
   },
   () => {
     test.beforeAll(async ({ apiServices, kbnClient }) => {
@@ -35,7 +34,10 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(DISCOVER_LOGSTASH_ALL_ROLE);
+      // Pin the role to `logstash*` so the wildcard `log*` data view used
+      // below resolves to exactly the `logstash_functional` fixture indices,
+      // regardless of what other archives sibling specs load.
+      await browserAuth.loginWithCustomRole(DISCOVER_LOGSTASH_ONLY_ROLE);
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.selectDataView(NO_TIME_DATA_VIEW);
@@ -76,11 +78,11 @@ test.describe(
       await pageObjects.discover.showChart();
       await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible();
 
-      await closeSidebar(page);
+      await pageObjects.discover.closeSidebar();
       await expect(page.testSubj.locator('fieldList')).toHaveCount(0);
       await expect(page.testSubj.locator('dscShowSidebarButton')).toBeVisible();
 
-      await openSidebar(page);
+      await pageObjects.discover.openSidebar();
       await expect(page.testSubj.locator('fieldList')).toBeVisible();
       await expect(page.testSubj.locator('dscHideSidebarButton')).toBeVisible();
     });

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
-import { DISCOVER_LOGSTASH_ALL_ROLE } from '../../fixtures/common/custom_roles';
 
-spaceTest.describe('Discover source filters', { tag: testData.DISCOVER_STATEFUL_TAGS }, () => {
+spaceTest.describe('Discover source filters', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.load(
       'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
@@ -32,7 +31,7 @@ spaceTest.describe('Discover source filters', { tag: testData.DISCOVER_STATEFUL_
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(DISCOVER_LOGSTASH_ALL_ROLE);
+    await browserAuth.loginAsAdmin();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.discover.waitForDocTableRendered();
