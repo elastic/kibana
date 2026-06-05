@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getDefaultMlCapabilities } from '@kbn/ml-common-types/capabilities';
-import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { getDefaultCapabilities as getDefaultMlCapabilities } from '../../../common/types/capabilities';
+import type { MlCapabilities } from '../../../common/types/capabilities';
 import { getDeepLinks } from './search_deep_links';
 
 const fullCapabilities: MlCapabilities = {
