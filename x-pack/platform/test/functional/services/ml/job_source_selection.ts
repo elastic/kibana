@@ -35,8 +35,10 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
     // Selects a data view via the inline DataViewPicker (MlDataSourcePicker)
     async selectDataView(name: string, nextPageSubj: string) {
-      await testSubjects.click('mlDataSourceSelectorButton');
-      await testSubjects.existOrFail('indexPattern-switcher', { timeout: 2000 });
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('mlDataSourceSelectorButton');
+        await testSubjects.existOrFail('indexPattern-switcher', { timeout: 2000 });
+      });
       await testSubjects.setValue('indexPattern-switcher--input', name);
       await retry.tryForTime(30 * 1000, async () => {
         const indexPatternSwitcher = await testSubjects.find('indexPattern-switcher', 500);
