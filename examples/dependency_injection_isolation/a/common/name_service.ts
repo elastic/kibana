@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
-import { Route } from '@kbn/core-di-server';
-import { NameServiceToken } from '@kbn/dependency-injection-c/server';
-import { NameService } from '../common';
-import { TestRoute } from './route';
+import { injectable } from 'inversify';
+import { INameService } from '@kbn/dependency-injection-c/common';
 
-export const module = new ContainerModule(({ bind }) => {
-  bind(Route).toConstantValue(TestRoute);
-
-  bind(NameServiceToken).to(NameService).inSingletonScope();
-});
+@injectable()
+export class NameService implements INameService {
+  getName() {
+    return 'a';
+  }
+}

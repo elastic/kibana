@@ -9,8 +9,12 @@
 
 import { ContainerModule } from 'inversify';
 import { Route } from '@kbn/core-di-server';
+import { NameServiceToken } from '@kbn/dependency-injection-c/server';
+import { NameService } from '../common';
 import { TestRoute } from './route';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(Route).toConstantValue(TestRoute);
+
+  bind(NameServiceToken).to(NameService).inSingletonScope();
 });

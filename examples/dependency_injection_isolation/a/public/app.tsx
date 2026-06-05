@@ -13,6 +13,7 @@ import { inject, injectable } from 'inversify';
 import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { ApplicationParameters, CoreStart } from '@kbn/core-di-browser';
+import { type INameService, NameServiceToken } from '@kbn/dependency-injection-c/public';
 
 @injectable()
 export class App {
@@ -22,12 +23,13 @@ export class App {
 
   constructor(
     @inject(ApplicationParameters) private readonly params: AppMountParameters,
-    @inject(CoreStart('injection')) private readonly di: CoreDiServiceStart
+    @inject(CoreStart('injection')) private readonly di: CoreDiServiceStart,
+    @inject(NameServiceToken) private readonly nameService: INameService
   ) {}
 
   mount(): AppUnmount {
     const { element } = this.params;
-    ReactDOM.render(<>A</>, element);
+    ReactDOM.render(<>{this.nameService.getName()}</>, element);
 
     return () => ReactDOM.unmountComponentAtNode(element);
   }

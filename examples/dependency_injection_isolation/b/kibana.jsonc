@@ -11,6 +11,9 @@
     "browser": true,
     "requiredPlugins": [
       "developerExamples"
+    ],
+    "requiredBundles": [
+      "dependencyInjectionC"
     ]
   }
 }
