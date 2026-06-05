@@ -585,6 +585,50 @@ const parseErrorClassificationFromReferenceBuckets = ({
   return lastFound ?? undefined;
 };
 
+/**
+ * Parses all event.reference-derived data for a single generation bucket in one
+ * pass, sharing the workflow_reference buckets across each parser.
+ */
+const parseWorkflowReferenceData = ({
+  bucket,
+  executionUuid,
+  logger,
+}: {
+  bucket: { workflow_reference?: { buckets: Array<{ key: string }> } };
+  executionUuid: string;
+  logger: Logger;
+}): {
+  errorClassification: ParsedErrorClassification | undefined;
+  sourceMetadata: ParsedSourceMetadata | undefined;
+  validationSummary: ParsedValidationSummary | undefined;
+  workflowExecutions: ReturnType<typeof mergeWorkflowExecutionsFromReferenceBuckets>;
+} => {
+  const workflowReferenceBuckets = bucket.workflow_reference?.buckets;
+
+  return {
+    errorClassification: parseErrorClassificationFromReferenceBuckets({
+      executionUuid,
+      logger,
+      workflowReferenceBuckets,
+    }),
+    sourceMetadata: parseSourceMetadataFromReferenceBuckets({
+      executionUuid,
+      logger,
+      workflowReferenceBuckets,
+    }),
+    validationSummary: parseValidationSummaryFromReferenceBuckets({
+      executionUuid,
+      logger,
+      workflowReferenceBuckets,
+    }),
+    workflowExecutions: mergeWorkflowExecutionsFromReferenceBuckets({
+      executionUuid,
+      logger,
+      workflowReferenceBuckets,
+    }),
+  };
+};
+
 export const transformGetAttackDiscoveryGenerationsSearchResult = ({
   logger,
   rawResponse,
@@ -639,26 +683,8 @@ export const transformGetAttackDiscoveryGenerationsSearchResult = ({
          */
         const workflowId: string | undefined = bucket.workflow_id?.buckets[0]?.key;
         const workflowRunId: string | undefined = bucket.workflow_run_id?.buckets[0]?.key;
-        const workflowExecutions = mergeWorkflowExecutionsFromReferenceBuckets({
-          executionUuid,
-          logger,
-          workflowReferenceBuckets: bucket.workflow_reference?.buckets,
-        });
-        const sourceMetadata = parseSourceMetadataFromReferenceBuckets({
-          executionUuid,
-          logger,
-          workflowReferenceBuckets: bucket.workflow_reference?.buckets,
-        });
-        const validationSummary = parseValidationSummaryFromReferenceBuckets({
-          executionUuid,
-          logger,
-          workflowReferenceBuckets: bucket.workflow_reference?.buckets,
-        });
-        const errorClassification = parseErrorClassificationFromReferenceBuckets({
-          executionUuid,
-          logger,
-          workflowReferenceBuckets: bucket.workflow_reference?.buckets,
-        });
+        const { errorClassification, sourceMetadata, validationSummary, workflowExecutions } =
+          parseWorkflowReferenceData({ bucket, executionUuid, logger });
 
         if (connectorId == null) {
           throw new Error(
