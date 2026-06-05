@@ -10,9 +10,9 @@ import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { HostStatus } from '../../../../../../common/endpoint/constants';
+import { HostStatus } from '../../../../../../common/endpoint/types';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
 
 const getEndpointStatusSchema = z.object({
