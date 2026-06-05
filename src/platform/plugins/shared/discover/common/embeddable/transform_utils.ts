@@ -73,9 +73,6 @@ export function fromStoredSearchEmbeddableByRef(
   storedState: SearchEmbeddableByReferenceState | StoredSearchEmbeddableByReferenceState,
   references: SavedObjectReference[] = []
 ): DiscoverSessionEmbeddableByReferenceState {
-  const referenceId = references.find(
-    (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
-  )?.id;
   const {
     sort,
     columns,
@@ -86,10 +83,16 @@ export function fromStoredSearchEmbeddableByRef(
     density,
     grid,
     selectedTabId,
+    savedObjectId,
     ...otherAttrs
-  } = storedState;
-  const savedObjectId =
-    referenceId ?? ('savedObjectId' in storedState && storedState.savedObjectId);
+  } = {
+    ...storedState,
+    savedObjectId:
+      references.find(
+        (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
+      )?.id ??
+      ('savedObjectId' in storedState && storedState.savedObjectId),
+  };
   if (!savedObjectId) throw new Error(`Missing reference of type "${SavedSearchType}"`);
   return {
     ...otherAttrs,
