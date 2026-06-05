@@ -450,7 +450,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             // close popover if agent is going to disappear from view to prevent UI error
             if (
               tagsToAdd.length > 0 &&
-              (selectedTags[0] === 'No Tags' || kuery.includes('not tags:*'))
+              (selectedTags[0] === 'No tags' || kuery.includes('not tags:*'))
             ) {
               setShowTagsAddRemove(false);
             }

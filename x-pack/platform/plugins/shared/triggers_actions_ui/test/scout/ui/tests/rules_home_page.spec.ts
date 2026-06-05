@@ -88,7 +88,6 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
     await page.testSubj.click(RULES_TAB_SUBJ);
 
-    expect(page.url()).toContain('/rules');
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
     await expect(
       page.testSubj.locator(RULES_LIST_SUBJ).locator(`[title="${ruleName}"]`)

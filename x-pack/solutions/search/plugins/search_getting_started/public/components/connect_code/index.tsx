@@ -31,10 +31,10 @@ export const SearchGettingStartedConnectCode = () => {
       <EuiFlexGroup alignItems="center">
         <SearchGettingStartedSectionHeading
           icon="plugs"
-          title={i18n.translate('xpack.search.gettingStarted.page.codeExample.title', {
+          title={i18n.translate('xpack.searchGettingStarted.page.codeExample.title', {
             defaultMessage: 'Connect to your application',
           })}
-          description={i18n.translate('xpack.search.gettingStarted.page.codeExample.description', {
+          description={i18n.translate('xpack.searchGettingStarted.page.codeExample.description', {
             defaultMessage: 'Choose a language client and connect your application.',
           })}
         />

@@ -29,9 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
       );
       await kibanaServer.importExport.load(

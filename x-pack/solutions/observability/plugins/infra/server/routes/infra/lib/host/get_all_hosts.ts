@@ -211,7 +211,7 @@ export const getAllHosts = async ({
         metadata,
         metrics: metrics.map((metric) => ({
           name: metric,
-          value: getMetricValue(bucket[metric]) || null,
+          value: getMetricValue(bucket[metric]) ?? null,
         })),
         hasSystemMetrics: systemIntegrationHosts.has(hostName),
       };

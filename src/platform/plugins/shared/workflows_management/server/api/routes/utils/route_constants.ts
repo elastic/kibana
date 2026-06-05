@@ -17,6 +17,12 @@ export const WORKFLOW_ROUTE_OPTIONS = {
 // Pagination constants
 export const MAX_PAGE_SIZE = 100;
 
+/** Max KQL length for trigger-event log search (matches other workflows query routes). */
+export const MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH = 4096;
+
+/** Max datemath / ISO timestamp string length for trigger-event log search bounds. */
+export const MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH = 64;
+
 // Versioned API constants
 export const API_VERSION = '2023-10-31';
 export const INTERNAL_API_VERSION = '1';
