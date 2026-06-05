@@ -53,7 +53,7 @@ export const createFieldDefinitionsSubClient = (
         throw Boom.badRequest('owner is required');
       }
       await authorization.ensureAuthorized({
-        operation: Operations.manageTemplate,
+        operation: Operations.getFieldDefinitions,
         entities: owners.map((owner) => ({ owner, id: owner })),
       });
       return fieldDefinitionsService.getFieldDefinitions(owners, {

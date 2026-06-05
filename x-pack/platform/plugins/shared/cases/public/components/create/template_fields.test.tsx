@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import yaml from 'js-yaml';
 
 import { CreateCaseTemplateFields } from './template_fields';
@@ -62,16 +62,14 @@ describe('CreateCaseTemplateFields', () => {
     }));
   });
 
-  it('shows callout when no template is selected', () => {
+  it('renders nothing when no template is selected and no global fields', () => {
     mockUseFormData.mockReturnValue([{ templateId: '' }]);
     mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
 
-    renderWithTestingProviders(<CreateCaseTemplateFields />);
+    const { container } = renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Template not selected')).toBeInTheDocument();
-    expect(
-      screen.getByText('Select a template in the first step above to edit extended fields.')
-    ).toBeInTheDocument();
+    expect(container.textContent).toBe('');
+    expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
 
   it('renders nothing when template has empty fields array and no global fields', () => {
@@ -90,7 +88,7 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
   });
 
-  it('shows callout when template definition has no fields property', () => {
+  it('renders nothing when template definition has no fields property and no global fields', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseTemplateFormSync.mockReturnValue({
       template: {
@@ -100,9 +98,10 @@ describe('CreateCaseTemplateFields', () => {
       isLoading: false,
     });
 
-    renderWithTestingProviders(<CreateCaseTemplateFields />);
+    const { container } = renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Template not selected')).toBeInTheDocument();
+    expect(container.textContent).toBe('');
+    expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
 
   it('returns null when loading', () => {
@@ -159,13 +158,14 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.queryByTestId('control-unknown')).not.toBeInTheDocument();
   });
 
-  it('shows callout when templateId is undefined', () => {
+  it('renders nothing when templateId is undefined and no global fields', () => {
     mockUseFormData.mockReturnValue([{ templateId: undefined }]);
     mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
 
-    renderWithTestingProviders(<CreateCaseTemplateFields />);
+    const { container } = renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Template not selected')).toBeInTheDocument();
+    expect(container.textContent).toBe('');
+    expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
 
   it('renders global fields when no template is selected but isGlobal defs exist', () => {
@@ -314,6 +314,44 @@ describe('CreateCaseTemplateFields', () => {
 
     expect(screen.getByText('Extended fields')).toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
+  });
+
+  it('applies global field defaults to the form when definitions load', async () => {
+    const setFieldValue = jest.fn();
+    mockUseFormContext.mockReturnValue({ setFieldValue });
+    mockUseFormData.mockReturnValue([{ templateId: undefined }]);
+    mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'incident_type',
+            definition: yaml.dump({
+              name: 'incident_type',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Incident Type',
+              metadata: { default: 'critical' },
+            }),
+            owner: 'securitySolution',
+            isGlobal: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    // The default value is applied via innerForm.reset(), which triggers the watch
+    // subscription that syncs to the parent form via setFieldValue.
+    await waitFor(() => {
+      expect(setFieldValue).toHaveBeenCalledWith(
+        CASE_EXTENDED_FIELDS,
+        expect.objectContaining({ incident_type_as_keyword: 'critical' })
+      );
+    });
   });
 
   it('syncs inner form changes to parent form under the CASE_EXTENDED_FIELDS key', () => {

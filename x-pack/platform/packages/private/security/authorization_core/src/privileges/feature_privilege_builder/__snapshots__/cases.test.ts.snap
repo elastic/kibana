@@ -12,6 +12,7 @@ Array [
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
   "cases:observability/findConfigurations",
+  "cases:observability/getFieldDefinitions",
   "cases:observability/updateCase",
   "cases:observability/updateComment",
   "cases:observability/deleteCase",
@@ -75,6 +76,7 @@ Array [
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
   "cases:observability/findConfigurations",
+  "cases:observability/getFieldDefinitions",
 ]
 `;
 

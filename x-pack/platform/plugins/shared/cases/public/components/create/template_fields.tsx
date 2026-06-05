@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
-import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   UseField,
@@ -19,6 +19,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useTemplateFormSync } from './use_template_form_sync';
 import * as i18n from './translations';
 import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
+import { getYamlDefaultAsString } from '../templates_v2/utils';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
@@ -42,7 +43,6 @@ export const CreateCaseTemplateFields: React.FC = () => {
   const {
     data: globalFieldDefsData,
     isLoading: isLoadingGlobalDefs,
-    isError: isGlobalDefsError,
   } = useGetFieldDefinitions({
     owner: ownerStr,
     isGlobal: true,
@@ -63,6 +63,43 @@ export const CreateCaseTemplateFields: React.FC = () => {
     defaultValues: { [CASE_EXTENDED_FIELDS]: {} },
   });
 
+  // Mirror the inner RHF `extendedFields` slice into the parent form_lib field
+  // on every change so the parent's submission picks up the latest values.
+  // IMPORTANT: this effect must be registered before any effect that calls
+  // innerForm.reset(), so that the watch callback is in place when those resets fire.
+  useEffect(() => {
+    const subscription = innerForm.watch((values) => {
+      const slice = values?.[CASE_EXTENDED_FIELDS] ?? {};
+      parentForm.setFieldValue(CASE_EXTENDED_FIELDS, slice);
+    });
+    return () => subscription.unsubscribe();
+  }, [innerForm, parentForm]);
+
+  // Apply global field defaults exactly once after definitions load. useTemplateFormSync
+  // preserves these values when templates are selected/changed.
+  const globalDefaultsAppliedRef = useRef(false);
+  useEffect(() => {
+    if (globalDefaultsAppliedRef.current || isLoadingGlobalDefs) return;
+
+    if (!globalInlineFields.length) return;
+    globalDefaultsAppliedRef.current = true;
+
+    const defaults: Record<string, string> = {};
+    for (const field of globalInlineFields) {
+      defaults[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(
+        field.metadata?.default
+      );
+    }
+
+    // Merge with any values already in the form (e.g. from template sync that ran
+    // before global defs finished loading) so neither overwrites the other.
+    const current = (innerForm.getValues()?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<
+      string,
+      unknown
+    >;
+    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...defaults, ...current } });
+  }, [isLoadingGlobalDefs, globalInlineFields, innerForm]);
+
   const { template, isLoading } = useTemplateFormSync(innerForm, globalFieldKeys);
 
   // Fields referenced by the template via $ref are owned by the template section —
@@ -76,16 +113,6 @@ export const CreateCaseTemplateFields: React.FC = () => {
     () => globalInlineFields.filter((f) => !templateRefNames.has(f.name)),
     [globalInlineFields, templateRefNames]
   );
-
-  // Mirror the inner RHF `extendedFields` slice into the parent form_lib field
-  // on every change so the parent's submission picks up the latest values.
-  useEffect(() => {
-    const subscription = innerForm.watch((values) => {
-      const slice = values?.[CASE_EXTENDED_FIELDS] ?? {};
-      parentForm.setFieldValue(CASE_EXTENDED_FIELDS, slice);
-    });
-    return () => subscription.unsubscribe();
-  }, [innerForm, parentForm]);
 
   // Register the inner form's trigger with the validation context so the submit
   // button can run RHF Controller validation (pattern, required_when, etc.) before
@@ -120,24 +147,15 @@ export const CreateCaseTemplateFields: React.FC = () => {
     return <FieldsRenderer resolvedFields={templateFields} />;
   }, [templateId, template, templateFields]);
 
-  if (isLoading || isLoadingFields || isLoadingGlobalDefs || isGlobalDefsError) {
+  if (isLoading || isLoadingFields || isLoadingGlobalDefs) {
     return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;
   }
 
-  // Render nothing if there are no visible global fields and no template fields to show.
   if (
     !visibleGlobalInlineFields.length &&
     (!templateId || template?.definition?.fields === undefined)
   ) {
-    return (
-      <>
-        <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />
-        <EuiSpacer />
-        <EuiCallOut announceOnMount title={i18n.TEMPLATE_NOT_SELECTED_TITLE} size="s">
-          <p>{i18n.TEMPLATE_NOT_SELECTED_DESCRIPTION}</p>
-        </EuiCallOut>
-      </>
-    );
+    return <UseField path={CASE_EXTENDED_FIELDS} component={HiddenField} />;
   }
 
   const hasFields = globalFieldsFragment !== null || templateFieldsFragment !== null;

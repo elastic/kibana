@@ -31,10 +31,12 @@ export class FieldDefinitionsService {
    * Returns field definitions for the given owner(s).
    *
    * `isGlobal: true`  — returns only definitions flagged as global.
-   * `isGlobal: false` — same as `undefined`: returns ALL definitions
-   *   (no isGlobal KQL filter is added). Pass `true` explicitly when
-   *   you need only global defs; omit the option (or pass `false`) for the
-   *   full set.
+   * `isGlobal: false` — same as `undefined`: returns ALL definitions.
+   *
+   * NOTE: `isGlobal` filtering is done in application code (not via KQL) because
+   * some existing documents were created with the legacy `applyToAllCases` attribute
+   * name before the rename. Relying on a KQL filter would miss those documents since
+   * the old attribute is not in the Elasticsearch mapping and therefore not indexed.
    */
   async getFieldDefinitions(
     owner: string | string[],
@@ -50,24 +52,26 @@ export class FieldDefinitionsService {
       .map((o) => `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(o)}"`)
       .join(' OR ');
 
-    // Only `true` adds a KQL filter; `false` and `undefined` both return all
-    // definitions for the owner without any isGlobal restriction.
-    const globalFilter =
-      isGlobal === true
-        ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.isGlobal: true`
-        : undefined;
-
-    const filter = globalFilter ? `(${ownerFilter}) AND ${globalFilter}` : ownerFilter;
-
-    const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
+    const result = await this.dependencies.unsecuredSavedObjectsClient.find<
+      FieldDefinition & { applyToAllCases?: boolean }
+    >({
       type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
-      filter,
+      filter: ownerFilter,
       perPage: MAX_FIELD_DEFINITIONS_PER_OWNER * owners.length,
     });
 
+    const allDefs = result.saved_objects.map((so) => so.attributes);
+
+    // Filter by isGlobal in application code to handle documents that were created
+    // with the legacy `applyToAllCases` attribute (stored in _source but not indexed).
+    const fieldDefinitions =
+      isGlobal === true
+        ? allDefs.filter((fd) => fd.isGlobal === true || fd.applyToAllCases === true)
+        : allDefs;
+
     return {
-      fieldDefinitions: result.saved_objects.map((so) => so.attributes),
-      total: result.total,
+      fieldDefinitions,
+      total: fieldDefinitions.length,
     };
   }
 

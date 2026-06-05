@@ -156,7 +156,7 @@ export const useTemplateFormSync = (
     const preserved = Object.fromEntries(
       Object.entries(current).filter(([k]) => globalFieldKeys.has(k))
     );
-    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...preserved, ...nextExtended } });
+    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...nextExtended, ...preserved } });
     appliedRef.current = key;
   }, [
     templateId,

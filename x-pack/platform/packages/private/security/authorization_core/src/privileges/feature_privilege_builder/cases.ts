@@ -30,6 +30,7 @@ const readOperations = [
   'getReporters',
   'getUserActions',
   'findConfigurations',
+  'getFieldDefinitions',
 ] as const;
 // Update operations do not currently include the ability to re-open a case
 const updateOperations = ['updateCase', 'updateComment'] as const;
