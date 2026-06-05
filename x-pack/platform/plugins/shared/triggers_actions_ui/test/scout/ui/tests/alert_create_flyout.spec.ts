@@ -72,9 +72,11 @@ const cancelRuleCreation = async (page: ScoutPage) => {
   }
 };
 
-// Uses the shared fixture which handles the index combobox correctly.
-const defineIndexThresholdAlert = (page: ScoutPage, alertName: string) =>
-  defineIndexThresholdRule(page, alertName);
+// Navigate to rules page then use the shared fixture to fill the form.
+const defineIndexThresholdAlert = async (page: ScoutPage, alertName: string) => {
+  await page.gotoApp('rules');
+  await defineIndexThresholdRule(page, alertName);
+};
 
 // Find and delete a rule by name via API
 const deleteRuleByName = async (kbnClient: KbnClient, name: string) => {
@@ -635,6 +637,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
   test('should add filter', async ({ page }) => {
     await page.gotoApp('triggersActionsAlerts');
+    await page.testSubj.locator('addFilter').waitFor({ state: 'visible', timeout: 15_000 });
 
     const filter = JSON.stringify({
       bool: { filter: [{ term: { 'kibana.alert.status': 'active' } }] },
