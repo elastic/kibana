@@ -26,23 +26,11 @@ describe('toEpochMs', () => {
     expect(toEpochMs('2024-01-01')).toBe(new Date('2024-01-01').getTime());
   });
 
-  it('returns NaN for an invalid date string', () => {
+  it('returns NaN for invalid dates', () => {
     expect(toEpochMs('not-a-date')).toBeNaN();
-  });
-
-  it('returns NaN for null', () => {
     expect(toEpochMs(null)).toBeNaN();
-  });
-
-  it('returns NaN for undefined', () => {
     expect(toEpochMs(undefined)).toBeNaN();
-  });
-
-  it('returns NaN for a boolean', () => {
     expect(toEpochMs(true)).toBeNaN();
-  });
-
-  it('returns NaN for an object', () => {
     expect(toEpochMs({})).toBeNaN();
   });
 });
