@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { escapeKuery } from '@kbn/es-query';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
