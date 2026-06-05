@@ -82,17 +82,23 @@ const ManagedExistingCollectorContent: React.FC<{ onboardingId?: string }> = ({ 
       <p>
         <FormattedMessage
           id="xpack.observability_onboarding.kubernetesV2.collectorSetup.managedExistingCollectorDescription"
-          defaultMessage="Add this managed OTLP exporter to a collector config that already gathers the Kubernetes logs, metrics, and traces you want to send to Elastic."
+          defaultMessage="Merge this configuration fragment into a collector config that already gathers the Kubernetes logs, metrics, and traces you want to send to Elastic."
         />
       </p>
       <p>
         <FormattedMessage
           id="xpack.observability_onboarding.kubernetesV2.collectorSetup.managedExistingCollectorOnboardingIdDescription"
-          defaultMessage="The {processor} processor adds {onboardingId} so Kibana can confirm data from this onboarding flow. It adds a resource attribute to telemetry sent through these pipelines."
+          defaultMessage="Keep your current receivers and add this processor and exporter to the logs, metrics, and traces pipelines you want to send to Elastic. The {processor} processor adds {onboardingId} so Kibana can confirm data from this onboarding flow."
           values={{
             processor: <EuiCode>resource/onboarding_id</EuiCode>,
             onboardingId: <EuiCode>onboarding.id</EuiCode>,
           }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.observability_onboarding.kubernetesV2.collectorSetup.managedExistingCollectorEnvironmentDescription"
+          defaultMessage="Set ELASTIC_OTLP_ENDPOINT and ELASTIC_API_KEY in your collector environment before restarting or reloading the collector."
         />
       </p>
       <p>

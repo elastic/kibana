@@ -106,7 +106,17 @@ describe('OtelCollectorSetupStep', () => {
       screen.getByRole('heading', { name: 'Add a managed OTLP exporter' })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/already gathers the Kubernetes logs, metrics, and traces/)
+      screen.getByText(
+        /Merge this configuration fragment into a collector config that already gathers the Kubernetes logs, metrics, and traces/
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Keep your current receivers and add this processor and exporter to the logs, metrics, and traces pipelines/
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Set ELASTIC_OTLP_ENDPOINT and ELASTIC_API_KEY in your collector environment/)
     ).toBeInTheDocument();
     expect(screen.getAllByText(/resource\/onboarding_id/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/onboarding\.id/).length).toBeGreaterThan(0);
@@ -158,7 +168,12 @@ describe('OtelCollectorSetupStep', () => {
         screen.getByRole('heading', { name: 'Add a managed OTLP exporter' })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/already gathers the Kubernetes logs, metrics, and traces/)
+        screen.getByText(
+          /Merge this configuration fragment into a collector config that already gathers the Kubernetes logs, metrics, and traces/
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Set ELASTIC_OTLP_ENDPOINT and ELASTIC_API_KEY in your collector environment/)
       ).toBeInTheDocument();
       expect(screen.getByText(/k8s_cluster/)).toBeInTheDocument();
       expect(screen.getByText(/kubeletstats/)).toBeInTheDocument();
