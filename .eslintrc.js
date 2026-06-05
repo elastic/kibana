@@ -3044,24 +3044,12 @@ module.exports = {
 
 /**
  * Navigation title sentence-case rule.
- * Applies to all files that define navigation trees, deep links, or navigation i18n strings.
- * Warns when an i18n.translate() defaultMessage uses Title Case instead of sentence case.
+ * The rule activates only in files that import from @kbn/core-chrome-browser, so no
+ * filename-specific globs are needed — the rule is self-scoping via import detection.
  */
 module.exports.overrides.push({
-  files: [
-    // Navigation tree definitions (all solutions / plugins)
-    '**/navigation_tree.{ts,tsx}',
-    '**/navigation_tree/**/*.{ts,tsx}',
-    // Centralised navigation i18n strings (e.g. security nav package)
-    '**/navigation/src/i18n_strings.ts',
-    // Deep link registrations
-    '**/deep_links.{ts,tsx}',
-    '**/deepLinks.{ts,tsx}',
-    'src/platform/packages/shared/deeplinks/**/*.{ts,tsx}',
-    // Navigation component mocks (use raw label: strings, not i18n.translate)
-    'src/platform/kbn-ui/side-navigation/src/mocks/**/*.{ts,tsx}',
-  ],
-  excludedFiles: ['**/*.{test,spec}.{ts,tsx}'],
+  files: ['**/*.{ts,tsx}'],
+  excludedFiles: ['**/*.{test,spec}.{ts,tsx}', '**/*.stories.{ts,tsx}'],
   rules: {
     '@kbn/i18n/nav_link_should_use_sentence_case': 'warn',
   },

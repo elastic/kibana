@@ -136,6 +136,10 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
   },
 
   create(context) {
+    // Only activate in files that import navigation tree types from the core chrome package.
+    // This avoids relying on fragile file-path globs in .eslintrc.js.
+    let isNavFile = false;
+
     function checkString(message: string, reportNode: Rule.Node) {
       if (!message || message.includes('{')) return; // skip ICU placeholders
 
@@ -169,8 +173,17 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
     }
 
     return {
+      ImportDeclaration(node) {
+        const importNode = node as TSESTree.ImportDeclaration;
+        if (importNode.source.value === '@kbn/core-chrome-browser') {
+          isNavFile = true;
+        }
+      },
+
       // i18n.translate('key', { defaultMessage: '...' })
       CallExpression(node) {
+        if (!isNavFile) return;
+
         const { callee } = node as TSESTree.CallExpression;
 
         if (
@@ -206,6 +219,8 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
 
       // Raw label: 'string' properties (used in navigation mocks and direct nav data)
       Property(node) {
+        if (!isNavFile) return;
+
         const prop = node as TSESTree.Property;
 
         if (
