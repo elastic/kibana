@@ -17,10 +17,7 @@ import type {
   ESQLAstAllCommands,
 } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
-import {
-  getCommandAutocompleteDefinitions,
-  getNewLineSuggestion,
-} from '../../commands/registry/complete_items';
+import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { SuggestionOrderingEngine } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
@@ -60,11 +57,6 @@ function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
 }
 
 const orderingEngine = new SuggestionOrderingEngine();
-
-const withNewLineFirst = (suggestions: ISuggestionItem[]): ISuggestionItem[] => [
-  getNewLineSuggestion(),
-  ...suggestions,
-];
 
 export async function suggest(
   fullText: string,
@@ -159,7 +151,7 @@ export async function suggest(
 
     if (!astContext.astForContext.commands.length) {
       if (isStartingSubquery) {
-        return withNewLineFirst(orderingEngine.sort(suggestions, { command: '' }));
+        return orderingEngine.sort(suggestions, { command: '' });
       }
 
       // Root level empty state: show source commands + recommended queries
@@ -204,20 +196,16 @@ export async function suggest(
         offset,
       });
 
-      return withNewLineFirst(
-        orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
-          command: '',
-        })
-      );
+      return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
+        command: '',
+      });
     }
 
-    return withNewLineFirst(
-      orderingEngine.sort(
-        suggestions.filter(
-          (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
-        ),
-        { command: '' }
-      )
+    return orderingEngine.sort(
+      suggestions.filter(
+        (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
+      ),
+      { command: '' }
     );
   }
 
@@ -238,7 +226,7 @@ export async function suggest(
       false
     );
 
-    return withNewLineFirst(orderingEngine.sort(controlSuggestions, { command: '' }));
+    return orderingEngine.sort(controlSuggestions, { command: '' });
   }
 
   if (astContext.type === 'expression') {
@@ -372,12 +360,10 @@ async function getSuggestionsWithinCommandExpression(
   );
 
   // Apply context-aware ordering
-  const orderedSuggestions = withNewLineFirst(
-    orderingEngine.sort(suggestions, {
-      command: astContext.command.name.toUpperCase(),
-      location: astContext.option?.name.toUpperCase(),
-    })
-  );
+  const orderedSuggestions = orderingEngine.sort(suggestions, {
+    command: astContext.command.name.toUpperCase(),
+    location: astContext.option?.name.toUpperCase(),
+  });
 
   return orderedSuggestions;
 }

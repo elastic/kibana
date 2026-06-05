@@ -7,32 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_NEW_LINE_COMMAND } from '../../../commands/registry/constants';
 import { setup } from './helpers';
 
 describe('Suggestion Ordering', () => {
-  describe('"New line" affordance', () => {
-    it.each([
-      ['root / source commands', 'FROM /'],
-      ['after a pipe', 'FROM a | /'],
-      ['within an expression', 'FROM a | EVAL x = /'],
-    ])('is the first suggestion (%s)', async (_title, query) => {
-      // `suggestRaw` keeps the "New line" item that the shared `suggest` helper strips out.
-      const { suggestRaw } = await setup();
-      const suggestions = await suggestRaw(query);
-
-      expect(suggestions[0].command?.id).toBe(ESQL_NEW_LINE_COMMAND);
-      expect(suggestions[0].text).toBe('');
-    });
-
-    it('is absent when there are no suggestions (inside a comment)', async () => {
-      const { suggestRaw } = await setup('^');
-      const suggestions = await suggestRaw('FROM index | EVAL // hey there ^');
-
-      expect(suggestions).toHaveLength(0);
-    });
-  });
-
   describe('COMPLETION command', () => {
     it('should order prompt suggestion first', async () => {
       const { suggest } = await setup();
