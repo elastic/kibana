@@ -86,6 +86,7 @@ steps:
       echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
 
 safe-outputs:
+  staged: true
   noop:
     report-as-issue: false
   activation-comments: false
