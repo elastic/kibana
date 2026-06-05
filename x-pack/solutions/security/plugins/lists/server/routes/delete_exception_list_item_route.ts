@@ -13,8 +13,6 @@ import {
   DeleteExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
-import type { RefreshFalseOrWaitFor } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { ListsPluginRouter } from '../types';
 
 import {
@@ -60,7 +58,7 @@ export const deleteExceptionListItemRoute = (router: ListsPluginRouter): void =>
             id,
             itemId,
             namespaceType,
-            refresh: refresh as RefreshFalseOrWaitFor | undefined,
+            refresh,
           });
 
           if (deleted == null) {

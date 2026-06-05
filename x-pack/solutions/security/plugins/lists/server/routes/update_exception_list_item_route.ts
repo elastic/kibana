@@ -14,7 +14,7 @@ import {
   UpdateExceptionListItemRequestQuery,
   UpdateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
-import type { OsTypeArray, RefreshFalseOrWaitFor } from '@kbn/securitysolution-io-ts-list-types';
+import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
@@ -95,7 +95,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             name,
             namespaceType,
             osTypes: osTypesArray,
-            refresh: refresh as RefreshFalseOrWaitFor | undefined,
+            refresh,
             tags: tagsArray,
             type,
           });
