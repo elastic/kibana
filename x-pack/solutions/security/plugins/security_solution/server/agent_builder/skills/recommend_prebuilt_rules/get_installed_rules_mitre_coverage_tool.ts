@@ -11,8 +11,8 @@ import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { RULE_PARAMS_FIELDS } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
+import type { RuleParams } from '../../../lib/detection_engine/rule_schema';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID =
@@ -20,38 +20,158 @@ export const GET_INSTALLED_RULES_MITRE_COVERAGE_INLINE_TOOL_ID =
 
 export const getInstalledRulesMitreCoverageSchema = z.object({}).strict();
 
-const TACTIC_AGG_SIZE = 20;
-const TECHNIQUE_AGG_SIZE = 500;
-const SUBTECHNIQUE_AGG_SIZE = 50;
+const MITRE_ATTACK_FRAMEWORK = 'MITRE ATT&CK';
 
-interface NameBucket {
-  buckets: Array<{ key: string }>;
+// `rulesClient.find` is capped by `index.max_result_window` (10k by default), so we read up to
+// that many installed rules. Same limitation the coverage-overview endpoint documents — see
+// https://github.com/elastic/kibana/issues/160698. `total_installed_rules` still reflects the
+// true total; only the per-id tallies are computed over the fetched page.
+const MAX_INSTALLED_RULES = 10000;
+
+interface MitreCoverageEntry {
+  id: string;
+  name: string;
+  count: number;
 }
 
-interface SubtechniqueBucket {
-  key: string;
-  doc_count: number;
-  name: NameBucket;
+interface MitreTechniqueCoverage extends MitreCoverageEntry {
+  subtechniques?: MitreCoverageEntry[];
 }
 
-interface TechniqueBucket {
-  key: string;
-  doc_count: number;
-  name: NameBucket;
-  subtechniques: { buckets: SubtechniqueBucket[] };
+export interface MitreCoverageData {
+  total_installed_rules: number;
+  total_with_mitre_mapping: number;
+  tactics: MitreCoverageEntry[];
+  techniques: MitreTechniqueCoverage[];
 }
 
-interface TacticBucket {
-  key: string;
-  doc_count: number;
-  name: NameBucket;
-}
+type RuleWithThreat = Pick<RuleParams, 'threat'>;
 
-interface MitreCoverageAggResult {
-  by_tactic?: { buckets?: TacticBucket[] };
-  by_technique?: { buckets?: TechniqueBucket[] };
-  with_mitre_mapping?: { doc_count: number };
-}
+const byCountDescThenId = (a: MitreCoverageEntry, b: MitreCoverageEntry): number =>
+  b.count - a.count || a.id.localeCompare(b.id);
+
+/**
+ * Tallies MITRE ATT&CK coverage from the structured `params.threat` of installed rules.
+ *
+ * We read the structured threat object from each rule (which preserves the association between
+ * an id, its name, and its parent technique) rather than aggregating the underlying
+ * `flattened` `params` field — `flattened` collapses the threat object into an uncorrelated bag
+ * of keywords, so an aggregation cannot pair an id with its own name or nest a subtechnique
+ * under the correct technique.
+ *
+ * Each rule contributes at most 1 to any tactic/technique/subtechnique count (ids are
+ * de-duplicated within a rule). Names come straight from the rule data.
+ */
+export const buildMitreCoverageFromRules = (
+  rules: Array<{ params: RuleWithThreat }>,
+  totalInstalledRules: number
+): MitreCoverageData => {
+  const tacticCounts = new Map<string, number>();
+  const tacticNames = new Map<string, string>();
+  const techniqueCounts = new Map<string, number>();
+  const techniqueNames = new Map<string, string>();
+  const subtechniqueCounts = new Map<string, number>();
+  const subtechniqueNames = new Map<string, string>();
+  const subtechniqueParents = new Map<string, string>(); // subtechnique id -> parent technique id
+  let totalWithMitreMapping = 0;
+
+  for (const rule of rules) {
+    const threat = rule.params.threat ?? [];
+
+    // De-duplicate within a single rule so each rule counts once per id.
+    const ruleTactics = new Set<string>();
+    const ruleTechniques = new Set<string>();
+    const ruleSubtechniques = new Set<string>();
+
+    const mitreThreats = threat.filter(
+      (threatItem) => threatItem.framework === MITRE_ATTACK_FRAMEWORK
+    );
+    for (const threatItem of mitreThreats) {
+      const tacticId = threatItem.tactic?.id;
+      if (tacticId) {
+        ruleTactics.add(tacticId);
+        if (threatItem.tactic?.name) {
+          tacticNames.set(tacticId, threatItem.tactic.name);
+        }
+      }
+
+      for (const technique of threatItem.technique ?? []) {
+        if (technique.id) {
+          ruleTechniques.add(technique.id);
+          if (technique.name) {
+            techniqueNames.set(technique.id, technique.name);
+          }
+        }
+
+        for (const subtechnique of technique.subtechnique ?? []) {
+          if (subtechnique.id) {
+            ruleSubtechniques.add(subtechnique.id);
+            if (subtechnique.name) {
+              subtechniqueNames.set(subtechnique.id, subtechnique.name);
+            }
+            if (technique.id) {
+              subtechniqueParents.set(subtechnique.id, technique.id);
+            }
+          }
+        }
+      }
+    }
+
+    if (ruleTactics.size > 0) {
+      totalWithMitreMapping += 1;
+    }
+    for (const id of ruleTactics) {
+      tacticCounts.set(id, (tacticCounts.get(id) ?? 0) + 1);
+    }
+    for (const id of ruleTechniques) {
+      techniqueCounts.set(id, (techniqueCounts.get(id) ?? 0) + 1);
+    }
+    for (const id of ruleSubtechniques) {
+      subtechniqueCounts.set(id, (subtechniqueCounts.get(id) ?? 0) + 1);
+    }
+  }
+
+  // Group subtechniques under their parent technique. Use the parent recorded during iteration,
+  // falling back to the id prefix (e.g. T1059.001 -> T1059) for defensiveness.
+  const subtechniquesByParent = new Map<string, MitreCoverageEntry[]>();
+  for (const [id, count] of subtechniqueCounts) {
+    const parentId = subtechniqueParents.get(id) ?? id.split('.')[0];
+    const entries = subtechniquesByParent.get(parentId) ?? [];
+    entries.push({ id, name: subtechniqueNames.get(id) ?? id, count });
+    subtechniquesByParent.set(parentId, entries);
+  }
+
+  const tactics = Array.from(tacticCounts.entries())
+    .map(([id, count]) => ({ id, name: tacticNames.get(id) ?? id, count }))
+    .sort(byCountDescThenId);
+
+  // Every technique that has coverage, plus any parent referenced only by a subtechnique (a
+  // malformed-data guard — normally the parent technique id is always recorded alongside it).
+  const techniqueIds = new Set<string>([
+    ...techniqueCounts.keys(),
+    ...subtechniquesByParent.keys(),
+  ]);
+  const techniques = Array.from(techniqueIds)
+    .map((id) => {
+      const subtechniques = (subtechniquesByParent.get(id) ?? []).sort(byCountDescThenId);
+      const count =
+        techniqueCounts.get(id) ?? Math.max(0, ...subtechniques.map((entry) => entry.count));
+      return {
+        id,
+        name: techniqueNames.get(id) ?? id,
+        count,
+        ...(subtechniques.length > 0 ? { subtechniques } : {}),
+      };
+    })
+    .sort(byCountDescThenId);
+
+  return {
+    total_installed_rules: totalInstalledRules,
+    total_with_mitre_mapping: totalWithMitreMapping,
+    tactics,
+    techniques,
+  };
+};
 
 interface GetInstalledRulesMitreCoverageToolDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
@@ -79,77 +199,23 @@ export const createGetInstalledRulesMitreCoverageTool = ({
       const [, startPlugins] = await getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
-      const findResult = await findRules({
+      // Read the structured `params.threat` per rule and tally in memory. We deliberately do
+      // NOT aggregate the underlying `flattened` `params` field — see buildMitreCoverageFromRules.
+      const { data, total } = await findRules({
         rulesClient,
         filter: undefined,
-        perPage: 0,
+        fields: ['params.threat'],
         page: 1,
+        perPage: MAX_INSTALLED_RULES,
         sortField: undefined,
         sortOrder: undefined,
-        fields: undefined,
-        aggregations: {
-          by_tactic: {
-            terms: { field: RULE_PARAMS_FIELDS.TACTIC_ID, size: TACTIC_AGG_SIZE },
-            aggs: {
-              name: { terms: { field: RULE_PARAMS_FIELDS.TACTIC_NAME, size: 1 } },
-            },
-          },
-          by_technique: {
-            terms: { field: RULE_PARAMS_FIELDS.TECHNIQUE_ID, size: TECHNIQUE_AGG_SIZE },
-            aggs: {
-              name: { terms: { field: RULE_PARAMS_FIELDS.TECHNIQUE_NAME, size: 1 } },
-              subtechniques: {
-                terms: { field: RULE_PARAMS_FIELDS.SUBTECHNIQUE_ID, size: SUBTECHNIQUE_AGG_SIZE },
-                aggs: {
-                  name: { terms: { field: RULE_PARAMS_FIELDS.SUBTECHNIQUE_NAME, size: 1 } },
-                },
-              },
-            },
-          },
-          with_mitre_mapping: {
-            filter: { exists: { field: RULE_PARAMS_FIELDS.TACTIC_ID } },
-          },
-        },
-      });
-
-      const aggs = findResult.aggregations as MitreCoverageAggResult | undefined;
-
-      const tacticBuckets = aggs?.by_tactic?.buckets ?? [];
-      const techniqueBuckets = aggs?.by_technique?.buckets ?? [];
-      const withMitreCount = aggs?.with_mitre_mapping?.doc_count ?? 0;
-
-      const tactics = tacticBuckets.map((b) => ({
-        id: b.key,
-        name: b.name.buckets[0]?.key ?? b.key,
-        count: b.doc_count,
-      }));
-
-      const techniques = techniqueBuckets.map((b) => {
-        const subtechniqueBuckets = b.subtechniques?.buckets ?? [];
-        const subtechniques = subtechniqueBuckets.map((s) => ({
-          id: s.key,
-          name: s.name.buckets[0]?.key ?? s.key,
-          count: s.doc_count,
-        }));
-
-        return {
-          id: b.key,
-          name: b.name.buckets[0]?.key ?? b.key,
-          count: b.doc_count,
-          ...(subtechniques.length > 0 ? { subtechniques } : {}),
-        };
       });
 
       return {
         results: [
           {
             type: ToolResultType.other,
-            data: {
-              total_installed_rules: findResult.total,
-              total_with_mitre_mapping: withMitreCount,
-              tactics,
-              techniques,
-            },
+            data: buildMitreCoverageFromRules(data, total),
           },
         ],
       };

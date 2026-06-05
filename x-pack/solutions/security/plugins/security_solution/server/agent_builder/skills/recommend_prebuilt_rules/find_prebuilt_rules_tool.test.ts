@@ -162,27 +162,45 @@ describe('buildPrebuiltRulesToolFilter', () => {
     );
   });
 
-  it('routes mitreTechnique to the technique id field', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: 'T1059' })).toBe(
-      'security-rule.threat.technique.id: T1059'
+  it('routes a single mitreTechnique to the technique id field', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059'] })).toBe(
+      'security-rule.threat.technique.id: (T1059)'
     );
   });
 
-  it('routes a sub-technique to the subtechnique id field', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: 'T1059.001' })).toBe(
-      'security-rule.threat.technique.subtechnique.id: T1059.001'
+  it('routes a single sub-technique to the subtechnique id field', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059.001'] })).toBe(
+      'security-rule.threat.technique.subtechnique.id: (T1059.001)'
     );
   });
 
-  it('routes a tactic ID to threat.tactic.id', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: 'TA0001' })).toBe(
-      'security-rule.threat.tactic.id: TA0001'
+  it('ORs techniques and sub-techniques across their respective fields', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTechnique: ['T1059', 'T1071', 'T1059.001'] })).toBe(
+      '(security-rule.threat.technique.id: (T1059 OR T1071) OR security-rule.threat.technique.subtechnique.id: (T1059.001))'
     );
   });
 
-  it('routes a tactic display name to threat.tactic.name', () => {
-    expect(buildPrebuiltRulesToolFilter({ mitreTactic: 'Initial Access' })).toBe(
-      'security-rule.threat.tactic.name: "Initial Access"'
+  it('routes a single tactic ID to threat.tactic.id', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001'] })).toBe(
+      'security-rule.threat.tactic.id: (TA0001)'
+    );
+  });
+
+  it('routes a single tactic display name to threat.tactic.name', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['Initial Access'] })).toBe(
+      'security-rule.threat.tactic.name: ("Initial Access")'
+    );
+  });
+
+  it('ORs multiple tactic IDs in one clause', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001', 'TA0006'] })).toBe(
+      'security-rule.threat.tactic.id: (TA0001 OR TA0006)'
+    );
+  });
+
+  it('ORs tactic IDs and names across their respective fields', () => {
+    expect(buildPrebuiltRulesToolFilter({ mitreTactic: ['TA0001', 'Credential Access'] })).toBe(
+      '(security-rule.threat.tactic.id: (TA0001) OR security-rule.threat.tactic.name: ("Credential Access"))'
     );
   });
 
@@ -236,7 +254,12 @@ describe('findPrebuiltRulesSchema', () => {
   it('accepts structured filter parameters', () => {
     expect(findPrebuiltRulesSchema.safeParse({ searchTerm: 'mimikatz' }).success).toBe(true);
     expect(findPrebuiltRulesSchema.safeParse({ ruleType: ['esql'] }).success).toBe(true);
-    expect(findPrebuiltRulesSchema.safeParse({ mitreTactic: 'TA0001' }).success).toBe(true);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ mitreTactic: ['TA0001', 'Execution'] }).success
+    ).toBe(true);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ mitreTechnique: ['T1059', 'T1059.001'] }).success
+    ).toBe(true);
     expect(findPrebuiltRulesSchema.safeParse({ fields: ['description', 'mitre'] }).success).toBe(
       true
     );
@@ -248,8 +271,12 @@ describe('findPrebuiltRulesSchema', () => {
   });
 
   it('rejects malformed MITRE technique IDs', () => {
-    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: 'TA0001' }).success).toBe(false);
-    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: 'powershell' }).success).toBe(false);
+    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: ['TA0001'] }).success).toBe(false);
+    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: ['powershell'] }).success).toBe(
+      false
+    );
+    // A non-array value is no longer accepted.
+    expect(findPrebuiltRulesSchema.safeParse({ mitreTechnique: 'T1059' }).success).toBe(false);
   });
 
   it('caps ruleIds at 50', () => {
