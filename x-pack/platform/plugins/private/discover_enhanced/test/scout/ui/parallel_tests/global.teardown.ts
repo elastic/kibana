@@ -11,7 +11,7 @@ globalTeardownHook('Teardown Discover Enhanced tests data', async ({ apiServices
   log.debug('[teardown:discover-enhanced] resetting isEsqlDefault feature flag');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'discover.isEsqlDefault': false,
+      'discover.isEsqlDefault': null,
     },
   });
 });
