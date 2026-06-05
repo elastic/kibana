@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/es-query'
   - '@kbn/es-types'
+  - '@kbn/inspector-plugin'
 tags:
   - shared-common
   - package
