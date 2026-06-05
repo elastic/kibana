@@ -14,8 +14,10 @@ import type {
   SmlContext,
   SmlDocument,
   SmlChunk,
+  SmlDeleteScope,
   SmlIngestionMethod,
   SmlIndexerParams,
+  SmlIndexerDeleteAttachmentParams,
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
@@ -29,21 +31,35 @@ export interface SmlIndexer {
   /**
    * Index, update, or delete SML data for a specific item.
    *
-   * In origin mode (no `content`), the indexer resolves the type's `getSmlData` hook
-   * and writes the produced chunks tagged `ingestion_method: 'crawled'`. If any existing
-   * chunks for this `origin_id` carry `ingestion_method: 'manual'`, the call is a no-op
-   * unless `force: true` is passed.
+   * In origin mode (no `content`), the indexer resolves the type's `getSmlData`
+   * hook and writes the produced chunks tagged `ingestion_method: 'crawled'`.
+   * If any existing chunks for this `origin_id` carry
+   * `ingestion_method: 'manual'`, the call is a no-op unless `force: true` is
+   * passed.
    *
-   * In content mode (`content` provided), `getSmlData` is skipped and the provided
-   * chunks are written directly, tagged `ingestion_method: 'manual'`. The write always
-   * overwrites any existing chunks for the `origin_id`.
+   * In content mode (`content` provided), `getSmlData` is skipped and the
+   * provided chunks are written directly, tagged `ingestion_method: 'manual'`.
+   * The write always overwrites any existing chunks for the `origin_id`.
    *
-   * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are removed
-   * — manual entries for the same `origin_id` are preserved. This keeps curated content
-   * around even when the upstream object goes away (e.g. transient blip, or a curator
-   * pinning standalone context to a deleted dashboard).
+   * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are
+   * removed — manual entries for the same `origin_id` are preserved. This keeps
+   * curated content around even when the upstream object goes away (e.g.
+   * transient blip, or a curator pinning standalone context to a deleted
+   * dashboard). Callers that need to wipe `'manual'` or `'all'` chunks should
+   * use {@link SmlIndexer.deleteAttachment} instead.
    */
   indexAttachment: (params: SmlIndexerParams) => Promise<void>;
+
+  /**
+   * Delete chunks for an origin, with explicit control over which ingestion
+   * method(s) are removed.
+   *
+   * The default scope (`'crawled'`) matches `indexAttachment({ action: 'delete' })`
+   * for back-compat with the crawler and event-driven CRUD callers; pass
+   * `'manual'` to wipe curated entries only, or `'all'` to fully retire the
+   * origin (used by workflow steps that "own" their origin).
+   */
+  deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
 
   /**
    * Delete chunks for a given `origin_id` from the SML index.
@@ -162,18 +178,44 @@ class SmlIndexerImpl implements SmlIndexer {
 
     await this.deleteChunks({ originId, esClient });
 
-    const bulkOps = smlData.chunks.map((chunk) => {
-      const chunkId = `${attachmentType}:${originId}:${uuidv4()}`;
-      return this.buildIndexOp({
-        chunkId,
+    const bulkOps = smlData.chunks.map((chunk) =>
+      // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
+      // identifier is bounded at 36 bytes regardless of `attachmentType` /
+      // `originId` length. ES `_id` is capped at 512 bytes and `originId`
+      // can be caller-supplied (e.g. via the workflow step's `with: originId`),
+      // so an embed-the-inputs scheme was unbounded by construction. Lookups
+      // happen via the `origin_id` and `type` document fields, not by parsing
+      // `_id`, so dropping the prefix is purely an internal change.
+      this.buildIndexOp({
+        chunkId: uuidv4(),
         chunk,
         originId,
         spaces,
         ingestionMethod: 'crawled',
-      });
-    });
+      })
+    );
 
     await this.executeBulk({ bulkOps, esClient, originId, chunkCount: smlData.chunks.length });
+  }
+
+  async deleteAttachment(params: SmlIndexerDeleteAttachmentParams): Promise<void> {
+    const { originId, attachmentType, esClient, spaces } = params;
+    const scope: SmlDeleteScope = params.ingestionMethod ?? 'crawled';
+
+    this.logger.info(
+      `SML indexer: deleteAttachment called — originId='${originId}', type='${attachmentType}', scope='${scope}', spaces=[${spaces.join(
+        ', '
+      )}]`
+    );
+
+    // `'all'` translates to "no ingestion_method filter" on the underlying
+    // helper — that's the way `SmlIndexer.deleteChunks` distinguishes "wipe
+    // everything for this origin" from "wipe a single method".
+    await this.deleteChunks({
+      originId,
+      esClient,
+      ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
+    });
   }
 
   /**
@@ -207,18 +249,21 @@ class SmlIndexerImpl implements SmlIndexer {
 
     await this.deleteChunks({ originId, esClient });
 
-    const bulkOps = chunks.map((chunk, index) => {
-      // Deterministic id per (type, originId, index) so repeated content-mode calls
-      // overwrite the same chunks rather than appending duplicates.
-      const chunkId = `${attachmentType}:${originId}:manual:${index}`;
-      return this.buildIndexOp({
-        chunkId,
+    const bulkOps = chunks.map((chunk) =>
+      // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
+      // scheme was unbounded (the inputs can be caller-controlled) and the
+      // determinism it advertised was redundant — `deleteChunks` above already
+      // wipes every chunk for the `origin_id`, so re-runs cannot accumulate
+      // stale rows. The `manual` literal was decoration; the document carries
+      // `ingestion_method: 'manual'` for that semantic.
+      this.buildIndexOp({
+        chunkId: uuidv4(),
         chunk,
         originId,
         spaces,
         ingestionMethod: 'manual',
-      });
-    });
+      })
+    );
 
     await this.executeBulk({ bulkOps, esClient, originId, chunkCount: chunks.length });
   }
