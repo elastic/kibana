@@ -54,9 +54,9 @@ describe('buildSnoozeSummary', () => {
 
   describe('condition-based snooze (no time expiry)', () => {
     it('returns "will unsnooze if {condition}" for a single severity_change condition', () => {
-      expect(
-        buildSnoozeSummary({ conditions: [{ type: 'severity_change' }] })
-      ).toBe(getUnsnoozeIfConditionsMessage('severity is changed'));
+      expect(buildSnoozeSummary({ conditions: [{ type: 'severity_change' }] })).toBe(
+        getUnsnoozeIfConditionsMessage('severity is changed')
+      );
     });
 
     it('returns "will unsnooze if {condition}" for a single field_change condition', () => {
@@ -77,23 +77,16 @@ describe('buildSnoozeSummary', () => {
           conditions: [{ type: 'severity_change' }, { type: 'field_change', field: 'host.name' }],
           conditionOperator: 'any',
         })
-      ).toBe(
-        getUnsnoozeIfConditionsMessage('severity is changed or field "host.name" is changed')
-      );
+      ).toBe(getUnsnoozeIfConditionsMessage('severity is changed or field "host.name" is changed'));
     });
 
     it('joins multiple conditions with "and" when conditionOperator is "all"', () => {
       expect(
         buildSnoozeSummary({
-          conditions: [
-            { type: 'severity_equals', value: 'critical' },
-            { type: 'severity_change' },
-          ],
+          conditions: [{ type: 'severity_equals', value: 'critical' }, { type: 'severity_change' }],
           conditionOperator: 'all',
         })
-      ).toBe(
-        getUnsnoozeIfConditionsMessage('severity equals critical and severity is changed')
-      );
+      ).toBe(getUnsnoozeIfConditionsMessage('severity equals critical and severity is changed'));
     });
 
     it('defaults to "or" connector when conditionOperator is not set', () => {
@@ -123,9 +116,7 @@ describe('buildSnoozeSummary', () => {
           conditions: [{ type: 'severity_change' }],
           conditionOperator: 'any',
         })
-      ).toBe(
-        getUnsnoozeIfConditionsOrOnDateMessage('severity is changed', formattedDate())
-      );
+      ).toBe(getUnsnoozeIfConditionsOrOnDateMessage('severity is changed', formattedDate()));
     });
 
     it('returns "will unsnooze if {conditions}, OR on {date}" with all operator', () => {

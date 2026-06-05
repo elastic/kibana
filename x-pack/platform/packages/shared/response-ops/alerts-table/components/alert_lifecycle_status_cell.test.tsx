@@ -227,9 +227,7 @@ describe('AlertLifecycleStatusCell - snooze badge tooltip', () => {
 
     render(<AlertLifecycleStatusCell {...props} />);
     await userEvent.hover(screen.getByTestId('alertSnoozedBadge'));
-    expect(
-      await screen.findByText(/Alert will unsnooze on Jun 10, 2026/)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Alert will unsnooze on Jun 10, 2026/)).toBeInTheDocument();
   });
 
   it('shows conditions OR date when snoozed with a date and conditions using "any" operator', async () => {
