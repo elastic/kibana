@@ -34,9 +34,9 @@ export class FieldDefinitionsService {
    * `isGlobal: false` — same as `undefined`: returns ALL definitions.
    *
    * NOTE: `isGlobal` filtering is done in application code (not via KQL) because
-   * some existing documents were created with the legacy `applyToAllCases` attribute
-   * name before the rename. Relying on a KQL filter would miss those documents since
-   * the old attribute is not in the Elasticsearch mapping and therefore not indexed.
+   * the `isGlobal` boolean is not reliably indexed for all documents (e.g. documents
+   * created before the mapping was applied). In-app filtering on `_source` is always
+   * accurate.
    */
   async getFieldDefinitions(
     owner: string | string[],
@@ -52,9 +52,7 @@ export class FieldDefinitionsService {
       .map((o) => `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(o)}"`)
       .join(' OR ');
 
-    const result = await this.dependencies.unsecuredSavedObjectsClient.find<
-      FieldDefinition & { applyToAllCases?: boolean }
-    >({
+    const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
       type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
       filter: ownerFilter,
       perPage: MAX_FIELD_DEFINITIONS_PER_OWNER * owners.length,
@@ -62,12 +60,8 @@ export class FieldDefinitionsService {
 
     const allDefs = result.saved_objects.map((so) => so.attributes);
 
-    // Filter by isGlobal in application code to handle documents that were created
-    // with the legacy `applyToAllCases` attribute (stored in _source but not indexed).
     const fieldDefinitions =
-      isGlobal === true
-        ? allDefs.filter((fd) => fd.isGlobal === true || fd.applyToAllCases === true)
-        : allDefs;
+      isGlobal === true ? allDefs.filter((fd) => fd.isGlobal === true) : allDefs;
 
     return {
       fieldDefinitions,

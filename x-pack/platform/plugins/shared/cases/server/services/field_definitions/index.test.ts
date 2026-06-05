@@ -124,26 +124,6 @@ describe('FieldDefinitionsService', () => {
       expect(result.fieldDefinitions[0].name).toBe('my_field');
     });
 
-    it('also returns docs with legacy applyToAllCases attribute when isGlobal is true', async () => {
-      const legacyField = makeFieldDefinitionSO({
-        name: 'legacy',
-        // applyToAllCases is the old attribute name (not in the FieldDefinition type),
-        // but may appear in existing saved object _source data
-        ...({ applyToAllCases: true } as object),
-      });
-      soClient.find.mockResolvedValue({
-        saved_objects: [legacyField],
-        total: 1,
-        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
-        page: 1,
-      } as SavedObjectsFindResponse<FieldDefinition>);
-
-      const result = await service.getFieldDefinitions('securitySolution', { isGlobal: true });
-
-      expect(result.fieldDefinitions).toHaveLength(1);
-      expect(result.fieldDefinitions[0].name).toBe('legacy');
-    });
-
     it('returns all definitions when isGlobal is false (no filtering)', async () => {
       const fd1 = makeFieldDefinitionSO({ isGlobal: true });
       const fd2 = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
