@@ -32,76 +32,47 @@ Almost everything you touch is in **one file**:
 Get the collector running and Kibana pointed at it **before** you start Kibana, so it
 exports from the moment it boots.
 
-### 1. Start a local OTLP collector
+### 1. Start the EDOT Collector and Elasticsearch
 
-Run an OpenTelemetry Collector on your laptop to receive Kibana's metrics and traces. The
-`debug` exporter prints every metric and span to the collector's own logs. The config below
-adds a `filter/workshop` processor so only workshop signals reach the exporter — no noise
-from Kibana's own internal telemetry.
+<details>
+<summary><strong>1. Using `docker compose`</strong></summary>
 
-**a. Save this as `otel-collector-config.yaml`** (anywhere — e.g. your home dir or a scratch
-folder; you'll mount it into the container next):
+The file [`compose.yaml`](./compose.yaml) allows running the EDOT Collector and the ES server in one single command:
 
-```yaml
-receivers:
-  otlp/fromsdk:
-    protocols:
-      grpc: { endpoint: 0.0.0.0:4317 }
-      http: { endpoint: 0.0.0.0:4318 }
-
-connectors:
-  # Necessary for the APM UI to understand the OTel Traces
-  elasticapm:
-
-processors:
-  # Necessary for the APM UI to understand the OTel Traces
-  elasticapm:
-  # Filter the metrics and spans relevant to this workshop
-  filter/workshop:
-    metrics:
-      metric:
-        - not(IsMatch(name, "kibana\\.otel_workshop\\..*"))
-    traces:
-      span:
-        - 'not(IsMatch(name, "open_coffee_shop") or IsMatch(name, "process_order") or IsMatch(name, "grind_beans") or IsMatch(name, "brew") or IsMatch(name, "garnish") or IsMatch(attributes["http.route"], ".*otel_workshop.*"))'
-
-exporters:
-  debug: { verbosity: detailed }
-  elasticsearch/otel:
-    # Point to localhost and the docker internal host to ensure that the container can reach the local-running Elasticsearch instance
-    endpoints: ['http://localhost:9200', 'http://host.docker.internal:9200']
-    user: elastic
-    password: changeme
-    mapping:
-      mode: otel
-
-service:
-  pipelines:
-    metrics:
-      receivers: [otlp/fromsdk]
-      processors: [filter/workshop]
-      exporters: [debug, elasticsearch/otel]
-    traces:
-      receivers: [otlp/fromsdk]
-      processors: [filter/workshop, elasticapm]
-      exporters: [debug, elasticsearch/otel]
+```bash
+docker-compose -f examples/otel_workshop/compose.yaml up
 ```
 
-The metrics filter keeps only `kibana.otel_workshop.*`; the trace filter keeps only the
-`process_order` / `grind_beans` / `brew` / `garnish` spans and the two HTTP route spans.
+NOTE: For some installations the command may look like:
 
-**b. Run the EDOT collector** from the directory where you saved that file (so `$(pwd)` resolves
+```bash
+docker compose -f examples/otel_workshop/compose.yaml up
+```
+
+</details>
+
+<details>
+<summary><strong>2. Prefer to run each service separately? Manual steps</strong></summary>
+
+#### 1. Start a local EDOT collector
+
+Run an EDOT Collector on your laptop to receive Kibana's metrics and traces. The
+`debug` exporter prints every metric and span to the collector's own logs. The config in
+[`otel-collector-config.yaml`](./otel-collector-config.yaml) adds a `filter/workshop`
+processor so only workshop signals reach the exporter — no noise from Kibana's existing telemetry.
+
+**b. Run the EDOT collector** from the root directory of the Kibana repo (so `$(pwd)` resolves
 to it), and leave it running in its own terminal:
 
 ```bash
 docker run --rm -p 4317:4317 -p 4318:4318 -e ELASTIC_AGENT_OTEL=true \
-  -v "$(pwd)/otel-collector-config.yaml:/etc/otelcol-config.yml" \
+  -v "$(pwd)/examples/otel_workshop/otel-collector-config.yaml:/etc/otelcol-config.yml" \
   elastic/elastic-agent:9.4.2 --config /etc/otelcol-config.yml
 ```
 
 This terminal now streams only your workshop metrics and spans, and push them to the local Elasticsearch instance that will be started in the following steps (so that we can use the local Kibana to inspect our metrics in the datastream `metrics-generic.otel-default` and our traces in `traces-generic.otel-default` and the APM UI).
 
-### 2. Start Elasticsearch
+#### 2. Start Elasticsearch
 
 In a **separate terminal**, start a local ES cluster and leave it running:
 
@@ -109,7 +80,9 @@ In a **separate terminal**, start a local ES cluster and leave it running:
 yarn es snapshot
 ```
 
-### 3. Point Kibana at the collector
+</details>
+
+### 2. Point Kibana at the collector
 
 All telemetry config goes in **`config/kibana.dev.yml`** — your personal, git-ignored dev
 config that Kibana automatically merges on top of `config/kibana.yml` when started with
@@ -131,7 +104,7 @@ telemetry.tracing:
         url: 'http://localhost:4317'
 ```
 
-### 4. Start Kibana with the example plugins
+### 4. Start dev Kibana with the example plugins
 
 ```bash
 yarn kbn bootstrap          # first time only (or after switching branches)

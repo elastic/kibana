@@ -1,0 +1,51 @@
+receivers:
+  otlp/fromsdk:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+
+connectors:
+  # Necessary for the APM UI to understand the OTel Traces
+  elasticapm:
+
+processors:
+  # Necessary for the APM UI to understand the OTel Traces
+  elasticapm:
+  # Filter the metrics and spans relevant to this workshop
+  # - The metrics filter keeps only `kibana.otel_workshop.*`;
+  # - The trace filter keeps only the `process_order` / `grind_beans` / `brew` / `garnish` spans
+  #   and the two HTTP route spans.
+  filter/workshop:
+    metrics:
+      metric:
+        - not(IsMatch(name, "kibana\\.otel_workshop\\..*"))
+    traces:
+      span:
+        - 'not(IsMatch(name, "open_coffee_shop") or IsMatch(name, "process_order") or IsMatch(name, "grind_beans") or IsMatch(name, "brew") or IsMatch(name, "garnish") or IsMatch(attributes["http.route"], ".*otel_workshop.*"))'
+
+exporters:
+  debug: { verbosity: detailed }
+  elasticsearch/otel:
+    # Using a pool of connections and the client will connect to the first available endpoint.
+    endpoints:
+      # When running in the docker compose setup, the Elasticsearch container is available at `elasticsearch:9200`.
+      - 'http://elasticsearch:9200'
+      # When running locally, the Elasticsearch instance is available at `localhost:9200`.
+      - 'http://localhost:9200'
+      # When running locally in a container (for some Docker installations), the Elasticsearch instance is available at `host.docker.internal:9200`.
+      - 'http://host.docker.internal:9200'
+    user: elastic
+    password: changeme
+    mapping:
+      mode: otel
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp/fromsdk]
+      processors: [filter/workshop]
+      exporters: [debug, elasticsearch/otel]
+    traces:
+      receivers: [otlp/fromsdk]
+      processors: [filter/workshop, elasticapm]
+      exporters: [debug, elasticsearch/otel]
