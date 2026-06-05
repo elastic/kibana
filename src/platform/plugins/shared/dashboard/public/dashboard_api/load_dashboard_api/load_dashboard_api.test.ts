@@ -12,7 +12,7 @@ import { startQueryPerformanceTracking } from '../performance/query_performance_
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { loadDashboardApi } from './load_dashboard_api';
 
-jest.mock('../telemetry/dashboard_load_telemetry', () => {
+jest.mock('../performance/query_performance_tracking', () => {
   return {
     startQueryPerformanceTracking: jest.fn(),
   };
