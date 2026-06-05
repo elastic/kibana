@@ -59,6 +59,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useKibana();
   const queryClient = useQueryClient();
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  // Only fetch features and queries once availability has resolved and is not
+  // explicitly unavailable (stays fail-open while the probe result is unknown).
+  const shouldFetchKnowledgeIndicators =
+    !isAvailabilityLoading && availability?.available !== false;
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
     .trim()
@@ -88,7 +92,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     isLoading: isKnowledgeIndicatorsLoading,
     isEmpty,
     refetch,
-  } = useFetchKnowledgeIndicators({ definition });
+  } = useFetchKnowledgeIndicators({ definition, enabled: shouldFetchKnowledgeIndicators });
   const onKnowledgeIndicatorsOnboardingComplete = useCallback(
     (
       completedState: Extract<
@@ -201,12 +205,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const isGenerateButtonDisabled =
     knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
 
-  if (isAvailabilityLoading || isKnowledgeIndicatorsLoading) {
+  if (isAvailabilityLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
   if (availability && !availability.available) {
     return <SignificantEventsNotEnabledPrompt reason={availability.reason} />;
+  }
+
+  if (isKnowledgeIndicatorsLoading) {
+    return <LoadingPanel size="xxl" />;
   }
 
   if (isEmpty) {
