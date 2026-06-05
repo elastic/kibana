@@ -173,6 +173,20 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     expect(skill.content).toMatch(/not reflexively the max|tighten the filter/i);
   });
 
+  it('encodes the v18 tactic-criticality prioritization default as an overridable soft default', () => {
+    const { getStartServices, logger } = createDeps();
+    const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
+    expect(skill.content).toContain('## Prioritization');
+    // The Critical tier in correct v18 criticality order.
+    expect(skill.content).toMatch(
+      /Credential Access, Lateral Movement, Privilege Escalation, Defense Evasion/
+    );
+    // A stated intent overrides the default ordering.
+    expect(skill.content).toMatch(/overrides this entirely/i);
+    // Data-source order is demoted to a tiebreaker, not the primary default.
+    expect(skill.content).toMatch(/tiebreaker/i);
+  });
+
   it('asks for a Selection notes block recording kept/dropped after a deepen pass', () => {
     const { getStartServices, logger } = createDeps();
     const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
