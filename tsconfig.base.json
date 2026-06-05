@@ -1040,6 +1040,8 @@
       "@kbn/default-tracer/*": ["src/platform/packages/shared/kbn-default-tracer/*"],
       "@kbn/delete-managed-asset-callout": ["src/platform/packages/shared/kbn-management/delete_managed_assets_callout"],
       "@kbn/delete-managed-asset-callout/*": ["src/platform/packages/shared/kbn-management/delete_managed_assets_callout/*"],
+      "@kbn/dependency-injection-a": ["examples/dependency_injection_isolation/a"],
+      "@kbn/dependency-injection-a/*": ["examples/dependency_injection_isolation/a/*"],
       "@kbn/dependency-injection-example-plugin": ["examples/dependency_injection"],
       "@kbn/dependency-injection-example-plugin/*": ["examples/dependency_injection/*"],
       "@kbn/dependency-ownership": ["packages/kbn-dependency-ownership"],

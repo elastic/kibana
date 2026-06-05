@@ -603,6 +603,7 @@
     "@kbn/deeplinks-workplace-ai": "link:src/platform/packages/shared/deeplinks/workplace_ai",
     "@kbn/default-tracer": "link:src/platform/packages/shared/kbn-default-tracer",
     "@kbn/delete-managed-asset-callout": "link:src/platform/packages/shared/kbn-management/delete_managed_assets_callout",
+    "@kbn/dependency-injection-a": "link:examples/dependency_injection_isolation/a",
     "@kbn/dependency-injection-example-plugin": "link:examples/dependency_injection",
     "@kbn/design-tools": "link:src/platform/packages/shared/kbn-design-tools",
     "@kbn/dev-tools-plugin": "link:src/platform/plugins/shared/dev_tools",
