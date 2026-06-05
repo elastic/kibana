@@ -17,20 +17,46 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloDefinitionsWithRemote } from '../../../hooks/use_fetch_slo_definitions_with_remote';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
-import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH } from '../constants';
+import { MAX_COMPOSITE_MEMBERS, MAX_WIDTH, MIN_COMPOSITE_MEMBERS } from '../constants';
 import type { CreateCompositeSLOForm } from '../types';
 
 export function CompositeSloMembersSection() {
-  const { control, watch } = useFormContext<CreateCompositeSLOForm>();
-  const { fields, append, remove } = useFieldArray({ control, name: 'members' });
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<CreateCompositeSLOForm>();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'members',
+    rules: {
+      required: {
+        value: true,
+        message: i18n.translate('xpack.slo.compositeSloEdit.members.requiredError', {
+          defaultMessage: 'A composite SLO requires at least {min} member SLOs.',
+          values: { min: MIN_COMPOSITE_MEMBERS },
+        }),
+      },
+      minLength: {
+        value: MIN_COMPOSITE_MEMBERS,
+        message: i18n.translate('xpack.slo.compositeSloEdit.members.minError', {
+          defaultMessage: 'A composite SLO requires at least {min} member SLOs.',
+          values: { min: MIN_COMPOSITE_MEMBERS },
+        }),
+      },
+    },
+  });
   const members = watch('members');
+  const minMembersError = errors.members?.root?.message;
 
   const [sloSearch, setSloSearch] = useState('');
   const { data: sloDefinitions, isLoading: isLoadingSlos } = useFetchSloDefinitionsWithRemote({
@@ -74,6 +100,7 @@ export function CompositeSloMembersSection() {
       <EuiFlexGroup direction="column" gutterSize="m">
         {atMax && (
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.compositeSloEdit.members.maxWarning', {
@@ -85,6 +112,8 @@ export function CompositeSloMembersSection() {
 
         <EuiFormRow
           fullWidth
+          isInvalid={Boolean(minMembersError)}
+          error={minMembersError}
           label={i18n.translate('xpack.slo.compositeSloEdit.members.addSlo.label', {
             defaultMessage: 'Add member SLOs',
           })}
@@ -95,6 +124,7 @@ export function CompositeSloMembersSection() {
         >
           <EuiComboBox
             fullWidth
+            isInvalid={Boolean(minMembersError)}
             isDisabled={atMax}
             isLoading={isLoadingSlos}
             options={sloOptions}
@@ -113,7 +143,7 @@ export function CompositeSloMembersSection() {
         {fields.length > 0 && (
           <>
             <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" color="subdued">
                   <strong>
@@ -177,8 +207,15 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     }
   }, [isGrouped, instanceId, index, setValue]);
 
+  const [instanceSearch, setInstanceSearch] = useState<string>();
+  const [debouncedInstanceSearch, setDebouncedInstanceSearch] = useState<string | undefined>(
+    undefined
+  );
+  useDebounce(() => setDebouncedInstanceSearch(instanceSearch), 300, [instanceSearch]);
+
   const { data: instances, isLoading: isLoadingInstances } = useFetchSloInstances({
     sloId,
+    search: debouncedInstanceSearch?.trim() || undefined,
     size: 100,
     enabled: isGrouped,
   });
@@ -190,16 +227,33 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
     value: ALL_VALUE,
   };
 
-  const instanceOptions: EuiComboBoxOptionOption[] = [
-    allInstancesOption,
-    ...(instances?.results ?? []).map((inst) => ({
+  const fetchedInstanceOptions: EuiComboBoxOptionOption[] = (instances?.results ?? []).map(
+    (inst) => ({
       label: inst.instanceId,
       value: inst.instanceId,
-    })),
+    })
+  );
+
+  // Preserve the currently selected instance in the options even when it falls outside
+  // the fetched batch (e.g. user picked an instance via search, then the search reset
+  // and the next page does not contain it). Without this, `selectedOptions` resolves
+  // to an empty array and the combo box renders no pill, making the selection look
+  // like it disappeared.
+  const hasSelectionInFetched =
+    instanceId === ALL_VALUE || fetchedInstanceOptions.some((opt) => opt.value === instanceId);
+  const pinnedSelectionOption: EuiComboBoxOptionOption | undefined =
+    !hasSelectionInFetched && typeof instanceId === 'string'
+      ? { label: instanceId, value: instanceId }
+      : undefined;
+
+  const instanceOptions: EuiComboBoxOptionOption[] = [
+    allInstancesOption,
+    ...(pinnedSelectionOption ? [pinnedSelectionOption] : []),
+    ...fetchedInstanceOptions,
   ];
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
         <EuiText size="s" style={{ paddingTop: 8 }}>
           {sloName}
@@ -216,11 +270,13 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
               return (
                 <EuiComboBox
                   fullWidth
-                  singleSelection={{ asPlainText: true }}
+                  async
+                  singleSelection={{ asPlainText: false }}
                   isLoading={isLoadingInstances}
                   options={instanceOptions}
                   selectedOptions={selected}
                   onChange={(opts) => onChange(opts[0]?.value ?? ALL_VALUE)}
+                  onSearchChange={setInstanceSearch}
                   isClearable={false}
                   compressed
                   data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
@@ -268,16 +324,24 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
             defaultMessage: 'Remove {name}',
             values: { name: sloName },
           })}
-          onClick={onRemove}
-          data-test-subj={`compositeSloMemberRemoveButton-${index}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
+              defaultMessage: 'Remove {name}',
+              values: { name: sloName },
+            })}
+            onClick={onRemove}
+            data-test-subj={`compositeSloMemberRemoveButton-${index}`}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

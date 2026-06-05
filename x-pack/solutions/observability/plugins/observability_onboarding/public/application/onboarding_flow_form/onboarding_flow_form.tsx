@@ -184,7 +184,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const featuredCardsForCategoryMap: Record<Category, string[]> = {
     host: ['auto-detect-logs', 'otel-logs'],
-    kubernetes: ['kubernetes-quick-start', 'otel-kubernetes'],
+    kubernetes: ['otel-kubernetes'],
     application: ['apm-virtual', 'otel-virtual', 'synthetics-virtual'],
     cloud: ['azure-logs-virtual', 'aws-logs-virtual', 'gcp-logs-virtual'],
   };

@@ -17,7 +17,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';

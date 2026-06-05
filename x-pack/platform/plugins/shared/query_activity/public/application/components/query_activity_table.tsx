@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
   type EuiBasicTableColumn,
   type SearchFilterConfig,
 } from '@elastic/eui';
@@ -229,14 +230,21 @@ export const QueryActivityTable: React.FC<QueryActivityTableProps> = ({
           }
 
           return (
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.queryActivity.table.stopQueryAriaLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.queryActivity.table.stopQueryAriaLabel', {
                 defaultMessage: 'Cancel query',
               })}
-              iconType="crossCircle"
-              color="danger"
-              onClick={() => requestStopQuery(query.taskId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.queryActivity.table.stopQueryAriaLabel', {
+                  defaultMessage: 'Cancel query',
+                })}
+                iconType="crossCircle"
+                color="danger"
+                onClick={() => requestStopQuery(query.taskId)}
+              />
+            </EuiToolTip>
           );
         },
       },

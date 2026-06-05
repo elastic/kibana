@@ -1,5 +1,5 @@
 {
-  "sha1": "80a33a82f01b271900c0cf8d1005154cccea4e51",
+  "sha1": "a19ae6d7fa00476c5193331baf632e58492f5ac5",
   "tests": [
     {
       "id": "fbc74590a1185af-3e73699777c3b59",
@@ -198,8 +198,8 @@
       }
     },
     {
-      "id": "bd77233fbb28a70-44dc6eb47e723c0",
-      "title": "Onboarding UI Validation navigates correctly within Kubernetes Host flow",
+      "id": "bd77233fbb28a70-59eb29cb307ed8e",
+      "title": "Onboarding UI Validation navigates correctly within Kubernetes OpenTelemetry flow",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -216,8 +216,8 @@
       }
     },
     {
-      "id": "bd77233fbb28a70-4ab634c0d169c88",
-      "title": "Onboarding UI Validation Navigates correctly within Kubernetes Host flow using the keyboard only",
+      "id": "bd77233fbb28a70-327b1fabac0e74c",
+      "title": "Onboarding UI Validation navigates correctly within Kubernetes OpenTelemetry flow using the keyboard only",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -229,7 +229,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 141,
+        "line": 139,
         "column": 7
       }
     },
@@ -243,7 +243,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 180,
+        "line": 175,
         "column": 7
       }
     },
@@ -323,7 +323,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
-        "line": 52,
+        "line": 49,
         "column": 9
       }
     },
