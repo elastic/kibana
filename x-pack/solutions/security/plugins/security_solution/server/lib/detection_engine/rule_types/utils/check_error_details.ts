@@ -21,6 +21,7 @@ const ILLEGAL_ARGUMENT_USER_REASON_SUBSTRINGS = [
   'is not an IP string literal',
   'is not supported for aggregation',
   'of type [text]',
+  'Fielddata is disabled on',
 ];
 
 const isIllegalArgumentUserError = (errorString: string): boolean =>
