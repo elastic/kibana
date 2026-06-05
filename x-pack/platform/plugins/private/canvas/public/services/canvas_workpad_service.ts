@@ -77,9 +77,12 @@ class CanvasWorkpadService {
   private apiPath = `${API_ROUTE_WORKPAD}`;
 
   public async get(id: string): Promise<CanvasWorkpad> {
-    const workpad = await coreServices.http.get<any>(buildPath(`${this.apiPath}/{id}`, { id }), {
-      version: '1',
-    });
+    const workpad = await coreServices.http.get<CanvasWorkpad>(
+      buildPath(`${this.apiPath}/{id}`, { id }),
+      {
+        version: '1',
+      }
+    );
 
     return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
   }
