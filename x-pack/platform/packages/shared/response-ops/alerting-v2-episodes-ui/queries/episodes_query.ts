@@ -68,6 +68,15 @@ export interface EpisodesFilterState {
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;
+  /** Group hash — narrows to a single per-rule series (used for deep-links from rule details). */
+  groupHash?: string | null;
+  /**
+   * Display-only companion to `groupHash`. When a deep-link carries the
+   * resolved grouping field values (e.g. `{ "host.name": "web-01" }`), the
+   * destination chip can render `host=web-01` without re-running the DSL
+   * lookup. Does NOT affect the query — `buildEpisodesQuery` ignores it.
+   */
+  groupingValues?: Record<string, string | null> | null;
   /** Query string for full-text search */
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
@@ -148,6 +157,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   if (filterState.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;
   }
+  if (filterState.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
+  }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);
   }
@@ -211,6 +223,49 @@ export const buildEpisodesQuery = (
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
     ...ALERT_EPISODE_FIELDS
   );
+};
+
+/**
+ * Builds an ES|QL query that computes six KPI counts in a single STATS pass.
+ * Uses indicator EVALs (CASE-based 0/1 columns) so all aggregations can share
+ * one STATS command without sub-queries.
+ *
+ * Counts: active_alerts, firing_rules, assigned_to_me, unassigned, acknowledged, snoozed.
+ */
+export const buildEpisodesKpisQuery = (
+  spaceId: string,
+  currentUserUid?: string,
+  filterState?: EpisodesFilterState
+): string => {
+  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+
+  if (filterState) {
+    applyFilterState(query, filterState);
+  }
+
+  // Indicator columns — null for distinct count, 1/0 for sum-based counts.
+  // When there's no current user (anonymous/proxy-authenticated), nothing can be
+  // "assigned to me", so the indicator is always 0.
+  // prettier-ignore
+  query
+    .pipe`EVAL _active_rule_id = CASE(effective_status == "active", \`rule.id\`, null)`
+    .pipe(
+      currentUserUid
+        ? `EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`
+        : `EVAL _assigned_to_me = 0`
+    )
+    .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
+    .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)`
+    .pipe`STATS
+      alerts_count   = COUNT(*),
+      firing_rules   = COUNT_DISTINCT(_active_rule_id),
+      assigned_to_me = SUM(_assigned_to_me),
+      unassigned     = SUM(_is_unassigned),
+      acknowledged   = SUM(_is_acked),
+      snoozed        = SUM(_is_snoozed)`;
+
+  return query.print('basic');
 };
 
 /**

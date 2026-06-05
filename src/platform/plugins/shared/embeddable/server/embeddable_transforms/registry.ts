@@ -15,7 +15,7 @@ export function getEmbeddableServerRegistry(
   drilldownRegistry: ReturnType<typeof getDrilldownRegistry>
 ) {
   const registry: { [key: string]: EmbeddableServerDefinition<any, any> } = {};
-  const schemaCache: Record<string, Type<object> | undefined> = {};
+  let schemaCache: Record<string, Type<object> | undefined> = {};
 
   function getCachedSchema(type: string) {
     if (schemaCache[type]) {
@@ -60,6 +60,9 @@ export function getEmbeddableServerRegistry(
         ...(schema ? { schema } : {}),
         ...(typeof throwOnUnmappedPanel === 'boolean' ? { throwOnUnmappedPanel } : {}),
       };
+    },
+    resetCache: () => {
+      schemaCache = {};
     },
   };
 }
