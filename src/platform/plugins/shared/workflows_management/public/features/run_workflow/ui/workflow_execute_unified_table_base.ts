@@ -45,16 +45,37 @@ export interface UseUnifiedDataTableColumnStateOptions {
   dataView: DataView | null;
   fallbackColumns: readonly string[];
   ensureColumnWhenOnlyTimeField?: string;
+  tableSort?: SortOrder[];
+  onTableSortChange?: (sort: SortOrder[]) => void;
 }
 
+const parseDataGridSort = (nextSort: string[][]): SortOrder[] =>
+  nextSort
+    .filter(
+      (value): value is [string, 'asc' | 'desc'] =>
+        Array.isArray(value) &&
+        value.length === 2 &&
+        typeof value[0] === 'string' &&
+        (value[1] === 'asc' || value[1] === 'desc')
+    )
+    .map(([field, direction]) => [field, direction]);
+
 export function useUnifiedDataTableColumnState(options: UseUnifiedDataTableColumnStateOptions) {
-  const { defaultColumns, dataView, fallbackColumns, ensureColumnWhenOnlyTimeField } = options;
+  const {
+    defaultColumns,
+    dataView,
+    fallbackColumns,
+    ensureColumnWhenOnlyTimeField,
+    tableSort: controlledSort,
+    onTableSortChange,
+  } = options;
 
   const [visibleTableColumns, setVisibleTableColumns] = useState<string[]>(() => [
     ...defaultColumns,
   ]);
   const [showTimeColumn, setShowTimeColumn] = useState(true);
-  const [sort, setSort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
+  const [internalSort, setInternalSort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
+  const sort = controlledSort ?? internalSort;
 
   const defaultColumnsKey = defaultColumns.join('\0');
   const defaultColumnsRef = useRef(defaultColumns);
@@ -70,19 +91,17 @@ export function useUnifiedDataTableColumnState(options: UseUnifiedDataTableColum
     });
   }, [defaultColumnsKey]);
 
-  const handleSortChange = useCallback((nextSort: string[][]) => {
-    setSort(
-      nextSort
-        .filter(
-          (value): value is [string, 'asc' | 'desc'] =>
-            Array.isArray(value) &&
-            value.length === 2 &&
-            typeof value[0] === 'string' &&
-            (value[1] === 'asc' || value[1] === 'desc')
-        )
-        .map(([field, direction]) => [field, direction])
-    );
-  }, []);
+  const handleSortChange = useCallback(
+    (nextSort: string[][]) => {
+      const parsedSort = parseDataGridSort(nextSort);
+      if (onTableSortChange) {
+        onTableSortChange(parsedSort);
+        return;
+      }
+      setInternalSort(parsedSort);
+    },
+    [onTableSortChange]
+  );
 
   const handleUnifiedDataTableSetColumns = useCallback(
     (columns: string[], hideTimeColumn: boolean) => {

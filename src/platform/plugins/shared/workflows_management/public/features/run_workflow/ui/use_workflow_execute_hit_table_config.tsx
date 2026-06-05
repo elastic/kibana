@@ -31,13 +31,18 @@ import {
   useUnifiedDataTableTimestampTypography,
 } from './workflow_execute_unified_table_base';
 
+export type {
+  UseWorkflowExecuteHitTableConfigOptions,
+  UseWorkflowExecuteHitTableConfigResult,
+} from './use_workflow_execute_hit_table_config_types';
+
 const buildColumnsMetaFromFieldNames = (fieldNames: readonly string[]): DataTableColumnsMeta =>
   fieldNames.reduce<DataTableColumnsMeta>((meta, fieldName) => {
     meta[fieldName] = { type: 'string' };
     return meta;
   }, {});
 
-export function useWorkflowExecuteHitTableConfigImpl(
+export function useWorkflowExecuteHitTableConfig(
   options: UseWorkflowExecuteHitTableConfigOptions
 ): UseWorkflowExecuteHitTableConfigResult {
   const {
@@ -50,6 +55,8 @@ export function useWorkflowExecuteHitTableConfigImpl(
     ensureColumnWhenOnlyTimeField,
     onSelectionChange,
     setErrors,
+    tableSort,
+    onTableSortChange,
   } = options;
 
   const { euiTheme } = useEuiTheme();
@@ -86,6 +93,8 @@ export function useWorkflowExecuteHitTableConfigImpl(
     dataView,
     fallbackColumns: defaultColumnsList,
     ensureColumnWhenOnlyTimeField,
+    tableSort,
+    onTableSortChange,
   });
 
   const columnsMeta = useMemo(

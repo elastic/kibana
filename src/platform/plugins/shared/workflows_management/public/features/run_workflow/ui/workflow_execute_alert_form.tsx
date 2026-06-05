@@ -14,25 +14,18 @@ import { take } from 'rxjs';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { CustomGridColumnsConfiguration, SortOrder } from '@kbn/unified-data-table';
+import type { CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
 import {
-  buildWorkflowExecuteHitSearchIdentityKey,
-  useWorkflowExecuteHitSearch,
-} from './use_workflow_execute_hit_search';
-import {
-  useWorkflowExecuteHitTableConfig,
-  type UseWorkflowExecuteHitTableConfigResult,
-} from './use_workflow_execute_hit_table_config';
+  useWorkflowExecuteHitTabSearchState,
+  type WorkflowExecuteHitTabFetchPageParams,
+} from './use_workflow_execute_hit_tab_search_state';
 import {
   parseSearchTotalHits,
   WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE,
 } from './workflow_execute_hit_search_pagination';
-import {
-  buildWorkflowExecuteHitSearchEsSort,
-  DEFAULT_WORKFLOW_EXECUTE_HIT_SORT,
-} from './workflow_execute_hit_search_sort';
+import { buildWorkflowExecuteHitSearchEsSort } from './workflow_execute_hit_search_sort';
 import { buildAlertTriggerInputFromRecords } from './workflow_execute_hit_selection_payload';
 import { createAlertMessageCellRenderer } from './workflow_execute_hit_table_cells';
 import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
@@ -76,19 +69,8 @@ export const WorkflowExecuteAlertForm = ({
   const { services } = useKibana();
   const { http, notifications, data: dataService, unifiedSearch } = services;
   const { SearchBar } = unifiedSearch.ui;
-  const [timeRange, setTimeRange] = useState<TimeRange>({
-    from: 'now-15m',
-    to: 'now',
-  });
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [dataView, setDataView] = useState<DataView | null>(null);
-  const [tableSortForSearch, setTableSortForSearch] = useState<SortOrder[]>(
-    DEFAULT_WORKFLOW_EXECUTE_HIT_SORT
-  );
   const dataViewCreatingRef = useRef(false);
-
-  const submittedQueryString = typeof submittedQuery.query === 'string' ? submittedQuery.query : '';
 
   const resolveFetchError = useCallback(
     (error: unknown) =>
@@ -101,7 +83,12 @@ export const WorkflowExecuteAlertForm = ({
   );
 
   const fetchAlertsPage = useCallback(
-    async (pageIndex: number) => {
+    async ({
+      pageIndex,
+      submittedQueryString,
+      timeRange,
+      tableSort,
+    }: WorkflowExecuteHitTabFetchPageParams) => {
       if (!dataService || !dataView) {
         return { pageHits: [], total: 0 };
       }
@@ -133,10 +120,7 @@ export const WorkflowExecuteAlertForm = ({
       };
 
       searchSource.setField('filter', [timeFilter]);
-      searchSource.setField(
-        'sort',
-        buildWorkflowExecuteHitSearchEsSort(tableSortForSearch, dataView)
-      );
+      searchSource.setField('sort', buildWorkflowExecuteHitSearchEsSort(tableSort, dataView));
       searchSource.setField('from', pageIndex * WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
       searchSource.setField('size', WORKFLOW_EXECUTE_HIT_SEARCH_PAGE_SIZE);
       searchSource.setField('trackTotalHits', true);
@@ -149,26 +133,69 @@ export const WorkflowExecuteAlertForm = ({
         total: parseSearchTotalHits(response?.rawResponse?.hits?.total),
       };
     },
-    [dataService, dataView, submittedQueryString, timeRange.from, timeRange.to, tableSortForSearch]
+    [dataService, dataView]
   );
 
-  const searchIdentityKey = useMemo(
-    () =>
-      buildWorkflowExecuteHitSearchIdentityKey({
-        dataViewId: dataView?.id,
-        submittedQueryString,
-        timeRange,
-        tableSort: tableSortForSearch,
+  const handleAlertSelection = useCallback(
+    (selectedRecords: DataTableRecord[]) => {
+      const payload = buildAlertTriggerInputFromRecords(selectedRecords);
+      if (payload) {
+        setValue(JSON.stringify(payload, null, 2));
+      } else {
+        setValue('');
+      }
+    },
+    [setValue]
+  );
+
+  const alertMessageRenderer = useMemo(() => createAlertMessageCellRenderer(), []);
+
+  const ruleColumnLabel = i18n.translate('workflows.workflowExecuteAlertForm.ruleColumn', {
+    defaultMessage: 'Rule',
+  });
+  const messageColumnLabel = i18n.translate(
+    'workflows.workflowExecuteEventForm.messageColumnHeader',
+    {
+      defaultMessage: 'Message',
+    }
+  );
+
+  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
+    () => ({
+      'kibana.alert.rule.name': ({ column }) => ({
+        ...column,
+        displayAsText: ruleColumnLabel,
+        display: ruleColumnLabel,
       }),
-    [dataView?.id, submittedQueryString, timeRange, tableSortForSearch]
+      'kibana.alert.reason': ({ column }) => ({
+        ...column,
+        displayAsText: messageColumnLabel,
+        display: messageColumnLabel,
+      }),
+    }),
+    [messageColumnLabel, ruleColumnLabel]
   );
 
-  const hitSearch = useWorkflowExecuteHitSearch({
-    enabled: Boolean(dataView),
-    searchIdentityKey,
-    fetchPage: fetchAlertsPage,
+  const {
+    query,
+    timeRange,
+    handleQueryChange,
+    handleQuerySubmit,
+    hitSearch,
+    tableConfig,
+    handleSortChange,
+  } = useWorkflowExecuteHitTabSearchState({
+    dataView,
+    services,
     setErrors,
     resolveFetchError,
+    fetchPage: fetchAlertsPage,
+    defaultColumns: DEFAULT_ALERT_TABLE_COLUMNS,
+    externalCustomRenderers: alertMessageRenderer,
+    customGridColumnsConfiguration,
+    onSelectionChange: handleAlertSelection,
+    isTableGridFullScreen,
+    onTableGridFullScreenChange,
   });
 
   // Fetch alert indices via the RAC endpoint (handles space-unaware systems like o11y)
@@ -229,99 +256,6 @@ export const WorkflowExecuteAlertForm = ({
 
     createDataView();
   }, [dataService, indexPattern, notifications.toasts, setErrors]);
-
-  const handleAlertSelection = useCallback(
-    (selectedRecords: DataTableRecord[]) => {
-      const payload = buildAlertTriggerInputFromRecords(selectedRecords);
-      if (payload) {
-        setValue(JSON.stringify(payload, null, 2));
-      } else {
-        setValue('');
-      }
-    },
-    [setValue]
-  );
-
-  const alertMessageRenderer = useMemo(() => createAlertMessageCellRenderer(), []);
-
-  const ruleColumnLabel = i18n.translate('workflows.workflowExecuteAlertForm.ruleColumn', {
-    defaultMessage: 'Rule',
-  });
-  const messageColumnLabel = i18n.translate(
-    'workflows.workflowExecuteEventForm.messageColumnHeader',
-    {
-      defaultMessage: 'Message',
-    }
-  );
-
-  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
-    () => ({
-      'kibana.alert.rule.name': ({ column }) => ({
-        ...column,
-        displayAsText: ruleColumnLabel,
-        display: ruleColumnLabel,
-      }),
-      'kibana.alert.reason': ({ column }) => ({
-        ...column,
-        displayAsText: messageColumnLabel,
-        display: messageColumnLabel,
-      }),
-    }),
-    [messageColumnLabel, ruleColumnLabel]
-  );
-
-  const tableConfig: UseWorkflowExecuteHitTableConfigResult = useWorkflowExecuteHitTableConfig({
-    services,
-    dataView,
-    hits: hitSearch.hits,
-    defaultColumns: DEFAULT_ALERT_TABLE_COLUMNS,
-    externalCustomRenderers: alertMessageRenderer,
-    customGridColumnsConfiguration,
-    onSelectionChange: handleAlertSelection,
-    setErrors,
-  });
-
-  useEffect(() => {
-    setTableSortForSearch(tableConfig.sort);
-  }, [tableConfig.sort]);
-
-  const handleTableSortChange = tableConfig.handleSortChange;
-  const { resetPageIndex } = hitSearch;
-
-  const handleSortChange = useCallback(
-    (nextSort: string[][]) => {
-      resetPageIndex();
-      handleTableSortChange(nextSort);
-    },
-    [handleTableSortChange, resetPageIndex]
-  );
-
-  const handleQueryChange = useCallback(
-    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-      if (newQuery) {
-        setQuery(newQuery);
-      }
-      setTimeRange(dateRange);
-    },
-    []
-  );
-
-  const handleQuerySubmit = useCallback(
-    ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-      if (newQuery) {
-        setQuery(newQuery);
-        setSubmittedQuery(newQuery);
-      }
-      setTimeRange(dateRange);
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (hitSearch.hits.length === 0 && isTableGridFullScreen) {
-      onTableGridFullScreenChange?.(false);
-    }
-  }, [hitSearch.hits.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
   return (
     <EuiFlexGroup

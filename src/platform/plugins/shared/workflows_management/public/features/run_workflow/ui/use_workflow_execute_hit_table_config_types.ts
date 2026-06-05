@@ -32,6 +32,8 @@ export interface UseWorkflowExecuteHitTableConfigOptions {
   ensureColumnWhenOnlyTimeField?: string;
   onSelectionChange: (selectedRecords: DataTableRecord[]) => void;
   setErrors?: (errors: string | null) => void;
+  tableSort?: SortOrder[];
+  onTableSortChange?: (sort: SortOrder[]) => void;
 }
 
 export interface UseWorkflowExecuteHitTableConfigResult {
