@@ -11,10 +11,12 @@ import type { LensApiConfigChartType } from '../../../../schema';
 import type { AttributesNormalizer } from './normalize';
 import { normalizeHeatmap } from './heatmap';
 import { normalizeDatatable } from './datatable';
+import { normalizeGauge } from './gauge';
 
 const chartNormalizers = {
   heatmap: normalizeHeatmap,
   data_table: normalizeDatatable,
+  gauge: normalizeGauge,
 } satisfies Record<string, AttributesNormalizer<any>>;
 
 export function getChartNormalizer(
