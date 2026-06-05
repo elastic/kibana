@@ -103,3 +103,17 @@ export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
     ],
   },
 };
+
+export const InlineAppHeader: StoryObj<TabbedContentProps> = {
+  render: TabbedContentTemplate,
+
+  args: {
+    tabsBarVisualVariant: 'inlineAppHeader',
+    items: [
+      { id: '1', label: 'First tab name' },
+      { id: '2', label: 'Second tab name' },
+      { id: '3', label: 'Third tab name' },
+    ],
+    selectedItemId: '1',
+  },
+};

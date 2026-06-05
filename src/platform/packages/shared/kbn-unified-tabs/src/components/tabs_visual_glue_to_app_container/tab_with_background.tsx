@@ -9,22 +9,48 @@
 
 import React, { type HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, euiSlightShadowHover, type EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import classNames from 'classnames';
 import type { TabsServices } from '../../types';
+import {
+  DEFAULT_TABS_BAR_VISUAL_VARIANT,
+  type TabsBarVisualVariant,
+} from '../../tabs_bar_visual_variant';
+import { getTabWithBackgroundStyles } from './tab_visual_variant_styles';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
   isDragging?: boolean;
   hideRightSeparator?: boolean;
   services: TabsServices;
+  visualVariant?: TabsBarVisualVariant;
   children: React.ReactNode;
 }
 
 export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgroundProps>(
-  ({ isSelected, isDragging, hideRightSeparator, services, children, ...otherProps }, ref) => {
+  (
+    {
+      isSelected,
+      isDragging = false,
+      hideRightSeparator = false,
+      services,
+      visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
+      children,
+      ...otherProps
+    },
+    ref
+  ) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
+
+    const { wrapper, inner, showAccents } = getTabWithBackgroundStyles({
+      visualVariant,
+      isSelected,
+      isDragging,
+      hideRightSeparator,
+      euiTheme,
+      euiThemeContext,
+    });
 
     return (
       <div
@@ -32,70 +58,12 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         ref={ref}
         className={classNames('unifiedTabs__tabWithBackground', {
           'unifiedTabs__tabWithBackground--selected': isSelected,
+          'unifiedTabs__tabWithBackground--inlineAppHeader': visualVariant === 'inlineAppHeader',
         })}
-        // tab main background and another background color on hover
-        css={css`
-          position: relative;
-          display: inline-block;
-          border-radius: ${euiTheme.border.radius.small};
-          background: ${isSelected || isDragging
-            ? euiTheme.colors.backgroundBasePlain
-            : euiTheme.colors.lightestShade};
-          transition: background ${euiTheme.animation.fast};
-          margin: ${euiTheme.size.xs};
-          margin-bottom: 0;
-          padding-bottom: ${isDragging ? '0' : euiTheme.size.xs};
-
-          ${isSelected
-            ? `
-              position: relative;
-              border-bottom-left-radius: 0;
-              border-bottom-right-radius: 0;
-              filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.06))
-                      drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.04));
-            `
-            : ''}
-
-          ${isDragging
-            ? `
-              ${euiSlightShadowHover(euiThemeContext)};
-              border-radius: ${euiTheme.border.radius.small};
-          `
-            : ''}
-
-          // right vertical separator
-          &::before {
-            content: '';
-            position: absolute;
-            right: -${euiTheme.size.xs};
-            top: calc(
-              50% - ${euiTheme.size.xs} / 2
-            ); // 50% is the tab height midpoint, we want it centered in the middle of the whole tab bar
-            transform: translateY(-50%);
-            width: 1px;
-            height: ${euiTheme.size.base};
-            background-color: ${euiTheme.colors.borderBasePlain};
-            transition: opacity ${euiTheme.animation.fast};
-            opacity: ${hideRightSeparator || isDragging ? '0' : '1'};
-            pointer-events: none;
-          }
-        `}
+        css={wrapper}
       >
-        <div
-          css={css`
-            ${!isSelected
-              ? `
-              &:hover {
-                background-color: ${euiTheme.colors.lightShade};
-                border-radius: ${euiTheme.border.radius.small};
-              }
-            `
-              : ''}
-          `}
-        >
-          {children}
-        </div>
-        {isSelected && !isDragging && (
+        <div css={inner}>{children}</div>
+        {showAccents && (
           <>
             <Accent direction="left" euiTheme={euiTheme} />
             <Accent direction="right" euiTheme={euiTheme} />

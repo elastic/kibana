@@ -37,6 +37,10 @@ import { TabsEventName } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 import { TabsEventDataKeys } from '../../event_data_keys';
+import {
+  DEFAULT_TABS_BAR_VISUAL_VARIANT,
+  type TabsBarVisualVariant,
+} from '../../tabs_bar_visual_variant';
 
 export interface TabbedContentProps
   extends Pick<
@@ -49,6 +53,8 @@ export interface TabbedContentProps
     | 'disableDragAndDrop'
     | 'disableTabsBarMenu'
   > {
+  /** Visual treatment for the tabs bar. Defaults to `appContainer`. */
+  tabsBarVisualVariant?: TabsBarVisualVariant;
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: RecentlyClosedTabItem[];
@@ -112,6 +118,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableInlineLabelEditing = false,
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
+  tabsBarVisualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
   appendRight,
   getTopTabMenuItems,
   getAdditionalTabMenuItems,
@@ -427,7 +434,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const tabsBarContainerCss = css`
     width: 100%;
     min-width: 0;
-    background-color: ${euiTheme.colors.lightestShade};
+    background-color: ${tabsBarVisualVariant === 'inlineAppHeader'
+      ? euiTheme.colors.backgroundBasePlain
+      : euiTheme.colors.lightestShade};
   `;
 
   const tabsBarComponentCss = css`
@@ -472,6 +481,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           disableInlineLabelEditing={disableInlineLabelEditing}
           disableDragAndDrop={disableDragAndDrop}
           disableTabsBarMenu={disableTabsBarMenu}
+          visualVariant={tabsBarVisualVariant}
         />
       </EuiFlexItem>
       {appendRight ? (

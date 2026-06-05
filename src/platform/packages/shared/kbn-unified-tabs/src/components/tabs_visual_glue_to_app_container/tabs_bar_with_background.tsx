@@ -9,10 +9,17 @@
 
 import type { HTMLAttributes } from 'react';
 import React, { useEffect } from 'react';
-import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import type { TabsServices } from '../../types';
+import {
+  DEFAULT_TABS_BAR_VISUAL_VARIANT,
+  type TabsBarVisualVariant,
+} from '../../tabs_bar_visual_variant';
+import {
+  getTabsBarWithBackgroundStyles,
+  shouldApplyTabsBarGlobalChromeStyles,
+} from './tab_visual_variant_styles';
 
 const globalCss = cssString`
   // Disables the overscroll behavior to prevent the page from bouncing when scrolling
@@ -27,32 +34,42 @@ const globalCss = cssString`
 
 export interface TabsBarWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   services: TabsServices;
+  visualVariant?: TabsBarVisualVariant;
   children: React.ReactNode;
 }
 
 export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   services,
+  visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
   children,
   ...otherProps
 }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
+  const applyGlobalChromeStyles = shouldApplyTabsBarGlobalChromeStyles(visualVariant);
+
   useEffect(() => {
+    if (!applyGlobalChromeStyles) {
+      return;
+    }
+
     document.body.classList.add(globalCss);
 
     return () => {
       document.body.classList.remove(globalCss);
     };
-  }, []);
+  }, [applyGlobalChromeStyles]);
 
   return (
     <div
       {...otherProps}
-      css={css`
-        // tabs bar background
-        background: ${euiTheme.colors.lightestShade};
-      `}
+      className={
+        visualVariant === 'inlineAppHeader'
+          ? 'unifiedTabs__tabsBar--inlineAppHeader'
+          : 'unifiedTabs__tabsBar--appContainer'
+      }
+      css={getTabsBarWithBackgroundStyles(visualVariant, euiTheme)}
     >
       {children}
     </div>

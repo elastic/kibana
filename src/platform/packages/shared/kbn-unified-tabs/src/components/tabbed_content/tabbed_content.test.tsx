@@ -628,6 +628,31 @@ describe('TabbedContent', () => {
       expect(screen.getByTestId('unifiedTabs_selectTabBtn_tab2')).toBeInTheDocument();
     });
 
+    it('passes tabsBarVisualVariant to the tabs bar', () => {
+      render(
+        <TabbedContent
+          items={[
+            { id: 'tab1', label: 'Tab 1' },
+            { id: 'tab2', label: 'Tab 2' },
+          ]}
+          selectedItemId="tab1"
+          recentlyClosedItems={[]}
+          createItem={() => NEW_TAB}
+          getPreviewData={getPreviewDataMock}
+          services={servicesMock}
+          tabsBarVisualVariant="inlineAppHeader"
+          onChanged={jest.fn()}
+          onEBTEvent={jest.fn()}
+          onClearRecentlyClosed={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('unifiedTabs_tabsBar')).toHaveClass(
+        'unifiedTabs__tabsBar--inlineAppHeader'
+      );
+      expect(screen.getAllByTestId(/unifiedTabs_tab_/)).toHaveLength(2);
+    });
+
     it('passes null to renderTabsBar when hideTabsBar is true', () => {
       const renderTabsBar = jest.fn(() => <div data-test-subj="custom-tabs-header" />);
 

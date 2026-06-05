@@ -34,6 +34,10 @@ import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_app_container/tab_with_background';
 import { TabPreview } from '../tab_preview';
 import { useTabLabelWidth } from './use_tab_label_width';
+import {
+  DEFAULT_TABS_BAR_VISUAL_VARIANT,
+  type TabsBarVisualVariant,
+} from '../../tabs_bar_visual_variant';
 
 export interface TabProps {
   item: TabItem;
@@ -56,6 +60,7 @@ export interface TabProps {
   disableCloseButton?: boolean;
   disableInlineLabelEditing?: boolean;
   disableDragAndDrop?: boolean;
+  visualVariant?: TabsBarVisualVariant;
 }
 
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -88,6 +93,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     disableCloseButton = false,
     disableInlineLabelEditing = false,
     disableDragAndDrop = false,
+    visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
@@ -323,6 +329,7 @@ export const Tab: React.FC<TabProps> = (props) => {
       isDragging={isDragging}
       hideRightSeparator={hideRightSeparator}
       services={services}
+      visualVariant={visualVariant}
       onMouseEnter={() => onHoverChange?.(item.id, true)}
       onMouseLeave={() => onHoverChange?.(item.id, false)}
     >

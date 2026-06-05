@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabbedContent, type TabbedContentProps } from './components/tabbed_content';
-export { type TabsEBTEvent, TabsEventName } from './types';
-export {
-  DEFAULT_TABS_BAR_VISUAL_VARIANT,
-  type TabsBarVisualVariant,
-} from './tabs_bar_visual_variant';
+/**
+ * Visual treatment for the tabs bar.
+ * - `appContainer`: folder-style tabs glued to the app content (default).
+ * - `inlineAppHeader`: compact pill tabs for use inside Chrome Next AppHeader titleAppend.
+ */
+export type TabsBarVisualVariant = 'appContainer' | 'inlineAppHeader';
+
+export const DEFAULT_TABS_BAR_VISUAL_VARIANT: TabsBarVisualVariant = 'appContainer';
