@@ -118,7 +118,10 @@ export const createDashboardSmlType = ({
   toAttachment: async (item, context) => {
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.savedObjectsClient, item.origin_id);
+      const dashboard = await dashboardClient.read(
+        context.savedObjectsClient,
+        item.origin_id ?? ''
+      );
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,

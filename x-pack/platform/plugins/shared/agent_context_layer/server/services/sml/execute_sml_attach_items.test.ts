@@ -34,6 +34,7 @@ const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
   type: 'visualization',
   title: 'Test Viz',
   origin_id: 'ref-1',
+  origin: { uri: 'ref-1' },
   content: 'content',
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
@@ -209,7 +210,7 @@ describe('resolveSmlAttachItems', () => {
   });
 
   it('uses toAttachment description when provided', async () => {
-    const smlDoc = createSmlDoc({ origin_id: 'so-1' });
+    const smlDoc = createSmlDoc({ origin_id: 'so-1', origin: { uri: 'so-1' } });
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
@@ -242,6 +243,7 @@ describe('resolveSmlAttachItems', () => {
       type: 'connector',
       title: 'My Drive',
       origin_id: 'so-1',
+      origin: { uri: 'so-1' },
     });
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
@@ -264,8 +266,11 @@ describe('resolveSmlAttachItems', () => {
     }
   });
 
-  it('uses smlDoc.origin_id when converted attachment has no origin', async () => {
-    const smlDoc = createSmlDoc({ origin_id: 'fallback-origin' });
+  it('uses smlDoc.origin.uri when converted attachment has no origin', async () => {
+    const smlDoc = createSmlDoc({
+      origin_id: 'fallback-origin',
+      origin: { uri: 'fallback-origin' },
+    });
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
@@ -307,7 +312,7 @@ describe('resolveSmlAttachItems', () => {
   });
 
   it('processes multiple chunk ids independently', async () => {
-    const docOk = createSmlDoc({ id: 'chunk-ok', origin_id: 'r-ok' });
+    const docOk = createSmlDoc({ id: 'chunk-ok', origin_id: 'r-ok', origin: { uri: 'r-ok' } });
     mockCheckItemsAccess.mockResolvedValue(
       new Map([
         ['chunk-denied', false],

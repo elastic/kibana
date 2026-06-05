@@ -72,7 +72,7 @@ export interface SmlIndexer {
    * duplicating the index/error-handling boilerplate.
    */
   deleteChunks: (params: {
-    originId: string;
+    originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
   }) => Promise<void>;
@@ -102,6 +102,7 @@ class SmlIndexerImpl implements SmlIndexer {
       logger: contextLogger,
     } = params;
     const isContentMode = params.content !== undefined;
+    const originUri = `${attachmentType}://${originId}`;
 
     this.logger.info(
       `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', mode='${
@@ -113,7 +114,7 @@ class SmlIndexerImpl implements SmlIndexer {
       this.logger.info(
         `SML indexer: deleting crawled chunks for origin '${originId}' (manual entries preserved)`
       );
-      await this.deleteChunks({ originId, esClient, ingestionMethod: 'crawled' });
+      await this.deleteChunks({ originUri, esClient, ingestionMethod: 'crawled' });
       return;
     }
 
@@ -141,7 +142,7 @@ class SmlIndexerImpl implements SmlIndexer {
 
     const force = params.force === true;
     if (!force) {
-      const hasManual = await this.hasManualEntry({ originId, esClient });
+      const hasManual = await this.hasManualEntry({ originUri, esClient });
       if (hasManual) {
         this.logger.debug(
           `SML indexer: skipping origin-mode index for '${originId}' (type='${attachmentType}') — manual entry exists. Pass force=true to override.`
@@ -164,7 +165,7 @@ class SmlIndexerImpl implements SmlIndexer {
       this.logger.info(
         `SML indexer: no SML data returned for origin '${originId}' of type '${attachmentType}' — deleting existing crawled chunks (manual entries preserved)`
       );
-      await this.deleteChunks({ originId, esClient, ingestionMethod: 'crawled' });
+      await this.deleteChunks({ originUri, esClient, ingestionMethod: 'crawled' });
       return;
     }
 
@@ -176,7 +177,7 @@ class SmlIndexerImpl implements SmlIndexer {
       }', content length: ${smlData.chunks[0]?.content?.length ?? 0}`
     );
 
-    await this.deleteChunks({ originId, esClient });
+    await this.deleteChunks({ originUri, esClient });
 
     const bulkOps = smlData.chunks.map((chunk) =>
       // Use a bare UUID for `_id` (and the document's `id` field) so the chunk
@@ -212,7 +213,7 @@ class SmlIndexerImpl implements SmlIndexer {
     // helper — that's the way `SmlIndexer.deleteChunks` distinguishes "wipe
     // everything for this origin" from "wipe a single method".
     await this.deleteChunks({
-      originId,
+      originUri: `${attachmentType}://${originId}`,
       esClient,
       ...(scope !== 'all' ? { ingestionMethod: scope } : {}),
     });
@@ -235,11 +236,12 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     chunks: SmlChunk[];
   }): Promise<void> {
+    const originUri = `${attachmentType}://${originId}`;
     if (chunks.length === 0) {
       this.logger.debug(
         `SML indexer: content mode for origin '${originId}' supplied no chunks — deleting existing chunks`
       );
-      await this.deleteChunks({ originId, esClient });
+      await this.deleteChunks({ originUri, esClient });
       return;
     }
 
@@ -247,7 +249,7 @@ class SmlIndexerImpl implements SmlIndexer {
       `SML indexer: content mode for origin '${originId}' of type '${attachmentType}' — writing ${chunks.length} chunk(s) as 'manual'`
     );
 
-    await this.deleteChunks({ originId, esClient });
+    await this.deleteChunks({ originUri, esClient });
 
     const bulkOps = chunks.map((chunk) =>
       // Use a bare UUID for `_id`. The previous `${attachmentType}:${originId}:manual:${index}`
@@ -286,7 +288,7 @@ class SmlIndexerImpl implements SmlIndexer {
       id: chunkId,
       type: chunk.type,
       title: chunk.title,
-      origin_id: originId,
+      origin: { uri: `${chunk.type}://${originId}` },
       content: chunk.content,
       created_at: now,
       updated_at: now,
@@ -299,6 +301,17 @@ class SmlIndexerImpl implements SmlIndexer {
     };
     if (chunk.description !== undefined) {
       document.description = chunk.description;
+    }
+    if (chunk.tags !== undefined) {
+      document.tags = chunk.tags;
+    }
+    document.discovery_labels = [
+      { value: chunk.title, kind: 'title' },
+      { value: chunk.type, kind: 'type' },
+      ...(chunk.discovery_labels ?? []),
+    ];
+    if (chunk.extended_attrs !== undefined) {
+      document.extended_attrs = chunk.extended_attrs;
     }
     if (chunk.user_id !== undefined) {
       document.user_id = chunk.user_id;
@@ -367,10 +380,10 @@ class SmlIndexerImpl implements SmlIndexer {
    * Return true when any chunk for this `origin_id` carries `ingestion_method: 'manual'`.
    */
   private async hasManualEntry({
-    originId,
+    originUri,
     esClient,
   }: {
-    originId: string;
+    originUri: string;
     esClient: ElasticsearchClient;
   }): Promise<boolean> {
     try {
@@ -381,7 +394,10 @@ class SmlIndexerImpl implements SmlIndexer {
         terminate_after: 1,
         query: {
           bool: {
-            filter: [{ term: { origin_id: originId } }, { term: { ingestion_method: 'manual' } }],
+            filter: [
+              { term: { 'origin.uri': originUri } },
+              { term: { ingestion_method: 'manual' } },
+            ],
           },
         },
       });
@@ -394,7 +410,7 @@ class SmlIndexerImpl implements SmlIndexer {
       // net is best-effort. Real protection lives at the document level via the
       // HTTP upsert route. Errors here should not prevent the crawl from progressing.
       this.logger.warn(
-        `SML indexer: hasManualEntry check failed for origin '${originId}': ${
+        `SML indexer: hasManualEntry check failed for origin '${originUri}': ${
           (error as Error).message
         }`
       );
@@ -413,15 +429,15 @@ class SmlIndexerImpl implements SmlIndexer {
    * the index has been created.
    */
   async deleteChunks({
-    originId,
+    originUri,
     esClient,
     ingestionMethod,
   }: {
-    originId: string;
+    originUri: string;
     esClient: ElasticsearchClient;
     ingestionMethod?: SmlIngestionMethod;
   }): Promise<void> {
-    const filter: Array<Record<string, unknown>> = [{ term: { origin_id: originId } }];
+    const filter: Array<Record<string, unknown>> = [{ term: { 'origin.uri': originUri } }];
     if (ingestionMethod) {
       filter.push({ term: { ingestion_method: ingestionMethod } });
     }
@@ -429,7 +445,7 @@ class SmlIndexerImpl implements SmlIndexer {
 
     try {
       this.logger.debug(
-        `SML indexer: deleting existing ${label} for origin '${originId}' from index '${smlIndexName}'`
+        `SML indexer: deleting existing ${label} for origin '${originUri}' from index '${smlIndexName}'`
       );
       const result = await esClient.deleteByQuery({
         index: smlIndexName,
@@ -440,18 +456,18 @@ class SmlIndexerImpl implements SmlIndexer {
       });
       if (result.deleted && result.deleted > 0) {
         this.logger.info(
-          `SML indexer: deleted ${result.deleted} existing ${label} for origin '${originId}'`
+          `SML indexer: deleted ${result.deleted} existing ${label} for origin '${originUri}'`
         );
       }
     } catch (error) {
       if (isNotFoundError(error)) {
         this.logger.debug(
-          `SML indexer: index '${smlIndexName}' not found — nothing to delete for '${originId}'`
+          `SML indexer: index '${smlIndexName}' not found — nothing to delete for '${originUri}'`
         );
         return;
       }
       this.logger.warn(
-        `SML indexer: failed to delete ${label} for origin '${originId}': ${
+        `SML indexer: failed to delete ${label} for origin '${originUri}': ${
           (error as Error).message
         }`
       );

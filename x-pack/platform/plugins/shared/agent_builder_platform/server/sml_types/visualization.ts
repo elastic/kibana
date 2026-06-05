@@ -104,7 +104,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
   },
 
   toAttachment: async (item, context) => {
-    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id);
+    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');
     const savedObject = resolveResult.saved_object as { error?: { message?: string } };
     if (savedObject?.error) {
       return undefined;

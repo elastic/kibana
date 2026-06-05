@@ -61,6 +61,7 @@ export const sampleDocument: SmlDocument = {
   type: 'visualization',
   title: 'Test Viz',
   origin_id: 'viz-1',
+  origin: { uri: 'visualization://viz-1' },
   content: 'some content',
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
