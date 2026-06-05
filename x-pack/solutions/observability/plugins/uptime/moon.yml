@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/ml-common-types'
   - '@kbn/connector-schemas'
   - '@kbn/kql'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { MemoryService } from '../../../lib/memory';
 
 export interface MemoryToolsOptions {
-  getMemoryService: () => MemoryService;
+  getMemoryService: (esClient: ElasticsearchClient) => MemoryService;
   getSecurity: () => SecurityServiceStart;
 }
