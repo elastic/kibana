@@ -6,9 +6,11 @@
  */
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type { PluginConfig } from '../config';
 import { registerTelemetryTask } from '../lib/usage/task_definition';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
@@ -47,15 +49,22 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
-    registerSavedObjects({
-      savedObjects: container.get(CoreSetup('savedObjects')),
-      encryptedSavedObjects: container.get(
-        PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
-          'encryptedSavedObjects'
-        )
-      ),
-      logger,
-    });
+    const config = container
+      .get<PluginInitializerContext<PluginConfig>['config']>(PluginInitializer('config'))
+      .get<PluginConfig>();
+
+    // Adding the config check bc alertingV2 SOs are WIP
+    if (config.enabled) {
+      registerSavedObjects({
+        savedObjects: container.get(CoreSetup('savedObjects')),
+        encryptedSavedObjects: container.get(
+          PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
+            'encryptedSavedObjects'
+          )
+        ),
+        logger,
+      });
+    }
 
     container.get(CoreSetup('capabilities')).registerProvider(() => ({
       alertingVTwo: {},
