@@ -219,7 +219,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       content: 'c',
       description: 'd',
       user_id: 'u',
-      references: ['r1'],
+      references: [{ uri: 'r1' }],
       permissions: ['p1'],
     });
   });
