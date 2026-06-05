@@ -34,6 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
     loadTestFile(require.resolve('./_inspector'));
-    loadTestFile(require.resolve('./_url_state'));
+    // `./_url_state` was migrated to Scout under
+    // `src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/url_state_*.spec.ts`.
   });
 }
