@@ -50,6 +50,3 @@ export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
-
-export { UnifiedDataTableContext } from './src/table_context';
-export type { DataTableContext } from './src/table_context';

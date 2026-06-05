@@ -21,7 +21,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { ToastsStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { type DataTableContext, UnifiedDataTableContext } from '@kbn/unified-data-table';
+import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
+import type { DataTableContext } from '@kbn/unified-data-table/src/table_context';
 import { formatTriggerEventPayloadForCopy } from './trigger_event_payload_format';
 import {
   createTriggerEventSummaryCopyPayloadCellAction,

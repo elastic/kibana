@@ -9,7 +9,7 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { UnifiedDataTableContext } from '@kbn/unified-data-table';
+import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 
 export interface WorkflowExecuteHitSelectionSyncProps {
   dataTableRows: DataTableRecord[];

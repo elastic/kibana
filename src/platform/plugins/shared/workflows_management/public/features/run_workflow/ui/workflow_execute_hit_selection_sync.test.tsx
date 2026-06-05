@@ -10,7 +10,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { type DataTableContext, UnifiedDataTableContext } from '@kbn/unified-data-table';
+import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
+import type { DataTableContext } from '@kbn/unified-data-table/src/table_context';
 import { WorkflowExecuteHitSelectionSync } from './workflow_execute_hit_selection_sync';
 
 const row: DataTableRecord = {

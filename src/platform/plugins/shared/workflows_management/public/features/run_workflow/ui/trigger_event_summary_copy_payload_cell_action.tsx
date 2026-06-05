@@ -12,7 +12,7 @@ import { copyToClipboard } from '@elastic/eui';
 import React, { useContext } from 'react';
 import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDataTableContext } from '@kbn/unified-data-table';
+import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 import { formatTriggerEventPayloadForCopy } from './trigger_event_payload_format';
 
 /**
