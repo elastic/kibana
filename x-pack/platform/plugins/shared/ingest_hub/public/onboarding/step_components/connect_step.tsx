@@ -61,6 +61,7 @@ export function ConnectStep({ onNext, onBack }: ConnectStepProps) {
           cloud={services.cloud as CloudSetupForCloudConnector | undefined}
           initialConnectorId={connectStep.connectorId}
           initialStaticKeys={connectStep.staticKeys}
+          // TODO remove temporary Keys
           initialTemporaryKeys={connectStep.temporaryKeys}
           showIdentityFederation={showIdentityFederation}
           staticKeysContent={staticKeysContent}

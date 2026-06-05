@@ -32,6 +32,7 @@ interface PersistedServicesStep {
   selectedServiceIds: string[];
 }
 
+// TODO if we enable defaultEnabled by default, it takes a lot of clicks to deselect from each category
 const DEFAULT_SELECTED_IDS = AWS_SERVICES_MATRIX.filter((s) => s.showInUI && s.defaultEnabled).map(
   (s) => s.id
 );
