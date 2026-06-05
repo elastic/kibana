@@ -38,6 +38,11 @@ export const DeleteExceptionListItemRequestQuery = lazySchema(() =>
 
       */
     namespace_type: ExceptionNamespaceType.optional().default('single'),
+    /**
+      * Controls when changes become visible to search operations. `false` (default) means no immediate refresh; `wait_for` waits for the next scheduled refresh cycle.
+
+      */
+    refresh: z.enum(['false', 'wait_for']).optional(),
   })
 );
 export type DeleteExceptionListItemRequestQuery = z.infer<

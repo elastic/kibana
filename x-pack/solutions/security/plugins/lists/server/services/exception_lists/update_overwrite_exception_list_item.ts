@@ -11,6 +11,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
+  toSavedObjectRefresh,
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
 } from './utils';
@@ -33,6 +34,7 @@ export const updateOverwriteExceptionListItem = async ({
   user,
   tags,
   type,
+  refresh,
 }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const exceptionListItem = await getExceptionListItem({
@@ -74,6 +76,7 @@ export const updateOverwriteExceptionListItem = async ({
       {
         id: id ?? exceptionListItem.id,
         overwrite: true,
+        refresh: toSavedObjectRefresh(refresh),
         version: _version,
       }
     );

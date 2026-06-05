@@ -181,6 +181,22 @@ export type UpdateExceptionListItemBlocklistMac = z.infer<
   typeof UpdateExceptionListItemBlocklistMac
 >;
 
+export const UpdateExceptionListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+      * Controls when changes become visible to search operations. `false` (default) means no immediate refresh; `wait_for` waits for the next scheduled refresh cycle.
+
+      */
+    refresh: z.enum(['false', 'wait_for']).optional(),
+  })
+);
+export type UpdateExceptionListItemRequestQuery = z.infer<
+  typeof UpdateExceptionListItemRequestQuery
+>;
+export type UpdateExceptionListItemRequestQueryInput = z.input<
+  typeof UpdateExceptionListItemRequestQuery
+>;
+
 export const UpdateExceptionListItemRequestBody = lazySchema(() =>
   z.union([
     UpdateExceptionListItemGeneric,

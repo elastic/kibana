@@ -47,6 +47,7 @@ import type {
   PerPageOrUndefined,
   PitId,
   PitOrUndefined,
+  RefreshFalseOrWaitFor,
   SearchAfterOrUndefined,
   SearchOrUndefined,
   SortFieldOrUndefined,
@@ -189,6 +190,8 @@ export interface DeleteExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: RefreshFalseOrWaitFor;
 }
 
 /**
@@ -200,6 +203,8 @@ export interface DeleteExceptionListItemByIdOptions {
   id: Id;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: RefreshFalseOrWaitFor;
 }
 
 /**
@@ -278,6 +283,8 @@ export interface CreateExceptionListItemOptions {
   tags: Tags;
   /** container type */
   type: ExceptionListItemType;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: RefreshFalseOrWaitFor;
 }
 
 /**
@@ -349,6 +356,8 @@ export interface UpdateExceptionListItemOptions {
   tags: TagsOrUndefined;
   /** container type */
   type: ExceptionListItemTypeOrUndefined;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: RefreshFalseOrWaitFor;
 }
 
 /**

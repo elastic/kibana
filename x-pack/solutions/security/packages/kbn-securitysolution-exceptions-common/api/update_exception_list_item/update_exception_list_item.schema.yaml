@@ -10,6 +10,18 @@ paths:
       x-codegen-enabled: true
       summary: Update an exception list item
       description: Update an exception list item using the `id` or `item_id` field.
+      parameters:
+        - name: refresh
+          in: query
+          required: false
+          description: >
+            Controls when changes become visible to search operations. `false` (default) means no immediate refresh;
+            `wait_for` waits for the next scheduled refresh cycle.
+          schema:
+            type: string
+            enum:
+              - 'false'
+              - wait_for
       requestBody:
         description: Exception list item's properties
         required: true

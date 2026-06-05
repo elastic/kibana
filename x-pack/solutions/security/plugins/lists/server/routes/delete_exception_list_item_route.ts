@@ -13,6 +13,7 @@ import {
   DeleteExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
+import type { RefreshFalseOrWaitFor } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -46,7 +47,7 @@ export const deleteExceptionListItemRoute = (router: ListsPluginRouter): void =>
         const siemResponse = buildSiemResponse(response);
         try {
           const exceptionLists = await getExceptionListClient(context);
-          const { item_id: itemId, id, namespace_type: namespaceType } = request.query;
+          const { item_id: itemId, id, namespace_type: namespaceType, refresh } = request.query;
 
           if (itemId == null && id == null) {
             return siemResponse.error({
@@ -59,6 +60,7 @@ export const deleteExceptionListItemRoute = (router: ListsPluginRouter): void =>
             id,
             itemId,
             namespaceType,
+            refresh: refresh as RefreshFalseOrWaitFor | undefined,
           });
 
           if (deleted == null) {

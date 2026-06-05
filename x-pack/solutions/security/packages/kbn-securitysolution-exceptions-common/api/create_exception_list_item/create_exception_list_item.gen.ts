@@ -168,6 +168,22 @@ export type CreateExceptionListItemBlocklistMac = z.infer<
   typeof CreateExceptionListItemBlocklistMac
 >;
 
+export const CreateExceptionListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+      * Controls when changes become visible to search operations. `false` (default) means no immediate refresh; `wait_for` waits for the next scheduled refresh cycle.
+
+      */
+    refresh: z.enum(['false', 'wait_for']).optional(),
+  })
+);
+export type CreateExceptionListItemRequestQuery = z.infer<
+  typeof CreateExceptionListItemRequestQuery
+>;
+export type CreateExceptionListItemRequestQueryInput = z.input<
+  typeof CreateExceptionListItemRequestQuery
+>;
+
 export const CreateExceptionListItemRequestBody = lazySchema(() =>
   z.union([
     CreateExceptionListItemGeneric,

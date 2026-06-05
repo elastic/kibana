@@ -13,6 +13,18 @@ paths:
         Create an exception item and associate it with the specified exception list.
         > info
         > Before creating exception items, you must create an exception list.
+      parameters:
+        - name: refresh
+          in: query
+          required: false
+          description: >
+            Controls when changes become visible to search operations. `false` (default) means no immediate refresh;
+            `wait_for` waits for the next scheduled refresh cycle.
+          schema:
+            type: string
+            enum:
+              - 'false'
+              - wait_for
       requestBody:
         description: Exception list item's properties
         required: true

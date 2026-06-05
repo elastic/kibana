@@ -587,6 +587,7 @@ export class ExceptionListClient {
     osTypes,
     tags,
     type,
+    refresh,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     let itemData: CreateExceptionListItemOptions = {
@@ -600,6 +601,7 @@ export class ExceptionListClient {
       name,
       namespaceType,
       osTypes,
+      refresh,
       tags,
       type,
     };
@@ -661,6 +663,7 @@ export class ExceptionListClient {
     osTypes,
     tags,
     type,
+    refresh,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     let updatedItem: UpdateExceptionListItemOptions = {
@@ -675,6 +678,7 @@ export class ExceptionListClient {
       name,
       namespaceType,
       osTypes,
+      refresh,
       tags,
       type,
     };
@@ -736,6 +740,7 @@ export class ExceptionListClient {
     osTypes,
     tags,
     type,
+    refresh,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     let updatedItem: UpdateExceptionListItemOptions = {
@@ -750,6 +755,7 @@ export class ExceptionListClient {
       name,
       namespaceType,
       osTypes,
+      refresh,
       tags,
       type,
     };
@@ -787,6 +793,7 @@ export class ExceptionListClient {
     id,
     itemId,
     namespaceType,
+    refresh,
   }: DeleteExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
 
@@ -802,6 +809,7 @@ export class ExceptionListClient {
       id,
       itemId,
       namespaceType,
+      refresh,
       savedObjectsClient,
     });
   };
@@ -815,6 +823,7 @@ export class ExceptionListClient {
   public deleteExceptionListItemById = async ({
     id,
     namespaceType,
+    refresh,
   }: DeleteExceptionListItemByIdOptions): Promise<void> => {
     const { savedObjectsClient } = this;
 
@@ -829,6 +838,7 @@ export class ExceptionListClient {
     return deleteExceptionListItemById({
       id,
       namespaceType,
+      refresh,
       savedObjectsClient,
     });
   };
