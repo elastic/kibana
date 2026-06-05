@@ -10,7 +10,10 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
-import type { SmlSearchFilters } from '@kbn/agent-context-layer-plugin/public';
+import type {
+  SmlSearchFilters,
+  SmlSearchConstraints,
+} from '@kbn/agent-context-layer-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -27,9 +30,9 @@ const smlSearchErrorToastTitle = i18n.translate(
 );
 
 export interface UseSmlSearchOptions {
-  /** When true, the server omits indexed `content` on each hit (smaller payload; e.g. command-menu autocomplete). */
-  readonly skipContent?: boolean;
-  /** Per-type filters for SML search. */
+  /** Runtime-imposed per-type id-allowlist constraints. */
+  readonly constraints?: SmlSearchConstraints;
+  /** Agent-discoverable filters (`types[]`, `tags[]`). */
   readonly filters?: SmlSearchFilters;
 }
 
@@ -37,18 +40,18 @@ export const useSmlSearch = (query: string, options?: UseSmlSearchOptions) => {
   const { services } = useKibana();
   const { smlService } = useAgentBuilderServices();
   const debouncedQuery = useDebouncedValue(query, SML_SEARCH_DEBOUNCE_MS);
-  const skipContent = options?.skipContent ?? false;
+  const constraints = options?.constraints;
   const filters = options?.filters;
 
   const searchQuery = useMemo(() => normalizeSmlSearchQuery(debouncedQuery), [debouncedQuery]);
 
   const { isError, isLoading, error, data } = useQuery({
-    queryKey: queryKeys.sml.search(searchQuery, skipContent, filters),
+    queryKey: queryKeys.sml.search(searchQuery, constraints, filters),
     queryFn: () =>
       smlService.search({
         query: searchQuery,
         size: SML_SEARCH_DEFAULT_SIZE,
-        skipContent,
+        constraints,
         filters,
       }),
     staleTime: SML_SEARCH_STALE_TIME_MS,
@@ -70,7 +73,6 @@ export const useSmlSearch = (query: string, options?: UseSmlSearchOptions) => {
 
   return {
     results: data?.results ?? [],
-    total: data?.total ?? 0,
     isLoading,
     isError,
     error,

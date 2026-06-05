@@ -47,6 +47,7 @@ export interface DocLinks {
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
     readonly storageExplorer: string;
+    readonly infrastructureTab: string;
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
@@ -162,6 +163,7 @@ export interface DocLinks {
     readonly e5Model: string;
     readonly elasticInferenceService: string;
     readonly elasticInferenceServicePricing: string;
+    readonly elasticInferenceServiceSupportedModels: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -577,6 +579,7 @@ export interface DocLinks {
     agentPolicy: string;
     agentlessIntegrations: string;
     api: string;
+    managedOtlp: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
@@ -82,12 +82,6 @@ describe('spec connector with API fetch', () => {
     },
   };
 
-  const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-    id: 'spec-connector-test',
-    source: 'spec',
-    actionConnectorFields: lazy(() => import('../connector_mock')),
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
@@ -96,9 +90,8 @@ describe('spec connector with API fetch', () => {
       actions: { save: true, show: true },
     };
     loadActionTypes.mockResolvedValue([specConnectorType]);
-    // Registered client-side (via registerConnectorTypesFromSpecs); API fetch is triggered by source==='spec'
-    actionTypeRegistry.has.mockReturnValue(true);
-    actionTypeRegistry.get.mockReturnValue(specActionTypeModel);
+    // Spec connectors are not in the UI actionTypeRegistry; useActionTypeModel fetches the spec API.
+    actionTypeRegistry.has.mockReturnValue(false);
     appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
     // Enable workflows UI setting so spec connectors are displayed
     appMockRenderer.coreStart.uiSettings.get = jest.fn().mockImplementation((key: string) => {

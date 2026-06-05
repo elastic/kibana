@@ -66,6 +66,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   cloneAPIKey: jest.fn(),
+  invalidateApiKeyNow: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -203,6 +204,49 @@ describe('delete()', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  test('synchronously invalidates API keys when invalidateApiKeyNow=true and skips the pending queue', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(
+      existingDecryptedAlertWithUiam
+    );
+
+    const result = await rulesClient.delete({ id: '1', invalidateApiKeyNow: true });
+    expect(result).toEqual({ success: true });
+
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(rulesClientParams.invalidateApiKeyNow).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.invalidateApiKeyNow).toHaveBeenCalledWith({
+      ruleName: fakeRuleName,
+      apiKey: 'MTIzOmFiYw==',
+      uiamApiKey: 'MTIzOmVzc3VfdWlhbQ==',
+    });
+  });
+
+  test('falls back to queueing when invalidateApiKeyNow is not set (default behavior)', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(
+      existingDecryptedAlertWithUiam
+    );
+
+    await rulesClient.delete({ id: '1' });
+
+    expect(rulesClientParams.invalidateApiKeyNow).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not call invalidateApiKeyNow when apiKeyCreatedByUser is true even with invalidateApiKeyNow=true', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlertWithUiam,
+      attributes: {
+        ...existingDecryptedAlertWithUiam.attributes,
+        apiKeyCreatedByUser: true,
+      },
+    });
+
+    await rulesClient.delete({ id: '1', invalidateApiKeyNow: true });
+
+    expect(rulesClientParams.invalidateApiKeyNow).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
   test('attempts to soft delete gaps', async () => {
