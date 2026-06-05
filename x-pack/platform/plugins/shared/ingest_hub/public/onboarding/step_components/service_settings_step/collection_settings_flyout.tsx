@@ -24,6 +24,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -65,6 +66,7 @@ export function CollectionSettingsFlyout({
   onApply,
   onClose,
 }: CollectionSettingsFlyoutProps) {
+  const flyoutTitleId = useGeneratedHtmlId();
   const [draft, setDraft] = useState<Record<string, string>>({ ...config.fields });
 
   const [regionsRows, setRegionsRows] = useState<string[]>(() => {
@@ -125,9 +127,9 @@ export function CollectionSettingsFlyout({
   };
 
   return (
-    <EuiFlyout size="m" ownFocus onClose={onClose}>
+    <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="m" id={flyoutTitleId}>
           <h2>
             <FormattedMessage
               id="xpack.ingestHub.serviceSettingsStep.flyout.title"
