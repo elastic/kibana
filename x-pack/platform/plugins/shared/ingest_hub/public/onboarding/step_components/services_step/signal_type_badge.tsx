@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { SignalType } from '../../aws_service_matrix';
 
-const LABELS: Record<SignalType, string> = {
+export const SIGNAL_TYPE_LABELS: Record<SignalType, string> = {
   logs: i18n.translate('xpack.ingestHub.servicesStep.signalType.logs', {
     defaultMessage: 'Logs',
   }),
@@ -30,5 +30,5 @@ interface SignalTypeBadgeProps {
 }
 
 export const SignalTypeBadge: React.FC<SignalTypeBadgeProps> = ({ signalType }) => (
-  <EuiBadge color={COLORS[signalType]}>{LABELS[signalType]}</EuiBadge>
+  <EuiBadge color={COLORS[signalType]}>{SIGNAL_TYPE_LABELS[signalType]}</EuiBadge>
 );
