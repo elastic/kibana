@@ -11,6 +11,7 @@ import type { EuiTableComputedColumnType, EuiTableFieldDataColumnType } from '@e
 import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common';
 
 import { getColumns } from '.';
+import type { ScheduleRunRow } from '../types';
 
 const mockGeneration: AttackDiscoveryGeneration = {
   connector_id: 'connector-1',
@@ -33,6 +34,19 @@ const mockWorkflowGeneration: AttackDiscoveryGeneration = {
   workflow_run_id: 'workflow-run-id-1',
 };
 
+const mockRow: ScheduleRunRow = {
+  executionUuid: 'exec-uuid-1',
+  start: '2026-04-07T12:00:00.000Z',
+  status: 'failure',
+};
+
+const mockWorkflowRow: ScheduleRunRow = {
+  executionUuid: 'exec-uuid-workflow',
+  generation: mockWorkflowGeneration,
+  start: '2026-04-07T12:00:00.000Z',
+  status: 'success',
+};
+
 describe('getColumns', () => {
   it('returns three columns', () => {
     const columns = getColumns(jest.fn());
@@ -40,57 +54,53 @@ describe('getColumns', () => {
     expect(columns).toHaveLength(3);
   });
 
-  it('renders an inspect button for a generation with workflow data', () => {
+  it('renders an inspect button for a run with workflow data', () => {
     const onViewDetails = jest.fn();
     const columns = getColumns(onViewDetails);
-    const actionColumn = columns[0] as EuiTableComputedColumnType<AttackDiscoveryGeneration>;
+    const actionColumn = columns[0] as EuiTableComputedColumnType<ScheduleRunRow>;
 
-    render(<>{actionColumn.render?.(mockWorkflowGeneration)}</>);
+    render(<>{actionColumn.render?.(mockWorkflowRow)}</>);
 
-    expect(
-      screen.getByTestId(`inspect-${mockWorkflowGeneration.execution_uuid}`)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId(`inspect-${mockWorkflowRow.executionUuid}`)).toBeInTheDocument();
   });
 
-  it('renders nothing for a generation without workflow data', () => {
+  it('renders nothing for a run without workflow data', () => {
     const onViewDetails = jest.fn();
     const columns = getColumns(onViewDetails);
-    const actionColumn = columns[0] as EuiTableComputedColumnType<AttackDiscoveryGeneration>;
+    const actionColumn = columns[0] as EuiTableComputedColumnType<ScheduleRunRow>;
 
-    const { container } = render(<>{actionColumn.render?.(mockGeneration)}</>);
+    const { container } = render(<>{actionColumn.render?.(mockRow)}</>);
 
     expect(container.querySelector('[data-test-subj^="inspect-"]')).not.toBeInTheDocument();
   });
 
-  it('calls onViewDetails with the item when the inspect button is clicked', () => {
+  it('calls onViewDetails with the row when the inspect button is clicked', () => {
     const onViewDetails = jest.fn();
     const columns = getColumns(onViewDetails);
-    const actionColumn = columns[0] as EuiTableComputedColumnType<AttackDiscoveryGeneration>;
+    const actionColumn = columns[0] as EuiTableComputedColumnType<ScheduleRunRow>;
 
-    render(<>{actionColumn.render?.(mockWorkflowGeneration)}</>);
+    render(<>{actionColumn.render?.(mockWorkflowRow)}</>);
 
-    fireEvent.click(screen.getByTestId(`inspect-${mockWorkflowGeneration.execution_uuid}`));
+    fireEvent.click(screen.getByTestId(`inspect-${mockWorkflowRow.executionUuid}`));
 
-    expect(onViewDetails).toHaveBeenCalledWith(mockWorkflowGeneration);
+    expect(onViewDetails).toHaveBeenCalledWith(mockWorkflowRow);
   });
 
   it('renders the start value in the start column', () => {
     const columns = getColumns(jest.fn());
-    const startColumn = columns[1] as EuiTableFieldDataColumnType<AttackDiscoveryGeneration>;
+    const startColumn = columns[1] as EuiTableFieldDataColumnType<ScheduleRunRow>;
 
-    const { container } = render(
-      <>{startColumn.render?.('2026-04-07T12:00:00.000Z', mockGeneration)}</>
-    );
+    const { container } = render(<>{startColumn.render?.('2026-04-07T12:00:00.000Z', mockRow)}</>);
 
     expect(container.textContent).toBe('2026-04-07T12:00:00.000Z');
   });
 
   it('renders the status value in the status column', () => {
     const columns = getColumns(jest.fn());
-    const statusColumn = columns[2] as EuiTableFieldDataColumnType<AttackDiscoveryGeneration>;
+    const statusColumn = columns[2] as EuiTableFieldDataColumnType<ScheduleRunRow>;
 
-    const { container } = render(<>{statusColumn.render?.('succeeded', mockGeneration)}</>);
+    const { container } = render(<>{statusColumn.render?.('failure', mockRow)}</>);
 
-    expect(container.textContent).toBe('succeeded');
+    expect(container.textContent).toBe('failure');
   });
 });

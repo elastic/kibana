@@ -399,5 +399,29 @@ describe('SchedulesTable', () => {
         });
       });
     });
+
+    it('refetches the schedules after the workflow disable mutation so the table updates', async () => {
+      const { getAllByTestId } = renderTable();
+
+      act(() => {
+        fireEvent.click(getAllByTestId('scheduleSwitch')[0]);
+      });
+
+      await waitFor(() => {
+        expect(refetchSchedulesMock).toHaveBeenCalled();
+      });
+    });
+
+    it('refetches the schedules after the workflow delete mutation so the table updates', async () => {
+      const { getAllByTestId } = renderTable();
+
+      act(() => {
+        fireEvent.click(getAllByTestId('deleteButton')[0]);
+      });
+
+      await waitFor(() => {
+        expect(refetchSchedulesMock).toHaveBeenCalled();
+      });
+    });
   });
 });
