@@ -478,10 +478,6 @@ const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventS
   };
 
 const streamsSignificantEventsDiscoveryTriggeredSchema = {
-  triggered_by: {
-    type: 'keyword' as const,
-    _meta: { description: 'How the discovery pipeline was triggered' },
-  },
   execution_id: {
     type: 'keyword' as const,
     _meta: { description: 'The workflow execution ID returned by the orchestrator' },

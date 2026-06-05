@@ -204,7 +204,10 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   }
 
   async getLastExecution(spaceId: string): Promise<WorkflowExecutionListItemDto | null> {
-    const { results } = await this.getExecutions({ size: 1 }, spaceId);
+    const { results } = await this.getExecutions(
+      { size: 1, sortField: 'createdAt', sortOrder: 'desc' },
+      spaceId
+    );
     return results[0] ?? null;
   }
 

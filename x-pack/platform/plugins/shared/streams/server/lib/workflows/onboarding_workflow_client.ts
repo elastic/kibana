@@ -12,10 +12,9 @@ import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   SigEventsWorkflowStatus,
-  type SigEventsWorkflowStatusResult,
   type StreamsKIsOnboardingFeaturesResult,
   type StreamsKIsOnboardingQueriesResult,
-  type StreamsKIsOnboardingResult,
+  type StreamsKIsOnboardingServerStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/streams-schema';
@@ -213,13 +212,14 @@ export class StreamsKIsOnboardingClient {
   }: {
     inputs: StreamsKIsOnboardingInputs;
     request: KibanaRequest;
-  }): Promise<void> {
-    await this.workflowExecutionService.execute({
+  }): Promise<{ executionId: string }> {
+    const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       inputs: toWorkflowInputPayload(inputs),
       request,
       notFoundMessage: `Onboarding workflow ${STREAMS_KI_ONBOARDING_WORKFLOW_ID} not found`,
     });
+    return { executionId };
   }
 
   /**
@@ -233,7 +233,7 @@ export class StreamsKIsOnboardingClient {
     streamName,
   }: {
     streamName: string;
-  }): Promise<SigEventsWorkflowStatusResult<StreamsKIsOnboardingResult>> {
+  }): Promise<StreamsKIsOnboardingServerStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       timedOutMessage: 'Onboarding workflow timed out',

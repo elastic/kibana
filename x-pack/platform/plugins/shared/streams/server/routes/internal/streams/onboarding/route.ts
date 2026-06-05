@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   StreamsKIsOnboardingStep,
   SigEventsWorkflowStatus,
-  type SigEventsWorkflowStatusResult,
+  type StreamsKIsOnboardingServerStatusResult,
 } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -85,7 +85,7 @@ export const onboardingExecuteRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
-  }): Promise<SigEventsWorkflowStatusResult> => {
+  }): Promise<StreamsKIsOnboardingServerStatusResult> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
@@ -116,9 +116,9 @@ export const onboardingExecuteRoute = createServerRoute({
         },
       };
 
-      await streamsKIsOnboardingClient.run({ inputs, request });
+      const { executionId } = await streamsKIsOnboardingClient.run({ inputs, request });
 
-      return { status: SigEventsWorkflowStatus.InProgress };
+      return { status: SigEventsWorkflowStatus.InProgress, executionId };
     }
 
     // action === 'cancel'
@@ -126,10 +126,7 @@ export const onboardingExecuteRoute = createServerRoute({
     // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    const { executionId: _executionId, ...statusResult } =
-      await streamsKIsOnboardingClient.getStatus({ streamName });
-
-    return statusResult;
+    return streamsKIsOnboardingClient.getStatus({ streamName });
   },
 });
 
@@ -154,7 +151,7 @@ export const onboardingStatusRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
-  }): Promise<SigEventsWorkflowStatusResult> => {
+  }): Promise<StreamsKIsOnboardingServerStatusResult> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
@@ -167,9 +164,7 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
     } = params;
 
-    const { executionId: _executionId, ...statusResult } =
-      await streamsKIsOnboardingClient.getStatus({ streamName });
-    return statusResult;
+    return streamsKIsOnboardingClient.getStatus({ streamName });
   },
 });
 

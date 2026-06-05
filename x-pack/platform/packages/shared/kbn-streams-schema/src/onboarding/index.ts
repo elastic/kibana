@@ -8,7 +8,11 @@
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature } from '../feature';
 import type { GeneratedSignificantEventQuery } from '../api/significant_events';
-import { SigEventsWorkflowStatus } from '../workflows';
+import {
+  SigEventsWorkflowStatus,
+  type SigEventsWorkflowStatusResult,
+  type SigEventsWorkflowServerStatusResult,
+} from '../workflows';
 
 /** Summary of the features identification step of a completed onboarding run. */
 export interface StreamsKIsOnboardingFeaturesResult {
@@ -30,6 +34,12 @@ export interface StreamsKIsOnboardingResult {
   features: StreamsKIsOnboardingFeaturesResult;
   queries: StreamsKIsOnboardingQueriesResult;
 }
+
+export type StreamsKIsOnboardingStatusResult =
+  SigEventsWorkflowStatusResult<StreamsKIsOnboardingResult>;
+
+export type StreamsKIsOnboardingServerStatusResult =
+  SigEventsWorkflowServerStatusResult<StreamsKIsOnboardingResult>;
 
 export enum StreamsKIsOnboardingStep {
   FeaturesIdentification = 'features_identification',

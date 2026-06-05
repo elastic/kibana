@@ -103,7 +103,6 @@ interface StreamsAgentToolEventStatusUpdateProps {
 }
 
 interface StreamsSignificantEventsDiscoveryTriggeredProps {
-  triggered_by: 'manual' | 'scheduled';
   execution_id: string;
   space_id: string;
 }

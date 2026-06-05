@@ -22,7 +22,10 @@ export enum SigEventsWorkflowStatus {
 /**
  * Client-side workflow execution status result.
  * `T` extends the `Completed` variant with workflow-specific output data.
- * All non-NotStarted variants carry `executionId: string`.
+ *
+ * `InProgress` and `BeingCanceled` carry `executionId?: string` (optional/undefined)
+ * because they may be set optimistically on the client before the server response
+ * provides the real id. All other non-NotStarted variants carry `executionId: string`.
  *
  * Note: `BeingCanceled` is a client-only optimistic state — the server never
  * returns it. For the server-returned shape use {@link SigEventsWorkflowServerStatusResult}.
@@ -30,14 +33,14 @@ export enum SigEventsWorkflowStatus {
 export type SigEventsWorkflowStatusResult<T extends object = {}> =
   | { status: SigEventsWorkflowStatus.NotStarted; executionId: null }
   | {
-      status:
-        | SigEventsWorkflowStatus.InProgress
-        | SigEventsWorkflowStatus.BeingCanceled
-        | SigEventsWorkflowStatus.Canceled;
-      executionId: string;
+      status: SigEventsWorkflowStatus.InProgress | SigEventsWorkflowStatus.BeingCanceled;
+      executionId?: string;
     }
-  | { status: SigEventsWorkflowStatus.Failed; executionId: string; error: string }
-  | ({ status: SigEventsWorkflowStatus.Completed; executionId: string } & T);
+  | ({ executionId: string } & (
+      | { status: SigEventsWorkflowStatus.Canceled }
+      | { status: SigEventsWorkflowStatus.Failed; error: string }
+      | ({ status: SigEventsWorkflowStatus.Completed } & T)
+    ));
 
 /**
  * Server-returned workflow status result — identical to {@link SigEventsWorkflowStatusResult}

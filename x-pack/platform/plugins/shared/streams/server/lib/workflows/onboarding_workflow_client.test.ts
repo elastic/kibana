@@ -82,11 +82,11 @@ describe('StreamsKIsOnboardingClient', () => {
   });
 
   describe('run', () => {
-    it('fetches the workflow definition and runs it', async () => {
+    it('fetches the workflow definition and runs it and returns executionId', async () => {
       const { client, managementApi } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
-      await client.run({
+      const result = await client.run({
         inputs: {
           streamName: 'logs.nginx',
           features: { skip: false, start: 1000, end: 2000 },
@@ -95,6 +95,7 @@ describe('StreamsKIsOnboardingClient', () => {
         request,
       });
 
+      expect(result).toEqual({ executionId: 'execution-id' });
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         '*'

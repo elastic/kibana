@@ -11,7 +11,7 @@ import { useCallback, useRef, useState } from 'react';
 import {
   SigEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type SigEventsWorkflowStatusResult,
+  type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
@@ -21,18 +21,21 @@ interface Props {
   streamName: string;
   onComplete: (
     completedState: Extract<
-      SigEventsWorkflowStatusResult,
+      StreamsKIsOnboardingStatusResult,
       { status: SigEventsWorkflowStatus.Completed }
     >
   ) => void;
   onError: (
-    failedState: Extract<SigEventsWorkflowStatusResult, { status: SigEventsWorkflowStatus.Failed }>
+    failedState: Extract<
+      StreamsKIsOnboardingStatusResult,
+      { status: SigEventsWorkflowStatus.Failed }
+    >
   ) => void;
 }
 
 export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onError }: Props) {
   const previousStatusRef = useRef<SigEventsWorkflowStatus | null>(null);
-  const [onboardingState, setOnboardingState] = useState<SigEventsWorkflowStatusResult | null>(
+  const [onboardingState, setOnboardingState] = useState<StreamsKIsOnboardingStatusResult | null>(
     null
   );
 
@@ -113,7 +116,7 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     return state;
   }, [getOnboardingStatus, streamName, onComplete, onError]);
 
-  useQuery<SigEventsWorkflowStatusResult, Error>({
+  useQuery<StreamsKIsOnboardingStatusResult, Error>({
     queryKey: ['knowledgeIndicatorsOnboardingStatus', streamName],
     queryFn: fetchStatus,
     enabled: !isScheduleLoading && !isCancelLoading,

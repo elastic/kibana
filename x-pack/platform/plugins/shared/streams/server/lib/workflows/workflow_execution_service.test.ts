@@ -360,5 +360,16 @@ describe('WorkflowExecutionService', () => {
 
       expect(result).toBeNull();
     });
+
+    it('queries by createdAt desc to get the most recently created execution', async () => {
+      const { service, managementApi } = createService();
+
+      await service.getLastExecution('space-a');
+
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ sortField: 'createdAt', sortOrder: 'desc', size: 1 }),
+        'space-a'
+      );
+    });
   });
 });

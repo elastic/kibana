@@ -280,7 +280,6 @@ const significantEventsDiscoveryExecuteRoute = createServerRoute({
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({
-          triggered_by: 'manual',
           execution_id: executionId,
           space_id: spaceId,
         });
