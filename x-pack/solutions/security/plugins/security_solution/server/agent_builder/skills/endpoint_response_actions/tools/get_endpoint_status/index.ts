@@ -16,10 +16,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
 
 const getEndpointStatusSchema = z.object({
-  hostName: z
-    .string()
-    .min(1)
-    .describe('The hostname of the endpoint to check status for.'),
+  hostName: z.string().min(1).describe('The hostname of the endpoint to check status for.'),
 });
 
 export const getEndpointStatusTool = (
@@ -30,10 +27,7 @@ export const getEndpointStatusTool = (
     type: ToolType.builtin,
     description: `Retrieves the current status of a host by its hostname, including whether it is isolated, its last seen time, and online/offline status.`,
     schema: getEndpointStatusSchema,
-    handler: async (
-      params,
-      { logger }
-    ) => {
+    handler: async (params, { logger }) => {
       try {
         const { hostName } = params;
         const spaceId = DEFAULT_SPACE_ID;
@@ -91,9 +85,7 @@ export const getEndpointStatusTool = (
             status = hostMetadata.host_status || HostStatus.OFFLINE;
           }
         } catch (metadataError) {
-          logger.warn(
-            `Could not retrieve metadata for host ${hostName}: ${metadataError.message}`
-          );
+          logger.warn(`Could not retrieve metadata for host ${hostName}: ${metadataError.message}`);
           // Fallback to agent-level info
           isolated = Boolean(agent.isolation);
           lastSeen = agent.last_checkin ?? null;

@@ -15,10 +15,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { UNISOLATE_TOOL_ID } from '../..';
 
 const unisolateHostSchema = z.object({
-  hostName: z
-    .string()
-    .min(1)
-    .describe('The hostname of the endpoint to un-isolate.'),
+  hostName: z.string().min(1).describe('The hostname of the endpoint to un-isolate.'),
   comment: z
     .string()
     .min(1)
@@ -34,10 +31,7 @@ export const unisolateHostTool = (
     type: ToolType.builtin,
     description: `Un-isolates a host by its hostname. Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
-    handler: async (
-      params,
-      { logger }
-    ) => {
+    handler: async (params, { logger }) => {
       try {
         const { hostName, comment } = params;
         const spaceId = DEFAULT_SPACE_ID;

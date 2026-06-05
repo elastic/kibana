@@ -7,7 +7,12 @@
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
-import { createEndpointResponseActionsSkill, ISOLATE_TOOL_ID, UNISOLATE_TOOL_ID, GET_ENDPOINT_STATUS_TOOL_ID } from '.';
+import {
+  createEndpointResponseActionsSkill,
+  ISOLATE_TOOL_ID,
+  UNISOLATE_TOOL_ID,
+  GET_ENDPOINT_STATUS_TOOL_ID,
+} from '.';
 
 describe('createEndpointResponseActionsSkill', () => {
   let mockEndpointAppContextService: EndpointAppContextService;

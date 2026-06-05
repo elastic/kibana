@@ -9,11 +9,7 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import {
-  isolateHostTool,
-  unisolateHostTool,
-  getEndpointStatusTool,
-} from './tools';
+import { isolateHostTool, unisolateHostTool, getEndpointStatusTool } from './tools';
 
 const ID = 'endpoint-response-actions';
 const NAME = 'endpoint-response-actions';
