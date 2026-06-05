@@ -50,10 +50,13 @@ receivers:
       http: { endpoint: 0.0.0.0:4318 }
 
 connectors:
+  # Necessary for the APM UI to understand the OTel Traces
   elasticapm:
 
 processors:
+  # Necessary for the APM UI to understand the OTel Traces
   elasticapm:
+  # Filter the metrics and spans relevant to this workshop
   filter/workshop:
     metrics:
       metric:
