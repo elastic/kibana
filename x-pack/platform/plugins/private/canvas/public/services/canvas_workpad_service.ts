@@ -28,6 +28,13 @@ export interface TemplateFindResponse {
   templates: CanvasTemplate[];
 }
 
+export interface UpdateWorkpadResponse {
+  ok: boolean;
+  // The server re-stamps the modified time on every save and returns it so the
+  // client can sync it into state.
+  '@timestamp'?: string;
+}
+
 export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
   outcome: SavedObjectsResolveResponse['outcome'];
@@ -171,11 +178,14 @@ class CanvasWorkpadService {
     });
   }
 
-  public async updateWorkpad(id: string, workpad: CanvasWorkpad) {
-    return await coreServices.http.put(buildPath(`${API_ROUTE_WORKPAD_STRUCTURES}/{id}`, { id }), {
-      body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
-      version: '1',
-    });
+  public async updateWorkpad(id: string, workpad: CanvasWorkpad): Promise<UpdateWorkpadResponse> {
+    return await coreServices.http.put<UpdateWorkpadResponse>(
+      buildPath(`${API_ROUTE_WORKPAD_STRUCTURES}/{id}`, { id }),
+      {
+        body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
+        version: '1',
+      }
+    );
   }
 
   public async updateAssets(id: string, assets: CanvasWorkpad['assets']) {

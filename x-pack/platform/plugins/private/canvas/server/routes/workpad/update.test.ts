@@ -53,8 +53,9 @@ describe('PUT workpad', () => {
     clock.restore();
   });
 
-  it(`returns 200 ok when the workpad is updated`, async () => {
+  it(`returns 200 ok with the server @timestamp when the workpad is updated`, async () => {
     const updatedWorkpad = { name: 'new name' };
+    const timestamp = '2021-01-01T00:05:00.000Z';
     const { id } = workpad;
 
     const request = httpServerMock.createKibanaRequest({
@@ -66,7 +67,12 @@ describe('PUT workpad', () => {
       body: updatedWorkpad,
     });
 
-    mockRouteContext.canvas.workpad.update.mockResolvedValue(true);
+    mockRouteContext.canvas.workpad.update.mockResolvedValue({
+      id,
+      type: CANVAS_TYPE,
+      attributes: { '@timestamp': timestamp } as any,
+      references: [],
+    });
 
     const response = await routeHandler(
       coreMock.createCustomRequestHandlerContext(mockRouteContext),
@@ -75,8 +81,42 @@ describe('PUT workpad', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual(okResponse);
+    expect(response.payload).toEqual({ ...okResponse, '@timestamp': timestamp });
     expect(mockRouteContext.canvas.workpad.update).toBeCalledWith(id, updatedWorkpad);
+  });
+
+  it(`returns the server @timestamp from the workpad-structures route`, async () => {
+    const routerDeps = getMockedRouterDeps();
+    initializeUpdateWorkpadRoute(routerDeps);
+    // The structures route is the second PUT registered by initializeUpdateWorkpadRoute.
+    const structuresHandler =
+      routerDeps.router.versioned.put.mock.results[1].value.addVersion.mock.calls[0][1];
+
+    const { id } = workpad;
+    const timestamp = '2021-02-02T00:00:00.000Z';
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'put',
+      path: `api/canvas/workpad-structures/${id}`,
+      params: { id },
+      body: { name: 'new name' },
+    });
+
+    mockRouteContext.canvas.workpad.update.mockResolvedValue({
+      id,
+      type: CANVAS_TYPE,
+      attributes: { '@timestamp': timestamp } as any,
+      references: [],
+    });
+
+    const response = await structuresHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({ ...okResponse, '@timestamp': timestamp });
   });
 
   it(`returns not found if existing workpad is not found`, async () => {

@@ -25,6 +25,11 @@ export const setWorkpadCSS = createAction<string>('setWorkpadCSS');
 export const setWorkpadVariables = createAction<CanvasVariable[]>('setWorkpadVariables');
 export const enableAutoplay = createAction<boolean>('enableAutoplay');
 export const setAutoplayInterval = createAction<number>('setAutoplayInterval');
+// The server re-stamps `@timestamp` on every save. This lets the client sync that
+// new value back into state after a successful persist, so the auto-refresh reload
+// doesn't mistake the client's own save for an external change (see refreshWorkpad
+// and useWorkpadPersist).
+export const setWorkpadTimestamp = createAction<string>('setWorkpadTimestamp');
 export const resetWorkpad = createAction<void>('resetWorkpad');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
