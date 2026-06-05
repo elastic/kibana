@@ -12,6 +12,7 @@ import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrou
 
 const TEST_DEFAULT_CONTEXT_SIZE = 2;
 const TEST_STEP_SIZE = 2;
+const INITIAL_ROW_COUNT = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
 spaceTest.describe(
   'Discover context - size settings',
@@ -40,47 +41,27 @@ spaceTest.describe(
     });
 
     spaceTest('should default to the context:defaultSize setting', async ({ pageObjects }) => {
-      const expectedRowCount = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-      // context data grid renders after anchor + surrounding doc queries
-      await expect(pageObjects.contextPage.rows).toHaveCount(expectedRowCount, {
-        timeout: 30_000,
-      });
-
-      const predecessorValue = await pageObjects.contextPage.getPredecessorCountPickerValue();
-      expect(predecessorValue).toBe(String(TEST_DEFAULT_CONTEXT_SIZE));
+      await expect(pageObjects.contextPage.rows).toHaveCount(INITIAL_ROW_COUNT);
+      expect(await pageObjects.contextPage.getPredecessorCountPickerValue()).toBe(
+        String(TEST_DEFAULT_CONTEXT_SIZE)
+      );
     });
 
-    spaceTest('should increase rows when clicking load newer button', async ({ pageObjects }) => {
-      const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-      // context data grid renders after anchor + surrounding doc queries
-      await expect(pageObjects.contextPage.rows).toHaveCount(initialExpected, {
-        timeout: 30_000,
-      });
+    spaceTest(
+      'should increase according to the context:step setting when clicking load newer',
+      async ({ pageObjects }) => {
+        await pageObjects.contextPage.clickPredecessorLoadMoreButton();
+        await expect(pageObjects.contextPage.rows).toHaveCount(INITIAL_ROW_COUNT + TEST_STEP_SIZE);
+      }
+    );
 
-      await pageObjects.contextPage.clickPredecessorLoadMoreButton();
-
-      const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
-      // new rows fetched and appended after load-more query
-      await expect(pageObjects.contextPage.rows).toHaveCount(expectedAfterLoad, {
-        timeout: 30_000,
-      });
-    });
-
-    spaceTest('should increase rows when clicking load older button', async ({ pageObjects }) => {
-      const initialExpected = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
-      // context data grid renders after anchor + surrounding doc queries
-      await expect(pageObjects.contextPage.rows).toHaveCount(initialExpected, {
-        timeout: 30_000,
-      });
-
-      await pageObjects.contextPage.clickSuccessorLoadMoreButton();
-
-      const expectedAfterLoad = initialExpected + TEST_STEP_SIZE;
-      // new rows fetched and appended after load-more query
-      await expect(pageObjects.contextPage.rows).toHaveCount(expectedAfterLoad, {
-        timeout: 30_000,
-      });
-    });
+    spaceTest(
+      'should increase according to the context:step setting when clicking load older',
+      async ({ pageObjects }) => {
+        await pageObjects.contextPage.clickSuccessorLoadMoreButton();
+        await expect(pageObjects.contextPage.rows).toHaveCount(INITIAL_ROW_COUNT + TEST_STEP_SIZE);
+      }
+    );
 
     spaceTest(
       'should show 101 records when 50 newer and 50 older are requested',
