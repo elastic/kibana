@@ -16,9 +16,8 @@ import {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   type PendingSignificantEventAttachment,
 } from '@kbn/streams-plugin/common';
-import type { FocusedSignificantEventService } from '../../services/significant_events/focused_significant_event_service';
-
-const AGENT_BUILDER_SIDEBAR_APP_ID = 'agentBuilder' as const;
+import type { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
+import { AGENT_BUILDER_SIDEBAR_APP_ID } from './constants';
 
 export interface IdGenerator {
   readonly current: string;

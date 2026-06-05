@@ -21,11 +21,12 @@ import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-bro
 import type { SignificantEventAttachment } from '@kbn/streams-plugin/common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
 import type { ChromeStart } from '@kbn/core/public';
-import type { StreamsAppStartDependencies } from '../../types';
-import type { FocusedSignificantEventService } from '../../services/significant_events/focused_significant_event_service';
-import sigEventIcon from '../asset_image/sig_event_icon.svg';
-import { registerSignificantEventAutoAttach } from './significant_event_auto_attach';
-import { getStatusColor } from './significant_events_discovery/components/sig_events_tab/filter_constants';
+import type { StreamsAppStartDependencies } from '../../../types';
+import type { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
+import sigEventIcon from '../../asset_image/sig_event_icon.svg';
+import { registerSignificantEventAutoAttach } from '../lib/significant_event_auto_attach';
+import { getStatusColor } from '../significant_events_discovery/components/sig_events_tab/filter_constants';
+import type { AGENT_BUILDER_SIDEBAR_APP_ID } from '../lib/constants';
 
 const labels = {
   fallback: i18n.translate('xpack.streams.significantEventAttachment.fallbackLabel', {
@@ -184,7 +185,7 @@ export const registerSignificantEventAttachment = ({
   chrome,
   focusedSignificantEventService,
 }: {
-  agentBuilder: NonNullable<StreamsAppStartDependencies['agentBuilder']>;
+  agentBuilder: NonNullable<StreamsAppStartDependencies[typeof AGENT_BUILDER_SIDEBAR_APP_ID]>;
   chrome: ChromeStart;
   focusedSignificantEventService: FocusedSignificantEventService;
 }): (() => void) => {

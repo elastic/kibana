@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import type { SignificantEventAttachment } from '@kbn/streams-plugin/common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
-import { FocusedSignificantEventService } from '../../services/significant_events/focused_significant_event_service';
+import { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
 import {
   registerSignificantEventAttachment,
   significantEventAttachmentDefinition,
