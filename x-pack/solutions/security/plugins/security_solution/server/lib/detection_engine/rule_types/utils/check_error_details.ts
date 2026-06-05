@@ -19,8 +19,6 @@ const USER_ERRORS_EXCEPTIONS = [
 // that are unambiguously caused by user data or configuration.
 const ILLEGAL_ARGUMENT_USER_REASON_SUBSTRINGS = [
   'is not an IP string literal',
-  'is not supported for aggregation',
-  'of type [text]',
   'Fielddata is disabled on',
 ];
 

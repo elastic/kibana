@@ -140,16 +140,6 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
-    it('should mark as user error when reason contains "is not supported for aggregation"', () => {
-      const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "[bytes_counter] of type [long][counter] is not supported for aggregation" caused by type: "illegal_argument_exception"`;
-      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
-    });
-
-    it('should mark as user error when reason contains "of type [text]"', () => {
-      const errorMessage = `index: "logs-*" reason: "failed to execute query" type: "query_shard_exception" caused by reason: "Fielddata is not supported on field [host.name] of type [text]" caused by type: "illegal_argument_exception"`;
-      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
-    });
-
     it('should mark as user error when reason contains "Fielddata is disabled on"', () => {
       const errorMessage = `index: "packetbeat-9.4.1" reason: "Fielddata is disabled on [source.ip] in [packetbeat-9.4.1]. Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default. Please use a keyword field instead." type: "query_shard_exception" caused by reason: "Fielddata is disabled on [source.ip] in [packetbeat-9.4.1]. Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default. Please use a keyword field instead." caused by type: "illegal_argument_exception"`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
