@@ -23,6 +23,13 @@ describe('compareWarmStartMemory', () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    delete process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_COMMIT;
+    delete process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_COMMIT;
+    delete process.env.KIBANA_CI_WARM_START_MEMORY_BASELINE_BUILD_ID;
+    delete process.env.KIBANA_CI_WARM_START_MEMORY_TARGET_BUILD_ID;
+    delete process.env.GITHUB_PR_MERGE_BASE;
+    delete process.env.BUILDKITE_COMMIT;
+    delete process.env.BUILDKITE_BUILD_ID;
   });
 
   afterAll(() => {
