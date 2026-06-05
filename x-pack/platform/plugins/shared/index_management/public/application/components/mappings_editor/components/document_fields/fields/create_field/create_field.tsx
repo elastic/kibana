@@ -102,9 +102,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     id: 'create-field',
   });
 
-  const [{ type, subType, inference_id: inferenceId }] = useFormData({
+  const [{ type, subType }] = useFormData({
     form,
-    watch: ['type', 'subType', 'inference_id'],
+    watch: ['type', 'subType'],
   });
 
   const { subscribe } = form;
@@ -126,8 +126,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const isSemanticText = type?.[0]?.value === 'semantic_text';
   const isSemantic = type?.[0]?.value === 'semantic';
-  // TODO: Check if this is fine.
-  const isAddDisabled = form.getErrors().length > 0 || (isSemantic && !inferenceId);
+  const isAddDisabled = form.getErrors().length > 0;
 
   useEffect(() => {
     if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
@@ -332,8 +331,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
               {renderRequiredParametersForm()}
 
-              {isSemanticText && <SelectInferenceId />}
-              {isSemantic && <SelectInferenceId taskTypes={['embedding']} />}
+              {isSemanticText && <SelectInferenceId fieldType="semantic_text" />}
+              {isSemantic && <SelectInferenceId fieldType="semantic" />}
               {renderFormActions()}
             </div>
           </EuiPanel>

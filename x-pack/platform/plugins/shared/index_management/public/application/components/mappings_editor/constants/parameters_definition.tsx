@@ -1126,6 +1126,25 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
+  inference_id_required: {
+    fieldConfig: {
+      defaultValue: '',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.inferenceIdLabel', {
+        defaultMessage: 'Select an inference endpoint:',
+      }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.validation.required',
+              { defaultMessage: 'Select an inference endpoint.' }
+            )
+          ),
+        },
+      ],
+    },
+    schema: t.string,
+  },
 
   relations: {
     fieldConfig: {

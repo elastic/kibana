@@ -9,8 +9,11 @@ import { useMemo } from 'react';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-
-const DEFAULT_COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
+import {
+  type SemanticInferenceFieldType,
+  getDefaultStrategyForFieldType,
+  getTaskTypesForFieldType,
+} from '../application/components/mappings_editor/constants';
 
 interface EndpointDefinition {
   /** The inference id of the endpoint. */
@@ -37,12 +40,15 @@ const defaultEndpointsPriorityList = [
 export const useCompatibleInferenceEndpoints = (
   endpoints: InferenceAPIConfigResponse[] | null | undefined,
   endpointsLoading: boolean,
-  taskTypes: readonly string[] = DEFAULT_COMPATIBLE_TASK_TYPES
+  fieldType: SemanticInferenceFieldType = 'semantic_text'
 ) => {
   const compatibleEndpoints = useMemo<CompatibleEndpointsData | undefined>(() => {
     if (endpointsLoading) {
       return;
     }
+    const taskTypes = getTaskTypesForFieldType(fieldType);
+    const defaultStrategy = getDefaultStrategyForFieldType(fieldType);
+
     const endpointDefinitions: EndpointDefinition[] = [];
     endpoints?.forEach((endpoint) => {
       // Skip incompatible endpoints
@@ -59,23 +65,33 @@ export const useCompatibleInferenceEndpoints = (
         description,
       });
     });
-    const compatibleIds = new Set(endpointDefinitions.map((e) => e.inference_id));
-    const priorityDefault = defaultEndpointsPriorityList.find((id) => compatibleIds.has(id));
+
     let defaultInferenceId: string | undefined;
-    if (priorityDefault) {
-      defaultInferenceId = priorityDefault;
-    } else if (taskTypes.includes('sparse_embedding')) {
-      // Preserve existing semantic_text behaviour: fall back to ELSER even if not in the list
-      defaultInferenceId = defaultInferenceEndpoints.ELSER;
-    } else if (endpointDefinitions.length > 0) {
-      defaultInferenceId = endpointDefinitions[0].inference_id;
+
+    if (defaultStrategy === 'priority_with_elser_fallback') {
+      const availableDefaultEndpoints = defaultEndpointsPriorityList.filter((defaultEndpoint) =>
+        endpoints?.some((endpoint) => endpoint.inference_id === defaultEndpoint)
+      );
+      defaultInferenceId =
+        availableDefaultEndpoints.length > 0
+          ? availableDefaultEndpoints[0]
+          : defaultInferenceEndpoints.ELSER;
+    } else {
+      // first_compatible, if no compatible endpoints return undefined.
+      const compatibleIds = new Set(endpointDefinitions.map((e) => e.inference_id));
+      const priorityDefault = defaultEndpointsPriorityList.find((id) => compatibleIds.has(id));
+      if (priorityDefault) {
+        defaultInferenceId = priorityDefault;
+      } else if (endpointDefinitions.length > 0) {
+        defaultInferenceId = endpointDefinitions[0].inference_id;
+      }
     }
-    // else undefined — user must pick or create a compatible endpoint
+
     return {
       defaultInferenceId,
       endpointDefinitions,
     };
-  }, [endpointsLoading, endpoints, taskTypes]);
+  }, [endpointsLoading, endpoints, fieldType]);
 
   return {
     compatibleEndpoints,

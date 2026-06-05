@@ -7,7 +7,6 @@
 
 import React, { useState, useCallback, useMemo, lazy, Suspense, useEffect } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -30,21 +29,21 @@ import { i18n } from '@kbn/i18n';
 import { InferenceCostsTransparencyTour } from '@kbn/search-api-panels';
 
 import { useCompatibleInferenceEndpoints } from '../../../../../../hooks/use_compatible_inference_endpoints';
+import { type SemanticInferenceFieldType, getTaskTypesForFieldType } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { documentationService, UseField } from '../../../shared_imports';
 
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
-const DEFAULT_TASK_TYPES: InferenceTaskType[] = ['text_embedding', 'sparse_embedding'];
 
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
-  taskTypes?: InferenceTaskType[];
+  fieldType?: SemanticInferenceFieldType;
 }
 
-type SelectInferenceIdContentProps = Required<Pick<SelectInferenceIdProps, 'taskTypes'>> &
-  Omit<SelectInferenceIdProps, 'taskTypes'> & {
+type SelectInferenceIdContentProps = Required<Pick<SelectInferenceIdProps, 'fieldType'>> &
+  Omit<SelectInferenceIdProps, 'fieldType'> & {
     setValue: (value: string) => void;
     value: string;
   };
@@ -55,18 +54,21 @@ interface EndpointOptionData {
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
-  taskTypes = DEFAULT_TASK_TYPES,
+  fieldType = 'semantic_text',
 }: SelectInferenceIdProps) => {
-  const config = getFieldConfig('inference_id');
+  const fieldConfig = getFieldConfig(
+    fieldType === 'semantic' ? 'inference_id_required' : 'inference_id'
+  );
+
   return (
-    <UseField path="inference_id" fieldConfig={config}>
+    <UseField path="inference_id" fieldConfig={fieldConfig}>
       {(field) => {
         return (
           <SelectInferenceIdContent
             data-test-subj={dataTestSubj}
             value={field.value as string}
             setValue={field.setValue}
-            taskTypes={taskTypes}
+            fieldType={fieldType}
           />
         );
       }}
@@ -78,7 +80,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   'data-test-subj': dataTestSubj,
   setValue,
   value,
-  taskTypes = DEFAULT_TASK_TYPES,
+  fieldType = 'semantic_text',
 }) => {
   const {
     core: { application, http },
@@ -96,12 +98,13 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   } = useLoadInferenceEndpoints();
   const { euiTheme } = useEuiTheme();
   const { compatibleEndpoints, isLoading: isCompatibleEndpointsLoading } =
-    useCompatibleInferenceEndpoints(endpoints, endpointsLoading, taskTypes);
+    useCompatibleInferenceEndpoints(endpoints, endpointsLoading, fieldType);
   const [isSelectInferenceIdOpen, setIsSelectInferenceIdOpen] = useState(false);
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
 
   const config = getFieldConfig('inference_id');
+  const allowedTaskTypes = getTaskTypesForFieldType(fieldType);
   const inferenceEndpointsPageLink = share?.url.locators
     .get('SEARCH_INFERENCE_ENDPOINTS')
     ?.useUrl({});
@@ -124,7 +127,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 
   /**
    * Computes the selectable options for the inference endpoint dropdown.
-   * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
    * Includes optimistic updates for newly created endpoints that may not be in the list yet.
    */
   const options: EuiSelectableOption<EndpointOptionData>[] = useMemo(() => {
@@ -362,7 +364,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
-                allowedTaskTypes={taskTypes}
+                allowedTaskTypes={[...allowedTaskTypes]}
               />
             </Suspense>
           )}
