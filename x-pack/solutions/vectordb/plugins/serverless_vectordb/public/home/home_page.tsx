@@ -18,10 +18,13 @@ import {
   EuiSpacer,
   EuiStat,
   EuiText,
+  EuiTextColor,
+  EuiTitle,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
 import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
+import { i18n } from '@kbn/i18n';
 import { formatBytes, formatNumber, useDeploymentStats } from '../hooks/use_deployment_stats';
 import { HomePageBanner } from './home_page_banner';
 import { DocumentationQuickLinks } from './documentation_quick_links';
@@ -45,8 +48,8 @@ const StatTile = ({ label, value, isLoading }: StatTileProps) => (
       title={isLoading ? <EuiLoadingSpinner size="m" /> : value}
       description={
         <>
-          <EuiText size="s" color="subdued">
-            <h5>{label}</h5>
+          <EuiText size="xs" color="subdued">
+            <strong>{label}</strong>
           </EuiText>
           <EuiSpacer size="s" />
         </>
@@ -139,6 +142,16 @@ export const HomePage = () => {
           </EuiFlexItem>
           <EuiSpacer size="s" />
           <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h2>
+                <EuiTextColor color="subdued">
+                  {i18n.translate('xpack.serverlessVectordb.home.stats.heading', {
+                    defaultMessage: 'Your vector database overview',
+                  })}
+                </EuiTextColor>
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
             <EuiFlexGrid columns={3} gutterSize="m">
               {statTiles.map(({ key, label, value }) => (
                 <StatTile key={key} label={label} value={value} isLoading={isLoading} />
