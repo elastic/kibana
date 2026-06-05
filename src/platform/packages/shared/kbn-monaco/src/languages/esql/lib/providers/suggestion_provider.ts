@@ -8,6 +8,10 @@
  */
 
 import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
+import {
+  getNewLineSuggestion,
+  pipeCompleteItem,
+} from '@kbn/esql-language/src/commands/registry/complete_items';
 import { monaco } from '../../../../monaco_imports';
 import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoSuggestions } from '../converters/suggestions';
@@ -71,7 +75,13 @@ export function getSuggestionProvider(
             );
           }
 
-          const result = wrapAsMonacoSuggestions(suggestions, fullText);
+          // Offer "New line" only where the pipe is suggested.
+          const isPipeSuggested = suggestions.some(({ label }) => label === pipeCompleteItem.label);
+          const suggestionsWithNewLine = isPipeSuggested
+            ? [getNewLineSuggestion(), ...suggestions]
+            : suggestions;
+
+          const result = wrapAsMonacoSuggestions(suggestionsWithNewLine, fullText);
           const computeEnd = performance.now();
 
           resolvedDeps?.telemetry?.onSuggestionsReady?.(
