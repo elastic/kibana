@@ -12,7 +12,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { chunk } from 'lodash';
+import { chunk, sortBy } from 'lodash';
 
 import { agentPolicyService, appContextService } from '..';
 import { DEPLOY_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
@@ -29,9 +29,10 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
       paramsSchema: schema.object({
         agentPolicyIdsWithSpace: schema.arrayOf(
           schema.object({
-            id: schema.string(),
-            spaceId: schema.maybe(schema.string()),
-          })
+            id: schema.string({ maxLength: 255 }),
+            spaceId: schema.maybe(schema.string({ maxLength: 255 })),
+          }),
+          { maxSize: DEPLOY_AGENT_POLICIES_BATCH_SIZE }
         ),
       }),
       createTaskRunner: ({ taskInstance, abortController }) => {
@@ -91,7 +92,8 @@ export async function scheduleDeployAgentPoliciesTask(
     return;
   }
 
-  const batches = chunk(agentPolicyIdsWithSpace, DEPLOY_AGENT_POLICIES_BATCH_SIZE);
+  const sorted = sortBy(agentPolicyIdsWithSpace, (p) => p.spaceId ?? '');
+  const batches = chunk(sorted, DEPLOY_AGENT_POLICIES_BATCH_SIZE);
   await Promise.all(
     batches.map((batch) =>
       taskManagerStart.schedule({
