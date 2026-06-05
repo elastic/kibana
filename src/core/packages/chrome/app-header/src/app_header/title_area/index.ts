@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { chromeServiceMock } from './chrome_service.mock';
-export { createChromeStorybookStart } from './chrome_service.storybook_mock';
+export { TitleArea } from './title_area';
+export type { TitleAreaProps } from './title_area';
