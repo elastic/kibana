@@ -85,6 +85,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="warning"
           data-test-subj="ruleChangesHistoryNoDiffCallout"
