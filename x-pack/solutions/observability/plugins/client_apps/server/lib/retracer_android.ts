@@ -165,6 +165,12 @@ interface R8Extra {
    * outline body back to the call-site line in the host method.
    */
   positions?: Record<string, number>;
+  /**
+   * Used by `outlineCallsite`. Descriptor of the outline method that
+   * produced the carried frame. The retracer only needs `positions`
+   * today, but the producer forwards this field from R8.
+   */
+  outline?: string;
 }
 
 /** Schema generation this retracer understands. */
