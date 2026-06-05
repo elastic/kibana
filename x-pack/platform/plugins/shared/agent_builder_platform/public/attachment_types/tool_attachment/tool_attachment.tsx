@@ -99,10 +99,6 @@ const textTestInputStyles = css`
 `;
 
 const RESULTS_GRID_DEFAULT_PAGE_SIZE = 10;
-const RESULTS_GRID_COMPACT_ROW_HEIGHT = 28;
-const RESULTS_GRID_HEADER_HEIGHT = 32;
-const RESULTS_GRID_PAGINATION_HEIGHT = 48;
-const RESULTS_GRID_MAX_HEIGHT = 400;
 
 const resultsGridContainerStyles = css`
   overflow: hidden;
@@ -463,20 +459,6 @@ const EsqlResultsTable: React.FC<{
     []
   );
 
-  const gridHeight = useMemo(() => {
-    const startRow = pagination.pageIndex * pagination.pageSize;
-    const rowsOnPage = Math.min(pagination.pageSize, Math.max(values.length - startRow, 0));
-    const paginationHeight =
-      values.length > pagination.pageSize ? RESULTS_GRID_PAGINATION_HEIGHT : 0;
-
-    return Math.min(
-      RESULTS_GRID_MAX_HEIGHT,
-      RESULTS_GRID_HEADER_HEIGHT +
-        Math.max(rowsOnPage, 1) * RESULTS_GRID_COMPACT_ROW_HEIGHT +
-        paginationHeight
-    );
-  }, [pagination.pageIndex, pagination.pageSize, values.length]);
-
   const renderCellValue = useCallback(
     ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const colIdx = columns.findIndex((c) => c.name === columnId);
@@ -497,7 +479,6 @@ const EsqlResultsTable: React.FC<{
         rowCount={values.length}
         renderCellValue={renderCellValue}
         gridStyle={{ border: 'horizontal', stripes: false, cellPadding: 's', fontSize: 's' }}
-        height={gridHeight}
         pagination={{
           ...pagination,
           onChangeItemsPerPage,
