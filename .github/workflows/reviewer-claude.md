@@ -1,7 +1,7 @@
 ---
 name: Claude Reviewer
 on:
-  pull_request_target:
+  pull_request:
     types: [synchronize, reopened, labeled]
   workflow_dispatch:
     inputs:
@@ -22,7 +22,7 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
-  version: "2.1.111"
+  version: "2.1.165"
   model: opus
   max-turns: 120
   env:
@@ -33,6 +33,7 @@ engine:
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
@@ -46,7 +47,7 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (
         (
           github.event.action == 'labeled' &&
@@ -135,6 +136,6 @@ safe-outputs:
 # Claude PR Reviewer
 
 Using the imported reviewer instructions:
-- Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
+- Run in review mode for `pull_request` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
 - This reviewer's own gh-aw workflow id is `reviewer-claude`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
