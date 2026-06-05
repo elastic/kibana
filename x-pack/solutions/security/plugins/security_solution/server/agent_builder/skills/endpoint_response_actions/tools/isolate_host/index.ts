@@ -15,10 +15,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { ISOLATE_TOOL_ID } from '../..';
 
 const isolateHostSchema = z.object({
-  hostName: z
-    .string()
-    .min(1)
-    .describe('The hostname of the endpoint to isolate.'),
+  hostName: z.string().min(1).describe('The hostname of the endpoint to isolate.'),
   comment: z
     .string()
     .min(1)
@@ -34,10 +31,7 @@ export const isolateHostTool = (
     type: ToolType.builtin,
     description: `Isolates a host by its hostname. Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: isolateHostSchema,
-    handler: async (
-      params,
-      { logger }
-    ) => {
+    handler: async (params, { logger }) => {
       try {
         const { hostName, comment } = params;
         const spaceId = DEFAULT_SPACE_ID;
