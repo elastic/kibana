@@ -156,7 +156,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // Open Collection settings flyout
-    await page.getByText('Collection settings').click();
+    await page.getByRole('button', { name: 'Collection settings' }).click();
     await expect(page.getByText('Collection settings — AWS EC2')).toBeVisible();
 
     // Region override is shown and pre-populated with the global region
