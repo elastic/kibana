@@ -9,6 +9,7 @@
 
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import removedTypes from '@kbn/core-saved-objects-server-internal/removed_types.json';
+import wipTypes from '@kbn/core-saved-objects-server-internal/wip_types.json';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -261,8 +262,12 @@ describe('SO type registrations', () => {
 
     // Make sure all removed types are added to removed_types.json
     // If this assertion fails, add the removed type to `removed_types.json` (via --fix flag on the check_saved_objects script)
-    expect(previouslyRegisteredTypes.filter((type) => !removedTypes.includes(type))).toEqual(
-      currentlyRegisteredTypes
-    );
+    // WIP types are excluded because they are conditionally registered (e.g. behind a config flag) and
+    // will not appear in currentlyRegisteredTypes in this test environment.
+    expect(
+      previouslyRegisteredTypes.filter(
+        (type) => !removedTypes.includes(type) && !wipTypes.includes(type)
+      )
+    ).toEqual(currentlyRegisteredTypes.filter((type) => !wipTypes.includes(type)));
   });
 });
