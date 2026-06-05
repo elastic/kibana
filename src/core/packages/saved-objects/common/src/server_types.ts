@@ -141,9 +141,8 @@ export interface SavedObject<T = unknown> {
 }
 
 /**
- * An error entry returned for a single object within a bulk Saved Objects
- * operation (`bulkGet`, `bulkCreate`, `bulkUpdate`, `bulkResolve`). Unlike a
- * successful {@link SavedObject}, it carries no `attributes`.
+ * An error entry returned for a single object by the bulk Saved Objects APIs.
+ * Unlike a successful {@link SavedObject}, it carries no `attributes`.
  *
  * @public
  */
@@ -156,7 +155,7 @@ export interface SavedObjectErrorResult {
 /**
  * A single entry in a bulk Saved Objects response: either a successful
  * {@link SavedObject} or a {@link SavedObjectErrorResult}. Narrow with
- * {@link isSavedObjectErrorResult} before reading `attributes`.
+ * {@link isSavedObjectErrorResult} before accessing `attributes`.
  *
  * @public
  */
