@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/270597
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- AI and machine Learning
+title: Fix "Conversation not found" errors during first message

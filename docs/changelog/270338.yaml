@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/270338
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Discover and ES|QL
+title: Improve period comparison with a chart showing both time periods in Discover ES|QL
