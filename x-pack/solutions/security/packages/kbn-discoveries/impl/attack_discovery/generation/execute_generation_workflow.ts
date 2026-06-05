@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  CoreStart,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -47,7 +53,13 @@ import {
   runManualOrchestration,
   type ManualOrchestrationOutcome,
 } from './run_manual_orchestration';
-import type { ExecuteGenerationWorkflowParams, ParsedApiConfig } from './types';
+import type {
+  DefaultWorkflowIds,
+  ExecuteGenerationWorkflowParams,
+  ParsedApiConfig,
+  WorkflowConfig,
+  WorkflowIntegrityResult,
+} from './types';
 import type { PreExecutionIssue } from './validate_pre_execution';
 import { writeGenerationStartedEvent } from './write_generation_started_event';
 
@@ -179,6 +191,293 @@ const getTimeRangeDuration = ({
   }
 
   return { dateRangeDuration: 0, isDefaultDateRange: true };
+};
+
+/**
+ * Assembles the DiagnosticsContext written to the generation-started event from
+ * pre-execution checks, workflow integrity, and a config summary.
+ */
+const buildDiagnosticsContext = ({
+  integrityResult,
+  parsedApiConfig,
+  preExecutionResult,
+  verifiedWorkflowIds,
+  workflowConfig,
+}: {
+  integrityResult: WorkflowIntegrityResult | null;
+  parsedApiConfig: ParsedApiConfig;
+  preExecutionResult: { issues: PreExecutionIssue[]; valid: boolean };
+  verifiedWorkflowIds: DefaultWorkflowIds | null;
+  workflowConfig: WorkflowConfig;
+}): DiagnosticsContext => ({
+  config: {
+    alertRetrievalMode: workflowConfig.alert_retrieval_mode,
+    alertRetrievalWorkflowCount: workflowConfig.alert_retrieval_workflow_ids.length,
+    connectorType: parsedApiConfig.action_type_id,
+    hasCustomValidation:
+      workflowConfig.validation_workflow_id !== '' &&
+      workflowConfig.validation_workflow_id !== verifiedWorkflowIds?.validate,
+  },
+  preExecutionChecks: preExecutionResult.issues.map((issue) => ({
+    check: issue.check,
+    message: issue.message,
+    passed: false,
+    severity: issue.severity,
+  })),
+  workflowIntegrity:
+    integrityResult != null
+      ? {
+          repaired: (integrityResult.repaired ?? []).map(({ key, workflowId }) => ({
+            key,
+            workflowId,
+          })),
+          status: integrityResult.status,
+          unrepairableErrors: (integrityResult.unrepairableErrors ?? []).map(
+            ({ error, key, workflowId }) => ({ error, key, workflowId })
+          ),
+        }
+      : {
+          repaired: [],
+          status: 'all_intact' as const,
+          unrepairableErrors: [],
+        },
+});
+
+/**
+ * Reports the workflow-success telemetry event, deriving the per-outcome counts
+ * from the orchestration result.
+ */
+const reportGenerationSuccessTelemetry = ({
+  analytics,
+  end,
+  filter,
+  getInferredPrebuiltStepTypes,
+  logger,
+  orchestrationOutcome,
+  parsedApiConfig,
+  pipelineStartTime,
+  scheduleInfo,
+  size,
+  start,
+  trigger,
+  verifiedWorkflowIds,
+  workflowConfig,
+}: {
+  analytics: NonNullable<ExecuteGenerationWorkflowParams['analytics']>;
+  end: ExecuteGenerationWorkflowParams['end'];
+  filter: ExecuteGenerationWorkflowParams['filter'];
+  getInferredPrebuiltStepTypes: ExecuteGenerationWorkflowParams['getInferredPrebuiltStepTypes'];
+  logger: Logger;
+  orchestrationOutcome: ManualOrchestrationOutcome;
+  parsedApiConfig: ParsedApiConfig;
+  pipelineStartTime: Date;
+  scheduleInfo: ExecuteGenerationWorkflowParams['scheduleInfo'];
+  size: ExecuteGenerationWorkflowParams['size'];
+  start: ExecuteGenerationWorkflowParams['start'];
+  trigger: ExecuteGenerationWorkflowParams['trigger'];
+  verifiedWorkflowIds: DefaultWorkflowIds;
+  workflowConfig: WorkflowConfig;
+}): void => {
+  const durationMs = Date.now() - pipelineStartTime.getTime();
+  const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ end, start });
+  const usesDefaultRetrieval = workflowConfig.alert_retrieval_mode !== 'custom_only';
+  const usesDefaultValidation =
+    workflowConfig.validation_workflow_id === '' ||
+    workflowConfig.validation_workflow_id === verifiedWorkflowIds.validate;
+
+  const alertsCount =
+    orchestrationOutcome.outcome === 'validation_succeeded'
+      ? uniq(
+          (
+            orchestrationOutcome.generationResult.attackDiscoveries as Array<{
+              alertIds?: string[];
+            }>
+          ).flatMap((d) => d.alertIds ?? [])
+        ).length
+      : 0;
+
+  const discoveriesGenerated =
+    orchestrationOutcome.outcome === 'validation_succeeded'
+      ? orchestrationOutcome.generationResult.attackDiscoveries?.length ?? 0
+      : 0;
+
+  const alertsContextCount =
+    orchestrationOutcome.outcome === 'validation_succeeded'
+      ? orchestrationOutcome.generationResult.alertsContextCount
+      : 0;
+
+  const validationDiscoveriesCount =
+    orchestrationOutcome.outcome === 'validation_succeeded'
+      ? orchestrationOutcome.validationResult.validationSummary.persistedCount
+      : undefined;
+
+  const duplicatesDroppedCount =
+    orchestrationOutcome.outcome === 'validation_succeeded'
+      ? orchestrationOutcome.validationResult.duplicatesDroppedCount
+      : undefined;
+
+  const hallucinationsFilteredCount =
+    orchestrationOutcome.outcome === 'validation_succeeded'
+      ? orchestrationOutcome.validationResult.validationSummary.hallucinationsFilteredCount
+      : undefined;
+
+  reportWorkflowSuccess({
+    analytics,
+    logger,
+    params: {
+      actionTypeId: parsedApiConfig.action_type_id,
+      alertsContextCount,
+      alertsCount,
+      configuredAlertsCount: size ?? 0,
+      custom_retrieval_workflow_count: workflowConfig.alert_retrieval_workflow_ids.length,
+      dateRangeDuration,
+      alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
+      discoveriesGenerated,
+      duplicatesDroppedCount,
+      durationMs,
+      execution_mode: 'workflow',
+      hallucinations_filtered_count: hallucinationsFilteredCount,
+      hasFilter: filter != null,
+      isDefaultDateRange,
+      model: parsedApiConfig.model,
+      prebuilt_step_types_used:
+        getInferredPrebuiltStepTypes?.({
+          defaultValidationWorkflowId: verifiedWorkflowIds.validate,
+          workflowConfig,
+        }) ?? [],
+      provider: parsedApiConfig.provider,
+      retrieval_workflow_count:
+        workflowConfig.alert_retrieval_workflow_ids.length + (usesDefaultRetrieval ? 1 : 0),
+      scheduleInfo,
+      trigger: trigger ?? 'unknown',
+      uses_default_retrieval: usesDefaultRetrieval,
+      uses_default_validation: usesDefaultValidation,
+      validation_discoveries_count: validationDiscoveriesCount,
+    },
+  });
+};
+
+/**
+ * Handles a failed generation: logs the error, reports failure telemetry, and
+ * writes a generation-failed event so the UI can leave the "loading" state.
+ */
+const handleGenerationFailure = async ({
+  analytics,
+  authenticatedUser,
+  coreStart,
+  err,
+  esClient,
+  eventLogIndex,
+  eventLogger,
+  executionUuid,
+  generationWorkflowId,
+  logger,
+  parsedApiConfig,
+  pipelineStartTime,
+  preExecutionResult,
+  request,
+  scheduleInfo,
+  source,
+  sourceMetadata,
+  spaceId,
+  trigger,
+}: {
+  analytics: ExecuteGenerationWorkflowParams['analytics'];
+  authenticatedUser: AuthenticatedUser | undefined;
+  coreStart: CoreStart | undefined;
+  err: unknown;
+  esClient: ElasticsearchClient | undefined;
+  eventLogIndex: string | undefined;
+  eventLogger: IEventLogger | undefined;
+  executionUuid: string;
+  generationWorkflowId: string | undefined;
+  logger: Logger;
+  parsedApiConfig: ParsedApiConfig | undefined;
+  pipelineStartTime: Date;
+  preExecutionResult: { issues: PreExecutionIssue[]; valid: boolean } | undefined;
+  request: KibanaRequest;
+  scheduleInfo: ExecuteGenerationWorkflowParams['scheduleInfo'];
+  source: ExecuteGenerationWorkflowParams['source'];
+  sourceMetadata: ExecuteGenerationWorkflowParams['sourceMetadata'];
+  spaceId: string | undefined;
+  trigger: ExecuteGenerationWorkflowParams['trigger'];
+}): Promise<void> => {
+  const message = err instanceof Error ? err.message : String(err);
+
+  const failedStep = err instanceof PipelineStepError ? err.step : undefined;
+  const misconfigurationDetected = preExecutionResult != null && !preExecutionResult.valid;
+
+  const errorCategory =
+    err instanceof PipelineStepError
+      ? err.errorCategory
+      : err instanceof AttackDiscoveryError
+      ? err.errorCategory
+      : undefined;
+  const failedWorkflowId =
+    err instanceof PipelineStepError
+      ? err.failedWorkflowId
+      : err instanceof AttackDiscoveryError
+      ? err.workflowId
+      : undefined;
+
+  if (analytics != null && parsedApiConfig != null) {
+    reportWorkflowError({
+      analytics,
+      logger,
+      params: {
+        actionTypeId: parsedApiConfig.action_type_id,
+        errorMessage: message,
+        execution_mode: 'workflow',
+        failed_step: failedStep,
+        misconfiguration_detected: misconfigurationDetected,
+        model: parsedApiConfig.model,
+        provider: parsedApiConfig.provider,
+        scheduleInfo,
+        trigger: trigger ?? 'unknown',
+      },
+    });
+  }
+
+  // Write a generation-failed event so the UI can detect the failure
+  // (instead of remaining stuck in "loading" state forever)
+  if (
+    authenticatedUser != null &&
+    parsedApiConfig != null &&
+    eventLogger != null &&
+    eventLogIndex != null &&
+    spaceId != null
+  ) {
+    await writeGenerationFailedEvent({
+      authenticatedUser,
+      connectorId: parsedApiConfig.connector_id,
+      endTime: new Date(),
+      errorCategory,
+      errorMessage: message,
+      eventLogger,
+      eventLogIndex,
+      executionUuid,
+      failedWorkflowId,
+      logger,
+      source,
+      sourceMetadata,
+      spaceId,
+      startTime: pipelineStartTime,
+      workflowId: generationWorkflowId ?? 'unknown',
+    });
+
+    // Refresh the index so the failure is immediately visible to the UI poller.
+    // Without this, the UI remains stuck in "loading" state until the next
+    // periodic ES refresh fires (up to 1 second by default).
+    if (coreStart != null) {
+      await refreshEventLogIndex({
+        coreStart,
+        esClient,
+        eventLogIndex,
+        logger,
+        request,
+      });
+    }
+  }
 };
 
 export async function executeGenerationWorkflow({
@@ -320,39 +619,13 @@ export async function executeGenerationWorkflow({
 
     // Assemble DiagnosticsContext from pre-execution checks + workflow integrity + config summary.
     // Written to the generation-started event so the pipeline_data route can surface it to the UI.
-    const diagnosticsContext: DiagnosticsContext = {
-      config: {
-        alertRetrievalMode: workflowConfig.alert_retrieval_mode,
-        alertRetrievalWorkflowCount: workflowConfig.alert_retrieval_workflow_ids.length,
-        connectorType: parsedApiConfig.action_type_id,
-        hasCustomValidation:
-          workflowConfig.validation_workflow_id !== '' &&
-          workflowConfig.validation_workflow_id !== verifiedWorkflowIds?.validate,
-      },
-      preExecutionChecks: preExecutionResult.issues.map((issue) => ({
-        check: issue.check,
-        message: issue.message,
-        passed: false,
-        severity: issue.severity,
-      })),
-      workflowIntegrity:
-        integrityResult != null
-          ? {
-              repaired: (integrityResult.repaired ?? []).map(({ key, workflowId }) => ({
-                key,
-                workflowId,
-              })),
-              status: integrityResult.status,
-              unrepairableErrors: (integrityResult.unrepairableErrors ?? []).map(
-                ({ error, key, workflowId }) => ({ error, key, workflowId })
-              ),
-            }
-          : {
-              repaired: [],
-              status: 'all_intact' as const,
-              unrepairableErrors: [],
-            },
-    };
+    const diagnosticsContext: DiagnosticsContext = buildDiagnosticsContext({
+      integrityResult,
+      parsedApiConfig,
+      preExecutionResult,
+      verifiedWorkflowIds,
+      workflowConfig,
+    });
 
     if (!preExecutionResult.valid) {
       const criticalMessages = preExecutionResult.issues
@@ -424,82 +697,21 @@ export async function executeGenerationWorkflow({
     });
 
     if (analytics != null) {
-      const durationMs = Date.now() - pipelineStartTime.getTime();
-      const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ end, start });
-      const usesDefaultRetrieval = workflowConfig.alert_retrieval_mode !== 'custom_only';
-      const usesDefaultValidation =
-        workflowConfig.validation_workflow_id === '' ||
-        workflowConfig.validation_workflow_id === verifiedWorkflowIds.validate;
-
-      const alertsCount =
-        orchestrationOutcome.outcome === 'validation_succeeded'
-          ? uniq(
-              (
-                orchestrationOutcome.generationResult.attackDiscoveries as Array<{
-                  alertIds?: string[];
-                }>
-              ).flatMap((d) => d.alertIds ?? [])
-            ).length
-          : 0;
-
-      const discoveriesGenerated =
-        orchestrationOutcome.outcome === 'validation_succeeded'
-          ? orchestrationOutcome.generationResult.attackDiscoveries?.length ?? 0
-          : 0;
-
-      const alertsContextCount =
-        orchestrationOutcome.outcome === 'validation_succeeded'
-          ? orchestrationOutcome.generationResult.alertsContextCount
-          : 0;
-
-      const validationDiscoveriesCount =
-        orchestrationOutcome.outcome === 'validation_succeeded'
-          ? orchestrationOutcome.validationResult.validationSummary.persistedCount
-          : undefined;
-
-      const duplicatesDroppedCount =
-        orchestrationOutcome.outcome === 'validation_succeeded'
-          ? orchestrationOutcome.validationResult.duplicatesDroppedCount
-          : undefined;
-
-      const hallucinationsFilteredCount =
-        orchestrationOutcome.outcome === 'validation_succeeded'
-          ? orchestrationOutcome.validationResult.validationSummary.hallucinationsFilteredCount
-          : undefined;
-
-      reportWorkflowSuccess({
+      reportGenerationSuccessTelemetry({
         analytics,
+        end,
+        filter,
+        getInferredPrebuiltStepTypes,
         logger,
-        params: {
-          actionTypeId: parsedApiConfig.action_type_id,
-          alertsContextCount,
-          alertsCount,
-          configuredAlertsCount: size ?? 0,
-          custom_retrieval_workflow_count: workflowConfig.alert_retrieval_workflow_ids.length,
-          dateRangeDuration,
-          alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
-          discoveriesGenerated,
-          duplicatesDroppedCount,
-          durationMs,
-          execution_mode: 'workflow',
-          hallucinations_filtered_count: hallucinationsFilteredCount,
-          hasFilter: filter != null,
-          isDefaultDateRange,
-          model: parsedApiConfig.model,
-          prebuilt_step_types_used:
-            getInferredPrebuiltStepTypes?.({
-              defaultValidationWorkflowId: verifiedWorkflowIds.validate,
-              workflowConfig,
-            }) ?? [],
-          provider: parsedApiConfig.provider,
-          retrieval_workflow_count:
-            workflowConfig.alert_retrieval_workflow_ids.length + (usesDefaultRetrieval ? 1 : 0),
-          scheduleInfo,
-          trigger: trigger ?? 'unknown',
-          uses_default_retrieval: usesDefaultRetrieval,
-          uses_default_validation: usesDefaultValidation,
-          validation_discoveries_count: validationDiscoveriesCount,
-        },
+        orchestrationOutcome,
+        parsedApiConfig,
+        pipelineStartTime,
+        scheduleInfo,
+        size,
+        start,
+        trigger,
+        verifiedWorkflowIds,
+        workflowConfig,
       });
     }
 
@@ -508,80 +720,27 @@ export async function executeGenerationWorkflow({
     const message = err instanceof Error ? err.message : String(err);
     logger.error(`Generation workflow failed: ${message}`, err);
 
-    const failedStep = err instanceof PipelineStepError ? err.step : undefined;
-    const misconfigurationDetected = preExecutionResult != null && !preExecutionResult.valid;
-
-    const errorCategory =
-      err instanceof PipelineStepError
-        ? err.errorCategory
-        : err instanceof AttackDiscoveryError
-        ? err.errorCategory
-        : undefined;
-    const failedWorkflowId =
-      err instanceof PipelineStepError
-        ? err.failedWorkflowId
-        : err instanceof AttackDiscoveryError
-        ? err.workflowId
-        : undefined;
-
-    if (analytics != null && parsedApiConfig != null) {
-      reportWorkflowError({
-        analytics,
-        logger,
-        params: {
-          actionTypeId: parsedApiConfig.action_type_id,
-          errorMessage: message,
-          execution_mode: 'workflow',
-          failed_step: failedStep,
-          misconfiguration_detected: misconfigurationDetected,
-          model: parsedApiConfig.model,
-          provider: parsedApiConfig.provider,
-          scheduleInfo,
-          trigger: trigger ?? 'unknown',
-        },
-      });
-    }
-
-    // Write a generation-failed event so the UI can detect the failure
-    // (instead of remaining stuck in "loading" state forever)
-    if (
-      authenticatedUser != null &&
-      parsedApiConfig != null &&
-      eventLogger != null &&
-      eventLogIndex != null &&
-      spaceId != null
-    ) {
-      await writeGenerationFailedEvent({
-        authenticatedUser,
-        connectorId: parsedApiConfig.connector_id,
-        endTime: new Date(),
-        errorCategory,
-        errorMessage: message,
-        eventLogger,
-        eventLogIndex,
-        executionUuid,
-        failedWorkflowId,
-        logger,
-        source,
-        sourceMetadata,
-        spaceId,
-        startTime: pipelineStartTime,
-        workflowId: generationWorkflowId ?? 'unknown',
-      });
-
-      // Refresh the index so the failure is immediately visible to the UI poller.
-      // Without this, the UI remains stuck in "loading" state until the next
-      // periodic ES refresh fires (up to 1 second by default).
-      if (coreStart != null) {
-        await refreshEventLogIndex({
-          coreStart,
-          esClient,
-          eventLogIndex,
-          logger,
-          request,
-        });
-      }
-    }
+    await handleGenerationFailure({
+      analytics,
+      authenticatedUser,
+      coreStart,
+      err,
+      esClient,
+      eventLogIndex,
+      eventLogger,
+      executionUuid,
+      generationWorkflowId,
+      logger,
+      parsedApiConfig,
+      pipelineStartTime,
+      preExecutionResult,
+      request,
+      scheduleInfo,
+      source,
+      sourceMetadata,
+      spaceId,
+      trigger,
+    });
 
     throw err;
   }
