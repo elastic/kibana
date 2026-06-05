@@ -9,6 +9,8 @@ owners:
   defaultOwner: '@elastic/security-detection-engine'
 toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
   title: '@kbn/evals-suite-security-ai-rules'
@@ -21,6 +23,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/scout'
   - '@kbn/tooling-log'
+  - '@kbn/security-evals-rule-data-snapshot'
 tags:
   - functional-tests
   - package

@@ -22,9 +22,8 @@ dependsOn:
 tags:
   - shared-common
   - package
-  - dev
-  - group-security
-  - private
+  - prod
+  - group-undefined
 fileGroups:
   src:
     - '**/*.ts'
