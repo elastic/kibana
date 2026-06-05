@@ -1009,14 +1009,21 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
 
-    await page.testSubj.click('collapsedItemActions');
+    const ruleRow = page
+      .locator('[data-test-subj^="rule-row"]')
+      .filter({ has: page.locator(`[title="${rule.data.name}"]`) });
+    await ruleRow.locator('[data-test-subj="collapsedItemActions"]').click();
     await page.testSubj.click('snoozeButton');
     await page.testSubj.click('ruleSnoozeCancel');
 
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
 
-    await expect(page.testSubj.locator('rulesListNotifyBadge-snoozed')).toBeHidden();
-    await expect(page.testSubj.locator('rulesListNotifyBadge-snoozedIndefinitely')).toBeHidden();
+    await expect(
+      ruleRow.locator('[data-test-subj="rulesListNotifyBadge-snoozed"]')
+    ).toBeHidden();
+    await expect(
+      ruleRow.locator('[data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"]')
+    ).toBeHidden();
   });
 });
