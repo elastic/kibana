@@ -51,6 +51,7 @@ import { hasDynamicSignalTypes } from '../../../common/services';
 export function generateOtelcolConfig({
   inputs,
   dataOutput,
+  packageOutputs,
   packageInfoCache,
   proxy,
   logger,
@@ -58,11 +59,27 @@ export function generateOtelcolConfig({
 }: {
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[];
   dataOutput?: Output;
+  /** Per-package-policy output overrides: maps package policy ID to its assigned Output. */
+  packageOutputs?: Map<string, Output>;
   packageInfoCache?: Map<string, PackageInfo>;
   proxy?: FleetProxy;
   logger?: Logger;
   defaultPackageInfo?: PackageInfo;
 }): OTelCollectorConfig {
+  // Pipeline IDs grouped by the output ID they route to. Built during the per-stream pass
+  // and consumed by attachOtelcolExporter to emit per-output fan-in pipelines. Sets dedupe
+  // namespace-keyed APM aggregated pipelines that are recorded once per package policy.
+  const pipelineIdsByOutputId = new Map<string, Set<OTelCollectorPipelineID>>();
+  const recordPipeline = (outputId: string, pipelineId: OTelCollectorPipelineID) => {
+    const set = pipelineIdsByOutputId.get(outputId);
+    if (set) {
+      set.add(pipelineId);
+    } else {
+      pipelineIdsByOutputId.set(outputId, new Set([pipelineId]));
+    }
+  };
+  const defaultOutputId = dataOutput ? getOutputIdForAgentPolicy(dataOutput) : undefined;
+
   const otelConfigs: OTelCollectorConfig[] = inputs
     .filter((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
     .flatMap((input) => {
@@ -90,6 +107,11 @@ export function generateOtelcolConfig({
             inputType: input.type,
           })
         : false;
+
+      // Resolve which output this input's package policy routes to (override or policy default).
+      const packagePolicyId = (input as FullAgentPolicyInput).package_policy_id;
+      const override = packagePolicyId ? packageOutputs?.get(packagePolicyId) : undefined;
+      const resolvedOutputId = override ? getOutputIdForAgentPolicy(override) : defaultOutputId;
 
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
@@ -190,6 +212,12 @@ export function generateOtelcolConfig({
         // does not receive the per-stream routing transform.
         otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
 
+        if (resolvedOutputId) {
+          for (const pipelineId of Object.keys(otelConfig.service?.pipelines ?? {})) {
+            recordPipeline(resolvedOutputId, pipelineId);
+          }
+        }
+
         if (shouldAddAPMConfig) {
           otelConfig.connectors ??= {};
           otelConfig.processors ??= {};
@@ -204,10 +232,17 @@ export function generateOtelcolConfig({
               },
             ],
           };
-          otelConfig.service.pipelines![`metrics/${namespace}-aggregated-apm-metrics`] = {
+          const apmPipelineId: OTelCollectorPipelineID = `metrics/${namespace}-aggregated-apm-metrics`;
+          otelConfig.service.pipelines![apmPipelineId] = {
             receivers: [`elasticapm/${namespace}`],
             processors: [`transform/${namespace}-apm-namespace-routing`],
           };
+          // APM aggregated pipelines are keyed by namespace (not by package policy), so they
+          // always route to the policy default output even if per-stream pipelines override it.
+          // Per-override aggregation would change APM semantics and is deferred.
+          if (defaultOutputId) {
+            recordPipeline(defaultOutputId, apmPipelineId);
+          }
         }
 
         return otelConfig;
@@ -221,7 +256,55 @@ export function generateOtelcolConfig({
   }
 
   const config = mergeOtelcolConfigs(otelConfigs);
-  return attachOtelcolExporter(config, dataOutput, proxy, logger);
+
+  // Templates (and other inputless paths) skip exporter attachment.
+  if (!dataOutput) {
+    return config;
+  }
+
+  const outputsById = resolveOutputsById({
+    referencedOutputIds: pipelineIdsByOutputId.keys(),
+    dataOutput,
+    defaultOutputId,
+    packageOutputs,
+  });
+
+  return attachOtelcolExporter(config, outputsById, pipelineIdsByOutputId, proxy, logger);
+}
+
+/**
+ * Resolve the set of Outputs referenced by the per-stream routing pass, keyed by the
+ * pipeline-suffix output ID used in the OTel config. The returned IDs are either the
+ * agent-policy default output alias (e.g. "default") or a raw `output.id`. Overrides
+ * on non-OTel package policies never appear in `referencedOutputIds`, so this does
+ * not need to prune.
+ */
+function resolveOutputsById({
+  referencedOutputIds,
+  dataOutput,
+  defaultOutputId,
+  packageOutputs,
+}: {
+  referencedOutputIds: Iterable<string>;
+  dataOutput: Output;
+  defaultOutputId: string | undefined;
+  packageOutputs?: Map<string, Output>;
+}): Map<string, Output> {
+  const outputsByRawId = new Map<string, Output>([[dataOutput.id, dataOutput]]);
+  if (packageOutputs) {
+    for (const output of packageOutputs.values()) {
+      outputsByRawId.set(output.id, output);
+    }
+  }
+
+  const outputsById = new Map<string, Output>();
+  for (const outputId of referencedOutputIds) {
+    const output = outputId === defaultOutputId ? dataOutput : outputsByRawId.get(outputId);
+    if (output) {
+      outputsById.set(outputId, output);
+    }
+  }
+  return outputsById;
 }
 
 function buildDataStreamStatements(type: string, dataset: string, namespace: string): string[] {
@@ -586,54 +669,57 @@ function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, 
 
 function attachOtelcolExporter(
   config: OTelCollectorConfig,
-  dataOutput?: Output,
+  outputsById: Map<string, Output>,
+  pipelineIdsByOutputId: Map<string, Set<OTelCollectorPipelineID>>,
   proxy?: FleetProxy,
   logger?: Logger
 ): OTelCollectorConfig {
-  if (!dataOutput) {
-    return config;
-  }
+  for (const [outputId, output] of outputsById) {
+    const { extensions, exporters } = generateOtelcolExporter(output, proxy, logger);
 
-  const { extensions, exporters } = generateOtelcolExporter(dataOutput, proxy, logger);
-  config.connectors = {
-    ...config.connectors,
-    forward: {},
-  };
-  if (Object.keys(extensions).length > 0) {
-    config.extensions = {
-      ...config.extensions,
-      ...extensions,
+    config.connectors = {
+      ...config.connectors,
+      [`forward/${outputId}`]: {},
     };
-  }
-  config.exporters = {
-    ...config.exporters,
-    ...exporters,
-  };
 
-  const extensionIDs = Object.keys(extensions);
-  if (extensionIDs.length > 0) {
-    config.service = {
-      ...config.service,
-      extensions: [...(config.service?.extensions ?? []), ...extensionIDs],
-    };
-  }
-
-  if (config.service?.pipelines) {
-    const signalTypes = new Set<string>();
-    Object.entries(config.service.pipelines).forEach(([id, pipeline]) => {
-      config.service!.pipelines![id] = {
-        ...pipeline,
-        exporters: [...(pipeline.exporters || []), 'forward'],
+    if (Object.keys(extensions).length > 0) {
+      config.extensions = {
+        ...config.extensions,
+        ...extensions,
       };
-      signalTypes.add(getSignalType(id));
-    });
+      config.service = {
+        ...config.service,
+        extensions: [...(config.service?.extensions ?? []), ...Object.keys(extensions)],
+      };
+    }
 
-    signalTypes.forEach((id) => {
-      config.service!.pipelines![id] = {
-        receivers: ['forward'],
+    config.exporters = {
+      ...config.exporters,
+      ...exporters,
+    };
+
+    const pipelineIds = pipelineIdsByOutputId.get(outputId);
+    if (!pipelineIds) continue;
+
+    // Route per-stream pipelines to this output's forward connector, then emit one fan-in
+    // pipeline per (signalType, outputId) pair.
+    const signalTypes = new Set<string>();
+    for (const pipelineId of pipelineIds) {
+      const pipeline = config.service?.pipelines?.[pipelineId];
+      if (pipeline) {
+        pipeline.exporters = [...(pipeline.exporters ?? []), `forward/${outputId}`];
+        signalTypes.add(getSignalType(pipelineId));
+      }
+    }
+
+    config.service ??= { pipelines: {} };
+    config.service.pipelines ??= {};
+    for (const signalType of signalTypes) {
+      config.service.pipelines[`${signalType}/${outputId}`] = {
+        receivers: [`forward/${outputId}`],
         exporters: Object.keys(exporters),
       };
-    });
+    }
   }
 
   return config;

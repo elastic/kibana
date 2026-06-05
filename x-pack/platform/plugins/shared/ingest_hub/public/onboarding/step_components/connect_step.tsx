@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 
 interface ConnectStepProps {
@@ -20,7 +21,16 @@ interface ConnectStepProps {
 
 export function ConnectStep({ onNext }: ConnectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys } = useOnboardingFlow();
+  const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys, servicesStep } =
+    useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
+  const showIdentityFederation = useMemo(() => {
+    if (selectedServiceIds.length === 0) return true;
+    return selectedServiceIds.every(
+      (id) => AWS_SERVICES_MAP.get(id)?.identityFederationSupported === true
+    );
+  }, [selectedServiceIds]);
 
   return (
     <div data-test-subj="onboardingStep-connect">
@@ -30,6 +40,7 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
           initialConnectorId={connectStep.connectorId}
           initialStaticKeys={connectStep.staticKeys}
           initialTemporaryKeys={connectStep.temporaryKeys}
+          showIdentityFederation={showIdentityFederation}
           onNext={onNext}
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}
