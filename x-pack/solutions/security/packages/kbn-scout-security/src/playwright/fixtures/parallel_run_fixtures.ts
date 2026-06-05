@@ -19,6 +19,7 @@ import {
   getCloudConnectorApiService,
   getTimelineApiService,
   getAttackDiscoveryApiService,
+  getThreatIntelligenceApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -92,6 +93,10 @@ export const spaceTest = securityParallelFixtures.extend<
         kbnClient,
         log,
         scoutSpace,
+      });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
+        esClient,
+        log,
       });
 
       await use(extendedApiServices);

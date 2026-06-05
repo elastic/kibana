@@ -21,3 +21,6 @@ export type { TimelineApiService } from './timeline';
 
 export { getAttackDiscoveryApiService } from './attack_discovery';
 export type { AttackDiscoveryApiService } from './attack_discovery';
+
+export { getThreatIntelligenceApiService } from './threat_intelligence';
+export type { ThreatIntelligenceApiService } from './threat_intelligence';

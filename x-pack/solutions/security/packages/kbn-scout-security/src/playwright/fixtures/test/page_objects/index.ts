@@ -19,6 +19,7 @@ import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { DocumentFlyoutV2 } from './document_flyout_v2';
+import { ThreatIntelligenceToolPage } from './threat_intelligence_tool';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -37,6 +38,8 @@ export interface SecurityPageObjects extends PageObjects {
   serverlessProjectChromePage: ServerlessProjectChromePage;
   /** v2 document flyout (alert / event) — requires `newFlyoutSystemEnabled` experimental feature. */
   documentFlyoutV2: DocumentFlyoutV2;
+  /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
+  threatIntelligenceTool: ThreatIntelligenceToolPage;
 }
 
 export function extendPageObjects(
@@ -62,5 +65,6 @@ export function extendPageObjects(
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
     documentFlyoutV2: createLazyPageObject(DocumentFlyoutV2, page),
+    threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceToolPage, page),
   };
 }

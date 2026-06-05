@@ -20,6 +20,7 @@ import type {
   CloudConnectorApiService,
   TimelineApiService,
   AttackDiscoveryApiService,
+  ThreatIntelligenceApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
@@ -29,6 +30,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   cloudConnectorApi: CloudConnectorApiService;
   timeline: TimelineApiService;
   attackDiscovery: AttackDiscoveryApiService;
+  threatIntelligence: ThreatIntelligenceApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

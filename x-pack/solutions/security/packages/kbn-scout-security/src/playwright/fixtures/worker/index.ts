@@ -15,6 +15,7 @@ export {
   getCloudConnectorApiService,
   getTimelineApiService,
   getAttackDiscoveryApiService,
+  getThreatIntelligenceApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -23,4 +24,5 @@ export type {
   CloudConnectorApiService,
   TimelineApiService,
   AttackDiscoveryApiService,
+  ThreatIntelligenceApiService,
 } from './apis';

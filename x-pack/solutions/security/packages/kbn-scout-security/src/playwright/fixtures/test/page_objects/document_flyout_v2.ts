@@ -204,13 +204,8 @@ export class DocumentFlyoutV2 {
     this.assigneesAvatarsPanel = page.testSubj.locator('securitySolutionUsersAvatarsPanel');
   }
 
-  /** Wait for the flyout to be visible and fully loaded (alert variant). */
+  /** Wait for the flyout to be visible and fully loaded. */
   async waitForAlertFlyout() {
-    await this.title.waitFor({ state: 'visible', timeout: 15_000 });
-  }
-
-  /** Wait for the flyout to be visible and fully loaded (event variant). */
-  async waitForEventFlyout() {
     await this.title.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
