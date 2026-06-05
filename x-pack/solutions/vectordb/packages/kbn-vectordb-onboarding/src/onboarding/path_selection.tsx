@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import { markOnboardingSeen } from '../first_load';
 import SearchLakeSvg from '../assets/search_lake.svg';
 import VectorSearchSvg from '../assets/vector_search.svg';
-import { ConnectToProject } from './connect_to_project';
+import { ConnectToProject } from '../connection_details/connect_to_project';
 import { FeatureTags, OnboardingPanel } from './onboarding_panel';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { pathQuery } from '../hooks/use_wizard_path';
