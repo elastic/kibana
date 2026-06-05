@@ -2757,7 +2757,7 @@ describe('TaskManagerRunner', () => {
     describe('logTaskRunStartEvent', () => {
       test('eventLog logs a start event when a task begins running', async () => {
         const id = _.random(1, 20).toString();
-        const { runner } = await readyToRunStageSetup({
+        const { runner, instance } = await readyToRunStageSetup({
           instance: { id },
           definitions: {
             bar: {
@@ -2776,7 +2776,8 @@ describe('TaskManagerRunner', () => {
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
             action: 'task-run-start',
-            start: expect.stringMatching(dateRegExp),
+            // start must equal task.startedAt so it aligns with the stored task document
+            start: instance.startedAt?.toISOString(),
           },
           kibana: {
             task: {
