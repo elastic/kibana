@@ -511,6 +511,9 @@ function createNavTree({
               {
                 link: 'management:data_quality',
               },
+              {
+                link: 'management:data_source_management',
+              },
             ],
           },
         ],

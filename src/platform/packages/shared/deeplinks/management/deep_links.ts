@@ -44,6 +44,7 @@ export type ManagementId =
   | 'cross_cluster_replication'
   | 'dataViews'
   | 'data_quality'
+  | 'data_source_management'
   | 'data_usage'
   | 'episodes'
   | 'content_connectors'

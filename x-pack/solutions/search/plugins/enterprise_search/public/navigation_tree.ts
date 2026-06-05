@@ -173,6 +173,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
                     { link: 'management:rollup_jobs' },
+                    { link: 'management:data_source_management' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.indices.title', {
                     defaultMessage: 'Indices and data streams',

@@ -162,6 +162,7 @@ export const createNavigationTree = (
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:data_quality' },
+              { link: 'management:data_source_management' },
             ],
           },
         ],
