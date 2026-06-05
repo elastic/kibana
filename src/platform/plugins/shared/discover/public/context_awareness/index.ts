@@ -10,6 +10,14 @@
 export type * from './types';
 export type * from './toolkit';
 export { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from './toolkit';
+export { createInMemoryContextAwarenessToolkit } from './in_memory_profile_state_toolkit';
+export {
+  type ProfileStateAdapter,
+  type ProfileStateDefinition,
+  type ProfileStateDescriptor,
+  ProfileStateRegistry,
+  ProfileStateType,
+} from './profile_state';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export {

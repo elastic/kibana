@@ -48,6 +48,9 @@ const mockTab1 = getTabStateMock({
     visContext: { someKey: 'test' } as unknown as UnifiedHistogramVisContext,
     controlGroupState: undefined,
   },
+  profileState: {
+    testProfileState: { color: 'primary' },
+  },
 });
 
 const mockTab2 = getTabStateMock({
@@ -127,6 +130,7 @@ describe('TabsStorageManager', () => {
     attributes: storedTab.attributes,
     appState: storedTab.appState,
     globalState: storedTab.globalState,
+    profileState: {},
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
 
@@ -231,6 +235,7 @@ describe('TabsStorageManager', () => {
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       discoverSessionId: 'testDiscoverSessionId',
     });
+    expect(toStoredTab(mockTab1)).not.toHaveProperty('profileState');
   });
 
   it('should load tabs state from local storage and select one of open tabs', () => {
