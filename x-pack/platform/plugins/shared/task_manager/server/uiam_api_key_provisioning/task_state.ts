@@ -28,7 +28,7 @@ export const stateSchemaByVersion = {
     up: (state: Record<string, unknown>) => ({
       runs: (state.runs as number) ?? 0,
       // One-time repair of `task` docs whose `uiamApiKey` was persisted unencrypted by the
-      // pre-fix provisioning run (see `repairBrokenUiamProvisionedTasks`). Defaults to `false`
+      // pre-fix provisioning run (see `repairPlaintextUiamKeysOnce`). Defaults to `false`
       // on upgrade so the repair runs once and then latches to `true`.
       plaintextUiamKeysRepaired: (state.plaintextUiamKeysRepaired as boolean) ?? false,
     }),
