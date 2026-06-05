@@ -11,7 +11,7 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { ISOLATE_TOOL_ID } from '../..';
 
 const isolateHostSchema = z.object({
@@ -70,7 +70,7 @@ export const isolateHostTool = (
           };
         }
 
-        const endpointIds = agents.items.map((a) => a.id);
+        const endpointIds = agents.items.map((a: Record<string, string>) => a.id);
 
         const actionDetails = await responseActionsClient.isolate(
           {
