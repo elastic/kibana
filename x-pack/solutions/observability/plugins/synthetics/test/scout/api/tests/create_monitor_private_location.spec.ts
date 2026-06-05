@@ -91,70 +91,65 @@ apiTest.describe(
     ): Promise<PackagePolicy | undefined> =>
       getPackagePolicyForMonitor(apiClient, adminHeaders, monitorId, locationId);
 
-    apiTest(
-      'handles auto upgrading policies',
-      async ({ apiClient, apiServices }) => {
-        apiTest.setTimeout(TEST_TIMEOUT);
-        // The package-registry-verify-and-promote pipeline may run against a
-        // registry that doesn't publish old versions — skip gracefully (mirrors
-        // the FTR `this.skip()` on a 404) rather than failing the install loop.
-        const pkgCheck = await apiClient.get(`api/fleet/epm/packages/synthetics/${LOWER_VERSION}`, {
-          headers: adminHeaders,
-          responseType: 'json',
+    apiTest('handles auto upgrading policies', async ({ apiClient, apiServices }) => {
+      apiTest.setTimeout(TEST_TIMEOUT);
+      // The package-registry-verify-and-promote pipeline may run against a
+      // registry that doesn't publish old versions — skip gracefully (mirrors
+      // the FTR `this.skip()` on a 404) rather than failing the install loop.
+      const pkgCheck = await apiClient.get(`api/fleet/epm/packages/synthetics/${LOWER_VERSION}`, {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+      apiTest.skip(
+        pkgCheck.statusCode === 404,
+        `synthetics ${LOWER_VERSION} not available in package registry`
+      );
+
+      // Force the global synthetics package down to an older version so the
+      // monitor's package policy is created at that version.
+      await apiServices.syntheticsPrivateLocations.installSyntheticsPackage({
+        version: LOWER_VERSION,
+      });
+
+      let monitorId = '';
+      try {
+        const res = await addMonitor(apiClient, editorHeaders, {
+          ...httpMonitorFixture,
+          locations: [privateLocation],
+          name: `Test monitor ${uuidv4()}`,
+          namespace: 'default',
         });
-        apiTest.skip(
-          pkgCheck.statusCode === 404,
-          `synthetics ${LOWER_VERSION} not available in package registry`
-        );
+        monitorId = (res.body as { id: string }).id;
 
-        // Force the global synthetics package down to an older version so the
-        // monitor's package policy is created at that version.
-        await apiServices.syntheticsPrivateLocations.installSyntheticsPackage({
-          version: LOWER_VERSION,
+        await tryForTime(30_000, async () => {
+          const policy = await getPolicy(apiClient, monitorId, testPolicyId);
+          expect(policy?.package?.version).toBe(LOWER_VERSION);
         });
 
-        let monitorId = '';
-        try {
-          const res = await addMonitor(apiClient, editorHeaders, {
-            ...httpMonitorFixture,
-            locations: [privateLocation],
-            name: `Test monitor ${uuidv4()}`,
-            namespace: 'default',
-          });
-          monitorId = (res.body as { id: string }).id;
+        // Reinstall the package at the latest version, then trigger Fleet
+        // setup. `installSyntheticsPackage` runs `POST /api/fleet/setup`
+        // *before* the install, so the managed-policy upgrade sweep
+        // (`setupUpgradeManagedPackagePolicies`) sees the old version and is a
+        // no-op. An explicit setup *after* the upgrade detects the now-outdated
+        // policy and schedules its upgrade — without it the test passively
+        // waits on a ~5-minute scheduled task that never fires within 120s
+        // (see PR #264487, which fixed the same flake in the FTR suite).
+        await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
+        await apiServices.fleet.internal.setup();
 
-          await tryForTime(30_000, async () => {
-            const policy = await getPolicy(apiClient, monitorId, testPolicyId);
-            expect(policy?.package?.version).toBe(LOWER_VERSION);
-          });
-
-          // Reinstall the package at the latest version, then trigger Fleet
-          // setup. `installSyntheticsPackage` runs `POST /api/fleet/setup`
-          // *before* the install, so the managed-policy upgrade sweep
-          // (`setupUpgradeManagedPackagePolicies`) sees the old version and is a
-          // no-op. An explicit setup *after* the upgrade detects the now-outdated
-          // policy and schedules its upgrade — without it the test passively
-          // waits on a ~5-minute scheduled task that never fires within 120s
-          // (see PR #264487, which fixed the same flake in the FTR suite).
-          await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
-          await apiServices.fleet.internal.setup();
-
-          await tryForTime(120_000, async () => {
-            const upgraded = await getPolicy(apiClient, monitorId, testPolicyId);
-            const upgradedVersion = upgraded?.package?.version;
-            expect(
-              Boolean(upgradedVersion && semver.gt(upgradedVersion, LOWER_VERSION))
-            ).toBe(true);
-          });
-        } finally {
-          if (monitorId) {
-            await deleteMonitors(apiClient, editorHeaders, [monitorId], { spaceId: 'default' });
-          }
-          // Restore the latest package version — subsequent specs in this worker
-          // assume the package is at the latest version.
-          await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
+        await tryForTime(120_000, async () => {
+          const upgraded = await getPolicy(apiClient, monitorId, testPolicyId);
+          const upgradedVersion = upgraded?.package?.version;
+          expect(Boolean(upgradedVersion && semver.gt(upgradedVersion, LOWER_VERSION))).toBe(true);
+        });
+      } finally {
+        if (monitorId) {
+          await deleteMonitors(apiClient, editorHeaders, [monitorId], { spaceId: 'default' });
         }
+        // Restore the latest package version — subsequent specs in this worker
+        // assume the package is at the latest version.
+        await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
       }
-    );
+    });
   }
 );
