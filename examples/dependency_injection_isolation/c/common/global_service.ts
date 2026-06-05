@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { type IGlobalService, GlobalService, GlobalServiceToken } from './global_service';
-export { type INameService, NameService, NameServiceToken } from './name_service';
+import { injectable, type ServiceIdentifier } from 'inversify';
+
+export const GlobalServiceToken = Symbol.for('GlobalService') as ServiceIdentifier<IGlobalService>;
+
+export interface IGlobalService {
+  getName(): string;
+}
+
+@injectable()
+export class GlobalService implements IGlobalService {
+  getName() {
+    return 'global';
+  }
+}

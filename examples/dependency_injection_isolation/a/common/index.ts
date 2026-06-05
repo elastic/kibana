@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { GlobalServiceOverride } from './global_service_override';
 export { NameService } from './name_service';

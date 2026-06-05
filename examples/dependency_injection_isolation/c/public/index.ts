@@ -9,14 +9,22 @@
 
 import { Application } from '@kbn/core-di-browser';
 import { ContainerModule } from 'inversify';
-import { NameService, NameServiceToken } from '../common';
+import { Global } from '@kbn/core-di-internal';
+import { GlobalService, GlobalServiceToken, NameService, NameServiceToken } from '../common';
 import { App } from './app';
 
 export const module = new ContainerModule(({ bind }) => {
-  bind(App).toSelf().inRequestScope();
   bind(Application).toConstantValue(App);
+  bind(Global).toConstantValue(GlobalServiceToken);
 
+  bind(App).toSelf().inRequestScope();
+  bind(GlobalServiceToken).to(GlobalService).inSingletonScope();
   bind(NameServiceToken).to(NameService).inSingletonScope();
 });
 
-export { type INameService, NameServiceToken } from '../common';
+export {
+  type IGlobalService,
+  type INameService,
+  GlobalServiceToken,
+  NameServiceToken,
+} from '../common';

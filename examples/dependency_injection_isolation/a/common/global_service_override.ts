@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { type IGlobalService, GlobalService, GlobalServiceToken } from './global_service';
-export { type INameService, NameService, NameServiceToken } from './name_service';
+import { injectable } from 'inversify';
+import type { IGlobalService } from '@kbn/dependency-injection-c/common';
+
+@injectable()
+export class GlobalServiceOverride implements IGlobalService {
+  getName() {
+    return 'local';
+  }
+}

@@ -9,13 +9,21 @@
 
 import { ContainerModule } from 'inversify';
 import { Route } from '@kbn/core-di-server';
+import { Global } from '@kbn/core-di-internal';
 import { TestRoute } from './route';
-import { NameService, NameServiceToken } from '../common';
+import { GlobalService, GlobalServiceToken, NameService, NameServiceToken } from '../common';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(Route).toConstantValue(TestRoute);
+  bind(Global).toConstantValue(GlobalServiceToken);
 
+  bind(GlobalServiceToken).to(GlobalService).inSingletonScope();
   bind(NameServiceToken).to(NameService).inSingletonScope();
 });
 
-export { type INameService, NameServiceToken } from '../common';
+export {
+  type IGlobalService,
+  type INameService,
+  GlobalServiceToken,
+  NameServiceToken,
+} from '../common';

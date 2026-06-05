@@ -10,7 +10,12 @@
 import { inject, injectable } from 'inversify';
 import { Response } from '@kbn/core-di-server';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
-import { type INameService, NameServiceToken } from '@kbn/dependency-injection-c/server';
+import {
+  type IGlobalService,
+  type INameService,
+  GlobalServiceToken,
+  NameServiceToken,
+} from '@kbn/dependency-injection-c/server';
 
 @injectable()
 export class TestRoute {
@@ -33,13 +38,17 @@ export class TestRoute {
 
   constructor(
     @inject(Response) private readonly response: KibanaResponseFactory,
+    @inject(GlobalServiceToken) private readonly globalService: IGlobalService,
     @inject(NameServiceToken) private readonly nameService: INameService
   ) {}
 
   handle() {
     return this.response.ok({
       headers: { 'content-type': 'application/json' },
-      body: { message: this.nameService.getName() },
+      body: {
+        context: this.globalService.getName(),
+        message: this.nameService.getName(),
+      },
     });
   }
 }
