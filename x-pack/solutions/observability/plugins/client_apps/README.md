@@ -97,6 +97,18 @@ For example, an Android crash dashboard drills down to:
 {{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event._id}}
 ```
 
+For environments where crash documents are written outside the default
+`logs-generic.otel*` data stream, the drilldown can include a free-form Elasticsearch
+index pattern:
+
+```
+{{kibanaUrl}}/app/clientApps/android/retrace?doc_id={{event._id}}&index=logs-myapp.otel*
+```
+
+The `index` value is passed to Elasticsearch as the current Kibana user. It is intentionally
+free-form so deployments can route crash events to custom data streams or aliases, but the
+user must still have Elasticsearch index privileges for the requested pattern.
+
 ## Running tests
 
 ```bash
