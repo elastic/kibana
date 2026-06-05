@@ -19,6 +19,13 @@ export const VALUE = i18n.translate('xpack.lists.exceptions.builder.valueLabel',
   defaultMessage: 'Value',
 });
 
+export const DELETE_ENTRY_ARIA_LABEL = i18n.translate(
+  'xpack.lists.exceptions.builder.deleteEntryAriaLabel',
+  {
+    defaultMessage: 'Delete entry',
+  }
+);
+
 export const EXCEPTION_ITEM_ARIA_LABEL = (
   name: string,
   groupIndex: number,

@@ -7,7 +7,7 @@
 
 import type { Output, FullAgentPolicyInput, TemplateAgentPolicyInput } from '../../types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 
 import { generateOtelcolConfig } from './otel_collector';
 
@@ -2392,6 +2392,108 @@ describe('generateOtelcolConfig', () => {
       };
 
       expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).toThrow();
+    });
+  });
+
+  describe('remote_elasticsearch output', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+    const remoteOutput: Output = {
+      ...defaultOutput,
+      id: 'remote-output',
+      name: 'remote-output',
+      is_default: false,
+      type: outputType.RemoteElasticsearch,
+      hosts: ['https://remote-es.example.com:9200'],
+    };
+
+    it('should generate an elasticsearch exporter keyed by the remote output id', () => {
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
+
+      expect(result.exporters).toHaveProperty('elasticsearch/remote-output');
+      expect(result.exporters).not.toHaveProperty('elasticsearch/default');
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should include beatsauth extension with ssl fields when remote output has ssl config', () => {
+      const remoteOutputWithSSL: Output = {
+        ...remoteOutput,
+        ca_trusted_fingerprint: 'remote-fingerprint',
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+          verification_mode: 'full',
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputWithSSL });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toEqual({
+        ssl: {
+          ca_trusted_fingerprint: 'remote-fingerprint',
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+          verification_mode: 'full',
+        },
+      });
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        auth: { authenticator: 'beatsauth/remote-output' },
+      });
+      expect(result.service?.extensions).toContain('beatsauth/remote-output');
+    });
+
+    it('should omit beatsauth when remote output has no ssl or proxy', () => {
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/remote-output']).not.toHaveProperty('auth');
+      expect(result.service?.extensions ?? []).not.toContain('beatsauth/remote-output');
+    });
+
+    it('should include proxy fields in beatsauth for remote output', () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        is_preconfigured: false,
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput, proxy });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toEqual({
+        proxy_url: 'http://proxy.example.com:3128',
+      });
+      expect(result.service?.extensions).toContain('beatsauth/remote-output');
+    });
+
+    it('should omit beatsauth and include only endpoints when otel_disable_beatsauth is true on remote output', () => {
+      const remoteOutputDisabled: Output = {
+        ...remoteOutput,
+        otel_disable_beatsauth: true,
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputDisabled });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/remote-output']).toEqual({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should merge otel_exporter_config_yaml into exporter for remote output', () => {
+      const remoteOutputWithYaml: Output = {
+        ...remoteOutput,
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputWithYaml });
+
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        flush_interval: '10s',
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
     });
   });
 

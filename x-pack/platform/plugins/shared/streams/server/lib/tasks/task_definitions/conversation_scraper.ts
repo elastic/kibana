@@ -49,9 +49,10 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
               const { _task } = runContext.taskInstance
                 .params as TaskParams<ConversationScraperTaskParams>;
 
-              const { taskClient, inferenceClient } = await taskContext.getScopedClients({
-                request: runContext.fakeRequest,
-              });
+              const { taskClient, inferenceClient, scopedClusterClient } =
+                await taskContext.getScopedClients({
+                  request: runContext.fakeRequest,
+                });
 
               const taskLogger = taskContext.logger.get('conversation_scraper');
 
@@ -98,7 +99,7 @@ export function createStreamsConversationScraperTask(taskContext: TaskContext) {
 
               const memory = new MemoryServiceImpl({
                 logger: taskLogger.get('memory'),
-                esClient: taskContext.getInternalEsClient(),
+                esClient: scopedClusterClient.asCurrentUser,
               });
 
               try {

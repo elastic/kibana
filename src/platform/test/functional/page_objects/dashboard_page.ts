@@ -540,36 +540,43 @@ export class DashboardPageObject extends FtrService {
   /**
    * @description opens the dashboard settings flyout to modify an existing dashboard
    */
-  public async modifyExistingDashboardDetails(
-    dashboard: string,
-    saveOptions: Pick<SaveDashboardOptions, 'storeTimeWithDashboard' | 'tags' | 'needsConfirm'> = {}
-  ) {
+  public async modifySettings({
+    title,
+    storeTimeWithDashboard,
+    tags,
+    confirmDuplicateTitle,
+  }: {
+    title?: string;
+    storeTimeWithDashboard?: boolean;
+    tags?: string[];
+    confirmDuplicateTitle?: boolean;
+  }) {
     await this.openSettingsFlyout();
 
     await this.retry.try(async () => {
-      this.log.debug('entering new title');
-      await this.testSubjects.setValue('dashboardTitleInput', dashboard);
-
-      if (saveOptions.storeTimeWithDashboard !== undefined) {
-        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      if (title) {
+        this.log.debug('entering new title');
+        await this.testSubjects.setValue('dashboardTitleInput', title);
       }
 
-      if (saveOptions.tags) {
+      if (storeTimeWithDashboard !== undefined) {
+        await this.setStoreTimeWithDashboard(storeTimeWithDashboard);
+      }
+
+      if (tags) {
         const tagsComboBox = await this.testSubjects.find('comboBoxInput');
-        for (const tagName of saveOptions.tags) {
+        for (const tagName of tags) {
           await this.comboBox.setElement(tagsComboBox, tagName);
         }
       }
 
-      this.log.debug('DashboardPage.applyCustomization');
       await this.testSubjects.click('applyCustomizeDashboardButton');
 
-      if (saveOptions.needsConfirm) {
+      if (confirmDuplicateTitle) {
         await this.ensureDuplicateTitleCallout();
         await this.testSubjects.click('applyCustomizeDashboardButton');
       }
 
-      this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
       return await this.expectUnsavedChangesNotificationExists(1500);
     });
   }
@@ -591,7 +598,11 @@ export class DashboardPageObject extends FtrService {
       if (saveOptions.saveAsNew) {
         await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
       } else {
-        await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
+        if (saveOptions.storeTimeWithDashboard !== undefined || saveOptions.tags) {
+          throw new Error(
+            `Unable to update settings with quick save. Call 'modifySettings' before calling 'saveDashboard'.`
+          );
+        }
         await this.clickQuickSave();
       }
 
