@@ -13,6 +13,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    security: {
+      ...functionalConfig.get('security'),
+      cookieLogin: false, // tests rely on localStorage column state between steps; loginByCookie clears it
+    },
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests - ML data_visualizer',
     },
