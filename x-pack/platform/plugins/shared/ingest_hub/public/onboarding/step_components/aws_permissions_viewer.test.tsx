@@ -45,20 +45,18 @@ describe('AwsPermissionsViewer', () => {
     expect(screen.getByText('Required IAM permissions')).toBeInTheDocument();
     expect(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-titleIcon`)).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Attach this aggregated policy to the IAM user whose access keys you'll enter below."
-      )
+      screen.getByText("Attach this policy to the IAM user whose access keys you'll enter below.")
     ).toBeInTheDocument();
 
     const actionsList = screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-actionsList`);
     expect(actionsList).toHaveTextContent('"Version": "2012-10-17"');
-    expect(actionsList).toHaveTextContent('"Sid": "ElasticAWSGrants"');
+    expect(actionsList).toHaveTextContent('"Sid": "ElasticAWSIntegration"');
     expect(actionsList).toHaveTextContent('"s3:GetObject"');
     expect(actionsList).toHaveTextContent('"s3:ListBucket"');
     expect(actionsList).toHaveTextContent('"sqs:ReceiveMessage"');
   });
 
-  it('narrows the policy when an individual integration is selected', () => {
+  it('narrows the policy and Sid when an individual integration is selected', () => {
     renderViewer();
 
     fireEvent.change(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-serviceSelector`), {
@@ -66,6 +64,7 @@ describe('AwsPermissionsViewer', () => {
     });
 
     const actionsList = screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-actionsList`);
+    expect(actionsList).toHaveTextContent('"Sid": "ElasticServiceA"');
     expect(actionsList).toHaveTextContent('"s3:GetObject"');
     expect(actionsList).toHaveTextContent('"s3:ListBucket"');
     expect(actionsList).not.toHaveTextContent('"sqs:ReceiveMessage"');

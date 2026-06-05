@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { formatIamPolicyDocument } from '../cloud_formation/iam_policy_document';
+import { formatIamPolicyDocument, getIntegrationSid } from '../cloud_formation/iam_policy_document';
 import type { AwsServicePermissions } from '../service_permissions';
 
 export const AWS_PERMISSIONS_VIEWER_TEST_SUBJ = 'awsPermissionsViewer';
@@ -76,10 +76,14 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({ serv
     [services, selectedOption]
   );
 
-  const policyDocument = useMemo(
-    () => formatIamPolicyDocument(displayedActions),
-    [displayedActions]
-  );
+  const policyDocument = useMemo(() => {
+    const selectedService =
+      selectedOption === ALL_SERVICES_OPTION_VALUE
+        ? undefined
+        : services.find(({ id }) => id === selectedOption);
+
+    return formatIamPolicyDocument(displayedActions, getIntegrationSid(selectedService?.name));
+  }, [services, selectedOption, displayedActions]);
 
   if (services.length === 0) {
     return null;
@@ -137,7 +141,7 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({ serv
             <p>
               <FormattedMessage
                 id="xpack.ingestHub.awsPermissionsViewer.intro"
-                defaultMessage="Attach this aggregated policy to the IAM user whose access keys you'll enter below."
+                defaultMessage="Attach this policy to the IAM user whose access keys you'll enter below."
               />
             </p>
           </EuiText>
