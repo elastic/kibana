@@ -6,11 +6,13 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { GetHealthScanResultsResponse, HealthScanResultResponse } from '@kbn/slo-schema';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { HEALTH_DATA_STREAM_NAME } from '../../../common/constants';
 import { IllegalArgumentError } from '../../errors';
 import type { HealthDocument } from '../tasks/health_scan_task/types';
+import { decodeSearchAfter, encodeSearchAfter } from '../utils/search_after';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -31,7 +33,7 @@ export async function getHealthScanResults(
   { scopedClusterClient, taskManager, spaceId }: Dependencies
 ): Promise<GetHealthScanResultsResponse> {
   const { scanId, size = 100, problematic, allSpaces, searchAfter: searchAfterStr } = params;
-  const searchAfter = parseSearchAfter(searchAfterStr);
+  const searchAfter = searchAfterStr ? decodeSearchAfter<SortResults>(searchAfterStr) : undefined;
   if (size <= 0 || size > 100) {
     throw new IllegalArgumentError('Size must be between 1 and 100');
   }
@@ -65,7 +67,7 @@ export async function getHealthScanResults(
         : 'completed',
     },
     total,
-    searchAfter: nextSearchAfter,
+    searchAfter: nextSearchAfter ? encodeSearchAfter(nextSearchAfter) : undefined,
   };
 }
 
@@ -84,7 +86,7 @@ async function getScanResults(
     size: number;
     allSpaces?: boolean;
     problematic?: boolean;
-    searchAfter?: any[];
+    searchAfter?: SortResults;
   }
 ) {
   const result = await scopedClusterClient.asInternalUser.search<HealthDocument>({
@@ -158,19 +160,4 @@ async function getGlobalScanSummary(scopedClusterClient: IScopedClusterClient, s
   });
 
   return summary.aggregations;
-}
-
-function parseSearchAfter(searchAfterStr: string | undefined) {
-  let searchAfter;
-  if (searchAfterStr) {
-    try {
-      const decoded = JSON.parse(searchAfterStr);
-      if (Array.isArray(decoded)) {
-        searchAfter = decoded;
-      }
-    } catch (e) {
-      // ignore invalid searchAfterStr
-    }
-  }
-  return searchAfter;
 }
