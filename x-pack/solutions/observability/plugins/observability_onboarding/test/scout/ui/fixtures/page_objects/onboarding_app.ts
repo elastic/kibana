@@ -103,7 +103,7 @@ export class OnboardingApp {
         await this.autoDetectLogsCard.waitFor({ state: 'visible' });
         break;
       case 'kubernetes':
-        await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+        await this.otelKubernetesCard.waitFor({ state: 'visible' });
         break;
       case 'cloud':
         await this.awsLogsVirtualCard.waitFor({ state: 'visible' });
@@ -122,7 +122,7 @@ export class OnboardingApp {
   async selectKubernetesUseCase() {
     const kubernetesRadio = this.kubernetesUseCaseTile.getByRole('radio');
     await kubernetesRadio.click();
-    await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+    await this.otelKubernetesCard.waitFor({ state: 'visible' });
   }
 
   async selectCloudUseCase() {
