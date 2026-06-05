@@ -122,7 +122,8 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
 
   const { data: rule, isLoading, isError, error } = useQuery(
     ['rulesV2Edit', ruleId],
-    () => services.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${ruleId}`)
+    () => services.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${ruleId}`),
+    { staleTime: 0, cacheTime: 0 }
   );
 
   const handleSuccess = useCallback(
@@ -179,6 +180,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
           <EuiPageHeader pageTitle={i18n.EDIT_RULE} />
           <EuiSpacer size="m" />
           <SecurityRuleForm
+            key={ruleId}
             services={services}
             ruleId={ruleId}
             initialValues={initialValues}

@@ -66,9 +66,9 @@ export const SuppressionDurationField = () => {
         >
           <DurationInput
             ref={field.ref}
-            value={field.value ?? ''}
+            value={field.value ?? '0m'}
             onChange={field.onChange}
-            fallback="5m"
+            fallback="0m"
             errors={error?.message}
             numberLabel={i18n.translate(
               'xpack.securitySolution.rulesV2.suppressionDuration.numberLabel',

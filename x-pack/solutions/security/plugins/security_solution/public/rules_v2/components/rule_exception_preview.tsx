@@ -27,12 +27,25 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { ExceptionListReference } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '../../common/lib/kibana';
 
-const OPERATOR_LABEL: Record<string, string> = {
+const OPERATOR_LABEL_INCLUDED: Record<string, string> = {
   match: 'is',
   match_any: 'is one of',
   exists: 'exists',
   wildcard: 'matches',
   nested: 'has nested',
+};
+
+const OPERATOR_LABEL_EXCLUDED: Record<string, string> = {
+  match: 'is not',
+  match_any: 'is not one of',
+  exists: 'does not exist',
+  wildcard: 'does not match',
+  nested: 'has nested',
+};
+
+const getOperatorLabel = (entry: { type: string; operator?: string }): string => {
+  const labels = entry.operator === 'excluded' ? OPERATOR_LABEL_EXCLUDED : OPERATOR_LABEL_INCLUDED;
+  return labels[entry.type] ?? entry.type;
 };
 
 const OPERATOR_ICON: Record<string, string> = {
@@ -118,27 +131,29 @@ export const RuleExceptionPreview: React.FC<RuleExceptionPreviewProps> = ({
 
     const shouldClauses = activeItems
       .map((item) => {
-        const mustClauses = item.entries
+        const clauses = item.entries
           .filter((entry) => 'value' in entry || 'field' in entry)
           .map((entry) => {
+            const isExcluded = 'operator' in entry && entry.operator === 'excluded';
+            let clause = null;
+
             if (entry.type === 'match' && 'value' in entry) {
-              return { match: { [entry.field]: entry.value } };
+              clause = { match: { [entry.field]: entry.value } };
+            } else if (entry.type === 'match_any' && 'value' in entry) {
+              clause = { terms: { [entry.field]: entry.value } };
+            } else if (entry.type === 'exists') {
+              clause = { exists: { field: entry.field } };
+            } else if (entry.type === 'wildcard' && 'value' in entry) {
+              clause = { wildcard: { [entry.field]: entry.value } };
             }
-            if (entry.type === 'match_any' && 'value' in entry) {
-              return { terms: { [entry.field]: entry.value } };
-            }
-            if (entry.type === 'exists') {
-              return { exists: { field: entry.field } };
-            }
-            if (entry.type === 'wildcard' && 'value' in entry) {
-              return { wildcard: { [entry.field]: entry.value } };
-            }
-            return null;
+
+            if (!clause) return null;
+            return isExcluded ? { bool: { must_not: [clause] } } : clause;
           })
           .filter(Boolean);
 
-        if (mustClauses.length === 0) return null;
-        return { bool: { filter: mustClauses } };
+        if (clauses.length === 0) return null;
+        return { bool: { filter: clauses } };
       })
       .filter(Boolean);
 
@@ -283,7 +298,7 @@ export const RuleExceptionPreview: React.FC<RuleExceptionPreviewProps> = ({
 
                           <EuiFlexItem grow={false}>
                             <EuiText size="xs" color="accent">
-                              <strong>{OPERATOR_LABEL[entry.type] ?? entry.type}</strong>
+                              <strong>{getOperatorLabel(entry)}</strong>
                             </EuiText>
                           </EuiFlexItem>
 
