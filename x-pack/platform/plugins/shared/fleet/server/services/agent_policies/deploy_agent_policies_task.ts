@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { chunk } from 'lodash';
 
 import { agentPolicyService, appContextService } from '..';
+import { DEPLOY_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
 import { runWithCache } from '../epm/packages/cache';
 
 const TASK_TYPE = 'fleet:deploy_agent_policies';
@@ -24,12 +26,21 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
       title: 'Fleet Deploy policies',
       timeout: '5m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const agentPolicyIdsWithSpace: Array<{ id: string; spaceId?: string }> =
-          taskInstance.params.agentPolicyIdsWithSpace;
-        let cancelled = false;
+      paramsSchema: schema.object({
+        agentPolicyIdsWithSpace: schema.arrayOf(
+          schema.object({
+            id: schema.string(),
+            spaceId: schema.maybe(schema.string()),
+          })
+        ),
+      }),
+      createTaskRunner: ({ taskInstance, abortController }) => {
         return {
           async run() {
+            const { agentPolicyIdsWithSpace } = taskInstance.params as {
+              agentPolicyIdsWithSpace: Array<{ id: string; spaceId?: string }>;
+            };
+
             if (!agentPolicyIdsWithSpace.length) {
               return;
             }
@@ -53,8 +64,11 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
               for (const [spaceId, agentPolicyIds] of Object.entries(
                 agentPoliciesIdsIndexedBySpace
               )) {
-                if (cancelled) {
-                  throw new Error('Task has been cancelled');
+                if (abortController.signal.aborted) {
+                  appContextService
+                    .getLogger()
+                    .warn('Deploy agent policies task was cancelled before completing all spaces');
+                  return;
                 }
                 await agentPolicyService.deployPolicies(
                   appContextService.getInternalUserSOClientForSpaceId(spaceId),
@@ -62,9 +76,6 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
                 );
               }
             });
-          },
-          async cancel() {
-            cancelled = true;
           },
         };
       },
@@ -80,12 +91,17 @@ export async function scheduleDeployAgentPoliciesTask(
     return;
   }
 
-  await taskManagerStart.ensureScheduled({
-    id: `${TASK_TYPE}:${uuidv4()}`,
-    scope: ['fleet'],
-    params: { agentPolicyIdsWithSpace },
-    taskType: TASK_TYPE,
-    runAt: new Date(Date.now() + 3 * 1000),
-    state: {},
-  });
+  const batches = chunk(agentPolicyIdsWithSpace, DEPLOY_AGENT_POLICIES_BATCH_SIZE);
+  await Promise.all(
+    batches.map((batch) =>
+      taskManagerStart.schedule({
+        id: `${TASK_TYPE}:${uuidv4()}`,
+        scope: ['fleet'],
+        params: { agentPolicyIdsWithSpace: batch },
+        taskType: TASK_TYPE,
+        runAt: new Date(Date.now() + 3 * 1000),
+        state: {},
+      })
+    )
+  );
 }
