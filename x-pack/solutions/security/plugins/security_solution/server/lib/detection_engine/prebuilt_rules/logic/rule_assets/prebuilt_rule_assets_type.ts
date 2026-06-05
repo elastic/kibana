@@ -90,22 +90,27 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
     },
     type: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     index: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     threat: {
       properties: {
         framework: {
           type: 'keyword',
+          ignore_above: 1024,
         },
         tactic: {
           properties: {
             id: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             name: {
               type: 'keyword',
+              ignore_above: 1024,
             },
           },
         },
@@ -113,17 +118,21 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
           properties: {
             id: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             name: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             subtechnique: {
               properties: {
                 id: {
                   type: 'keyword',
+                  ignore_above: 1024,
                 },
                 name: {
                   type: 'keyword',
+                  ignore_above: 1024,
                 },
               },
             },
@@ -135,12 +144,15 @@ const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
       properties: {
         package: {
           type: 'keyword',
+          ignore_above: 1024,
         },
         integration: {
           type: 'keyword',
+          ignore_above: 1024,
         },
         version: {
           type: 'keyword',
+          ignore_above: 1024,
         },
       },
     },
@@ -222,22 +234,27 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
             },
             type: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             index: {
               type: 'keyword',
+              ignore_above: 1024,
             },
             threat: {
               properties: {
                 framework: {
                   type: 'keyword',
+                  ignore_above: 1024,
                 },
                 tactic: {
                   properties: {
                     id: {
                       type: 'keyword',
+                      ignore_above: 1024,
                     },
                     name: {
                       type: 'keyword',
+                      ignore_above: 1024,
                     },
                   },
                 },
@@ -245,17 +262,21 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
                   properties: {
                     id: {
                       type: 'keyword',
+                      ignore_above: 1024,
                     },
                     name: {
                       type: 'keyword',
+                      ignore_above: 1024,
                     },
                     subtechnique: {
                       properties: {
                         id: {
                           type: 'keyword',
+                          ignore_above: 1024,
                         },
                         name: {
                           type: 'keyword',
+                          ignore_above: 1024,
                         },
                       },
                     },
@@ -267,12 +288,15 @@ export const prebuiltRuleAssetType: SavedObjectsType = {
               properties: {
                 package: {
                   type: 'keyword',
+                  ignore_above: 1024,
                 },
                 integration: {
                   type: 'keyword',
+                  ignore_above: 1024,
                 },
                 version: {
                   type: 'keyword',
+                  ignore_above: 1024,
                 },
               },
             },
