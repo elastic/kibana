@@ -35,13 +35,10 @@ export const DEFAULT_RULE_DATA_SNAPSHOT_CONFIG: Required<RuleDataSnapshotConfig>
  *   `GCS_CREDENTIALS` is missing (Elasticsearch needs repository-gcs
  *   creds wired up, which in Scout is gated on `GCS_CREDENTIALS`).
  */
-export const resolveRuleDataSnapshotConfig = (
-  envPrefix: string
-): RuleDataSnapshotConfig | null => {
+export const resolveRuleDataSnapshotConfig = (envPrefix: string): RuleDataSnapshotConfig | null => {
   if (process.env[`${envPrefix}_DISABLE`] === 'true') return null;
 
-  const bucket =
-    process.env[`${envPrefix}_BUCKET`] ?? DEFAULT_RULE_DATA_SNAPSHOT_CONFIG.bucket;
+  const bucket = process.env[`${envPrefix}_BUCKET`] ?? DEFAULT_RULE_DATA_SNAPSHOT_CONFIG.bucket;
   const basePath =
     process.env[`${envPrefix}_BASE_PATH`] ?? DEFAULT_RULE_DATA_SNAPSHOT_CONFIG.basePath;
   const snapshotName =

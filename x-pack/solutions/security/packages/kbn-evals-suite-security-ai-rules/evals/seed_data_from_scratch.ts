@@ -28,15 +28,9 @@ import { PassThrough } from 'node:stream';
 /* Constants
 /* ────────────────────────────────────────────────────────────────────────── */
 
-const GITHUB_RAW =
-  'https://raw.githubusercontent.com/elastic/integrations/main/packages';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/elastic/integrations/main/packages';
 
-const CACHE_DIR = path.resolve(
-  __dirname,
-  '..',
-  '.cache',
-  'integration-samples'
-);
+const CACHE_DIR = path.resolve(__dirname, '..', '.cache', 'integration-samples');
 
 const EPISODE_DIR = path.resolve(
   __dirname,
@@ -62,27 +56,70 @@ const INTEGRATION_SOURCES: SourceDef[] = [
   { pkg: 'o365', stream: 'audit', cloneCount: 80, index: 'logs-o365.audit-default' },
   { pkg: 'azure', stream: 'auditlogs', cloneCount: 80, index: 'logs-azure.auditlogs-default' },
   { pkg: 'gcp', stream: 'audit', cloneCount: 80, index: 'logs-gcp.audit-default' },
-  { pkg: 'windows', stream: 'sysmon_operational', cloneCount: 80, index: 'logs-windows.sysmon_operational-default' },
-  { pkg: 'network_traffic', stream: 'http', cloneCount: 80, index: 'logs-network_traffic.http-default' },
+  {
+    pkg: 'windows',
+    stream: 'sysmon_operational',
+    cloneCount: 80,
+    index: 'logs-windows.sysmon_operational-default',
+  },
+  {
+    pkg: 'network_traffic',
+    stream: 'http',
+    cloneCount: 80,
+    index: 'logs-network_traffic.http-default',
+  },
   { pkg: 'aws', stream: 'cloudtrail', cloneCount: 80, index: 'logs-aws.cloudtrail-default' },
-  { pkg: 'google_workspace', stream: 'admin', cloneCount: 80, index: 'logs-google_workspace.admin-default' },
+  {
+    pkg: 'google_workspace',
+    stream: 'admin',
+    cloneCount: 80,
+    index: 'logs-google_workspace.admin-default',
+  },
   { pkg: 'okta', stream: 'system', cloneCount: 80, index: 'logs-okta.system-default' },
-  { pkg: 'windows', stream: 'powershell_operational', cloneCount: 80, index: 'logs-windows.powershell_operational-default' },
-  { pkg: 'network_traffic', stream: 'flow', cloneCount: 80, index: 'logs-network_traffic.flow-default' },
+  {
+    pkg: 'windows',
+    stream: 'powershell_operational',
+    cloneCount: 80,
+    index: 'logs-windows.powershell_operational-default',
+  },
+  {
+    pkg: 'network_traffic',
+    stream: 'flow',
+    cloneCount: 80,
+    index: 'logs-network_traffic.flow-default',
+  },
 ];
 
 const EPISODE_SAMPLE_SIZE = 200;
 
 const HOST_POOL = [
-  'WIN-ITADMIN01', 'WIN-DEV03', 'WIN-ANALYST01', 'DC-CORP01',
-  'WS-WEB01', 'WS-DB01', 'MAC-ENG01', 'LNX-SRV01',
-  'LNX-PROXY02', 'WIN-SRE04', 'WIN-FIN05', 'WIN-HR06',
+  'WIN-ITADMIN01',
+  'WIN-DEV03',
+  'WIN-ANALYST01',
+  'DC-CORP01',
+  'WS-WEB01',
+  'WS-DB01',
+  'MAC-ENG01',
+  'LNX-SRV01',
+  'LNX-PROXY02',
+  'WIN-SRE04',
+  'WIN-FIN05',
+  'WIN-HR06',
 ];
 
 const USER_POOL = [
-  'alice.chen', 'bob.martinez', 'carol.white', 'david.lee',
-  'eve.johnson', 'frank.brown', 'grace.kim', 'henry.davis',
-  'SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'admin@elastic.co',
+  'alice.chen',
+  'bob.martinez',
+  'carol.white',
+  'david.lee',
+  'eve.johnson',
+  'frank.brown',
+  'grace.kim',
+  'henry.davis',
+  'SYSTEM',
+  'LOCAL SERVICE',
+  'NETWORK SERVICE',
+  'admin@elastic.co',
 ];
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -129,7 +166,9 @@ export const rewriteIdLike = (value: string, salt: string): string => {
     value.length >= 8 &&
     (/^[a-f0-9-]{8,}$/i.test(value) || /^[A-Za-z0-9+/=_-]{10,}$/.test(value))
   ) {
-    return `${value.slice(0, 4)}${djb2(`${salt}:${value}`).toString(36).slice(0, 12)}${value.slice(-4)}`;
+    return `${value.slice(0, 4)}${djb2(`${salt}:${value}`).toString(36).slice(0, 12)}${value.slice(
+      -4
+    )}`;
   }
   return value;
 };
@@ -196,8 +235,9 @@ export const variate = (
   rewriteIds(clone, `v:${variationIdx}`);
 
   // Set agent.id AFTER rewriteIds so it is not overwritten by id-rewrite logic
-  (clone.agent as Record<string, unknown>).id =
-    `agent-${djb2(`a:${variationIdx}`).toString(36).slice(0, 8)}`;
+  (clone.agent as Record<string, unknown>).id = `agent-${djb2(`a:${variationIdx}`)
+    .toString(36)
+    .slice(0, 8)}`;
 
   return clone;
 };
@@ -308,9 +348,9 @@ const readEpisodeSample = async (
   return docs;
 };
 
-const loadEndpointSamples = async (sampleCount: number): Promise<
-  Record<string, Record<string, unknown>[]>
-> => {
+const loadEndpointSamples = async (
+  sampleCount: number
+): Promise<Record<string, Record<string, unknown>[]>> => {
   const result: Record<string, Record<string, unknown>[]> = {};
   const episodeFiles = [
     path.join(EPISODE_DIR, 'ep1data.ndjson.gz'),
@@ -358,7 +398,9 @@ const bulkIndex = async (
     if (resp.errors) {
       const firstErr = resp.items?.find((it: any) => it.create?.error)?.create?.error;
       if (log && firstErr) {
-        log.warning(`[security-ai-rules eval setup] bulk errors into ${index}: ${firstErr.type}: ${firstErr.reason}`);
+        log.warning(
+          `[security-ai-rules eval setup] bulk errors into ${index}: ${firstErr.type}: ${firstErr.reason}`
+        );
       }
     }
   }
@@ -416,7 +458,9 @@ export const seedDataFromScratch = async ({
         clones.push(variate(base, i, baseTimeMs, timeSpreadMs));
       }
       await bulkIndex(esClient, index, clones, 500, log);
-      log.info(`[security-ai-rules eval setup] indexed ${clones.length} endpoint docs into ${index}`);
+      log.info(
+        `[security-ai-rules eval setup] indexed ${clones.length} endpoint docs into ${index}`
+      );
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -455,11 +499,15 @@ export const seedDataFromScratch = async ({
     }
     if (attempt === 10) {
       log.warning(
-        `[security-ai-rules eval setup] indices still missing after 10 attempts: ${missing.join(', ')}`
+        `[security-ai-rules eval setup] indices still missing after 10 attempts: ${missing.join(
+          ', '
+        )}`
       );
     } else {
       log.info(
-        `[security-ai-rules eval setup] waiting for indices (attempt ${attempt}): ${missing.join(', ')}`
+        `[security-ai-rules eval setup] waiting for indices (attempt ${attempt}): ${missing.join(
+          ', '
+        )}`
       );
       await new Promise((r) => setTimeout(r, 1000));
     }

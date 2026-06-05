@@ -23,10 +23,9 @@
 const { Client } = require('@elastic/elasticsearch');
 
 // Load kbn-es-snapshot-loader via Node resolution from repo root
-const esSnapshotLoader = require(require.resolve(
-  '@kbn/es-snapshot-loader',
-  { paths: [process.cwd()] }
-));
+const esSnapshotLoader = require(require.resolve('@kbn/es-snapshot-loader', {
+  paths: [process.cwd()],
+}));
 
 const { createGcsRepository, createSnapshot } = esSnapshotLoader;
 
@@ -37,7 +36,8 @@ if (!gcsCreds) {
 }
 
 const BUCKET = process.env.SNAPSHOT_BUCKET ?? 'security-ai-datasets';
-const BASE_PATH = process.env.SNAPSHOT_BASE_PATH ?? `rule-data/${new Date().toISOString().slice(0, 10)}`;
+const BASE_PATH =
+  process.env.SNAPSHOT_BASE_PATH ?? `rule-data/${new Date().toISOString().slice(0, 10)}`;
 const SNAPSHOT_NAME = process.env.SNAPSHOT_NAME ?? 'security-ai-rules-v1';
 
 async function main() {
@@ -54,20 +54,28 @@ async function main() {
   };
 
   // Verify data exists before snapshotting
-  const { count: o365Count } = await esClient.count({ index: 'logs-o365.audit-default' }).catch(() => ({ count: 0 }));
+  const { count: o365Count } = await esClient
+    .count({ index: 'logs-o365.audit-default' })
+    .catch(() => ({ count: 0 }));
   if (o365Count === 0) {
-    console.error('ERROR: No data found in logs-o365.audit-default. Seed data first (e.g. run eval setup).');
+    console.error(
+      'ERROR: No data found in logs-o365.audit-default. Seed data first (e.g. run eval setup).'
+    );
     process.exit(1);
   }
 
-  console.log(`[create-snapshot] found ${o365Count} docs in logs-o365.audit-default (data looks seeded)`);
+  console.log(
+    `[create-snapshot] found ${o365Count} docs in logs-o365.audit-default (data looks seeded)`
+  );
 
   const repository = createGcsRepository({
     bucket: BUCKET,
     basePath: BASE_PATH,
   });
 
-  console.log(`[create-snapshot] creating snapshot ${SNAPSHOT_NAME} in gs://${BUCKET}/${BASE_PATH}...`);
+  console.log(
+    `[create-snapshot] creating snapshot ${SNAPSHOT_NAME} in gs://${BUCKET}/${BASE_PATH}...`
+  );
 
   const result = await createSnapshot({
     esClient,
@@ -97,8 +105,12 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`[create-snapshot] success — indices: ${result.snapshotIndices?.join(', ') ?? 'n/a'}`);
-  console.log(`[create-snapshot] If this is the new canonical snapshot, update DEFAULT_RULE_DATA_SNAPSHOT_CONFIG:`);
+  console.log(
+    `[create-snapshot] success — indices: ${result.snapshotIndices?.join(', ') ?? 'n/a'}`
+  );
+  console.log(
+    `[create-snapshot] If this is the new canonical snapshot, update DEFAULT_RULE_DATA_SNAPSHOT_CONFIG:`
+  );
   console.log(`  basePath: "${BASE_PATH}"`);
 }
 

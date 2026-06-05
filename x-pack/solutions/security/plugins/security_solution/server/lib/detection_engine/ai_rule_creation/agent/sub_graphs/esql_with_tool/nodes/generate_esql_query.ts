@@ -87,10 +87,7 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
 
       // Detect explicit refusal before any retry loop can override it
       const refusalPattern = /ERROR:\s*UNSUPPORTED_DETECTION/i;
-      if (
-        esqlResponseFirst.answer &&
-        refusalPattern.test(esqlResponseFirst.answer)
-      ) {
+      if (esqlResponseFirst.answer && refusalPattern.test(esqlResponseFirst.answer)) {
         events?.reportProgress(
           'The requested detection is not supported by the available data sources'
         );

@@ -169,10 +169,11 @@ Respond with ONLY a JSON object in this exact format:
   ],
 ]);
 
-export const getMitreMappingPrompt = (mitreCatalog: string) => ChatPromptTemplate.fromMessages([
-  [
-    'system',
-    `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
+export const getMitreMappingPrompt = (mitreCatalog: string) =>
+  ChatPromptTemplate.fromMessages([
+    [
+      'system',
+      `Your role is to analyze user queries, ES|QL queries, and rule tags for creating Elastic Detection (SIEM) rules and selects relevant MITRE ATT&CK tactics and techniques.
 
 AVAILABLE MITRE ATT&CK TECHNIQUES — select ONLY from this list. Do NOT invent IDs.
 
@@ -263,14 +264,14 @@ Format:
     }}
   ]
 }}`,
-  ],
-  [
-    'human',
-    `
+    ],
+    [
+      'human',
+      `
     <query>
       User request: {user_request}
       ES|QL query: {esql_query}
       Rule tags: {rule_tags}
     </query>`,
-  ],
-]);
+    ],
+  ]);

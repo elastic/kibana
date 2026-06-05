@@ -50,9 +50,7 @@ export const verifyRuleDataInvariants = async ({
     try {
       const { count } = await esClient.count({ index });
       if (count < expected.min || count > expected.max) {
-        violations.push(
-          `${index}: expected ${expected.min}-${expected.max} docs, found ${count}`
-        );
+        violations.push(`${index}: expected ${expected.min}-${expected.max} docs, found ${count}`);
       }
     } catch (err) {
       violations.push(`${index}: count query failed — ${String(err)}`);

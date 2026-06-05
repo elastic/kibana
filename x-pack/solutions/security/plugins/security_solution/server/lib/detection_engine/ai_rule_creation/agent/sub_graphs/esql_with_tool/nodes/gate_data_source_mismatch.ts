@@ -10,19 +10,107 @@
  * treated as meaningful overlap.
  */
 const STOPWORDS = new Set([
-  'detect', 'detection', 'detections', 'rule', 'rules', 'alert', 'alerts',
-  'attack', 'threat', 'anomaly', 'suspicious', 'malicious', 'indicator',
-  'behavior', 'activity', 'events', 'event', 'log', 'logs', 'query',
-  'monitor', 'monitoring', 'observed', 'create', 'creation', 'generate',
-  'generating', 'identify', 'identifying', 'find', 'finding', 'look',
-  'looking', 'search', 'searching', 'when', 'where', 'how', 'what',
-  'which', 'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been',
-  'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-  'could', 'should', 'may', 'might', 'must', 'can', 'shall', 'need',
-  'used', 'using', 'use', 'via', 'from', 'for', 'with', 'by', 'to',
-  'of', 'in', 'on', 'at', 'as', 'or', 'and', 'but', 'not', 'no',
-  'that', 'this', 'these', 'those', 'it', 'its', 'they', 'them',
-  'their', 'we', 'our', 'you', 'your', 'i', 'my', 'me',
+  'detect',
+  'detection',
+  'detections',
+  'rule',
+  'rules',
+  'alert',
+  'alerts',
+  'attack',
+  'threat',
+  'anomaly',
+  'suspicious',
+  'malicious',
+  'indicator',
+  'behavior',
+  'activity',
+  'events',
+  'event',
+  'log',
+  'logs',
+  'query',
+  'monitor',
+  'monitoring',
+  'observed',
+  'create',
+  'creation',
+  'generate',
+  'generating',
+  'identify',
+  'identifying',
+  'find',
+  'finding',
+  'look',
+  'looking',
+  'search',
+  'searching',
+  'when',
+  'where',
+  'how',
+  'what',
+  'which',
+  'the',
+  'a',
+  'an',
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'being',
+  'have',
+  'has',
+  'had',
+  'do',
+  'does',
+  'did',
+  'will',
+  'would',
+  'could',
+  'should',
+  'may',
+  'might',
+  'must',
+  'can',
+  'shall',
+  'need',
+  'used',
+  'using',
+  'use',
+  'via',
+  'from',
+  'for',
+  'with',
+  'by',
+  'to',
+  'of',
+  'in',
+  'on',
+  'at',
+  'as',
+  'or',
+  'and',
+  'but',
+  'not',
+  'no',
+  'that',
+  'this',
+  'these',
+  'those',
+  'it',
+  'its',
+  'they',
+  'them',
+  'their',
+  'we',
+  'our',
+  'you',
+  'your',
+  'i',
+  'my',
+  'me',
 ]);
 
 /**
@@ -52,8 +140,8 @@ const REQUEST_SYNONYMS: Record<string, string[]> = {
   malware: ['endpoint'],
   ransomware: ['endpoint'],
   credential: ['endpoint'],
-  'kerberoast': ['endpoint'],
-  'kerberoasting': ['endpoint'],
+  kerberoast: ['endpoint'],
+  kerberoasting: ['endpoint'],
   dcsync: ['endpoint', 'windows'],
   'privilege escalation': ['endpoint', 'windows'],
 };
@@ -68,7 +156,18 @@ const REQUEST_SYNONYMS: Record<string, string[]> = {
  * bidirectionally.
  */
 const CATEGORY_SYNONYMS: Record<string, string[]> = {
-  endpoint: ['windows', 'sysmon', 'powershell', 'uac', 'credential', 'malware', 'ransomware', 'privilege', 'dcsync', 'kerberoast'],
+  endpoint: [
+    'windows',
+    'sysmon',
+    'powershell',
+    'uac',
+    'credential',
+    'malware',
+    'ransomware',
+    'privilege',
+    'dcsync',
+    'kerberoast',
+  ],
   windows: ['sysmon', 'powershell', 'uac', 'mmc', 'credential', 'process'],
   sysmon: ['windows', 'endpoint', 'process'],
   aws: ['cloudtrail', 's3', 'ec2', 'iam', 'lambda', 'rds'],
@@ -131,7 +230,7 @@ function extractAvailablePrefixes(userQuery: string): string[] {
  */
 function splitPrompt(userQuery: string): { request: string; availableLine: string | null } {
   const lines = userQuery.split('\n');
-  let requestLines: string[] = [];
+  const requestLines: string[] = [];
   let availableLine: string | null = null;
 
   for (const line of lines) {
@@ -226,11 +325,7 @@ export function detectDataSourceMismatch(userQuery: string): string | null {
       // Bidirectional prefix match handles wildcards gracefully:
       //   "endpoint"  matches "logs-endpoint.events.*"
       //   "powershell" matches "logs-windows.powershell_operational"
-      if (
-        token === allowedKw ||
-        token.startsWith(allowedKw) ||
-        allowedKw.startsWith(token)
-      ) {
+      if (token === allowedKw || token.startsWith(allowedKw) || allowedKw.startsWith(token)) {
         overlap.push(token);
         break;
       }

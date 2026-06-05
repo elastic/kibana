@@ -92,7 +92,9 @@ describe('seed_data_from_scratch', () => {
 
   describe('detectWindowsOs', () => {
     it('detects windows from winlog field', () => {
-      expect(detectWindowsOs({ winlog: { provider_name: 'Microsoft-Windows-Security-Auditing' } })).toBe(true);
+      expect(
+        detectWindowsOs({ winlog: { provider_name: 'Microsoft-Windows-Security-Auditing' } })
+      ).toBe(true);
     });
 
     it('detects windows from .exe path', () => {
@@ -194,24 +196,32 @@ describe('seed_data_from_scratch', () => {
     it('injects agent id', () => {
       const clone = variate({}, 0, Date.now(), 1000);
       expect(clone.agent).toBeDefined();
-      expect(((clone.agent as Record<string, unknown>).id as string).startsWith('agent-')).toBe(true);
+      expect(((clone.agent as Record<string, unknown>).id as string).startsWith('agent-')).toBe(
+        true
+      );
     });
 
     it('injects host.os.type when missing', () => {
       const clone = variate({}, 0, Date.now(), 1000);
       expect((clone.host as Record<string, unknown>).os).toBeDefined();
-      expect(((clone.host as Record<string, unknown>).os as Record<string, unknown>).type).toMatch(/windows|linux/);
+      expect(((clone.host as Record<string, unknown>).os as Record<string, unknown>).type).toMatch(
+        /windows|linux/
+      );
     });
 
     it('detects windows from .exe path', () => {
       const clone = variate({ process: { executable: 'C:\\\\\test.exe' } }, 0, Date.now(), 1000);
-      expect(((clone.host as Record<string, unknown>).os as Record<string, unknown>).type).toBe('windows');
+      expect(((clone.host as Record<string, unknown>).os as Record<string, unknown>).type).toBe(
+        'windows'
+      );
     });
 
     it('leaves existing host.os.type untouched', () => {
       const original = { host: { os: { type: 'macos' } } };
       const clone = variate(original, 0, Date.now(), 1000);
-      expect(((clone.host as Record<string, unknown>).os as Record<string, unknown>).type).toBe('macos');
+      expect(((clone.host as Record<string, unknown>).os as Record<string, unknown>).type).toBe(
+        'macos'
+      );
     });
 
     it('rewrites id-like fields', () => {

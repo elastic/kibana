@@ -70,8 +70,10 @@ function formatEvalSummary(summaries: DatasetSkipSummary[]): string {
   ];
 
   const pct = grandTotal > 0 ? Math.round((grandSucceeded / grandTotal) * 100) : 0;
-  const posPct = grandPositiveTotal > 0 ? Math.round((grandPositiveSucceeded / grandPositiveTotal) * 100) : 0;
-  const negPct = grandNegativeTotal > 0 ? Math.round((grandNegativeSucceeded / grandNegativeTotal) * 100) : 0;
+  const posPct =
+    grandPositiveTotal > 0 ? Math.round((grandPositiveSucceeded / grandPositiveTotal) * 100) : 0;
+  const negPct =
+    grandNegativeTotal > 0 ? Math.round((grandNegativeSucceeded / grandNegativeTotal) * 100) : 0;
   lines.push('', `Rule generation success rate: ${grandSucceeded}/${grandTotal} (${pct}%)`);
   lines.push(
     `  Positive cases: ${grandPositiveSucceeded}/${grandPositiveTotal} (${posPct}%) | Negative cases: ${grandNegativeSucceeded}/${grandNegativeTotal} (${negPct}%)`

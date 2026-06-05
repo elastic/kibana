@@ -7,10 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  createGcsRepository,
-  restoreSnapshot,
-} from '@kbn/es-snapshot-loader';
+import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { RuleDataSnapshotConfig } from './config';
 
 const INDEX_REFRESH_WAIT_MS = 3_000;
@@ -36,10 +33,7 @@ const INDICES_TO_RESTORE = [
   '.internal.alerts-security.alerts-default-*',
 ];
 
-const resolveIndicesByPattern = async (
-  esClient: Client,
-  pattern: string
-): Promise<string[]> => {
+const resolveIndicesByPattern = async (esClient: Client, pattern: string): Promise<string[]> => {
   try {
     const response = (await esClient.indices.get({
       index: pattern,
@@ -53,10 +47,7 @@ const resolveIndicesByPattern = async (
   }
 };
 
-const deleteExistingIndices = async (
-  esClient: Client,
-  log: ToolingLog
-): Promise<void> => {
+const deleteExistingIndices = async (esClient: Client, log: ToolingLog): Promise<void> => {
   log.info('[rule-data] resolving existing indices to delete before restore...');
   const resolved = (
     await Promise.all(
@@ -106,16 +97,15 @@ export const restoreRuleDataSnapshot = async ({
   });
 
   log.info(
-    `[rule-data] Restoring from gs://${config.bucket}/${config.basePath}` +
-      (config.snapshotName ? ` (snapshot: ${config.snapshotName})` : ' (latest)')
+    `[rule-data] Restoring from gs://${config.bucket}/${config.basePath}${
+      config.snapshotName ? ` (snapshot: ${config.snapshotName})` : ' (latest)'
+    }`
   );
 
   try {
     await deleteExistingIndices(esClient, log);
   } catch (err) {
-    log.warning(
-      `[rule-data] failed to delete existing indices (continuing): ${String(err)}`
-    );
+    log.warning(`[rule-data] failed to delete existing indices (continuing): ${String(err)}`);
   }
 
   let result = await restoreSnapshot({

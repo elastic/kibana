@@ -8,7 +8,7 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { RuleCreationState }  from '../state';
+import type { RuleCreationState } from '../state';
 import { SEVERITY_INFERENCE_PROMPT } from './prompts';
 
 export interface SeverityInferenceResponse {
@@ -33,7 +33,9 @@ const SEVERITY_TO_RISK_SCORE: Record<string, number> = {
  * Always enforces the canonical risk score for the severity to ensure
  * consistency with eval expectations and Elastic Security conventions.
  */
-const validateSeverityMapping = (response: SeverityInferenceResponse): SeverityInferenceResponse => {
+const validateSeverityMapping = (
+  response: SeverityInferenceResponse
+): SeverityInferenceResponse => {
   const normalizedSeverity = response.severity?.toLowerCase();
   const expectedRiskScore = SEVERITY_TO_RISK_SCORE[normalizedSeverity];
 
@@ -45,7 +47,10 @@ const validateSeverityMapping = (response: SeverityInferenceResponse): SeverityI
   // Always use the canonical risk score for the severity level.
   // The model may hallucinate arbitrary risk scores; we enforce the
   // exact mapping: low=21, medium=47, high=73, critical=99.
-  return { severity: normalizedSeverity as SeverityInferenceResponse['severity'], risk_score: expectedRiskScore };
+  return {
+    severity: normalizedSeverity as SeverityInferenceResponse['severity'],
+    risk_score: expectedRiskScore,
+  };
 };
 
 export const inferSeverityNode = ({ model, events }: InferSeverityNodeParams) => {
