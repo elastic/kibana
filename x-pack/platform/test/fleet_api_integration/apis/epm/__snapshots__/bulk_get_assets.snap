@@ -170,6 +170,7 @@ Array [
     "appLink": "",
     "attributes": Object {
       "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
+      "title": "Svchost spawning Cmd",
     },
     "id": "sample_security_rule",
     "type": "security-rule",
@@ -182,7 +183,9 @@ Array [
   },
   Object {
     "appLink": "",
-    "attributes": Object {},
+    "attributes": Object {
+      "title": "vuln-management",
+    },
     "id": "sample_osquery_pack_asset",
     "type": "osquery-pack-asset",
   },
@@ -198,6 +201,7 @@ Array [
     "appLink": "",
     "attributes": Object {
       "description": "",
+      "title": "my tag",
     },
     "id": "sample_tag",
     "type": "tag",
