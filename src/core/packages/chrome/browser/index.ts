@@ -20,6 +20,8 @@ export type {
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
   AppHeaderTab,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
   AppId,
   ChromeBadge,
   ChromeBreadcrumbsBadge,
