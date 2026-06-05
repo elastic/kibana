@@ -74,6 +74,7 @@ import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 import { inferenceModelRoutes } from './routes/inference_models';
 import { registerAnomalyDetectionAgentBuilder } from './agent_builder/register_anomaly_detection';
+import { registerEmbeddables } from './lib/register_embeddables';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -307,6 +308,8 @@ export class MlServerPlugin
     }
 
     registerKibanaSettings(coreSetup);
+
+    registerEmbeddables(plugins.embeddable, this.enabledFeatures);
 
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
