@@ -16,9 +16,9 @@ add the instrumentation and watch it show up in a telemetry backend.
 each with a little artificial latency and a small chance of failing (the grinder jams, we
 run out of beans, someone spills the milk). There are two routes and a UI to drive them:
 
-| Route | What it does |
-| --- | --- |
-| `POST /api/otel_workshop/order` | Brews one order. |
+| Route                                     | What it does                                                  |
+| ----------------------------------------- | ------------------------------------------------------------- |
+| `POST /api/otel_workshop/order`           | Brews one order.                                              |
 | `POST /internal/otel_workshop/brew_batch` | Fires N orders **concurrently** — the "generate load" button. |
 
 The app is registered under **Developer examples → "Coffee Shop (OTel Workshop)"**.
@@ -32,52 +32,55 @@ Almost everything you touch is in **one file**:
 Get the collector running and Kibana pointed at it **before** you start Kibana, so it
 exports from the moment it boots.
 
-### 1. Start a local OTLP collector
+### 1. Start the EDOT Collector and Elasticsearch
 
-Run an OpenTelemetry Collector on your laptop to receive Kibana's metrics and traces. The
-`debug` exporter prints every metric and span to the collector's own logs. The config below
-adds a `filter/workshop` processor so only workshop signals reach the exporter — no noise
-from Kibana's own internal telemetry.
+<details>
+<summary><strong>1. Using `docker compose`</strong></summary>
 
-**a. Save this as `otel-collector-config.yaml`** (anywhere — e.g. your home dir or a scratch
-folder; you'll mount it into the container next):
+The file [`compose.yaml`](./compose.yaml) allows running the EDOT Collector and the ES server in one single command:
 
-```yaml
-receivers:
-  otlp:
-    protocols:
-      grpc: { endpoint: 0.0.0.0:4317 }
-      http: { endpoint: 0.0.0.0:4318 }
-processors:
-  filter/workshop:
-    metrics:
-      metric:
-        - not(IsMatch(name, "kibana\\.otel_workshop\\..*"))
-    traces:
-      span:
-        - 'not(IsMatch(name, "process_order") or IsMatch(name, "grind_beans") or IsMatch(name, "brew") or IsMatch(name, "garnish") or IsMatch(attributes["http.route"], ".*otel_workshop.*"))'
-exporters:
-  debug: { verbosity: detailed }
-service:
-  pipelines:
-    metrics: { receivers: [otlp], processors: [filter/workshop], exporters: [debug] }
-    traces: { receivers: [otlp], processors: [filter/workshop], exporters: [debug] }
+```bash
+docker-compose -f examples/otel_workshop/compose.yaml up
 ```
 
-The metrics filter keeps only `kibana.otel_workshop.*`; the trace filter keeps only the
-`process_order` / `grind_beans` / `brew` / `garnish` spans and the two HTTP route spans.
+NOTE: For some installations the command may look like:
 
-**b. Run the collector** from the directory where you saved that file (so `$(pwd)` resolves
+```bash
+docker compose -f examples/otel_workshop/compose.yaml up
+```
+
+</details>
+
+<details>
+<summary><strong>2. Prefer to run each service separately? Manual steps</strong></summary>
+
+#### 1. Start a local EDOT collector
+
+Run an EDOT Collector on your laptop to receive Kibana's metrics and traces. The
+`debug` exporter prints every metric and span to the collector's own logs. The config in
+[`otel-collector-config.yaml`](./otel-collector-config.yaml) adds a `filter/workshop`
+processor so only workshop signals reach the exporter — no noise from Kibana's existing telemetry.
+
+**b. Run the EDOT collector** from the root directory of the Kibana repo (so `$(pwd)` resolves
 to it), and leave it running in its own terminal:
 
 ```bash
-docker run --rm -p 4317:4317 -p 4318:4318 \
-  -v "$(pwd)/otel-collector-config.yaml:/etc/otelcol/config.yaml" \
-  otel/opentelemetry-collector:latest
+docker run --rm -p 4317:4317 -p 4318:4318 -e ELASTIC_AGENT_OTEL=true \
+  -v "$(pwd)/examples/otel_workshop/otel-collector-config.yaml:/etc/otelcol-config.yml" \
+  elastic/elastic-agent:9.4.2 --config /etc/otelcol-config.yml
 ```
 
-This terminal now streams only your workshop metrics and spans. Want a real trace UI?
-Add a Jaeger service on `:16686` and an `otlp/jaeger` exporter to the collector config.
+This terminal now streams only your workshop metrics and spans, and push them to the local Elasticsearch instance that will be started in the following steps (so that we can use the local Kibana to inspect our metrics in the datastream `metrics-generic.otel-default` and our traces in `traces-generic.otel-default` and the APM UI).
+
+#### 2. Start Elasticsearch
+
+In a **separate terminal**, start a local ES cluster and leave it running:
+
+```bash
+yarn es snapshot
+```
+
+</details>
 
 ### 2. Point Kibana at the collector
 
@@ -86,12 +89,6 @@ config that Kibana automatically merges on top of `config/kibana.yml` when start
 `--dev` (which `yarn start` does). Create the file if it doesn't exist yet, and add:
 
 ```yaml
-# Elastic APM and OpenTelemetry tracing can't both be enabled. APM defaults to on in dev,
-# so turn it fully off — otherwise Kibana refuses to boot with telemetry.tracing enabled.
-# Both lines are needed: `active: false` alone leaves context propagation on, which also errors.
-elastic.apm.active: false
-elastic.apm.contextPropagationOnly: false
-
 telemetry.metrics:
   enabled: true
   interval: 10s
@@ -107,23 +104,7 @@ telemetry.tracing:
         url: 'http://localhost:4317'
 ```
 
-> ⚠️ **Both `elastic.apm` lines are required.** APM defaults to on in dev and conflicts with
-> `telemetry.tracing` at start-up — you'll hit these errors in sequence if you miss them:
-> - with neither → *"Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously."*
-> - with only `active: false` → *"APM is disabled, but context propagation is enabled. Please
->   disable context propagation with contextPropagationOnly:false"*
-
-### 3. Start Elasticsearch
-
-Kibana needs an Elasticsearch to boot. The workshop plugin itself never touches ES, but
-Kibana won't start without one — so in a **separate terminal**, start a local snapshot and
-leave it running:
-
-```bash
-yarn es snapshot --license trial
-```
-
-### 4. Start Kibana with the example plugins
+### 4. Start dev Kibana with the example plugins
 
 ```bash
 yarn kbn bootstrap          # first time only (or after switching branches)
@@ -134,7 +115,7 @@ The `no-base-path` warning at start-up is **expected and safe to ignore**: `--ru
 intentionally disables dev mode's base-path proxy so example apps get stable URLs. It
 disables nothing the workshop needs.
 
-Open Kibana → **Developer examples → "Coffee Shop (OTel Workshop)"**. Place an order and brew
+Open Kibana → **Developer examples → "Coffee Shop (OTel Workshop)"** (http://localhost:5601/app/otelWorkshop). Place an order and brew
 a batch to confirm the app works. It emits **no** telemetry yet — that's the exercise.
 
 ---
@@ -148,10 +129,10 @@ a batch to confirm the app works. It emits **no** telemetry yet — that's the e
 
 You'll add **two** instruments to the order pipeline:
 
-| Instrument | Name | What it measures |
-| --- | --- | --- |
-| `UpDownCounter` | `kibana.otel_workshop.order.active` | Orders **currently** in the pipeline (goes up, then down). |
-| `Histogram` | `kibana.otel_workshop.order.duration` | How long each order took, split by `coffee.drink` + `outcome`. |
+| Instrument      | Name                                  | What it measures                                               |
+| --------------- | ------------------------------------- | -------------------------------------------------------------- |
+| `UpDownCounter` | `kibana.otel_workshop.order.active`   | Orders **currently** in the pipeline (goes up, then down).     |
+| `Histogram`     | `kibana.otel_workshop.order.duration` | How long each order took, split by `coffee.drink` + `outcome`. |
 
 ### Recommended: let the `kibana-otel-instrumentation` skill wire it up
 
@@ -162,10 +143,11 @@ meter, picks the right instrument types/units, and writes the emit calls for you
 to **review** its own output against the skill's checklist.
 
 Two things to confirm in what it produces:
+
 - the in-flight metric is emitted **twice** — `+1` where the order enters, `-1` in the
   `finally` block (so it still fires when an order fails);
 - the duration histogram carries `coffee.drink` + `outcome`, while the UpDownCounter stays
-  attribute-free (the callouts below explain *why*).
+  attribute-free (the callouts below explain _why_).
 
 <details>
 <summary><strong>Prefer to wire it by hand? Manual steps</strong></summary>
@@ -173,7 +155,7 @@ Two things to confirm in what it produces:
 #### Step 1 — Create the meter and instruments
 
 Create a new file `server/metrics.ts`. Get the meter **once** at module scope, and pass the
-**fully-qualified** metric name to each `create*` call (the meter name is *not* auto-prefixed):
+**fully-qualified** metric name to each `create*` call (the meter name is _not_ auto-prefixed):
 
 ```ts
 import { metrics, ValueType } from '@opentelemetry/api';
@@ -211,13 +193,13 @@ activeOrders.add(-1);
 
 </details>
 
-> **Why an UpDownCounter has two emit sites.** An order *enters* the pipeline (`+1`) and
-> later *leaves* it (`-1`). The `-1` lives in `finally` so it runs whether the order
+> **Why an UpDownCounter has two emit sites.** An order _enters_ the pipeline (`+1`) and
+> later _leaves_ it (`-1`). The `-1` lives in `finally` so it runs whether the order
 > succeeds or fails — otherwise the in-flight count would leak upward forever. An instrument
 > is a stable handle: you create it once and emit on it many times.
 >
 > **Why no attributes on the UpDownCounter.** For the series to net back to zero, the `+1`
-> and `-1` must carry *identical* attributes. We keep it attribute-free here to stay simple;
+> and `-1` must carry _identical_ attributes. We keep it attribute-free here to stay simple;
 > all the interesting dimensions go on the histogram, where there's no matching constraint.
 > (See the Appendix for the attributed variant.)
 
@@ -225,20 +207,21 @@ activeOrders.add(-1);
 
 Restart `yarn start`, open the app, and click **Brew a batch of 25**. Within ~10s
 (`interval`) your **collector terminal** prints metric records — look for:
+
 - `kibana.otel_workshop.order.active` rising above 1 during the batch, then settling to 0.
 - `kibana.otel_workshop.order.duration` as a histogram carrying the `coffee.drink` and
   `outcome` (`success` / `failure`) attributes.
 
 ---
 
-## Tier 2 — Observable metrics *(skipped — see Appendix)*
+## Tier 2 — Observable metrics _(skipped — see Appendix)_
 
 Tier 2 in the curriculum is **observable / pull-based** metrics: values sampled on a timer
 (`createObservableGauge` / `Observable*Counter`) instead of pushed on each event, plus
 batching them with `addBatchObservableCallback`. It's intentionally left out of the
 60-minute flow to keep things tight — the write-up is in the **[Appendix](#appendix--going-further-not-part-of-the-60-minute-flow)** below.
-The tier numbers stay aligned with the workshop slides: Tier 1 was the *push* side of
-metrics, Tier 2 is the *pull* side, and Tier 3 moves on to traces.
+The tier numbers stay aligned with the workshop slides: Tier 1 was the _push_ side of
+metrics, Tier 2 is the _pull_ side, and Tier 3 moves on to traces.
 
 ---
 
@@ -288,8 +271,8 @@ const grindBeans = (drink: DrinkType, size: DrinkSize): Promise<void> =>
 
 ### Verify
 
-Brew another batch and watch your **collector terminal** (or your Jaeger UI, if you added
-one). You should see `process_order` spans with nested `grind_beans` / `brew` / `garnish`
+Brew another batch and watch your **collector terminal**. Then, head to the APM UI in Kibana.
+You should see `process_order` spans with nested `grind_beans` / `brew` / `garnish`
 children, your `coffee.*` attributes, and — for the orders that fail — a span automatically
 marked **error** with the exception recorded. You did not write any error-handling code for
 that: `withActiveSpan` does it for you.
@@ -306,7 +289,7 @@ that: `withActiveSpan` does it for you.
   per order. Sums are meaningful, so attributes here are fine.
 - **Attribute cardinality trap.** Never put the order `id` (or any unbounded value) on a
   metric attribute — it creates one time series per order and blows up storage. `coffee.drink`
-  is bounded and safe; `id` is not. (It's fine as a *span* attribute, though.)
+  is bounded and safe; `id` is not. (It's fine as a _span_ attribute, though.)
 - **Elasticsearch auto-instrumentation.** The ES client is auto-traced. Add a stage that does
   a real `esClient.search(...)` and you'll see an ES child span appear under `process_order`
   for free.

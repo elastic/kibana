@@ -1,0 +1,27 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.0-SNAPSHOT
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      # Suppress the default logging from Elasticsearch to avoid noise during the workshop
+      - logger.org.elasticsearch=ERROR
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  otel-collector:
+    image: elastic/elastic-agent:9.4.2
+    command: ['--config', '/etc/otelcol-config.yml']
+    ports:
+      - 4317:4317
+      - 4318:4318
+    environment:
+      - ELASTIC_AGENT_OTEL=true
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-config.yml:ro
+
+volumes:
+  elasticsearch_data:
+    driver: local
