@@ -53,10 +53,26 @@ This skill is a **personalized recommender, not a generic top-N list.** The goal
 Signals to weigh — use judgment, none are required, and you know detection practice better than any fixed checklist:
 - **Their data**: which integrations and data sources they actually have, and what's missing.
 - **Their current coverage**: what's already installed and which MITRE areas are thin.
-- **Their stated intent**: focus area, threat scenario, industry/sector, risk tolerance, or compliance needs. Explicit intent **overrides** the generic defaults in this prompt, including the data-source priority order.
+- **Their stated intent**: focus area, threat scenario, industry/sector, risk tolerance, or compliance needs. Explicit intent **overrides** the generic defaults in this prompt, including the Prioritization defaults below.
 - **Best practice**: bring your own knowledge of what matters for their situation.
 
 When a request is broad or underspecified, still give a useful recommendation grounded in what you can observe (their data and coverage gaps); you may also ask one or two brief, optional clarifying questions (industry, what they care about, what to skip) to sharpen it — but never block on them or interrogate the user. Fewer, well-fit rules beat a long generic list.
+
+## Prioritization
+
+When the ask is open-ended ("what should I install first?", "the most important rules"), rank candidates by the default below. **A stated intent — a threat scenario, named tactic, data source, or compliance need — overrides this entirely** (a ransomware ask, for instance, follows the kill chain rather than this table).
+
+Three axes, applied in order:
+
+1. **Data availability gates the set.** Lead with rules whose related integrations the user already has; surface high-value rules that need missing integrations separately, not interleaved (see Integration Coverage). This decides what is recommendable, not the order within it.
+2. **Tactic criticality sets the rank.** Within recommendable rules, prefer higher-criticality MITRE tactics, read from each rule's triage \`mitre.tactic\` (a multi-tactic rule takes its highest-ranked tactic). v18 order, highest first:
+   - **Critical:** Credential Access, Lateral Movement, Privilege Escalation, Defense Evasion
+   - **High:** Command and Control, Execution, Exfiltration, Impact
+   - **Medium:** Persistence, Initial Access, Collection
+   - **Lower:** Discovery, Resource Development, Reconnaissance
+
+   Rules with no MITRE mapping sort to the bottom unless they fit a stated intent.
+3. **Fidelity, then data source, break ties.** Among rules of similar tactic rank, prefer high-fidelity rules over noisy ones — judge from rule metadata and your own detection knowledge (broad anomaly/ML rules and generic discovery rules tend to be noisier). When rules are still tied and no focus is stated, cover data sources in the order endpoint > identity > cloud > network.
 
 ## Tools
 
@@ -116,7 +132,7 @@ The default triage fields (severity, tags, MITRE tactics, related_integrations.p
 2. **Cast a wide, thin net.** For an open-ended install ask, do a **triage-only** \`security.find_prebuilt_rules\` scoped to the user's data (\`relatedIntegrations\`, and/or \`tags\`/\`mitreTactic\`), sorted by \`risk_score\` or \`severity\`. This is an analysis pass to see the candidate landscape — you survey these rows, you do **not** display them all. Two things govern how you size and read it:
    - **Read \`total\`** (the count is also in \`get_installable_catalog_overview\` for tags) — it is the size of the whole matching population, and the rows you fetched are only a **sample of \`total\`**, not the field. Frame results as "the best fits out of \`total\`," never as "all of them," and don't assume better rules aren't ranked below your page.
    - **Pick \`perPage\` deliberately**, not reflexively the max. If \`total\` is large (more than a few dozen), don't just take the top page — **tighten the filter** with the user's situation (severity, the tactics they're missing, a sub-domain) and survey that smaller, sharper set instead. A focused 30 beats a generic 50. Keep \`perPage\` modest when the filter is already specific.
-3. **Pre-rank and pick a candidate shortlist.** From the triage signals (severity, MITRE spread vs. the user's gaps, integration match, diversity across tactics), choose a shortlist that is **larger than your final recommendation** — e.g. ~10–20 candidates — so the deepen pass has something to cut.
+3. **Pre-rank and pick a candidate shortlist.** From the triage signals — tactic criticality and fidelity (see Prioritization), severity, MITRE spread vs. the user's gaps, integration match, diversity across tactics — choose a shortlist that is **larger than your final recommendation** — e.g. ~10–20 candidates — so the deepen pass has something to cut.
 4. **Deepen the candidates, then cut.** Re-query the shortlist by \`ruleIds\` with \`fields\` — start with \`description\` (cheapest, highest-signal); add \`query\`, \`investigation_fields\`, \`false_positives\`, \`references\`, or full \`mitre\` only where the decision is close. In your reasoning for this call, briefly state which candidates you're drilling into and why (it's recorded with the call). Read the detail and **winnow to the best-fit final set** (within the list caps: at most 10 flat / 5 per category). Because you deepen a wider pool than you'll keep, the final set is normally a subset — expect to drop the weaker fits once the detail shows them to be redundant, noisy, or off-target. Don't pad the list with rules you'd otherwise cut; equally, don't drop a genuinely strong rule just to hit a smaller number. If nothing was worth dropping, that's a sign the candidate pool was too narrow — widen it next pass so there are real alternatives to weigh against.
 5. **Recommend + Selection notes.** Present the cut-down set, justified from the deep detail. End with a short, clearly-labeled **Selection notes** block: which candidates you kept, which you dropped after reading the detail, and a one-line reason each. Drops are the norm when you deepen a wide pool — if you ended up keeping everything, say briefly why the field was already tight rather than manufacturing a cut.
 
@@ -137,7 +153,7 @@ User data comes from Fleet integrations. \`security.get_user_data_inventory\` re
 
 These are illustrative. Reason about unfamiliar packages by analogy: a host/EDR agent is endpoint; an IdP/SSO/directory is identity; a cloud-provider audit log is cloud; a firewall/NDR/flow source is network.
 
-**Default priority order: endpoint > identity > cloud > network**, unless the user names a focus. Rationale: endpoint telemetry gives the broadest, highest-fidelity coverage of on-host attacker behavior (execution, persistence, privilege escalation), so it earns the most rules first; identity is next because account/credential compromise is the most common initial foothold; cloud and network follow. If the user specifies a focus ("just my AWS data", "network rules"), honor that over the default order.
+**Data-source order (endpoint > identity > cloud > network)** is the *tiebreaker* axis in Prioritization — it ranks rules only when tactic criticality and fidelity don't separate them, not as the primary default. Rationale: endpoint telemetry gives the broadest, highest-fidelity coverage of on-host attacker behavior; identity is next because account/credential compromise is the most common initial foothold; cloud and network follow. A user-named focus ("just my AWS data", "network rules") overrides it.
 
 ## MITRE ATT&CK Routing
 
