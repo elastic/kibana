@@ -9,7 +9,7 @@ import React, { createContext, useContext, useCallback, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials, AwsTemporaryKeyCredentials } from '@kbn/fleet-plugin/public';
 
-import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
+import { AWS_SERVICES_MATRIX, AWS_SERVICES_MAP } from './aws_service_matrix';
 
 export interface ConnectStepState {
   connectorId?: string;
@@ -127,7 +127,9 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   };
 
   const servicesStep: ServicesStepState = {
-    selectedServiceIds: persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS,
+    selectedServiceIds: (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
+      (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
+    ),
   };
 
   return (
