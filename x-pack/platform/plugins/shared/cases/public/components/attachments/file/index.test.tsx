@@ -9,17 +9,12 @@ import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
-import {
-  AttachmentActionType,
-  type UnifiedReferenceAttachmentViewProps,
-} from '../../../client/attachment_framework/types';
-import type { FileAttachmentMetadata } from '../../../../common/types/domain_zod/attachment/file/v2';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { basicCase, basicFileMock } from '../../../containers/mock';
 import { getFileAttachmentType } from '.';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { renderWithTestingProviders } from '../../../common/mock';
-
-type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+import type { FileViewProps } from '.';
 
 describe('getFileType', () => {
   const fileType = getFileAttachmentType();
