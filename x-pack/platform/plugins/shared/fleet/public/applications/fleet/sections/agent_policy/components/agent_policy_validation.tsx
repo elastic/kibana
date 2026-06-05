@@ -103,5 +103,34 @@ export const agentPolicyFormValidation = (
     ];
   }
 
+  const durationRegex = /^\d+(ms|s|m|h)$/;
+  const durationErrorMessage = (
+    <FormattedMessage
+      id="xpack.fleet.agentPolicyForm.invalidDurationFormatErrorMessage"
+      defaultMessage="Must be a duration with a time unit, e.g. 30s, 5m, 2h"
+    />
+  );
+
+  if (
+    agentPolicy.monitoring_diagnostics?.limit?.interval &&
+    !durationRegex.test(agentPolicy.monitoring_diagnostics.limit.interval)
+  ) {
+    errors['monitoring_diagnostics.limit.interval'] = [durationErrorMessage];
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.uploader?.init_dur &&
+    !durationRegex.test(agentPolicy.monitoring_diagnostics.uploader.init_dur)
+  ) {
+    errors['monitoring_diagnostics.uploader.init_dur'] = [durationErrorMessage];
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.uploader?.max_dur &&
+    !durationRegex.test(agentPolicy.monitoring_diagnostics.uploader.max_dur)
+  ) {
+    errors['monitoring_diagnostics.uploader.max_dur'] = [durationErrorMessage];
+  }
+
   return errors;
 };
