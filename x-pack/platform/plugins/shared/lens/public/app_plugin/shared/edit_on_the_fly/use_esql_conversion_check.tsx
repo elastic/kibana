@@ -276,11 +276,11 @@ function tryConvertTrendlineLayer(
 ): { success: true; layer: ConvertibleLayer } | { success: false; reason?: string } {
   if (!layer?.columnOrder || !layer?.columns) return { success: false };
 
-  // Patch date_histogram columns for trendline conversion:
-  // - Strip includeEmptyRows (ES|QL trendlines don't need gap-filling, and this flag blocks conversion)
-  // - Fill empty sourceField with the index pattern's time field (the trendline layer is created
-  //   with sourceField: '' and relies on syncColumns to fill it later, but during conversion
-  //   we need it resolved upfront)
+  // Defensive patching of date_histogram columns for trendline conversion.
+  //
+  // - includeEmptyRows: ES|QL trendlines don't need gap-filling; this flag blocks conversion.
+  // - sourceField: normally set by initializeDimension via autoTimeField, but can be empty
+  //   in edge cases (e.g. missing timeFieldName at creation time).
   const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
   const timeFieldName = indexPattern?.timeFieldName ?? '';
   const columns = Object.fromEntries(
