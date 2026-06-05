@@ -14,7 +14,6 @@ import type { RuleHistoryItem } from '../../../../common/api/detection_engine/ru
  */
 export const IGNORED_DIFF_FIELDS: ReadonlySet<string> = new Set([
   'rule_source',
-  'version',
   'revision',
   'updated_at',
   'updated_by',
