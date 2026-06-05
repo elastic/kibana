@@ -76,6 +76,7 @@ import { getEventType } from './cases/attachments/event';
 import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { getIndicatorAttachment } from './cases/attachments/indicator';
+import { getTimelineAttachment } from './cases/attachments/timeline';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {
@@ -297,6 +298,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
     cases.attachmentFramework.registerUnified(getEventType());
     cases.attachmentFramework.registerUnified(getSecurityAlertType());
+    cases.attachmentFramework.registerUnified(getTimelineAttachment());
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
