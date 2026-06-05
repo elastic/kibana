@@ -6,13 +6,16 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type {
   ComposeDiscoverFlyoutProps,
@@ -23,6 +26,7 @@ import {
   type AlertingV2KibanaServices,
 } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
+import { RulesApi } from './services/rules_api';
 import {
   CREATE_WITH_AGENT_INITIAL_PROMPT,
   AGENT_BUILDER_NEW_CONVERSATION_PATH,
@@ -42,7 +46,11 @@ export interface CreateAlertFlyoutProps {
   legacyRuleTypes?: CreateAlertFlyoutLegacyItem[];
 }
 
-type Step = 'selector' | 'esql' | 'threshold' | { legacy: string };
+type Step =
+  | { type: 'selector' }
+  | { type: 'esql' }
+  | { type: 'threshold' }
+  | { type: 'legacy'; id: string };
 
 interface LoadedModules {
   services: AlertingV2KibanaServices;
@@ -56,7 +64,7 @@ const CreateAlertFlyoutInner = ({
   esqlVariables,
   legacyRuleTypes,
 }: CreateAlertFlyoutProps) => {
-  const [step, setStep] = useState<Step>('selector');
+  const [step, setStep] = useState<Step>({ type: 'selector' });
   const [isSaving, setIsSaving] = useState(false);
 
   const { loading, value } = useAsync(async (): Promise<LoadedModules> => {
@@ -82,16 +90,18 @@ const CreateAlertFlyoutInner = ({
 
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
 
+  const rulesApi = useMemo(
+    () => (value?.services ? new RulesApi(value.services.http) : undefined),
+    [value]
+  );
+
   const handleCreateRule = useCallback(
     async (payload: CreateRuleData) => {
-      if (!value?.services) return;
-      const { http, notifications } = value.services;
+      if (!rulesApi || !value?.services) return;
       setIsSaving(true);
       try {
-        const rule = await http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
-          body: JSON.stringify(payload),
-        });
-        notifications.toasts.addSuccess(
+        const rule = await rulesApi.createRule(payload);
+        value.services.notifications.toasts.addSuccess(
           i18n.translate('xpack.alertingV2.createAlertFlyout.createSuccess', {
             defaultMessage: 'Rule "{ruleName}" created successfully',
             values: { ruleName: rule.metadata.name },
@@ -99,7 +109,7 @@ const CreateAlertFlyoutInner = ({
         );
         onClose();
       } catch (err) {
-        notifications.toasts.addDanger(
+        value.services.notifications.toasts.addDanger(
           i18n.translate('xpack.alertingV2.createAlertFlyout.createError', {
             defaultMessage: 'Failed to create rule',
           })
@@ -108,7 +118,7 @@ const CreateAlertFlyoutInner = ({
         setIsSaving(false);
       }
     },
-    [value, onClose]
+    [rulesApi, value, onClose]
   );
 
   const legacyPanelItems = useMemo(
@@ -116,19 +126,25 @@ const CreateAlertFlyoutInner = ({
       legacyRuleTypes?.map((item) => ({
         id: item.id,
         label: item.label,
-        onClick: () => setStep({ legacy: item.id }),
+        onClick: () => setStep({ type: 'legacy', id: item.id }),
         'data-test-subj': item['data-test-subj'],
       })),
     [legacyRuleTypes]
   );
 
   if (loading || !value) {
-    return <EuiLoadingSpinner size="l" />;
+    return (
+      <EuiFlyout type="push" size="s" ownFocus onClose={onClose} data-test-subj="createAlertFlyoutLoading">
+        <EuiFlyoutBody>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
   }
 
   const { services, DynamicRuleFormFlyout, ComposeDiscoverFlyout } = value;
 
-  if (step === 'esql') {
+  if (step.type === 'esql') {
     return (
       <DynamicRuleFormFlyout
         query={initialQuery ?? ''}
@@ -139,7 +155,7 @@ const CreateAlertFlyoutInner = ({
     );
   }
 
-  if (step === 'threshold') {
+  if (step.type === 'threshold') {
     return (
       <ComposeDiscoverFlyout
         historyKey={historyKey}
@@ -153,8 +169,8 @@ const CreateAlertFlyoutInner = ({
     );
   }
 
-  if (typeof step === 'object' && step.legacy) {
-    const legacyItem = legacyRuleTypes?.find((item) => item.id === step.legacy);
+  if (step.type === 'legacy') {
+    const legacyItem = legacyRuleTypes?.find((item) => item.id === step.id);
     if (legacyItem) {
       return legacyItem.render(onClose);
     }
@@ -163,9 +179,9 @@ const CreateAlertFlyoutInner = ({
   return (
     <RuleCreateOptionsFlyout
       onClose={onClose}
-      onCreateEsqlRule={() => setStep('esql')}
+      onCreateEsqlRule={() => setStep({ type: 'esql' })}
       onCreateWithAgent={navigateToAgentBuilder}
-      onCreateThresholdAlert={() => setStep('threshold')}
+      onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
     />
   );
