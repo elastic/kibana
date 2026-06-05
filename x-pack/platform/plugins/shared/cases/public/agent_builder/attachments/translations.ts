@@ -17,12 +17,6 @@ export const GO_TO_CASE = i18n.translate('xpack.cases.agentBuilder.case.goToCase
   defaultMessage: 'Go to case',
 });
 
-export const ID_LABEL = (id: string | number) =>
-  i18n.translate('xpack.cases.agentBuilder.case.idLabel', {
-    defaultMessage: 'ID: {id}',
-    values: { id },
-  });
-
 export const SHOW_MORE = i18n.translate('xpack.cases.agentBuilder.case.showMore', {
   defaultMessage: 'Show more',
 });

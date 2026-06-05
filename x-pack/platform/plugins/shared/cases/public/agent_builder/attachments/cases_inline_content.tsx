@@ -13,7 +13,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
-  EuiPanel,
+  EuiSplitPanel,
   EuiText,
   EuiTextBlockTruncate,
   EuiTitle,
@@ -46,7 +46,6 @@ const CaseRow: React.FC<{ data: CaseAttachmentData; application: ApplicationStar
   data,
   application,
 }) => {
-  
   const idLabel = data.incremental_id ? `#${data.incremental_id}` : null;
   const caseUrls = useMemo(() => getCaseUrls({ application, data }), [application, data]);
 
@@ -117,56 +116,56 @@ const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="xs" data-test-subj="cases-attachment-inline">
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="briefcase" aria-hidden />
+    <EuiSplitPanel.Outer hasBorder data-test-subj="cases-attachment-inline">
+      <EuiSplitPanel.Inner color="subdued">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="briefcase" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>{CASES_HEADER(data.total)}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="popout"
+              iconSide="right"
+              href={casesUrl}
+              target="_blank"
+              color="text"
+              data-test-subj="cases-attachment-go-to-cases"
+            >
+              {GO_TO_CASES}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner>
+        <EuiFlexGroup
+          style={{ maxHeight: SCROLL_CUTOFF_PX, overflowY: 'auto' }}
+          data-test-subj="cases-attachment-scroll-container"
+          gutterSize="s"
+          direction="column"
+        >
+          {visible.map((c: CaseAttachmentData, idx: number) => (
+            <EuiFlexItem key={c.id}>
+              {idx > 0 && <EuiHorizontalRule margin="m" />}
+              <CaseRow data={c} application={application} />
+              {idx === visible.length - 1 && data.total > visible.length && (
+                <>
+                  <EuiHorizontalRule margin="s" />
+                  <EuiText size="xs" color="subdued" textAlign="center">
+                    {SHOWING_FOOTER(visible.length, data.total)}
+                  </EuiText>
+                </>
+              )}
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <strong>{CASES_HEADER(data.total)}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="popout"
-                iconSide="right"
-                href={casesUrl}
-                target="_blank"
-                data-test-subj="cases-attachment-go-to-cases"
-              >
-                {GO_TO_CASES}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            style={{ maxHeight: SCROLL_CUTOFF_PX, overflowY: 'auto' }}
-            data-test-subj="cases-attachment-scroll-container"
-            gutterSize="l"
-            direction="column"
-          >
-            {visible.map((c: CaseAttachmentData, idx: number) => (
-              <EuiFlexItem key={c.id}>
-                <CaseRow data={c} application={application} />
-                {idx === visible.length - 1 && data.total > visible.length && (
-                  <>
-                    <EuiHorizontalRule margin="s" />
-                    <EuiText size="xs" color="subdued" textAlign="center">
-                      {SHOWING_FOOTER(visible.length, data.total)}
-                    </EuiText>
-                  </>
-                )}
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          ))}
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };
 

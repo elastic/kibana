@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
   EuiTextBlockTruncate,
   EuiTitle,
@@ -36,7 +36,6 @@ import {
   CREATED,
   DESCRIPTION,
   GO_TO_CASE,
-  ID_LABEL,
   OBSERVABLES,
   SHOW_LESS,
   SHOW_MORE,
@@ -72,7 +71,7 @@ interface InlineContentProps extends AttachmentRenderProps<CaseAttachment> {
 
 const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, application }) => {
   const { data } = attachment;
-  const idLabel = data.incremental_id ?? data.id;
+  const idLabel = data.incremental_id ? `#${data.incremental_id}` : null;
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = useCallback(() => {
     setExpanded((_expanded) => !_expanded);
@@ -94,85 +93,89 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
     Boolean(data.connector_name);
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="case-attachment-inline">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="briefcase" aria-hidden />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{CASE_HEADER}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="popout"
-            iconSide="right"
-            href={caseUrls.case}
-            target="_blank"
-            data-test-subj="case-attachment-go-to-case"
-          >
-            {GO_TO_CASE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup alignItems="baseline" gutterSize="s" wrap responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{data.title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {ID_LABEL(idLabel)}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
-      <CaseMetaRow caseUrls={caseUrls} data={data} />
-
-      {data.description && !expanded && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiTextBlockTruncate lines={2}>
-            <EuiText size="s" color="subdued">
-              {data.description}
+    <EuiSplitPanel.Outer hasBorder data-test-subj="case-attachment-inline">
+      <EuiSplitPanel.Inner color="subdued">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="briefcase" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>{CASE_HEADER}</strong>
             </EuiText>
-          </EuiTextBlockTruncate>
-        </>
-      )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="popout"
+              iconSide="right"
+              href={caseUrls.case}
+              target="_blank"
+              color="text"
+              data-test-subj="case-attachment-go-to-case"
+            >
+              {GO_TO_CASE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner>
+        <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+          {idLabel && (
+            <EuiFlexItem grow>
+              <EuiText size="s" color="subdued">
+                {idLabel}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{data.title}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      {expanded && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <CaseInlineExpandedContent
-            attachment={attachment}
-            hasObservablesCount={hasObservablesCount}
-          />
-        </>
-      )}
+        <EuiSpacer size="s" />
 
-      {hasDetails && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiButtonEmpty
-            size="xs"
-            iconType={expanded ? 'arrowUp' : 'arrowDown'}
-            iconSide="right"
-            onClick={toggleExpanded}
-            data-test-subj="case-attachment-toggle-details"
-          >
-            {expanded ? SHOW_LESS : SHOW_MORE}
-          </EuiButtonEmpty>
-        </>
-      )}
-    </EuiPanel>
+        <CaseMetaRow caseUrls={caseUrls} data={data} />
+
+        {data.description && !expanded && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiTextBlockTruncate lines={2}>
+              <EuiText size="s" color="subdued">
+                {data.description}
+              </EuiText>
+            </EuiTextBlockTruncate>
+          </>
+        )}
+
+        {expanded && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <CaseInlineExpandedContent
+              attachment={attachment}
+              hasObservablesCount={hasObservablesCount}
+            />
+          </>
+        )}
+
+        {hasDetails && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              size="xs"
+              iconType={expanded ? 'arrowUp' : 'arrowDown'}
+              iconSide="right"
+              onClick={toggleExpanded}
+              data-test-subj="case-attachment-toggle-details"
+            >
+              {expanded ? SHOW_LESS : SHOW_MORE}
+            </EuiButtonEmpty>
+          </>
+        )}
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };
 CaseInlineContent.displayName = 'CaseInlineContent';

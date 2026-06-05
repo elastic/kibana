@@ -40,10 +40,9 @@ const renderInline = (attachment: CaseAttachment) => {
 };
 
 describe('CaseInlineContent', () => {
-  it('renders title, ID, counts, and description', () => {
+  it('renders title, counts, and description', () => {
     renderInline(buildAttachment());
     expect(screen.getByText('Threat Intel Filebeat Module Indicator Match')).toBeInTheDocument();
-    expect(screen.getByText('ID: 125')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument(); // alerts count
     expect(screen.getByText('5')).toBeInTheDocument(); // comments count
     expect(screen.getByText('12')).toBeInTheDocument(); // assignees count
@@ -63,10 +62,5 @@ describe('CaseInlineContent', () => {
   it('renders status label from the status configuration', () => {
     renderInline(buildAttachment());
     expect(screen.getByText('In progress')).toBeInTheDocument();
-  });
-
-  it('falls back to the id when incremental_id is missing', () => {
-    renderInline(buildAttachment({ incremental_id: null }));
-    expect(screen.getByText('ID: abc')).toBeInTheDocument();
   });
 });
