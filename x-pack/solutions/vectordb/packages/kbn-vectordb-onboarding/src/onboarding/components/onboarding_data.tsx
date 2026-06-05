@@ -176,3 +176,24 @@ export const getStepContent = (docLinks: DocLinksStart) => ({
     },
   },
 });
+
+export const generateTags = [
+  i18n.translate('vectordbOnboarding.pathSelection.generate.tag1', {
+    defaultMessage: 'Jina models',
+  }),
+  i18n.translate('vectordbOnboarding.pathSelection.generate.tag2', {
+    defaultMessage: 'Semantic search',
+  }),
+  i18n.translate('vectordbOnboarding.pathSelection.generate.tag3', {
+    defaultMessage: 'No config needed',
+  }),
+];
+
+export const storeTags = [
+  i18n.translate('vectordbOnboarding.pathSelection.store.tag1', {
+    defaultMessage: 'Intelligent mapping',
+  }),
+  i18n.translate('vectordbOnboarding.pathSelection.store.tag2', {
+    defaultMessage: 'Optimized storage settings',
+  }),
+];

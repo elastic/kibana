@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import pythonIcon from '../assets/python.svg';
-import javascriptIcon from '../assets/javascript.svg';
-import javaIcon from '../assets/java.svg';
-import goIcon from '../assets/go.svg';
-import rustIcon from '../assets/rust.svg';
-import csharpIcon from '../assets/csharp.svg';
+import pythonIcon from '../../assets/python.svg';
+import javascriptIcon from '../../assets/javascript.svg';
+import javaIcon from '../../assets/java.svg';
+import goIcon from '../../assets/go.svg';
+import rustIcon from '../../assets/rust.svg';
+import csharpIcon from '../../assets/csharp.svg';
 
 export type Language = 'python' | 'javascript' | 'java' | 'go' | 'rust' | 'csharp';
 

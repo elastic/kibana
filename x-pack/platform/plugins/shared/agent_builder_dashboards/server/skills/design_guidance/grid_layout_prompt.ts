@@ -22,7 +22,7 @@ Use these sizes — **do not make metric or gauge panels full-width**:
 - **Gauge** → \`w: 12–16, h: 9–12\`. Gauges need extra vertical space for the dial, but should still stay compact. Fit 3–4 per row.
   - 4 gauges in a row: each \`w: 12, h: 9\`
   - 3 gauges in a row: each \`w: 16, h: 10–12\`
-- **XY (line / area / bar)** → \`w: 24, h: 10–12\` (half-width) or \`w: 48, h: 14–16\` (full-width for primary time series).
+- **XY (line / area / bar)** → \`w: 24, h: 10–12\`.
 - **Heatmap** → \`w: 24–48, h: 10–12\`. Needs height for the color matrix.
 - **Tagcloud** → \`w: 24, h: 8–10\`.
 - **Pie / Treemap / Waffle / Mosaic** → \`w: 24, h: 10–12\`.
