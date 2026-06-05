@@ -5,20 +5,27 @@
  * 2.0.
  */
 
+import type { BaseMessage } from '@langchain/core/messages';
+import { isAIMessage } from '@langchain/core/messages';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ToolSummarizationDeps } from './tool_summarization';
 import { createSummarizationTransformer } from './tool_summarization';
 import { roundToLangchain } from './to_langchain_messages';
-import { estimateMessagesTokens } from './estimate_messages_tokens';
 
-export { estimateMessagesTokens };
+export const estimateMessagesTokens = (messages: BaseMessage[]): number => {
+  let total = 0;
+  for (const message of messages) {
+    // estimateTokens stringifies non-string content (e.g. structured message parts).
+    total += estimateTokens(message.content);
+    // Tool-call params/reasoning live on tool_calls, not in content, but are sent too.
+    if (isAIMessage(message) && message.tool_calls?.length) {
+      total += estimateTokens(JSON.stringify(message.tool_calls));
+    }
+  }
+  return total;
+};
 
-/**
- * Estimates per-round token counts as each round will actually be sent: built via
- * the same `roundToLangchain` conversion with tool-result summarization (Part 1)
- * applied. Filestore substitution (Part 2) is intentionally excluded because it is
- * gated on the very estimate being computed here.
- */
 export const estimatePerRoundTokens = async (
   rounds: ProcessedConversationRound[],
   deps: ToolSummarizationDeps

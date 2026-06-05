@@ -9,15 +9,8 @@ import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 
-/**
- * Marker to identify cleaned/transformed tool results.
- * Prevents double-processing if results are transformed multiple times.
- */
 const SUMMARY_MARKER = '_summary';
 
-/**
- * Checks if a result has already been summarized/transformed.
- */
 export const isSummaryResult = (data: unknown): boolean => {
   return (
     typeof data === 'object' &&
@@ -27,9 +20,6 @@ export const isSummaryResult = (data: unknown): boolean => {
   );
 };
 
-/**
- * Checks if all results in a tool call have already been cleaned.
- */
 export const areAllResultsCleaned = (results: ToolResult[]): boolean => {
   return results.every((result) => {
     if ('data' in result) {
@@ -39,9 +29,6 @@ export const areAllResultsCleaned = (results: ToolResult[]): boolean => {
   });
 };
 
-/**
- * Marks a result as cleaned by adding the cleaned marker to its data.
- */
 export const markResultAsCleaned = (result: ToolResult): ToolResult => {
   if ('data' in result && typeof result.data === 'object' && result.data !== null) {
     const data = result.data as Record<string, unknown>;
@@ -59,16 +46,9 @@ export const markResultAsCleaned = (result: ToolResult): ToolResult => {
 };
 
 export interface ToolCallResultTransformerOptions {
-  // Force filestore substitution regardless of the transformer's construction-time
-  // conversation-size gate. Intra-round compaction sets this because the pressure
-  // comes from the in-flight round, not from the (possibly empty) conversation history.
   forceFilestoreSubstitution?: boolean;
 }
 
-/**
- * Function type for transforming all results from a tool call.
- * Works at the tool-call level to allow aggregation/summarization across results.
- */
 export type ToolCallResultTransformer = (
   toolCall: ToolCallWithResult,
   options?: ToolCallResultTransformerOptions
@@ -79,12 +59,6 @@ export interface ToolSummarizationDeps {
   toolRegistry: ToolRegistry;
 }
 
-/**
- * Attempts to apply tool-specific summarization using the tool's `summarizeToolReturn` function.
- * Checks the tool manager first (has all active tools including internal ones like filestore tools),
- * then falls back to the tool registry (for evicted dynamic tools from previous rounds).
- * Returns the summarized results, or undefined if no summarization is available/applicable.
- */
 export const tryToolSummarization = async (
   toolCall: ToolCallWithResult,
   toolManager: ToolManager,
@@ -105,16 +79,10 @@ export const tryToolSummarization = async (
     const summarizedResults = tool.summarizeToolReturn(toolCall);
     return summarizedResults ?? undefined;
   } catch {
-    // Tool not found or error - skip summarization
     return undefined;
   }
 };
 
-/**
- * Builds a transformer that applies only tool-specific summarization (Part 1),
- * without filestore substitution. Used for token estimation so the estimate
- * reflects the summarized payload actually sent to the model, not the raw results.
- */
 export const createSummarizationTransformer = ({
   toolManager,
   toolRegistry,

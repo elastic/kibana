@@ -215,9 +215,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const graphRecursionLimit = getRecursionLimit(CYCLE_LIMIT);
 
-  // Estimate per-round token counts once, reflecting the summarized payload actually
-  // sent to the model. Threaded into both the filestore gate and compaction so both
-  // decisions share a single, accurate view of conversation size.
   const perRoundTokenCounts = await estimatePerRoundTokens(processedConversation.previousRounds, {
     toolManager,
     toolRegistry,

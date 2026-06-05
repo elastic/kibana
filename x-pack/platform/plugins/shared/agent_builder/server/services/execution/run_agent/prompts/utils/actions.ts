@@ -39,19 +39,10 @@ import {
 } from '../../actions';
 import type { ToolCallResultTransformer } from '../../utils/tool_summarization';
 import { extractToolReturn } from '../../utils/extract_tool_return';
-import { estimateMessagesTokens } from '../../utils/estimate_messages_tokens';
+import { estimateMessagesTokens } from '../../utils/estimate_conversation_tokens';
 
-/**
- * Number of most-recent cycles whose tool results are always kept verbatim during
- * intra-round compaction. The agent typically needs the latest results to decide its
- * next action, so only older cycles are summarized/substituted.
- */
 const PRESERVED_RECENT_CYCLES = 2;
 
-/**
- * In-flight token budget above which older tool results in the current round are
- * compacted. Below it the round is small enough to send verbatim.
- */
 export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
 
 interface IntraRoundCompaction {
@@ -72,8 +63,6 @@ export const formatResearcherActionHistory = async ({
 }): Promise<BaseMessageLike[]> => {
   const rawMessages = await formatActions({ actions, cycleLimit });
 
-  // Intra-round compaction only kicks in for large rounds and when the tools to do it
-  // are wired; the common (small) case returns the verbatim messages untouched.
   if (
     !resultTransformer ||
     !toolManager ||
@@ -158,12 +147,6 @@ const formatActions = async ({
 
   return formatted;
 };
-
-/**
- * Cycle at/below which tool results are compacted. Returns undefined when the round
- * is too short to have older cycles (the last PRESERVED_RECENT_CYCLES cycles are
- * always kept verbatim).
- */
 const getCompactionCutoffCycle = (actions: ResearchAgentAction[]): number | undefined => {
   const cycles = actions
     .filter(isExecuteToolAction)
