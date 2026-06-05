@@ -11,7 +11,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { Query, TimeRange } from '@kbn/es-query';
-import type { CustomCellRenderer, CustomGridColumnsConfiguration, SortOrder } from '@kbn/unified-data-table';
+import type {
+  CustomCellRenderer,
+  CustomGridColumnsConfiguration,
+  SortOrder,
+} from '@kbn/unified-data-table';
 import {
   buildWorkflowExecuteHitSearchIdentityKey,
   useWorkflowExecuteHitSearch,
@@ -36,7 +40,9 @@ export interface UseWorkflowExecuteHitTabSearchStateOptions {
   services: WorkflowExecuteKibanaServices;
   setErrors: (errors: string | null) => void;
   resolveFetchError: (error: unknown) => string;
-  fetchPage: (params: WorkflowExecuteHitTabFetchPageParams) => Promise<WorkflowExecuteHitSearchPageResult>;
+  fetchPage: (
+    params: WorkflowExecuteHitTabFetchPageParams
+  ) => Promise<WorkflowExecuteHitSearchPageResult>;
   defaultColumns: readonly string[];
   externalCustomRenderers?: CustomCellRenderer;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -141,7 +147,11 @@ export function useWorkflowExecuteHitTabSearchState({
       if (newQuery) {
         setQuery(newQuery);
       }
-      setTimeRange(dateRange);
+      setTimeRange((previousTimeRange) =>
+        previousTimeRange.from === dateRange.from && previousTimeRange.to === dateRange.to
+          ? previousTimeRange
+          : dateRange
+      );
     },
     []
   );
