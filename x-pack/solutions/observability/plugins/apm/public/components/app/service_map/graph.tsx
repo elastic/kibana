@@ -691,20 +691,18 @@ function GraphInner({
                         css={mapToolbarControlIconCss}
                       />
                     </EuiToolTip>
-                    {!isEmbedded && (
-                      <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
-                        <EuiButtonIcon
-                          display="empty"
-                          color="text"
-                          size="s"
-                          iconType="crosshair"
-                          onClick={() => fitView(getFitViewOptions())}
-                          aria-label={fitViewLabel}
-                          data-test-subj="serviceMapFitViewButton"
-                          css={mapToolbarControlIconCss}
-                        />
-                      </EuiToolTip>
-                    )}
+                    <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="crosshair"
+                        onClick={() => fitView(getFitViewOptions())}
+                        aria-label={fitViewLabel}
+                        data-test-subj="serviceMapFitViewButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    </EuiToolTip>
                     {fullMapHref && (
                       <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
