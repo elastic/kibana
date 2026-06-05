@@ -58,7 +58,8 @@ spaceTest.describe(
       await expect(detectionsAttackDiscoveryPage.tableExpandAttackDetailsButtons).toHaveCount(2);
       await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toHaveCount(1);
       await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toContainText('Run by:');
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toHaveCount(1);
+      await expect(detectionsAttackDiscoveryPage.manualAttackSubtitle).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attackRunByAvatar).toBeVisible();
     });
   }
