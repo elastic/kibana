@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
+import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { resolveProviderPermissions } from './resolve_provider_permissions';
 
 export interface AwsServicePermissions {
@@ -14,15 +14,13 @@ export interface AwsServicePermissions {
   actions: string[];
 }
 
-const SERVICE_MAP = new Map(AWS_SERVICES_MATRIX.map((entry) => [entry.id, entry]));
-
 /**
  * Returns IAM actions per selected service for display in the permissions viewer.
  * Services without provider permissions (non-agentless, unknown ids) are omitted.
  */
 export function getSelectedServicePermissions(serviceIds: string[]): AwsServicePermissions[] {
   return serviceIds.flatMap((id) => {
-    const entry = SERVICE_MAP.get(id);
+    const entry = AWS_SERVICES_MAP.get(id);
     const { actions } = resolveProviderPermissions(id);
 
     if (actions.length === 0) {

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
+import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import type { ProviderPermissions } from './aws_provider_permissions';
 
 export interface ResolvedProviderPermissions {
   actions: string[];
   managedPolicyArns: string[];
 }
-
-const SERVICE_MAP = new Map(AWS_SERVICES_MATRIX.map((entry) => [entry.id, entry]));
 
 /**
  * Future manifest shape for provider_permissions once packages are upgraded.
@@ -46,7 +44,7 @@ export function resolveProviderPermissions(
   serviceId: string,
   options: ResolveProviderPermissionsOptions = {}
 ): ResolvedProviderPermissions {
-  const entry = SERVICE_MAP.get(serviceId);
+  const entry = AWS_SERVICES_MAP.get(serviceId);
 
   // Future: read provider_permissions from installed package manifest when available.
   if (options.manifestPermissions) {

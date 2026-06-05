@@ -48,7 +48,7 @@ export function buildIamPolicyDocument(
         Sid: sid,
         Effect: 'Allow',
         Resource: '*',
-        Action: [...actions].sort(),
+        Action: Array.from(new Set(actions)).sort(),
       },
     ],
   };

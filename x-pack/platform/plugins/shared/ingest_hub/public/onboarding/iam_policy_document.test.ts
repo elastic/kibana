@@ -54,6 +54,16 @@ describe('buildIamPolicyDocument', () => {
 
     expect(policy.Statement[0].Sid).toBe('ElasticAWSGuardDuty');
   });
+
+  it('de-duplicates actions before sorting', () => {
+    const policy = buildIamPolicyDocument([
+      's3:GetObject',
+      's3:GetObject',
+      'ec2:DescribeInstances',
+    ]);
+
+    expect(policy.Statement[0].Action).toEqual(['ec2:DescribeInstances', 's3:GetObject']);
+  });
 });
 
 describe('formatIamPolicyDocument', () => {

@@ -103,4 +103,30 @@ describe('AwsPermissionsViewer', () => {
       '__all__'
     );
   });
+
+  it('resets to all integrations when the selected service is no longer in the list', () => {
+    const { rerender } = renderViewer();
+
+    fireEvent.change(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-serviceSelector`), {
+      target: { value: 'service_a' },
+    });
+
+    expect(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-serviceSelector`)).toHaveValue(
+      'service_a'
+    );
+
+    rerender(
+      <I18nProvider>
+        <AwsPermissionsViewer services={[MOCK_SERVICES[1]]} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-serviceSelector`)).toHaveValue(
+      '__all__'
+    );
+
+    const actionsList = screen.getByTestId(`${AWS_PERMISSIONS_VIEWER_TEST_SUBJ}-actionsList`);
+    expect(actionsList).toHaveTextContent('"Sid": "ElasticAWSIntegration"');
+    expect(actionsList).toHaveTextContent('"sqs:ReceiveMessage"');
+  });
 });

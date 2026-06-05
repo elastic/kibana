@@ -90,11 +90,17 @@ describe('AWS_SERVICES_MATRIX', () => {
     it('has a boolean showInUI', () => {
       expect(typeof entry.showInUI).toBe('boolean');
     });
+  });
 
-    if (entry.deliveryMethods.some(({ method }) => method === 'agentless')) {
-      it('has non-empty providerPermissions.actions for agentless delivery', () => {
-        expect(entry.providerPermissions?.actions?.length).toBeGreaterThan(0);
-      });
-    }
+  const agentlessEntries = AWS_SERVICES_MATRIX.filter((entry) =>
+    entry.deliveryMethods.some(({ method }) => method === 'agentless')
+  );
+
+  describe.each(
+    agentlessEntries.map((entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry])
+  )('agentless service "%s"', (_id, entry) => {
+    it('has non-empty providerPermissions.actions', () => {
+      expect(entry.providerPermissions?.actions?.length).toBeGreaterThan(0);
+    });
   });
 });

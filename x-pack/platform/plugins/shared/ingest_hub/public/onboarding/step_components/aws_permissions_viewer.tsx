@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -84,6 +84,15 @@ export const AwsPermissionsViewer: React.FC<AwsPermissionsViewerProps> = ({ serv
 
     return formatIamPolicyDocument(displayedActions, getIntegrationSid(selectedService?.name));
   }, [services, selectedOption, displayedActions]);
+
+  useEffect(() => {
+    if (
+      selectedOption !== ALL_SERVICES_OPTION_VALUE &&
+      !services.some(({ id }) => id === selectedOption)
+    ) {
+      setSelectedOption(ALL_SERVICES_OPTION_VALUE);
+    }
+  }, [services, selectedOption]);
 
   if (services.length === 0) {
     return null;
