@@ -86,7 +86,6 @@ const applyTextReplacement = (
 };
 
 const insertNewLine = (editor: monaco.editor.IStandaloneCodeEditor) => {
-  editor.focus();
   editor.trigger('keyboard', 'type', { text: '\n' });
 };
 

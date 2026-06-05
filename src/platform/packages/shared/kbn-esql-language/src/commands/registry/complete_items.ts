@@ -47,7 +47,7 @@ function buildCharCompleteItem(
   return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
 }
 
-export const NEW_LINE_SORT_TEXT = ' ';
+const NEW_LINE_SORT_TEXT = ' ';
 
 /** "New line" affordance prepended to every popover so users can break to a new line via Enter. */
 export function getNewLineSuggestion(): ISuggestionItem {
@@ -55,17 +55,18 @@ export function getNewLineSuggestion(): ISuggestionItem {
     defaultMessage: 'New line',
   });
 
-  return {
+  const suggestion: ISuggestionItem = {
     label: `${title} ⏎`,
     filterText: title,
     text: '',
-    kind: 'Issue',
+    kind: 'Keyword',
     sortText: NEW_LINE_SORT_TEXT,
     command: {
       id: ESQL_NEW_LINE_COMMAND,
       title,
     },
-  } as ISuggestionItem;
+  };
+  return suggestion;
 }
 
 export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({
