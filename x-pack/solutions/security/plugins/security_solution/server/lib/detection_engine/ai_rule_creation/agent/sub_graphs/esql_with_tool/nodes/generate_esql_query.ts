@@ -11,10 +11,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { RuleCreationState } from '../../../state';
-import {
-  extractAvailableIndices,
-  isQueryCompatibleWithAvailableData,
-} from './validate_esql_indices';
+import { detectDataSourceMismatch } from './gate_data_source_mismatch';
 
 interface GenerateEsqlQueryParams {
   model: InferenceChatModel;
@@ -46,6 +43,11 @@ export const generateEsqlQueryNode = async ({
       const connector = await inferenceClient.getConnectorById(connectorId);
 
       // Build security-specific instructions for ES|QL query generation
+      const detectedMismatch = detectDataSourceMismatch(state.userQuery);
+      const refusalInstruction = detectedMismatch
+        ? `\n- CRITICAL: The requested detection cannot be supported by the available data source (${detectedMismatch}). You MUST refuse to generate a query. Do NOT wrap any explanation or partial code in ES|QL triple-backtick blocks (\`\`\`esql). Instead, respond with exactly: ERROR: UNSUPPORTED_DETECTION — <brief explanation>.`
+        : '';
+
       const additionalInstructions = `
 Your role to is to help in creating Elastic Detection (SIEM) rules of ES|QL type, based on provided user request by understanding the intent of the user query and generating a concise and relevant ES|QL query that aligns with the user's intent.
 
@@ -55,7 +57,7 @@ Guidelines for ES|QL query generation:
 - If generated query does not have any aggregations (using STATS..BY command), make sure you add operator metadata _id, _index, _version after source index in FROM command
 - Do not use any date range filters in the query (like WHERE @timestamp > NOW() - 5 minutes) or bucket aggregation limited by time (COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), unless explicitly told to include them in query. The system will handle time range filtering separately.
 - Never include bucket aggregation limited by time (like this example COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), to avoid clash with scheduling of the detection rule.
-- If you use KEEP command, after METADATA operator, make sure to include _id field.
+- If you use KEEP command, after METADATA operator, make sure to include _id field.${refusalInstruction}
 - Keep queries concise. Do not include unnecessary fields in KEEP or METADATA. Only select fields that are actually used in WHERE, EVAL, STATS, or SORT. If a query would require selecting a large number of fields, use KEEP with explicit field names rather than METADATA _id, _index, _version on aggregations.
 - Ensure the query is syntactically correct and adheres to ES|QL standards.
 - Do not include any explanations outside of ES|QL code blocks, only provide the ES|QL query string inside a single triple-backtick block.
@@ -130,22 +132,6 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         return {
           ...state,
           errors: ['Generated ES|QL query is empty'],
-        };
-      }
-
-      // Programmatically validate that the query's FROM indices are compatible
-      // with the available data sources stated in the user request.
-      const availableIndices = extractAvailableIndices(state.userQuery);
-      if (
-        availableIndices.length > 0 &&
-        !isQueryCompatibleWithAvailableData(esqlResponse.query, availableIndices)
-      ) {
-        const fromIndex = extractFromIndex(esqlResponse.query);
-        const msg = `The requested detection is not supported by the available data sources: the generated query references index "${fromIndex}" which is outside the available data (${availableIndices.join(', ')}).`;
-        events?.reportProgress(msg);
-        return {
-          ...state,
-          errors: [msg],
         };
       }
 
