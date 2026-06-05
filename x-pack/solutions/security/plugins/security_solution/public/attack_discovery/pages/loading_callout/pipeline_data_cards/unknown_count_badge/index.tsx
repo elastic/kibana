@@ -13,7 +13,7 @@ import * as i18n from '../translations';
 export const UnknownCountBadge: React.FC = () => (
   <span aria-label={i18n.UNKNOWN_COUNT_TOOLTIP} data-test-subj="unknownCountTooltip">
     <EuiToolTip content={i18n.UNKNOWN_COUNT_TOOLTIP}>
-      <EuiBadge color="hollow" data-test-subj="unknownCountBadge">
+      <EuiBadge color="hollow" data-test-subj="unknownCountBadge" tabIndex={0}>
         {'?'}
       </EuiBadge>
     </EuiToolTip>
