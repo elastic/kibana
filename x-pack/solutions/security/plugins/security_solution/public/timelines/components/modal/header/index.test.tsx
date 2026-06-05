@@ -84,6 +84,11 @@ describe('TimelineModalHeader', () => {
               read: true,
             }),
           },
+          hooks: {
+            useCasesAddToNewCaseFlyout: jest.fn().mockReturnValue({ open: jest.fn() }),
+            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+          },
+          config: { attachmentsEnabled: false },
         },
         uiSettings: {
           get: jest.fn(),
