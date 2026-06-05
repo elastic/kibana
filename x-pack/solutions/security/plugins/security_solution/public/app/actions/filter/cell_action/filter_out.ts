@@ -20,6 +20,7 @@ import type { StartServices } from '../../../../types';
 import { isTimelineScope } from '../../../../helpers';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
+import { buildIncludeNullFilter } from './utils';
 
 export const createFilterOutCellActionFactory = ({
   services,
@@ -71,25 +72,12 @@ export const createFilterOutCellActionFactory = ({
 
       if (metadata?.includeNullValues) {
         fm.addFilters([
-          {
-            meta: {
-              type: 'custom',
-              key: fieldName,
-              index: dataViewId,
-              alias: `${fieldName}: ${value[0]} OR null`,
-              disabled: false,
-              negate: metadata?.negateFilters !== true,
-            },
-            query: {
-              bool: {
-                should: [
-                  { match_phrase: { [fieldName]: value[0] } },
-                  { bool: { must_not: { exists: { field: fieldName } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          },
+          buildIncludeNullFilter({
+            fieldName,
+            dataViewId,
+            value,
+            negate: metadata?.negateFilters !== true,
+          }),
         ]);
         return;
       }
