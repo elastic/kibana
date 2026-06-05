@@ -12,7 +12,7 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
@@ -26,7 +26,7 @@ const addSearchEmbeddableToDashboard = async (
   expect(page.getByTestId('docTable').locator('.euiDataGridRowCell')).toBeTruthy();
 };
 
-spaceTest.describe('Discover saved search embeddable', { tag: testData.DISCOVER_CORE_TAGS }, () => {
+spaceTest.describe('Discover saved search embeddable', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

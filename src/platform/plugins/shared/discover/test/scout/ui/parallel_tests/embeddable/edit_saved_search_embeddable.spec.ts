@@ -11,13 +11,13 @@
  * Discover saved search embeddable edit flow behaviours.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
 spaceTest.describe(
   'Discover saved search panel edit flow',
-  { tag: testData.DISCOVER_CORE_TAGS },
+  { tag: tags.deploymentAgnostic },
   () => {
     const panelName = 'Rendering Test: saved search';
     const savedAsTitle = 'Rendering Test: saved as search';

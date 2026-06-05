@@ -11,11 +11,11 @@
  * Discover saved search embeddable edit flow behaviours.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
-spaceTest.describe('Discover ES|QL panel edit flow', { tag: testData.DISCOVER_CORE_TAGS }, () => {
+spaceTest.describe('Discover ES|QL panel edit flow', { tag: tags.deploymentAgnostic }, () => {
   const panelName = 'ES|QL Discover Session';
   const savedAsTitle = 'ES|QL Discover Session Saved As';
 
