@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
+  EuiTextBlockTruncate,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -25,36 +26,15 @@ import type {
   CaseAttachmentData,
   CasesAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
-import { SeverityBadge } from './severity_badge';
+import { SeverityHealth } from '../../components/severity/config';
 import { CaseMetaRow } from './case_meta_row';
-import {
-  buildCasesFilterQuery,
-  getAppIdForOwner,
-  getCasePathForOwner,
-  getCasesListPathForOwner,
-  getSharedOwner,
-} from './route_helpers';
+import { getAppIdForOwner, getCasesListPathForOwner, getCaseUrls } from './route_helpers';
+import { CASES_HEADER, GO_TO_CASES, SHOWING_FOOTER } from './translations';
+import type { CaseSeverity } from '../../../common/types/domain';
 
-const MAX_VISIBLE_ROWS = 5;
-
-const i18nStrings = {
-  filters: i18n.translate('xpack.cases.agentBuilder.cases.filters', {
-    defaultMessage: 'Filters',
-  }),
-  goToCases: i18n.translate('xpack.cases.agentBuilder.cases.goToCases', {
-    defaultMessage: 'Go to cases',
-  }),
-  header: (count: number) =>
-    i18n.translate('xpack.cases.agentBuilder.cases.header', {
-      defaultMessage: '{count, plural, one {# Case} other {# Cases}}',
-      values: { count },
-    }),
-  showingFooter: (visible: number, total: number) =>
-    i18n.translate('xpack.cases.agentBuilder.cases.showingFooter', {
-      defaultMessage: 'Showing {visible} of {total}',
-      values: { visible, total },
-    }),
-};
+const MAX_VISIBLE_ROWS = 10;
+// Approx height of 5 case rows + dividers to create a scroll cutoff
+const SCROLL_CUTOFF_PX = 400;
 
 export type CasesAttachment = Attachment<typeof CASES_ATTACHMENT_TYPE, CasesAttachmentData>;
 
@@ -66,62 +46,56 @@ const CaseRow: React.FC<{ data: CaseAttachmentData; application: ApplicationStar
   data,
   application,
 }) => {
-  const idLabel = data.incremental_id ? `#${data.incremental_id}` : `#${data.id}`;
-  const goToCase = () => {
-    application.navigateToApp(getAppIdForOwner(data.owner), {
-      path: getCasePathForOwner(data.owner, data.id),
-    });
-  };
+  debugger;
+  const idLabel = data.incremental_id ? `#${data.incremental_id}` : null;
+  const caseUrls = useMemo(() => getCaseUrls({ application, data }), [application, data]);
+
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      paddingSize="s"
-      onClick={goToCase}
-      data-test-subj="case-attachment-row"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+            {idLabel && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  {idLabel}
+                </EuiText>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {idLabel}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h4>{data.title}</h4>
+              <EuiTitle size="xs">
+                <EuiLink
+                  href={caseUrls.case}
+                  target="_blank"
+                  data-test-subj="case-attachment-row-title"
+                >
+                  {data.title}
+                </EuiLink>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SeverityBadge severity={data.severity} />
+          <SeverityHealth severity={data.severity as CaseSeverity} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup gutterSize="xs" responsive={false} css={{ marginTop: 8 }}>
-        <EuiFlexItem grow={false}>
-          <CaseMetaRow data={data} showAttachments />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <CaseMetaRow data={data} caseUrls={caseUrls} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
-      {data.description && (
-        <EuiText
-          size="s"
-          color="subdued"
-          css={{
-            marginTop: 8,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {data.description}
-        </EuiText>
-      )}
-    </EuiPanel>
+      <EuiFlexItem>
+        <EuiTextBlockTruncate lines={2}>
+          <EuiText size="s" color="subdued">
+            {data.description}
+          </EuiText>
+        </EuiTextBlockTruncate>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 CaseRow.displayName = 'CaseRow';
@@ -132,68 +106,66 @@ interface InlineContentProps extends AttachmentRenderProps<CasesAttachment> {
 const InlineContent: React.FC<InlineContentProps> = ({ attachment, application }) => {
   const { data } = attachment;
   const visible = data.cases.slice(0, MAX_VISIBLE_ROWS);
-  const sharedOwner = getSharedOwner(data.cases);
+  const owner = data.cases[0].owner;
 
-  const goToCases = () => {
-    application.navigateToApp(getAppIdForOwner(sharedOwner), {
-      path: getCasesListPathForOwner(sharedOwner),
-    });
-  };
-
-  const goToFilteredCases = () => {
-    application.navigateToApp(getAppIdForOwner(sharedOwner), {
-      path: getCasesListPathForOwner(sharedOwner, buildCasesFilterQuery(data.cases)),
-    });
-  };
+  const casesUrl = useMemo(
+    () =>
+      application.getUrlForApp(getAppIdForOwner(owner), {
+        path: getCasesListPathForOwner(owner),
+      }),
+    [application, owner]
+  );
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-attachment-inline">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="casesApp" aria-hidden />
+    <EuiPanel hasBorder paddingSize="xs" data-test-subj="cases-attachment-inline">
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="briefcase" aria-hidden />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{CASES_HEADER(data.total)}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="popout"
+                iconSide="right"
+                href={casesUrl}
+                target="_blank"
+                data-test-subj="cases-attachment-go-to-cases"
+              >
+                {GO_TO_CASES}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{i18nStrings.header(data.total)}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="filter"
-            onClick={goToFilteredCases}
-            data-test-subj="cases-attachment-filters"
+          <EuiFlexGroup
+            style={{ maxHeight: SCROLL_CUTOFF_PX, overflowY: 'auto' }}
+            data-test-subj="cases-attachment-scroll-container"
+            gutterSize="l"
+            direction="column"
           >
-            {i18nStrings.filters}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="popout"
-            iconSide="right"
-            onClick={goToCases}
-            data-test-subj="cases-attachment-go-to-cases"
-          >
-            {i18nStrings.goToCases}
-          </EuiButton>
+            {visible.map((c: CaseAttachmentData, idx: number) => (
+              <EuiFlexItem key={c.id}>
+                <CaseRow data={c} application={application} />
+                {idx === visible.length - 1 && data.total > visible.length && (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    <EuiText size="xs" color="subdued" textAlign="center">
+                      {SHOWING_FOOTER(visible.length, data.total)}
+                    </EuiText>
+                  </>
+                )}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {visible.map((c: CaseAttachmentData, idx: number) => (
-        <React.Fragment key={c.id}>
-          <EuiHorizontalRule margin="s" />
-          <CaseRow data={c} application={application} />
-          {idx === visible.length - 1 && data.total > visible.length && (
-            <>
-              <EuiHorizontalRule margin="s" />
-              <EuiText size="xs" color="subdued" textAlign="center">
-                {i18nStrings.showingFooter(visible.length, data.total)}
-              </EuiText>
-            </>
-          )}
-        </React.Fragment>
-      ))}
     </EuiPanel>
   );
 };

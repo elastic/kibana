@@ -7,47 +7,74 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Status, type CaseStatuses } from '@kbn/cases-components';
+import { getStatusConfiguration } from '@kbn/cases-components';
+
 import type { CaseAttachmentData } from '../../../common/types/agent_builder/attachment_schemas';
+import { VIEW_ALERTS, VIEW_COMMENTS } from './translations';
+import type { getCaseUrls } from './route_helpers';
+
+const statusConfig = getStatusConfiguration();
 
 interface Props {
   data: CaseAttachmentData;
-  showAttachments?: boolean;
+  caseUrls: ReturnType<typeof getCaseUrls>;
 }
 
-export const CaseMetaRow: React.FC<Props> = ({ data, showAttachments }) => (
-  <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-    {data.totalAlerts > 0 && (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow" iconType="warning">
-          {data.totalAlerts}
-        </EuiBadge>
-      </EuiFlexItem>
-    )}
-    <EuiFlexItem grow={false}>
-      <Status status={data.status as CaseStatuses} />
-    </EuiFlexItem>
-    {data.assignees && data.assignees.length > 0 && (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow" iconType="users">
-          {data.assignees.length}
-        </EuiBadge>
-      </EuiFlexItem>
-    )}
-    {data.totalComment > 0 && (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow" iconType="editorComment">
-          {data.totalComment}
-        </EuiBadge>
-      </EuiFlexItem>
-    )}
-    {showAttachments && data.totalAttachments != null && data.totalAttachments > 0 && (
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow" iconType="paperClip">
-          {data.totalAttachments}
-        </EuiBadge>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+export const CaseMetaRow: React.FC<Props> = ({ data, caseUrls }) => {
+  const statusEntry = statusConfig[data.status as keyof typeof statusConfig];
+  return (
+    <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
+      {data.totalAlerts > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="danger"
+            iconType="warning"
+            href={caseUrls.alertsTab}
+            target="_blank"
+            aria-label={VIEW_ALERTS}
+          >
+            {data.totalAlerts}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {statusEntry && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{statusEntry.label}</EuiBadge>
+        </EuiFlexItem>
+      )}
+      {data.assignees && data.assignees.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" iconType="users">
+            {data.assignees.length}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {data.totalComment > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType="editorComment"
+            href={caseUrls.activityTab}
+            target="_blank"
+            aria-label={VIEW_COMMENTS}
+          >
+            {data.totalComment}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {data?.totalAttachments && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType="paperClip"
+            href={caseUrls.attachmentsTab}
+            target="_blank"
+          >
+            {data.totalAttachments}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
 CaseMetaRow.displayName = 'CaseMetaRow';

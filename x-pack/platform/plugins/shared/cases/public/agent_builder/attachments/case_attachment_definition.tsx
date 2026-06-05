@@ -20,7 +20,7 @@ export const createCaseAttachmentDefinition = (
   const InlineContent = createCaseInlineContent(services);
   return {
     getLabel: (attachment) => attachment.data.title,
-    getIcon: () => 'casesApp',
+    getIcon: () => 'briefcase',
     renderInlineContent: (props) => <InlineContent {...props} />,
   };
 };

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import { createCasesInlineContent, type CasesAttachment } from './cases_inline_content';
+import { CASES_LABEL } from './translations';
 
 interface Services {
   application: ApplicationStart;
@@ -20,11 +20,7 @@ export const createCasesAttachmentDefinition = (
 ): AttachmentUIDefinition<CasesAttachment> => {
   const InlineContent = createCasesInlineContent(services);
   return {
-    getLabel: (attachment) =>
-      i18n.translate('xpack.cases.agentBuilder.cases.label', {
-        defaultMessage: '{count, plural, one {# case} other {# cases}}',
-        values: { count: attachment.data.total },
-      }),
+    getLabel: (attachment) => CASES_LABEL(attachment.data.total),
     getIcon: () => 'casesApp',
     renderInlineContent: (props) => <InlineContent {...props} />,
   };

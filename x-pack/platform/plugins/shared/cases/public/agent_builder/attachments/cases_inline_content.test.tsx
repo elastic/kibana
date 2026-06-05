@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { createCasesInlineContent, type CasesAttachment } from './cases_inline_content';
 import {
@@ -42,10 +41,7 @@ const buildAttachment = (cases: CaseAttachmentData[], total?: number): CasesAtta
 const renderInline = (attachment: CasesAttachment) => {
   const application = applicationServiceMock.createStartContract();
   const Inline = createCasesInlineContent({ application });
-  return {
-    application,
-    ...render(<Inline attachment={attachment} isSidebar={false} />),
-  };
+  return render(<Inline attachment={attachment} isSidebar={false} />);
 };
 
 describe('CasesInlineContent', () => {
@@ -62,37 +58,32 @@ describe('CasesInlineContent', () => {
     expect(screen.getByText('SHA256 hash')).toBeInTheDocument();
   });
 
-  it('shows "Showing N of M" footer when cases exceed visible rows', () => {
+  it('renders clickable title links and badge links for each row', () => {
+    const cases = [buildCase({ id: '125', incremental_id: 125, title: 'Suspicious OAuth Token' })];
+    renderInline(buildAttachment(cases));
+    expect(screen.getByTestId('case-attachment-row-title')).toBeInTheDocument();
+    expect(screen.getByLabelText('View alerts')).toBeInTheDocument();
+    expect(screen.getByLabelText('View comments')).toBeInTheDocument();
+  });
+
+  it('renders the "Go to cases" button', () => {
+    renderInline(buildAttachment([buildCase()]));
+    expect(screen.getByTestId('cases-attachment-go-to-cases')).toBeInTheDocument();
+  });
+
+  it('shows "Showing N of M" footer when cases exceed the 10-row limit', () => {
+    const cases = Array.from({ length: 10 }, (_, i) =>
+      buildCase({ id: `c${i}`, incremental_id: i + 1, title: `Case ${i}` })
+    );
+    renderInline(buildAttachment(cases, 12));
+    expect(screen.getByText('Showing 10 of 12')).toBeInTheDocument();
+  });
+
+  it('does not show "Showing N of M" footer when total fits within the limit', () => {
     const cases = Array.from({ length: 7 }, (_, i) =>
       buildCase({ id: `c${i}`, incremental_id: i + 1, title: `Case ${i}` })
     );
     renderInline(buildAttachment(cases, 7));
-    expect(screen.getByText('Showing 5 of 7')).toBeInTheDocument();
-  });
-
-  it('"Go to cases" navigates to the cases app', async () => {
-    const { application } = renderInline(
-      buildAttachment([buildCase({ owner: 'securitySolution' })])
-    );
-    await userEvent.click(screen.getByTestId('cases-attachment-go-to-cases'));
-    expect(application.navigateToApp).toHaveBeenCalledWith(
-      'securitySolutionUI',
-      expect.objectContaining({ path: expect.stringMatching(/cases$/) })
-    );
-  });
-
-  it('"Filters" navigates with severity + owner query params', async () => {
-    const { application } = renderInline(
-      buildAttachment([
-        buildCase({ severity: 'critical', owner: 'securitySolution' }),
-        buildCase({ severity: 'high', owner: 'securitySolution' }),
-      ])
-    );
-    await userEvent.click(screen.getByTestId('cases-attachment-filters'));
-    expect(application.navigateToApp).toHaveBeenCalled();
-    const call = (application.navigateToApp as jest.Mock).mock.calls[0];
-    expect(call[0]).toBe('securitySolutionUI');
-    expect(call[1].path).toContain('severity=');
-    expect(call[1].path).toContain('owner=securitySolution');
+    expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
   });
 });

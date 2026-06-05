@@ -115,6 +115,7 @@ export const emitFromStepResult = async (
     return [id];
   }
   if (Array.isArray(data.cases) && data.cases.length > 0) {
+    // If only a single case was returned, treat it like a singular case attachment
     if (data.cases.length === 1) {
       const id = await emitCaseAttachment(attachments, toCaseAttachmentData(data.cases[0]));
       return [id];

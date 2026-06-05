@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,7 +19,6 @@ import {
   EuiTextBlockTruncate,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -28,61 +26,27 @@ import type {
   CASE_ATTACHMENT_TYPE,
   CaseAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
-import { SeverityBadge } from './severity_badge';
+import { CreationDate } from '../../components/creation_date';
 import { CaseMetaRow } from './case_meta_row';
-import { getAppIdForOwner, getCasePathForOwner } from './route_helpers';
+import { getCaseUrls } from './route_helpers';
+import {
+  CASE_HEADER,
+  CATEGORY,
+  CONNECTOR,
+  CREATED,
+  DESCRIPTION,
+  GO_TO_CASE,
+  ID_LABEL,
+  OBSERVABLES,
+  SHOW_LESS,
+  SHOW_MORE,
+  UPDATED,
+} from './translations';
 
-const MAX_TAGS = 3;
-
-const i18nStrings = {
-  caseHeader: i18n.translate('xpack.cases.agentBuilder.case.header', { defaultMessage: 'Case' }),
-  goToCase: i18n.translate('xpack.cases.agentBuilder.case.goToCase', {
-    defaultMessage: 'Go to case',
-  }),
-  idLabel: (id: string | number) =>
-    i18n.translate('xpack.cases.agentBuilder.case.idLabel', {
-      defaultMessage: 'ID: {id}',
-      values: { id },
-    }),
-  showMore: i18n.translate('xpack.cases.agentBuilder.case.showMore', {
-    defaultMessage: 'Show more',
-  }),
-  showLess: i18n.translate('xpack.cases.agentBuilder.case.showLess', {
-    defaultMessage: 'Show less',
-  }),
-  description: i18n.translate('xpack.cases.agentBuilder.case.description', {
-    defaultMessage: 'Description',
-  }),
-  category: i18n.translate('xpack.cases.agentBuilder.case.category', {
-    defaultMessage: 'Category',
-  }),
-  created: i18n.translate('xpack.cases.agentBuilder.case.created', {
-    defaultMessage: 'Created',
-  }),
-  updated: i18n.translate('xpack.cases.agentBuilder.case.updated', {
-    defaultMessage: 'Last updated',
-  }),
-  observables: i18n.translate('xpack.cases.agentBuilder.case.observables', {
-    defaultMessage: 'Observables',
-  }),
-  connector: i18n.translate('xpack.cases.agentBuilder.case.connector', {
-    defaultMessage: 'Connector',
-  }),
-  none: i18n.translate('xpack.cases.agentBuilder.case.none', {
-    defaultMessage: 'None',
-  }),
-};
-
-const formatDateTime = (iso: string | null | undefined): string | null => {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleString();
-};
-
+const keyColumnWidth = { minWidth: 110 };
 const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
-    <EuiFlexItem grow={false} style={{ minWidth: 110 }}>
+    <EuiFlexItem grow={false} style={keyColumnWidth}>
       <EuiText size="s">
         <strong>{label}</strong>
       </EuiText>
@@ -109,19 +73,14 @@ interface InlineContentProps extends AttachmentRenderProps<CaseAttachment> {
 const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, application }) => {
   const { data } = attachment;
   const idLabel = data.incremental_id ?? data.id;
-  const tags = data.tags ?? [];
-  const visibleTags = tags.slice(0, MAX_TAGS);
-  const overflowTags = tags.length - visibleTags.length;
   const [expanded, setExpanded] = useState(false);
+  const toggleExpanded = useCallback(() => {
+    setExpanded((_expanded) => !_expanded);
+  }, []);
 
-  const goToCase = () => {
-    application.navigateToApp(getAppIdForOwner(data.owner), {
-      path: getCasePathForOwner(data.owner, data.id),
-    });
-  };
-
-  const createdAt = formatDateTime(data.created_at);
-  const updatedAt = formatDateTime(data.updated_at);
+  const caseUrls = useMemo(() => {
+    return getCaseUrls({ application, data });
+  }, [application, data]);
 
   const hasObservablesCount =
     data.total_observables !== null && data.total_observables !== undefined;
@@ -129,8 +88,8 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
   const hasDetails =
     Boolean(data.description) ||
     Boolean(data.category) ||
-    createdAt !== null ||
-    updatedAt !== null ||
+    Boolean(data.created_at) ||
+    Boolean(data.updated_at) ||
     hasObservablesCount ||
     Boolean(data.connector_name);
 
@@ -138,11 +97,11 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
     <EuiPanel hasBorder paddingSize="m" data-test-subj="case-attachment-inline">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="casesApp" aria-hidden />
+          <EuiIcon type="briefcase" aria-hidden />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <strong>{i18nStrings.caseHeader}</strong>
+            <strong>{CASE_HEADER}</strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -150,10 +109,11 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
             size="s"
             iconType="popout"
             iconSide="right"
-            onClick={goToCase}
+            href={caseUrls.case}
+            target="_blank"
             data-test-subj="case-attachment-go-to-case"
           >
-            {i18nStrings.goToCase}
+            {GO_TO_CASE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -168,31 +128,14 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {i18nStrings.idLabel(idLabel)}
+            {ID_LABEL(idLabel)}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <SeverityBadge severity={data.severity} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CaseMetaRow data={data} />
-        </EuiFlexItem>
-        {visibleTags.map((tag: string) => (
-          <EuiFlexItem grow={false} key={tag}>
-            <EuiBadge color="hollow">{tag}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {overflowTags > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{`+${overflowTags}`}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <CaseMetaRow caseUrls={caseUrls} data={data} />
 
       {data.description && !expanded && (
         <>
@@ -210,8 +153,6 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
           <EuiHorizontalRule margin="m" />
           <CaseInlineExpandedContent
             attachment={attachment}
-            createdAt={createdAt}
-            updatedAt={updatedAt}
             hasObservablesCount={hasObservablesCount}
           />
         </>
@@ -224,10 +165,10 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
             size="xs"
             iconType={expanded ? 'arrowUp' : 'arrowDown'}
             iconSide="right"
-            onClick={() => setExpanded((prev) => !prev)}
+            onClick={toggleExpanded}
             data-test-subj="case-attachment-toggle-details"
           >
-            {expanded ? i18nStrings.showLess : i18nStrings.showMore}
+            {expanded ? SHOW_LESS : SHOW_MORE}
           </EuiButtonEmpty>
         </>
       )}
@@ -237,46 +178,39 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
 CaseInlineContent.displayName = 'CaseInlineContent';
 
 const CaseInlineExpandedContent: React.FC<
-  Pick<InlineContentProps, 'attachment'> & {
-    createdAt: string | null;
-    updatedAt: string | null;
-    hasObservablesCount: boolean;
-  }
-> = ({ attachment, createdAt, updatedAt, hasObservablesCount }) => {
+  Pick<InlineContentProps, 'attachment'> & { hasObservablesCount: boolean }
+> = ({ attachment, hasObservablesCount }) => {
   const data = attachment.data;
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {data.description && (
         <EuiFlexItem>
-          <DetailRow
-            label={i18nStrings.description}
-            value={<span style={{ whiteSpace: 'pre-wrap' }}>{data.description}</span>}
-          />
+          <DetailRow label={DESCRIPTION} value={data.description} />
         </EuiFlexItem>
       )}
       {data.category && (
         <EuiFlexItem>
-          <DetailRow label={i18nStrings.category} value={data.category} />
+          <DetailRow label={CATEGORY} value={data.category} />
         </EuiFlexItem>
       )}
-      {createdAt && (
+      {data.created_at && (
         <EuiFlexItem>
-          <DetailRow label={i18nStrings.created} value={createdAt} />
+          <DetailRow label={CREATED} value={<CreationDate date={data.created_at} />} />
         </EuiFlexItem>
       )}
-      {updatedAt && (
+      {data.updated_at && (
         <EuiFlexItem>
-          <DetailRow label={i18nStrings.updated} value={updatedAt} />
+          <DetailRow label={UPDATED} value={<CreationDate date={data.updated_at} />} />
         </EuiFlexItem>
       )}
       {hasObservablesCount && (
         <EuiFlexItem>
-          <DetailRow label={i18nStrings.observables} value={String(data.total_observables)} />
+          <DetailRow label={OBSERVABLES} value={String(data.total_observables)} />
         </EuiFlexItem>
       )}
       {data.connector_name && (
         <EuiFlexItem>
-          <DetailRow label={i18nStrings.connector} value={data.connector_name} />
+          <DetailRow label={CONNECTOR} value={data.connector_name} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

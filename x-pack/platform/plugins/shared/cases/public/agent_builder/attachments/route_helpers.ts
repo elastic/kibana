@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { GENERAL_CASES_OWNER, OWNER_INFO } from '../../../common/constants';
 import type { CaseAttachmentData } from '../../../common/types/agent_builder/attachment_schemas';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
 const getOwnerInfo = (owner: string) => {
   const info = (OWNER_INFO as Record<string, { appId: string }>)[owner];
@@ -15,7 +17,7 @@ const getOwnerInfo = (owner: string) => {
 
 export const getAppIdForOwner = (owner: string): string => getOwnerInfo(owner).appId;
 
-export const getCasePathForOwner = (owner: string, caseId: string): string => {
+const getCasePathForOwner = (owner: string, caseId: string): string => {
   if (owner === GENERAL_CASES_OWNER) {
     return `/insightsAndAlerting/cases/${caseId}`;
   }
@@ -27,20 +29,32 @@ export const getCasesListPathForOwner = (owner: string, query?: string): string 
   return query ? `${base}?${query}` : base;
 };
 
-export const buildCasesFilterQuery = (cases: CaseAttachmentData[]): string => {
-  const params = new URLSearchParams();
-  const severities = new Set(cases.map((c) => c.severity));
-  if (severities.size > 0 && severities.size < 4) {
-    params.set('severity', Array.from(severities).join(','));
-  }
-  const owners = new Set(cases.map((c) => c.owner));
-  if (owners.size === 1) {
-    params.set('owner', cases[0].owner);
-  }
-  return params.toString();
+const getCaseTabPathForOwner = (
+  owner: string,
+  caseId: string,
+  tabId: CASE_VIEW_PAGE_TABS
+): string => {
+  const base = getCasePathForOwner(owner, caseId);
+  return `${base}/?tabId=${tabId}`;
 };
 
-export const getSharedOwner = (cases: CaseAttachmentData[]): string => {
-  const owners = new Set(cases.map((c) => c.owner));
-  return owners.size === 1 ? cases[0].owner : GENERAL_CASES_OWNER;
-};
+export const getCaseUrls = ({
+  application,
+  data,
+}: {
+  data: CaseAttachmentData;
+  application: ApplicationStart;
+}) => ({
+  case: application.getUrlForApp(getAppIdForOwner(data.owner), {
+    path: getCasePathForOwner(data.owner, data.id),
+  }),
+  activityTab: application.getUrlForApp(getAppIdForOwner(data.owner), {
+    path: getCaseTabPathForOwner(data.owner, data.id, CASE_VIEW_PAGE_TABS.ACTIVITY),
+  }),
+  alertsTab: application.getUrlForApp(getAppIdForOwner(data.owner), {
+    path: getCaseTabPathForOwner(data.owner, data.id, CASE_VIEW_PAGE_TABS.ALERTS),
+  }),
+  attachmentsTab: application.getUrlForApp(getAppIdForOwner(data.owner), {
+    path: getCaseTabPathForOwner(data.owner, data.id, CASE_VIEW_PAGE_TABS.ATTACHMENTS),
+  }),
+});
