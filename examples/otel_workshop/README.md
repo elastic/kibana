@@ -29,59 +29,17 @@ Almost everything you touch is in **one file**:
 
 ## Setup
 
-Configure the telemetry backend **first**, so Kibana exports from the moment it boots.
+Get the collector running and Kibana pointed at it **before** you start Kibana, so it
+exports from the moment it boots.
 
-### 1. Choose and configure a telemetry backend
+### 1. Start a local OTLP collector
 
-All telemetry config goes in **`config/kibana.dev.yml`** — your personal, git-ignored dev
-config that Kibana automatically merges on top of `config/kibana.yml` when started with
-`--dev` (which `yarn start` does). Create the file if it doesn't exist yet. Pick **one** of
-the options below and paste its YAML in. Both signals (metrics + traces) go to the same place.
+Run an OpenTelemetry Collector on your laptop to receive Kibana's metrics and traces. The
+quickest "did it work?" check is the `debug` exporter, which prints every metric and span to
+the collector's own logs.
 
-<details open>
-<summary><strong>Option A — Elastic Cloud Managed OTLP endpoint (recommended)</strong></summary>
-
-Easiest path: no local infra, and you view **metrics in Discover** + **traces in
-Observability → APM** in the same deployment.
-
-**Where to get the URL + API key:** in the Kibana of an [Elastic Cloud Hosted](https://cloud.elastic.co)
-deployment, go to **Observability → Add data** (top-right) **→ Application → OpenTelemetry**.
-The section **"Configure the OpenTelemetry SDK"** shows the managed OTLP endpoint URL and an
-API key. Copy them into `config/kibana.dev.yml`:
-
-```yaml
-telemetry.metrics:
-  enabled: true
-  interval: 10s
-  exporters:
-    - proto:
-        url: '<MANAGED_OTLP_URL>/v1/metrics' # e.g. https://<id>.ingest.<region>.cloud.es.io
-        headers:
-          authorization: 'ApiKey <YOUR_API_KEY>'
-
-telemetry.tracing:
-  enabled: true
-  sample_rate: 1 # trace 100% of orders for the workshop
-  exporters:
-    - proto:
-        url: '<MANAGED_OTLP_URL>/v1/traces'
-        headers:
-          authorization: 'ApiKey <YOUR_API_KEY>'
-```
-
-> The local Elasticsearch you start in step 2 is **only** what your local Kibana runs
-> against — it is unrelated to where telemetry is shipped. With Option A, your metrics and
-> traces land in the **ECH** deployment, not your local ES.
-</details>
-
-<details>
-<summary><strong>Option B — Local OTLP collector via Docker (offline / no cloud)</strong></summary>
-
-Run a collector on your laptop and point Kibana at `localhost`. The quickest "did it work?"
-check is the collector's `debug` exporter, which prints every metric and span to its own logs.
-
-**1. Save this as `otel-collector-config.yaml`** (anywhere — e.g. your home dir or a scratch
-folder; you'll mount it into the container in the next step):
+**a. Save this as `otel-collector-config.yaml`** (anywhere — e.g. your home dir or a scratch
+folder; you'll mount it into the container next):
 
 ```yaml
 receivers:
@@ -97,20 +55,29 @@ service:
     traces: { receivers: [otlp], exporters: [debug] }
 ```
 
-**2. Run the collector** from the directory where you saved that file (so `$(pwd)` resolves
-to it), and leave it running:
+**b. Run the collector** from the directory where you saved that file (so `$(pwd)` resolves
+to it), and leave it running in its own terminal:
 
 ```bash
 docker run --rm -p 4317:4317 -p 4318:4318 \
   -v "$(pwd)/otel-collector-config.yaml:/etc/otelcol/config.yaml" \
   otel/opentelemetry-collector:latest
-# this terminal now streams your metrics + spans (the `debug` exporter).
-# Want a real trace UI? Add a Jaeger service on :16686 and an `otlp/jaeger` exporter.
 ```
 
-**3. Point Kibana at it** in `config/kibana.dev.yml`:
+This terminal now streams your metrics + spans (the `debug` exporter). Want a real trace UI?
+Add a Jaeger service on `:16686` and an `otlp/jaeger` exporter to the collector config.
+
+### 2. Point Kibana at the collector
+
+All telemetry config goes in **`config/kibana.dev.yml`** — your personal, git-ignored dev
+config that Kibana automatically merges on top of `config/kibana.yml` when started with
+`--dev` (which `yarn start` does). Create the file if it doesn't exist yet, and add:
 
 ```yaml
+# Elastic APM and OpenTelemetry tracing can't both be enabled. APM defaults to on in dev,
+# so turn it off — otherwise Kibana refuses to boot with telemetry.tracing enabled.
+elastic.apm.active: false
+
 telemetry.metrics:
   enabled: true
   interval: 10s
@@ -120,14 +87,17 @@ telemetry.metrics:
 
 telemetry.tracing:
   enabled: true
-  sample_rate: 1
+  sample_rate: 1 # trace 100% of orders for the workshop
   exporters:
     - grpc:
         url: 'http://localhost:4317'
 ```
-</details>
 
-### 2. Start Elasticsearch
+> ⚠️ **`elastic.apm.active: false` is required.** With `telemetry.tracing.enabled: true` but
+> APM still active, Kibana errors out at start-up:
+> *"Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously."*
+
+### 3. Start Elasticsearch
 
 Kibana needs an Elasticsearch to boot. The workshop plugin itself never touches ES, but
 Kibana won't start without one — so in a **separate terminal**, start a local snapshot and
@@ -137,7 +107,7 @@ leave it running:
 yarn es snapshot --license trial
 ```
 
-### 3. Start Kibana with the example plugins
+### 4. Start Kibana with the example plugins
 
 ```bash
 yarn kbn bootstrap          # first time only (or after switching branches)
@@ -215,10 +185,10 @@ activeOrders.add(-1);
 ### Verify
 
 Restart `yarn start`, open the app, and click **Brew a batch of 25**. Within ~10s
-(`interval`) you should see:
-- `kibana.otel_workshop.order.active` rise above 1 during the batch, then settle back to 0.
-- `kibana.otel_workshop.order.duration` as a histogram, filterable by `coffee.drink` and
-  `outcome` (`success` / `failure`).
+(`interval`) your **collector terminal** prints metric records — look for:
+- `kibana.otel_workshop.order.active` rising above 1 during the batch, then settling to 0.
+- `kibana.otel_workshop.order.duration` as a histogram carrying the `coffee.drink` and
+  `outcome` (`success` / `failure`) attributes.
 
 ---
 
@@ -268,10 +238,11 @@ const grindBeans = (drink: DrinkType, size: DrinkSize): Promise<void> =>
 
 ### Verify
 
-Brew another batch and open your traces backend. You should see `process_order` traces with
-nested `grind_beans` / `brew` / `garnish` spans, your `coffee.*` attributes, and — for the
-orders that fail — a span automatically marked **error** with the exception recorded. You
-did not write any error-handling code for that: `withActiveSpan` does it for you.
+Brew another batch and watch your **collector terminal** (or your Jaeger UI, if you added
+one). You should see `process_order` spans with nested `grind_beans` / `brew` / `garnish`
+children, your `coffee.*` attributes, and — for the orders that fail — a span automatically
+marked **error** with the exception recorded. You did not write any error-handling code for
+that: `withActiveSpan` does it for you.
 
 ---
 
