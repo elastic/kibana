@@ -12,7 +12,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { chunk } from 'lodash';
+import { chunk, sortBy } from 'lodash';
 
 import { agentPolicyService, appContextService } from '..';
 import { BUMP_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
@@ -28,7 +28,11 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
       maxAttempts: 3,
       paramsSchema: schema.object({
         agentPolicyIdsWithSpace: schema.arrayOf(
-          schema.object({ id: schema.string(), spaceId: schema.string() })
+          schema.object({
+            id: schema.string({ maxLength: 255 }),
+            spaceId: schema.string({ maxLength: 255 }),
+          }),
+          { maxSize: BUMP_AGENT_POLICIES_BATCH_SIZE }
         ),
         user: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       }),
@@ -88,7 +92,8 @@ export async function scheduleBumpAgentPoliciesByIdTask(
     return;
   }
 
-  const batches = chunk(agentPolicyIdsWithSpace, BUMP_AGENT_POLICIES_BATCH_SIZE);
+  const sorted = sortBy(agentPolicyIdsWithSpace, 'spaceId');
+  const batches = chunk(sorted, BUMP_AGENT_POLICIES_BATCH_SIZE);
   await Promise.all(
     batches.map((batch) =>
       taskManagerStart.schedule({
