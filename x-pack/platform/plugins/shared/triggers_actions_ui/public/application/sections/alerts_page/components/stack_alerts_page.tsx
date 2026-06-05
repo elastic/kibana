@@ -317,11 +317,12 @@ const PageContentComponent: React.FC<PageContentProps> = ({
                 http,
                 notifications,
                 fieldFormats,
-              application,
-              licensing,
-              settings,
-            }}
-          />)}
+                application,
+                licensing,
+                settings,
+              }}
+            />
+          )}
         </EuiFlexGroup>
       )}
     </>
