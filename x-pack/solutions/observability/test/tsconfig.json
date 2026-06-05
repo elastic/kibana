@@ -97,5 +97,6 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/product-doc-common",
     "@kbn/kbn-client",
+    "@kbn/apm-types"
   ]
 }
