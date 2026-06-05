@@ -1,7 +1,7 @@
 ---
 name: Claude Reviewer
 on:
-  pull_request:
+  pull_request_target:
     types: [synchronize, reopened, labeled]
   workflow_dispatch:
     inputs:
@@ -47,7 +47,7 @@ if: >-
     (
       github.event.sender.type != 'Bot' &&
       !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
-      github.event_name == 'pull_request' &&
+      github.event_name == 'pull_request_target' &&
       (
         (
           github.event.action == 'labeled' &&
@@ -136,6 +136,6 @@ safe-outputs:
 # Claude PR Reviewer
 
 Using the imported reviewer instructions:
-- Run in review mode for `pull_request` and manual `workflow_dispatch` events without a comment id.
+- Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
 - This reviewer's own gh-aw workflow id is `reviewer-claude`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
