@@ -104,15 +104,6 @@ const resultsGridContainerStyles = css`
   overflow: hidden;
 `;
 
-const canvasTestSectionStyles = css`
-  flex-grow: 0;
-  flex-shrink: 0;
-`;
-
-const testPanelStyles = css`
-  flex-grow: 0;
-`;
-
 const renderInlineTestParamInput = ({
   name,
   param,
@@ -329,7 +320,7 @@ const CanvasTestSection: React.FC<CanvasTestSectionProps> = ({ data, http }) => 
   }, [data.configuration, data.type, http, params, values]);
 
   return (
-    <div css={canvasTestSectionStyles}>
+    <div>
       <EuiText size="xs" color="subdued">
         <strong>
           <FormattedMessage
@@ -346,7 +337,7 @@ const CanvasTestSection: React.FC<CanvasTestSectionProps> = ({ data, http }) => 
         />
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiPanel color="subdued" css={testPanelStyles}>
+      <EuiPanel color="subdued">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           {paramEntries.map(([name, param]) => (
             <EuiFlexItem grow={false} key={name}>
@@ -531,27 +522,16 @@ const ToolCard: React.FC<ToolCardProps> = ({ attachment, isCanvas, http }) => {
 
       <EuiHorizontalRule margin="m" />
 
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="xs"
-        css={css`
-          flex-grow: 0;
-        `}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>
-              <FormattedMessage
-                id="xpack.agentBuilderPlatform.attachments.tool.parametersLabel"
-                defaultMessage="Parameters"
-              />
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ParameterList params={configuration.params} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        <strong>
+          <FormattedMessage
+            id="xpack.agentBuilderPlatform.attachments.tool.parametersLabel"
+            defaultMessage="Parameters"
+          />
+        </strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <ParameterList params={configuration.params} />
 
       {showCanvasExtras && (
         <>
