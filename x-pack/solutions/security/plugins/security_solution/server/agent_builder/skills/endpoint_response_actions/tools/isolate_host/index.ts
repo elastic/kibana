@@ -55,8 +55,11 @@ export const isolateHostTool = (
             results: [
               {
                 tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
+                type: ToolResultType.other,
                 data: {
+                  hostName,
+                  found: false,
+                  reason: 'endpoint_not_found' as const,
                   message: `No endpoint found with hostname '${hostName}'.`,
                 },
               },
