@@ -13,6 +13,7 @@
 //   test.failing       → .es-query with invalid query type (fails at ES execution time)
 //   test.always-firing → .es-query with threshold >= 0 (always fires against .kibana)
 
+import { randomUUID } from 'node:crypto';
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -192,7 +193,11 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
 
   test.beforeAll(async ({ kbnClient }) => {
-    await deleteRulesByPrefix(kbnClient, 'clear-');
+    // Remove stale rules left by failed previous runs to prevent cross-run interference.
+    await Promise.all([
+      deleteRulesByPrefix(kbnClient, 'delete-'),
+      deleteRulesByPrefix(kbnClient, 'percentile-test-'),
+    ]);
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
@@ -253,9 +258,19 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     page,
     apiServices,
   }) => {
+    // Use UUID-based names so the two rules share no search tokens and the
+    // tokenized OR search for r1's name won't also match r2.
     const [r1, r2] = await Promise.all([
-      apiServices.alerting.rules.create({ ...makeEsQueryRule('clear-b'), tags: [] }),
-      apiServices.alerting.rules.create({ ...makeEsQueryRule('clear-c'), tags: [] }),
+      apiServices.alerting.rules.create({
+        ...makeEsQueryRule('clearfind'),
+        name: `clearfind-${randomUUID()}`,
+        tags: [],
+      }),
+      apiServices.alerting.rules.create({
+        ...makeEsQueryRule('clearcheck'),
+        name: `clearcheck-${randomUUID()}`,
+        tags: [],
+      }),
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
 
@@ -407,6 +422,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     createdRuleIds.push(rule.data.id);
 
     await refreshRulesList(page);
+    await searchRules(page, rule.data.name as string);
 
     await expect(page.testSubj.locator('rulesTable-P50ColumnName')).toBeVisible();
     await expect(page.testSubj.locator('P50Percentile')).toBeVisible();
