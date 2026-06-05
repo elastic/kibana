@@ -132,7 +132,7 @@ describe('workflow:scheduled task runner', () => {
       state: taskState,
       shouldDeleteTask: true,
     });
-    expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, spaceId, { includeGlobal: true });
+    expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, spaceId);
     expect(mockCheckAndSkipIfExistingScheduledExecution).not.toHaveBeenCalled();
     expect(mockRunWorkflow).not.toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith(
