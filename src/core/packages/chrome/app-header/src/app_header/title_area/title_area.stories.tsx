@@ -45,8 +45,6 @@ const HeaderWithTitle = ({
     text: title,
     placeholder,
     onSave: async (nextTitle: string) => {
-      action('title-saved')(nextTitle);
-
       if (asyncSave) {
         await new Promise((resolve) => setTimeout(resolve, 1500));
       }
@@ -55,6 +53,7 @@ const HeaderWithTitle = ({
         return `Use at least ${minimumLength} characters.`;
       }
 
+      action('title-saved')(nextTitle);
       setTitle(nextTitle);
     },
   };
