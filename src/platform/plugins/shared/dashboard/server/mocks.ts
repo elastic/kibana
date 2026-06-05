@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import type { StartDeps } from './plugin';
+import { coreMock } from '@kbn/core/server/mocks';
+import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
+import { setKibanaServices } from './kibana_services';
 
-export let embeddableService: EmbeddableStart;
-export let logger: Logger;
-
-export const setKibanaServices = (deps: Pick<StartDeps, 'embeddable'>, _logger: Logger) => {
-  embeddableService = deps.embeddable;
-  logger = _logger;
+export const setStubKibanaServices = () => {
+  setKibanaServices(
+    {
+      embeddable: createEmbeddableStartMock(),
+    },
+    coreMock.createPluginInitializerContext().logger.get()
+  );
 };

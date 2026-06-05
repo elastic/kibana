@@ -33,7 +33,7 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => {
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   ...createEmbeddablePersistableStateServiceMock(),
-  getAllEmbeddableSchemas: jest.fn(),
+  getAllEmbeddableSchemas: jest.fn().mockReturnValue([]),
   getTransforms: jest.fn(),
 });
 
