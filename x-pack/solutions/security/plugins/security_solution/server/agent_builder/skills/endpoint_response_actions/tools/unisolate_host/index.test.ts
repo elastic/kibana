@@ -9,15 +9,15 @@
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { createMockEndpointAppContext } from '../../../../endpoint/mocks';
-import { ISOLATE_TOOL_ID } from '..';
-import { isolateHostTool } from '.';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import { UNISOLATE_TOOL_ID } from '../..';
+import { unisolateHostTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
 
-describe('isolateHostTool', () => {
+describe('unisolateHostTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
@@ -27,23 +27,23 @@ describe('isolateHostTool', () => {
 
   describe('tool definition', () => {
     it('returns a valid builtin tool definition', () => {
-      const tool = isolateHostTool(mockEndpointAppContextService);
+      const tool = unisolateHostTool(mockEndpointAppContextService);
       expect(tool.type).toBe(ToolType.builtin);
-      expect(tool.id).toBe(ISOLATE_TOOL_ID);
-      expect(tool.description).toContain('Isolates a host');
+      expect(tool.id).toBe(UNISOLATE_TOOL_ID);
+      expect(tool.description).toContain('Un-isolates a host');
       expect(tool.schema).toBeDefined();
     });
 
     it('has correct tool id format', () => {
-      expect(ISOLATE_TOOL_ID).toBe('endpoint-response-actions.isolate_host');
+      expect(UNISOLATE_TOOL_ID).toBe('endpoint-response-actions.unisolate_host');
     });
   });
 
   describe('handler', () => {
-    let tool: ReturnType<typeof isolateHostTool>;
+    let tool: ReturnType<typeof unisolateHostTool>;
 
     beforeEach(() => {
-      tool = isolateHostTool(mockEndpointAppContextService);
+      tool = unisolateHostTool(mockEndpointAppContextService);
     });
 
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
@@ -100,7 +100,7 @@ describe('isolateHostTool', () => {
       }
     });
 
-    it('calls responseActionsClient.isolate with endpoint_ids and comment when agent found', async () => {
+    it('calls responseActionsClient.release with endpoint_ids and comment when agent found', async () => {
       const mockAgentService = {
         asInternalUser: {
           list: jest.fn().mockResolvedValue({
@@ -110,13 +110,13 @@ describe('isolateHostTool', () => {
       };
 
       const mockResponseActionsClient = {
-        isolate: jest.fn().mockResolvedValue({
+        isolate: jest.fn().mockReturnValue(Promise.resolve()),
+        release: jest.fn().mockResolvedValue({
           id: 'action-456',
           status: 'accepted',
           wasSuccessful: true,
           hosts: { 'agent-123': { name: 'my-host' } },
         }),
-        release: jest.fn().mockReturnValue(Promise.resolve()),
         suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
         upload: jest.fn().mockReturnValue(Promise.resolve()),
         getFile: jest.fn().mockReturnValue(Promise.resolve()),
@@ -147,17 +147,20 @@ describe('isolateHostTool', () => {
 
       try {
         const result = await tool.handler(
-          { hostName: 'my-host', comment: 'malware detected' },
+          { hostName: 'my-host', comment: 'reconnecting' },
           mockContext
         );
 
-        expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
+        expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
           {
             endpoint_ids: ['agent-123'],
-            comment: 'malware detected',
+            comment: 'reconnecting',
           },
           { hosts: { 'agent-123': { name: 'my-host' } } }
         );
+
+        // Ensure isolate was NOT called — unisolate tool calls release, not isolate
+        expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
 
         expect(result.results).toHaveLength(1);
         expect(result.results[0].type).toBe(ToolResultType.other);
@@ -165,7 +168,7 @@ describe('isolateHostTool', () => {
         expect(data.actionId).toBe('action-456');
         expect(data.status).toBe('accepted');
         expect(data.wasSuccessful).toBe(true);
-        expect(data.comment).toBe('malware detected');
+        expect(data.comment).toBe('reconnecting');
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getInternalResponseActionsClient =
@@ -183,13 +186,13 @@ describe('isolateHostTool', () => {
       };
 
       const mockResponseActionsClient = {
-        isolate: jest.fn().mockResolvedValue({
+        isolate: jest.fn().mockReturnValue(Promise.resolve()),
+        release: jest.fn().mockResolvedValue({
           id: 'action-789',
           status: 'accepted',
           wasSuccessful: true,
           hosts: { 'agent-123': { name: 'test-host' } },
         }),
-        release: jest.fn().mockReturnValue(Promise.resolve()),
         suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
         upload: jest.fn().mockReturnValue(Promise.resolve()),
         getFile: jest.fn().mockReturnValue(Promise.resolve()),
@@ -221,10 +224,10 @@ describe('isolateHostTool', () => {
       try {
         await tool.handler({ hostName: 'test-host' }, mockContext);
 
-        expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
+        expect(mockResponseActionsClient.release).toHaveBeenCalledWith(
           {
             endpoint_ids: ['agent-123'],
-            comment: 'Isolated via AI agent: test-host',
+            comment: 'Un-isolated via AI agent: test-host',
           },
           { hosts: { 'agent-123': { name: 'test-host' } } }
         );
@@ -270,8 +273,8 @@ describe('isolateHostTool', () => {
       };
 
       const mockResponseActionsClient = {
-        isolate: jest.fn().mockRejectedValue(new Error('isolation failed')),
-        release: jest.fn().mockReturnValue(Promise.resolve()),
+        isolate: jest.fn().mockReturnValue(Promise.resolve()),
+        release: jest.fn().mockRejectedValue(new Error('release failed')),
         suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
         upload: jest.fn().mockReturnValue(Promise.resolve()),
         getFile: jest.fn().mockReturnValue(Promise.resolve()),
@@ -306,7 +309,7 @@ describe('isolateHostTool', () => {
         expect(result.results).toHaveLength(1);
         expect(result.results[0].type).toBe(ToolResultType.error);
         expect((result.results[0].data as Record<string, unknown>).message).toContain(
-          'Error isolating host'
+          'Error un-isolating host'
         );
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
