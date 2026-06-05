@@ -24437,12 +24437,12 @@ language-tags@=1.0.5:
     language-subtag-registry "~0.3.2"
 
 launch-editor@^2.6.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/launch-editor/-/launch-editor-2.8.1.tgz#3bda72af213ec9b46b170e39661916ec66c2f463"
-  integrity sha512-elBx2l/tp9z99X5H/qev8uyDywVh0VXAwEbjk8kJhnc5grOFkGh7aW6q55me9xnYbss261XtnUrysZ+XvGbhQA==
+  version "2.13.2"
+  resolved "https://registry.yarnpkg.com/launch-editor/-/launch-editor-2.13.2.tgz#41d51baaf8afb393224b89bd2bcb4e02f2306405"
+  integrity sha512-4VVDnbOpLXy/s8rdRCSXb+zfMeFR0WlJWpET1iA9CQdlZDfwyLjUuGQzXU4VeOoey6AicSAluWan7Etga6Kcmg==
   dependencies:
-    picocolors "^1.0.0"
-    shell-quote "^1.8.1"
+    picocolors "^1.1.1"
+    shell-quote "^1.8.3"
 
 launchdarkly-eventsource@2.2.0:
   version "2.2.0"
@@ -30566,7 +30566,7 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
-shell-quote@^1.8.1:
+shell-quote@^1.8.3:
   version "1.8.4"
   resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.8.4.tgz#2edd9a4dcefc96649e2e2cb12f637b1f1d92a190"
   integrity sha512-VsC6n6vz1ihYYyZZwX7YZSF5l5x36ca17OC+a69h94YqB7X6XLwf+5MOgynYir2SLFUbl8gIYvBo8K8RoNQ6bQ==
