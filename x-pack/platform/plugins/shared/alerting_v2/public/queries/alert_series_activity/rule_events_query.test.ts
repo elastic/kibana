@@ -55,4 +55,38 @@ describe('buildRuleEventsEsqlQuery', () => {
 
     expect(queryString).toContain('LIMIT 123 BY group_hash');
   });
+
+  it('scopes to the provided group hashes', () => {
+    const queryString = buildRuleEventsEsqlQuery({
+      ruleId: 'rule-abc',
+      gteMs: Date.parse('2026-04-01T00:00:00Z'),
+      lteMs: Date.parse('2026-04-08T00:00:00Z'),
+      pageSize: 5000,
+      groupHashes: ['hash-1', 'hash-2'],
+    }).print('basic');
+
+    expect(queryString).toContain('group_hash IN');
+    expect(queryString).toContain('hash-1');
+    expect(queryString).toContain('hash-2');
+  });
+
+  it('omits the group hash filter when no hashes are provided', () => {
+    const withoutHashes = buildRuleEventsEsqlQuery({
+      ruleId: 'rule-abc',
+      gteMs: Date.parse('2026-04-01T00:00:00Z'),
+      lteMs: Date.parse('2026-04-08T00:00:00Z'),
+      pageSize: 5000,
+    }).print('basic');
+
+    const withEmptyHashes = buildRuleEventsEsqlQuery({
+      ruleId: 'rule-abc',
+      gteMs: Date.parse('2026-04-01T00:00:00Z'),
+      lteMs: Date.parse('2026-04-08T00:00:00Z'),
+      pageSize: 5000,
+      groupHashes: [],
+    }).print('basic');
+
+    expect(withoutHashes).not.toContain('group_hash IN');
+    expect(withEmptyHashes).not.toContain('group_hash IN');
+  });
 });
