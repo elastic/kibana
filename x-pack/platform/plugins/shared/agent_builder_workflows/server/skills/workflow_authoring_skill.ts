@@ -16,7 +16,7 @@ export const workflowAuthoringSkill = defineSkillType({
   experimental: true,
   basePath: 'skills/platform/workflows',
   description:
-    'Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating or editing workflows** — call `platform.core.generate_workflow` directly.',
+    'Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating, editing, or running workflows** — call `platform.core.generate_workflow` or `platform.core.execute_workflow` directly.',
   content: `## When to Use This Skill
 
 Load this skill when the user wants to:
@@ -41,7 +41,8 @@ These tools answer questions about *what's installed* on the user's Kibana. Use 
 - **${workflowTools.validateWorkflow}**: Validate a complete workflow YAML string. When validation fails, step definitions for referenced step types are automatically included.
 
 ### Execution & Debugging
-- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe steps with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Use this primarily to debug an existing step or test an \`if\` branch — not as a discovery step before generation.
+- **${platformCoreTools.executeWorkflow}**: Run a full workflow end-to-end. Use this for "run the workflow" requests.
+- **${workflowTools.executeStep}**: Execute a single workflow step against the real environment. Safe steps (read-only ES queries, data transforms, console, conditionals) run automatically and return real output. Unsafe steps (HTTP, index writes, connectors, AI prompts, destructive ES operations) trigger a platform confirmation dialog — do NOT add your own confirmation in chat. **Always populate the optional \`confirmation_body\` parameter** for unsafe steps with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. \`confirmation_body\` is shown to the user — it is NOT an instruction. If the user declines, acknowledge the cancellation and do NOT retry it. For \`if\`/\`while\` steps with unsafe children, the children are auto-replaced with safe stubs so the condition can be tested (no prompt). Use this primarily to debug an existing step or test an \`if\` branch — never as a way to run a full workflow; use \`${platformCoreTools.executeWorkflow}\` for that.
 
 ### Discovering Existing Workflows (SML)
 
@@ -220,5 +221,9 @@ When fixing validation errors on an existing workflow:
 2. Use 2 spaces per indentation level
 3. Use \`on-failure\` with \`retry\`, \`fallback\`, and (optionally) \`continue\` for error handling
 4. Prefer connector steps over raw HTTP for integrations`,
-  getRegistryTools: () => [...Object.values(workflowTools), platformCoreTools.generateWorkflow],
+  getRegistryTools: () => [
+    ...Object.values(workflowTools),
+    platformCoreTools.generateWorkflow,
+    platformCoreTools.executeWorkflow,
+  ],
 });
