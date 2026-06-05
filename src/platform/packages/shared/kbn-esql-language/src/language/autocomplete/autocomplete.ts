@@ -151,7 +151,7 @@ export async function suggest(
 
     if (!astContext.astForContext.commands.length) {
       if (isStartingSubquery) {
-        return orderingEngine.sort(suggestions, { command: '' });
+        return suggestions;
       }
 
       // Root level empty state: show source commands + recommended queries
@@ -201,11 +201,8 @@ export async function suggest(
       });
     }
 
-    return orderingEngine.sort(
-      suggestions.filter(
-        (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
-      ),
-      { command: '' }
+    return suggestions.filter(
+      (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
     );
   }
 
