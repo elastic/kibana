@@ -8,8 +8,6 @@
  */
 
 import agent from 'elastic-apm-node';
-import { capabilitySchemas } from '@kbn/workflows-extensions/common';
-import type { CapabilityKey } from '@kbn/workflows-extensions/common';
 import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -24,7 +22,6 @@ export interface StepDispatchInput {
   step: SyncStep;
   /** Workflow-level context (event + accumulated step outputs). */
   context: Record<string, unknown>;
-  capabilities: Record<string, unknown> | undefined;
   executionLogger: IWorkflowEventLogger;
 }
 
@@ -50,7 +47,7 @@ export class StepDispatcher {
   ) {}
 
   async dispatchStep(input: StepDispatchInput): Promise<StepDispatchResult> {
-    const { step, context, capabilities, executionLogger } = input;
+    const { step, context, executionLogger } = input;
     const { name: stepName, type: stepType, with: stepWith } = step;
     const stepExecutionId = `${this.executionId}_${stepName}`;
 
@@ -75,19 +72,6 @@ export class StepDispatcher {
       const stepDef = this.getStepDefinition(stepType);
       if (!stepDef) {
         throw new Error(`[executeWorkflowSync] No step definition found for type "${stepType}"`);
-      }
-
-      // Validate each declared required capability is present and well-formed.
-      for (const key of (stepDef.requiresCapabilities ?? []) as CapabilityKey[]) {
-        const schema = capabilitySchemas[key];
-        const value = capabilities?.[key];
-        const parsed = schema.safeParse(value);
-        if (!parsed.success) {
-          throw new Error(
-            `[capability_validation] Step "${stepName}" requires capability "${key}" but it ` +
-              `failed validation: ${parsed.error.issues.map((i) => i.message).join(', ')}`
-          );
-        }
       }
 
       const evaluatedInput = stepWith ? this.engine.render(stepWith, context) : {};
@@ -118,7 +102,6 @@ export class StepDispatcher {
         abortSignal: new AbortController().signal,
         stepId: stepName,
         stepType,
-        capabilities,
       };
 
       const result = await stepDef.handler(handlerContext as never);

@@ -108,7 +108,6 @@ export const createWorkflowsClientProvider = (
             workflowDefinition: workflow.definition,
             payload: current,
             maxTimeoutMs: timeoutMs,
-            capabilities,
             workflowId: workflow.id,
             workflowName: workflow.name,
           });
@@ -159,7 +158,6 @@ export const createWorkflowsClientProvider = (
                 maxTimeoutMs: timeoutMs,
                 resumeFrom: firstResult.checkpoint,
                 proceedResult,
-                capabilities,
                 workflowId: workflow.id,
                 workflowName: workflow.name,
               });

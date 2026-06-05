@@ -35,8 +35,6 @@ export interface ExecuteWorkflowSyncInput {
   logger: Logger;
   resumeFrom?: WorkflowCheckpoint;
   proceedResult?: Record<string, unknown>;
-  /** Call-scoped opaque references threaded by synchronous hook invokers. Always undefined on async/Task-Manager-driven runs. */
-  capabilities?: Record<string, unknown>;
   /** Workflow saved-object ID — used for event-log context and APM span labels. */
   workflowId?: string;
   /** Human-readable workflow name — used for event-log context. */
@@ -88,7 +86,6 @@ export const executeWorkflowSync = async ({
   logger,
   resumeFrom,
   proceedResult,
-  capabilities,
   workflowId,
   workflowName,
   workflowEventLoggerService,
@@ -171,7 +168,6 @@ export const executeWorkflowSync = async ({
         const { output: stepOutput } = await dispatcher.dispatchStep({
           step: { name: stepName, type: stepType, with: stepWith },
           context,
-          capabilities,
           executionLogger,
         });
 
