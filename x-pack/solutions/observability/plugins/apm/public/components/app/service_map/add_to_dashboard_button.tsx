@@ -11,14 +11,20 @@ import type { SerializedStyles } from '@emotion/serialize';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { getPhraseFilterValue, isPhraseFilter, isPhrasesFilter } from '@kbn/es-query';
+import {
+  escapeQuotes,
+  getPhraseFilterValue,
+  isExistsFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
+} from '@kbn/es-query';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { encode as encodeRison } from '@kbn/rison';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { APM_SERVICE_MAP_EMBEDDABLE } from '../../../embeddable/service_map/constants';
-import type { ServiceMapEmbeddableState } from '../../../../server/lib/embeddables/service_map_embeddable_schema';
+import type { ServiceMapEmbeddableState } from '../../../../common/embeddable/service_map_embeddable_schema';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceMapOrientation } from './service_map_options_panel';
 import type { ServiceMapViewFilters } from './apply_service_map_visibility';
@@ -41,15 +47,13 @@ interface AddToDashboardButtonProps {
   serviceGroupId?: string;
   mapOrientation: ServiceMapOrientation;
   viewFilters: ServiceMapViewFilters;
-  /** Current find-in-page query — captured into the dashboard panel state. */
-  searchQuery: string;
   /** Optional Emotion styles for the icon button; lets the toolbar enforce a consistent hit target. */
   controlIconCss?: SerializedStyles;
 }
 
-/** Serialize a single string value as a quoted KQL phrase (backslashes escaped first, then quotes). */
+/** Serialize a single string value as a quoted KQL phrase, using es-query's canonical escaping. */
 function quoteKqlValue(value: string): string {
-  return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  return `"${escapeQuotes(String(value))}"`;
 }
 
 /**
@@ -73,7 +77,12 @@ function dashboardPathForId(
   return `${base}?_g=${g}`;
 }
 
-/** Convert a phrase / phrases filter to a KQL fragment; returns `undefined` for unsupported filter shapes. */
+/**
+ * Convert a phrase / phrases / exists filter (optionally negated) to a KQL fragment.
+ * Range, custom and other complex filter shapes aren't representable as a simple KQL clause and
+ * are intentionally dropped (review #5) — the service map only attaches the simple filters this
+ * handles, so anything else returns `undefined` and is skipped.
+ */
 function filterToKql(filter: Filter): string | undefined {
   const field = filter.meta?.key;
   if (!field || filter.meta?.disabled) return undefined;
@@ -88,6 +97,9 @@ function filterToKql(filter: Filter): string | undefined {
     if (!params || params.length === 0) return undefined;
     const values = params.map((v) => quoteKqlValue(String(v))).join(' or ');
     return `${negate}${field}: (${values})`;
+  }
+  if (isExistsFilter(filter)) {
+    return `${negate}${field}: *`;
   }
   return undefined;
 }
@@ -111,48 +123,48 @@ function controlSelectionsToKql(selections: Record<string, string[]>): string[] 
  * - service.environment selection → ignored here (URL `?environment=` already captured)
  * - everything else (URL kuery, remaining Controls selections, pill filters) → KQL clauses appended to `kuery`
  *
- * Service-name pills with the same value as the promoted `service_name` are skipped to
- * avoid double-filtering; pills with a different value are kept as KQL clauses.
+ * Once a `service_name` is set (from the URL or a single Controls selection), every leftover
+ * `service.name` selection/pill is dropped so the panel can't get two conflicting service
+ * filters (review #6).
+ *
+ * Pure: all page/app state is passed in (the caller reads the URL once), which keeps it
+ * unit-testable and the captured state aligned with what the caller saw on screen (review #4).
  */
 function capturePageFilters({
   urlKuery,
   urlServiceName,
   filterManagerFilters,
+  controlSelections,
 }: {
   urlKuery: string;
   urlServiceName: string | undefined;
   filterManagerFilters: Filter[];
+  controlSelections: Record<string, string[]>;
 }): { kuery: string | undefined; service_name: string | undefined } {
-  const appState = readInitialAppStateFromRawUrl();
-  const controlSelections = appState?.controlSelections ?? {};
-
   // Promote a single Controls API service.name selection to the dedicated field
   // when no URL service name is set. Multiple selections stay as a KQL clause.
   let serviceName = urlServiceName;
-  let promotedServiceNameFromControls = false;
   const serviceNameSelection = controlSelections['service.name'];
   if (!serviceName && serviceNameSelection && serviceNameSelection.length === 1) {
     serviceName = serviceNameSelection[0];
-    promotedServiceNameFromControls = true;
   }
 
-  // Build KQL fragments from remaining Controls selections.
+  // Build KQL fragments from remaining Controls selections. Drop env (dedicated URL param) and,
+  // once a service name is set, drop any service.name selection (promoted to the dedicated field).
   const remainingSelections: Record<string, string[]> = { ...controlSelections };
   delete remainingSelections['service.environment'];
-  if (promotedServiceNameFromControls) {
+  if (serviceName) {
     delete remainingSelections['service.name'];
   }
   const controlsKql = controlSelectionsToKql(remainingSelections);
 
   // Build KQL fragments from filter-bar pills:
   // - skip env (dedicated URL param)
-  // - skip a service.name pill whose value matches the promoted service_name (avoid duplicate)
+  // - skip every service.name pill once a service name is set (avoid duplicate / contradiction)
   const pillsKql = filterManagerFilters
     .filter((f) => {
       if (f.meta?.key === 'service.environment') return false;
-      if (f.meta?.key === 'service.name' && serviceName && isPhraseFilter(f)) {
-        return String(getPhraseFilterValue(f)) !== serviceName;
-      }
+      if (f.meta?.key === 'service.name' && serviceName) return false;
       return true;
     })
     .map(filterToKql)
@@ -184,24 +196,36 @@ export function AddToDashboardButton({
   serviceGroupId,
   mapOrientation,
   viewFilters,
-  searchQuery,
   controlIconCss,
 }: AddToDashboardButtonProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const embeddable = services?.embeddable;
   const filterManager = services?.data?.query?.filterManager;
   const telemetry = services?.telemetry;
+  const toasts = services?.notifications?.toasts;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSave: SaveModalDashboardProps['onSave'] = useCallback(
     async ({ dashboardId, newTitle, newDescription }) => {
-      if (!embeddable) return;
+      const failWithToast = () => {
+        toasts?.addDanger(
+          i18n.translate('xpack.apm.serviceMap.copyToDashboard.saveErrorToast', {
+            defaultMessage: 'Unable to open the dashboard with the service map panel.',
+          })
+        );
+      };
+
+      if (!embeddable) {
+        failWithToast();
+        return;
+      }
       const stateTransfer = embeddable.getStateTransfer();
 
       const { kuery: capturedKuery, service_name: capturedServiceName } = capturePageFilters({
         urlKuery: kuery,
         urlServiceName: serviceName,
         filterManagerFilters: filterManager?.getFilters() ?? [],
+        controlSelections: readInitialAppStateFromRawUrl()?.controlSelections ?? {},
       });
 
       const serializedState: ServiceMapEmbeddableState = {
@@ -234,7 +258,6 @@ export function AddToDashboardButton({
         anomaly_severity_filter: viewFilters.anomalySeverityFilter.length
           ? viewFilters.anomalySeverityFilter
           : undefined,
-        find_query: searchQuery.trim() ? searchQuery : undefined,
       };
 
       const packageState: EmbeddablePackageState<ServiceMapEmbeddableState> = {
@@ -262,13 +285,21 @@ export function AddToDashboardButton({
         sync_with_dashboard_filters: serializedState.sync_with_dashboard_filters ?? false,
       });
 
-      stateTransfer.navigateToWithEmbeddablePackages<ServiceMapEmbeddableState>('dashboards', {
-        state: [packageState],
-        path,
-      });
+      try {
+        await stateTransfer.navigateToWithEmbeddablePackages<ServiceMapEmbeddableState>(
+          'dashboards',
+          {
+            state: [packageState],
+            path,
+          }
+        );
+      } catch {
+        failWithToast();
+      }
     },
     [
       embeddable,
+      toasts,
       telemetry,
       filterManager,
       kuery,
@@ -281,7 +312,6 @@ export function AddToDashboardButton({
       serviceGroupId,
       mapOrientation,
       viewFilters,
-      searchQuery,
     ]
   );
 
