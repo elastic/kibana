@@ -61,6 +61,7 @@ sandbox:
   agent: awf
 
 safe-outputs:
+  staged: true
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -75,17 +76,6 @@ safe-outputs:
     allowed-base-branches: [main]
     if-no-changes: 'ignore'
     protected-files: fallback-to-issue
-    excluded-files:
-      - '.github/**'
-      - '.buildkite/**'
-      - '**/package.json'
-      - '**/yarn.lock'
-      - '**/*.lock'
-      - 'renovate.json5'
-      - '.gitattributes'
-      - '.gitignore'
-      - '**/secrets/**'
-      - '**/.env*'
 
 strict: false
 timeout-minutes: 90
