@@ -132,7 +132,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       // Mock ES client to return index does not exist
       const mockEsClient = {
         indices: {
-          exists: jest.fn().mockResolvedValue({ body: false }),
+          exists: jest.fn().mockResolvedValue(false),
         },
       };
 

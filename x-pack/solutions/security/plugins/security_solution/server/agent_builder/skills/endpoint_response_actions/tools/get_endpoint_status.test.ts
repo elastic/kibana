@@ -230,7 +230,7 @@ describe('getEndpointStatusTool', () => {
 
       const mockEsClient = {
         indices: {
-          exists: jest.fn().mockResolvedValue({ body: false }),
+          exists: jest.fn().mockResolvedValue(false),
         },
       };
 
