@@ -6,7 +6,7 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -16,14 +16,17 @@ import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { AnomalySwimLaneAttachmentData } from '../../common/util/cases_utils';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
+type AnomalySwimLaneViewProps = UnifiedValueAttachmentViewProps<AnomalySwimLaneAttachmentData>;
+
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
   return React.memo(
-    (props: UnifiedValueAttachmentViewProps) => {
+    (props: AnomalySwimLaneViewProps) => {
       const { caseData } = props;
-      const attachmentState = props.data.state as Record<string, unknown>;
+      const attachmentState = props.data.state;
 
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,

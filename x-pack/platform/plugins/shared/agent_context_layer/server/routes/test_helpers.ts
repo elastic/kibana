@@ -14,6 +14,7 @@ export const createMockSmlService = () => ({
   search: jest.fn(),
   checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
+  deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   listDocuments: jest.fn(),
   upsertDocument: jest.fn(),
@@ -65,6 +66,7 @@ export const sampleDocument: SmlDocument = {
   updated_at: '2024-01-02',
   spaces: ['test-space'],
   permissions: [],
+  ingestion_method: 'crawled',
 };
 
 export { httpServerMock, httpServiceMock };

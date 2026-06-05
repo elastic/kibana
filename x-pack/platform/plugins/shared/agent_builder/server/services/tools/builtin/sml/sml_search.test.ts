@@ -15,6 +15,7 @@ const mockSearch = jest.fn();
 const getAgentContextLayer = jest.fn(() => ({
   search: mockSearch,
   indexAttachment: jest.fn(),
+  deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
   resolveSmlAttachItems: jest.fn(),
@@ -77,6 +78,7 @@ describe('createSmlSearchTool', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        ingestion_method: 'crawled',
       },
     ];
     mockSearch.mockResolvedValue({ results: hits, total: 1 });

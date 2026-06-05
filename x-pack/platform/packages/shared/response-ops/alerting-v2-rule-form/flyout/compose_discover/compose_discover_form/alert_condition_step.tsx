@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
@@ -20,7 +20,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -32,12 +31,14 @@ import { useDataFields } from '../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
+import { ModeSelect } from '../../../form/fields/mode_select';
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  isEditing: boolean;
 }
 
 export function AlertConditionStep({
@@ -45,6 +46,7 @@ export function AlertConditionStep({
   dispatch,
   services,
   onKindChange,
+  isEditing,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
@@ -121,10 +123,6 @@ export function AlertConditionStep({
       // Non-parseable query -- skip auto-populate
     }
   }, [state.queryCommitted, committedQuery, setValue]);
-
-  const handleTrackingToggle = useCallback(() => {
-    onKindChange(isAlert ? 'signal' : 'alert');
-  }, [isAlert, onKindChange]);
 
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
@@ -298,15 +296,12 @@ export function AlertConditionStep({
       </EuiFormRow>
 
       <EuiSpacer size="m" />
-      <EuiSwitch
-        label={i18n.translate(
-          'xpack.alertingV2.composeDiscover.alertCondition.trackingToggleLabel',
-          { defaultMessage: 'Track active and recovered state over time' }
-        )}
-        checked={isAlert}
-        onChange={handleTrackingToggle}
-        disabled={!state.queryCommitted}
-        data-test-subj="composeDiscoverTrackingToggle"
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={onKindChange}
+        disabled={!state.queryCommitted || isEditing}
+        compressed
+        data-test-subj="composeDiscoverModeSelect"
       />
 
       {isAlert && (
