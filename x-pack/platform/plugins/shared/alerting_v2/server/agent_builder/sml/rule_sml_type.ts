@@ -86,7 +86,7 @@ export const createRuleSmlType = ({
   toAttachment: async (item, context) => {
     try {
       const rulesClient = getScopedRulesClient(context.request);
-      const rule = await rulesClient.getRule({ id: item.origin_id });
+      const rule = await rulesClient.getRule({ id: item.origin_id ?? '' });
       return {
         type: RULE_ATTACHMENT_TYPE,
         data: ruleAttachmentDataSchema.parse(rule),

@@ -19,6 +19,10 @@ export interface TraceWaterfallFlyout {
       readonly section: Locator;
     };
     readonly logMessage: Locator;
+    readonly cellPopover: Locator;
+    expandFirstValueCell(): Promise<void>;
+    ensureCellPopoverOnTop(): Promise<void>;
+    closeCellPopover(): Promise<void>;
     close(): Promise<void>;
   };
   open(): Promise<void>;
@@ -30,6 +34,8 @@ export interface TraceWaterfallFlyout {
 export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyout {
   const dialog = page.getByRole('dialog', { name: 'Full trace waterfall flyout' });
   const spanDetailFlyout = page.getByTestId('apmTraceWaterfallSpanDetailFlyout');
+  const aboutTableGrid = spanDetailFlyout.locator('.kbnDocViewer__fieldsGrid');
+  const cellPopover = page.locator('.euiDataGridRowCell__popover');
 
   return {
     dialog,
@@ -43,6 +49,30 @@ export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyou
         section: spanDetailFlyout.getByTestId('unifiedDocViewerErrorsAccordion'),
       },
       logMessage: spanDetailFlyout.getByTestId('unifiedDocViewLogsOverviewMessage'),
+      cellPopover,
+
+      async expandFirstValueCell() {
+        await aboutTableGrid.waitFor({ state: 'visible' });
+
+        const valueCell = aboutTableGrid.locator(
+          '[data-gridcell-column-id="value"][data-gridcell-row-index="0"]'
+        );
+        await valueCell.scrollIntoViewIfNeeded();
+        await valueCell.hover();
+
+        const expandButton = valueCell.getByTestId('euiDataGridCellExpandButton');
+        await expandButton.click();
+      },
+
+      async ensureCellPopoverOnTop() {
+        await cellPopover.click({ trial: true });
+      },
+
+      async closeCellPopover() {
+        await page.keyboard.press('Escape');
+        await cellPopover.waitFor({ state: 'hidden' });
+      },
+
       async close() {
         await page.keyboard.press('Escape');
         await spanDetailFlyout.waitFor({ state: 'hidden' });
