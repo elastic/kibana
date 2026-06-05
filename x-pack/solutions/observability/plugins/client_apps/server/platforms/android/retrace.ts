@@ -32,6 +32,16 @@ function isIndexNotFoundError(err: unknown): boolean {
   return meta?.body?.error?.type === 'index_not_found_exception';
 }
 
+// _mget returns HTTP 200 even for missing indices, embedding the error in each doc rather
+// than throwing. This helper detects that case so we can surface it as a proper 404.
+function indexNotFoundErrorFromDoc(doc: unknown): Error | undefined {
+  const error = (doc as { error?: { type?: string } }).error;
+  if (error?.type !== 'index_not_found_exception') return undefined;
+  return Object.assign(new Error(error.type), {
+    meta: { body: { error: { type: 'index_not_found_exception' } } },
+  });
+}
+
 export async function retrace({
   esClient,
   stacktrace,
@@ -48,6 +58,11 @@ export async function retrace({
         const ids = classNames.map((cls) => crypto.createHash('sha256').update(cls).digest('hex'));
         try {
           const response = await esClient.mget<AndroidClassMap>({ index, ids });
+          const docError = indexNotFoundErrorFromDoc(response.docs[0]);
+          if (docError) {
+            fetchError = docError;
+            throw docError;
+          }
           return response.docs
             .filter((doc) => 'found' in doc && doc.found && '_source' in doc)
             .map((doc) => (doc as { _source: AndroidClassMap })._source);

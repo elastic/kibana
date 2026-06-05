@@ -82,11 +82,27 @@ describe('retrace (Android ES fetcher)', () => {
     expect(result).toBe(stacktrace);
   });
 
-  it('throws RetraceMapNotFoundError when the mapping index does not exist', async () => {
+  it('throws RetraceMapNotFoundError when the mapping index does not exist (mget throws)', async () => {
     const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
     const mget = jest.fn().mockRejectedValue(indexNotFoundError);
+
+    await expect(
+      retrace({
+        esClient: makeEsClient(mget),
+        stacktrace: '\tat f8.b(SourceFile:3)',
+        buildId: BUILD_ID,
+        logger: loggingSystemMock.createLogger(),
+      })
+    ).rejects.toThrow(RetraceMapNotFoundError);
+  });
+
+  it('throws RetraceMapNotFoundError when mget returns index_not_found inline in docs (ES 8+ behavior)', async () => {
+    // Real ES returns HTTP 200 with per-doc error objects rather than throwing
+    const mget = jest.fn().mockResolvedValue({
+      docs: [{ error: { type: 'index_not_found_exception' } }],
+    });
 
     await expect(
       retrace({
