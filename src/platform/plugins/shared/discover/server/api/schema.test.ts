@@ -11,6 +11,7 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
   discoverSessionApiRequestBodySchema,
   discoverSessionApiResponseSchema,
@@ -110,7 +111,7 @@ describe('discoverSessionDataSchema', () => {
         {
           ...classicTab,
           vis_context: {
-            suggestion_type: 'line',
+            suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
             attributes: {
               visualizationType: 'lnsXY',
               state: { foo: 'bar' },
@@ -121,12 +122,32 @@ describe('discoverSessionDataSchema', () => {
     });
 
     expect(validated.tabs[0].vis_context).toEqual({
-      suggestion_type: 'line',
+      suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
       attributes: {
         visualizationType: 'lnsXY',
         state: { foo: 'bar' },
       },
     });
+  });
+
+  it('rejects an invalid vis_context suggestion_type', () => {
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Invalid suggestion type',
+        tabs: [
+          {
+            ...classicTab,
+            vis_context: {
+              suggestion_type: 'line',
+              attributes: {
+                visualizationType: 'lnsXY',
+                state: { foo: 'bar' },
+              },
+            },
+          },
+        ],
+      })
+    ).toThrow();
   });
 
   it('rejects an empty vis_context object (use omission to indicate a cleared chart)', () => {
@@ -153,7 +174,7 @@ describe('discoverSessionDataSchema', () => {
             breakdown_field: 'host.name',
             chart_interval: 'auto',
             vis_context: {
-              suggestion_type: 'line',
+              suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
               request_data: {
                 time_interval: 'auto',
                 data_view_id: 'logs-data-view',

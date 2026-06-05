@@ -13,21 +13,40 @@ import { asCodeIdSchema, asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
+const MAX_SESSION_TITLE_LENGTH = 256;
+const MAX_TAB_LABEL_LENGTH = 120;
+const MAX_CHART_INTERVAL_LENGTH = 64;
+const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
+const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
+
 const visContextSchema = schema.object({
-  suggestion_type: schema.string({
-    meta: {
-      description:
-        'Discover histogram suggestion path that produced the chart (for example `histogramForDataView`, `histogramForESQL`, or `lensSuggestion`). Inner Lens state is validated by the Lens embeddable transform registry.',
-    },
-  }),
-  attributes: schema.recordOf(schema.string(), schema.any(), {
-    meta: {
-      description:
-        'Opaque Lens visualization attributes. Validation is delegated to the Lens embeddable transform registry. Chart request metadata (data view, time field, breakdown field, interval) is inferred from the tab `data_source`, `breakdown_field`, and `chart_interval` when applying this context at runtime.',
-    },
-  }),
+  suggestion_type: schema.oneOf(
+    [
+      schema.literal(UnifiedHistogramSuggestionType.lensSuggestion),
+      schema.literal(UnifiedHistogramSuggestionType.histogramForESQL),
+      schema.literal(UnifiedHistogramSuggestionType.histogramForDataView),
+    ],
+    {
+      meta: {
+        description:
+          'Discover histogram suggestion path that produced the chart. Inner Lens state is validated by the Lens embeddable transform registry.',
+      },
+    }
+  ),
+  attributes: schema.recordOf(
+    schema.string({ maxLength: MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH }),
+    schema.any(),
+    {
+      meta: {
+        description:
+          'Opaque Lens visualization attributes. Validation is delegated to the Lens embeddable transform registry. Chart request metadata (data view, time field, breakdown field, interval) is inferred from the tab `data_source`, `breakdown_field`, and `chart_interval` when applying this context at runtime.',
+      },
+    }
+  ),
 });
 
 const discoverSessionTabPresentationSchema = schema.object({
@@ -46,11 +65,13 @@ const discoverSessionTabPresentationSchema = schema.object({
   ),
   breakdown_field: schema.maybe(
     schema.string({
+      maxLength: MAX_BREAKDOWN_FIELD_LENGTH,
       meta: { description: 'Field used to break down chart series.' },
     })
   ),
   chart_interval: schema.maybe(
     schema.string({
+      maxLength: MAX_CHART_INTERVAL_LENGTH,
       meta: {
         description: 'Time interval for the chart histogram on this tab.',
       },
@@ -72,6 +93,7 @@ const discoverSessionTabPresentationSchema = schema.object({
 const discoverSessionTabIdentitySchema = schema.object({
   id: asCodeIdSchema,
   label: schema.string({
+    maxLength: MAX_TAB_LABEL_LENGTH,
     meta: { description: 'Human-readable label displayed on the tab.' },
   }),
 });
@@ -97,6 +119,7 @@ export const discoverSessionDataSchema = schema.object(
   {
     title: schema.string({
       minLength: 1,
+      maxLength: MAX_SESSION_TITLE_LENGTH,
       meta: { description: 'A human-readable title for the Discover session.' },
     }),
     description: schema.string({
@@ -105,6 +128,7 @@ export const discoverSessionDataSchema = schema.object(
     }),
     tabs: schema.arrayOf(discoverSessionApiTabSchema, {
       minSize: 1,
+      maxSize: MAX_DISCOVER_SESSION_TABS,
       meta: {
         description:
           'Tabs in the Discover session. Each tab is either a classic data view tab or an ES|QL tab, discriminated by `data_source.type`.',
