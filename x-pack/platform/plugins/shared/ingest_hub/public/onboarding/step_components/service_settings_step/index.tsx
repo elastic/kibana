@@ -36,7 +36,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
     globalRegion,
     setGlobalRegion,
     selectedServices,
-    getServiceConfig,
+    getServiceVars,
     setServiceTransport,
     setServiceField,
     setServiceFields,
@@ -122,13 +122,12 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
       <EuiSpacer size="m" />
 
       {selectedServices.map((service) => {
-        const config = getServiceConfig(service.id);
+        const config = getServiceVars(service.id);
         return (
           <React.Fragment key={service.id}>
             <ServiceSettingsCard
               service={service}
               config={config}
-              globalRegion={globalRegion}
               onTransportChange={handleTransportChange(service.id)}
               onFieldChange={handleFieldChange(service.id)}
               onOpenFlyout={() => setActiveFlyoutServiceId(service.id)}
@@ -169,7 +168,7 @@ export function ServiceSettingsStep({ onNext, onBack }: ServiceSettingsStepProps
       {activeFlyoutService && (
         <CollectionSettingsFlyout
           service={activeFlyoutService}
-          config={getServiceConfig(activeFlyoutService.id)}
+          config={getServiceVars(activeFlyoutService.id)}
           globalRegion={globalRegion}
           onApply={handleFlyoutApply(activeFlyoutService.id)}
           onClose={() => setActiveFlyoutServiceId(null)}

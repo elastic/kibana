@@ -21,15 +21,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceConfig } from './use_service_settings';
+import type { ServiceVars } from './use_service_settings';
 import type { TransportType } from './field_config';
 import { FIELD_CONFIG, getInlineFields, hasTransportChoice } from './field_config';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 
 interface ServiceSettingsCardProps {
   service: AwsServiceMatrixEntry;
-  config: ServiceConfig;
-  globalRegion: string;
+  config: ServiceVars;
   onTransportChange: (transport: TransportType) => void;
   onFieldChange: (fieldName: string, value: string) => void;
   onOpenFlyout: () => void;
@@ -58,10 +57,10 @@ export function ServiceSettingsCard({
   onOpenFlyout,
 }: ServiceSettingsCardProps) {
   const hasTransport = hasTransportChoice(service);
-  const inlineFields = getInlineFields(service, config.activeTransport);
+  const inlineFields = getInlineFields(service, config.trigger);
   const hasFlyoutFields = true; // every service has at least the region override
 
-  const hasEmptyInlineFields = inlineFields.some((f) => (config.fields[f] ?? '').trim() === '');
+  const hasEmptyInlineFields = inlineFields.some((f) => (config.vars[f] ?? '').trim() === '');
 
   function getFieldLabel(fieldName: string): string {
     const meta = FIELD_CONFIG[fieldName];
@@ -97,7 +96,7 @@ export function ServiceSettingsCard({
                 defaultMessage: 'Transport type',
               })}
               options={TRANSPORT_OPTIONS}
-              idSelected={config.activeTransport ?? 'aws-s3'}
+              idSelected={config.trigger ?? 'aws-s3'}
               onChange={(id) => onTransportChange(id as TransportType)}
               buttonSize="compressed"
               color="primary"
@@ -136,7 +135,7 @@ export function ServiceSettingsCard({
       {inlineFields.map((fieldName) => {
         const meta = FIELD_CONFIG[fieldName];
         if (!meta) return null;
-        const value = config.fields[fieldName] ?? '';
+        const value = config.vars[fieldName] ?? '';
         const isInvalid = value.trim() === '';
         return (
           <EuiFormRow

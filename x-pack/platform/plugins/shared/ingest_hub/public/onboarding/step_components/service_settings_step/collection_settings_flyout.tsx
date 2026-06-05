@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceConfig } from './use_service_settings';
+import type { ServiceVars } from './use_service_settings';
 import {
   AWS_REGION_OPTIONS,
   FIELD_CONFIG,
@@ -40,7 +40,7 @@ import {
 
 interface CollectionSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
-  config: ServiceConfig;
+  config: ServiceVars;
   globalRegion: string;
   onApply: (fields: Record<string, string>) => void;
   onClose: () => void;
@@ -67,10 +67,10 @@ export function CollectionSettingsFlyout({
   onClose,
 }: CollectionSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
-  const [draft, setDraft] = useState<Record<string, string>>({ ...config.fields });
+  const [draft, setDraft] = useState<Record<string, string>>({ ...config.vars });
 
   const [regionsRows, setRegionsRows] = useState<string[]>(() => {
-    const parts = (config.fields.regions ?? '')
+    const parts = (config.vars.regions ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
@@ -96,10 +96,10 @@ export function CollectionSettingsFlyout({
     syncRegionsToDraft(final);
   };
 
-  const flyoutFields = getFlyoutFields(service, config.activeTransport);
-  const regionField = getRegionFieldName(service, config.activeTransport);
+  const flyoutFields = getFlyoutFields(service, config.trigger);
+  const regionField = getRegionFieldName(service, config.trigger);
   const otherFlyoutFields = flyoutFields.filter((f) => !REGION_FIELD_NAMES.has(f));
-  const mandatoryBoolFields = getMandatoryBooleanFields(service, config.activeTransport);
+  const mandatoryBoolFields = getMandatoryBooleanFields(service, config.trigger);
 
   const regionValue = draft[regionField]?.trim() || globalRegion;
   const selectedRegionOption = regionValue ? [{ label: regionValue }] : [];
@@ -123,7 +123,6 @@ export function CollectionSettingsFlyout({
 
   const handleApply = () => {
     onApply(draft);
-    onClose();
   };
 
   return (

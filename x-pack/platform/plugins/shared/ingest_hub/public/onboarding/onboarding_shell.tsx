@@ -128,11 +128,10 @@ export function OnboardingShell() {
             | 'complete'
             | 'current'
             | 'incomplete',
-          onClick: () => {
-            if (isComplete || isCurrent) {
-              history.push({ ...location, hash: `#${step.id}` });
-            }
-          },
+          onClick:
+            isComplete || isCurrent
+              ? () => history.push({ ...location, hash: `#${step.id}` })
+              : () => {},
           'data-test-subj': `onboardingStepIndicator-${step.id}`,
         };
       }),
