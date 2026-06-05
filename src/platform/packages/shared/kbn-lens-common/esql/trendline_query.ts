@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esql, parse, BasicPrettyPrinter, isOptionNode } from '@elastic/esql';
+import { esql, Parser, BasicPrettyPrinter, isOptionNode } from '@elastic/esql';
 import type { ESQLCommand, ESQLCommandOption } from '@elastic/esql/types';
 import { AUTO_TARGET_NUMBER_OF_BUCKETS } from './constants';
 
@@ -32,7 +32,7 @@ export const buildTrendlineBucketExpression = (timeField: string): string =>
  * Parses a BUCKET expression into an AST node by extracting it from a helper query.
  */
 const parseBucketNode = (bucketExpr: string) => {
-  const { root } = parse(`FROM _x | STATS _x BY ${bucketExpr}`);
+  const { root } = Parser.parse(`FROM _x | STATS _x BY ${bucketExpr}`);
   const statsCmd = findStatsCommand(root.commands);
   const byOption = findByOption(statsCmd);
   return byOption.args[0];
@@ -71,7 +71,7 @@ export const appendTimeBucketToEsqlQuery = (esqlQuery: string, timeField: string
   const bucketExpr = buildTrendlineBucketExpression(timeField);
   const bucketNode = parseBucketNode(bucketExpr);
 
-  const { root } = parse(esqlQuery);
+  const { root } = Parser.parse(esqlQuery);
 
   if (root.commands.length === 0) {
     throw new Error('Cannot append time bucket to an empty ES|QL query');
@@ -87,13 +87,13 @@ export const appendTimeBucketToEsqlQuery = (esqlQuery: string, timeField: string
       byOption.args.push(bucketNode);
     } else {
       // STATS without BY → extract a typed BY option node from a helper parse
-      const { root: byHelper } = parse(`FROM _x | STATS _x BY ${bucketExpr}`);
+      const { root: byHelper } = Parser.parse(`FROM _x | STATS _x BY ${bucketExpr}`);
       const byNode = findByOption(findStatsCommand(byHelper.commands));
       statsCmd.args.push(byNode);
     }
   } else {
     // No STATS → append full STATS COUNT(*) BY BUCKET(...) command
-    const { root: helperAst } = parse(`FROM _x | STATS COUNT(*) BY ${bucketExpr}`);
+    const { root: helperAst } = Parser.parse(`FROM _x | STATS COUNT(*) BY ${bucketExpr}`);
     root.commands.push(findStatsCommand(helperAst.commands));
   }
 

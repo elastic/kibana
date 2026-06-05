@@ -405,7 +405,7 @@ export function getTextBasedDatasource({
         // Copy the source column with the target's columnId
         const newCol: TextBasedLayerColumn = {
           ...sourceCol,
-          columnId: link.to.columnId!,
+          columnId: link.to.columnId,
         };
 
         newState = {
