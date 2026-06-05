@@ -23,37 +23,34 @@ export const NonEmptyString = z
   .refine((s) => s.trim().length >= 1, 'string must have length >= 1');
 
 export const limitedStringSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
-  z
-    .string()
-    .max(max)
-    .superRefine((s, ctx) => {
-      const trimmed = s.trim();
+  z.string().superRefine((s, ctx) => {
+    const trimmed = s.trim();
 
-      // io-ts parity: an empty / whitespace-only string is only rejected when
-      // `min > 0`; with `min === 0` it should pass through.
-      if (trimmed.length === 0 && min > 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `The ${fieldName} field cannot be an empty string.`,
-        });
-        return;
-      }
+    // io-ts parity: an empty / whitespace-only string is only rejected when
+    // `min > 0`; with `min === 0` it should pass through.
+    if (trimmed.length === 0 && min > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The ${fieldName} field cannot be an empty string.`,
+      });
+      return;
+    }
 
-      if (trimmed.length < min) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `The length of the ${fieldName} is too short. The minimum length is ${min}.`,
-        });
-        return;
-      }
+    if (trimmed.length < min) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The length of the ${fieldName} is too short. The minimum length is ${min}.`,
+      });
+      return;
+    }
 
-      if (trimmed.length > max) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `The length of the ${fieldName} is too long. The maximum length is ${max}.`,
-        });
-      }
-    });
+    if (trimmed.length > max) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The length of the ${fieldName} is too long. The maximum length is ${max}.`,
+      });
+    }
+  });
 
 export const limitedArraySchema = <T extends z.ZodTypeAny>({
   codec,
