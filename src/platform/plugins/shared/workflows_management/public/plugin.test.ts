@@ -146,7 +146,13 @@ describe('WorkflowsPlugin', () => {
         plugin.start(coreStart, startDeps as any);
 
         expect(updates).toHaveLength(1);
-        expect(updates[0].visibleIn).toEqual(['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'projectSideNav']);
+        expect(updates[0].visibleIn).toEqual([
+          'globalSearch',
+          'home',
+          'kibanaOverview',
+          'classicSideNav',
+          'projectSideNav',
+        ]);
       });
 
       it('should hide the app from sideNav when the user lacks read capability', () => {
