@@ -56,8 +56,9 @@ saves, Escape cancels, and returning a string from `onSave` keeps edit mode open
 
 ## Title size
 
-The title is `xs` by default and `s` when the header has tabs (an `xs` title looks too small in the
-taller tabbed header). This is automatic — there is no size knob to set.
+The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
+metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
+is no size knob to set.
 
 ## Padding
 

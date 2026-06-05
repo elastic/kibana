@@ -35,9 +35,9 @@ inline editor. `onSave` returns nothing on success, or an **error string** to re
 the value (also thrown errors are caught and surfaced). The component owns all edit
 state (`draft`, `error`, `isSaving`); the caller only owns the committed `text`.
 
-The `size` (`xs` | `s`) is decided upstream in `AppHeaderView`: `s` when tabs are
-present, otherwise `xs`. The size applies uniformly to read and edit, so it does not
-affect the pixel-parity below.
+The `size` (`xs` | `s`) is decided upstream in `AppHeaderView`: `s` when the header
+has a second row (tabs or metadata), otherwise `xs`. The size applies uniformly to
+read and edit, so it does not affect the pixel-parity below.
 
 ## The one hard requirement: read and edit must be pixel-identical
 
