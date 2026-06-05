@@ -108,6 +108,15 @@ const resultsGridContainerStyles = css`
   overflow: hidden;
 `;
 
+const canvasTestSectionStyles = css`
+  flex-grow: 0;
+  flex-shrink: 0;
+`;
+
+const testPanelStyles = css`
+  flex-grow: 0;
+`;
+
 const renderInlineTestParamInput = ({
   name,
   param,
@@ -196,19 +205,24 @@ const ParameterList: React.FC<{ params: ToolAttachmentData['configuration']['par
             </EuiFlexItem>
             {param.optional && param.defaultValue !== undefined && (
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
+                <EuiBadge color="hollow">
                   <FormattedMessage
                     id="xpack.agentBuilderPlatform.attachments.tool.paramDefault"
                     defaultMessage="default: {value}"
                     values={{ value: JSON.stringify(param.defaultValue) }}
                   />
-                </EuiText>
+                </EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <EuiText size="xs" color="subdued">
-            <p>{param.description}</p>
-          </EuiText>
+          {param.description?.trim() && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
+                <p>{param.description}</p>
+              </EuiText>
+            </>
+          )}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
@@ -319,7 +333,7 @@ const CanvasTestSection: React.FC<CanvasTestSectionProps> = ({ data, http }) => 
   }, [data.configuration, data.type, http, params, values]);
 
   return (
-    <>
+    <div css={canvasTestSectionStyles}>
       <EuiText size="xs" color="subdued">
         <strong>
           <FormattedMessage
@@ -336,7 +350,7 @@ const CanvasTestSection: React.FC<CanvasTestSectionProps> = ({ data, http }) => 
         />
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiPanel color="subdued">
+      <EuiPanel color="subdued" css={testPanelStyles}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           {paramEntries.map(([name, param]) => (
             <EuiFlexItem grow={false} key={name}>
@@ -381,7 +395,7 @@ const CanvasTestSection: React.FC<CanvasTestSectionProps> = ({ data, http }) => 
           </>
         )}
       </EuiPanel>
-    </>
+    </div>
   );
 };
 
@@ -495,23 +509,12 @@ const EsqlResultsTable: React.FC<{
   );
 };
 
-const fullContentPanelStyles = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
-
 const ToolCard: React.FC<ToolCardProps> = ({ attachment, isCanvas, http }) => {
   const { description, configuration } = attachment.data;
   const showCanvasExtras = isCanvas === true;
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      paddingSize="m"
-      css={showCanvasExtras && fullContentPanelStyles}
-    >
+    <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
       <EuiText size="xs" color="subdued">
         <strong>
           <FormattedMessage
