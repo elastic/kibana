@@ -73,6 +73,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -165,6 +166,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -261,6 +263,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -353,6 +356,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -445,6 +449,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -541,6 +546,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -633,6 +639,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -725,6 +732,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -817,6 +825,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -909,6 +918,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1010,6 +1020,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1104,6 +1115,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1205,6 +1217,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1302,6 +1315,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1394,6 +1408,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1495,6 +1510,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1592,6 +1608,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1689,6 +1706,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1788,6 +1806,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
@@ -1887,6 +1906,7 @@ Object {
   "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "spaceId": "default",
   "theme": Object {
     "darkMode": "theme:darkMode",
     "name": "borealis",
