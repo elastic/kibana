@@ -20,3 +20,24 @@ export const DEFAULT_WORKFLOW_CONFIGURATION: WorkflowConfiguration = {
   alertRetrievalWorkflowIds: [],
   validationWorkflowId: 'default',
 };
+
+/**
+ * The well-known ID of the system-managed default validation workflow.
+ */
+export const SYSTEM_VALIDATE_WORKFLOW_ID = 'system-attack-discovery-validate';
+
+/**
+ * The well-known ID of the system-managed custom validation example workflow.
+ */
+export const SYSTEM_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID =
+  'system-attack-discovery-custom-validation-example';
+
+/**
+ * Managed (system) workflows are hidden from the settings dropdowns, EXCEPT the
+ * validation workflows in this allowlist, which must remain selectable in the
+ * Validation step.
+ */
+export const VALIDATION_ALLOWLIST_WORKFLOW_IDS: ReadonlySet<string> = new Set([
+  SYSTEM_VALIDATE_WORKFLOW_ID,
+  SYSTEM_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+]);

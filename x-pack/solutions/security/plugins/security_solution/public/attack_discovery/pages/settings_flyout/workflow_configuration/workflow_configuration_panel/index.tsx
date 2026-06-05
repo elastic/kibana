@@ -43,6 +43,7 @@ const WorkflowConfigurationPanelComponent: React.FC<WorkflowConfigurationPanelPr
       description: workflow.description || workflow.name,
       enabled: workflow.enabled,
       id: workflow.id,
+      managed: workflow.managed,
       name: workflow.name,
       tags: workflow.tags,
     }));

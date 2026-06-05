@@ -14,6 +14,13 @@ export const GENERATION_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const RUN_FROM_WORKFLOW_DESCRIPTION = i18n.translate(
+  'xpack.discoveries.components.runFromWorkflowDescription',
+  {
+    defaultMessage: 'You can also run Attack Discovery from a workflow.',
+  }
+);
+
 export const VALIDATION_ERRORS_TITLE = i18n.translate(
   'xpack.discoveries.components.validationErrorsTitle',
   {

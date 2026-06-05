@@ -8,6 +8,8 @@
 export { GenerationStep } from './generation_step';
 export type { GenerationStepProps } from './generation_step';
 
+export { RunExampleLink } from './run_example_link';
+
 export type { ValidationItem, ValidationLevel } from './types';
 
 export { ValidationStep } from './validation_step';

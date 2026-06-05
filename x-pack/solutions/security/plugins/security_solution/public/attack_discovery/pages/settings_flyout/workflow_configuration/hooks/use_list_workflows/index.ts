@@ -15,6 +15,7 @@ interface WorkflowSearchResult {
   description: string;
   enabled: boolean;
   id: string;
+  managed?: boolean;
   name: string;
   tags?: string[];
   definition?: { tags?: string[] } | null;
@@ -49,7 +50,11 @@ export const useListWorkflows = () => {
 
   return {
     ...result,
-    data: result.data?.results.map((r) => ({ ...r, tags: r.definition?.tags })),
+    data: result.data?.results.map((r) => ({
+      ...r,
+      managed: r.managed,
+      tags: r.definition?.tags,
+    })),
   };
 };
 

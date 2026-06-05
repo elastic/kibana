@@ -48,21 +48,31 @@ const mockWorkflowsWithPredefined: WorkflowItem[] = [
   },
   {
     description: 'Default alert retrieval',
-    id: 'default-alert-retrieval-id',
+    id: 'system-attack-discovery-alert-retrieval',
+    managed: true,
     name: 'Attack discovery - Default alert retrieval',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:default_alert_retrieval'],
   },
   {
     description: 'Generation workflow',
-    id: 'generation-id',
+    id: 'system-attack-discovery-generation',
+    managed: true,
     name: 'Attack discovery - Generation',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:generation'],
   },
   {
     description: 'Default validation',
-    id: 'default-validation-id',
+    id: 'system-attack-discovery-validate',
+    managed: true,
     name: 'Attack discovery - Default validation',
     tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
+  },
+  {
+    description: 'Orchestrates KI feature identification',
+    id: 'system-streams-ki-onboarding',
+    managed: true,
+    name: '.streams-ki-onboarding',
+    tags: ['Streams'],
   },
 ];
 
@@ -414,6 +424,26 @@ describe('WorkflowConfigurationPanel', () => {
       });
 
       expect(screen.queryByTitle('Attack discovery - Default validation')).not.toBeInTheDocument();
+    });
+
+    it('excludes managed workflows owned by other plugins from the picker', async () => {
+      mockUseListWorkflows.mockReturnValue(mockSuccessWithPredefined);
+
+      render(
+        <TestProviders>
+          <WorkflowConfigurationPanel {...defaultProps} />
+        </TestProviders>
+      );
+
+      const input = screen.getByRole('combobox');
+      input.focus();
+      await userEvent.type(input, 'My');
+
+      await waitFor(() => {
+        expect(screen.getByTitle('My Custom Retrieval')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTitle('.streams-ki-onboarding')).not.toBeInTheDocument();
     });
 
     it('includes custom (user-created) workflows without AD tags', async () => {
