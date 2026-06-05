@@ -77,7 +77,12 @@ export const createActionPolicySmlType = ({
             type: ACTION_POLICY_SML_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}`],
+            permissions: {
+              kibana: {
+                privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+              },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
