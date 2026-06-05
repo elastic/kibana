@@ -119,7 +119,7 @@ Open one draft PR with the smallest test-side fix for this flaky-test issue. If 
 - **Body**:
 
   ```
-  Fixes #<issue-number>
+  Fixes #<issue-number> (add more issue numbers here if this fix resolves multiple issues)
 
   <a few sentences: what was failing, and what this patch changes>
 
