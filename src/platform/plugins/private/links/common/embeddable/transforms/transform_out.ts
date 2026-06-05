@@ -38,7 +38,7 @@ export function transformOut(
   if (savedObjectRef) {
     const { links, ...rest } = state; // some by-ref panels had links serialized for some reason
     return {
-      ...state,
+      ...rest,
       savedObjectId: savedObjectRef.id,
     };
   }
