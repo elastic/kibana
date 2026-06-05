@@ -11,11 +11,11 @@ import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
-import type { DashboardUpdateResponseBody } from './types';
+import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
+import { create } from '../create/create';
 
 export async function update(
   requestCtx: RequestHandlerContext,
@@ -53,11 +53,10 @@ export async function update(
       requestCtx,
       strictValidationSchema,
       updateBody,
-      serverTiming,
       isDashboardAppRequest,
       id
     );
-    return { body, operation: 'create' };
+    return body;
   }
 
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
@@ -72,13 +71,10 @@ export async function update(
     }
   );
 
-  return {
-    body: getDashboardCRUResponseBody(
-      updated,
-      'update',
-      strictValidationSchema,
-      isDashboardAppRequest
-    ),
-    operation: 'update',
-  };
+  return getDashboardCRUResponseBody(
+    savedObject,
+    'update',
+    strictValidationSchema,
+    isDashboardAppRequest
+  );
 }

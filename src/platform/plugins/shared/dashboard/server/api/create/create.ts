@@ -14,6 +14,7 @@ import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardState } from '../types';
 import type { DashboardCreateResponseBody } from './types';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export async function create(
   requestCtx: RequestHandlerContext,

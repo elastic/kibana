@@ -22,7 +22,7 @@ export function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
-  operation: Operation,
+  operation: 'create' | 'read' | 'update' | 'search',
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false
 ) {

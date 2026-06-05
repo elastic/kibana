@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { once } from 'lodash';
-
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { logRequest } from '../log_request';
 import { deleteDashboard } from './delete';
@@ -30,13 +27,6 @@ export function registerDeleteRoute(
     summary: `Delete a dashboard`,
     ...routeConfig,
     description: 'Permanently deletes a dashboard by ID.',
-  });
-
-  // Do not call getDashboardStateSchema when registering route.
-  // Route is registered during setup and before all plugins have registered embeddable schemas.
-  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
-  const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(false);
   });
 
   deleteRoute.addVersion(
@@ -71,7 +61,7 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          await deleteDashboard(ctx, req.params.id, getCachedDashboardStateSchema());
+          await deleteDashboard(ctx, req.params.id);
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
             const message = `A dashboard with ID [${req.params.id}] was not found.`;
