@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/content-management-utils'
   - '@kbn/content-management-plugin'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/saved-objects-plugin'
   - '@kbn/core-saved-objects-server'
   - '@kbn/saved-objects-plugin'
