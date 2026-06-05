@@ -1019,9 +1019,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await refreshRulesList(page);
     await searchRules(page, rule.data.name as string);
 
-    await expect(
-      ruleRow.locator('[data-test-subj="rulesListNotifyBadge-snoozed"]')
-    ).toBeHidden();
+    await expect(ruleRow.locator('[data-test-subj="rulesListNotifyBadge-snoozed"]')).toBeHidden();
     await expect(
       ruleRow.locator('[data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"]')
     ).toBeHidden();

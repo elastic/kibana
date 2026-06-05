@@ -81,7 +81,6 @@ const closeFlyoutIfOpen = async (page: ScoutPage) => {
   }
 };
 
-
 const cancelRuleCreation = async (page: ScoutPage) => {
   const cancelBtn = page.testSubj.locator('rulePageFooterCancelButton');
   if (await cancelBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
