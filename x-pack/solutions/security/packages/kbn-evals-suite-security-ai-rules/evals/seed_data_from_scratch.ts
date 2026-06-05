@@ -24,9 +24,9 @@ import { pipeline } from 'node:stream/promises';
 import { createInterface } from 'node:readline';
 import { PassThrough } from 'node:stream';
 
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 /* Constants
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 
 const GITHUB_RAW =
   'https://raw.githubusercontent.com/elastic/integrations/main/packages';
@@ -73,10 +73,6 @@ const INTEGRATION_SOURCES: SourceDef[] = [
 
 const EPISODE_SAMPLE_SIZE = 200;
 
-/* ────────────────────────────────────────────────────────────────────── */
-/* Deterministic variation helpers
-/* ────────────────────────────────────────────────────────────────────── */
-
 const HOST_POOL = [
   'WIN-ITADMIN01', 'WIN-DEV03', 'WIN-ANALYST01', 'DC-CORP01',
   'WS-WEB01', 'WS-DB01', 'MAC-ENG01', 'LNX-SRV01',
@@ -89,7 +85,11 @@ const USER_POOL = [
   'SYSTEM', 'LOCAL SERVICE', 'NETWORK SERVICE', 'admin@elastic.co',
 ];
 
-const djb2 = (str: string): number => {
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Deterministic variation helpers (exported for testing)
+/* ────────────────────────────────────────────────────────────────────────── */
+
+export const djb2 = (str: string): number => {
   let h = 5381;
   for (let i = 0; i < str.length; i++) {
     h = ((h << 5) + h + str.charCodeAt(i)) & 0xffffffff;
@@ -97,28 +97,71 @@ const djb2 = (str: string): number => {
   return h >>> 0;
 };
 
-const deterministicFloat = (seed: string): number => {
+export const deterministicFloat = (seed: string): number => {
   const h = djb2(seed);
   return h / 0xffffffff;
 };
 
-const pickFrom = <T>(arr: T[], seed: string): T => {
+export const pickFrom = <T>(arr: T[], seed: string): T => {
   const idx = Math.floor(deterministicFloat(seed) * arr.length);
   return arr[idx % arr.length];
 };
 
-const shiftTimestamp = (iso: string, deltaMs: number): string => {
+export const shiftTimestamp = (iso: string, deltaMs: number): string => {
   const ms = Date.parse(iso);
   if (!Number.isFinite(ms)) return iso;
   return new Date(ms + deltaMs).toISOString();
 };
 
-function variate(
+export const detectWindowsOs = (doc: Record<string, unknown>): boolean => {
+  const hostOs = (doc.host as Record<string, unknown>)?.os as Record<string, unknown>;
+  const procPath = ((doc.process as Record<string, unknown>)?.executable as string) ?? '';
+  return !!(
+    doc.winlog ||
+    procPath.includes('.exe') ||
+    procPath.includes('C:\\') ||
+    hostOs?.Ext?.variant?.toString().toLowerCase().includes('windows')
+  );
+};
+
+export const rewriteIdLike = (value: string, salt: string): string => {
+  if (
+    value.length >= 8 &&
+    (/^[a-f0-9-]{8,}$/i.test(value) || /^[A-Za-z0-9+/=_-]{10,}$/.test(value))
+  ) {
+    return `${value.slice(0, 4)}${djb2(`${salt}:${value}`).toString(36).slice(0, 12)}${value.slice(-4)}`;
+  }
+  return value;
+};
+
+export const rewriteIds = (node: unknown, salt: string): unknown => {
+  if (Array.isArray(node)) return node.map((v, i) => rewriteIds(v, `${salt}:${i}`));
+  if (!node || typeof node !== 'object') {
+    if (typeof node === 'string') {
+      return rewriteIdLike(node, salt);
+    }
+    return node;
+  }
+  const o = node as Record<string, unknown>;
+  for (const k of Object.keys(o)) {
+    const v = o[k];
+    if (k === 'entity_id' || k === 'id' || k === 'unique_id') {
+      if (typeof v === 'string') {
+        o[k] = rewriteIdLike(v, salt);
+      }
+    } else {
+      o[k] = rewriteIds(v, `${salt}:${k}`);
+    }
+  }
+  return o;
+};
+
+export const variate = (
   original: Record<string, unknown>,
   variationIdx: number,
   baseTimeMs: number,
   timeSpreadMs: number
-): Record<string, unknown> {
+): Record<string, unknown> => {
   const clone: Record<string, unknown> = JSON.parse(JSON.stringify(original));
   const host = pickFrom(HOST_POOL, `h:${variationIdx}`);
   const user = pickFrom(USER_POOL, `u:${variationIdx}`);
@@ -135,58 +178,35 @@ function variate(
   if (!hostObj.os) hostObj.os = {};
   const hostOs = hostObj.os as Record<string, unknown>;
   if (!hostOs.type) {
-    const procPath = ((clone.process as Record<string, unknown>)?.executable as string) ?? '';
-    const isWindows = !!(
-      clone.winlog ||
-      procPath.includes('.exe') ||
-      procPath.includes('C:\\\\') ||
-      (hostOs.Ext as Record<string, unknown>)?.variant?.toString().toLowerCase().includes('windows')
-    );
-    hostOs.type = isWindows ? 'windows' : 'linux';
+    hostOs.type = detectWindowsOs(clone) ? 'windows' : 'linux';
   }
   if (!clone.user) clone.user = {};
   (clone.user as Record<string, unknown>).name = user;
   if (!clone.agent) clone.agent = {};
-  (clone.agent as Record<string, unknown>).id = `agent-${djb2(`a:${variationIdx}`).toString(36).slice(0, 8)}`;
 
-  const rewriteIds = (node: unknown, salt: string): unknown => {
-    if (Array.isArray(node)) return node.map((v, i) => rewriteIds(v, `${salt}:${i}`));
-    if (!node || typeof node !== 'object') {
-      if (typeof node === 'string' && node.length >= 8) {
-        if (/^[a-f0-9-]{8,}$/i.test(node) || /^[A-Za-z0-9+/=_-]{10,}$/.test(node)) {
-          return `${node.slice(0, 4)}${djb2(`${salt}:${node}`).toString(36).slice(0, 12)}${node.slice(-4)}`;
-        }
-      }
-      return node;
+  // Update event timestamps before rewriteIds touches nested objects
+  for (const key of ['event', 'host', 'user', 'agent'] as const) {
+    const obj = clone[key] as Record<string, unknown> | undefined;
+    if (obj && typeof obj === 'object') {
+      obj.created = shifted;
+      obj.ingested = shifted;
     }
-    const o = node as Record<string, unknown>;
-    for (const k of Object.keys(o)) {
-      const v = o[k];
-      if (k === 'entity_id' || k === 'id' || k === 'unique_id') {
-        if (typeof v === 'string') {
-          o[k] = `${v.slice(0, 4)}${djb2(`${salt}:${v}`).toString(36).slice(0, 12)}${v.slice(-4)}`;
-        }
-      } else if (k === '@timestamp' || k === 'event' || k === 'host' || k === 'user' || k === 'agent') {
-        if (typeof v === 'object' && v !== null) {
-          (v as Record<string, unknown>)['created'] = shifted;
-          (v as Record<string, unknown>)['ingested'] = shifted;
-        }
-      } else {
-        o[k] = rewriteIds(v, `${salt}:${k}`);
-      }
-    }
-    return o;
-  };
+  }
 
   rewriteIds(clone, `v:${variationIdx}`);
+
+  // Set agent.id AFTER rewriteIds so it is not overwritten by id-rewrite logic
+  (clone.agent as Record<string, unknown>).id =
+    `agent-${djb2(`a:${variationIdx}`).toString(36).slice(0, 8)}`;
+
   return clone;
-}
+};
 
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 /* HTTP fetch helpers
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-function fetchBuffer(url: string, timeoutMs = 30000): Promise<Buffer> {
+const fetchBuffer = (url: string, timeoutMs = 30000): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const req = https.get(url, { timeout: timeoutMs }, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -208,28 +228,28 @@ function fetchBuffer(url: string, timeoutMs = 30000): Promise<Buffer> {
       reject(new Error(`Timeout fetching ${url}`));
     });
   });
-}
+};
 
-async function fetchJson<T = Record<string, unknown>>(url: string): Promise<T> {
+const fetchJson = async <T = Record<string, unknown>>(url: string): Promise<T> => {
   const buf = await fetchBuffer(url);
   return JSON.parse(buf.toString('utf-8')) as T;
-}
+};
 
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 /* Caching
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-function cachePath(pkg: string, stream: string): string {
+const cachePath = (pkg: string, stream: string): string => {
   return path.join(CACHE_DIR, `${pkg}__${stream}.json`);
-}
+};
 
-function ensureCacheDir() {
+const ensureCacheDir = (): void => {
   if (!existsSync(CACHE_DIR)) {
     mkdirSync(CACHE_DIR, { recursive: true });
   }
-}
+};
 
-function readCachedOrNull(pkg: string, stream: string): Record<string, unknown> | null {
+const readCachedOrNull = (pkg: string, stream: string): Record<string, unknown> | null => {
   const p = cachePath(pkg, stream);
   if (!existsSync(p)) return null;
   try {
@@ -237,14 +257,14 @@ function readCachedOrNull(pkg: string, stream: string): Record<string, unknown> 
   } catch {
     return null;
   }
-}
+};
 
-function writeCache(pkg: string, stream: string, doc: Record<string, unknown>) {
+const writeCache = (pkg: string, stream: string, doc: Record<string, unknown>): void => {
   const p = cachePath(pkg, stream);
   fs.writeFileSync(p, JSON.stringify(doc, null, 0));
-}
+};
 
-async function getSampleEvent(pkg: string, stream: string): Promise<Record<string, unknown>> {
+const getSampleEvent = async (pkg: string, stream: string): Promise<Record<string, unknown>> => {
   ensureCacheDir();
   const cached = readCachedOrNull(pkg, stream);
   if (cached) return cached;
@@ -252,16 +272,16 @@ async function getSampleEvent(pkg: string, stream: string): Promise<Record<strin
   const doc = await fetchJson(url);
   writeCache(pkg, stream, doc);
   return doc;
-}
+};
 
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 /* Endpoint episode helpers
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-async function readEpisodeSample(
+const readEpisodeSample = async (
   dataPath: string,
   sampleCount: number
-): Promise<Record<string, unknown>[]> {
+): Promise<Record<string, unknown>[]> => {
   const fileStream = createReadStream(dataPath);
   const out = new PassThrough();
   const docs: Record<string, unknown>[] = [];
@@ -286,11 +306,11 @@ async function readEpisodeSample(
     }
   }
   return docs;
-}
+};
 
-async function loadEndpointSamples(sampleCount: number): Promise<
+const loadEndpointSamples = async (sampleCount: number): Promise<
   Record<string, Record<string, unknown>[]>
-> {
+> => {
   const result: Record<string, Record<string, unknown>[]> = {};
   const episodeFiles = [
     path.join(EPISODE_DIR, 'ep1data.ndjson.gz'),
@@ -318,19 +338,19 @@ async function loadEndpointSamples(sampleCount: number): Promise<
     }
   }
   return result;
-}
+};
 
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 /* Bulk indexing helpers
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-async function bulkIndex(
+const bulkIndex = async (
   esClient: Client,
   index: string,
   docs: Record<string, unknown>[],
   batchSize = 500,
   log?: ToolingLog
-) {
+) => {
   for (let i = 0; i < docs.length; i += batchSize) {
     const slice = docs.slice(i, i + batchSize);
     const body = slice.flatMap((doc) => [{ create: { _index: index } }, doc]);
@@ -342,19 +362,19 @@ async function bulkIndex(
       }
     }
   }
-}
+};
 
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 /* Exported fallback routine
-/* ────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-export async function seedDataFromScratch({
+export const seedDataFromScratch = async ({
   esClient,
   log,
 }: {
   esClient: Client;
   log: ToolingLog;
-}): Promise<void> {
+}): Promise<void> => {
   log.info('[security-ai-rules eval setup] seeding security indices with realistic data');
 
   const baseTimeMs = Date.now();
@@ -444,4 +464,4 @@ export async function seedDataFromScratch({
       await new Promise((r) => setTimeout(r, 1000));
     }
   }
-}
+};
