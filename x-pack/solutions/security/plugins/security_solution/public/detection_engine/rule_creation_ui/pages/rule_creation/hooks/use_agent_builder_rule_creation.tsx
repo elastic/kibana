@@ -229,7 +229,7 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // Auto-apply agent attachment edits to the form without requiring "Open in form".
+  // CHAT -> FORM
   useEffect(() => {
     if (!agentBuilder?.events?.chat$) return;
     const subscription = agentBuilder.events.chat$.subscribe((event) => {
@@ -260,6 +260,7 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [agentBuilder]);
 
+  // FORM -> CHAT
   useEffect(() => {
     if (
       !isSyncActive ||

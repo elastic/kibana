@@ -81,21 +81,28 @@ export const shouldShowViewRuleButton = (
   return !isAttachmentRuleOpenOnFormPage(attachmentRuleId, pathname);
 };
 
-/** Saved-rule id from the attachment. `data.ruleId` is primary; `origin` is a legacy fallback. */
+/**
+ * Saved-rule id from the attachment. `data.ruleId` is primary; `origin` is a legacy fallback
+ * used only when resolving the rule id for navigation/save targets — NOT for intent detection.
+ */
 export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | undefined =>
   attachment.data?.ruleId ?? (attachment as { origin?: string }).origin ?? undefined;
 
 /**
  * Effective intent: 'create' for a new rule, 'update' for a saved one.
- * `data.intent` is authoritative (frozen at write time); legacy attachments fall back to
- * ruleId/origin presence.
+ * `data.intent` is authoritative (frozen at write time).
+ * Legacy fallback: only `data.ruleId` (not `origin`) signals a prior save — `origin` is a
+ * server-side linkage that persists across sessions and must not flip the label to "Update rule"
+ * when the user is asking to create a fresh rule in an existing conversation.
  */
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent => {
   const dataIntent = attachment.data?.intent;
   if (dataIntent === 'create' || dataIntent === 'update') {
     return dataIntent;
   }
-  return getRuleIdFromAttachment(attachment) ? 'update' : 'create';
+  // Use only data.ruleId (not origin) so that an old conversation's origin from a previous save
+  // does not incorrectly show "Update rule" when the user intends to create a new rule.
+  return attachment.data?.ruleId ? 'update' : 'create';
 };
 
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {

@@ -182,10 +182,12 @@ describe('createRuleAttachmentDefinition', () => {
       ).toBe('Update rule');
     });
 
-    it('falls back to origin for legacy attachments that predate data.ruleId', () => {
+    it('shows "Create rule" for legacy attachments that have origin but no data.ruleId', () => {
+      // origin is a server-side linkage from a prior session; it must NOT flip the button to
+      // "Update rule" when the user is asking to create a fresh rule.
       expect(
         primaryLabel(buildButtons({ text: JSON.stringify(validRule) }, { origin: 'rule-1' }))
-      ).toBe('Update rule');
+      ).toBe('Create rule');
     });
 
     it('returns no buttons when the user cannot edit rules', () => {
