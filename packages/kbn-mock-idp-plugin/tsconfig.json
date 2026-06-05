@@ -11,6 +11,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-plugins-browser",
+    "@kbn/core-lifecycle-server",
     "@kbn/core-plugins-server",
     "@kbn/core-theme-browser",
     "@kbn/i18n-react",
@@ -26,5 +27,10 @@
     "@kbn/core-http-server-utils",
     "@kbn/i18n",
     "@kbn/core",
+    "@kbn/inference-langchain",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/features-plugin",
+    "@kbn/zod",
   ]
 }

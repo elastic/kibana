@@ -55,6 +55,7 @@ export const useAuthenticator = (reloadPage = false) => {
 export const RoleSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [roles, setRoles] = useState<string[]>([]);
+  const [generatedRoles, setGeneratedRoles] = useState<string[]>([]);
   const [currentUserState, getCurrentUser] = useCurrentUser();
   const [authenticateUserState, authenticateUser] = useAuthenticator();
   const { services } = useKibana<CoreStart>();
@@ -62,8 +63,11 @@ export const RoleSwitcher = () => {
   useEffect(() => {
     getCurrentUser();
     services.http
-      .get<{ roles: string[] }>('/mock_idp/supported_roles')
-      .then((response) => setRoles(response.roles));
+      .get<{ roles: string[]; generatedRoles: string[] }>('/mock_idp/supported_roles')
+      .then((response) => {
+        setRoles(response.roles);
+        setGeneratedRoles(response.generatedRoles ?? []);
+      });
   }, [getCurrentUser, authenticateUserState.value, services]);
 
   useEffect(() => {
@@ -82,12 +86,38 @@ export const RoleSwitcher = () => {
   if (
     !currentUserState.value ||
     !isAuthenticatedWithMockIDP(currentUserState.value) ||
-    roles.length === 0
+    (roles.length === 0 && generatedRoles.length === 0)
   ) {
     return null;
   }
 
   const [currentRole] = currentUserState.value.roles;
+
+  const makeRoleItem = (role: string) => ({
+    name: role,
+    icon: currentUserState.value!.roles.includes(role) ? 'check' : 'empty',
+    onClick: () => {
+      authenticateUser({
+        username: currentUserState.value!.username,
+        full_name: currentUserState.value!.full_name,
+        email: currentUserState.value!.email,
+        roles: [role],
+        url: window.location.href,
+      });
+      setIsOpen(false);
+    },
+  });
+
+  const menuItems = [
+    ...roles.map(makeRoleItem),
+    ...(generatedRoles.length > 0
+      ? [
+          { isSeparator: true as const },
+          { name: 'Generated roles', disabled: true, icon: 'empty' },
+          ...generatedRoles.map(makeRoleItem),
+        ]
+      : []),
+  ];
 
   return (
     <EuiPopover
@@ -118,24 +148,7 @@ export const RoleSwitcher = () => {
       <EuiContextMenu
         initialPanelId={0}
         panels={[
-          {
-            id: 0,
-            title: 'Switch role',
-            items: roles.map((role) => ({
-              name: role,
-              icon: currentUserState.value!.roles.includes(role) ? 'check' : 'empty',
-              onClick: () => {
-                authenticateUser({
-                  username: currentUserState.value!.username,
-                  full_name: currentUserState.value!.full_name,
-                  email: currentUserState.value!.email,
-                  roles: [role],
-                  url: window.location.href,
-                });
-                setIsOpen(false);
-              },
-            })),
-          },
+          { id: 0, title: 'Switch role', items: menuItems },
         ]}
       />
     </EuiPopover>
