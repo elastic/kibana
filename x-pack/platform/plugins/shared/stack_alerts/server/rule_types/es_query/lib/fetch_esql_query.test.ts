@@ -16,7 +16,10 @@ import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitor
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlEsqlClusterInfo,
+  EsqlEsqlShardFailure,
+} from '@elastic/elasticsearch/lib/api/types';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -50,6 +53,7 @@ jest.mock('../../../../common', () => {
 
 const logger = loggingSystemMock.create().get();
 const mockRuleResultService = publicRuleResultServiceMock.create();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
 describe('fetchEsqlQuery', () => {
   afterAll(() => {
@@ -69,9 +73,7 @@ describe('fetchEsqlQuery', () => {
 
   describe('fetch', () => {
     it('should throw a user error when the error is a verification_exception error', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-
-      scopedClusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(
+      scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
         new Error(
           'verification_exception: Found 1 problem line 1:23: Unknown column [user_agent.original]'
         )
@@ -114,18 +116,17 @@ describe('fetchEsqlQuery', () => {
         index: 'test-index',
       };
 
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [],
         values: [],
-        is_partial: true, // is_partial is true
+        is_partial: true,
         _clusters: {
           details: {
             'cluster-1': {
               failures: [shardFailure],
             },
           },
-        },
+        } as unknown as EsqlEsqlClusterInfo,
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -174,14 +175,13 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should add a warning when is_partial is true but there is no shard failure', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [],
         values: [],
-        is_partial: true, // is_partial is true
+        is_partial: true,
         _clusters: {
           details: {},
-        },
+        } as unknown as EsqlEsqlClusterInfo,
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -230,11 +230,10 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should not add a warning when is_partial is false', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+      scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
         columns: [],
         values: [],
-        is_partial: false, // is_partial is true
+        is_partial: false,
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -383,8 +382,7 @@ describe('fetchEsqlQuery', () => {
   });
 
   it('should bubble up warnings if there are duplicate alerts', async () => {
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+    scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
       columns: [],
       values: [],
     });
