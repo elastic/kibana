@@ -725,6 +725,7 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
+  rulePreview = 'security.rule.preview',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

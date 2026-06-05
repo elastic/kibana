@@ -42,6 +42,8 @@ const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 const SCHEDULE_BUTTON_TEST_ID_TABLE = 'scheduleButton';
 const SCHEDULE_DETAILS_FLYOUT_TEST_ID = 'scheduleDetailsFlyout';
 const QUERY_TOGGLE_HEADER_TEST_ID = 'query-toggle-header';
+const ATTACK_SUBTITLE_TEST_ID = 'attack-subtitle';
+const ATTACK_RUN_BY_AVATAR_TEST_ID = 'attack-run-by-avatar';
 
 export class DetectionsAttackDiscoveryPage {
   public readonly standaloneAlertsNavItem: Locator;
@@ -75,6 +77,9 @@ export class DetectionsAttackDiscoveryPage {
   public readonly generateButton: Locator;
   public readonly runButton: Locator;
   public readonly globalToastList: Locator;
+  public readonly attackSubtitle: Locator;
+  public readonly attackRunByAvatar: Locator;
+  public readonly manualAttackSubtitle: Locator;
 
   constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
     this.attacksPageContent = this.page.testSubj.locator(ATTACKS_PAGE_CONTENT_TEST_ID);
@@ -111,6 +116,9 @@ export class DetectionsAttackDiscoveryPage {
     this.generateButton = this.page.testSubj.locator('generate');
     this.runButton = this.page.testSubj.locator('run');
     this.globalToastList = this.page.testSubj.locator('globalToastList');
+    this.attackSubtitle = this.attacksTableSection.getByTestId(ATTACK_SUBTITLE_TEST_ID);
+    this.manualAttackSubtitle = this.attackSubtitle.filter({ hasText: 'Run by:' });
+    this.attackRunByAvatar = this.attacksTableSection.getByTestId(ATTACK_RUN_BY_AVATAR_TEST_ID);
 
     if (_config.serverless) {
       this.standaloneAlertsNavItem = this.page.testSubj.locator(
