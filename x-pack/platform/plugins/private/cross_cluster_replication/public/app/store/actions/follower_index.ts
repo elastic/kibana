@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
+import type { AnyAction } from 'redux-v4';
 import type { ThunkAction } from 'redux-thunk-v2';
 import { i18n } from '@kbn/i18n';
 import { routing } from '../../services/routing';
