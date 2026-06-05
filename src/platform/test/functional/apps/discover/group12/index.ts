@@ -21,7 +21,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_unsaved_changes_notification_indicator'));
+    // `./_unsaved_changes_notification_indicator` was migrated to Scout under
+    // `src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/`
+    // (unsaved_changes_*.spec.ts).
     loadTestFile(require.resolve('./_view_mode_toggle'));
   });
 }
