@@ -9,10 +9,11 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
-import { search } from './search';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
 import { commonRouteConfig } from '../constants';
+import { searchLinksOASOperationObject } from '../oas_examples';
+import { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
+import { search } from './search';
 
 export const LINKS_SEARCH_DESCRIPTION =
   `Returns a paginated list of links library items. Each result includes title, description, and metadata, but not the content. ` +
@@ -29,6 +30,9 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
   searchRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: () => searchLinksOASOperationObject,
+      },
       validate: {
         request: {
           query: searchRequestQuerySchema,
