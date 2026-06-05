@@ -17,10 +17,7 @@ import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import {
-  AGENT_BUILDER_NEW_CONVERSATION_PATH,
-  CREATE_WITH_AGENT_INITIAL_PROMPT,
-} from './constants';
+import { AGENT_BUILDER_NEW_CONVERSATION_PATH, CREATE_WITH_AGENT_INITIAL_PROMPT } from './constants';
 
 const createMockServices = (): RuleFormServices => ({
   http: httpServiceMock.createStartContract(),
@@ -186,13 +183,10 @@ describe('CreateAlertFlyout', () => {
 
       fireEvent.click(screen.getByTestId('agentBtn'));
 
-      expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(
-        AGENT_BUILDER_APP_ID,
-        {
-          path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
-          state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
-        }
-      );
+      expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(AGENT_BUILDER_APP_ID, {
+        path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
+        state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+      });
       expect(onClose).toHaveBeenCalledTimes(1);
     });
   });

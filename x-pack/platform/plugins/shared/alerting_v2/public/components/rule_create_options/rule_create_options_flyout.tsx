@@ -59,15 +59,22 @@ export const RuleCreateOptionsFlyout = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              onClick={onClose}
-              aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+            <EuiToolTip
+              content={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
                 defaultMessage: 'Close',
               })}
-              data-test-subj="ruleCreateOptionsFlyoutCloseButton"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={i18n.translate('xpack.alertingV2.ruleCreateOptionsFlyout.close', {
+                  defaultMessage: 'Close',
+                })}
+                data-test-subj="ruleCreateOptionsFlyoutCloseButton"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
