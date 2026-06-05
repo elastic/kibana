@@ -475,7 +475,7 @@ describe('createFindPrebuiltRulesInlineTool', () => {
       const tool = createFindPrebuiltRulesInlineTool({ getStartServices, logger: mockLogger });
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-      const toolResult = await tool.handler({}, context);
+      const toolResult = await tool.handler({ perPage: 10, sortOrder: 'desc' }, context);
       if ('results' in toolResult) {
         expect(toolResult.results[0].type).toBe(ToolResultType.error);
         expect((toolResult.results[0].data as { message: string }).message).toContain('ES is down');

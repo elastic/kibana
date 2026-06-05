@@ -26,7 +26,7 @@ const permissiveMlAuthz: MlAuthz = {
   validateRuleType: async () => ({ valid: true, message: undefined }),
 };
 
-const version = (ruleId: string, type = 'query' as const, v = 1) => ({
+const version = (ruleId: string, type: string = 'query', v = 1) => ({
   rule_id: ruleId,
   version: v,
   type,
