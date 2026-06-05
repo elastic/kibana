@@ -10,6 +10,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { executeGenerationWorkflow } from '@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow';
 import type { WorkflowConfig } from '@kbn/discoveries/impl/attack_discovery/generation/types';
@@ -124,6 +125,32 @@ const buildSuccessResult = (data: Record<string, unknown>) => ({
   type: ToolResultType.other,
 });
 
+const resolveEffectiveConnectorId = async ({
+  args,
+  context,
+  logger,
+}: {
+  args: { connector_id?: string };
+  context: ToolHandlerContext;
+  logger: Logger;
+}): Promise<string | undefined> => {
+  if (args.connector_id != null && args.connector_id.length > 0) {
+    return args.connector_id;
+  }
+
+  try {
+    const { connector } = await context.modelProvider.getDefaultModel();
+    return connector.connectorId;
+  } catch (error) {
+    logger.error(
+      `Attack Discovery tool failed to resolve a default LLM connector from the agent's selected model: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return undefined;
+  }
+};
+
 export const getRunAttackDiscoveryTool = ({
   analytics,
   getEventLogIndex,
@@ -134,7 +161,7 @@ export const getRunAttackDiscoveryTool = ({
 }: RunAttackDiscoveryToolDeps): BuiltinSkillBoundedTool<typeof inputSchema> => ({
   description: `Run the canonical Attack Discovery generation pipeline (alert retrieval → generation → validation → persistence) inside the audited Anonymization Boundary. Prefer "provided" mode (pass curated \`alerts\`) when you have already gathered evidence; otherwise use "esql" with \`esql_query\`, "custom_only" with \`alert_retrieval_workflow_ids\`, or "custom_query" with explicit \`size\`/\`start\`/\`end\`. Returns inline discoveries when sync-mode finishes within the soft deadline; otherwise returns \`execution_uuid\` for slow-path resume via \`security.attack-discovery.get_status\`. The LLM connector is resolved from the agent execution; pass \`connector_id\` only to override.`,
   handler: async (args, context) => {
-    const effectiveConnectorId = args.connector_id ?? context.defaultConnectorId;
+    const effectiveConnectorId = await resolveEffectiveConnectorId({ args, context, logger });
 
     if (effectiveConnectorId == null || effectiveConnectorId.length === 0) {
       return {
