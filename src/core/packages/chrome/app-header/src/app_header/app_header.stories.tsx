@@ -11,7 +11,7 @@ import React, { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageTemplate, EuiToolTip } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
 import type {
