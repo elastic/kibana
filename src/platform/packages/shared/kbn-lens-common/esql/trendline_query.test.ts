@@ -58,4 +58,26 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'FROM index | WHERE status >= ?_tstart AND status <= ?_tend | STATS MEDIAN(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
   });
+
+  it('appends bucket to the last STATS in a query with multiple piped STATS', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | STATS total = SUM(bytes) BY host | STATS AVG(total)',
+      'timestamp'
+    );
+    expect(result).toBe(
+      'FROM index | STATS total = SUM(bytes) BY host | STATS AVG(total) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('throws on empty query', () => {
+    expect(() => appendTimeBucketToEsqlQuery('', 'timestamp')).toThrow(
+      'Cannot append time bucket to an empty ES|QL query'
+    );
+  });
+
+  it('throws on whitespace-only query', () => {
+    expect(() => appendTimeBucketToEsqlQuery('   ', 'timestamp')).toThrow(
+      'Cannot append time bucket to an empty ES|QL query'
+    );
+  });
 });

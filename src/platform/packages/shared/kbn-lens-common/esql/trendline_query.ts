@@ -72,7 +72,12 @@ export const appendTimeBucketToEsqlQuery = (esqlQuery: string, timeField: string
   const bucketNode = parseBucketNode(bucketExpr);
 
   const { root } = parse(esqlQuery);
-  const statsCmd = root.commands.find((c): c is ESQLCommand<'stats'> => c.name === 'stats');
+
+  if (root.commands.length === 0) {
+    throw new Error('Cannot append time bucket to an empty ES|QL query');
+  }
+
+  const statsCmd = root.commands.findLast((c): c is ESQLCommand<'stats'> => c.name === 'stats');
 
   if (statsCmd) {
     const byOption = statsCmd.args.find(isOptionNode);
