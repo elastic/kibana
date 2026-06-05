@@ -102,7 +102,8 @@ const RelatedDashboardsComboBox = ({
         }
         // On a total fetch failure, surface every attachment as unavailable rather
         // than silently dropping them — the user can still see and remove them.
-        resolvedIds.current = dashboardIds;
+        // Leave `resolvedIds.current` unadvanced so a later render can retry instead
+        // of permanently stranding the ids as unavailable after a transient error.
         setSelectedDashboards([]);
         onMissingChange(dashboardIds.map((id) => ({ id, notFound: false })));
       }
@@ -199,7 +200,7 @@ const MissingDashboardsCallout = ({
               alignItems="center"
               gutterSize="s"
               responsive={false}
-              data-test-subj="missingDashboardArtifact"
+              data-test-subj={`missingDashboardArtifact-${missingDashboard.id}`}
             >
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning" iconType="warning">
@@ -214,6 +215,10 @@ const MissingDashboardsCallout = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.alertingV2.ruleForm.missingDashboardUnknownLabel"
+                    defaultMessage="Unknown dashboard"
+                  />{' '}
                   <EuiCode>{missingDashboard.id}</EuiCode>
                 </EuiText>
               </EuiFlexItem>
@@ -231,7 +236,7 @@ const MissingDashboardsCallout = ({
                   <EuiButtonIcon
                     iconType="trash"
                     color="danger"
-                    data-test-subj="removeMissingDashboardButton"
+                    data-test-subj={`removeMissingDashboardButton-${missingDashboard.id}`}
                     aria-label={i18n.translate(
                       'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
                       {
@@ -267,10 +272,6 @@ export const RelatedDashboardSelector: React.FC = () => {
     () => dashboardArtifacts.map((artifact) => ({ id: artifact.value })),
     [dashboardArtifacts]
   );
-
-  const handleMissingChange = useCallback((missing: MissingDashboard[]) => {
-    setMissingDashboards(missing);
-  }, []);
 
   const updateDashboardArtifacts = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
@@ -343,7 +344,7 @@ export const RelatedDashboardSelector: React.FC = () => {
           dashboard={dashboard}
           dashboardsFormData={dashboardsFormData}
           onChange={updateDashboardArtifacts}
-          onMissingChange={handleMissingChange}
+          onMissingChange={setMissingDashboards}
           labelId={relatedDashboardsLabelId}
           placeholder={i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsPlaceholder', {
             defaultMessage: 'Link related dashboards for investigation',

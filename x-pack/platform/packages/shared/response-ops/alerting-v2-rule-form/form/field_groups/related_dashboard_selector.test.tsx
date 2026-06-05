@@ -230,7 +230,9 @@ describe('RelatedDashboardSelector', () => {
       }
     );
 
-    const removeButton = await screen.findByTestId('removeMissingDashboardButton');
+    const removeButton = await screen.findByTestId(
+      `removeMissingDashboardButton-${MISSING_DASHBOARD_ID}`
+    );
     await userEvent.click(removeButton);
 
     await waitFor(() => {
