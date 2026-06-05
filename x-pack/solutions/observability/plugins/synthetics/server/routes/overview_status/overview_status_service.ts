@@ -143,6 +143,7 @@ export class OverviewStatusService {
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
+    const ccsEnabled = isCCSEnabled(this.routeContext.server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
