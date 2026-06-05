@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+import type { BulkGetRulesResponse, FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -35,15 +35,16 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       return;
     }
 
-    const rulesResponse = await services.http.get<FindRulesResponse>(
-      `${ALERTING_V2_RULE_API_PATH}/_bulk`,
+    const rulesResponse = await services.http.post<BulkGetRulesResponse>(
+      `${ALERTING_V2_RULE_API_PATH}/_bulk_get`,
       {
-        query: { ids: uncachedIds },
+        body: JSON.stringify({ ids: uncachedIds }),
       }
     );
+
     setRulesCache((prev) => {
       const next = { ...prev };
-      rulesResponse.items.forEach((rule) => {
+      rulesResponse.rules.forEach((rule) => {
         next[rule.id] = rule;
       });
       return next;
