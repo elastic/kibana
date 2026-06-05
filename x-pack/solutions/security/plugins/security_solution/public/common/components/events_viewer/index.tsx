@@ -69,6 +69,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 export interface EventsViewerProps {
   bulkActions: boolean | BulkActionsProp;
   cellActionsTriggerId?: string;
+  dataTableId?: string;
   defaultModel: SubsetDataTableModel;
   end: string;
   entityType?: EntityType;
@@ -93,6 +94,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   bulkActions,
   cellActionsTriggerId,
   clearSelected,
+  dataTableId,
   defaultModel,
   end,
   entityType = 'events',
@@ -104,10 +106,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   setSelected,
   pageScope,
   start,
-  tableId,
+  tableId: eventTableId,
   topRightMenuOptions,
   unit = defaultUnit,
 }) => {
+  const tableId = (dataTableId ?? eventTableId) as TableId;
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
   const tableContext = useMemo(() => ({ tableId }), [tableId]);

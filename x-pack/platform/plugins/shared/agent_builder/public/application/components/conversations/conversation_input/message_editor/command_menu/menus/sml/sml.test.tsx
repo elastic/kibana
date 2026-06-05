@@ -17,20 +17,16 @@ const defaultMockResults = [
     origin_id: 'att-1',
     type: 'visualization',
     title: 'Pacific Sales',
-    content: 'content',
-    score: 1,
   },
   {
     id: 'chunk-2',
     origin_id: 'att-2',
     type: 'visualization',
     title: 'Atlantic Metrics',
-    content: 'content',
-    score: 0.9,
   },
 ];
 
-let mockUseSmlSearchReturn: {
+let mockUseSmlAutocompleteReturn: {
   results: typeof defaultMockResults;
   total: number;
   isLoading: boolean;
@@ -44,8 +40,10 @@ let mockUseSmlSearchReturn: {
   error: null,
 };
 
-jest.mock('../../../../../../../hooks/sml/use_sml_search', () => ({
-  useSmlSearch: () => mockUseSmlSearchReturn,
+const mockUseSmlAutocomplete = jest.fn(() => mockUseSmlAutocompleteReturn);
+
+jest.mock('../../../../../../../hooks/sml/use_sml_autocomplete', () => ({
+  useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
 }));
 
 jest.mock('../../../../../../../hooks/use_conversation', () => ({
@@ -57,13 +55,14 @@ jest.mock('../../../../../../../hooks/agents/use_agent_by_id', () => ({
 }));
 
 beforeEach(() => {
-  mockUseSmlSearchReturn = {
+  mockUseSmlAutocompleteReturn = {
     results: defaultMockResults,
     total: defaultMockResults.length,
     isLoading: false,
     isError: false,
     error: null,
   };
+  mockUseSmlAutocomplete.mockClear();
 });
 
 const renderWithProvider = (ui: React.ReactElement) => {
@@ -71,15 +70,15 @@ const renderWithProvider = (ui: React.ReactElement) => {
 };
 
 describe('Sml', () => {
-  it('renders SML search results as type/title', () => {
+  it('renders SML autocomplete results as type/title', () => {
     const { container } = renderWithProvider(<Sml query="" onSelect={jest.fn()} />);
 
     expect(container.textContent).toContain('visualization/Pacific Sales');
     expect(container.textContent).toContain('visualization/Atlantic Metrics');
   });
 
-  it('shows loading state when search is loading', () => {
-    mockUseSmlSearchReturn = {
+  it('shows loading state when autocomplete is loading', () => {
+    mockUseSmlAutocompleteReturn = {
       results: [],
       total: 0,
       isLoading: true,
@@ -107,8 +106,8 @@ describe('Sml', () => {
     });
   });
 
-  it('shows default empty list when search errors with no results (errors surface via toast from useSmlSearch)', () => {
-    mockUseSmlSearchReturn = {
+  it('shows default empty list when autocomplete errors with no results', () => {
+    mockUseSmlAutocompleteReturn = {
       results: [],
       total: 0,
       isLoading: false,
@@ -123,8 +122,8 @@ describe('Sml', () => {
     expect(screen.getByText('No matching results')).toBeInTheDocument();
   });
 
-  it('still lists cached results when useSmlSearch reports error', () => {
-    mockUseSmlSearchReturn = {
+  it('still lists cached results when useSmlAutocomplete reports error', () => {
+    mockUseSmlAutocompleteReturn = {
       results: defaultMockResults,
       total: defaultMockResults.length,
       isLoading: false,
@@ -137,5 +136,11 @@ describe('Sml', () => {
     expect(container.textContent).toContain('visualization/Pacific Sales');
     expect(screen.queryByTestId('smlMenu-loading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('smlMenuError')).not.toBeInTheDocument();
+  });
+
+  it('passes undefined constraints to useSmlAutocomplete when the agent has no connector constraints', () => {
+    renderWithProvider(<Sml query="git" onSelect={jest.fn()} />);
+
+    expect(mockUseSmlAutocomplete).toHaveBeenCalledWith('git', { constraints: undefined });
   });
 });
