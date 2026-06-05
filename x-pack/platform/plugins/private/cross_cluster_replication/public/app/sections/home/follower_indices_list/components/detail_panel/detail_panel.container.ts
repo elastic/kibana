@@ -7,7 +7,7 @@
 
 import { connect } from 'react-redux';
 import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 
 import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
 import { DetailPanel as DetailPanelView } from './detail_panel';

@@ -7,7 +7,7 @@
 
 import { connect } from 'react-redux-v7';
 import type { AnyAction } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 
 import { SECTIONS } from '../../constants';
 import type { AutoFollowPatternCreateConfig } from '../../services/api';
