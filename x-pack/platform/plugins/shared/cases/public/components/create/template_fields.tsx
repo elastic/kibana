@@ -40,10 +40,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   // staleTime: Infinity — field definitions don't change during a user session, so we
   // prevent background refetches that would create a new Set object reference, re-run the
   // useTemplateFormSync effect, and unexpectedly reset the form.
-  const {
-    data: globalFieldDefsData,
-    isLoading: isLoadingGlobalDefs,
-  } = useGetFieldDefinitions({
+  const { data: globalFieldDefsData, isLoading: isLoadingGlobalDefs } = useGetFieldDefinitions({
     owner: ownerStr,
     isGlobal: true,
     staleTime: Infinity,
