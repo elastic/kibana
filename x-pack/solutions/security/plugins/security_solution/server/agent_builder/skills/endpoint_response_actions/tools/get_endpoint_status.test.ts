@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../endpoint/mocks';
 import { GET_ENDPOINT_STATUS_TOOL_ID } from '..';
-import { getEndpointStatusTool } from './index';
+import { getEndpointStatusTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
@@ -72,8 +73,7 @@ describe('getEndpointStatusTool', () => {
         expect(data.status).toBe('offline');
         expect(mockLogger.error).not.toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
@@ -99,8 +99,7 @@ describe('getEndpointStatusTool', () => {
           perPage: 1,
         });
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
@@ -155,8 +154,7 @@ describe('getEndpointStatusTool', () => {
           kuery: 'agent.id: agent-123',
         });
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
       }
@@ -204,8 +202,7 @@ describe('getEndpointStatusTool', () => {
         expect(data.status).toBe('healthy');
         expect(data.lastSeen).toBe('2024-06-01T12:00:00Z');
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
       }
@@ -215,7 +212,14 @@ describe('getEndpointStatusTool', () => {
       const mockAgentService = {
         asInternalUser: {
           list: jest.fn().mockResolvedValue({
-            items: [{ id: 'agent-789', last_checkin: '2024-01-01T00:00:00Z', isolation: false, host_status: 'healthy' }],
+            items: [
+              {
+                id: 'agent-789',
+                last_checkin: '2024-01-01T00:00:00Z',
+                isolation: false,
+                host_status: 'healthy',
+              },
+            ],
           }),
         },
       };
@@ -234,8 +238,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
-      const originalGetInternalEsClient =
-        mockEndpointAppContextService.getInternalEsClient;
+      const originalGetInternalEsClient = mockEndpointAppContextService.getInternalEsClient;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agentService: mockAgentService,
@@ -256,12 +259,10 @@ describe('getEndpointStatusTool', () => {
           index: '.ds-metrics-endpoint.metadata-default',
         });
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
-        mockEndpointAppContextService.getInternalEsClient =
-          originalGetInternalEsClient;
+        mockEndpointAppContextService.getInternalEsClient = originalGetInternalEsClient;
       }
     });
 
@@ -309,8 +310,7 @@ describe('getEndpointStatusTool', () => {
 
         expect(mockLogger.warn).toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
       }
@@ -337,8 +337,7 @@ describe('getEndpointStatusTool', () => {
         expect(result.results[0].data).toHaveProperty('message');
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
@@ -385,8 +384,7 @@ describe('getEndpointStatusTool', () => {
 
         expect(mockLogger.warn).toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getEndpointMetadataService =
           originalGetEndpointMetadataService;
       }

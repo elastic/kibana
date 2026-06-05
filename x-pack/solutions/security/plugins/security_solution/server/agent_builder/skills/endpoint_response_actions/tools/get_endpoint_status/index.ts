@@ -24,7 +24,10 @@ const getEndpointStatusSchema = z.object({
  * Builds a consistent "endpoint not found" result object. The consumer
  * (agent / caller) can distinguish the cause by inspecting `reason`.
  */
-function notFoundResult(hostName: string, reason: 'endpoint_not_found' | 'index_not_found'): EndpointNotFoundResult {
+function notFoundResult(
+  hostName: string,
+  reason: 'endpoint_not_found' | 'index_not_found'
+): EndpointNotFoundResult {
   const messages: Record<string, string> = {
     endpoint_not_found: `No endpoint found with hostname '${hostName}'.`,
     index_not_found: `The endpoint metadata index is not available. Cannot retrieve status for '${hostName}'.`,
@@ -125,7 +128,9 @@ export const getEndpointStatusTool = (
                   };
                 }
               } catch (esError) {
-                logger.warn(`Could not verify index existence for host ${hostName}: ${esError.message}`);
+                logger.warn(
+                  `Could not verify index existence for host ${hostName}: ${esError.message}`
+                );
               }
             }
           }
