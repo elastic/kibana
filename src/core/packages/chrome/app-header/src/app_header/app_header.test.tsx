@@ -125,13 +125,22 @@ describe('AppHeaderView', () => {
     expect(screen.getByText('Technical preview')).toBeInTheDocument();
   });
 
-  it('renders an xs title by default and an s title when tabs are present', () => {
-    const { unmount } = renderAppHeader(<AppHeaderView title="Dashboard" />);
+  it('renders an xs title for a single row and an s title when a second row is present', () => {
+    const { unmount: unmountSingle } = renderAppHeader(<AppHeaderView title="Dashboard" />);
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
-    unmount();
+    unmountSingle();
+
+    const { unmount: unmountTabs } = renderAppHeader(
+      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
+    );
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    unmountTabs();
 
     renderAppHeader(
-      <AppHeaderView title="Dashboard" tabs={[{ id: 'overview', label: 'Overview' }]} />
+      <AppHeaderView
+        title="Dashboard"
+        metadata={[{ type: 'text', label: 'Created by: analyst' }]}
+      />
     );
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
   });
