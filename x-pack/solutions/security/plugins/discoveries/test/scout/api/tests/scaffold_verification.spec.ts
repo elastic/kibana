@@ -31,22 +31,18 @@ apiTest.describe('Workflow schedule API - scaffold verification', { tag: SCHEDUL
     await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
   });
 
-  apiTest.skip(
-    'scaffold: can import test utilities without errors',
+  apiTest('scaffold: can import test utilities without errors', async ({ apiClient }) => {
+    const schedule = getSimpleWorkflowSchedule();
+    expect(schedule).toBeDefined();
+    expect(schedule.name).toBe('Test workflow schedule');
 
-    async ({ apiClient }) => {
-      const schedule = getSimpleWorkflowSchedule();
-      expect(schedule).toBeDefined();
-      expect(schedule.name).toBe('Test workflow schedule');
-
-      const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
-      expect(apis.createSchedule).toBeDefined();
-      expect(apis.deleteSchedule).toBeDefined();
-      expect(apis.disableSchedule).toBeDefined();
-      expect(apis.enableSchedule).toBeDefined();
-      expect(apis.findSchedules).toBeDefined();
-      expect(apis.getSchedule).toBeDefined();
-      expect(apis.updateSchedule).toBeDefined();
-    }
-  );
+    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+    expect(apis.createSchedule).toBeDefined();
+    expect(apis.deleteSchedule).toBeDefined();
+    expect(apis.disableSchedule).toBeDefined();
+    expect(apis.enableSchedule).toBeDefined();
+    expect(apis.findSchedules).toBeDefined();
+    expect(apis.getSchedule).toBeDefined();
+    expect(apis.updateSchedule).toBeDefined();
+  });
 });

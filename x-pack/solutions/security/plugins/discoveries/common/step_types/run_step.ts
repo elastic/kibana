@@ -20,9 +20,10 @@ export const RunStepTypeId = 'security.attack-discovery.run';
 /**
  * Input schema for the Run step.
  *
- * Only `connector_id` is required. All other fields are optional,
- * allowing workflow authors to invoke Attack Discovery with minimal
- * configuration.
+ * All fields are optional. When `connector_id` is omitted, the server resolves
+ * the configured default AI connector (`genAiSettings:defaultAIConnector`, with
+ * an `inference.getDefaultConnector` fallback). Provide `connector_id` to
+ * override the configured default.
  */
 export const RunStepInputSchema = z.object({
   additional_context: z.string().optional(),
@@ -32,7 +33,7 @@ export const RunStepInputSchema = z.object({
     .default('custom_query'),
   alert_retrieval_workflow_ids: z.array(z.string()).optional().default([]),
   alerts: z.array(z.string()).optional(),
-  connector_id: z.string(),
+  connector_id: z.string().optional(),
   end: z.string().optional(),
   esql_query: z.string().optional(),
   filter: z.record(z.string(), z.unknown()).optional(),
