@@ -2,8 +2,5 @@
   "name": "@kbn/evals-suite-security-ai-rules",
   "private": true,
   "version": "1.0.0",
-  "license": "Elastic License 2.0",
-  "dependencies": {
-    "@kbn/security-evals-rule-data-snapshot": "link:../kbn-security-evals-rule-data-snapshot"
-  }
+  "license": "Elastic License 2.0"
 }
