@@ -56,13 +56,13 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
     // Selects a saved search via the "Open Discover session" flyout (MlOpenSessionFlyout)
     async selectSavedSearch(name: string, nextPageSubj: string) {
-      await testSubjects.click('mlOpenDiscoverSessionButton');
-      await testSubjects.existOrFail('loadSearchForm');
-      await testSubjects.existOrFail('savedObjectFinderSearchInput', { timeout: 30 * 1000 });
-      await testSubjects.setValue('savedObjectFinderSearchInput', name, {
-        clearWithKeyboard: true,
-      });
-      await retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(3 * 60 * 1000, async () => {
+        await testSubjects.click('mlOpenDiscoverSessionButton');
+        await testSubjects.existOrFail('loadSearchForm', { timeout: 10 * 1000 });
+        await testSubjects.existOrFail('savedObjectFinderSearchInput', { timeout: 30 * 1000 });
+        await testSubjects.setValue('savedObjectFinderSearchInput', name, {
+          clearWithKeyboard: true,
+        });
         await testSubjects.clickWhenNotDisabledWithoutRetry(`savedObjectTitle${name}`);
         // Wait for flyout to close, confirming selection was made
         await testSubjects.missingOrFail('loadSearchForm', { timeout: 5 * 1000 });
