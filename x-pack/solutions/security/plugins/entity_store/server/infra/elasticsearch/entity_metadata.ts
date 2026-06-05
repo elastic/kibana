@@ -14,6 +14,11 @@ import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearc
  * owns the doc shape — this primitive is event-action agnostic so future
  * metadata kinds (behaviors, anomalies, alerts) can reuse it without
  * needing a new write path.
+ *
+ * `refresh` defaults to `false`: this is an append-only history stream
+ * written by background maintainers and read asynchronously, so blocking
+ * each bulk on a shard refresh only adds latency to maintainer runs. Callers
+ * that need read-your-write (e.g. tests) can opt into `'wait_for'`.
  */
 export const bulkCreateEntityMetadataDocs = <TDoc extends object>(
   esClient: ElasticsearchClient,
@@ -30,6 +35,6 @@ export const bulkCreateEntityMetadataDocs = <TDoc extends object>(
   return esClient.bulk({
     index: params.index,
     operations,
-    refresh: params.refresh ?? 'wait_for',
+    refresh: params.refresh ?? false,
   });
 };

@@ -24,7 +24,6 @@ import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_ext
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
-import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import type { TelemetryReporter } from './telemetry/events';
 
@@ -75,11 +74,6 @@ export async function createRequestHandlerContext({
     namespace,
   });
   const entityMetadataClient = new EntityMetadataClient({
-    logger,
-    esClient,
-    namespace,
-  });
-  const relationshipsClient = new RelationshipsClient({
     logger,
     esClient,
     namespace,
@@ -139,7 +133,6 @@ export async function createRequestHandlerContext({
     }),
     crudClient,
     entityMetadataClient,
-    relationshipsClient,
     resolutionClient: new ResolutionClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,

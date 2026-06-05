@@ -15,11 +15,6 @@ export type {
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
 export type { EntityMetadataClient } from './domain/entity_metadata';
-export type {
-  RelationshipsClient,
-  ListRelationshipMetadataParams,
-  ListRelationshipMetadataResult,
-} from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';
 export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';

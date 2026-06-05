@@ -121,13 +121,9 @@ export {
   getLatestEntityIndexPattern,
 } from './domain/entity_index';
 
-export {
-  RELATIONSHIP_KINDS,
-  normalizeRelationshipRecord,
-} from './domain/entity_metadata/relationship_metadata';
+export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
 export type {
   RelationshipKind,
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
-  RelationshipRecord,
 } from './domain/entity_metadata/relationship_metadata';

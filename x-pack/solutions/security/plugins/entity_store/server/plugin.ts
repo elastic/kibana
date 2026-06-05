@@ -28,7 +28,6 @@ import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
-import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
@@ -123,8 +122,6 @@ export class EntityStorePlugin
       createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
       createEntityMetadataClient: (esClient, namespace) =>
         new EntityMetadataClient({ logger, esClient, namespace }),
-      createRelationshipsClient: (esClient, namespace) =>
-        new RelationshipsClient({ logger, esClient, namespace }),
       createResolutionClient: (esClient, namespace) =>
         new ResolutionClient({ logger, esClient, namespace }),
     };

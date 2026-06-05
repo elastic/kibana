@@ -23,8 +23,8 @@ interface EntityMetadataClientDependencies {
  * (`.entities.v2.metadata.security_{namespace}`). The datastream is shared
  * across event kinds — relationships today, behaviors/anomalies/etc.
  * tomorrow — so this client owns the append primitive and stays
- * event-action agnostic. Domain-specific read clients (RelationshipsClient
- * and future siblings) live in their own folders and call this for writes.
+ * event-action agnostic. Domain-specific read clients live in their own
+ * folders and call this for writes.
  */
 export class EntityMetadataClient {
   private readonly logger: Logger;
