@@ -46,7 +46,6 @@ const CaseRow: React.FC<{ data: CaseAttachmentData; application: ApplicationStar
   data,
   application,
 }) => {
-  
   const idLabel = data.incremental_id ? `#${data.incremental_id}` : null;
   const caseUrls = useMemo(() => getCaseUrls({ application, data }), [application, data]);
 
