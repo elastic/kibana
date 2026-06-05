@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/core-status-server-internal'
   - '@kbn/core-ui-settings-common'
   - '@kbn/core-ui-settings-server'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/core-plugins-base-server-internal'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-http-server-mocks'

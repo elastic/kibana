@@ -38,6 +38,11 @@ interface FactoryOptions {
   auth: HttpAuth;
   userSettingsService?: InternalUserSettingsServiceSetup;
   themeName$: BehaviorSubject<ThemeName>;
+  /**
+   * Resolves the default space `theme:darkMode` for unauthenticated requests via an internal
+   * client. Returns `undefined` when unavailable, so the renderer keeps the default. See #127700.
+   */
+  getDefaultSpaceDarkMode?: () => Promise<DarkModeValue | undefined>;
 }
 
 interface RenderedOptions {
@@ -66,6 +71,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   auth,
   userSettingsService,
   themeName$,
+  getDefaultSpaceDarkMode,
 }) => {
   const isAuthenticated = (request: KibanaRequest) => {
     const { status: authStatus } = auth.get(request);
@@ -133,6 +139,10 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         } else {
           darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
+      } else if (getDefaultSpaceDarkMode) {
+        // Unauthenticated requests have no user or space context, so fall back to the default
+        // space's `theme:darkMode`, resolved via an internal client. See #127700.
+        darkMode = (await getDefaultSpaceDarkMode()) ?? darkMode;
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES

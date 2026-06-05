@@ -25,6 +25,7 @@ import { load } from 'cheerio';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import {
   mockRenderingServiceParams,
   mockRenderingPrebootDeps,
@@ -38,7 +39,7 @@ import type {
 } from './types';
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
-import type { ThemeName } from '@kbn/core-ui-settings-common';
+import type { ThemeName, DarkModeValue } from '@kbn/core-ui-settings-common';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { BehaviorSubject } from 'rxjs';
 
@@ -867,6 +868,99 @@ describe('RenderingService', () => {
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
+    });
+  });
+
+  describe('anonymous pages dark mode', () => {
+    const buildUiSettings = () => ({
+      client: uiSettingsServiceMock.createClient(),
+      globalClient: uiSettingsServiceMock.createClient(),
+    });
+
+    const renderAnonymousDarkMode = async (
+      render: InternalRenderingServiceSetup['render']
+    ): Promise<DarkModeValue> => {
+      const { body } = await render(
+        createKibanaRequest({ auth: { isAuthenticated: false } }),
+        buildUiSettings(),
+        { isAnonymousPage: true }
+      );
+      const dom = load(body);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      return data.theme.darkMode;
+    };
+
+    beforeEach(() => {
+      // Distinct from the internal client value so tests can tell which source won.
+      getSettingValueMock.mockImplementation((settingName: string) =>
+        settingName === 'theme:darkMode' ? false : settingName
+      );
+    });
+
+    it('resolves theme:darkMode from the default space via an internal unscoped client', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const savedObjects = savedObjectsServiceMock.createStartContract();
+      const uiSettings = uiSettingsServiceMock.createStartContract();
+      const internalUiSettingsClient = uiSettingsServiceMock.createClient();
+      internalUiSettingsClient.get.mockResolvedValue(true);
+      uiSettings.asScopedToClient.mockReturnValue(internalUiSettingsClient);
+
+      service.start({ ...mockRenderingStartDeps, savedObjects, uiSettings });
+
+      const darkMode = await renderAnonymousDarkMode(render);
+
+      expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+      expect(uiSettings.asScopedToClient).toHaveBeenCalledWith(
+        savedObjects.getUnsafeInternalClient.mock.results[0].value
+      );
+      expect(internalUiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
+      // The default-space value wins over the registered default (`false`).
+      expect(darkMode).toBe(true);
+    });
+
+    it('falls back to the registered default when start deps are unavailable', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) =>
+        settingName === 'theme:darkMode' ? true : settingName
+      );
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const darkMode = await renderAnonymousDarkMode(render);
+
+      expect(darkMode).toBe(true);
+    });
+
+    it('falls back to the registered default when the internal read throws', async () => {
+      getSettingValueMock.mockImplementation((settingName: string) =>
+        settingName === 'theme:darkMode' ? true : settingName
+      );
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const savedObjects = savedObjectsServiceMock.createStartContract();
+      const uiSettings = uiSettingsServiceMock.createStartContract();
+      const internalUiSettingsClient = uiSettingsServiceMock.createClient();
+      internalUiSettingsClient.get.mockRejectedValue(new Error('ES exploded'));
+      uiSettings.asScopedToClient.mockReturnValue(internalUiSettingsClient);
+
+      service.start({ ...mockRenderingStartDeps, savedObjects, uiSettings });
+
+      const darkMode = await renderAnonymousDarkMode(render);
+
+      expect(internalUiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
+      expect(darkMode).toBe(true);
+    });
+
+    it('does not consult the internal client for authenticated pages', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const savedObjects = savedObjectsServiceMock.createStartContract();
+      const uiSettings = uiSettingsServiceMock.createStartContract();
+      service.start({ ...mockRenderingStartDeps, savedObjects, uiSettings });
+
+      await render(createKibanaRequest(), buildUiSettings());
+
+      expect(savedObjects.getUnsafeInternalClient).not.toHaveBeenCalled();
+      expect(uiSettings.asScopedToClient).not.toHaveBeenCalled();
     });
   });
 

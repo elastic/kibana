@@ -386,6 +386,48 @@ describe('bootstrapRenderer', () => {
         })
       );
     });
+
+    it('resolves darkMode from the default space when getDefaultSpaceDarkMode is provided', async () => {
+      const getDefaultSpaceDarkMode = jest.fn().mockResolvedValue(true);
+      const rendererWithDefaultSpace = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`,
+        themeName$,
+        getDefaultSpaceDarkMode,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await rendererWithDefaultSpace({ request, uiSettingsClient, isAnonymousPage: true });
+
+      expect(getDefaultSpaceDarkMode).toHaveBeenCalledTimes(1);
+      // The per-request client would 403 for unauthenticated users, so it must not be consulted.
+      expect(uiSettingsClient.get).not.toHaveBeenCalledWith('theme:darkMode');
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ colorMode: 'dark' })
+      );
+    });
+
+    it('keeps the default light colorMode when getDefaultSpaceDarkMode resolves undefined', async () => {
+      const getDefaultSpaceDarkMode = jest.fn().mockResolvedValue(undefined);
+      const rendererWithDefaultSpace = bootstrapRendererFactory({
+        auth,
+        packageInfo,
+        uiPlugins,
+        baseHref: `/base-path/${packageInfo.buildShaShort}`,
+        themeName$,
+        getDefaultSpaceDarkMode,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await rendererWithDefaultSpace({ request, uiSettingsClient, isAnonymousPage: true });
+
+      expect(getDefaultSpaceDarkMode).toHaveBeenCalledTimes(1);
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ colorMode: 'light' })
+      );
+    });
   });
 
   it('calls renderTemplate with the correct theme name', async () => {

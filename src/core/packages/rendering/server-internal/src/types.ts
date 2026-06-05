@@ -17,7 +17,8 @@ import type {
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { IUiSettingsClient, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
@@ -71,6 +72,12 @@ export interface RenderingStartDeps {
   featureFlags: FeatureFlagsStart;
   /** Optional so `render()` is safe to call before `start()` runs. */
   userStorage?: UserStorageServiceStart;
+  /**
+   * Used to resolve the default space `theme:darkMode` for anonymous pages via an internal,
+   * unscoped client. Optional so `render()` stays safe before `start()` runs (e.g. preboot).
+   */
+  savedObjects?: SavedObjectsServiceStart;
+  uiSettings?: UiSettingsServiceStart;
 }
 
 /** @internal */
