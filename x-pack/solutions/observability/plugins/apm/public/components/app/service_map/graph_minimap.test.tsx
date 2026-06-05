@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceMapGraph } from './graph';
+import { getMinimapNodeColor } from './service_map_minimap';
 import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
@@ -49,8 +50,6 @@ jest.mock('./use_service_map_alerts_tab_href', () =>
   jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
 );
 
-let mockMinimapProps: Record<string, unknown> = {};
-
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -62,21 +61,15 @@ jest.mock('@xyflow/react', () => {
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-test-subj="serviceMapControls">{children}</div>
     ),
-    MiniMap: (props: Record<string, unknown>) => {
-      mockMinimapProps = props;
-      return (
-        <div
-          data-test-subj={props['data-test-subj'] as string}
-          aria-label={props.ariaLabel as string}
-          data-position={props.position as string}
-          data-pannable={String(props.pannable)}
-          data-zoomable={String(props.zoomable)}
-        />
-      );
-    },
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
-    useReactFlow: jest.fn(() => ({ fitView: jest.fn() })),
+    useReactFlow: jest.fn(() => ({
+      fitView: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+      setCenter: jest.fn(),
+      getNodes: jest.fn(() => []),
+    })),
   };
 });
 
@@ -141,75 +134,9 @@ const defaultProps = {
 describe('ServiceMapGraph - MiniMap', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockMinimapProps = {};
   });
 
-  it('renders the minimap', () => {
-    render(
-      <ReactFlowProvider>
-        <ServiceMapGraph {...defaultProps} />
-      </ReactFlowProvider>
-    );
-
-    expect(screen.getByTestId('serviceMapMinimap')).toBeInTheDocument();
-  });
-
-  it('is positioned at bottom-right', () => {
-    render(
-      <ReactFlowProvider>
-        <ServiceMapGraph {...defaultProps} />
-      </ReactFlowProvider>
-    );
-
-    const minimap = screen.getByTestId('serviceMapMinimap');
-    expect(minimap).toHaveAttribute('data-position', 'bottom-right');
-  });
-
-  it('is pannable and zoomable', () => {
-    render(
-      <ReactFlowProvider>
-        <ServiceMapGraph {...defaultProps} />
-      </ReactFlowProvider>
-    );
-
-    const minimap = screen.getByTestId('serviceMapMinimap');
-    expect(minimap).toHaveAttribute('data-pannable', 'true');
-    expect(minimap).toHaveAttribute('data-zoomable', 'true');
-  });
-
-  it('has an accessible aria-label', () => {
-    render(
-      <ReactFlowProvider>
-        <ServiceMapGraph {...defaultProps} />
-      </ReactFlowProvider>
-    );
-
-    const minimap = screen.getByTestId('serviceMapMinimap');
-    expect(minimap).toHaveAttribute('aria-label');
-    expect(minimap.getAttribute('aria-label')).toContain('minimap');
-  });
-
-  it('uses EUI background color', () => {
-    render(
-      <ReactFlowProvider>
-        <ServiceMapGraph {...defaultProps} />
-      </ReactFlowProvider>
-    );
-
-    expect(mockMinimapProps.bgColor).toBe(MOCK_EUI_THEME_FOR_USE_THEME.colors.backgroundBasePlain);
-  });
-
-  it('uses EUI-based mask color', () => {
-    render(
-      <ReactFlowProvider>
-        <ServiceMapGraph {...defaultProps} />
-      </ReactFlowProvider>
-    );
-
-    expect(mockMinimapProps.maskColor).toBe(`${MOCK_EUI_THEME.colors.lightShade}80`);
-  });
-
-  it('renders alongside controls and background within ReactFlow', () => {
+  it('renders the minimap container within ReactFlow', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
@@ -218,50 +145,27 @@ describe('ServiceMapGraph - MiniMap', () => {
 
     const reactFlow = screen.getByTestId('react-flow');
     const minimap = screen.getByTestId('serviceMapMinimap');
-    const controls = screen.getByTestId('serviceMapControls');
-    const background = screen.getByTestId('react-flow-background');
-
     expect(reactFlow).toContainElement(minimap);
-    expect(reactFlow).toContainElement(controls);
-    expect(reactFlow).toContainElement(background);
   });
 
-  describe('nodeColor', () => {
-    it('returns primary color for service nodes without anomaly stats', () => {
-      render(
-        <ReactFlowProvider>
-          <ServiceMapGraph {...defaultProps} />
-        </ReactFlowProvider>
+  describe('getMinimapNodeColor', () => {
+    const colors = {
+      mediumShade: MOCK_EUI_THEME.colors.mediumShade,
+    };
+
+    it('returns the default gray for service nodes without anomaly stats', () => {
+      expect(getMinimapNodeColor(createMockServiceNode('svc-1', 'My Service'), colors)).toBe(
+        MOCK_EUI_THEME.colors.mediumShade
       );
-
-      const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
-      expect(typeof nodeColorFn).toBe('function');
-
-      const serviceNode = createMockServiceNode('svc-1', 'My Service');
-      expect(nodeColorFn(serviceNode)).toBe(MOCK_EUI_THEME.colors.primary);
     });
 
-    it('returns mediumShade for dependency nodes', () => {
-      render(
-        <ReactFlowProvider>
-          <ServiceMapGraph {...defaultProps} />
-        </ReactFlowProvider>
+    it('returns the default gray for dependency nodes', () => {
+      expect(getMinimapNodeColor(createMockDependencyNode('dep-1', 'My Dependency'), colors)).toBe(
+        MOCK_EUI_THEME.colors.mediumShade
       );
-
-      const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
-      const depNode = createMockDependencyNode('dep-1', 'My Dependency');
-      expect(nodeColorFn(depNode)).toBe(MOCK_EUI_THEME.colors.mediumShade);
     });
 
-    it('returns primary when service anomaly stats exist without anomaly score', () => {
-      render(
-        <ReactFlowProvider>
-          <ServiceMapGraph {...defaultProps} />
-        </ReactFlowProvider>
-      );
-
-      const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
-
+    it('returns the default gray when service anomaly stats exist without an anomaly score', () => {
       const partialStatsNode: ServiceMapNode = {
         id: 'svc-partial',
         position: { x: 0, y: 0 },
@@ -277,21 +181,10 @@ describe('ServiceMapGraph - MiniMap', () => {
         type: 'service',
       };
 
-      expect(nodeColorFn(partialStatsNode)).toBe(MOCK_EUI_THEME.colors.primary);
-      expect(nodeColorFn(createMockServiceNode('svc-1', 'Normal'))).toBe(
-        MOCK_EUI_THEME.colors.primary
-      );
+      expect(getMinimapNodeColor(partialStatsNode, colors)).toBe(MOCK_EUI_THEME.colors.mediumShade);
     });
 
     it('returns ML severity color from anomaly score when anomalyScore is present', () => {
-      render(
-        <ReactFlowProvider>
-          <ServiceMapGraph {...defaultProps} />
-        </ReactFlowProvider>
-      );
-
-      const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
-
       const scoredNode: ServiceMapNode = {
         id: 'svc-scored',
         position: { x: 0, y: 0 },
@@ -309,7 +202,7 @@ describe('ServiceMapGraph - MiniMap', () => {
         type: 'service',
       };
 
-      expect(nodeColorFn(scoredNode)).toBe(getSeverityColor(90));
+      expect(getMinimapNodeColor(scoredNode, colors)).toBe(getSeverityColor(90));
     });
   });
 });

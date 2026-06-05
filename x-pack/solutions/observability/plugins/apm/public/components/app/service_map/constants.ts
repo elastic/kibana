@@ -27,11 +27,36 @@ export const GRAPH_MARGIN = 50;
 /** Padding around the graph when fitting the view (as a ratio) */
 export const FIT_VIEW_PADDING = 0.2;
 
+/** Minimum zoom level the user can pan/zoom to (also the floor fitView clamps to) */
+export const MIN_ZOOM = 0.2;
+
+/**
+ * Zoom level used for the initial view when a map is too large to fit within {@link MIN_ZOOM}.
+ * Instead of fitView (which centers on the bounding-box center — often empty space for sprawling
+ * graphs, then clamps to {@link MIN_ZOOM} so the camera lands on nothing), we center on the median
+ * node position at this zoom so the user lands on the dense cluster of services.
+ */
+export const LARGE_MAP_OVERVIEW_ZOOM = 0.5;
+
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
 
 /** Delay before calling fitView after layout update (ms), to allow React Flow to measure nodes */
 export const FIT_VIEW_DEFER_MS = 50;
+
+/** Fixed pixel width of the minimap box */
+export const MINIMAP_WIDTH = 200;
+
+/** Fixed pixel height of the minimap box */
+export const MINIMAP_HEIGHT = 140;
+
+/**
+ * How many of the current viewport the minimap window spans. The window is this multiple of the
+ * viewport (clamped around the graph), so the minimap zoom tracks the main pane zoom: zooming in
+ * shrinks the window and zooms the minimap in, and vice versa. Larger = more surrounding context but
+ * a smaller viewport indicator.
+ */
+export const MINIMAP_CONTEXT_VIEWPORTS = 2;
 
 /** Size of the default marker */
 export const DEFAULT_MARKER_SIZE = 12;

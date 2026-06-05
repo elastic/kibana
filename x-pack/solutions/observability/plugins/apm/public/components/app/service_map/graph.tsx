@@ -13,6 +13,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useStore,
   ReactFlowProvider,
   type NodeTypes,
   type EdgeTypes,
@@ -29,6 +30,7 @@ import {
   EuiPanel,
   useGeneratedHtmlId,
   keys,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -38,6 +40,7 @@ import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
 import { applyDagreLayout } from '../../shared/service_map/layout';
 import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
+import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
@@ -129,7 +132,9 @@ function GraphInner({
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
-  const { fitView, zoomIn, zoomOut } = useReactFlow();
+  const { fitView, zoomIn, zoomOut, setCenter, getNodes } = useReactFlow<ServiceMapNode>();
+  const viewportWidth = useStore((state) => state.width);
+  const viewportHeight = useStore((state) => state.height);
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
@@ -155,12 +160,42 @@ function GraphInner({
 
   const { getAnimationDuration } = useReducedMotion();
   const getFitViewOptions = useCallback(
-    (): FitViewOptions => ({
+    (): FitViewOptions<ServiceMapNode> => ({
       padding: FIT_VIEW_PADDING,
       duration: getAnimationDuration(FIT_VIEW_DURATION),
     }),
     [getAnimationDuration]
   );
+
+  // Camera placement used for both the initial load and the "fit view" control. For graphs that fit,
+  // this is just fitView; for large/sprawling graphs (where fitView would clamp to MIN_ZOOM and center
+  // on empty space) it centers on the median node so the user lands on the dense cluster of services
+  // instead of nothing.
+  const fitOrCenterView = useCallback(() => {
+    const target = getServiceMapViewTarget({
+      nodes: getNodes(),
+      viewportWidth,
+      viewportHeight,
+    });
+
+    if (target.kind === 'center') {
+      setCenter(target.x, target.y, {
+        zoom: target.zoom,
+        duration: getAnimationDuration(FIT_VIEW_DURATION),
+      });
+      return;
+    }
+
+    fitView(getFitViewOptions());
+  }, [
+    getNodes,
+    viewportWidth,
+    viewportHeight,
+    setCenter,
+    fitView,
+    getFitViewOptions,
+    getAnimationDuration,
+  ]);
 
   // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
   // not strictly once per page visit—intentional for measuring failure frequency.
@@ -231,7 +266,7 @@ function GraphInner({
     setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
     if (nodesAfterFilters.length > 0) {
-      const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
+      const timer = setTimeout(() => fitOrCenterView(), FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
@@ -239,9 +274,8 @@ function GraphInner({
     edgesAfterFilters,
     setNodes,
     setEdges,
-    fitView,
+    fitOrCenterView,
     applyEdgeHighlighting,
-    getFitViewOptions,
     nodesAfterFilters.length,
     highlightedServiceName,
   ]);
@@ -506,9 +540,9 @@ function GraphInner({
 
   const onInit = useCallback(() => {
     if (layoutedNodes.length > 0) {
-      fitView(getFitViewOptions());
+      fitOrCenterView();
     }
-  }, [fitView, layoutedNodes.length, getFitViewOptions]);
+  }, [fitOrCenterView, layoutedNodes.length]);
 
   const screenReaderInstructions = i18n.translate('xpack.apm.serviceMap.screenReaderInstructions', {
     defaultMessage:
@@ -588,66 +622,71 @@ function GraphInner({
                     justifyContent="center"
                     responsive={false}
                   >
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="plus"
-                      onClick={() => zoomIn()}
-                      title={zoomInLabel}
-                      aria-label={zoomInLabel}
-                      data-test-subj="serviceMapZoomInButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="minus"
-                      onClick={() => zoomOut()}
-                      title={zoomOutLabel}
-                      aria-label={zoomOutLabel}
-                      data-test-subj="serviceMapZoomOutButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                    {!isEmbedded && (
+                    <EuiToolTip content={zoomInLabel} disableScreenReaderOutput>
                       <EuiButtonIcon
                         display="empty"
                         color="text"
                         size="s"
-                        iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
-                        title={fitViewLabel}
-                        aria-label={fitViewLabel}
-                        data-test-subj="serviceMapFitViewButton"
+                        iconType="plus"
+                        onClick={() => zoomIn()}
+                        aria-label={zoomInLabel}
+                        data-test-subj="serviceMapZoomInButton"
                         css={mapToolbarControlIconCss}
                       />
+                    </EuiToolTip>
+                    <EuiToolTip content={zoomOutLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="minus"
+                        onClick={() => zoomOut()}
+                        aria-label={zoomOutLabel}
+                        data-test-subj="serviceMapZoomOutButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    </EuiToolTip>
+                    {!isEmbedded && (
+                      <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType="crosshair"
+                          onClick={() => fitOrCenterView()}
+                          aria-label={fitViewLabel}
+                          data-test-subj="serviceMapFitViewButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
                     )}
                     {fullMapHref && (
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType="apps"
-                        href={fullMapHref}
-                        title={viewFullMapButtonLabel}
-                        aria-label={viewFullMapButtonLabel}
-                        data-test-subj="serviceMapViewFullMapButton"
-                        css={mapToolbarControlIconCss}
-                      />
+                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType="apps"
+                          href={fullMapHref}
+                          aria-label={viewFullMapButtonLabel}
+                          data-test-subj="serviceMapViewFullMapButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
                     )}
                     {onToggleFullscreen && (
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-                        onClick={onToggleFullscreen}
-                        title={fullscreenButtonLabel}
-                        aria-label={fullscreenButtonLabel}
-                        data-test-subj="serviceMapFullScreenButton"
-                        css={mapToolbarControlIconCss}
-                      />
+                      <EuiToolTip content={fullscreenButtonLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                          onClick={onToggleFullscreen}
+                          aria-label={fullscreenButtonLabel}
+                          data-test-subj="serviceMapFullScreenButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiFlexGroup>
                 </EuiPanel>
@@ -686,7 +725,7 @@ function GraphInner({
                 />
               )}
             </Panel>
-            {!isEmbedded && <ServiceMapMinimap />}
+            {!isEmbedded && <ServiceMapMinimap nodes={nodes} />}
           </ReactFlow>
           <MapPopover
             selectedNode={selectedNodeForPopover}
