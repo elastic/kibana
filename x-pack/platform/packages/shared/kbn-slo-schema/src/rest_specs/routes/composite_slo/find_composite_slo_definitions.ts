@@ -10,7 +10,7 @@ import { compositeStatusSchema } from '../../../schema/composite_slo';
 const findCompositeSLODefinitionsQuerySchema = z.object({
   search: z.string().optional(),
   page: z.coerce.number().min(1).optional(),
-  perPage: z.coerce.number().min(1).max(100).optional(),
+  perPage: z.coerce.number().min(1).max(1000).optional(),
   sortBy: z.union([z.literal('name'), z.literal('createdAt'), z.literal('updatedAt')]).optional(),
   sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
   tags: z
