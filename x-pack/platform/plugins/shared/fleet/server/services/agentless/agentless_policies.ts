@@ -19,11 +19,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
-import type { AgentlessPolicy, CreateAgentlessPolicyRequestSchema } from '../../../common/types';
+import type {
+  AgentlessPolicy,
+  AgentlessPolicyConfig,
+  CreateAgentlessPolicyRequestSchema,
+  PackagePolicy,
+} from '../../../common/types';
 
 import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/constants';
 
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import {
+  formatInputs,
+  formatVars,
+  simplifiedPackagePolicytoNewPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
 import type { PackagePolicyClient } from '../package_policy_service';
 
@@ -45,7 +54,7 @@ export interface AgentlessPoliciesService {
     data: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>,
     context?: RequestHandlerContext,
     request?: KibanaRequest
-  ) => Promise<any>;
+  ) => Promise<AgentlessPolicy>;
 
   deleteAgentlessPolicy: (
     policyId: string,
@@ -55,7 +64,9 @@ export interface AgentlessPoliciesService {
   ) => Promise<void>;
 }
 
-const getAgentlessPolicy = (packageInfo?: PackageInfo): AgentlessPolicy | undefined => {
+const getAgentlessPolicyConfig = (
+  packageInfo?: PackageInfo
+): AgentlessPolicyConfig | undefined => {
   if (
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
@@ -75,6 +86,32 @@ const getAgentlessPolicy = (packageInfo?: PackageInfo): AgentlessPolicy | undefi
 
   return {
     resources: agentlessInfo.resources,
+  };
+};
+
+export const packagePolicyToAgentlessPolicy = (packagePolicy: PackagePolicy): AgentlessPolicy => {
+  const supportsAgentless = true;
+  return {
+    id: packagePolicy.id,
+    name: packagePolicy.name,
+    namespace: packagePolicy.namespace,
+    package: packagePolicy.package
+      ? {
+          name: packagePolicy.package.name,
+          title: packagePolicy.package.title,
+          version: packagePolicy.package.version,
+        }
+      : undefined,
+    inputs: formatInputs(packagePolicy.inputs, supportsAgentless),
+    vars: formatVars(packagePolicy.vars),
+    global_data_tags: packagePolicy.global_data_tags,
+    cloud_connector: packagePolicy.cloud_connector_id
+      ? { enabled: true, cloud_connector_id: packagePolicy.cloud_connector_id }
+      : null,
+    created_at: packagePolicy.created_at,
+    created_by: packagePolicy.created_by,
+    updated_at: packagePolicy.updated_at,
+    updated_by: packagePolicy.updated_by,
   };
 };
 
@@ -124,7 +161,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
 
       // Get base agentless config from package info
-      const baseAgentlessConfig = getAgentlessPolicy(pkgInfo);
+      const baseAgentlessConfig = getAgentlessPolicyConfig(pkgInfo);
 
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
@@ -227,7 +264,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         throwOnAgentlessError: true,
       });
 
-      return packagePolicy;
+      return packagePolicyToAgentlessPolicy(packagePolicy);
     } catch (err) {
       // Handle cloud connector rollback
       if (createdCloudConnectorId) {

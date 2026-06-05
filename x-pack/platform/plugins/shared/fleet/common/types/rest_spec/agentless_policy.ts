@@ -7,27 +7,20 @@
 
 import { type TypeOf, schema } from '@kbn/config-schema';
 
-import {
-  PackagePolicyResponseSchema,
-  SimplifiedCreatePackagePolicyRequestBodySchema,
-} from '../models/package_policy_schema';
+import { SimplifiedCreatePackagePolicyRequestBodySchema } from '../models/package_policy_schema';
+import { AgentlessPolicyResponseSchema } from '../models/agentless_policy_schema';
 
 export const CreateAgentlessPolicyRequestSchema = {
-  query: schema.object({
-    format: schema.oneOf([schema.literal('legacy'), schema.literal('simplified')], {
-      defaultValue: 'simplified',
-      meta: {
-        description: 'The format of the response package policy.',
-      },
-    }),
-  }),
-  body: SimplifiedCreatePackagePolicyRequestBodySchema.extends(
-    {
+  body: SimplifiedCreatePackagePolicyRequestBodySchema.extends({
       // Remove all properties that are not relevant for agentless policies
       policy_id: undefined,
       policy_ids: undefined,
       supports_agentless: undefined,
       output_id: undefined,
+      description: undefined,
+      var_group_selections: undefined,
+      additional_datastreams_permissions: undefined,
+      condition: undefined,
       policy_template: schema.maybe(
         schema.string({
           meta: {
@@ -133,22 +126,12 @@ export const DeleteAgentlessPolicyResponseSchema = schema.object(
   }
 );
 
-export const CreateAgentlessPolicyResponseSchema = schema.object({
-  item: PackagePolicyResponseSchema.extends(
-    {},
-    {
-      meta: {
-        description: 'The created agentless package policy.',
-      },
-    }
-  ),
-});
+export const CreateAgentlessPolicyResponseSchema = AgentlessPolicyResponseSchema;
 
 export type CreateAgentlessPolicyResponse = TypeOf<typeof CreateAgentlessPolicyResponseSchema>;
 
 export interface CreateAgentlessPolicyRequest {
   body: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>;
-  query: TypeOf<typeof CreateAgentlessPolicyRequestSchema.query>;
 }
 
 export type DeleteAgentlessPolicyResponse = TypeOf<typeof DeleteAgentlessPolicyResponseSchema>;

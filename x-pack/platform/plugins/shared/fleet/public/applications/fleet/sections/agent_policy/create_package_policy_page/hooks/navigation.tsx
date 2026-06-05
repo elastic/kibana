@@ -17,6 +17,7 @@ import type {
   PackagePolicy,
   OnSaveQueryParamKeys,
 } from '../../../../types';
+import type { AgentlessPolicy } from '../../../../../../../common';
 import type { EditPackagePolicyFrom } from '../types';
 
 import { appendOnSaveQueryParamsToPath } from '../utils';
@@ -86,11 +87,13 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   }, []);
 
   const onSaveNavigate = useCallback(
-    (policy: PackagePolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
+    (policy: PackagePolicy | AgentlessPolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
       if (!doOnSaveNavigation.current) {
         return;
       }
-      const hasNoAgentPolicies = policy.policy_ids.length === 0;
+      const isAgentless = !('policy_ids' in policy);
+      const policyIds = isAgentless ? [] : policy.policy_ids;
+      const hasNoAgentPolicies = policyIds.length === 0;
       let onSaveNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
       let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
 
@@ -99,7 +102,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         onSaveQueryParams = routeState?.onSaveQueryParams;
       } else {
         // If agentless or no agent policies, navigate to the integration's policies table
-        if ((policy.supports_agentless || hasNoAgentPolicies) && !queryParamsPolicyId) {
+        if ((isAgentless || hasNoAgentPolicies) && !queryParamsPolicyId) {
           onSaveNavigateTo = [
             INTEGRATIONS_PLUGIN_ID,
             {
@@ -109,7 +112,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
             },
           ];
 
-          if (policy.supports_agentless) {
+          if (isAgentless) {
             onSaveQueryParams = {
               openEnrollmentFlyout: { policyIdAsValue: true },
             };
@@ -125,7 +128,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
             PLUGIN_ID,
             {
               path: getPath('policy_details', {
-                policyId: queryParamsPolicyId || policy.policy_ids[0],
+                policyId: queryParamsPolicyId || policyIds[0],
               }),
             },
           ];

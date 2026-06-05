@@ -65,6 +65,8 @@ export function generateCreatePackagePolicyDevToolsRequest(
   });
 }
 
+// TODO: Replace this omit-based approach with a pick-based toNewAgentlessPolicy()
+// mapper shared with form.tsx.
 export function generateCreateAgentlessPolicyDevToolsRequest(
   packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean }
 ) {
@@ -72,12 +74,20 @@ export function generateCreateAgentlessPolicyDevToolsRequest(
     package: formatPackage(packagePolicy.package),
     ...omit(
       packagePolicy,
+      'policy_ids',
       'package',
       'enabled',
-      'policy_ids',
-      'policy_id',
+      'inputs',
+      'vars',
+      'id',
+      'description',
+      'var_group_selections',
+      'additional_datastreams_permissions',
+      'condition',
       'supports_agentless',
-      'supports_cloud_connector'
+      'supports_cloud_connector',
+      'cloud_connector_id',
+      'cloud_connector_name'
     ),
     inputs: formatInputs(packagePolicy.inputs, true),
     vars: formatVars(packagePolicy.vars),

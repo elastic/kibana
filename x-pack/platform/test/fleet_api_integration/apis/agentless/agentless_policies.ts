@@ -78,7 +78,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: `test_agentless-${Date.now()}`,
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -122,7 +121,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: `test_agentless-${Date.now()}`,
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -144,7 +142,6 @@ export default function (providerContext: FtrProviderContext) {
                 version: '1.0.0',
               },
               name: `test_agentless-${Date.now()}`,
-              description: 'test agentless policy',
               namespace: 'default',
               inputs: {
                 'sample-httpjson': {
@@ -199,7 +196,6 @@ export default function (providerContext: FtrProviderContext) {
                 version: '1.0.0',
               },
               name: packagePolicyName,
-              description: 'test agentless policy',
               namespace: 'default',
               inputs: {
                 'sample-httpjson': {
@@ -239,7 +235,6 @@ export default function (providerContext: FtrProviderContext) {
                 version: '1.0.0',
               },
               name: packagePolicyName,
-              description: 'test agentless policy',
               namespace: 'default',
               inputs: {
                 'sample-httpjson': {
@@ -297,7 +292,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: `test_agentless-${Date.now()}`,
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -404,7 +398,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: originalName,
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -430,7 +423,6 @@ export default function (providerContext: FtrProviderContext) {
             name: 'test_agentless',
             version: '1.0.0',
           },
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -498,7 +490,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: 'Test agentless policy ' + Date.now(),
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -518,7 +509,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: 'Test agentless policy ' + Date.now(),
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -602,7 +592,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: `test_agentless-${Date.now()}`,
-          description: 'test agentless policy with custom fields',
           namespace: 'default',
           global_data_tags: [
             { name: 'client_id', value: 'acme' },
@@ -652,7 +641,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: `test_agentless-${Date.now()}`,
-          description: 'test agentless policy with custom fields',
           namespace: 'default',
           global_data_tags: [{ name: 'client_id', value: 'original' }],
           inputs: {
@@ -753,7 +741,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '1.0.0',
           },
           name: `Test ${Date.now()}`,
-          description: 'test agentless policy',
           namespace: 'default',
           inputs: {
             'sample-httpjson': {
@@ -818,7 +805,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '3.1.1',
           },
           name: `cspm-aws-${Date.now()}`,
-          description: 'test agentless policy with AWS cloud connector',
           namespace: 'default',
           inputs: {
             'cspm-cloudbeat/cis_aws': {
@@ -863,7 +849,6 @@ export default function (providerContext: FtrProviderContext) {
             version: '3.1.1',
           },
           name: `cspm-aws-${Date.now()}`,
-          description: 'test agentless policy with AWS cloud connector',
           namespace: 'default',
           inputs: {
             'cspm-cloudbeat/cis_aws': {

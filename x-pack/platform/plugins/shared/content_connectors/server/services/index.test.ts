@@ -23,8 +23,12 @@ import type {
   AgentService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import type { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import type {
+  AgentlessPolicy,
+  PackagePolicy,
+  PackagePolicyInput,
+} from '@kbn/fleet-plugin/common';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
@@ -352,11 +356,19 @@ describe('AgentlessConnectorsInfraService', () => {
     });
   });
   describe('deployConnector', () => {
-    let agentPolicy: AgentPolicy;
+    let agentPolicy: AgentlessPolicy;
     let sharepointOnlinePackagePolicy: PackagePolicy;
 
     beforeAll(() => {
-      agentPolicy = createAgentPolicyMock();
+      agentPolicy = {
+        id: 'mock-agentless-policy-id',
+        name: 'mock-agentless-policy',
+        namespace: 'default',
+        created_at: new Date().toISOString(),
+        created_by: 'system',
+        updated_at: new Date().toISOString(),
+        updated_by: 'system',
+      };
 
       sharepointOnlinePackagePolicy = createPackagePolicyMock();
       sharepointOnlinePackagePolicy.id = 'this-is-package-policy-id';
@@ -481,15 +493,13 @@ describe('AgentlessConnectorsInfraService', () => {
         is_deleted: false,
       };
 
-      const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentPolicy;
+      const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentlessPolicy;
       agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
 
       const result = await service.deployConnector(testConnector);
 
       expect(agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
-          description: '',
-          enabled: true,
           inputs: {
             'github-connectors-py': {
               enabled: true,
@@ -503,7 +513,7 @@ describe('AgentlessConnectorsInfraService', () => {
           policy_template: 'github',
           name: 'github connector 000000005',
           namespace: '',
-          package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.5' },
+          package: { name: 'elastic_connectors', version: '0.0.5' },
         })
       );
 

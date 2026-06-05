@@ -15,7 +15,6 @@ import { EuiLink } from '@elastic/eui';
 
 import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
-import { inputsFormat } from '../../../../../../../../common/constants';
 import {
   formatInputs,
   formatVars,
@@ -52,7 +51,7 @@ import {
   packageToPackagePolicy,
   ExperimentalFeaturesService,
 } from '../../../../../services';
-import type { CreatePackagePolicyResponse } from '../../../../../../../../common';
+import type { CreatePackagePolicyResponse, AgentlessPolicy } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -157,7 +156,7 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
   varGroups?: RegistryVarGroup[]
-) {
+): Promise<CreatePackagePolicyResponse | { item: AgentlessPolicy }> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
@@ -169,6 +168,8 @@ async function savePackagePolicy(
     // Detect target cloud provider from var_groups or inputs
     const targetCsp = detectTargetCsp(pkgPolicy as NewPackagePolicy, varGroups);
 
+    // TODO: Replace this omit-based approach with a pick-based toNewAgentlessPolicy()
+    // mapper that produces a NewAgentlessPolicy directly.
     const agentlessRequestBody = {
       package: formatPackage(pkgPolicy.package),
       ...omit(
@@ -179,6 +180,10 @@ async function savePackagePolicy(
         'inputs',
         'vars',
         'id',
+        'description',
+        'var_group_selections',
+        'additional_datastreams_permissions',
+        'condition',
         'supports_agentless',
         'supports_cloud_connector',
         'cloud_connector_id',
@@ -205,11 +210,7 @@ async function savePackagePolicy(
       }),
     };
 
-    const result = await sendCreateAgentlessPolicy(agentlessRequestBody, {
-      format: inputsFormat.Legacy,
-    });
-
-    return result as CreatePackagePolicyResponse;
+    return await sendCreateAgentlessPolicy(agentlessRequestBody);
   }
 
   const result = await sendCreatePackagePolicyForRq({
@@ -765,24 +766,27 @@ export function useOnSubmit({
             toasts: notifications.toasts,
           });
         }
-        const hasAzureArmTemplate = data?.item
-          ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
-          : false;
-
-        const hasCloudFormation = data?.item
-          ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
-          : false;
-
-        const hasGoogleCloudShell = data?.item
-          ? getCloudShellUrlFromPackagePolicy(data.item)
-          : false;
-
-        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
         const isAgentlessConfigured = createdPolicy
           ? isAgentlessAgentPolicy(createdPolicy)
-          : data?.item?.supports_agentless;
+          : getAgentlessStatusForPackage(packageInfo).isAgentless;
 
-        // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
+        // Cloud template helpers expect PackagePolicy with array-based inputs;
+        // they are irrelevant for agentless policies where inputs are simplified.
+        const hasAzureArmTemplate =
+          !isAgentlessConfigured && data?.item
+            ? getAzureArmPropsFromPackagePolicy(data.item as PackagePolicy).templateUrl
+            : false;
+
+        const hasCloudFormation =
+          !isAgentlessConfigured && data?.item
+            ? getCloudFormationPropsFromPackagePolicy(data.item as PackagePolicy).templateUrl
+            : false;
+
+        const hasGoogleCloudShell =
+          !isAgentlessConfigured && data?.item
+            ? getCloudShellUrlFromPackagePolicy(data.item as PackagePolicy)
+            : false;
+
         if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
           if (agentCount) {
             setFormState('SUBMITTED');
@@ -796,7 +800,7 @@ export function useOnSubmit({
             setFormState('SUBMITTED_NO_AGENTS');
           }
         }
-        setSavedPackagePolicy(data!.item);
+        setSavedPackagePolicy(data!.item as PackagePolicy);
 
         const promptForAgentEnrollment =
           (createdPolicy || (agentPolicies.length > 0 && !agentCount)) &&

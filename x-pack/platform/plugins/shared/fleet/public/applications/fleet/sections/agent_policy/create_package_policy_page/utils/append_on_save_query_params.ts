@@ -12,6 +12,7 @@ import type {
   PackagePolicy,
   OnSaveQueryParamKeys,
 } from '../../../../types';
+import type { AgentlessPolicy } from '../../../../../../../common';
 
 export function appendOnSaveQueryParamsToPath({
   path,
@@ -20,12 +21,13 @@ export function appendOnSaveQueryParamsToPath({
   mappingOptions = {},
 }: {
   path: string;
-  policy: PackagePolicy;
+  policy: PackagePolicy | AgentlessPolicy;
   paramsToApply: OnSaveQueryParamKeys[];
   mappingOptions?: CreatePackagePolicyRouteState['onSaveQueryParams'];
 }) {
   const [basePath, queryStringIn] = path.split('?');
   const queryParams = parse(queryStringIn);
+  const policyId = 'policy_ids' in policy ? policy.policy_ids[0] : policy.id; // TODO handle multiple
 
   paramsToApply.forEach((paramName) => {
     const paramOptions = mappingOptions[paramName];
@@ -33,7 +35,7 @@ export function appendOnSaveQueryParamsToPath({
       const [paramKey, paramValue] = createQueryParam(
         paramName,
         paramOptions,
-        (policy.policy_ids && policy.policy_ids[0]) || undefined // TODO handle multiple
+        policyId || undefined
       );
       if (paramKey && paramValue) {
         queryParams[paramKey] = paramValue;
