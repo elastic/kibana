@@ -2500,9 +2500,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('alerts should be enriched', () => {
-          // User enrichment in V2 requires local-namespace resolution: host.id must be present and
-          // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
-          // EUID for a local-namespace user: user:<name>@<host.id>@local
+          // User enrichment in V2 uses local-namespace EUID when user.name is not in
+          // LOCAL_NAMESPACE_EXCLUDED_USER_NAMES and host.id is present in the entity body.
+          // host.id must be a string (not array) for getEuidFromObject to fire the local-namespace
+          // gate: user:<name>@<host.id>@local. The test docs also carry this host.id so the
+          // detection engine computes the same EUID.
           const TEST_HOST_ID = 'zeek-amsterdam-test-host-id';
           before(async () => {
             await entityStoreV2.setup({
@@ -2519,6 +2521,7 @@ export default ({ getService }: FtrProviderContext) => {
               users: [
                 {
                   user: { name: 'alice' },
+                  host: { id: TEST_HOST_ID },
                   entity: {
                     id: `user:alice@${TEST_HOST_ID}@local`,
                     type: 'user',
@@ -2594,8 +2597,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('with asset criticality', () => {
-          // User enrichment in V2 requires local-namespace resolution: host.id must be present and
-          // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+          // Same local-namespace EUID pattern as the risk describe above.
           const TEST_CRITICALITY_HOST_ID = 'zeek-amsterdam-criticality-host-id';
           before(async () => {
             await entityStoreV2.setup({
@@ -2609,6 +2611,7 @@ export default ({ getService }: FtrProviderContext) => {
               users: [
                 {
                   user: { name: 'alice' },
+                  host: { id: TEST_CRITICALITY_HOST_ID },
                   entity: {
                     id: `user:alice@${TEST_CRITICALITY_HOST_ID}@local`,
                     type: 'user',
