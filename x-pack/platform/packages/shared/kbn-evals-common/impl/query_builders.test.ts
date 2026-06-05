@@ -480,6 +480,25 @@ describe('query_builders', () => {
       expect(result[0].stats.mean).toBe(0);
     });
 
+    it('defaults example_count to 0 when cardinality value is null', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              example_count: { value: null },
+              by_evaluator: {
+                buckets: [{ key: 'eval-a' }],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].example_count).toBe(0);
+    });
+
     it('defaults stats to 0 when score_stats fields are missing', () => {
       const aggs = {
         by_dataset: {

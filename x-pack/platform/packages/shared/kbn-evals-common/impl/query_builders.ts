@@ -328,7 +328,7 @@ interface StatsAggregations {
     buckets?: Array<{
       key: string;
       dataset_name?: TermsBucket;
-      example_count?: { value?: number };
+      example_count?: { value?: number | null };
       by_evaluator?: {
         buckets?: Array<{
           key: string;

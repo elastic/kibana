@@ -45,6 +45,7 @@ import * as i18n from './translations';
 interface DatasetStatsGroup {
   datasetId: string;
   datasetName: string;
+  exampleCount: number;
   stats: EvaluatorStats[];
 }
 
@@ -81,8 +82,6 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     error: examplesError,
   } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId);
 
-  const exampleCount = group.stats[0]?.example_count;
-
   return (
     <>
       <EuiAccordion
@@ -104,13 +103,11 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
                 </h4>
               </EuiText>
             </EuiFlexItem>
-            {exampleCount != null && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.getExampleCountLabel(exampleCount)}
-                </EuiText>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.getExampleCountLabel(group.exampleCount)}
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         forceState={isOpen ? 'open' : 'closed'}
@@ -249,10 +246,7 @@ export const ExperimentDetailPage: React.FC = () => {
   );
 
   const datasetStatsGroups = useMemo(() => {
-    const groupedStats = new Map<
-      string,
-      { datasetId: string; datasetName: string; stats: EvaluatorStats[] }
-    >();
+    const groupedStats = new Map<string, DatasetStatsGroup>();
 
     for (const stat of experimentDetail?.stats ?? []) {
       const existingGroup = groupedStats.get(stat.dataset_id);
@@ -264,6 +258,7 @@ export const ExperimentDetailPage: React.FC = () => {
       groupedStats.set(stat.dataset_id, {
         datasetId: stat.dataset_id,
         datasetName: stat.dataset_name,
+        exampleCount: stat.example_count,
         stats: [stat],
       });
     }
@@ -447,12 +442,12 @@ export const ExperimentDetailPage: React.FC = () => {
           <h3>{i18n.SECTION_DATASETS}</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        {datasetStatsGroups.map(({ datasetId, datasetName, stats }) => (
+        {datasetStatsGroups.map(({ datasetId, datasetName, exampleCount, stats }) => (
           <DatasetStatsAccordion
             key={datasetId}
             experimentId={experimentId}
             executionId={executionId}
-            group={{ datasetId, datasetName, stats }}
+            group={{ datasetId, datasetName, exampleCount, stats }}
             statsColumns={statsColumns}
             experimentLoading={experimentLoading}
             isOpen={openDatasetId === datasetId}
