@@ -18,12 +18,12 @@ import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+import { createEndpointResponseActionsSkill } from './endpoint_response_actions';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
-import { endpointResponseActionsSkill } from './endpoint_response_actions/endpoint_response_actions_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -96,6 +96,8 @@ export const registerSkills = async ({
   }
 
   if (experimentalFeatures.endpointResponseActionsSkill) {
-    agentBuilder.skills.register(endpointResponseActionsSkill);
+    agentBuilder.skills.register(
+      createEndpointResponseActionsSkill(options.endpointAppContextService)
+    );
   }
 };
