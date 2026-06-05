@@ -8,6 +8,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Verify map renders with ES|QL layer
+ *
+ * Migration: Replace FTR test with unit test. Verify `getGeoJsonWithMeta` and `getSourceStatus` in
+ * x-pack/platform/plugins/shared/maps/public/classes/sources/esql_source/esql_source.tsx
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { maps } = getPageObjects(['maps']);
   const security = getService('security');

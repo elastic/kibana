@@ -8,7 +8,7 @@
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React from 'react';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,6 +19,7 @@ import {
   toUiMinimumTimeRange,
   type RawPatternAnalysisState,
 } from '../../common/embeddables/pattern_analysis/normalize_legacy_state';
+import type { PatternAnalysisAttachmentData } from '../../common/utils';
 import type {
   PatternAnalysisProps,
   PatternAnalysisSharedComponent,
@@ -26,16 +27,18 @@ import type {
 
 // Pre-9.5 case attachments stored time_range as timeRange.
 type RawAttachmentState = RawPatternAnalysisState & { timeRange?: TimeRange };
+type PatternAnalysisViewProps = UnifiedValueAttachmentViewProps<PatternAnalysisAttachmentData>;
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, PatternAnalysisComponent: PatternAnalysisSharedComponent) => {
     return React.memo(
-      (props: UnifiedValueAttachmentViewProps) => {
+      (props: PatternAnalysisViewProps) => {
+        const rawState = props.data.state as RawAttachmentState;
+
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const rawState = props.data.state as RawAttachmentState;
         const normalized = normalizePatternAnalysisLegacyFields(rawState);
         const inputProps = {
           dataViewId: normalized.data_view_id ?? '',

@@ -224,6 +224,7 @@ export const AttachmentsMenu = ({
                 content={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"

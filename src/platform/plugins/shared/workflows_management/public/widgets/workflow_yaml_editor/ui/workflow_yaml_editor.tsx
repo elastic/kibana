@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -87,6 +94,7 @@ import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monac
 import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
 import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
+import { setStabilityBadgeThemeContext } from '../lib/get_stability_note';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
@@ -171,15 +179,29 @@ export const WorkflowYAMLEditor = ({
   editorRef: parentEditorRef,
 }: WorkflowYAMLEditorProps) => {
   const { notifications, http } = useKibana().services;
+  const euiThemeContext = useEuiTheme();
+
+  useEffect(() => {
+    setStabilityBadgeThemeContext(euiThemeContext);
+  }, [euiThemeContext]);
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
+  const workflow = useSelector(selectWorkflow);
+  const isExecutionYaml = useSelector(selectIsExecutionsTab);
+  const isManagedWorkflow = workflow?.managed === true;
+  const isReadOnlyYaml = isExecutionYaml || isManagedWorkflow;
+  const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
+  isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
     (yaml: string) => {
+      if (isReadOnlyYaml) {
+        return;
+      }
       dispatch(setYamlString(yaml));
     },
-    [dispatch]
+    [dispatch, isReadOnlyYaml]
   );
 
   const onSyncStateChange = useCallback(
@@ -190,9 +212,7 @@ export const WorkflowYAMLEditor = ({
   );
 
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
-  const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const hasChanges = useSelector(selectHasChanges);
-  const workflow = useSelector(selectWorkflow);
 
   const originalValue = workflow?.yaml ?? '';
 
@@ -357,14 +377,14 @@ export const WorkflowYAMLEditor = ({
   const keyboardHandlers = useMemo(
     () => ({
       save: () => {
-        if (isSavingRef.current) {
+        if (isSavingRef.current || isReadOnlyYamlRef.current) {
           return;
         }
         saveYaml();
       },
       run: () => dispatch(setIsTestModalOpen(true)),
       saveAndRun: () => {
-        if (isSavingRef.current) {
+        if (isSavingRef.current || isReadOnlyYamlRef.current) {
           return;
         }
         saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
@@ -508,7 +528,7 @@ export const WorkflowYAMLEditor = ({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
     isEditorMounted,
-    readOnly: isExecutionYaml,
+    readOnly: isReadOnlyYaml,
   });
 
   useWorkflowEventsOnDecorations({
@@ -516,7 +536,7 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     yamlLineCounter,
     isEditorMounted,
-    readOnly: isExecutionYaml,
+    readOnly: isReadOnlyYaml,
   });
 
   useWorkflowIdDecorations({
@@ -595,6 +615,9 @@ export const WorkflowYAMLEditor = ({
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
   const openActionsPopover = useCallback(() => {
+    if (isReadOnlyYamlRef.current) {
+      return;
+    }
     setActionsPopoverOpen(true);
   }, []);
   const closeActionsPopover = useCallback(() => {
@@ -602,6 +625,9 @@ export const WorkflowYAMLEditor = ({
   }, []);
   const onActionSelected = useCallback(
     (action: ActionOptionData) => {
+      if (isReadOnlyYaml) {
+        return;
+      }
       const model = editorRef.current?.getModel();
       const yamlDocumentCurrent = yamlDocumentRef.current;
       const cursorPosition = editorRef.current?.getPosition();
@@ -623,7 +649,7 @@ export const WorkflowYAMLEditor = ({
       }
       closeActionsPopover();
     },
-    [closeActionsPopover]
+    [closeActionsPopover, isReadOnlyYaml]
   );
 
   const editorCommands: EditorCommand[] = useMemo(
@@ -696,8 +722,8 @@ export const WorkflowYAMLEditor = ({
   );
 
   const options = useMemo(() => {
-    return { ...editorOptions, readOnly: isExecutionYaml };
-  }, [isExecutionYaml]);
+    return { ...editorOptions, readOnly: isReadOnlyYaml };
+  }, [isReadOnlyYaml]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
@@ -771,8 +797,8 @@ export const WorkflowYAMLEditor = ({
   // These were triggering rerendering of the actions containers on every scroll, because they were
   // being re-created on every render. Memoizing them prevents unnecessary child re-renders.
   const extraActionElement = useMemo(
-    () => <ExtraActionsBar actions={extraActions} isReadOnly={isExecutionYaml} />,
-    [extraActions, isExecutionYaml]
+    () => <ExtraActionsBar actions={extraActions} isReadOnly={isReadOnlyYaml} />,
+    [extraActions, isReadOnlyYaml]
   );
 
   const actionsMenuPanelProps = useMemo(() => {
@@ -813,7 +839,7 @@ export const WorkflowYAMLEditor = ({
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
+      {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
         <div css={styles.agentBuilderSectionCss}>
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}

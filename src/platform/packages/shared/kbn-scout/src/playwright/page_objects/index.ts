@@ -15,6 +15,7 @@ import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_fly
 import { DashboardApp } from './dashboard_app';
 import { DataViewsManagementPage } from './data_views_management_page';
 import { DashboardLinks } from './dashboard_links';
+import { DataViewEditorPage } from './data_view_editor_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './filter_bar';
@@ -64,6 +65,7 @@ export interface PageObjects {
   discover: DiscoverApp;
   dashboard: DashboardApp;
   dashboardLinks: DashboardLinks;
+  dataViewEditor: DataViewEditorPage;
   filterBar: FilterBar;
   listingTable: ListingTable;
   home: HomePage;
@@ -91,6 +93,7 @@ export interface PageObjects {
 export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dataViewEditor: createLazyPageObject(DataViewEditorPage, fixtures.page),
     dataViewsManagement: createLazyPageObject(DataViewsManagementPage, fixtures.page),
     dashboard: createLazyPageObject(DashboardApp, fixtures.page),
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
