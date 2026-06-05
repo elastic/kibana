@@ -10,9 +10,12 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/scenarios/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/synthtrace",
+    "@kbn/synthtrace-client",
     "@kbn/alerting-plugin",
     "@kbn/ml-plugin",
     "@kbn/triggers-actions-ui-plugin",
@@ -129,6 +132,8 @@
     "@kbn/scout-oblt",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/zod-helpers",
+    "@kbn/core-spaces-common",
+    "@kbn/expect"
   ],
   "exclude": ["target/**/*"]
 }

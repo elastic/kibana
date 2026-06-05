@@ -11,13 +11,10 @@ import { z } from '@kbn/zod';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-/**
- * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
- * get the pinned panel schema from a pinned panel registry **independent** from controls
- */
-import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
+import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
+
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
   DEFAULT_PANEL_HEIGHT,
@@ -59,14 +56,9 @@ const basePanelSchema = z
     id: 'kbn-dashboard-panel-type-unknown',
   });
 
-export function getPanelSchema(isDashboardAppRequest: boolean) {
-  // looser route validation for dashboard application requests
-  // TODO remove when all embeddables register schemas
-  if (isDashboardAppRequest) {
-    return basePanelSchema;
-  }
-
+export function getPanelSchema() {
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+
   const panelSchemas = Object.entries(embeddableSchemas)
     // sort to ensure consistent order in OAS documenation
     .sort(([aType, { title: aTitle }], [bType, { title: bTitle }]) => aTitle.localeCompare(bTitle))
@@ -117,6 +109,17 @@ export function getSectionSchema<T extends ReturnType<typeof getPanelSchema>>(pa
       id: 'kbn-dashboard-section',
       title: 'Section',
     });
+}
+
+export function getPinnedPanelsSchema(
+  isDashboardAppRequest: boolean = false,
+  isReadRequest: boolean = false
+) {
+  return isDashboardAppRequest && isReadRequest // looser route validation for dashboard application read requests
+    ? (z.array(z.object({}).loose()).max(Number.MAX_SAFE_INTEGER) as unknown as ReturnType<
+        typeof getControlsGroupSchema
+      >) // keeps derived types happy
+    : getControlsGroupSchema();
 }
 
 export const optionsSchema = z
@@ -175,22 +178,33 @@ export const accessControlSchema = z
     title: 'Access control',
   });
 
-export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
-  const panelSchema = getPanelSchema(isDashboardAppRequest);
+export function getDashboardStateSchema(
+  isDashboardAppRequest: boolean,
+  isReadRequest: boolean = false
+) {
+  const panelSchema = getPanelSchema(); // call once to avoid duplicate schemas
   return z
     .object({
-      pinned_panels: getPinnedPanelsSchema(),
+      pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
       description: z
         .string()
         .optional()
         .meta({ description: 'A short description of the dashboard.' }),
-      filters: z.array(asCodeFilterSchema).max(500).optional().meta({
-        description: 'Filters applied across all panels, including pinned panels.',
-      }),
+      filters: z
+        .array(asCodeFilterSchema)
+        .max(isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 500)
+        .optional()
+        .meta({
+          description: 'Filters applied across all panels, including pinned panels.',
+        }),
       options: optionsSchema,
       panels: z
-        .array(z.union([panelSchema, getSectionSchema(panelSchema)]))
-        .max(MAX_PANELS)
+        .array(
+          isDashboardAppRequest // looser route validation for dashboard application requests
+            ? (z.object({}).loose() as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
+            : z.union([panelSchema, getSectionSchema(panelSchema)])
+        )
+        .max(isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS)
         .default([])
         .meta({
           description:

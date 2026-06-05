@@ -10,6 +10,7 @@ import type {
   IngestPipelineDateProcessor,
   IngestPipelineDissectProcessor,
   IngestPipelineGrokProcessor,
+  IngestPipelineUriPartsProcessor,
   IngestPipelineManualIngestPipelineProcessor,
   IngestPipelineMathProcessor,
   IngestPipelineRenameProcessor,
@@ -38,6 +39,7 @@ type WithOptionalTracingTag<T> = T & { tag?: string };
 export interface ActionToIngestType {
   grok: WithOptionalTracingTag<IngestPipelineGrokProcessor>;
   dissect: WithOptionalTracingTag<IngestPipelineDissectProcessor>;
+  uri_parts: WithOptionalTracingTag<IngestPipelineUriPartsProcessor>;
   date: WithOptionalTracingTag<IngestPipelineDateProcessor>;
   math: WithOptionalTracingTag<IngestPipelineMathProcessor>;
   rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;

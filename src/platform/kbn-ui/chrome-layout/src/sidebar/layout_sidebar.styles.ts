@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
+import { layoutVar, layoutLevels } from '@kbn/ui-chrome-layout-constants';
 
 const root = css`
   grid-area: sidebar;
@@ -18,6 +18,8 @@ const root = css`
     100% - ${layoutVar('application.marginTop')} - ${layoutVar('application.marginBottom')}
   );
   width: calc(100% - ${layoutVar('application.marginRight')});
+  margin-top: ${layoutVar('application.marginTop')};
+  margin-bottom: ${layoutVar('application.marginBottom')};
   z-index: ${layoutLevels.sidebar};
   min-height: 0; // to allow flex children to shrink properly
 `;

@@ -9,7 +9,6 @@ import { USER } from '../../../services/ml/security_common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const testUsers = [
     { user: USER.ML_POWERUSER, discoverAvailable: true },
@@ -139,11 +138,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
       const expectedUploadFileTitle = 'artificial_server_log';
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
-        await esArchiver.loadIfNeeded(
-          'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
-        );
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
         await ml.testResources.createDataViewIfNeeded(ecIndexPattern, 'order_date');

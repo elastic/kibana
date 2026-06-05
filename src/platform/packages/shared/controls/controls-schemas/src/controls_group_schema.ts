@@ -44,60 +44,62 @@ export const pinnedControlSchema = z
   })
   .strict();
 
+export const getControlsSchema = () => {
+  /**
+   * - keep types in alphabetical order for the sake of documentation
+   * - control order will be determined by the array
+   */
+  return z.discriminatedUnion('type', [
+    pinnedControlSchema
+      .extend({
+        type: z.literal(ESQL_CONTROL),
+        config: optionsListESQLControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-esql-control',
+        title: ESQL_CONTROL,
+        description:
+          'An ES|QL variable control whose selected value is injected into ES|QL visualizations using the `?variable_name` syntax. Options can come from a fixed list or an ES|QL query. Define the options source in `config`.',
+      }),
+    pinnedControlSchema
+      .extend({
+        type: z.literal(OPTIONS_LIST_CONTROL),
+        config: optionsListDSLControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-options-list-control',
+        title: OPTIONS_LIST_CONTROL,
+        description:
+          'A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.',
+      }),
+    pinnedControlSchema
+      .extend({
+        type: z.literal(RANGE_SLIDER_CONTROL),
+        config: rangeSliderControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-range-slider-control',
+        title: RANGE_SLIDER_CONTROL,
+        description:
+          'A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.',
+      }),
+    pinnedControlSchema
+      .extend({
+        type: z.literal(TIME_SLIDER_CONTROL),
+        config: timeSliderControlSchema,
+      })
+      .meta({
+        id: 'kbn-controls-schemas-controls-group-schema-time-slider-control',
+        title: TIME_SLIDER_CONTROL,
+        description:
+          'A control panel that filters a time field to a selected sub-range of the global time range. Define the start and end positions in `config` as fractions of the global range (0 to 1).',
+      }),
+  ]);
+};
+
 export const getControlsGroupSchema = () => {
   return z
-    .array(
-      /**
-       * - keep types in alphabetical order for the sake of documentation
-       * - control order will be determined by the array
-       */
-      z.discriminatedUnion('type', [
-        pinnedControlSchema
-          .safeExtend({
-            type: z.literal(ESQL_CONTROL),
-            config: optionsListESQLControlSchema,
-          })
-          .meta({
-            id: 'kbn-controls-schemas-controls-group-schema-esql-control',
-            title: ESQL_CONTROL,
-            description:
-              'An ES|QL variable control whose selected value is injected into ES|QL visualizations using the `?variable_name` syntax. Options can come from a fixed list or an ES|QL query. Define the options source in `config`.',
-          }),
-        pinnedControlSchema
-          .safeExtend({
-            type: z.literal(OPTIONS_LIST_CONTROL),
-            config: optionsListDSLControlSchema,
-          })
-          .meta({
-            id: 'kbn-controls-schemas-controls-group-schema-options-list-control',
-            title: OPTIONS_LIST_CONTROL,
-            description:
-              'A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.',
-          }),
-        pinnedControlSchema
-          .safeExtend({
-            type: z.literal(RANGE_SLIDER_CONTROL),
-            config: rangeSliderControlSchema,
-          })
-          .meta({
-            id: 'kbn-controls-schemas-controls-group-schema-range-slider-control',
-            title: RANGE_SLIDER_CONTROL,
-            description:
-              'A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.',
-          }),
-        pinnedControlSchema
-          .safeExtend({
-            type: z.literal(TIME_SLIDER_CONTROL),
-            config: timeSliderControlSchema,
-          })
-          .meta({
-            id: 'kbn-controls-schemas-controls-group-schema-time-slider-control',
-            title: TIME_SLIDER_CONTROL,
-            description:
-              'A control panel that filters a time field to a selected sub-range of the global time range. Define the start and end positions in `config` as fractions of the global range (0 to 1).',
-          }),
-      ])
-    )
+    .array(getControlsSchema())
     .max(100)
     .default([])
     .meta({ description: 'An array of control panels and their state in the control group.' });

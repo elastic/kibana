@@ -41,7 +41,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(transformPanelsOut(panelsJSON, [])).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -81,7 +81,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(transformPanelsOut(panelsJSON, [])).toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -92,6 +92,88 @@ describe('transformPanelsOut', () => {
             },
             "panel_references": Array [],
             "panel_type": "test",
+            "type": "dropped_panel",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('should drop invalid panels', () => {
+    mockGetTransforms.mockImplementation((type: string) => {
+      if (type === 'DASHBOARD_MARKDOWN') {
+        return {
+          title: 'markdown',
+          transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
+          schema: {
+            validate: jest.fn().mockImplementation((val) => val),
+          },
+        };
+      }
+      if (type === 'invalidPanel') {
+        return {
+          title: 'invalid',
+          schema: {
+            validate: jest.fn().mockImplementation(() => {
+              throw new Error('Boo!');
+            }),
+          },
+        };
+      }
+    });
+
+    const panelsJSON = JSON.stringify([
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        embeddableConfig: { content: 'Markdown panel content' },
+        panelIndex: 'panel-1',
+        gridData: {
+          h: 15,
+          i: 'panel-1',
+          w: 24,
+          x: 0,
+          y: 0,
+        },
+      },
+      {
+        type: 'invalidPanel',
+        embeddableConfig: { invalid: true },
+        panelIndex: 'panel-2',
+        gridData: {
+          h: 15,
+          i: 'panel-2',
+          w: 24,
+          x: 24,
+          y: 0,
+        },
+      },
+    ]);
+
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
+      Object {
+        "panels": Array [
+          Object {
+            "config": Object {
+              "content": "Markdown panel content",
+            },
+            "grid": Object {
+              "h": 15,
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "id": "panel-1",
+            "type": "markdown",
+          },
+        ],
+        "warnings": Array [
+          Object {
+            "message": "Unable to transform panel config. Error: Boo!",
+            "panel_config": Object {
+              "invalid": true,
+            },
+            "panel_references": Array [],
+            "panel_type": "invalidPanel",
             "type": "dropped_panel",
           },
         ],
@@ -112,7 +194,7 @@ describe('transformPanelsOut', () => {
         },
       },
     ];
-    const panelsOut = transformPanelsOut(panelsJSON, sections);
+    const panelsOut = transformPanelsOut(panelsJSON, sections, [], false);
     getDashboardStateSchema(true).parse({ title: 'My dashboard', panels: panelsOut.panels });
     expect(panelsOut).toMatchInlineSnapshot(`
       Object {

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/obs-presentation-team'
   sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
@@ -144,6 +146,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
@@ -156,6 +159,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scenarios/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

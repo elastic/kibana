@@ -35,7 +35,29 @@ const droppedPanelWarningSchema = z
       'A panel that was excluded from the response because its type is not supported by the API.',
   });
 
-export const warningsSchema = z.array(droppedPanelWarningSchema).max(100).meta({
-  description:
-    'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.',
-});
+const droppedDashboardProperty = z
+  .object({
+    type: z.literal('dropped_property'),
+    message: z
+      .string()
+      .meta({ description: 'Human-readable explanation of why the property was dropped.' }),
+    key: z.string().meta({ description: 'The name of the property that was dropped.' }),
+    value: z
+      .any()
+      .optional()
+      .meta({ description: 'The original value of the property that was dropped.' }),
+  })
+  .strict()
+  .meta({
+    id: 'kbn-dashboard-dropped-property-warning',
+    title: 'Dropped property',
+    description: 'A property that was excluded from the response because it failed validation.',
+  });
+
+export const warningsSchema = z
+  .array(z.union([droppedPanelWarningSchema, droppedDashboardProperty]))
+  .max(100)
+  .meta({
+    description:
+      'A list of warnings returned by the Dashboards API. Present only when one or more dashboard properties failed validation.',
+  });

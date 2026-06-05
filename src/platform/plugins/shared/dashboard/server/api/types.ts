@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
+import type { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import type {
   getDashboardStateSchema,
   getPanelSchema,
@@ -29,6 +30,6 @@ export type DashboardPanel = z.output<ReturnType<typeof getPanelSchema>>;
 export type DashboardSection = z.output<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = z.output<ReturnType<typeof getDashboardStateSchema>>;
-export type DashboardPinnedPanelsState = NonNullable<DashboardState['pinned_panels']>;
+export type DashboardPinnedPanelsState = z.output<ReturnType<typeof getPinnedPanelsSchema>>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
 export type Operation = 'create' | 'read' | 'update' | 'search';

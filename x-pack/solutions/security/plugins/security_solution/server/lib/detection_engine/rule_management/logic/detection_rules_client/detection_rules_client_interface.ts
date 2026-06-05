@@ -6,6 +6,7 @@
  */
 
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
@@ -39,18 +40,22 @@ export interface IDetectionRulesClient {
 
 export interface CreateCustomRuleArgs {
   params: RuleCreateProps;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export interface CreatePrebuiltRuleArgs {
   params: RuleCreateProps;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface UpdateRuleArgs {
   ruleUpdate: RuleUpdateProps;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export interface PatchRuleArgs {
   rulePatch: RulePatchProps;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export interface DeleteRuleArgs {
@@ -59,6 +64,7 @@ export interface DeleteRuleArgs {
 
 export interface BulkDeleteRulesArgs {
   ruleIds: RuleObjectId[];
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface BulkDeleteRulesReturn {
@@ -68,11 +74,13 @@ export interface BulkDeleteRulesReturn {
 
 export interface UpgradePrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface RevertPrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
   existingRule: RuleResponse;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface ImportRuleArgs {
@@ -80,6 +88,7 @@ export interface ImportRuleArgs {
   overrideFields?: { rule_source: RuleSource; immutable: boolean };
   overwriteRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface ImportRulesArgs {
@@ -87,6 +96,7 @@ export interface ImportRulesArgs {
   overwriteRules: boolean;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export interface GetHistoryForRuleArgs {

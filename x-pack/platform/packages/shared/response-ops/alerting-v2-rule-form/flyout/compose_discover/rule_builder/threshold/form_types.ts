@@ -48,6 +48,13 @@ export interface AlertCondition {
   threshold: number[];
 }
 
+export type RecoveryCondition = AlertCondition;
+
+export interface RecoveryConfig {
+  conditions: RecoveryCondition[];
+  conditionOperator: ConditionOperator;
+}
+
 export interface ThresholdFormValues {
   indexPattern: string;
   timeField: string;
@@ -57,6 +64,7 @@ export interface ThresholdFormValues {
   alertConditions: AlertCondition[];
   conditionOperator: ConditionOperator;
   groupByFields: string[];
+  recovery?: RecoveryConfig;
 }
 
 export const AGGREGATIONS_REQUIRING_FIELD: Aggregation[] = [
@@ -98,8 +106,31 @@ export const DEFAULT_ALERT_CONDITION: Omit<AlertCondition, 'id'> = {
   threshold: [100],
 };
 
+export const DEFAULT_RECOVERY_CONDITION: Omit<RecoveryCondition, 'id'> = {
+  metric: 'count',
+  comparator: Comparator.LTE,
+  threshold: [100],
+};
+
 let idCounter = 0;
 export const generateId = (): string => `_${Date.now()}_${++idCounter}`;
+
+const FLIPPED_COMPARATOR: Record<Comparator, Comparator> = {
+  [Comparator.GT]: Comparator.LTE,
+  [Comparator.GTE]: Comparator.LT,
+  [Comparator.LT]: Comparator.GTE,
+  [Comparator.LTE]: Comparator.GT,
+  [Comparator.BETWEEN]: Comparator.NOT_BETWEEN,
+  [Comparator.NOT_BETWEEN]: Comparator.BETWEEN,
+};
+
+export const deriveRecoveryConditions = (alertConditions: AlertCondition[]): RecoveryCondition[] =>
+  alertConditions.map((c) => ({
+    id: generateId(),
+    metric: c.metric,
+    comparator: FLIPPED_COMPARATOR[c.comparator],
+    threshold: [...c.threshold],
+  }));
 
 export const DEFAULT_THRESHOLD_FORM_VALUES: ThresholdFormValues = {
   indexPattern: '',

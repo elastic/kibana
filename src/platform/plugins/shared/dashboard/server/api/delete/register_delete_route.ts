@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
+
 import { z } from '@kbn/zod';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+
 import { getRouteConfig } from '../get_route_config';
+import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
 import { logRequest } from '../log_request';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -27,6 +32,13 @@ export function registerDeleteRoute(
     summary: `Delete a dashboard`,
     ...routeConfig,
     description: 'Permanently deletes a dashboard by ID.',
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(false);
   });
 
   deleteRoute.addVersion(
@@ -61,7 +73,12 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          await deleteDashboard(ctx, req.params.id);
+          const result = await deleteDashboard(ctx, req.params.id, getCachedDashboardStateSchema());
+          try {
+            await trackDeleteDashboardAction(result, req);
+          } catch (e) {
+            // if tracking throws, just swallow the error; no need to surface it
+          }
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
             const message = `A dashboard with ID [${req.params.id}] was not found.`;

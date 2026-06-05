@@ -43,6 +43,11 @@ export const savedDataViewSpecSchema = z
       title: 'Allow hidden and system indices',
       description: 'When `true`, allows the data view to match hidden indices.',
     }),
+    field_filters: z.array(z.string().min(1).max(1000)).max(10_000).optional().meta({
+      title: 'Field filters',
+      description:
+        "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
+    }),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     field_settings: z.record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema).optional(),

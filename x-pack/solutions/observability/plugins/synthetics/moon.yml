@@ -17,6 +17,8 @@ project:
   owner: '@elastic/actionable-obs-team'
   sourceRoot: x-pack/solutions/observability/plugins/synthetics
 dependsOn:
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/alerting-plugin'
   - '@kbn/ml-plugin'
   - '@kbn/triggers-actions-ui-plugin'
@@ -133,6 +135,8 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/zod-helpers'
+  - '@kbn/core-spaces-common'
+  - '@kbn/expect'
 tags:
   - plugin
   - prod
@@ -147,6 +151,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scenarios/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
