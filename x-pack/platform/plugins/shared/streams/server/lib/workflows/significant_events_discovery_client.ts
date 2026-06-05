@@ -7,78 +7,49 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { isTerminalStatus } from '@kbn/workflows';
-import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { type SigEventsWorkflowStatusResult } from '@kbn/streams-schema';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 export interface SignificantEventsDiscoveryRunParams {
   request: KibanaRequest;
   spaceId: string;
-  triggeredBy: 'manual' | 'scheduled';
 }
 
-export interface SignificantEventsDiscoveryStatusResult {
-  status:
-    | WorkflowStatus.NotStarted
-    | WorkflowStatus.InProgress
-    | WorkflowStatus.Completed
-    | WorkflowStatus.Failed
-    | WorkflowStatus.Canceled;
-  executionId: string | null;
-  error?: string;
-}
-
-/** Maps a workflow execution to the {@link SignificantEventsDiscoveryStatusResult} shape returned by the API. */
-const mapExecutionToStatusResult = (
-  execution: WorkflowExecutionListItemDto
-): Omit<SignificantEventsDiscoveryStatusResult, 'executionId'> & { executionId: string } => {
-  const status = WorkflowExecutionService.classifyExecutionStatus(execution.status);
-
-  if (status === WorkflowStatus.Failed) {
-    return {
-      status: WorkflowStatus.Failed,
-      executionId: execution.id,
-      error: WorkflowExecutionService.getFailureMessage(
-        execution,
-        'Significant events discovery timed out'
-      ),
-    };
-  }
-
-  return { status, executionId: execution.id };
-};
+/**
+ * Status result for the significant events discovery workflow.
+ * Currently has no workflow-specific completion data (T defaults to {}).
+ * Extend the generic when the discovery pipeline produces structured output.
+ */
+export type SignificantEventsDiscoveryStatusResult = SigEventsWorkflowStatusResult;
 
 export class SignificantEventsDiscoveryClient {
   private readonly workflowExecutionService: WorkflowExecutionService;
 
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
-    this.workflowExecutionService = new WorkflowExecutionService({ managementApi });
+    this.workflowExecutionService = new WorkflowExecutionService({
+      managementApi,
+      workflowId: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
+      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
   }
 
-  async run({
-    request,
-    spaceId,
-    triggeredBy,
-  }: SignificantEventsDiscoveryRunParams): Promise<{ executionId: string }> {
-    // Guard against overlapping runs: status/cancel only track the latest execution,
-    // so reuse an in-flight one instead of orphaning it with a parallel trigger.
-    const { results } = await this.workflowExecutionService.getExecutions(
-      { workflowId: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID, size: 1 },
-      spaceId
-    );
-    if (results.length > 0 && !isTerminalStatus(results[0].status)) {
-      return { executionId: results[0].id };
+  async run({ request, spaceId }: SignificantEventsDiscoveryRunParams): Promise<{
+    executionId: string;
+    isNew: boolean;
+  }> {
+    const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId);
+    if (lastExecution && !isTerminalStatus(lastExecution.status)) {
+      return { executionId: lastExecution.id, isNew: false };
     }
 
     const executionId = await this.workflowExecutionService.execute({
-      workflowId: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
       executionSpaceId: spaceId,
-      inputs: { triggeredBy },
       request,
     });
-    return { executionId };
+    return { executionId, isNew: true };
   }
 
   async cancel({
@@ -88,11 +59,7 @@ export class SignificantEventsDiscoveryClient {
     request: KibanaRequest;
     spaceId: string;
   }): Promise<string | null> {
-    return this.workflowExecutionService.cancelLatest({
-      workflowId: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID,
-      spaceId,
-      request,
-    });
+    return this.workflowExecutionService.cancelLatest({ spaceId, request });
   }
 
   async getStatus({
@@ -100,15 +67,9 @@ export class SignificantEventsDiscoveryClient {
   }: {
     spaceId: string;
   }): Promise<SignificantEventsDiscoveryStatusResult> {
-    const { results } = await this.workflowExecutionService.getExecutions(
-      { workflowId: SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID, size: 1 },
-      spaceId
-    );
-
-    if (results.length === 0) {
-      return { status: WorkflowStatus.NotStarted, executionId: null };
-    }
-
-    return mapExecutionToStatusResult(results[0]);
+    return this.workflowExecutionService.getStatus({
+      spaceId,
+      timedOutMessage: 'Significant events discovery timed out',
+    });
   }
 }

@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -150,7 +150,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: WorkflowStatus.NotStarted, executionId: null });
+      expect(result).toEqual({ status: SigEventsWorkflowStatus.NotStarted, executionId: null });
     });
 
     it('returns InProgress for a running execution', async () => {
@@ -163,7 +163,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.InProgress,
+        status: SigEventsWorkflowStatus.InProgress,
         executionId: 'exec-1',
       });
     });
@@ -192,7 +192,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Completed,
+        status: SigEventsWorkflowStatus.Completed,
         executionId: 'exec-1',
         features: {
           skipped: false,
@@ -220,7 +220,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Completed,
+        status: SigEventsWorkflowStatus.Completed,
         executionId: 'exec-1',
         features: {
           skipped: false,
@@ -253,7 +253,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Failed,
+        status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
         error: 'something broke',
       });
@@ -269,7 +269,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Failed,
+        status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
         error: 'Onboarding workflow timed out',
       });
@@ -285,7 +285,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Canceled,
+        status: SigEventsWorkflowStatus.Canceled,
         executionId: 'exec-1',
       });
     });

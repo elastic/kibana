@@ -30,7 +30,6 @@ import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
-import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
@@ -67,7 +66,6 @@ export interface RouteDependencies {
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
   continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
-  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
   workflowClients: WorkflowClients;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
 }

@@ -152,7 +152,7 @@ export function StreamsView() {
               onCancel={handleCancel}
               isRunning={isRunning}
               isCanceling={isCanceling}
-              isDisabled={isConnectorCatalogUnavailable}
+              isDisabled={isRunning}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -7,80 +7,155 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import type {
+  WorkflowExecutionListItemDto,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
+} from '@kbn/workflows';
 import type {
   WorkflowsManagementApi,
   WorkflowsServerPluginSetup,
 } from '@kbn/workflows-management-plugin/server';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus, type SigEventsWorkflowStatusResult } from '@kbn/streams-schema';
 
-export class WorkflowExecutionService {
+export interface WorkflowExecutionQueryParams {
+  size?: number;
+  statuses?: ExecutionStatus[];
+  concurrencyGroupKey?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
+  collapse?: WorkflowExecutionCollapseField;
+}
+
+interface WorkflowExecutionGetParams {
+  id: string;
+  spaceId: string;
+  options?: Parameters<WorkflowsManagementApi['getWorkflowExecution']>[2];
+}
+
+interface WorkflowExecutionCancelParams {
+  id: string;
+  spaceId: string;
+  request: KibanaRequest;
+}
+
+/**
+ * Generic adapter over the workflow management API.
+ * `TInput` types the inputs passed to `execute`; the cast to
+ * `Record<string, unknown>` for the underlying API is done internally.
+ */
+export class WorkflowExecutionService<TInput extends object = {}> {
   private readonly managementApi: WorkflowsServerPluginSetup['management'];
+  private readonly workflowId: string;
+  private readonly workflowSpaceId: string;
 
-  constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
+  constructor({
+    managementApi,
+    workflowId,
+    workflowSpaceId,
+  }: {
+    managementApi: WorkflowsServerPluginSetup['management'];
+    workflowId: string;
+    workflowSpaceId: string;
+  }) {
     this.managementApi = managementApi;
+    this.workflowId = workflowId;
+    this.workflowSpaceId = workflowSpaceId;
   }
 
-  /**
-   * Maps a raw workflow engine `ExecutionStatus` to the shared domain status.
-   * Does not cover `NotStarted` (no execution exists) or `BeingCanceled` (client-only optimistic state).
-   */
   static classifyExecutionStatus(
     status: ExecutionStatus
-  ):
-    | WorkflowStatus.InProgress
-    | WorkflowStatus.Completed
-    | WorkflowStatus.Failed
-    | WorkflowStatus.Canceled {
+  ): Exclude<
+    SigEventsWorkflowStatus,
+    SigEventsWorkflowStatus.NotStarted | SigEventsWorkflowStatus.BeingCanceled
+  > {
     switch (status) {
       case ExecutionStatus.PENDING:
       case ExecutionStatus.RUNNING:
       case ExecutionStatus.WAITING:
       case ExecutionStatus.WAITING_FOR_INPUT:
       case ExecutionStatus.WAITING_FOR_CHILD:
-        return WorkflowStatus.InProgress;
+        return SigEventsWorkflowStatus.InProgress;
       case ExecutionStatus.COMPLETED:
-        return WorkflowStatus.Completed;
+        return SigEventsWorkflowStatus.Completed;
       case ExecutionStatus.FAILED:
       case ExecutionStatus.TIMED_OUT:
-        return WorkflowStatus.Failed;
+        return SigEventsWorkflowStatus.Failed;
       case ExecutionStatus.CANCELLED:
       case ExecutionStatus.SKIPPED:
-        return WorkflowStatus.Canceled;
-      default:
+        return SigEventsWorkflowStatus.Canceled;
+      default: {
         const _exhaustiveCheck: never = status;
-        return _exhaustiveCheck;
+        throw new Error(`Unhandled ExecutionStatus: ${_exhaustiveCheck}`);
+      }
     }
   }
 
-  static getFailureMessage(
-    execution: Pick<WorkflowExecutionListItemDto, 'status' | 'error'>,
-    timedOutMessage: string
-  ): string {
+  static getFailureMessage({
+    execution,
+    timedOutMessage,
+  }: {
+    execution: Pick<WorkflowExecutionListItemDto, 'status' | 'error'>;
+    timedOutMessage: string;
+  }): string {
     if (execution.status === ExecutionStatus.TIMED_OUT) {
       return timedOutMessage;
     }
     return execution.error?.message ?? 'Unknown error';
   }
 
+  async getStatus({
+    spaceId,
+    timedOutMessage = 'Workflow timed out',
+    queryParams = {},
+  }: {
+    spaceId: string;
+    timedOutMessage?: string;
+    queryParams?: WorkflowExecutionQueryParams;
+  }): Promise<SigEventsWorkflowStatusResult> {
+    const { results } = await this.getExecutions({ ...queryParams, size: 1 }, spaceId);
+    const lastExecution = results[0] ?? null;
+
+    if (!lastExecution) {
+      return { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
+    }
+
+    const status = WorkflowExecutionService.classifyExecutionStatus(lastExecution.status);
+
+    if (status === SigEventsWorkflowStatus.Failed) {
+      return {
+        status: SigEventsWorkflowStatus.Failed,
+        executionId: lastExecution.id,
+        error: WorkflowExecutionService.getFailureMessage({
+          execution: lastExecution,
+          timedOutMessage,
+        }),
+      };
+    }
+
+    if (status === SigEventsWorkflowStatus.Completed) {
+      return { status: SigEventsWorkflowStatus.Completed, executionId: lastExecution.id };
+    }
+
+    return { status, executionId: lastExecution.id };
+  }
+
   async execute({
-    workflowId,
     executionSpaceId,
-    inputs,
+    inputs = {},
     request,
     notFoundMessage,
   }: {
-    workflowId: string;
     executionSpaceId: string;
-    inputs: Record<string, unknown>;
+    inputs?: TInput;
     request: KibanaRequest;
     notFoundMessage?: string;
   }): Promise<string> {
-    const workflow = await this.managementApi.getWorkflow(workflowId, GLOBAL_WORKFLOW_SPACE_ID);
+    const workflow = await this.managementApi.getWorkflow(this.workflowId, this.workflowSpaceId);
 
     if (!workflow || !workflow.definition) {
-      throw new Error(notFoundMessage ?? `Workflow ${workflowId} not found`);
+      throw new Error(notFoundMessage ?? `Workflow ${this.workflowId} not found`);
     }
 
     return this.managementApi.runWorkflow(
@@ -92,19 +167,17 @@ export class WorkflowExecutionService {
   }
 
   async cancelLatest({
-    workflowId,
     spaceId,
     request,
     concurrencyGroupKey,
   }: {
-    workflowId: string;
     spaceId: string;
     request: KibanaRequest;
     concurrencyGroupKey?: string;
   }): Promise<string | null> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
-        workflowId,
+        workflowId: this.workflowId,
         ...(concurrencyGroupKey !== undefined && { concurrencyGroupKey }),
         size: 1,
       },
@@ -119,22 +192,23 @@ export class WorkflowExecutionService {
     return null;
   }
 
-  async getExecutions(
-    params: Parameters<WorkflowsManagementApi['getWorkflowExecutions']>[0],
-    spaceId: string
-  ) {
-    return this.managementApi.getWorkflowExecutions(params, spaceId);
+  async getExecutions(params: WorkflowExecutionQueryParams, spaceId: string) {
+    return this.managementApi.getWorkflowExecutions(
+      { workflowId: this.workflowId, ...params },
+      spaceId
+    );
   }
 
-  async getExecution(
-    id: string,
-    spaceId: string,
-    options?: Parameters<WorkflowsManagementApi['getWorkflowExecution']>[2]
-  ) {
+  async getLastExecution(spaceId: string): Promise<WorkflowExecutionListItemDto | null> {
+    const { results } = await this.getExecutions({ size: 1 }, spaceId);
+    return results[0] ?? null;
+  }
+
+  async getExecution({ id, spaceId, options }: WorkflowExecutionGetParams) {
     return this.managementApi.getWorkflowExecution(id, spaceId, options);
   }
 
-  async cancelExecution(id: string, spaceId: string, request: KibanaRequest): Promise<void> {
+  async cancelExecution({ id, spaceId, request }: WorkflowExecutionCancelParams): Promise<void> {
     return this.managementApi.cancelWorkflowExecution(id, spaceId, request);
   }
 }

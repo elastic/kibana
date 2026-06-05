@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import {
   SignificantEventsDiscoveryProvider,
   useSignificantEventsDiscoveryContext,
@@ -31,7 +31,7 @@ const mockUseApi = useSignificantEventsDiscoveryApi as jest.MockedFunction<
 >;
 
 interface StatusResponse {
-  status: WorkflowStatus;
+  status: SigEventsWorkflowStatus;
   executionId?: string;
   error?: string;
 }
@@ -150,10 +150,10 @@ describe('SignificantEventsDiscoveryProvider', () => {
       await waitFor(() => expect(result.current.isRunning).toBe(true));
 
       act(() => {
-        setStatus({ status: WorkflowStatus.InProgress, executionId: 'exec-1' });
+        setStatus({ status: SigEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
       });
       act(() => {
-        setStatus({ status: WorkflowStatus.Completed, executionId: 'exec-1' });
+        setStatus({ status: SigEventsWorkflowStatus.Completed, executionId: 'exec-1' });
       });
 
       await waitFor(() => expect(addSuccess).toHaveBeenCalledTimes(1));
@@ -171,10 +171,14 @@ describe('SignificantEventsDiscoveryProvider', () => {
       await waitFor(() => expect(result.current.isRunning).toBe(true));
 
       act(() => {
-        setStatus({ status: WorkflowStatus.InProgress, executionId: 'exec-1' });
+        setStatus({ status: SigEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
       });
       act(() => {
-        setStatus({ status: WorkflowStatus.Failed, executionId: 'exec-1', error: 'kaboom' });
+        setStatus({
+          status: SigEventsWorkflowStatus.Failed,
+          executionId: 'exec-1',
+          error: 'kaboom',
+        });
       });
 
       await waitFor(() => expect(addDanger).toHaveBeenCalledTimes(1));
@@ -192,7 +196,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
 
       // A previous run is completed in the cache before the user clicks.
       act(() => {
-        setStatus({ status: WorkflowStatus.Completed, executionId: 'old-exec' });
+        setStatus({ status: SigEventsWorkflowStatus.Completed, executionId: 'old-exec' });
       });
       act(() => {
         result.current.handleRun();
@@ -210,7 +214,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
       const { result, setStatus } = renderContext(onComplete);
 
       act(() => {
-        setStatus({ status: WorkflowStatus.Completed, executionId: 'old-exec' });
+        setStatus({ status: SigEventsWorkflowStatus.Completed, executionId: 'old-exec' });
       });
       act(() => {
         result.current.handleRun();
@@ -220,7 +224,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
       // Poll still reports the previous (completed) run — must stay running and
       // not toast, since its execution id differs from the one we triggered.
       act(() => {
-        setStatus({ status: WorkflowStatus.Completed, executionId: 'old-exec' });
+        setStatus({ status: SigEventsWorkflowStatus.Completed, executionId: 'old-exec' });
       });
       await new Promise((resolve) => setTimeout(resolve, 50));
       expect(result.current.isRunning).toBe(true);
@@ -228,7 +232,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
 
       // The new execution surfaces and completes.
       act(() => {
-        setStatus({ status: WorkflowStatus.Completed, executionId: 'new-exec' });
+        setStatus({ status: SigEventsWorkflowStatus.Completed, executionId: 'new-exec' });
       });
 
       await waitFor(() => expect(result.current.isRunning).toBe(false));
@@ -252,7 +256,7 @@ describe('SignificantEventsDiscoveryProvider', () => {
 
       // A run is in progress on the server.
       act(() => {
-        setStatus({ status: WorkflowStatus.InProgress, executionId: 'exec-1' });
+        setStatus({ status: SigEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
       });
 
       const first = renderHook(() => useSignificantEventsDiscoveryContext(), { wrapper });
@@ -280,14 +284,14 @@ describe('SignificantEventsDiscoveryProvider', () => {
 
       // Run completes while the first instance is mounted (toasts once).
       act(() => {
-        setStatus({ status: WorkflowStatus.InProgress, executionId: 'exec-1' });
+        setStatus({ status: SigEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
       });
       act(() => {
         first.result.current.handleRun();
       });
       await waitFor(() => expect(first.result.current.isRunning).toBe(true));
       act(() => {
-        setStatus({ status: WorkflowStatus.Completed, executionId: 'exec-1' });
+        setStatus({ status: SigEventsWorkflowStatus.Completed, executionId: 'exec-1' });
       });
       await waitFor(() => expect(addSuccess).toHaveBeenCalledTimes(1));
 

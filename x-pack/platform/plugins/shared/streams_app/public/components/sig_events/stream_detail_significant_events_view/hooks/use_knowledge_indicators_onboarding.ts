@@ -9,9 +9,9 @@ import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useRef, useState } from 'react';
 import {
-  WorkflowStatus,
+  SigEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type WorkflowStatusResult,
+  type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
@@ -20,14 +20,21 @@ import { useKibana } from '../../../../hooks/use_kibana';
 interface Props {
   streamName: string;
   onComplete: (
-    completedState: Extract<WorkflowStatusResult, { status: WorkflowStatus.Completed }>
+    completedState: Extract<
+      SigEventsWorkflowStatusResult,
+      { status: SigEventsWorkflowStatus.Completed }
+    >
   ) => void;
-  onError: (failedState: Extract<WorkflowStatusResult, { status: WorkflowStatus.Failed }>) => void;
+  onError: (
+    failedState: Extract<SigEventsWorkflowStatusResult, { status: SigEventsWorkflowStatus.Failed }>
+  ) => void;
 }
 
 export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onError }: Props) {
-  const previousStatusRef = useRef<WorkflowStatus | null>(null);
-  const [onboardingState, setOnboardingState] = useState<WorkflowStatusResult | null>(null);
+  const previousStatusRef = useRef<SigEventsWorkflowStatus | null>(null);
+  const [onboardingState, setOnboardingState] = useState<SigEventsWorkflowStatusResult | null>(
+    null
+  );
 
   const {
     core: {
@@ -68,8 +75,8 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     // To fix, the workflow engine should expose `cancelRequested` in
     // WorkflowExecutionDto so the server can return BeingCanceled.
     const shouldPreserveBeingCanceled =
-      previousStatusRef.current === WorkflowStatus.BeingCanceled &&
-      state.status === WorkflowStatus.InProgress;
+      previousStatusRef.current === SigEventsWorkflowStatus.BeingCanceled &&
+      state.status === SigEventsWorkflowStatus.InProgress;
 
     if (shouldPreserveBeingCanceled) {
       return state;
@@ -87,16 +94,16 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
      */
     if (
       previousStatusRef.current !== null &&
-      previousStatusRef.current !== WorkflowStatus.Completed &&
-      state.status === WorkflowStatus.Completed
+      previousStatusRef.current !== SigEventsWorkflowStatus.Completed &&
+      state.status === SigEventsWorkflowStatus.Completed
     ) {
       onComplete(state);
     }
 
     if (
       previousStatusRef.current !== null &&
-      previousStatusRef.current !== WorkflowStatus.Failed &&
-      state.status === WorkflowStatus.Failed
+      previousStatusRef.current !== SigEventsWorkflowStatus.Failed &&
+      state.status === SigEventsWorkflowStatus.Failed
     ) {
       onError(state);
     }
@@ -106,7 +113,7 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     return state;
   }, [getOnboardingStatus, streamName, onComplete, onError]);
 
-  useQuery<WorkflowStatusResult, Error>({
+  useQuery<SigEventsWorkflowStatusResult, Error>({
     queryKey: ['knowledgeIndicatorsOnboardingStatus', streamName],
     queryFn: fetchStatus,
     enabled: !isScheduleLoading && !isCancelLoading,
@@ -114,13 +121,13 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
   });
 
   const scheduleKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({ status: WorkflowStatus.InProgress });
+    setOnboardingState({ status: SigEventsWorkflowStatus.InProgress });
     scheduleMutate(streamName);
   }, [scheduleMutate, streamName]);
 
   const cancelKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({ status: WorkflowStatus.BeingCanceled });
-    previousStatusRef.current = WorkflowStatus.BeingCanceled;
+    setOnboardingState({ status: SigEventsWorkflowStatus.BeingCanceled });
+    previousStatusRef.current = SigEventsWorkflowStatus.BeingCanceled;
     cancelMutate(streamName);
   }, [cancelMutate, streamName]);
 

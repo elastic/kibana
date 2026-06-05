@@ -231,7 +231,7 @@ const readAllSignificantEventsRoute = createServerRoute({
   },
 });
 
-const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
+const significantEventsDiscoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
   params: z.object({
     body: z.discriminatedUnion('action', [
@@ -274,16 +274,17 @@ const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
     const { body } = params;
 
     if (body.action === 'trigger') {
-      const { executionId } = await significantEventsDiscoveryClient.run({
+      const { executionId, isNew } = await significantEventsDiscoveryClient.run({
         request,
         spaceId,
-        triggeredBy: 'manual',
       });
-      telemetry.trackSignificantEventsDiscoveryTriggered({
-        triggered_by: 'manual',
-        execution_id: executionId,
-        space_id: spaceId,
-      });
+      if (isNew) {
+        telemetry.trackSignificantEventsDiscoveryTriggered({
+          triggered_by: 'manual',
+          execution_id: executionId,
+          space_id: spaceId,
+        });
+      }
       return { executionId };
     }
 
@@ -292,7 +293,7 @@ const SignificantEventsDiscoveryExecuteRoute = createServerRoute({
   },
 });
 
-const SignificantEventsDiscoveryStatusRoute = createServerRoute({
+const significantEventsDiscoveryStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/significant_events/discovery/_status',
   params: z.object({}),
   options: {
@@ -330,6 +331,6 @@ export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
   ...readAllSignificantEventsRoute,
-  ...SignificantEventsDiscoveryExecuteRoute,
-  ...SignificantEventsDiscoveryStatusRoute,
+  ...significantEventsDiscoveryExecuteRoute,
+  ...significantEventsDiscoveryStatusRoute,
 };

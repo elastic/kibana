@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
@@ -34,16 +34,16 @@ const createService = (overrides: Record<string, jest.Mock> = {}) => {
 describe('WorkflowExecutionService', () => {
   describe('classifyExecutionStatus', () => {
     it.each([
-      [ExecutionStatus.PENDING, WorkflowStatus.InProgress],
-      [ExecutionStatus.RUNNING, WorkflowStatus.InProgress],
-      [ExecutionStatus.WAITING, WorkflowStatus.InProgress],
-      [ExecutionStatus.WAITING_FOR_INPUT, WorkflowStatus.InProgress],
-      [ExecutionStatus.WAITING_FOR_CHILD, WorkflowStatus.InProgress],
-      [ExecutionStatus.COMPLETED, WorkflowStatus.Completed],
-      [ExecutionStatus.FAILED, WorkflowStatus.Failed],
-      [ExecutionStatus.TIMED_OUT, WorkflowStatus.Failed],
-      [ExecutionStatus.CANCELLED, WorkflowStatus.Canceled],
-      [ExecutionStatus.SKIPPED, WorkflowStatus.Canceled],
+      [ExecutionStatus.PENDING, SigEventsWorkflowStatus.InProgress],
+      [ExecutionStatus.RUNNING, SigEventsWorkflowStatus.InProgress],
+      [ExecutionStatus.WAITING, SigEventsWorkflowStatus.InProgress],
+      [ExecutionStatus.WAITING_FOR_INPUT, SigEventsWorkflowStatus.InProgress],
+      [ExecutionStatus.WAITING_FOR_CHILD, SigEventsWorkflowStatus.InProgress],
+      [ExecutionStatus.COMPLETED, SigEventsWorkflowStatus.Completed],
+      [ExecutionStatus.FAILED, SigEventsWorkflowStatus.Failed],
+      [ExecutionStatus.TIMED_OUT, SigEventsWorkflowStatus.Failed],
+      [ExecutionStatus.CANCELLED, SigEventsWorkflowStatus.Canceled],
+      [ExecutionStatus.SKIPPED, SigEventsWorkflowStatus.Canceled],
     ])('maps %s to %s', (executionStatus, expected) => {
       expect(WorkflowExecutionService.classifyExecutionStatus(executionStatus)).toBe(expected);
     });

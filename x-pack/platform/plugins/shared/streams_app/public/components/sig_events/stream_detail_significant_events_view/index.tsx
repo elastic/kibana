@@ -20,7 +20,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
-import { type Streams, WorkflowStatus, type WorkflowStatusResult } from '@kbn/streams-schema';
+import {
+  type Streams,
+  SigEventsWorkflowStatus,
+  type SigEventsWorkflowStatusResult,
+} from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
@@ -84,7 +88,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     refetch,
   } = useFetchKnowledgeIndicators({ definition });
   const onKnowledgeIndicatorsOnboardingComplete = useCallback(
-    (completedState: Extract<WorkflowStatusResult, { status: WorkflowStatus.Completed }>) => {
+    (
+      completedState: Extract<
+        SigEventsWorkflowStatusResult,
+        { status: SigEventsWorkflowStatus.Completed }
+      >
+    ) => {
       const { features, queries } = completedState;
 
       const count = features.discovered.length + queries.persisted.length;
@@ -117,7 +126,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   );
 
   const onKnowledgeIndicatorsOnboardingError = useCallback(
-    (failedState: Extract<WorkflowStatusResult, { status: WorkflowStatus.Failed }>) => {
+    (
+      failedState: Extract<
+        SigEventsWorkflowStatusResult,
+        { status: SigEventsWorkflowStatus.Failed }
+      >
+    ) => {
       toasts.addDanger({
         title: KNOWLEDGE_INDICATORS_ONBOARDING_FAILED_TOAST_TITLE,
         text: failedState.error,
@@ -139,7 +153,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   useInterval(
     refetch,
-    knowledgeIndicatorsOnboardingState?.status === WorkflowStatus.InProgress
+    knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.InProgress
       ? RUNNING_POLL_INTERVAL_MS
       : null
   );
@@ -181,7 +195,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [typeFilterOptions]
   );
   const isKnowledgeIndicatorsGenerationCanceling =
-    knowledgeIndicatorsOnboardingState?.status === WorkflowStatus.BeingCanceled;
+    knowledgeIndicatorsOnboardingState?.status === SigEventsWorkflowStatus.BeingCanceled;
   const isGenerateButtonDisabled =
     knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
 

@@ -313,13 +313,13 @@ export type {
   StreamsKIsOnboardingResult,
   StreamsKIsOnboardingFeaturesResult,
   StreamsKIsOnboardingQueriesResult,
-  WorkflowStatusResult,
 } from './src/onboarding';
 export {
   StreamsKIsOnboardingStep,
-  WorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
 } from './src/onboarding';
+export type { SigEventsWorkflowStatusResult } from './src/workflows';
+export { SigEventsWorkflowStatus } from './src/workflows';
 
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';

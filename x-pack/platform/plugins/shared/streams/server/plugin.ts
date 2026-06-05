@@ -435,7 +435,6 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiOnboardingWorkflowService,
-        streamsKIsOnboardingClient,
         workflowClients,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();

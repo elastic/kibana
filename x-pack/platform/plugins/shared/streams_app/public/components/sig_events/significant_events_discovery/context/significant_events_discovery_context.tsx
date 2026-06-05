@@ -7,7 +7,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import React, {
   createContext,
   useCallback,
@@ -28,9 +28,9 @@ const TERMINAL_STATUS_TOAST_DELAY_MS = 5 * 1000;
 const SIGNIFICANT_EVENT_DISCOVERY_NOTIFIED = ['significant_events_discovery_notified'];
 
 const isTerminalStatus = (status: string) =>
-  status === WorkflowStatus.Completed ||
-  status === WorkflowStatus.Failed ||
-  status === WorkflowStatus.Canceled;
+  status === SigEventsWorkflowStatus.Completed ||
+  status === SigEventsWorkflowStatus.Failed ||
+  status === SigEventsWorkflowStatus.Canceled;
 
 interface SignificantEventsDiscoveryContextValue {
   isRunning: boolean;
@@ -74,11 +74,12 @@ export function SignificantEventsDiscoveryProvider({
     queryKey: ['significant_events_discovery_status'],
     queryFn: getSignificantEventsDiscoveryStatus,
     refetchInterval: (result) =>
-      result?.status === WorkflowStatus.InProgress ? RUNNING_POLL_INTERVAL_MS : false,
+      result?.status === SigEventsWorkflowStatus.InProgress ? RUNNING_POLL_INTERVAL_MS : false,
   });
 
   const serverStatus = data?.status;
-  const isServerRunning = serverStatus === WorkflowStatus.InProgress;
+  const isServerRunning = serverStatus === SigEventsWorkflowStatus.InProgress;
+  const serverError = data?.status === SigEventsWorkflowStatus.Failed ? data.error : undefined;
 
   // Optimistic bridge: true from click until the poll reports a settled status
   // (or any terminal status) for the run we triggered. Cleared as soon as the
@@ -181,7 +182,7 @@ export function SignificantEventsDiscoveryProvider({
         queryClient.invalidateQueries({ queryKey: ['discoveriesEntities'] }),
       ]);
 
-    if (status === WorkflowStatus.Completed) {
+    if (status === SigEventsWorkflowStatus.Completed) {
       invalidateAll();
       const timer = setTimeout(invalidateAll, TERMINAL_STATUS_TOAST_DELAY_MS);
 
@@ -194,12 +195,12 @@ export function SignificantEventsDiscoveryProvider({
       return () => clearTimeout(timer);
     }
 
-    if (status === WorkflowStatus.Failed) {
+    if (status === SigEventsWorkflowStatus.Failed) {
       toasts.addDanger({
         title: i18n.translate('xpack.streams.SignificantEventsDiscoveryWorkflow.failedTitle', {
           defaultMessage: 'Significant events discovery failed',
         }),
-        text: data?.error,
+        text: serverError,
       });
     } else {
       toasts.addSuccess({
@@ -208,7 +209,7 @@ export function SignificantEventsDiscoveryProvider({
         }),
       });
     }
-  }, [data?.status, data?.executionId, data?.error, toasts, queryClient]);
+  }, [data?.status, data?.executionId, serverError, toasts, queryClient]);
 
   const handleRun = useCallback(() => {
     // Optimistic bridge until the poll reflects the new run; the tracked id is

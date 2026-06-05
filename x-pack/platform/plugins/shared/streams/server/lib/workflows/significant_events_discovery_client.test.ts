@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { WorkflowStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGEVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
@@ -90,7 +90,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
       const result = await client.getStatus({ spaceId: 'space-a' });
 
-      expect(result).toEqual({ status: WorkflowStatus.NotStarted, executionId: null });
+      expect(result).toEqual({ status: SigEventsWorkflowStatus.NotStarted, executionId: null });
     });
 
     it('maps a running execution to InProgress', async () => {
@@ -102,7 +102,7 @@ describe('SignificantEventsDiscoveryClient', () => {
 
       const result = await client.getStatus({ spaceId: 'space-a' });
 
-      expect(result).toEqual({ status: WorkflowStatus.InProgress, executionId: 'exec-1' });
+      expect(result).toEqual({ status: SigEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
     });
 
     it('surfaces the error message for a failed execution', async () => {
@@ -115,7 +115,7 @@ describe('SignificantEventsDiscoveryClient', () => {
       const result = await client.getStatus({ spaceId: 'space-a' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Failed,
+        status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
         error: 'boom',
       });
@@ -131,7 +131,7 @@ describe('SignificantEventsDiscoveryClient', () => {
       const result = await client.getStatus({ spaceId: 'space-a' });
 
       expect(result).toEqual({
-        status: WorkflowStatus.Failed,
+        status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
         error: 'Significant events discovery timed out',
       });
