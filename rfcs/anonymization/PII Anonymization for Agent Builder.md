@@ -64,7 +64,7 @@ Read more about other options we explored [here](#other-technical-options-we-exp
 | Reviewer | Comment | Status |
 | :---- | :---- | :---- |
 | [James Spiteri](mailto:james.spiteri@elastic.co) |  | In progress |
-| [Yuliia Naumenko](mailto:yuliia.naumenko@elastic.co) |  | Not started |
+| [Yuliia Naumenko](mailto:yuliia.naumenko@elastic.co) |  | Approved |
 | [Anish Mathur](mailto:anish.mathur@elastic.co) |  | Approved |
 | [Tinsae Erkailo](mailto:tin@elastic.co) |  | Not started |
 | [Snehal Adlinge](mailto:snehal.adlinge@elastic.co) |  | Not started |
@@ -96,7 +96,7 @@ the data I send through my AI agent contains employee names, IP addresses, email
 
 ## Concept
 
-Agent Builder is the AI agent platform for all of Elastic. Every prompt sent through an agent — whether by a developer building a RAG application over an HR system, an SRE summarizing a production incident, or a security analyst triaging an alert — can carry sensitive content. Customer records, employee data, log lines with internal IPs and hostnames, alert context, RAG-retrieved documents — all of it flows to an external LLM by default. For customers in regulated industries (financial services, healthcare, government) and for multi-tenant SaaS operators, this is a compliance non-starter. Agent Builder has no anonymization capability today, so those customers cannot adopt it for their highest-value workflows in any solution — Search, Observability, or Security. The platform needs a single, consistent answer that every agent across every solution inherits.
+Agent Builder is the AI agent platform for all of Elastic. Every prompt sent through an agent — whether by a developer building a RAG application over an HR system, an SRE summarizing a production incident, or a security analyst triaging an alert — can carry sensitive content. Customer records, employee data, log lines with internal IPs and hostnames, alert context, RAG-retrieved documents — all of it flows to an external LLM by default. For customers in regulated industries (financial services, healthcare, government) and for multi-tenant SaaS operators, this is a compliance non-starter. The Observability AI Assistant ships text-level anonymization today, but it is a single global advanced setting — not per-space, not visible to space admins outside Observability, and off by default. The platform needs a single, consistent answer that every agent across every solution inherits, surfaced where admins actually operate.
 
 # Technical proposal
 
@@ -114,9 +114,7 @@ Regex-based detection is the first phase as it covers structured PII patterns (I
 
 Three previous anonymization efforts preceded this approach. The Observability AI Assistant shipped a content-scanning approach using regex and NER rules, configured via an advanced setting (`ai:anonymizationSettings`). It is text-level — operating on prompt content rather than fields — which is why it works correctly with ESQL. It is opt-in, and has seen low adoption (one cluster). Security AI shipped a separate field-level implementation (per-ECS-field Allow/Anonymize/Deny) matching its use case of structured alert context with known field lineage. A subsequent effort then attempted to merge both into a single global solution covering regex, NER, and field-level rules for all consumers, with two system indices (`.kibana-anonymization-profiles`, `.kibana-anonymization-replacements`), encrypted saved objects for per-space salt, a full CRUD API, and a dedicated Stack Management UI. That merged implementation never reached production. It is disabled in the codebase (`ANONYMIZATION_FEATURE_ACTIVE = false`) and is marked for removal.
 
-The fundamental problem the global solution ran into was that field-level anonymization breaks down with Agent Builder. Tools are defined in ESQL, and ESQL operators like `EVAL`, `STATS`, and renames produce derived columns whose lineage back to source fields is unrecoverable — making field-level rules unreliable for any tool that uses ESQL ([discussion](https://elastic.slack.com/archives/C08RSJUPCC8/p1769531326077459)). Building a field lineage utility would be tightly coupled to ESQL syntax and fragile to maintain as new operators are added. The text-level approach the Observability team already validated — operating on the serialized prompt rather than on fields — sidesteps this problem entirely. The practical path forward is text-level content redaction using regex and NER, delivered as workflow steps on lifecycle hooks at the `chatComplete` boundary, covering all consumers in one place.
-
-Lifecycle hooks at the inference layer fix both problems:
+The fundamental problem the global solution ran into was that field-level anonymization breaks down with Agent Builder. Tools are defined in ESQL, and ESQL operators like `EVAL`, `STATS`, and renames produce derived columns whose lineage back to source fields is unrecoverable — making field-level rules unreliable for any tool that uses ESQL ([discussion](https://elastic.slack.com/archives/C08RSJUPCC8/p1769531326077459)). Building a field lineage utility would be tightly coupled to ESQL syntax and fragile to maintain as new operators are added. The O11y approach validates the right technical direction — text-level scanning over the serialized prompt, no field lineage required, works correctly with ESQL — but it cannot be the platform answer. It is a single global setting with Observability ownership and Observability UX; in its current form it cannot cater for Search and Security users. Lifecycle hooks at the inference layer take the same text-level approach and deliver it at the platform level:
 
 * **One integration point covers everything.** Any Kibana feature that uses the inference plugin today or in the future gets anonymization automatically. Agent Builder, Observability AI Assistant, Security AI, Attack Discovery — all covered without per-consumer wiring.  
 * **Text-level, not field-level.** Hooks operate on the serialized prompt text after all tool outputs have been assembled. Regex and NER scan the full text regardless of which fields or ESQL transformations produced it. The ESQL lineage problem disappears.  
@@ -138,9 +136,9 @@ Two synchronous lifecycle hooks sit at the `inference.chatComplete` boundary. Ev
 | inference.beforeCompletion | Anonymization: scan prompt for PII, replace with deterministic tokens, inject anonymization context into system prompt | Fail-closed by default (admin-configurable to fail-open) | 15s |
 | inference.afterCompletion | De-anonymization: restore original values in the LLM response | Fail-closed by default (admin-configurable to fail-open) | 15s |
 
-### Alternatively one Hook Point
+### Why not a single aroundCompletion hook?
 
-Another option is to implement a synchronous aroundCompletion hook instead (or we could even do all three if we have the use case). The benefit of doing the around hook is that we would only have to provide one default workflow and it would only be one workflow for the user to maintain. The downside is that the around hook breaks steaming since the workflow must buffer the entire LLM response before any post-proceed step can run; the caller receives nothing until the full pipeline completes.
+We evaluated a single `aroundCompletion` hook as an alternative — it would mean one workflow to configure and maintain rather than two. The problem is that it breaks streaming: the workflow must buffer the entire LLM response before any post-proceed step can run, so the caller receives nothing until the full pipeline completes. Since streaming is non-negotiable for conversational AI, this approach was ruled out.
 
 | Hook | Purpose | Failure Policy | Timeout |
 | :---- | :---- | :---- | :---- |
@@ -342,13 +340,10 @@ The inference plugin already has a full anonymization implementation (`chat_comp
 **Cons**
 
 - No per-space configuration \- a single global Kibana advanced setting applies to all spaces; you cannot enable anonymization for one space and disable it for another  
-- Not visible to space admins \- configured via advanced settings under Observability, outside the Workflows management UI, no YAML composability  
-- Detection rules are configured via Kibana advanced settings (`ai:anonymizationSettings`), not the Workflows UI. It is user-configurable but limited to what the settings schema exposes  
+- Not visible to space admins \- configured via advanced settings under Observability; space admins across Search and Security have no path to enabling or customizing it for their space  
+- Configurable but not composable \- admins can adjust regex rules and enable NER via advanced settings without a code deployment, but are limited to what the settings schema exposes; they cannot chain custom logic or integrate with other workflow behaviors  
 - Parallel system to the workflow engine \- two separate anonymization surfaces to maintain long-term as workflows become the configuration model for AI features  
-- Regex runs in a worker thread pool (off the main thread) with a 15s timeout \- same latency ceiling as Options 1/2, but a timed-out worker destroys and recreates the pool, adding recovery overhead. When workers are disabled, execution falls back to the main thread with no timeout protection  
 - NER calls hit Elasticsearch on the hot path \- additional latency risk under load, this risk is the same if we add NER support to option 1 or 2\.
-
-## 
 
 ## References
 
@@ -364,4 +359,4 @@ The inference plugin already has a full anonymization implementation (`chat_comp
 
 [image2]: <data:image/png;base64,>
 
-[image3]: <data:image/png;base64,i>
+[image3]: <data:image/png;base64,>
