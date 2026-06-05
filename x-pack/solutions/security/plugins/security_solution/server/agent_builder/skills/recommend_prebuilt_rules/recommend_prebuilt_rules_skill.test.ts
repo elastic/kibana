@@ -158,14 +158,16 @@ describe('createRecommendPrebuiltRulesSkill', () => {
     expect(skill.content).toMatch(/\bruleIds\b/);
   });
 
-  it('requires a wide survey pass and cutting the candidate pool to a strict subset', () => {
+  it('requires a wide survey pass and cutting the candidate pool down to the best fits', () => {
     const { getStartServices, logger } = createDeps();
     const skill = createRecommendPrebuiltRulesSkill({ getStartServices, logger });
     // A wide, thin survey pass before deepening.
     expect(skill.content).toMatch(/wide, thin net|survey pass|candidate landscape/i);
-    // The shortlist must be larger than the final list, and the final set a strict subset.
+    // The shortlist must be larger than the final list, so the final set is normally a subset.
     expect(skill.content).toMatch(/larger than your final/i);
-    expect(skill.content).toMatch(/strict subset/i);
+    expect(skill.content).toMatch(/final set is normally a subset/i);
+    // But it must not force an artificial cut when the field is genuinely tight.
+    expect(skill.content).toMatch(/don't drop a genuinely strong rule/i);
     // Population awareness: survey rows are a sample of total; narrow instead of maxing perPage.
     expect(skill.content).toMatch(/sample of `total`/i);
     expect(skill.content).toMatch(/not reflexively the max|tighten the filter/i);
