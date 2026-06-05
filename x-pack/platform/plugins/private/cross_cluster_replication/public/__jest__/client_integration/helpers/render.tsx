@@ -9,7 +9,7 @@ import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
 import * as userEventLib from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { Store } from 'redux';
 import type { RouteComponentProps } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
