@@ -166,7 +166,7 @@ flowchart LR
 
 - **Root context is shared** across all scoped managers via `BehaviorSubject`. When root re-resolves (e.g. solution nav change), all scoped managers see the update through their subscription.
 - **Deduplication**: Both `ProfilesManager` and `ScopedProfilesManager` serialize resolution params and skip re-resolution when params haven't changed (`isEqual` check on serialized form).
-- **Abort on supersede**: Async resolution uses an `AbortController`. If a new resolution starts before the previous completes, the previous is aborted (`AbortReason.REPLACED`). The aborted result is silently discarded.
+- **Abort on supersede**: Async resolution uses an `AbortController` to mark stale in-flight work. If a new resolution starts before the previous completes, the previous controller is aborted (`AbortReason.REPLACED`). Providers do not receive this signal, so it does not cancel provider work by itself; the result is silently discarded when it returns.
 - **Document context is lazy**: `resolveDocumentProfile` returns a `Proxy` over the record. The `context` property is resolved on first access, not eagerly. This avoids unnecessary work for records that are never expanded.
 - **Error fallback**: If any resolution throws, the error is logged and the **default context** for that level is used. The app never crashes from a resolution failure.
 
@@ -213,6 +213,8 @@ For document-level extension points, pass `{ record }` in options to include the
 const getDocViewer = useProfileAccessor('getDocViewer', { record });
 ```
 
+The record must be the proxy returned by `ScopedProfilesManager.resolveDocumentProfile()`. Passing a raw `DataTableRecord` falls back to the default document profile because no lazy `context` property is available.
+
 ### Non-React consumption
 
 Outside React (e.g. state management utils), call `getMergedAccessor` directly with `scopedProfilesManager.getProfiles()`.
@@ -244,25 +246,26 @@ This is rare and significant. Steps:
 
 The toolkit is created per `ScopedProfilesManager` at creation time and is immutable for its lifetime.
 
-`EMPTY_CONTEXT_AWARENESS_TOOLKIT` (no-op actions) is **only** used for the root profile accessors returned directly from `ProfilesManager.resolveRootProfile()` — specifically `getDefaultAdHocDataViews` and `getDefaultEsqlQuery`, which are consumed before any scoped manager exists (e.g. during app initialization). When the root profile is accessed through a `ScopedProfilesManager` (which is how all other extension points reach it), `createScopedProfilesManager` passes the real toolkit to `rootProfileService.getProfile()`, so root profile extension points receive a fully populated toolkit in that path.
+`EMPTY_CONTEXT_AWARENESS_TOOLKIT` (no-op actions) is used for the root profile accessors returned directly from `ProfilesManager.resolveRootProfile()` — specifically `getDefaultAdHocDataViews` and `getDefaultEsqlQuery`, which are consumed before any scoped manager exists (e.g. during app initialization). Scoped managers pass through the toolkit supplied by their host surface. In the main Discover app this is usually the full runtime toolkit, while the document route, surrounding documents page, embeddables, and tests may provide a partial or empty toolkit depending on which actions they can support.
 
 When adding new toolkit actions:
 
 1. Add the method to `ContextAwarenessToolkitActions` in `toolkit.ts`.
-2. Provide the implementation when constructing the toolkit (in the runtime state setup code).
-3. The action is then available to all extension point implementations via `params.toolkit.actions`.
+2. Provide host-specific implementations when constructing each toolkit for surfaces that should expose the action.
+3. Treat the action as optional in extension point implementations and access it via `params.toolkit.actions`.
 
 ## Error handling
 
 - **Resolution errors** (thrown from `resolve`): Caught in `ProfilesManager` / `ScopedProfilesManager`. Logged via `logResolutionError`. The default context for that level is used as fallback.
 - **Extension point errors** (thrown from profile methods): Not caught by the framework. These propagate to the calling component. Extension point implementations are responsible for their own error handling.
-- **Abort handling**: Superseded async resolutions are silently discarded — the result is ignored if the abort signal has fired.
+- **Abort handling**: Superseded async resolutions are silently discarded — the result is ignored if the abort signal has fired. The signal is owned by the manager and is not passed into provider `resolve` methods.
 
 ## EBT (Event-Based Telemetry)
 
 `ScopedProfilesManager` tracks:
 
-- **Profile resolution events**: Emitted per level when a profile resolves, via `trackContextualProfileResolvedEvent({ contextLevel, profileId })`.
+- **Root and data source events**: Emitted when data source resolution is applied, via `trackContextualProfileResolvedEvent({ contextLevel, profileId })`.
+- **Document events**: Emitted lazily when the proxied record's `context` property is read.
 - **Active profiles context**: Updated on data source resolution via `updateProfilesContextWith([rootId, dataSourceId])`, which sets the EBT context for all subsequent events in that session.
 
 The `ScopedDiscoverEBTManager` is injected at scoped manager creation time.
