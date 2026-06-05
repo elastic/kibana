@@ -28,8 +28,22 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    let initialHitCount: number;
+
+    spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
       await browserAuth.loginAsViewer();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForDocTableRendered();
+
+      await addFilters(page, TEST_FILTER_COLUMN_NAMES);
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+
+      initialHitCount = await pageObjects.discover.getHitCountInt();
+
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+      await pageObjects.contextPage.clickRowAction(1);
+      await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -40,19 +54,6 @@ spaceTest.describe(
     spaceTest(
       'should go back after loading more in context view',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
-        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-
-        const initialHitCount = await pageObjects.discover.getHitCountInt();
-
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
         await pageObjects.contextPage.clickSuccessorLoadMoreButton();
         await pageObjects.contextPage.clickSuccessorLoadMoreButton();
         await pageObjects.contextPage.clickSuccessorLoadMoreButton();
@@ -69,17 +70,6 @@ spaceTest.describe(
     spaceTest(
       'should go back via breadcrumbs with preserved state',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
-        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
         await page.testSubj.click('~breadcrumb-deepLinkId-discover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
@@ -97,17 +87,6 @@ spaceTest.describe(
     spaceTest(
       'should go back via breadcrumbs with preserved state after page refresh',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
-        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
@@ -124,17 +103,6 @@ spaceTest.describe(
     spaceTest(
       'should preserve state when navigating back after URL state changes',
       async ({ page, pageObjects }) => {
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-
-        await addFilters(page, TEST_FILTER_COLUMN_NAMES);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
-        await pageObjects.contextPage.clickRowAction(1);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
         await spaceTest.step('remove a filter in context view to change URL state', async () => {
           const agentFilter = page.testSubj.locator('~filter & ~filter-key-agent');
           await agentFilter.click();
