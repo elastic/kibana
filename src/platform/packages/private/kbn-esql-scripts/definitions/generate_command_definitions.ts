@@ -11,10 +11,14 @@
 
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
-import type { ElasticsearchCommandDefinition } from '../src/commands/definitions/types';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { ElasticsearchCommandDefinition } from '@kbn/esql-language';
+import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
 
-const GENERATED_COMMANDS_BASE_PATH = '../src/commands/definitions/generated/commands';
+const GENERATED_COMMANDS_BASE_PATH = join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/commands'
+);
 
 async function generateElasticsearchCommandDefinitions(): Promise<void> {
   const pathToElasticsearch = process.argv[2];
@@ -25,7 +29,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
     language: 'esql',
   });
 
-  const outputCommandsDir = join(__dirname, GENERATED_COMMANDS_BASE_PATH);
+  const outputCommandsDir = GENERATED_COMMANDS_BASE_PATH;
   await mkdir(outputCommandsDir, { recursive: true });
 
   const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = {};

@@ -8,8 +8,8 @@ if [ -z "$1" ]; then
 fi
 
 ELASTICSEARCH_PATH="$1"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Run both scripts with the provided path
-ts-node --transpileOnly ./scripts/generate_function_definitions.ts "$ELASTICSEARCH_PATH" && \
-ts-node --transpileOnly ./scripts/generate_command_definitions.ts "$ELASTICSEARCH_PATH" && \
-ts-node --transpileOnly ./scripts/generate_settings.ts "$ELASTICSEARCH_PATH"
+ts-node --transpileOnly "$SCRIPT_DIR/generate_esql_command_docs.ts" "$ELASTICSEARCH_PATH" && \
+ts-node --transpileOnly "$SCRIPT_DIR/generate_esql_docs.ts" "$ELASTICSEARCH_PATH"

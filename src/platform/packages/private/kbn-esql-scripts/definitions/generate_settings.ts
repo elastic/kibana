@@ -12,12 +12,17 @@
 import { camelCase } from 'lodash';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { readElasticsearchDefinitions, clearDocumentationDirectives } from '@kbn/esql-scripts';
-import type { ElasticsearchSettingsDefinition } from '../src/commands/definitions/types';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { ElasticsearchSettingsDefinition } from '@kbn/esql-language';
+import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
+import { clearDocumentationDirectives } from '../lib/docs';
 
 // We exlude the time_zone setting as we decided that we won't support it in Kibana
 const SETTINGS_TO_EXCLUDE = new Set(['time_zone', 'project_routing']);
-const GENERATED_DEFINITIONS_PATH = '../src/commands/definitions/generated';
+const GENERATED_DEFINITIONS_PATH = join(
+  REPO_ROOT,
+  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
+);
 
 async function generateElasticsearchSettingsDefinitions(): Promise<void> {
   const pathToElasticsearch = process.argv[2];
@@ -28,7 +33,7 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
     language: 'esql',
   });
 
-  const outputSettingsDir = join(__dirname, GENERATED_DEFINITIONS_PATH);
+  const outputSettingsDir = GENERATED_DEFINITIONS_PATH;
   await mkdir(outputSettingsDir, { recursive: true });
 
   const outputTsPath = join(outputSettingsDir, 'settings.ts');
