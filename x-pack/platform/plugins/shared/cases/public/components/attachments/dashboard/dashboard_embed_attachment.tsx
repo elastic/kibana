@@ -21,6 +21,7 @@ import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attach
 
 type DashboardViewProps = UnifiedReferenceAttachmentViewProps<
   DashboardAttachmentMetadata,
+  string,
   DashboardAttachmentData
 >;
 

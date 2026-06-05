@@ -162,10 +162,8 @@ type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId:
 /** Narrow registration type — renderers see typed `data`/`metadata`/`attachmentId` from `schema`. */
 type UnifiedAttachmentTypeFromSchema<S extends z.ZodType> = IsReferenceSchema<S> extends true
   ? UnifiedReferenceAttachmentType<
-      
       z.infer<S> extends { metadata?: infer M } ? M : never,
-      z.infer<S> extends { attachmentId: infer A } ? A : never
-    ,
+      z.infer<S> extends { attachmentId: infer A } ? A : never,
       z.infer<S> extends { data?: infer D } ? D : UnifiedReferenceAttachmentPayload['data']
     >
   : z.infer<S> extends { data: infer D }

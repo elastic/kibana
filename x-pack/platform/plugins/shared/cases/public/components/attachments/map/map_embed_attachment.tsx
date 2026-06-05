@@ -17,7 +17,11 @@ import type {
 import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
 import { useKibana } from '../../../common/lib/kibana';
 
-type MapViewProps = UnifiedReferenceAttachmentViewProps<MapAttachmentMetadata, MapAttachmentData>;
+type MapViewProps = UnifiedReferenceAttachmentViewProps<
+  MapAttachmentMetadata,
+  string,
+  MapAttachmentData
+>;
 
 /**
  * Compile-time tripwire: if Maps drops or renames any of the snapshot fields

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const DASHBOARDS = i18n.translate('xpack.cases.caseView.dashboard.displayName', {
-  defaultMessage: 'Dashboard',
+  defaultMessage: 'Dashboards',
 });
 
 export const ADDED_DASHBOARD = i18n.translate('xpack.cases.caseView.dashboard.addedDashboard', {

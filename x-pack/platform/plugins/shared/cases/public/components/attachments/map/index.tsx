@@ -20,7 +20,11 @@ import * as i18n from './translations';
 import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 
-type MapViewProps = UnifiedReferenceAttachmentViewProps<MapAttachmentMetadata, MapAttachmentData>;
+type MapViewProps = UnifiedReferenceAttachmentViewProps<
+  MapAttachmentMetadata,
+  string,
+  MapAttachmentData
+>;
 
 const MAP_SO_TYPE = 'map';
 
@@ -35,16 +39,12 @@ const MapAttachmentsTab = createSavedObjectAttachmentsTab({
 });
 
 const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewProps) => {
-  // Schema constrains `attachmentId` to a single string; the framework type
-  // permits `string | string[]` for reference attachments that bulk-attach
-  // (alerts), hence the cast.
-  const id = attachmentId as string;
   // Always show "added map <title>" as the timeline event. Inline embed is
   // appended as `children` only when a snapshot was captured at attach time.
   const event = (
     <SavedObjectAddedEvent
       soType={MAP_SO_TYPE}
-      attachmentId={id}
+      attachmentId={attachmentId}
       title={metadata?.title}
       label={i18n.ADDED_MAP}
       data-test-subj="cases-map-event-link"

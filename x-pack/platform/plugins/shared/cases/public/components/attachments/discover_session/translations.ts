@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DISCOVER_SESSION = i18n.translate(
-  'xpack.cases.attachment.savedObject.discoverSession',
+export const DISCOVER_SESSIONS = i18n.translate(
+  'xpack.cases.attachment.savedObject.discoverSessionDisplayName',
   {
-    defaultMessage: 'Discover session',
+    defaultMessage: 'Discover sessions',
   }
 );
 

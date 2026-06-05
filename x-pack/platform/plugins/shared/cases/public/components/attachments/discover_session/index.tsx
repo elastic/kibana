@@ -22,22 +22,16 @@ import * as i18n from './translations';
 const DISCOVER_SESSION_SO_TYPE = 'search';
 
 const DiscoverSessionEvent: React.FC<
-  UnifiedReferenceAttachmentViewProps<SavedObjectReferenceMetadata>
-> = ({ attachmentId, metadata }) => {
-  // Schema constrains `attachmentId` to a single string; the framework type
-  // permits `string | string[]` for bulk-attached reference types (alerts).
-  const id = attachmentId as string;
-
-  return (
-    <SavedObjectAddedEvent
-      soType={DISCOVER_SESSION_SO_TYPE}
-      attachmentId={id}
-      title={metadata?.title}
-      label={i18n.ADDED_DISCOVER_SESSION}
-      data-test-subj={`cases-discover-session-event-link-${id}`}
-    />
-  );
-};
+  UnifiedReferenceAttachmentViewProps<SavedObjectReferenceMetadata, string>
+> = ({ attachmentId, metadata }) => (
+  <SavedObjectAddedEvent
+    soType={DISCOVER_SESSION_SO_TYPE}
+    attachmentId={attachmentId}
+    title={metadata?.title}
+    label={i18n.ADDED_DISCOVER_SESSION}
+    data-test-subj={`cases-discover-session-event-link-${attachmentId}`}
+  />
+);
 
 DiscoverSessionEvent.displayName = 'DiscoverSessionEvent';
 
@@ -50,7 +44,7 @@ export const getDiscoverSessionAttachmentType = () =>
   defineAttachment({
     id: DISCOVER_SESSION_ATTACHMENT_TYPE,
     icon: 'discoverApp',
-    displayName: i18n.DISCOVER_SESSION,
+    displayName: i18n.DISCOVER_SESSIONS,
     schema: DiscoverSessionAttachmentPayloadSchema,
     getAttachmentViewObject: (props) => ({
       event: <DiscoverSessionEvent {...props} />,

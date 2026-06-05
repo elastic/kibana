@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const MAPS = i18n.translate('xpack.cases.caseView.map.displayName', {
-  defaultMessage: 'Map',
+  defaultMessage: 'Maps',
 });
 
 export const ADDED_MAP = i18n.translate('xpack.cases.caseView.map.addedMap', {

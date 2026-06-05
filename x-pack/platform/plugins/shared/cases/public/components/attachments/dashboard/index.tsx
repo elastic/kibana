@@ -22,6 +22,7 @@ import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_ob
 
 type DashboardViewProps = UnifiedReferenceAttachmentViewProps<
   DashboardAttachmentMetadata,
+  string,
   DashboardAttachmentData
 >;
 
@@ -38,15 +39,10 @@ const DashboardAttachmentsTab = createSavedObjectAttachmentsTab({
 });
 
 const getDashboardAttachmentViewObject = ({ attachmentId, metadata, data }: DashboardViewProps) => {
-  // Schema constrains `attachmentId` to a single string; the framework type
-  // permits `string | string[]` for reference attachments that bulk-attach
-  // (alerts), hence the cast.
-  const id = attachmentId as string;
-
   const event = (
     <SavedObjectAddedEvent
       soType={DASHBOARD_SO_TYPE}
-      attachmentId={id}
+      attachmentId={attachmentId}
       title={metadata?.title}
       label={i18n.ADDED_DASHBOARD}
       data-test-subj="cases-dashboard-event-link"

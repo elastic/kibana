@@ -14,10 +14,9 @@ import { UploadFileModal } from '../../attachments/file/upload_file_modal';
 import { AttachSavedObjectModalLazy } from '../../attachments/common/saved_object/attach_saved_object_modal_lazy';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useTimelineContext } from '../../timeline_context/use_timeline_context';
-import { useCasesConfig } from '../../../common/lib/kibana';
+import { useCasesConfig, KibanaServices } from '../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
-import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 
 export interface CaseViewAttachButtonProps {
@@ -63,7 +62,7 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
       closeModal();
       createAttachments(
         {
-          caseId,
+          caseId: caseData.id,
           caseOwner: owner[0],
           attachments: [
             {
@@ -76,7 +75,7 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
         { onSuccess: refreshCaseViewPage }
       );
     },
-    [caseId, closeModal, createAttachments, owner, refreshCaseViewPage]
+    [caseData.id, closeModal, createAttachments, owner, refreshCaseViewPage]
   );
 
   const openSavedObject = useCallback(() => {
