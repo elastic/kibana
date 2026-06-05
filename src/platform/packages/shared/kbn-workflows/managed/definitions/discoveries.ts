@@ -366,24 +366,29 @@ export const ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW = {
   id: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 1,
+  version: 2,
   yaml: `version: '1'
 name: Security - Attack discovery - Run example
 description: |
   Demonstrates the security.attack-discovery.run step, which orchestrates the
   full Attack Discovery pipeline (alert retrieval → generation → validation →
-  persistence) in a single step. \`connector_id\` is the only required field.
+  persistence) in a single step. All inputs are optional: when \`connector_id\`
+  is omitted, the server resolves the configured default AI connector
+  (\`genAiSettings:defaultAIConnector\`, with an inference default-connector
+  fallback). Provide \`connector_id\` to override the configured default.
 
   ## Modes of execution
 
   ### 1. All defaults (custom_query)
-  Retrieves the 100 most recent security alerts and generates discoveries.
+  Retrieves the 100 most recent security alerts and generates discoveries using
+  the configured default AI connector.
   \`\`\`json
-  { "connector_id": "<your-connector-id>" }
+  {}
   \`\`\`
 
   ### 2. custom_query with overrides
-  Scope retrieval to a specific time range, alert count, and DSL filter.
+  Scope retrieval to a specific time range, alert count, and DSL filter. Pass
+  \`connector_id\` to override the configured default connector.
   \`\`\`json
   {
     "connector_id": "<your-connector-id>",
@@ -399,7 +404,6 @@ description: |
   Retrieve alerts via an ES|QL query instead of DSL.
   \`\`\`json
   {
-    "connector_id": "<your-connector-id>",
     "alert_retrieval_mode": "esql",
     "esql_query": "FROM .alerts-security.alerts-default | WHERE kibana.alert.severity == \\"critical\\" | LIMIT 50"
   }
@@ -412,7 +416,6 @@ description: |
   re-querying Elasticsearch.
   \`\`\`json
   {
-    "connector_id": "<your-connector-id>",
     "alerts": [
       "Alert 1: Unusual process execution on host web-prod-01. Process: cmd.exe spawned by iis.exe.",
       "Alert 2: Lateral movement detected. User admin logged in from 10.0.0.5 to 10.0.0.23 via PsExec.",
@@ -426,7 +429,7 @@ description: |
   discoveries are written to Elasticsearch in the background. Can be combined
   with any retrieval mode by adding the relevant inputs alongside \`"mode": "async"\`.
   \`\`\`json
-  { "connector_id": "<your-connector-id>", "mode": "async" }
+  { "mode": "async" }
   \`\`\`
 enabled: true
 tags:
@@ -487,7 +490,11 @@ inputs:
         type: string
       type: array
     connector_id:
-      description: LLM connector UUID used for generation.
+      description: |
+        Optional LLM connector UUID used for generation. When omitted, the
+        server resolves the configured default AI connector
+        (genAiSettings:defaultAIConnector, with an inference default-connector
+        fallback). Provide a value to override the configured default.
       type: string
     end:
       description: |
@@ -536,8 +543,6 @@ inputs:
         to use a custom validation workflow, or leave empty to use
         the default validation.
       type: string
-  required:
-    - connector_id
 
 steps:
   - name: run_attack_discovery

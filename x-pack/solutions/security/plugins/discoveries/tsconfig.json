@@ -26,6 +26,7 @@
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
     "@kbn/logging",
+    "@kbn/management-settings-ids",
     "@kbn/react-query",
     "@kbn/rule-registry-plugin",
     "@kbn/security-ai-prompts",

@@ -62,14 +62,18 @@ See the YAML block above.
 
 ### 3. Run the example workflow
 
-The **Security - Attack discovery - Run example** workflow is the recommended way to desk-test the pipeline end-to-end with a single connector ID.
+The **Security - Attack discovery - Run example** workflow is the recommended way to desk-test the pipeline end-to-end.
 
 1. Start Kibana and Elasticsearch (`yarn es snapshot --license trial`, then `yarn start`).
 2. Navigate to **http://localhost:5601/app/workflows**.
 3. Managed workflows are hidden from the list view by default — go directly to:
    `http://localhost:5601/app/workflows/system-attack-discovery-run-example`
 4. Click **Test Workflow** and choose the **Manual** trigger.
-5. Paste a JSON body. Minimum:
+5. Paste a JSON body. All inputs are optional — the minimum runs with the configured default AI connector:
+   ```json
+   {}
+   ```
+   To target a specific connector, add `connector_id` to override the configured default:
    ```json
    { "connector_id": "<your-connector-id>" }
    ```
@@ -232,7 +236,7 @@ The plugin registers five workflow step handlers (see [`server/workflows/registe
 | `security.attack-discovery.generate` | Generates attack discoveries from anonymized alerts via LangGraph | `alerts` (string[]), `apiConfig`, `replacements`, `size` | `attack_discoveries`, `execution_uuid`, `replacements` |
 | `security.attack-discovery.defaultValidation` | Hallucination detection + deduplication | `attackDiscoveries`, `anonymizedAlerts`, `apiConfig`, `connectorName`, `generationUuid`, `alertsContextCount`, `replacements` | `validated_discoveries`, `filtered_count`, `filter_reason` |
 | `security.attack-discovery.persistDiscoveries` | Persists validated discoveries to the AD data store | (as above) | `persisted_discoveries`, `duplicates_dropped_count` |
-| `security.attack-discovery.run` | Runs the full pipeline (retrieve → generate → validate → persist) as a single step | `connector_id`, `alert_retrieval_mode`, `mode`, `alerts` (optional), `size`, `start`/`end`, `filter`, `esql_query` | `attack_discoveries`, `execution_uuid`, `alerts_context_count`, `discovery_count` |
+| `security.attack-discovery.run` | Runs the full pipeline (retrieve → generate → validate → persist) as a single step | `connector_id` (optional — defaults to `genAiSettings:defaultAIConnector` → inference fallback), `alert_retrieval_mode`, `mode`, `alerts` (optional), `size`, `start`/`end`, `filter`, `esql_query` | `attack_discoveries`, `execution_uuid`, `alerts_context_count`, `discovery_count` |
 
 Common (cross-runtime) step definitions live in [`common/step_types/`](common/step_types/); server-side handlers live in [`server/workflows/steps/`](server/workflows/steps/).
 
@@ -375,18 +379,28 @@ The full schedule API surface is documented under [Scheduling → Schedule-Relat
 
 ## Using the `security.attack-discovery.run` Step
 
-The `security.attack-discovery.run` step is the recommended entry point for triggering Attack Discovery from a user-authored workflow. `connector_id` is the only required field — all other inputs have sensible defaults.
+The `security.attack-discovery.run` step is the recommended entry point for triggering Attack Discovery from a user-authored workflow. **All inputs are optional** — every field has a sensible default, including the LLM connector.
 
 The **Security - Attack discovery - Run example** workflow (`system-attack-discovery-run-example`, declared inline in [`kbn-workflows/managed/definitions/discoveries.ts`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries.ts)) is a ready-made workflow that exposes all inputs and is ideal for desk-testing or as a starting template.
 
+### Connector resolution
+
+`connector_id` is optional. When it is omitted, the step resolves the connector server-side in this order:
+
+1. **`genAiSettings:defaultAIConnector`** — the configured default AI connector (read via request-scoped `uiSettings`). The `NO_DEFAULT_CONNECTOR` sentinel and empty values are treated as unset.
+2. **`inference.getDefaultConnector`** — the platform default inference connector, used as a fallback when no default AI connector is configured.
+
+If neither source yields a connector, the step fails with a clear error asking the caller to configure a default or provide `connector_id`. Workflow-engine surfaces (the run step and the example workflow) have no agent execution context, so they always use this server-side resolution. Pass an explicit `connector_id` to override the configured default. The examples below include `connector_id` to show the override; drop it to use the configured default.
+
 ### Quick Start (Minimal Input)
 
-Retrieve the 100 most recent security alerts and generate discoveries using all defaults:
+Retrieve the 100 most recent security alerts and generate discoveries using all defaults (including the configured default AI connector):
 
 ```json
-{ "connector_id": "<your-connector-id>" }
+{}
 ```
 
+- `connector_id` defaults to the configured default AI connector (`genAiSettings:defaultAIConnector` → inference fallback)
 - `alert_retrieval_mode` defaults to `custom_query`
 - `size` defaults to `100`
 - `mode` defaults to `sync`
@@ -565,6 +579,10 @@ The skill teaches the agent to pick the `security.attack-discovery.run` mode tha
 ⛔ The skill explicitly forbids bare connector-ID-only invocations (`{ "connector_id": "..." }`) because they rely on server-side defaults that do not reflect the investigation context.
 
 Sync mode is the default and the only mode the skill actively instructs the agent to use, per [ADR-012](#adr-012--agent-builder-uses-run-in-sync-mode-with-a-soft-deadline). The run step's executor races the pipeline against `ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS` (90s) so the wrapping Agent Builder workflow tool — which itself caps at 120s — always gets a clean response well inside its window. When the soft deadline wins, only `execution_uuid` is returned; the pipeline keeps running in the background and the agent resumes via `security.attack-discovery.get_status` when the user asks for status.
+
+#### Connector resolution
+
+The Agent Builder tool resolves the LLM connector from the **agent's selected model**, not from a server-side platform default. When `connector_id` is omitted, the tool awaits `context.modelProvider.getDefaultModel()` and uses the resulting `connector.connectorId` — the full-fidelity connector the agent execution already selected (per-request override → `genAiSettings` default → fallback), so no Agent Builder context-shape change is needed. Passing `connector_id` overrides the agent's selected connector. If neither yields a connector, the tool returns the existing "no LLM connector available" error result. This differs from the workflow-engine run step, which has no agent execution context and instead resolves `genAiSettings:defaultAIConnector` (with an inference fallback) server-side — see [Connector resolution](#connector-resolution) under the run-step guide.
 
 #### Anonymization boundary
 
@@ -1121,17 +1139,17 @@ The records below preserve the historical rationale behind each load-bearing des
 
 **Context.** The four phase steps (retrieval, generate, validation, persist) require a workflow author to thread intermediate data via Liquid expressions — non-trivial boilerplate.
 
-**Decision.** Add `security.attack-discovery.run` as a single step that internally executes the full pipeline and exposes a minimal input surface (`connector_id` is the only required field).
+**Decision.** Add `security.attack-discovery.run` as a single step that internally executes the full pipeline and exposes a minimal input surface (every input is optional — `connector_id` defaults to the configured default AI connector when omitted).
 
 **Consequence.** Dramatically reduces the surface area a workflow author must understand. Advanced users who need to inject custom logic between phases can still compose the individual steps directly. The `run` step is the recommended entry point for Agent Builder integrations.
 
-### ADR-004 — `run` step takes `connector_id`, not `api_config`
+### ADR-004 — `run` step takes optional `connector_id`, not `api_config`
 
-**Context.** Every connector already knows its own action type. Requiring callers to provide both `action_type_id` and `connector_id` is redundant and error-prone.
+**Context.** Every connector already knows its own action type. Requiring callers to provide both `action_type_id` and `connector_id` is redundant and error-prone. Beyond that, Attack Discovery should not depend on a caller always supplying a connector, nor on any Agent Builder-specific connector primitive — the connector should resolve from the execution context or platform defaults.
 
-**Decision.** Take `connector_id` directly; resolve the action type from the connector at runtime.
+**Decision.** Take an optional `connector_id`; resolve the action type from the connector at runtime. When `connector_id` is omitted, resolve a default based on the surface: the **workflow-engine run step** (no agent context) reads `genAiSettings:defaultAIConnector` with an `inference.getDefaultConnector` fallback; the **Agent Builder tool** resolves the agent's selected model via `context.modelProvider.getDefaultModel()`. An explicit `connector_id` overrides either default.
 
-**Consequence.** Simpler input contract; one less field for callers to get wrong; no behavioral difference at runtime.
+**Consequence.** Simpler input contract; one less field for callers to get wrong; callers can omit the connector entirely and rely on the configured default. Attack Discovery ships its connector handling with no dependency on an Agent Builder connector-shape change — the only AB-owned file the AD stack touches is `allow_lists.ts` (skill-ID registration).
 
 ### ADR-005 — `run` does not internally call `workflow.execute`
 
@@ -1262,6 +1280,7 @@ gantt
 | **Feature flag** | `securitySolution.attackDiscoveryWorkflowsEnabled` (default OFF) |
 | **`assertWorkflowsEnabled`** | FF gate helper; returns 404 from internal routes when the FF is OFF |
 | **`@kbn/zod/v4` requirement** | Workflow step schemas use `@kbn/zod/v4` (NOT v3) per the Workflows platform contract; v3 schemas (REST route validation) must never be cast to v4 |
+| **Connector resolution** | `connector_id` is optional everywhere. The workflow-engine run step resolves `genAiSettings:defaultAIConnector` (→ `inference.getDefaultConnector` fallback) server-side; the Agent Builder tool resolves the agent's selected model via `context.modelProvider.getDefaultModel()`. An explicit `connector_id` overrides either default. No Agent Builder connector-shape dependency — the AD stack touches only `allow_lists.ts` in that package |
 | **Anonymization boundary** | Alert retrieval transforms raw alerts → anonymized `string[]` + `replacements` map; `replacements` de-anonymizes only on display and is excluded from `security.attack-discovery.run` output |
 | **`replacements` map** | `Record<string, string>` mapping anonymized tokens (e.g., `"SRVHQMWPN001"`) back to real values (e.g., `"dc01.example.com"`) |
 | **Tag-based isolation** | Internal-API schedules carry the `attack-discovery-schedule` tag; reads filter on it; legacy/public-API schedules carry no tag |
