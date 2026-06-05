@@ -39,6 +39,7 @@ export const getHistoryForRule = async ({
       ruleId,
       from: (page - 1) * perPage,
       size: perPage + 1,
+      sort: [{ '@timestamp': { order: 'desc' } }],
     }),
     page === 1
       ? rulesClient.getHistory({
