@@ -94,7 +94,7 @@ const useTitleStyles = () => {
         content: '';
         position: absolute;
         inset-block: calc(-1 * ${euiTheme.size.xxs});
-        inset-inline: calc(-1 * ${euiTheme.size.s}) calc(-1 * ${euiTheme.size.s});
+        inset-inline: calc(-1 * ${euiTheme.size.xs}) calc(-1 * ${euiTheme.size.xs});
         border-radius: ${euiTheme.border.radius.small};
         pointer-events: none;
       }
@@ -216,7 +216,7 @@ const useTitleStyles = () => {
       inset-block: 0;
       // Align the icon with the overlay's bled trailing edge so it sits in the box's
       // right padding rather than crowding the text.
-      inset-inline-end: calc(-1 * ${euiTheme.size.s});
+      inset-inline-end: calc(-1 * ${euiTheme.size.xs});
       display: flex;
       align-items: center;
       justify-content: flex-end;
