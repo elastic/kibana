@@ -267,8 +267,8 @@ Or a list of issue numbers provided by the user.
 
 For each issue:
 1. Extract test file path from the issue title (Kibana auto-reporter format: `<Pipeline>.<path> - <describe chain> <test name>`).
-2. Check if file/test still exists: `grep -r "<test name>" <file>` (or `NOT FOUND`).
-3. Check last commit on the file: `git log -1 --format="%ai %s" -- <file>`.
+2. Check if file/test still exists: `grep -r "<test name>" "<file>"` (or `NOT FOUND`).
+3. Check last commit on the file: `git log -1 --format="%ai %s" -- "<file>"`.
 4. Check issue's `updatedAt` — if only bumped by the auto-reporter, note it.
 5. Check issue labels — note `blocker` if present, and record any version labels (e.g. `v9.3.0`, `v9.4.0`) for use in PR backport labels later.
 6. Look for sibling issues: `base=$(basename "<file>" .ts); gh issue list --repo elastic/kibana --label "Team:Fleet" --label "failed-test" --state open --search "$base"`.
@@ -398,10 +398,10 @@ For jest: if it passes 9/10 or more runs locally after a long silence, that's su
 |---|---|
 | Feature still valid? | Search codebase, check recent commits |
 | Duplicate coverage? | Grep for the assertion/behavior in other test files |
-| When was test skipped? | `git log -S '.skip' -- <file>` |
+| When was test skipped? | `git log -S '.skip' -- "<file>"` |
 | Which FTR config runs it? | `base=$(basename "<file>" .ts); grep -rl -- "$base" x-pack/platform/test/fleet_api_integration/` |
 | Sibling open issues? | `check_fleet_test_status.sh` output, or `base=$(basename "<file>" .ts); gh issue list --search "$base"` |
-| Is the issue stale? | Compare `git log -1 --format=%ai -- <file>` with issue `updatedAt` |
+| Is the issue stale? | Compare `git log -1 --format=%ai -- "<file>"` with issue `updatedAt` |
 | Was it already fixed? | `base=$(basename "<file>" .ts); gh pr list --repo elastic/kibana --search "$base" --state merged` |
 | Linked GitHub issue? | Look at the `// Failing:` or `// FLAKY:` comment above the skip |
 
