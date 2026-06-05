@@ -54,7 +54,7 @@ const defineEsQueryAlert = async (page: ScoutPage, alertName: string) => {
 const setEditorValue = async (page: ScoutPage, testSubj: string, value: string) => {
   const textarea = page.locator(`[data-test-subj="${testSubj}"] textarea`);
   await textarea.waitFor({ state: 'attached' });
-  await textarea.click({ force: true });
+  await textarea.focus();
   await page.keyboard.press('Control+a');
   await page.keyboard.type(value);
 };
@@ -398,7 +398,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('editQueryDSL');
     const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
     await dslTextarea.waitFor({ state: 'attached' });
-    await dslTextarea.click({ force: true });
+    await dslTextarea.focus();
     await page.keyboard.press('Control+a');
     await page.keyboard.type(dslFilter);
     await page.testSubj.click('saveFilter');
@@ -550,12 +550,11 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('testQueryError')).toBeVisible({ timeout: 15_000 });
 
     await page.testSubj.click('rulePageFooterCancelButton');
-    const confirmBtn = page.testSubj
+    await page.testSubj
       .locator('confirmRuleCloseModal')
-      .locator('[data-test-subj="confirmModalConfirmButton"]');
-    if (await confirmBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+      .locator('[data-test-subj="confirmModalConfirmButton"]')
+      .click({ timeout: 2_000 })
+      .catch(() => {});
   });
 
   test('should show KEEP command warning when creating a ES query rule with ESQL', async ({
@@ -600,9 +599,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await setEditorValue(page, 'ESQLEditor', 'FROM *');
     await page.keyboard.press('Escape');
 
-    await page.waitForTimeout(2_000);
-
-    await expect(page.testSubj.locator('ESQLEditor-errors-warnings-content')).toBeHidden();
+    await expect(page.testSubj.locator('ESQLEditor-errors-warnings-content')).toBeHidden({
+      timeout: 5_000,
+    });
   });
 
   test('should successfully show the APM error count rule flyout', async ({ page }) => {
@@ -627,12 +626,11 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('testQueryError')).toBeHidden();
 
     await page.testSubj.click('rulePageFooterCancelButton');
-    const confirmBtn = page.testSubj
+    await page.testSubj
       .locator('confirmRuleCloseModal')
-      .locator('[data-test-subj="confirmModalConfirmButton"]');
-    if (await confirmBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+      .locator('[data-test-subj="confirmModalConfirmButton"]')
+      .click({ timeout: 2_000 })
+      .catch(() => {});
   });
 
   test('should add filter', async ({ page }) => {
@@ -646,7 +644,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('editQueryDSL');
     const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
     await dslTextarea.waitFor({ state: 'attached' });
-    await dslTextarea.click({ force: true });
+    await dslTextarea.focus();
     await page.keyboard.press('Control+a');
     await page.keyboard.type(filter);
     await page.testSubj.click('saveFilter');
