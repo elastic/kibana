@@ -529,6 +529,42 @@ globalSetupHook(
       log.warning(`[security-ai-rules eval setup] refresh failed: ${msg}`);
     }
 
+    /* ── Verify all expected indices are queryable (prevents race skips) ─ */
+
+    const expectedIndices = [
+      ...INTEGRATION_SOURCES.map((s) => s.index),
+      'logs-endpoint.events.file-default',
+      'logs-endpoint.events.process-default',
+      'logs-endpoint.events.network-default',
+      'logs-endpoint.events.registry-default',
+    ];
+
+    for (let attempt = 1; attempt <= 10; attempt++) {
+      const missing: string[] = [];
+      for (const idx of expectedIndices) {
+        try {
+          const { count } = await esClient.count({ index: idx });
+          if (count === 0) missing.push(idx);
+        } catch {
+          missing.push(idx);
+        }
+      }
+      if (missing.length === 0) {
+        log.info('[security-ai-rules eval setup] all expected indices verified');
+        break;
+      }
+      if (attempt === 10) {
+        log.warning(
+          `[security-ai-rules eval setup] indices still missing after 10 attempts: ${missing.join(', ')}`
+        );
+      } else {
+        log.info(
+          `[security-ai-rules eval setup] waiting for indices (attempt ${attempt}): ${missing.join(', ')}`
+        );
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+
     log.info('[security-ai-rules eval setup] done');
   }
 );
