@@ -402,7 +402,10 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
     );
 
     return (
-      <div css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}>
+      <div
+        css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}
+        data-test-subj="appHeaderTitle"
+      >
         <EuiTitle size="s">
           <h1>
             {isEditing ? (
@@ -413,6 +416,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                   // `size={1}` keeps the input's intrinsic width from inflating the grid track,
                   // so the sizer span alone determines the frame width.
                   size={1}
+                  data-test-subj="appHeaderTitleInput"
                   css={styles.input}
                   value={draft}
                   placeholder={placeholder}
@@ -447,7 +451,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
                 />
                 {error && (
                   <EuiScreenReaderOnly>
-                    <span id={errorId} role="alert">
+                    <span id={errorId} role="alert" data-test-subj="appHeaderTitleError">
                       {error}
                     </span>
                   </EuiScreenReaderOnly>
@@ -469,6 +473,7 @@ export const Title = React.memo<{ title: AppHeaderTitle; titleOffset?: boolean }
               <button
                 ref={titleRef}
                 type="button"
+                data-test-subj="appHeaderTitleButton"
                 css={styles.readModeTrigger}
                 aria-describedby={instructionsId}
                 // `event.detail === 0` marks a keyboard activation (Enter/Space) vs a mouse

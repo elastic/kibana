@@ -119,10 +119,9 @@ When changing markup, re-verify the heading's accessible name is still the title
 
 ## Stories
 
-`title_area.stories.tsx` renders every state inside the **full app header** (back nav,
-badges, metadata, favorite) because alignment/spacing only matter in that context.
-Keep new scenarios in the full-header harness rather than isolating the title. Covered:
-Default, Truncated, Placeholder, Saving-and-error (async), Read-only.
+`title_area.stories.tsx` renders the title inside the **full app header** because
+alignment/spacing only matter in that context. Keep new scenarios in the full-header
+harness rather than isolating the title.
 
 ## If you change this component
 
@@ -132,7 +131,4 @@ Default, Truncated, Placeholder, Saving-and-error (async), Read-only.
 3. Verify Enter/blur save, Escape cancels, blur-after-Enter doesn't double-save, and an
    unchanged title doesn't call `onSave`.
 4. Re-check the heading's accessible name and the error alert.
-5. Run the behavior/a11y tests in `title.test.tsx` (save, no-op, validation, saving,
-   cancel) — they guard the save flow that pixel checks can't.
-6. Run `node scripts/eslint --fix` and `node scripts/type_check --project` on the
-   package's tsconfig.
+5. Run `title.test.tsx` — it guards the save flow that pixel checks can't.
