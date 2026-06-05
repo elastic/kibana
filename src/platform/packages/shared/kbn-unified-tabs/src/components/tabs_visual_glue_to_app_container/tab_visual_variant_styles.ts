@@ -36,10 +36,10 @@ export const getTabWithBackgroundStyles = ({
         flex-shrink: 0;
         border-radius: ${euiTheme.border.radius.small};
         background: ${isSelected || isDragging
-          ? euiTheme.colors.backgroundLightPrimary
-          : 'transparent'};
+          ? euiTheme.colors.backgroundBaseFormsPrepend
+          : euiTheme.colors.backgroundBasePlain};
         transition: background ${euiTheme.animation.fast};
-        margin-inline: ${euiTheme.size.xs};
+        margin-inline: ${euiTheme.size.s};
         padding: 0;
 
         ${isDragging ? euiSlightShadowHover(euiThemeContext) : ''}
@@ -47,7 +47,7 @@ export const getTabWithBackgroundStyles = ({
         &::after {
           content: '';
           position: absolute;
-          right: calc(-1 * ${euiTheme.size.xs});
+          right: calc(-1 * ${euiTheme.size.s});
           top: 50%;
           transform: translateY(-50%);
           width: 1px;

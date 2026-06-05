@@ -210,7 +210,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   }, [selectedItemId, isSelected, isActionPopoverOpen]);
 
   const mainTabContent = (
-    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
+    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging, visualVariant)}>
       <div
         ref={tabInteractiveElementRef}
         {...(!disableDragAndDrop ? dragHandleProps : {})}
@@ -358,7 +358,8 @@ function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
   isSelected: boolean,
-  isDragging?: boolean
+  isDragging?: boolean,
+  visualVariant: TabsBarVisualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT
 ) {
   // TODO: remove the usage of deprecated colors
 
@@ -377,6 +378,9 @@ function getTabContainerCss(
 
     .unifiedTabs__tabLabelText {
       color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
+      font-weight: ${visualVariant === 'inlineAppHeader' && isSelected
+        ? euiTheme.font.weight.semiBold
+        : euiTheme.font.weight.regular};
     }
 
     &:hover .unifiedTabs__tabLabelText {
