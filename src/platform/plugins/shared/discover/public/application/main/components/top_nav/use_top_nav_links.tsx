@@ -143,7 +143,7 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, authorizedRuleTypes]
   );
 
-  const showCreateRuleV2 = !!services.capabilities.alertingVTwo;
+  const showCreateRuleV2 = !!services.alertingVTwo;
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];

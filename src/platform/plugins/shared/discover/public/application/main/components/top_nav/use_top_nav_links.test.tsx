@@ -369,7 +369,6 @@ describe('useTopNavLinks', () => {
             save: true,
             storeSearchSession: true,
           },
-          ...(alertingV2Enabled ? { alertingVTwo: {} } : {}),
           management: {
             ...baseMock.capabilities.management,
             insightsAndAlerting: {
@@ -377,6 +376,7 @@ describe('useTopNavLinks', () => {
             },
           },
         },
+        alertingVTwo: alertingV2Enabled ? baseMock.alertingVTwo : undefined,
         triggersActionsUi: triggersActionsUiMock.createStart(),
       });
 
@@ -473,13 +473,13 @@ describe('useTopNavLinks', () => {
             save: true,
             storeSearchSession: true,
           },
-          ...(alertingVTwoEnabled ? { alertingVTwo: {} } : {}),
           // No v1 management.insightsAndAlerting.triggersActions capability.
           management: {
             ...baseMock.capabilities.management,
             insightsAndAlerting: {},
           },
         },
+        alertingVTwo: alertingVTwoEnabled ? baseMock.alertingVTwo : undefined,
         triggersActionsUi: triggersActionsUiMock.createStart(),
       });
     };
