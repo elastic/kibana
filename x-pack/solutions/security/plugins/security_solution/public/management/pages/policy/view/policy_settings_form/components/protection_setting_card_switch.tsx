@@ -159,16 +159,6 @@ export const ProtectionSettingCardSwitch = React.memo(
           for (const os of osList) {
             applyToggleOnForOs(os, protection, isPlatinumPlus, newPayload, savedModesRef.current);
           }
-          for (const os of osList) {
-            if (os === 'windows') {
-              savedModesRef.current.windows = newPayload.windows[protection].mode;
-            } else if (os === 'mac') {
-              savedModesRef.current.mac = newPayload.mac[protection as MacPolicyProtection].mode;
-            } else if (os === 'linux') {
-              savedModesRef.current.linux =
-                newPayload.linux[protection as LinuxPolicyProtection].mode;
-            }
-          }
         }
 
         onChange({
