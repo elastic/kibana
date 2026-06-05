@@ -48,22 +48,13 @@ spaceTest.describe(
 
     spaceTest(
       'inclusive filter should be addable via expanded data grid rows',
-      async ({ page, pageObjects }) => {
-        const flyout = await pageObjects.contextPage.openAnchorFlyoutAndSearchField(
-          TEST_ANCHOR_FILTER_FIELD
+      async ({ pageObjects }) => {
+        await pageObjects.contextPage.openAnchorDocViewer();
+        await pageObjects.discover.findFieldByNameOrValueInDocViewer(TEST_ANCHOR_FILTER_FIELD);
+        await pageObjects.discover.clickFieldActionInFlyout(
+          TEST_ANCHOR_FILTER_FIELD,
+          'addFilterForValueButton'
         );
-
-        const valueCell = flyout.locator(
-          `[data-test-subj="tableDocViewRow-${TEST_ANCHOR_FILTER_FIELD}-value"]`
-        );
-        // field search + table re-render inside flyout
-        await expect(valueCell).toBeVisible({ timeout: 10_000 });
-        await valueCell.hover();
-
-        const addFilterBtn = page.testSubj.locator(
-          `addFilterForValueButton-${TEST_ANCHOR_FILTER_FIELD}`
-        );
-        await addFilterBtn.click();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         expect(
@@ -74,7 +65,7 @@ spaceTest.describe(
           })
         ).toBe(true);
 
-        await page.testSubj.locator('euiFlyoutCloseButton').click();
+        await pageObjects.discover.closeDocViewerFlyout();
 
         const fields = await pageObjects.discover.getDataGridRows();
         expect(fields.map((row) => row[2]).every((v) => v === TEST_ANCHOR_FILTER_VALUE)).toBe(true);
@@ -83,7 +74,7 @@ spaceTest.describe(
 
     spaceTest(
       'inclusive filter should be toggleable via the filter bar',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         await pageObjects.filterBar.addFilter({
           field: TEST_ANCHOR_FILTER_FIELD,
           operator: 'is',
@@ -91,11 +82,7 @@ spaceTest.describe(
         });
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const filterBadge = page.testSubj.locator(
-          `~filter & ~filter-key-${TEST_ANCHOR_FILTER_FIELD}`
-        );
-        await filterBadge.click();
-        await page.testSubj.click('disableFilter');
+        await pageObjects.filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         expect(
@@ -115,22 +102,13 @@ spaceTest.describe(
 
     spaceTest(
       'filter for presence should be addable via expanded data grid rows',
-      async ({ page, pageObjects }) => {
-        const flyout = await pageObjects.contextPage.openAnchorFlyoutAndSearchField(
-          TEST_ANCHOR_FILTER_FIELD
+      async ({ pageObjects }) => {
+        await pageObjects.contextPage.openAnchorDocViewer();
+        await pageObjects.discover.findFieldByNameOrValueInDocViewer(TEST_ANCHOR_FILTER_FIELD);
+        await pageObjects.discover.clickFieldActionInFlyout(
+          TEST_ANCHOR_FILTER_FIELD,
+          'addExistsFilterButton'
         );
-
-        const nameCell = flyout.locator(
-          '[data-gridcell-column-id="name"][data-gridcell-visible-row-index="0"]'
-        );
-        // field search + table re-render inside flyout
-        await expect(nameCell).toBeVisible({ timeout: 10_000 });
-        await nameCell.hover();
-
-        const addExistsBtn = page.testSubj.locator(
-          `addExistsFilterButton-${TEST_ANCHOR_FILTER_FIELD}`
-        );
-        await addExistsBtn.click();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         expect(
@@ -153,17 +131,12 @@ spaceTest.describe(
         });
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const filterBadge = page.testSubj.locator(
-          `~filter & ~filter-key-${TEST_ANCHOR_FILTER_FIELD}`
-        );
-        await filterBadge.click();
-        await page.testSubj.click('pinFilter');
+        await pageObjects.filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
 
         await addFilterWithoutStrictCheck(page, 'extension', 'png');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const filterBadges = page.testSubj.locator('^filter-badge');
-        await expect(filterBadges).toHaveCount(2);
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
         expect(
           await pageObjects.filterBar.hasFilter({
             field: TEST_ANCHOR_FILTER_FIELD,
@@ -184,7 +157,7 @@ spaceTest.describe(
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        await expect(filterBadges).toHaveCount(2);
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
         expect(
           await pageObjects.filterBar.hasFilter({
             field: TEST_ANCHOR_FILTER_FIELD,
@@ -214,8 +187,7 @@ spaceTest.describe(
         });
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const filterBadges = page.testSubj.locator('^filter-badge');
-        await expect(filterBadges).toHaveCount(1);
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);
@@ -225,14 +197,14 @@ spaceTest.describe(
 
         await page.goBack();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-        await expect(filterBadges).toHaveCount(0);
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
 
         const fieldsWithoutFilter = await pageObjects.discover.getDataGridRows();
         expect(fieldsWithoutFilter.every((row) => row[1] === 'png')).toBe(false);
 
         await page.goForward();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-        await expect(filterBadges).toHaveCount(1);
+        expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
 
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })

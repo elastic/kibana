@@ -145,19 +145,19 @@ export class ContextPage {
     );
   }
 
-  async openAnchorFlyoutAndSearchField(fieldName: string) {
+  /**
+   * Open the anchor row's doc-viewer flyout and activate the table tab.
+   * Mirrors the FTR `dataGrid.clickRowToggle({ isAnchorRow: true })`.
+   */
+  async openAnchorDocViewer() {
     const anchorExpandBtn = this.page.testSubj.locator('docTableExpandToggleColumnAnchor');
     await anchorExpandBtn.click();
 
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-    await expect(flyout).toBeVisible({ timeout: 10_000 });
+    await this.page.testSubj
+      .locator('kbnDocViewer')
+      .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });
 
-    await flyout.locator('[data-test-subj="docViewerTab-doc_view_table"]').click();
-
-    const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
-    await searchInput.fill(fieldName);
-
-    return flyout;
+    await this.page.locator('#kbn_doc_viewer_tab_doc_view_table').click();
   }
 
   async openRowActionsForAnchor() {

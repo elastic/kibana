@@ -16,6 +16,12 @@ interface FilterCreationOptions {
   value: string;
 }
 
+interface FilterFormOptions {
+  field: string;
+  operator: string;
+  value?: string | string[] | { from: string; to: string };
+}
+
 interface FilterStateOptions {
   field: string;
   value: string;
@@ -88,5 +94,107 @@ export class FilterBar {
       .join(' & ');
 
     return this.page.testSubj.isVisible(testSubjLocator, { strict: true });
+  }
+
+  async toggleFilterEnabled(field: string) {
+    await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
+    await this.page.testSubj.click('disableFilter');
+  }
+
+  async toggleFilterPinned(field: string) {
+    await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
+    await this.page.testSubj.click('pinFilter');
+  }
+
+  async toggleFilterNegated(field: string) {
+    await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
+    await this.page.testSubj.click('negateFilter');
+  }
+
+  async hasFilterWithId(
+    id: string,
+    enabled = true,
+    pinned = false,
+    negated = false
+  ): Promise<boolean> {
+    const dataSubj = [
+      '~filter',
+      `~filter-${enabled ? 'enabled' : 'disabled'}`,
+      `~filter-${pinned ? 'pinned' : 'unpinned'}`,
+      negated ? '~filter-negated' : '',
+      `~filter-id-${id}`,
+    ]
+      .filter(Boolean)
+      .join(' & ');
+    return this.page.testSubj.isVisible(dataSubj);
+  }
+
+  async clickEditFilterById(id: string) {
+    await this.page.testSubj.click(`~filter & ~filter-id-${id}`);
+    await this.page.testSubj.click('editFilter');
+  }
+
+  async getFilterEditorPreview(): Promise<string> {
+    const preview = this.page.testSubj.locator('filter-preview');
+    return preview.innerText();
+  }
+
+  async getFiltersLabel(): Promise<string[]> {
+    const filters = this.page.testSubj.locator('~filter');
+    return filters.evaluateAll((elements) =>
+      elements.map((el) => (el as HTMLElement).innerText.trim())
+    );
+  }
+
+  async addAndFilter(path: string) {
+    const filterForm = this.page.testSubj.locator(`filter-${path}`);
+    await filterForm.locator('[data-test-subj="add-and-filter"]').click();
+  }
+
+  async addOrFilter(path: string) {
+    const filterForm = this.page.testSubj.locator(`filter-${path}`);
+    await filterForm.locator('[data-test-subj="add-or-filter"]').click();
+  }
+
+  async openFilterBuilder() {
+    await this.page.testSubj.click('addFilter');
+    await this.page.testSubj.waitForSelector('addFilterPopover', { state: 'visible' });
+  }
+
+  async saveAndCloseFilterBuilder() {
+    await this.page.testSubj.click('saveFilter');
+    await this.page.testSubj.waitForSelector('addFilterPopover', { state: 'hidden' });
+  }
+
+  /**
+   * Fill a filter form at a given path inside the filter builder.
+   * Mirrors the FTR `filterBar.createFilter` / `pasteFilterData` for leaf filters.
+   */
+  async fillFilterForm(path: string, options: FilterFormOptions) {
+    const form = this.page.locator(`[data-test-subj="filter-${path}"]`);
+    await form.locator('[data-test-subj="filterFieldSuggestionList"] input').fill(options.field);
+    await this.page.locator(`.euiComboBoxOption[title="${options.field}"]`).click();
+
+    await form.locator('[data-test-subj="filterOperatorList"] input').fill(options.operator);
+    await this.page.locator(`.euiComboBoxOption[title="${options.operator}"]`).click();
+
+    if (options.value === undefined) {
+      return;
+    }
+
+    if (typeof options.value === 'object' && !Array.isArray(options.value)) {
+      await form.locator('[data-test-subj="range-start"]').fill(options.value.from);
+      await form.locator('[data-test-subj="range-end"]').fill(options.value.to);
+    } else if (Array.isArray(options.value)) {
+      const input = form.locator('[data-test-subj="filterParams"] input');
+      for (const v of options.value) {
+        await input.fill(v);
+        await input.press('Enter');
+      }
+    } else {
+      const input = form.locator('[data-test-subj="filterParams"] input');
+      await input.fill(options.value);
+      await input.press('Enter');
+    }
   }
 }
