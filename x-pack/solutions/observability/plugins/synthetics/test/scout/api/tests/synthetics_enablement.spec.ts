@@ -278,6 +278,44 @@ apiTest.describe(
       );
     });
 
+    // A user with the full synthetics-writer ES privileges plus `uptime: all`
+    // but WITHOUT any api-key management cluster privilege can still *enable*
+    // synthetics, reporting `canManageApiKeys: false`. Ported from the FTR
+    // `returns response for an admin with privilege` case (which used a bespoke
+    // ES role without `manage_*`). The created key's privileges are asserted via
+    // the cross-target-safe `expectSyntheticsWriterPrivileges` helper rather than
+    // an exact `role_descriptors` match, consistent with the rest of this suite.
+    apiTest(
+      '[PUT] enables synthetics for a writer user without api-key management privileges',
+      async ({ apiClient, samlAuth, config }) => {
+        // `canEnable` requires the user to hold the synthetics-writer cluster
+        // privileges for the *current* target. Mirror `getServiceApiKeyPrivileges`:
+        // `read_ilm` is required on stateful but rejected by ES on serverless.
+        const writerCluster = config.serverless
+          ? COMMON_SYNTHETICS_WRITER_CLUSTER_PRIVS
+          : [...COMMON_SYNTHETICS_WRITER_CLUSTER_PRIVS, 'read_ilm'];
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          elasticsearch: {
+            cluster: writerCluster,
+            indices: SYNTHETICS_SERVICE_WRITER_INDICES,
+          },
+          kibana: [{ base: [], feature: { uptime: ['all'] }, spaces: ['*'] }],
+        });
+        const res = await putEnablement(apiClient, { ...KIBANA_HEADERS, ...cookieHeader });
+        expect(res).toHaveStatusCode(200);
+        expect(res.body).toMatchObject({
+          areApiKeysEnabled: true,
+          canManageApiKeys: false,
+          canEnable: true,
+          isEnabled: true,
+          isValidApiKey: true,
+        });
+        const validApiKeys = await getApiKeys(apiClient);
+        expect(validApiKeys).toHaveLength(1);
+        expectSyntheticsWriterPrivileges(validApiKeys[0]);
+      }
+    );
+
     apiTest(
       '[PUT] auto re-enables the api key when the existing key has invalid permissions',
       async ({ apiClient, esClient, kbnClient }) => {

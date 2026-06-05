@@ -9,6 +9,11 @@
 // Source of truth for delivery mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
+import {
+  AWS_SERVICE_PROVIDER_PERMISSIONS,
+  type ProviderPermissions,
+} from './aws_provider_permissions';
+
 export type SignalType = 'logs' | 'metrics';
 
 export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
@@ -62,9 +67,27 @@ export interface AwsServiceMatrixEntry {
   /** Whether this service should be shown in the AWS onboarding UI */
   showInUI: boolean;
   badge?: Badge;
+  /** Hardcoded AWS IAM permissions required to ingest this data stream.
+   *  Temporary until packages expose provider_permissions in the manifest. */
+  providerPermissions?: ProviderPermissions;
 }
 
-export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
+function hasAgentlessDelivery(entry: AwsServiceMatrixEntry): boolean {
+  return entry.deliveryMethods.some(({ method }) => method === 'agentless');
+}
+
+function enrichWithProviderPermissions(
+  entry: Omit<AwsServiceMatrixEntry, 'providerPermissions'>
+): AwsServiceMatrixEntry {
+  if (!hasAgentlessDelivery(entry)) {
+    return entry;
+  }
+
+  const providerPermissions = AWS_SERVICE_PROVIDER_PERMISSIONS[entry.id];
+  return providerPermissions ? { ...entry, providerPermissions } : entry;
+}
+
+const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'>[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
@@ -859,5 +882,9 @@ export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = [
     showInUI: true,
   },
 ];
+
+export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = AWS_SERVICES_MATRIX_RAW.map(
+  enrichWithProviderPermissions
+);
 
 export const AWS_SERVICES_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));

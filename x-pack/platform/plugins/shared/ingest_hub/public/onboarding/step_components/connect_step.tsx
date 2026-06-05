@@ -14,7 +14,9 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
+import { getSelectedServicePermissions } from '../service_permissions';
 import { useOnboardingFlow } from '../onboarding_flow_context';
+import { AwsPermissionsViewer } from './aws_permissions_viewer';
 
 interface ConnectStepProps {
   onNext: () => void;
@@ -34,6 +36,16 @@ export function ConnectStep({ onNext, onBack }: ConnectStepProps) {
     );
   }, [selectedServiceIds]);
 
+  const staticKeysPermissions = useMemo(
+    () => getSelectedServicePermissions(selectedServiceIds),
+    [selectedServiceIds]
+  );
+
+  const staticKeysContent = useMemo(
+    () => <AwsPermissionsViewer services={staticKeysPermissions} />,
+    [staticKeysPermissions]
+  );
+
   return (
     <div data-test-subj="onboardingStep-connect">
       {onBack && (
@@ -51,6 +63,7 @@ export function ConnectStep({ onNext, onBack }: ConnectStepProps) {
           initialStaticKeys={connectStep.staticKeys}
           initialTemporaryKeys={connectStep.temporaryKeys}
           showIdentityFederation={showIdentityFederation}
+          staticKeysContent={staticKeysContent}
           onNext={onNext}
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}
