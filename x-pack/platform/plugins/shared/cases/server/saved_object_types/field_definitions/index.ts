@@ -37,6 +37,9 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   hidden: true,
   namespaceType: 'multiple-isolated',
   mappings,
+  modelVersions: {
+    '1': { changes: [] },
+  },
 };
 
 // NOTE: maintain type "connection" with Domain Schema

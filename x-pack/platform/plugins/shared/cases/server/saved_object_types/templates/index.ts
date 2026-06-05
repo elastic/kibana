@@ -85,6 +85,9 @@ export const caseTemplateSavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings,
+  modelVersions: {
+    '1': { changes: [] },
+  },
 };
 
 // NOTE: maintain type "connection" with Domain Schema
