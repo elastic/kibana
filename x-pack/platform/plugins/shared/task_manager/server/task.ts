@@ -27,6 +27,7 @@ export enum TaskPriority {
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,
+  Large = 4,
   ExtraLarge = 10,
 }
 
@@ -37,6 +38,7 @@ export enum TaskCost {
 export enum InstanceTaskCost {
   Tiny = 'tiny',
   Normal = 'normal',
+  Large = 'large',
   ExtraLarge = 'extralarge',
 }
 
@@ -44,6 +46,7 @@ export enum InstanceTaskCost {
 const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
   [InstanceTaskCost.Tiny]: TaskCost.Tiny,
   [InstanceTaskCost.Normal]: TaskCost.Normal,
+  [InstanceTaskCost.Large]: TaskCost.Large,
   [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
 };
 

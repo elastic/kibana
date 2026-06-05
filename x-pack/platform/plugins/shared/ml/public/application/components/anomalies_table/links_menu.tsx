@@ -1042,18 +1042,26 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
   const closePopover = setPopoverOpen.bind(null, false);
 
   const button = (
-    <EuiButtonIcon
-      size="s"
-      color="text"
-      onClick={onButtonClick}
-      iconType="gear"
-      aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
         defaultMessage: 'Select action for anomaly at {time}',
         values: { time: formatHumanReadableDateTimeSeconds(props.anomaly.time) },
       })}
-      data-test-subj="mlAnomaliesListRowActionsButton"
-      id={`mlAnomaliesListRowActionsButton-${props.anomaly.rowId}`}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="s"
+        color="text"
+        onClick={onButtonClick}
+        iconType="gear"
+        aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
+          defaultMessage: 'Select action for anomaly at {time}',
+          values: { time: formatHumanReadableDateTimeSeconds(props.anomaly.time) },
+        })}
+        data-test-subj="mlAnomaliesListRowActionsButton"
+        id={`mlAnomaliesListRowActionsButton-${props.anomaly.rowId}`}
+      />
+    </EuiToolTip>
   );
 
   return (

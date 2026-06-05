@@ -117,8 +117,10 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
+  - '@kbn/core-spaces-common'
   - '@kbn/datemath'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod

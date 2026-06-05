@@ -7,6 +7,7 @@
 
 import {
   buildEpisodesBaseQuery,
+  buildEpisodesKpisQuery,
   buildEpisodesHistogramQuery,
   buildEpisodesQuery,
 } from './episodes_query';
@@ -344,6 +345,87 @@ describe('buildEpisodesQuery', () => {
 
     expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
     expect(queryString).toContain('WHERE last_assignee_uid == "user-123"');
+  });
+});
+
+describe('buildEpisodesKpisQuery', () => {
+  const SPACE = 'default';
+  const UID = 'user-abc-123';
+
+  it('produces a STATS command with all six KPI aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('STATS');
+    expect(output).toContain('alerts_count');
+    expect(output).toContain('firing_rules');
+    expect(output).toContain('assigned_to_me');
+    expect(output).toContain('unassigned');
+    expect(output).toContain('acknowledged');
+    expect(output).toContain('snoozed');
+  });
+
+  it('uses COUNT(*) for alerts_count to capture all matching episodes', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/alerts_count\s*=\s*COUNT\(\*\)/);
+  });
+
+  it('uses COUNT_DISTINCT over a nullable rule.id column for firing_rules', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/COUNT_DISTINCT\(_active_rule_id\)/);
+  });
+
+  it('embeds the currentUserUid in the assigned_to_me EVAL', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain(UID);
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('sets assigned_to_me to a constant 0 when no currentUserUid is provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, undefined);
+    expect(output).toContain('EVAL _assigned_to_me = 0');
+    expect(output).not.toContain('last_assignee_uid ==');
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('uses IS NULL check for unassigned', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_assignee_uid IS NULL');
+  });
+
+  it('checks last_ack_action for acknowledged', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_ack_action == "ack"');
+  });
+
+  it('counts indefinitely snoozed episodes (snooze_expiry IS NULL) as snoozed', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_snooze_action == "snooze"');
+    expect(output).toContain('snooze_expiry IS NULL');
+  });
+
+  it('excludes expired snoozes (snooze_expiry in the past) from the snoozed count', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('TO_DATETIME(snooze_expiry) > NOW()');
+  });
+
+  it('applies queryString filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
+    expect(output).toContain('QSTR(');
+  });
+
+  it('does not include SORT or LIMIT', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output.toUpperCase()).not.toContain('SORT');
+    expect(output.toUpperCase()).not.toContain('LIMIT');
+  });
+
+  it('applies status filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { status: 'active' });
+    expect(output).toContain('WHERE effective_status == "active"');
+  });
+
+  it('applies ruleId filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
+    expect(output).toContain('WHERE rule.id == "rule-xyz"');
   });
 });
 

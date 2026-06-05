@@ -114,8 +114,10 @@
     "@kbn/code-editor",
     "@kbn/workflows-yaml",
     "@kbn/workflows-ui",
+    "@kbn/core-spaces-common",
     "@kbn/datemath",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

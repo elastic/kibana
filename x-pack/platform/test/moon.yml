@@ -164,6 +164,8 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/inbox-common'
+  - '@kbn/core-spaces-common'
+  - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
 tags:
   - test-helper
