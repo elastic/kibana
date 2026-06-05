@@ -31,7 +31,7 @@ export const SendFeedbackButton = ({
     <EuiToolTip
       content={
         isSendFeedbackButtonDisabled
-          ? i18n.translate('feedback.footer.sendFeedbackButton.tooltip', {
+          ? i18n.translate('kbnUI.feedback.footer.sendFeedbackButton.tooltip', {
               defaultMessage: 'Answer at least one of the questions in order to send feedback.',
             })
           : undefined
@@ -46,7 +46,7 @@ export const SendFeedbackButton = ({
         onClick={handleSubmit}
         iconType="send"
       >
-        <FormattedMessage id="feedback.footer.sendFeedbackButton" defaultMessage="Send" />
+        <FormattedMessage id="kbnUI.feedback.footer.sendFeedbackButton" defaultMessage="Send" />
       </EuiButton>
     </EuiToolTip>
   );

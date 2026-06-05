@@ -57,7 +57,7 @@ export const FeedbackContainer = ({
     if (error) {
       hideFeedbackContainer();
       showToast(
-        i18n.translate('feedback.loadQuestionsFailureToast.title', {
+        i18n.translate('kbnUI.feedback.loadQuestionsFailureToast.title', {
           defaultMessage: 'Failed to load feedback form. Please try again later.',
         }),
         'error'
@@ -126,7 +126,7 @@ export const FeedbackContainer = ({
       setIsSubmitting(false);
 
       showToast(
-        i18n.translate('feedback.submissionSuccessToast.title', {
+        i18n.translate('kbnUI.feedback.submissionSuccessToast.title', {
           defaultMessage: 'Thanks for your feedback!',
         }),
         'success'
@@ -135,7 +135,7 @@ export const FeedbackContainer = ({
       hideFeedbackContainer();
     } catch (_error) {
       showToast(
-        i18n.translate('feedback.submissionFailureToast.title', {
+        i18n.translate('kbnUI.feedback.submissionFailureToast.title', {
           defaultMessage: 'Failed to submit feedback. Please try again later.',
         }),
         'error'

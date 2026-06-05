@@ -71,10 +71,10 @@ export const FeedbackTriggerButton = ({
       <EuiToolTip
         content={
           !isOptedIn
-            ? i18n.translate('feedback.triggerButton.tooltip.disabled', {
+            ? i18n.translate('kbnUI.feedback.triggerButton.tooltip.disabled', {
                 defaultMessage: 'Enable usage collection to submit feedback',
               })
-            : i18n.translate('feedback.triggerButton.tooltip.enabled', {
+            : i18n.translate('kbnUI.feedback.triggerButton.tooltip.enabled', {
                 defaultMessage: 'Submit feedback',
               })
         }
@@ -89,7 +89,7 @@ export const FeedbackTriggerButton = ({
           <EuiIcon
             type="comment"
             size="m"
-            aria-label={i18n.translate('feedback.triggerButton.ariaLabel', {
+            aria-label={i18n.translate('kbnUI.feedback.triggerButton.ariaLabel', {
               defaultMessage: 'Submit feedback',
             })}
           />
@@ -99,7 +99,7 @@ export const FeedbackTriggerButton = ({
         <Suspense fallback={null}>
           <EuiModal
             onClose={handleHideFeedbackContainer}
-            aria-label={i18n.translate('feedback.modal.ariaLabel', {
+            aria-label={i18n.translate('kbnUI.feedback.modal.ariaLabel', {
               defaultMessage: 'Feedback form',
             })}
             css={modalCss}

@@ -53,7 +53,7 @@ export const CsatButtons = ({
         <>
           <EuiText size="s">
             <FormattedMessage
-              id="feedback.body.csatButtons.titleText"
+              id="kbnUI.feedback.body.csatButtons.titleText"
               defaultMessage="How satisfied are you with {appTitle}?"
               values={{ appTitle }}
             />
@@ -66,7 +66,7 @@ export const CsatButtons = ({
         <EuiButtonGroup
           data-test-subj="feedbackCsatButtonGroup"
           options={options}
-          legend={i18n.translate('feedback.body.csatButtons.legend', {
+          legend={i18n.translate('kbnUI.feedback.body.csatButtons.legend', {
             defaultMessage: 'Customer satisfaction rating',
           })}
           type="single"
@@ -79,14 +79,14 @@ export const CsatButtons = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" css={labelsCss}>
           <EuiFlexItem>
             <EuiText size="xs">
-              {i18n.translate('feedback.body.csatButtons.veryDissatisfiedLabel', {
+              {i18n.translate('kbnUI.feedback.body.csatButtons.veryDissatisfiedLabel', {
                 defaultMessage: 'Very dissatisfied',
               })}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem css={rightLabelCss}>
             <EuiText size="xs">
-              {i18n.translate('feedback.body.csatButtons.verySatisfiedLabel', {
+              {i18n.translate('kbnUI.feedback.body.csatButtons.verySatisfiedLabel', {
                 defaultMessage: 'Very satisfied',
               })}
             </EuiText>

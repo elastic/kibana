@@ -15,7 +15,7 @@ export const FeedbackHeader = () => (
   <EuiFlexItem grow={false} data-test-subj="feedbackHeader">
     <EuiTitle size="l">
       <h2>
-        <FormattedMessage id="feedback.header.title" defaultMessage="Feedback" />
+        <FormattedMessage id="kbnUI.feedback.header.title" defaultMessage="Feedback" />
       </h2>
     </EuiTitle>
   </EuiFlexItem>

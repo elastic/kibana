@@ -16,7 +16,7 @@ export const PrivacyAndSessionDisclaimer = () => (
     <EuiSpacer size="l" />
     <EuiText size="xs" color="subdued" data-test-subj="feedbackDisclaimerSupportInfo">
       <FormattedMessage
-        id="feedback.disclaimer.supportInfo"
+        id="kbnUI.feedback.disclaimer.supportInfo"
         defaultMessage="If you need assistance, submit a <supportLink>support request</supportLink> instead."
         values={{
           supportLink: (linkText) => (
@@ -30,13 +30,13 @@ export const PrivacyAndSessionDisclaimer = () => (
     <EuiSpacer size="xs" />
     <EuiText size="xs" color="subdued" data-test-subj="feedbackDisclaimerSessionInfo">
       <FormattedMessage
-        id="feedback.disclaimer.sessionInfo"
+        id="kbnUI.feedback.disclaimer.sessionInfo"
         defaultMessage="Some session information is sent to Elastic. We use it to improve Elastic. If you've opted-in, we'll use your email to follow up. Please avoid sharing sensitive info (like passwords)."
       />
     </EuiText>
     <EuiText size="xs" color="subdued" data-test-subj="feedbackDisclaimerPrivacyStatement">
       <FormattedMessage
-        id="feedback.disclaimer.privacyStatement"
+        id="kbnUI.feedback.disclaimer.privacyStatement"
         defaultMessage="See our <privacyStatement>Privacy Statement</privacyStatement> for details and your rights."
         values={{
           privacyStatement: (linkText) => (

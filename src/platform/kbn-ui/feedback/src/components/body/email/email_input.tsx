@@ -90,14 +90,14 @@ export const EmailInput = ({
           type="email"
           value={email}
           isInvalid={showError}
-          placeholder={i18n.translate('feedback.emailInput.placeholder', {
+          placeholder={i18n.translate('kbnUI.feedback.emailInput.placeholder', {
             defaultMessage: 'Your email',
           })}
         />
       </EuiFormRow>
       {showError && (
         <EuiFormErrorText>
-          {i18n.translate('feedback.emailInput.errorMessage', {
+          {i18n.translate('kbnUI.feedback.emailInput.errorMessage', {
             defaultMessage: 'Enter a valid email address',
           })}
         </EuiFormErrorText>
