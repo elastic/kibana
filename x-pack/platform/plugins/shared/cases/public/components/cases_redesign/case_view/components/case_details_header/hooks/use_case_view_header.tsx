@@ -15,22 +15,16 @@ import { useRefreshCaseViewPage } from '../../../../../case_view/use_on_refresh_
 import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
-import type { OnUpdateFields } from '../../../../../case_view/types';
 import * as commonI18n from '../../../../../../common/translations';
 import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
-  onUpdateField: (args: OnUpdateFields) => void;
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
-export const useCaseViewHeader = ({
-  caseData,
-  onUpdateField,
-  onStatusChanged,
-}: UseCaseViewHeaderArgs) => {
+export const useCaseViewHeader = ({ caseData, onStatusChanged }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();

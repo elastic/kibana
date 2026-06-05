@@ -44,7 +44,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     isSettingsOpen,
     setIsSettingsOpen,
     settingsAnchor,
-  } = useCaseViewHeader({ caseData, onUpdateField, onStatusChanged });
+  } = useCaseViewHeader({ caseData, onStatusChanged });
 
   const onCaseNameChange = useCallback(
     (newName: string) => {
