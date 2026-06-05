@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'contextEngine.addEntry',
-    handlerHash: '27344216178a96568fc8bcaf53701928a274b598b297a9b39bfbae6eb8b5b8ff',
+    handlerHash: 'a646e235b593db9e6bb0c7a87117252689fd26171ea34c05e8c308cf7632d365',
   },
   {
     id: 'ai.agent',

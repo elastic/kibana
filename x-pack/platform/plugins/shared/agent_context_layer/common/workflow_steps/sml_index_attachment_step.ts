@@ -39,6 +39,7 @@ const MAX_SML_DESCRIPTION_LENGTH = 8192;
 const MAX_SML_CONTENT_LENGTH = 50_000;
 const MAX_SML_REFERENCES = 100;
 const MAX_SML_PERMISSIONS = 100;
+const MAX_SML_ES_INDICES = 100;
 
 const ChunkSchema = z.object({
   type: z
@@ -72,6 +73,13 @@ const ChunkSchema = z.object({
     .max(MAX_SML_PERMISSIONS)
     .optional()
     .describe('Optional Kibana privilege strings required to view the chunk later.'),
+  elasticsearchIndices: z
+    .array(z.string().max(MAX_SML_IDENTIFIER_LENGTH))
+    .max(MAX_SML_ES_INDICES)
+    .optional()
+    .describe(
+      'Optional Elasticsearch index / alias / data-stream names whose data this chunk depends on. Viewers must hold the ES `read` privilege on every listed name to see the chunk at search time.'
+    ),
 });
 
 /**
