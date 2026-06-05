@@ -66,14 +66,14 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
     defaultMessage: 'Delete blocklist',
   }),
   flyoutCreateTitle: i18n.translate('xpack.securitySolution.blocklist.flyoutCreateTitle', {
-    defaultMessage: 'Add blocklist',
+    defaultMessage: 'Add YARA rule',
   }),
   flyoutEditTitle: i18n.translate('xpack.securitySolution.blocklist.flyoutEditTitle', {
     defaultMessage: 'Edit blocklist',
   }),
   flyoutCreateSubmitButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.flyoutCreateSubmitButtonLabel',
-    { defaultMessage: 'Add blocklist' }
+    { defaultMessage: 'Add YARA rule' }
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>
     i18n.translate('xpack.securitySolution.blocklist.flyoutCreateSubmitSuccess', {
