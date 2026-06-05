@@ -76,7 +76,13 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
             conversationId={conversationId}
           />
         ) : liveStep ? (
-          <StepItem step={liveStep} />
+          <StepItem
+            step={liveStep}
+            steps={steps}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
+          />
         ) : showCompletedAnswer ? (
           <ChatMessageText
             content={response.message}

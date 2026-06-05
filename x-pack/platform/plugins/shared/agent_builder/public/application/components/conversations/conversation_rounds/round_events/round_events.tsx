@@ -12,13 +12,25 @@ import {
   isBackgroundAgentCompleteStep,
   isToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
 import { StepItem } from './step_item';
 
 interface RoundEventsProps {
   steps: ConversationRoundStep[];
+  conversationAttachments?: VersionedAttachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationId?: string;
 }
 
-export const RoundEvents: React.FC<RoundEventsProps> = ({ steps }) => {
+export const RoundEvents: React.FC<RoundEventsProps> = ({
+  steps,
+  conversationAttachments,
+  attachmentRefs,
+  conversationId,
+}) => {
   if (steps.length === 0) return null;
 
   return (
@@ -27,7 +39,13 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({ steps }) => {
         <EuiFlexGroup direction="column" gutterSize="s">
           {steps.map((step, index) => (
             <EuiFlexItem grow={false} key={getStepKey(step, index)}>
-              <StepItem step={step} />
+              <StepItem
+                step={step}
+                steps={steps}
+                conversationAttachments={conversationAttachments}
+                attachmentRefs={attachmentRefs}
+                conversationId={conversationId}
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
