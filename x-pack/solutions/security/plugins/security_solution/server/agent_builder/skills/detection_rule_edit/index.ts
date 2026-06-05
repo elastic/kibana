@@ -40,7 +40,11 @@ Do NOT use this skill when the user:
 - Asks a general security question that doesn't imply building or changing a detection (e.g., "what is lateral movement?", "explain MITRE ATT&CK")
 - Asks to enable, disable, or delete an existing rule (no tool support for this yet)
 
-This covers the rule type ES|QL. Do not create a rule with a rule type other than ES|QL. Only create ES|QL rules.
+This skill only supports the **ES|QL** rule type. If the user asks to create a rule with any other rule type (e.g., KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT attempt to create it. Do NOT automatically offer or proceed to create an ES|QL alternative. Instead, stop and clearly tell the user:
+
+> "This skill only supports creating **ES|QL** detection rules. [Requested type] rules are not supported here."
+
+Then stop. Do not create anything. Do not offer alternatives unless the user explicitly asks.
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
@@ -309,6 +313,10 @@ The lookback should be at least as long as the interval. A common pattern is int
 
 **To change the query**, use \`security.create_detection_rule\` with \`existing_rule\` and \`attachment_id\` — do NOT hand-edit \`query\` via \`attachment_update\`.
 
+### Identity fields — never set these
+
+Do **NOT** include \`id\` or \`rule_id\` in the rule JSON you pass to \`existing_rule\` or store via \`attachment_update\`. Both fields are server-assigned or saved-object identifiers; including them in a generated or draft rule will cause them to be confused with the attachment's own id and break save/update flows.
+
 ### Enabled
 
 \`enabled\` (boolean): Whether the rule is active. Default: \`true\`.
@@ -367,4 +375,6 @@ Pre-check: attachment exists in context → edit path → proceed to Step 1.
 6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (\`user_query\` only).
 7. ALWAYS use \`security.create_detection_rule\` with \`existing_rule\` + \`attachment_id\` when rewriting the query.
 8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`.
+9. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
+9. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
 `;
