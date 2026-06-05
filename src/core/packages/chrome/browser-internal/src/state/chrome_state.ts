@@ -19,8 +19,8 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   GlobalSearchConfig,
-  ChromeNextAiButton,
   ChromeNavLink,
+  GlobalHeaderAiButton,
   ChromeUserBanner,
   AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
@@ -65,7 +65,7 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
-  aiButton: State<ReadonlySet<ChromeNextAiButton>>;
+  aiButton: State<ReadonlySet<GlobalHeaderAiButton>>;
   globalSearch: State<GlobalSearchConfig | undefined>;
   userMenu: State<ReactNode>;
   contextSwitcher: State<ReactNode>;
@@ -125,7 +125,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
-  const aiButton = createState<ReadonlySet<ChromeNextAiButton>>(new Set());
+  const aiButton = createState<ReadonlySet<GlobalHeaderAiButton>>(new Set());
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
   const contextSwitcher = createState<ReactNode>(null);

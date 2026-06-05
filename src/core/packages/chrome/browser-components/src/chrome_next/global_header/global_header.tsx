@@ -19,8 +19,8 @@ export const ChromeNextGlobalHeader = React.memo(() => (
   <ChromeNextGlobalHeaderShell
     logo={<ChromeNextGlobalHeaderLogo />}
     search={<SearchButton />}
-    help={<HelpButton />}
     actions={<AiButtonSlot />}
+    help={<HelpButton />}
     userMenu={useUserMenu()}
     switcher={useContextSwitcher()}
   />

@@ -8,13 +8,13 @@
  */
 
 import { useMemo } from 'react';
-import type { ChromeNextAiButton } from '@kbn/core-chrome-browser';
+import type { GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 
-const EMPTY: ChromeNextAiButton[] = [];
+const EMPTY: GlobalHeaderAiButton[] = [];
 
-export function useAiButtons(): ChromeNextAiButton[] {
+export function useAiButtons(): GlobalHeaderAiButton[] {
   const chrome = useChromeService();
   const buttons$ = useMemo(() => chrome.next.aiButton.get$(), [chrome]);
   return useObservable(buttons$, EMPTY);
