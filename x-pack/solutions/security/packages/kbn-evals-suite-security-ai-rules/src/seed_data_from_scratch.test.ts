@@ -14,7 +14,7 @@ import {
   rewriteIdLike,
   rewriteIds,
   variate,
-} from './seed_data_from_scratch';
+} from '../evals/seed_data_from_scratch';
 
 describe('seed_data_from_scratch', () => {
   describe('djb2', () => {
