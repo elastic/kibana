@@ -12,7 +12,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { UNISOLATE_TOOL_ID } from '.';
+import { UNISOLATE_TOOL_ID } from '../..';
 
 const unisolateHostSchema = z.object({
   hostName: z
