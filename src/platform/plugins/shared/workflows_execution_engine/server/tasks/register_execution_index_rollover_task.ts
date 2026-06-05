@@ -7,20 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-import { WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_ID, WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_TYPE } from './types';
+import {
+  WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_ID,
+  WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_TYPE,
+} from './types';
+import type { ExecutionIndexRolloverConditions } from '../lib/execution_indexes/rollover_execution_indexes';
+import { rolloverWorkflowExecutionIndexes } from '../lib/execution_indexes/rollover_execution_indexes';
+import type {
+  WorkflowsExecutionEnginePluginStart,
+  WorkflowsExecutionEnginePluginStartDeps,
+} from '../types';
 
 export function registerExecutionIndexRolloverTask({
   taskManager,
   logger,
+  core,
+  getRolloverConditions,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
+  core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>;
+  getRolloverConditions: () => ExecutionIndexRolloverConditions;
 }): void {
   taskManager.registerTaskDefinitions({
     [WORKFLOW_EXECUTION_INDEX_ROLLOVER_TASK_TYPE]: {
@@ -30,7 +43,16 @@ export function registerExecutionIndexRolloverTask({
       maxAttempts: 1,
       createTaskRunner: ({ abortController }) => ({
         async run() {
-          logger.debug('workflow:execution-index-rollover task run (not implemented)');
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const conditions = getRolloverConditions();
+
+          await rolloverWorkflowExecutionIndexes({
+            esClient,
+            conditions,
+            logger,
+            signal: abortController.signal,
+          });
         },
         async cancel() {
           abortController.abort();

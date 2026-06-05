@@ -635,10 +635,19 @@ export class WorkflowsExecutionEnginePlugin
     registerExecutionIndexRolloverTask({
       taskManager: plugins.taskManager,
       logger: this.logger.get('execution-index-rollover'),
+      core,
+      getRolloverConditions: () => ({
+        maxAge: this.config.executionIndexRolloverMaxAge,
+        maxPrimaryShardSize: this.config.executionIndexRolloverMaxPrimaryShardSize,
+      }),
     });
     registerExecutionIndexCleanupTask({
       taskManager: plugins.taskManager,
       logger: this.logger.get('execution-index-cleanup'),
+      core,
+      getCleanupOptions: () => ({
+        minIndexAge: this.config.executionIndexCleanupMinIndexAge,
+      }),
     });
 
     return {};

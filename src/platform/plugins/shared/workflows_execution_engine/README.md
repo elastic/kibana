@@ -714,6 +714,11 @@ workflowsExecutionEngine:
   # Task Manager intervals for execution backing-index maintenance (e.g. "1d", "12h")
   executionIndexRolloverTaskInterval: "1d"
   executionIndexCleanupTaskInterval: "1d"
+  # Rollover write indexes when age or primary-shard size thresholds are exceeded
+  executionIndexRolloverMaxAge: "1m"
+  executionIndexRolloverMaxPrimaryShardSize: "1gb"
+  # Delete non-write backing indexes older than this (should exceed max workflow timeout)
+  executionIndexCleanupMinIndexAge: "30d"
 ```
 
 ### Event-driven and depth settings

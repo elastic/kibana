@@ -7,31 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-import { WORKFLOW_EXECUTION_INDEX_CLEANUP_TASK_ID, WORKFLOW_EXECUTION_INDEX_CLEANUP_TASK_TYPE } from './types';
+import {
+  WORKFLOW_EXECUTION_INDEX_CLEANUP_TASK_ID,
+  WORKFLOW_EXECUTION_INDEX_CLEANUP_TASK_TYPE,
+} from './types';
+import type { ExecutionIndexCleanupOptions } from '../lib/execution_indexes/cleanup_execution_indexes';
+import { cleanupWorkflowExecutionIndexes } from '../lib/execution_indexes/cleanup_execution_indexes';
+import type {
+  WorkflowsExecutionEnginePluginStart,
+  WorkflowsExecutionEnginePluginStartDeps,
+} from '../types';
 
 export function registerExecutionIndexCleanupTask({
   taskManager,
   logger,
+  core,
+  getCleanupOptions,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
+  core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>;
+  getCleanupOptions: () => ExecutionIndexCleanupOptions;
 }): void {
   taskManager.registerTaskDefinitions({
     [WORKFLOW_EXECUTION_INDEX_CLEANUP_TASK_TYPE]: {
       title: 'Workflow execution index cleanup',
       description:
-        'Deletes workflow and step execution backing indexes where every execution is terminal.',
+        'Deletes workflow and step execution backing indexes older than a configured minimum age.',
       timeout: '5m',
       maxAttempts: 1,
       createTaskRunner: ({ abortController }) => ({
         async run() {
-          logger.debug('workflow:execution-index-cleanup task run (not implemented)');
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const options = getCleanupOptions();
+
+          await cleanupWorkflowExecutionIndexes({
+            esClient,
+            options,
+            logger,
+            signal: abortController.signal,
+          });
         },
         async cancel() {
           abortController.abort();

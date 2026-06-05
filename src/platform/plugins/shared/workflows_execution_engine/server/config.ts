@@ -16,6 +16,12 @@ export const DEFAULT_EXECUTION_INDEX_ROLLOVER_TASK_INTERVAL = '1d';
 
 export const DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL = '1d';
 
+export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE = '7d';
+
+export const DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE = '10gb';
+
+export const DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE = '7d';
+
 const EventTriggersConfigSchema = schema.object({
   /**
    * When false, event-driven workflow execution is disabled: event-triggered runs
@@ -77,12 +83,36 @@ const configSchema = schema.object({
         'Uses Elasticsearch duration format (e.g. "1d", "12h"). Changes take effect on next Kibana restart.',
     },
   }),
+  executionIndexRolloverMaxAge: schema.string({
+    defaultValue: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_AGE,
+    meta: {
+      description:
+        'Rollover the workflow execution write index when its age exceeds this value. ' +
+        'Uses Elasticsearch duration format (e.g. "1m", "1d").',
+    },
+  }),
+  executionIndexRolloverMaxPrimaryShardSize: schema.string({
+    defaultValue: DEFAULT_EXECUTION_INDEX_ROLLOVER_MAX_PRIMARY_SHARD_SIZE,
+    meta: {
+      description:
+        'Rollover the workflow execution write index when its primary shard size exceeds this value. ' +
+        'Uses Elasticsearch byte size format (e.g. "1gb", "500mb").',
+    },
+  }),
   executionIndexCleanupTaskInterval: schema.string({
     defaultValue: DEFAULT_EXECUTION_INDEX_CLEANUP_TASK_INTERVAL,
     meta: {
       description:
         'Task Manager schedule interval for the workflow execution index cleanup background task. ' +
         'Uses Elasticsearch duration format (e.g. "1d", "12h"). Changes take effect on next Kibana restart.',
+    },
+  }),
+  executionIndexCleanupMinIndexAge: schema.string({
+    defaultValue: DEFAULT_EXECUTION_INDEX_CLEANUP_MIN_INDEX_AGE,
+    meta: {
+      description:
+        'Minimum age of a non-write backing index before it is deleted. ' +
+        'Uses Elasticsearch duration format (e.g. "30d", "1d"). Should be much greater than the maximum workflow timeout.',
     },
   }),
 });
