@@ -138,7 +138,7 @@ export function CollapsibleNav({
     () =>
       allLinks.filter(
         (link) =>
-          // Filterting out hidden links,
+          // Filtering out hidden links,
           link.visibleIn.includes('classicSideNav') &&
           // and non-data overview pages
           !overviewIDsToHide.includes(link.id)
