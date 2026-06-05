@@ -35,8 +35,9 @@ exports from the moment it boots.
 ### 1. Start a local OTLP collector
 
 Run an OpenTelemetry Collector on your laptop to receive Kibana's metrics and traces. The
-quickest "did it work?" check is the `debug` exporter, which prints every metric and span to
-the collector's own logs.
+`debug` exporter prints every metric and span to the collector's own logs. The config below
+adds a `filter/workshop` processor so only workshop signals reach the exporter — no noise
+from Kibana's own internal telemetry.
 
 **a. Save this as `otel-collector-config.yaml`** (anywhere — e.g. your home dir or a scratch
 folder; you'll mount it into the container next):
@@ -47,13 +48,24 @@ receivers:
     protocols:
       grpc: { endpoint: 0.0.0.0:4317 }
       http: { endpoint: 0.0.0.0:4318 }
+processors:
+  filter/workshop:
+    metrics:
+      metric:
+        - not(IsMatch(name, "kibana\\.otel_workshop\\..*"))
+    traces:
+      span:
+        - 'not(IsMatch(name, "process_order") or IsMatch(name, "grind_beans") or IsMatch(name, "brew") or IsMatch(name, "garnish") or IsMatch(attributes["http.route"], ".*otel_workshop.*"))'
 exporters:
   debug: { verbosity: detailed }
 service:
   pipelines:
-    metrics: { receivers: [otlp], exporters: [debug] }
-    traces: { receivers: [otlp], exporters: [debug] }
+    metrics: { receivers: [otlp], processors: [filter/workshop], exporters: [debug] }
+    traces: { receivers: [otlp], processors: [filter/workshop], exporters: [debug] }
 ```
+
+The metrics filter keeps only `kibana.otel_workshop.*`; the trace filter keeps only the
+`process_order` / `grind_beans` / `brew` / `garnish` spans and the two HTTP route spans.
 
 **b. Run the collector** from the directory where you saved that file (so `$(pwd)` resolves
 to it), and leave it running in its own terminal:
@@ -64,7 +76,7 @@ docker run --rm -p 4317:4317 -p 4318:4318 \
   otel/opentelemetry-collector:latest
 ```
 
-This terminal now streams your metrics + spans (the `debug` exporter). Want a real trace UI?
+This terminal now streams only your workshop metrics and spans. Want a real trace UI?
 Add a Jaeger service on `:16686` and an `otlp/jaeger` exporter to the collector config.
 
 ### 2. Point Kibana at the collector
