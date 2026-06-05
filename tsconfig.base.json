@@ -1042,6 +1042,8 @@
       "@kbn/delete-managed-asset-callout/*": ["src/platform/packages/shared/kbn-management/delete_managed_assets_callout/*"],
       "@kbn/dependency-injection-a": ["examples/dependency_injection_isolation/a"],
       "@kbn/dependency-injection-a/*": ["examples/dependency_injection_isolation/a/*"],
+      "@kbn/dependency-injection-b": ["examples/dependency_injection_isolation/b"],
+      "@kbn/dependency-injection-b/*": ["examples/dependency_injection_isolation/b/*"],
       "@kbn/dependency-injection-example-plugin": ["examples/dependency_injection"],
       "@kbn/dependency-injection-example-plugin/*": ["examples/dependency_injection/*"],
       "@kbn/dependency-ownership": ["packages/kbn-dependency-ownership"],
