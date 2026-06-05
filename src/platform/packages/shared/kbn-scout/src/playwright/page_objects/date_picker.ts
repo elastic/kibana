@@ -340,6 +340,29 @@ export class DatePicker {
     }
   }
 
+  /**
+   * Pause the time picker's auto-refresh. Mirrors FTR `timePicker.pauseAutoRefresh()`.
+   * No-op if auto-refresh is already paused.
+   */
+  async pauseAutoRefresh() {
+    if (await this.isNewDateRangePicker()) {
+      await this.page.testSubj.locator('dateRangePickerControlButton').click();
+      await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
+      await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor();
+      const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
+      if ((await toggle.getAttribute('aria-checked')) === 'true') {
+        await toggle.click();
+      }
+      await this.page.keyboard.press('Escape');
+    } else {
+      await this.quickMenuButton.click();
+      if ((await this.toggleRefreshButton.getAttribute('aria-checked')) === 'true') {
+        await this.toggleRefreshButton.click();
+      }
+      await this.quickMenuButton.click();
+    }
+  }
+
   async waitToBeHidden() {
     if (await this.isNewDateRangePicker()) {
       await this.page.testSubj

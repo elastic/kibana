@@ -23,3 +23,13 @@ export const DEFAULT_TIME_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
   to: '2015-09-23T18:31:44.000Z',
 };
+
+/**
+ * Human-readable form of {@link DEFAULT_TIME_RANGE} as rendered by the
+ * Kibana time picker (matches FTR `timePicker.defaultStartTime/EndTime`).
+ * Useful for asserting on `datePicker.getTimeConfig()` output.
+ */
+export const DEFAULT_TIME_RANGE_DISPLAY = {
+  start: 'Sep 19, 2015 @ 06:31:44.000',
+  end: 'Sep 23, 2015 @ 18:31:44.000',
+};

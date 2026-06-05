@@ -21,7 +21,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_discover'));
+    // `./_discover` was migrated to Scout under
+    // `src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/`.
     loadTestFile(require.resolve('./_discover_accessibility'));
     loadTestFile(require.resolve('./_discover_histogram_breakdown'));
     loadTestFile(require.resolve('./_discover_histogram'));
