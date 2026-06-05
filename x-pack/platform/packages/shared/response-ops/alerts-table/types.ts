@@ -456,6 +456,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   showCsvExportButton?: boolean;
   /**
+   * The current Kibana version (e.g. '9.5.0'). Used when generating CSV reports
+   * so the correct version is recorded in the report metadata.
+   */
+  kibanaVersion?: string;
+  /**
    * Dependencies
    */
   services: {
@@ -471,11 +476,6 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     application: ApplicationStart;
     licensing: LicensingPluginStart;
     settings: SettingsStart;
-    /**
-     * The current Kibana version (e.g. '9.5.0'). Used when generating CSV reports
-     * so the correct version is recorded in the report metadata.
-     */
-    kibanaVersion?: string;
     /**
      * The cases service is optional: cases features will be disabled if not provided
      */
@@ -566,6 +566,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'onExpandedAlertIndexChange'
     | 'renderExpandedAlertView'
     | 'services'
+    | 'kibanaVersion'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'

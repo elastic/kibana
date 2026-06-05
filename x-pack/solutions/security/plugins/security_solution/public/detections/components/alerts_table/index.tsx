@@ -400,7 +400,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       application,
       licensing,
       settings,
-      kibanaVersion: KibanaServices.getKibanaVersion(),
       cases,
       agentBuilder,
     }),
@@ -503,6 +502,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               cellActionsOptions={cellActionsOptions}
               showInspectButton
               showCsvExportButton
+              kibanaVersion={KibanaServices.getKibanaVersion()}
               services={services}
               bulkAddToChatConfig={maybeBulkAddToChatConfig}
               {...tablePropsOverrides}

@@ -61,13 +61,13 @@ describe('CsvExportButton', () => {
   };
 
   const defaultContext = {
+    kibanaVersion: '9.5.0',
     services: {
       http,
       notifications,
       rendering: renderingServiceMock.create(),
       settings,
       application,
-      kibanaVersion: '9.5.0',
     },
     ruleTypeIds: ['siem.queryRule'],
     consumers: ['siem'],

@@ -19,8 +19,9 @@ const CSV_EXPORT_LABEL = i18n.translate('responseOpsAlertsTable.csvExport.button
 });
 
 export const CsvExportButton: React.FC = () => {
-  const { services, ruleTypeIds, consumers, query, sort, columns } = useAlertsTableContext();
-  const { http, notifications, rendering, settings, application, kibanaVersion } = services;
+  const { services, kibanaVersion, ruleTypeIds, consumers, query, sort, columns } =
+    useAlertsTableContext();
+  const { http, notifications, rendering, settings, application } = services;
   const { data: indexNames } = useFetchAlertsIndexNamesQuery({ http, ruleTypeIds });
 
   const { capabilities } = application;
