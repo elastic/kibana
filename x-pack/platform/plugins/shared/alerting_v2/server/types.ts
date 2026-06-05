@@ -30,8 +30,11 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { RulesClient } from './lib/rules_client';
+import type { ActionPolicyClient } from './lib/action_policy_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
 export type AlertingServerSetup = void;
 
@@ -41,6 +44,12 @@ export interface AlertingServerStart {
     request: KibanaRequest,
     spaceId: string
   ): Promise<RulesClientApi>;
+
+  getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
+  getActionPolicyClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<ActionPolicyClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

@@ -12,21 +12,27 @@ import {
   isStateTransitionAllowed,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
+import { PluginStart } from '@kbn/core-di';
+import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
+import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
-import { type ActionPolicyClient } from '../action_policy_client';
+import { ActionPolicyClient } from '../action_policy_client';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
+import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
+import { UserService } from '../services/user_service/user_service';
 import { buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
@@ -75,35 +81,18 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
-interface RulesClientParams {
-  services: {
-    request: KibanaRequest;
-    rulesSavedObjectService: RulesSavedObjectServiceContract;
-    taskManager: TaskManagerStartContract;
-    userService: UserServiceContract;
-    actionPolicyClient: ActionPolicyClient;
-  };
-  options: {
-    spaceId: string;
-  };
-}
-
+@injectable()
 export class RulesClient {
-  private readonly request: KibanaRequest;
-  private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
-  private readonly taskManager: TaskManagerStartContract;
-  private readonly userService: UserServiceContract;
-  private readonly actionPolicyClient: ActionPolicyClient;
-  private readonly spaceId: string;
-
-  constructor({ services, options }: RulesClientParams) {
-    this.request = services.request;
-    this.rulesSavedObjectService = services.rulesSavedObjectService;
-    this.taskManager = services.taskManager;
-    this.userService = services.userService;
-    this.actionPolicyClient = services.actionPolicyClient;
-    this.spaceId = options.spaceId;
-  }
+  constructor(
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(RulesSavedObjectServiceScopedToken)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
+    @inject(PluginStart<TaskManagerStartContract>('taskManager'))
+    private readonly taskManager: TaskManagerStartContract,
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
+    @inject(RequestSpaceIdToken) private readonly spaceId: string
+  ) {}
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };
@@ -395,8 +384,9 @@ export class RulesClient {
   }
 
   @withApm
-  public async getTags(): Promise<string[]> {
-    return this.rulesSavedObjectService.findTags();
+  public async getTags(params: { filter?: string } = {}): Promise<string[]> {
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    return this.rulesSavedObjectService.findTags({ filter: soFilter });
   }
 
   @withApm
