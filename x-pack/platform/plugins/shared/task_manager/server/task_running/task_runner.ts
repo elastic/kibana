@@ -395,9 +395,10 @@ export class TaskManagerRunner implements TaskRunner {
         const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
           childOf: this.instance.task.traceparent,
         });
-        const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
-        // captures start time - note that despite the name, stopTaskTimer() does not stop the timer
-        this.logTaskRunStartEvent(this.instance.task, stopTaskTimer());
+        const { startTime, stopTaskTimer } = startTaskTimerWithEventLoopMonitoring(
+          this.config.event_loop_delay
+        );
+        this.logTaskRunStartEvent(this.instance.task, startTime);
 
         // Validate state
         const stateValidationResult = this.validateTaskState(this.instance.task);
@@ -1106,7 +1107,7 @@ export class TaskManagerRunner implements TaskRunner {
     return stop;
   }
 
-  private logTaskRunStartEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
+  private logTaskRunStartEvent(task: ConcreteTaskInstance, startTime: number): void {
     const scheduleDelayNs =
       task.startedAt && task.scheduledAt
         ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
@@ -1114,7 +1115,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskRunStart,
-        start: new Date(taskTiming.start).toISOString(),
+        start: new Date(startTime).toISOString(),
       },
       kibana: {
         task: {

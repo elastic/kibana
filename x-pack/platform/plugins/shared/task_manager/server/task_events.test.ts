@@ -58,7 +58,7 @@ describe('task_events', () => {
 
   describe('startTaskTimerWithEventLoopMonitoring', () => {
     test('non-blocking', async () => {
-      const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
+      const { stopTaskTimer } = startTaskTimerWithEventLoopMonitoring({
         monitor: true,
         warn_threshold: 5000,
       });
@@ -69,7 +69,7 @@ describe('task_events', () => {
     });
 
     test('blocking', async () => {
-      const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
+      const { stopTaskTimer } = startTaskTimerWithEventLoopMonitoring({
         monitor: true,
         warn_threshold: 5000,
       });
@@ -80,7 +80,7 @@ describe('task_events', () => {
     });
 
     test('not monitoring', async () => {
-      const stopTaskTimer = startTaskTimerWithEventLoopMonitoring({
+      const { stopTaskTimer } = startTaskTimerWithEventLoopMonitoring({
         monitor: false,
         warn_threshold: 5000,
       });
