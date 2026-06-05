@@ -261,6 +261,22 @@ for (const owner of filteredOwners) {
     const densityDelta = density - prev.density;
     const criticalDelta = critical.length - prev.critical;
     const prevDate = prevSnapshot.timestamp.slice(0, 10);
+    const [, mm, dd] = prevDate.split('-');
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const shortDate = `${monthNames[parseInt(mm, 10) - 1]} ${parseInt(dd, 10)}`;
 
     const scoreArrow = scoreTrendEmoji(scoreDelta);
     const densityArrow = metricTrendEmoji(densityDelta, true);
@@ -279,9 +295,9 @@ for (const owner of filteredOwners) {
     annotationLines.push(
       `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
         2
-      )} · ${critical.length} critical · vs ${prevDate}: ${scoreArrow}${
+      )} · ${critical.length} critical · Δ ${scoreArrow}${
         scoreDelta >= 0 ? '+' : ''
-      }${scoreDelta.toFixed(1)}`
+      }${scoreDelta.toFixed(1)} (${shortDate})`
     );
   } else {
     annotationLines.push(
