@@ -14,5 +14,7 @@
   ],
   "exclude": [
     "target/**/*",
+    "packaging/target/**/*",
+    "packaging/example/**/*",
   ]
 }

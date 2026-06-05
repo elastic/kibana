@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/feedback-components",
+  "id": "@kbn/ui-feedback",
   "owner": [
     "@elastic/appex-sharedux"
   ],

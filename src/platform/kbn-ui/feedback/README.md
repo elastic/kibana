@@ -1,3 +1,3 @@
-# @kbn/feedback-components
+# @kbn/ui-feedback
 
 Feedback form components.
