@@ -52,7 +52,6 @@ interface DatasetStatsAccordionProps {
   experimentId: string;
   executionId?: string;
   group: DatasetStatsGroup;
-  totalRepetitions: number;
   statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>>;
   experimentLoading: boolean;
   isOpen: boolean;
@@ -67,7 +66,6 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   experimentId,
   executionId,
   group,
-  totalRepetitions,
   statsColumns,
   experimentLoading,
   isOpen,
@@ -83,8 +81,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
     error: examplesError,
   } = useExperimentDatasetExamples(experimentId, isOpen ? group.datasetId : '', executionId);
 
-  const scoreCount = group.stats[0]?.stats.count;
-  const exampleCount = scoreCount != null ? Math.round(scoreCount / totalRepetitions) : undefined;
+  const exampleCount = group.stats[0]?.example_count;
 
   return (
     <>
@@ -456,7 +453,6 @@ export const ExperimentDetailPage: React.FC = () => {
             experimentId={experimentId}
             executionId={executionId}
             group={{ datasetId, datasetName, stats }}
-            totalRepetitions={experimentDetail?.total_repetitions ?? 1}
             statsColumns={statsColumns}
             experimentLoading={experimentLoading}
             isOpen={openDatasetId === datasetId}

@@ -144,6 +144,7 @@ export const buildStatsAggregation = () => ({
     terms: { field: 'example.dataset.id', size: 10000 },
     aggs: {
       dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
+      example_count: { cardinality: { field: 'example.id' } },
       by_evaluator: {
         terms: { field: 'evaluator.name', size: 1000 },
         aggs: {
@@ -327,6 +328,7 @@ interface StatsAggregations {
     buckets?: Array<{
       key: string;
       dataset_name?: TermsBucket;
+      example_count?: { value?: number };
       by_evaluator?: {
         buckets?: Array<{
           key: string;
@@ -348,6 +350,7 @@ export interface ExperimentDetailEvaluatorStat {
   dataset_id: string;
   dataset_name: string;
   evaluator_name: string;
+  example_count: number;
   stats: {
     mean: number;
     median: number;
@@ -371,6 +374,7 @@ export const parseStatsAggregationResponse = (
   return datasetBuckets.flatMap((datasetBucket) => {
     const datasetId = datasetBucket.key;
     const datasetName = firstBucket(datasetBucket.dataset_name) ?? datasetId;
+    const exampleCount = datasetBucket.example_count?.value ?? 0;
     const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
 
     return evaluatorBuckets.map((evaluatorBucket) => {
@@ -381,6 +385,7 @@ export const parseStatsAggregationResponse = (
         dataset_id: datasetId,
         dataset_name: datasetName,
         evaluator_name: evaluatorBucket.key,
+        example_count: exampleCount,
         stats: {
           mean: scoreStats?.avg ?? 0,
           median: median ?? 0,

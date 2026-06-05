@@ -101,6 +101,9 @@ describe('query_builders', () => {
     it('returns the expected aggregation structure', () => {
       const agg = buildStatsAggregation();
       expect(agg.by_dataset.terms.field).toBe('example.dataset.id');
+      expect(agg.by_dataset.aggs.example_count).toEqual({
+        cardinality: { field: 'example.id' },
+      });
       expect(agg.by_dataset.aggs.by_evaluator.terms.field).toBe('evaluator.name');
       expect(agg.by_dataset.aggs.by_evaluator.aggs.score_stats).toEqual({
         extended_stats: { field: 'evaluator.score' },
@@ -423,6 +426,7 @@ describe('query_builders', () => {
             {
               key: 'ds-1',
               dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
               by_evaluator: {
                 buckets: [
                   {
@@ -443,6 +447,7 @@ describe('query_builders', () => {
         dataset_id: 'ds-1',
         dataset_name: 'Dataset One',
         evaluator_name: 'correctness',
+        example_count: 5,
         stats: { mean: 0.8, median: 0.85, std_dev: 0.1, min: 0.5, max: 1.0, count: 10 },
       });
     });
@@ -454,6 +459,7 @@ describe('query_builders', () => {
             {
               key: 'ds-fallback',
               dataset_name: { buckets: [] },
+              example_count: { value: 3 },
               by_evaluator: {
                 buckets: [
                   {
@@ -470,6 +476,7 @@ describe('query_builders', () => {
 
       const result = parseStatsAggregationResponse(aggs);
       expect(result[0].dataset_name).toBe('ds-fallback');
+      expect(result[0].example_count).toBe(3);
       expect(result[0].stats.mean).toBe(0);
     });
 
@@ -488,6 +495,7 @@ describe('query_builders', () => {
       };
 
       const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].example_count).toBe(0);
       expect(result[0].stats).toEqual({
         mean: 0,
         median: 0,
