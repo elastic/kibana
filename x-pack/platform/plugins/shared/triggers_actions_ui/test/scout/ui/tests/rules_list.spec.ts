@@ -855,8 +855,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
           params: { message: 'scout test' },
           frequency: {
             summary: false,
-            notifyWhen: 'onActionGroupChange' as const,
-            throttle: undefined,
+            notify_when: 'onActionGroupChange',
+            throttle: null,
           },
         },
       ],
