@@ -15,6 +15,7 @@
     "@kbn/i18n",
     "@kbn/use-observable",
     "@kbn/core-chrome-browser-internal-types",
-    "@kbn/core-chrome-browser-mocks"
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/content-management-favorites-public"
   ]
 }

@@ -25,6 +25,27 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
 
+## Editable titles
+
+Pass a title object when the page title can be renamed from the header:
+
+```tsx
+<AppHeader
+  title={{
+    text: name,
+    onSave: async (nextName) => {
+      const saved = await saveName(nextName);
+      if (!saved) {
+        return 'Choose a different name.';
+      }
+    },
+  }}
+/>
+```
+
+The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
+saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
+
 ## Chrome Next flag and runtime checks
 
 Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
