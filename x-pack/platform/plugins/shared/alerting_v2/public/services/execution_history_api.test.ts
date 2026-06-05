@@ -29,13 +29,18 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards page and perPage as query params', async () => {
+  it('forwards page, perPage, search and outcome as query params', async () => {
     const { api, http } = buildApi();
 
-    await api.listExecutionHistory({ page: 3, perPage: 25 });
+    await api.listExecutionHistory({
+      page: 3,
+      perPage: 25,
+      search: 'foo',
+      outcome: 'throttled',
+    });
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: 3, perPage: 25 },
+      query: { page: 3, perPage: 25, search: 'foo', outcome: 'throttled' },
     });
   });
 
@@ -45,7 +50,7 @@ describe('ExecutionHistoryApi', () => {
     await api.listExecutionHistory();
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: undefined, perPage: undefined },
+      query: { page: undefined, perPage: undefined, search: undefined, outcome: undefined },
     });
   });
 

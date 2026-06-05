@@ -40,15 +40,23 @@ describe('useFetchExecutionHistory', () => {
     });
   });
 
-  it('calls listExecutionHistory with the provided page and perPage', async () => {
+  it('calls listExecutionHistory with the provided params (page, perPage, search, outcome)', async () => {
     mockListExecutionHistory.mockResolvedValue({ items: [], page: 2, perPage: 25, totalEvents: 0 });
 
-    renderHook(() => useFetchExecutionHistory({ page: 2, perPage: 25 }), {
-      wrapper: createWrapper(),
-    });
+    renderHook(
+      () => useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: 'throttled' }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => {
-      expect(mockListExecutionHistory).toHaveBeenCalledWith({ page: 2, perPage: 25 });
+      expect(mockListExecutionHistory).toHaveBeenCalledWith({
+        page: 2,
+        perPage: 25,
+        search: 'foo',
+        outcome: 'throttled',
+      });
     });
   });
 
