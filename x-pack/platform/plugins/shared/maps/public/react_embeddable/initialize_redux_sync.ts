@@ -12,6 +12,7 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
@@ -150,15 +151,16 @@ export function initializeReduxSync({
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const query$ = new BehaviorSubject<AggregateQuery | Query | undefined>(undefined);
   const { filters, query } = savedMap.getAttributes();
+  const storedFilters = toStoredFilters(filters) ?? [];
   if (filters) {
-    filters$.next(filters);
+    filters$.next(storedFilters);
   }
   if (query) {
     query$.next(query);
   }
   store.dispatch(
     setEmbeddableSearchContext({
-      filters: filters ?? [],
+      filters: storedFilters,
       query,
     })
   );

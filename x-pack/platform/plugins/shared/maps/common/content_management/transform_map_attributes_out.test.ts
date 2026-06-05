@@ -85,6 +85,46 @@ describe('transformMapOut', () => {
     `);
   });
 
+  test('mapStateJSON filters (stored Filter[] -> AsCodeFilter[])', () => {
+    expect(
+      transformMapAttributesOut(
+        {
+          title: 'my map',
+          mapStateJSON: JSON.stringify({
+            filters: [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  key: 'foo',
+                  type: 'phrase',
+                  params: { query: 'bar' },
+                },
+                query: { match_phrase: { foo: 'bar' } },
+              },
+            ],
+          }),
+        },
+        findReference
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "filters": Array [
+          Object {
+            "condition": Object {
+              "field": "foo",
+              "operator": "is",
+              "value": "bar",
+            },
+            "disabled": false,
+            "type": "condition",
+          },
+        ],
+        "title": "my map",
+      }
+    `);
+  });
+
   test('should remove mode from timeFilters', () => {
     expect(
       transformMapAttributesOut(

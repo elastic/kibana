@@ -6,6 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
@@ -22,20 +23,20 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   if (mapState.description) storedMapAttributes.description = mapState.description;
   if (mapState.layers) storedMapAttributes.layerListJSON = JSON.stringify(mapState.layers);
 
-  const mapStateJSON = getJSONString(
-    {
-      ...mapState,
-      ...(mapState.refreshInterval
-        ? {
-            refreshConfig: {
-              isPaused: mapState.refreshInterval.pause,
-              interval: mapState.refreshInterval.value,
-            } as StoredRefreshInterval,
-          }
-        : {}),
-    },
-    mapStateKeys
-  );
+  const mapStateWithStoredFilters: Record<string, unknown> = {
+    ...mapState,
+    ...(mapState.filters ? { filters: toStoredFilters(mapState.filters) ?? [] } : {}),
+    ...(mapState.refreshInterval
+      ? {
+          refreshConfig: {
+            isPaused: mapState.refreshInterval.pause,
+            interval: mapState.refreshInterval.value,
+          } as StoredRefreshInterval,
+        }
+      : {}),
+  };
+
+  const mapStateJSON = getJSONString(mapStateWithStoredFilters, mapStateKeys);
   if (mapStateJSON) storedMapAttributes.mapStateJSON = mapStateJSON;
 
   const uiStateJSON = getJSONString(mapState, uiStateKeys);

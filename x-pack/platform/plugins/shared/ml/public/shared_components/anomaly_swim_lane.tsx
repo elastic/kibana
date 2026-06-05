@@ -8,6 +8,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type {
   AnomalySwimLaneEmbeddableState,
   AnomalySwimlaneProps as AnomalySwimlanePropsFromSchema,
@@ -85,7 +86,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       executionContext: KibanaExecutionContext;
     } & HasSerializedChildState<AnomalySwimLaneEmbeddableState>
   >(() => {
-    const filters$ = new BehaviorSubject<Filter[] | undefined>(filters);
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(query);
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
 
@@ -117,7 +118,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
 
   useEffect(
     function syncUnifiedSearch() {
-      parentApi.setFilters(filters);
+      parentApi.setFilters(toStoredFilters(filters));
       parentApi.setQuery(query);
     },
     [filters, query, parentApi]

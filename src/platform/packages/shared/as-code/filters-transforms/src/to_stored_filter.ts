@@ -20,9 +20,8 @@ import type {
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
-import { FILTERS, getFilterField } from '@kbn/es-query';
+import { FILTERS, getFilterField, type Filter } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
-import type { StoredFilter } from './types';
 import {
   isConditionFilter,
   isGroupFilter,
@@ -65,9 +64,9 @@ function resolveNegate(baseNegate?: boolean, conditionNegate?: boolean): boolean
  *
  * @param filter The AsCodeFilter to convert
  * @param logger Optional logger for warnings
- * @returns StoredFilter or undefined if conversion fails
+ * @returns Filter or undefined if conversion fails
  */
-export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFilter | undefined {
+export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): Filter | undefined {
   try {
     // Validate filter structure - must have exactly one of: condition, group, or dsl
     if (!isAsCodeFilter(filter)) {
@@ -79,7 +78,7 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
     // Build base stored filter structure
     // Only include properties that are explicitly set in AsCodeFilter (minimize round-trip differences)
     // Note: $state.store (pinned) is not included as it's UI state only
-    const storedFilter: StoredFilter = {
+    const storedFilter: Filter = {
       meta: {
         ...(filter.label !== undefined ? { alias: filter.label } : {}),
         ...(filter.disabled !== undefined ? { disabled: filter.disabled } : {}),
@@ -123,8 +122,8 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
  */
 function convertFromSimpleCondition(
   condition: AsCodeConditionFilter['condition'],
-  baseStored: StoredFilter
-): StoredFilter {
+  baseStored: Filter
+): Filter {
   // Base meta that all operators share
   // Extract negate from baseStored.meta to handle separately (for precedence)
   const { negate: baseNegate, ...baseMetaWithoutNegate } = baseStored.meta;
@@ -225,10 +224,7 @@ function convertFromSimpleCondition(
 /**
  * Convert filter group to stored filter
  */
-function convertFromFilterGroup(
-  group: AsCodeGroupFilter['group'],
-  baseStored: StoredFilter
-): StoredFilter {
+function convertFromFilterGroup(group: AsCodeGroupFilter['group'], baseStored: Filter): Filter {
   // Standard group filter conversion - use combined filter format
   const filterParams = group.conditions.map((condition) => {
     const typedCondition = condition as
@@ -270,10 +266,7 @@ function convertFromFilterGroup(
 /**
  * Convert spatial filter to stored filter with FILTERS.SPATIAL_FILTER type
  */
-function convertFromSpatialFilter(
-  asCodeFilter: AsCodeSpatialFilter,
-  baseStored: StoredFilter
-): StoredFilter {
+function convertFromSpatialFilter(asCodeFilter: AsCodeSpatialFilter, baseStored: Filter): Filter {
   return {
     ...baseStored,
     query: asCodeFilter.dsl.query,
@@ -287,14 +280,11 @@ function convertFromSpatialFilter(
 /**
  * Convert DSL filter to stored filter with FILTERS.CUSTOM type
  */
-function convertFromDSLFilter(
-  asCodeFilter: AsCodeDSLFilter,
-  baseStored: StoredFilter
-): StoredFilter {
+function convertFromDSLFilter(asCodeFilter: AsCodeDSLFilter, baseStored: Filter): Filter {
   const query = asCodeFilter.dsl.query;
 
   // Build a filter to test with type guard functions
-  const dslFilter: StoredFilter = {
+  const dslFilter: Filter = {
     ...baseStored,
     query,
   };
@@ -331,8 +321,6 @@ function convertFromDSLFilter(
 export function toStoredFilters(
   filters: AsCodeFilter[] | undefined,
   logger?: Logger
-): StoredFilter[] | undefined {
-  return filters
-    ?.map((f) => toStoredFilter(f, logger))
-    .filter((f): f is StoredFilter => f !== undefined);
+): Filter[] | undefined {
+  return filters?.map((f) => toStoredFilter(f, logger)).filter((f): f is Filter => f !== undefined);
 }

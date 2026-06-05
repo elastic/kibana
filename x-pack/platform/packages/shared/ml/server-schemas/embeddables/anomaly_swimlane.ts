@@ -8,7 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
+import { querySchema } from '@kbn/es-query-server';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -40,7 +41,7 @@ const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
   ...serializedTimeRangeSchema.getPropSchemas(),
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(schema.arrayOf(storedFilterSchema, { maxSize: 10000 })),
+  filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 10000 })),
   query: schema.maybe(querySchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
 });

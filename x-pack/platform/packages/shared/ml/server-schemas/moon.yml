@@ -17,6 +17,7 @@ project:
   owner: '@elastic/ml-ui'
   sourceRoot: x-pack/platform/packages/shared/ml/server-schemas
 dependsOn:
+  - '@kbn/as-code-filters-schema'
   - '@kbn/config-schema'
   - '@kbn/data-service-server'
   - '@kbn/es-query-server'

@@ -86,6 +86,32 @@ describe('transformMapIn', () => {
     `);
   });
 
+  test('mapStateJSON filters (AsCodeFilter[] -> stored Filter[])', () => {
+    expect(
+      transformMapAttributesIn({
+        title: 'my map',
+        filters: [
+          {
+            type: 'condition',
+            condition: {
+              field: 'foo',
+              operator: 'is',
+              value: 'bar',
+            },
+          },
+        ],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "mapStateJSON": "{\\"filters\\":[{\\"meta\\":{\\"key\\":\\"foo\\",\\"field\\":\\"foo\\",\\"type\\":\\"phrase\\",\\"params\\":{\\"query\\":\\"bar\\"}},\\"query\\":{\\"match_phrase\\":{\\"foo\\":\\"bar\\"}}}]}",
+          "title": "my map",
+        },
+        "references": Array [],
+      }
+    `);
+  });
+
   test('uiStateJSON', () => {
     expect(
       transformMapAttributesIn({
