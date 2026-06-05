@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IGNORED_FIELDS } from './constants';
+import { IGNORED_DIFF_FIELDS } from '../../utils/extract_changed_field_names';
 
 export function filterAndSort(rule: Record<string, unknown>): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(rule).sort()) {
-    if (!IGNORED_FIELDS.has(key)) {
+    if (!IGNORED_DIFF_FIELDS.has(key)) {
       result[key] = rule[key];
     }
   }
@@ -23,7 +23,7 @@ export function reconstructBefore(
 ): Record<string, unknown> {
   const before = { ...after };
   for (const [key, val] of Object.entries(oldValues)) {
-    if (!IGNORED_FIELDS.has(key)) {
+    if (!IGNORED_DIFF_FIELDS.has(key)) {
       if (val === null) {
         delete before[key];
       } else {

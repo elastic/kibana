@@ -8,6 +8,23 @@
 import type { RuleHistoryItem } from '../../../../common/api/detection_engine/rule_management';
 
 /**
+ * Rule field names that are excluded from the visible "changed fields" list
+ * and from the diff view in the flyout. These are bookkeeping fields that
+ * change on every rule write and would otherwise dominate the UI.
+ */
+export const IGNORED_DIFF_FIELDS: ReadonlySet<string> = new Set([
+  'rule_source',
+  'version',
+  'revision',
+  'updated_at',
+  'updated_by',
+  'created_at',
+  'created_by',
+  'execution_summary',
+  'meta',
+]);
+
+/**
  * Extract the list of changed-field names from a history item, stripping out
  * fields that should never be shown to the user. The source is the
  * `old_values` RFC 7396 merge patch — its top-level keys are exactly the
@@ -23,18 +40,3 @@ export const extractChangedFieldNames = (
 
   return Object.keys(item.old_values).filter((field) => !ignored.has(field));
 };
-
-/**
- * Rule field names that are excluded from the visible "changed fields" list
- * and from the diff view in the flyout. These are bookkeeping fields that
- * change on every rule write and would otherwise dominate the UI.
- */
-const IGNORED_DIFF_FIELDS: ReadonlySet<string> = new Set([
-  'updated_at',
-  'updated_by',
-  'created_at',
-  'created_by',
-  'revision',
-  'execution_summary',
-  'meta',
-]);
