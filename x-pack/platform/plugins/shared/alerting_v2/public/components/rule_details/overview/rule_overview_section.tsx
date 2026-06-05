@@ -8,11 +8,21 @@
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { AlertTimelineSection } from './alert_timeline/alert_timeline_section';
+import { SignalRuleOverview } from './signal_rule_overview';
+import { useRule } from '../rule_context';
 
-export const RuleOverviewSection: React.FC = () => (
-  <div data-test-subj="ruleOverviewSection">
-    <EuiErrorBoundary>
-      <AlertTimelineSection />
-    </EuiErrorBoundary>
-  </div>
-);
+export const RuleOverviewSection: React.FC = () => {
+  const rule = useRule();
+
+  return (
+    <div data-test-subj="ruleOverviewSection">
+      {rule.kind === 'signal' ? (
+        <SignalRuleOverview />
+      ) : (
+        <EuiErrorBoundary>
+          <AlertTimelineSection />
+        </EuiErrorBoundary>
+      )}
+    </div>
+  );
+};
