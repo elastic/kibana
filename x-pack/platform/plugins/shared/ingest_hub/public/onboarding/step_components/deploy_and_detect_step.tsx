@@ -9,19 +9,19 @@ import React from 'react';
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface DeploymentStepProps {
+interface DeployAndDetectStepProps {
   onNext: () => void;
   onBack?: () => void;
 }
 
-export function DeploymentStep({ onBack }: DeploymentStepProps) {
+export function DeployAndDetectStep({ onBack }: DeployAndDetectStepProps) {
   return (
     <>
       {onBack && (
         <>
           <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
             <FormattedMessage
-              id="xpack.ingestHub.deploymentStep.backButton"
+              id="xpack.ingestHub.deployAndDetectStep.backButton"
               defaultMessage="Back"
             />
           </EuiButtonEmpty>
@@ -29,7 +29,7 @@ export function DeploymentStep({ onBack }: DeploymentStepProps) {
         </>
       )}
       <EuiEmptyPrompt
-        data-test-subj="onboardingStep-deployment"
+        data-test-subj="onboardingStep-deploy-and-detect"
         title={<h2>Deploy and Detect</h2>}
         body={<p>Deploy and Detect step content will go here.</p>}
       />

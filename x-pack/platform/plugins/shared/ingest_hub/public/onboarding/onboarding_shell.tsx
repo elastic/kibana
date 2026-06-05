@@ -25,9 +25,14 @@ import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
-import { ConnectStep, ServicesStep, ServiceSettingsStep, DeploymentStep } from './step_components';
+import {
+  DeploySettingsStep,
+  ServicesStep,
+  ServiceSettingsStep,
+  DeployAndDetectStep,
+} from './step_components';
 
-const CONNECT_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'connect');
+const DEPLOY_SETTINGS_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'deploy-settings');
 
 export interface StepComponentProps {
   onNext: () => void;
@@ -35,10 +40,10 @@ export interface StepComponentProps {
 }
 
 const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> = {
-  connect: ConnectStep,
+  'deploy-settings': DeploySettingsStep,
   services: ServicesStep,
   'service-settings': ServiceSettingsStep,
-  deployment: DeploymentStep,
+  'deploy-and-detect': DeployAndDetectStep,
 };
 
 interface IntegrationMeta {
@@ -69,7 +74,7 @@ export function OnboardingShell() {
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const needsConnectStep = useMemo(
+  const needsDeploySettingsStep = useMemo(
     () =>
       selectedServiceIds.length === 0 ||
       selectedServiceIds.some(
@@ -94,9 +99,9 @@ export function OnboardingShell() {
     const nextStep = ONBOARDING_STEPS[currentStepIndex + 1];
     return () => {
       markStepComplete(currentStepId);
-      if (currentStepId === 'services' && !needsConnectStep) {
-        markStepComplete('connect');
-        const stepAfterConnect = ONBOARDING_STEPS[CONNECT_STEP_INDEX + 1];
+      if (currentStepId === 'services' && !needsDeploySettingsStep) {
+        markStepComplete('deploy-settings');
+        const stepAfterConnect = ONBOARDING_STEPS[DEPLOY_SETTINGS_STEP_INDEX + 1];
         if (stepAfterConnect) {
           history.push({ ...location, hash: `#${stepAfterConnect.id}` });
         }
@@ -104,18 +109,29 @@ export function OnboardingShell() {
         history.push({ ...location, hash: `#${nextStep.id}` });
       }
     };
-  }, [currentStepId, currentStepIndex, markStepComplete, needsConnectStep, history, location]);
+  }, [
+    currentStepId,
+    currentStepIndex,
+    markStepComplete,
+    needsDeploySettingsStep,
+    history,
+    location,
+  ]);
 
   const onBack = useMemo(() => {
     if (currentStepIndex <= 0) return undefined;
     // Scan backward, skipping connect when it is not part of the current flow
     let prevIndex = currentStepIndex - 1;
-    while (prevIndex > 0 && ONBOARDING_STEPS[prevIndex].id === 'connect' && !needsConnectStep) {
+    while (
+      prevIndex > 0 &&
+      ONBOARDING_STEPS[prevIndex].id === 'deploy-settings' &&
+      !needsDeploySettingsStep
+    ) {
       prevIndex--;
     }
     const prevStep = ONBOARDING_STEPS[prevIndex];
     return () => history.push({ ...location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, needsConnectStep, history, location]);
+  }, [currentStepIndex, needsDeploySettingsStep, history, location]);
 
   const horizontalStepsConfig = useMemo(
     () =>

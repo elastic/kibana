@@ -54,11 +54,11 @@ test.describe(
       page,
     }) => {
       await browserAuth.loginAsAdmin();
-      await page.gotoApp('onboarding/aws#connect');
-      await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+      await page.gotoApp('onboarding/aws#deploy-settings');
+      await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
 
       await selectPermissionBearingServices(page);
-      await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+      await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
 
       await test.step('viewer is rendered above the static keys form', async () => {
         await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');
@@ -85,11 +85,11 @@ test.describe(
       page,
     }) => {
       await browserAuth.loginAsAdmin();
-      await page.gotoApp('onboarding/aws#connect');
-      await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+      await page.gotoApp('onboarding/aws#deploy-settings');
+      await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
 
       await selectPermissionBearingServices(page);
-      await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+      await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
 
       await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');
       await expect(page.testSubj.locator(VIEWER)).toBeVisible();

@@ -18,15 +18,14 @@ import { getSelectedServicePermissions } from '../service_permissions';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { AwsPermissionsViewer } from './aws_permissions_viewer';
 
-interface ConnectStepProps {
+interface DeploySettingsStepProps {
   onNext: () => void;
   onBack?: () => void;
 }
 
-export function ConnectStep({ onNext, onBack }: ConnectStepProps) {
+export function DeploySettingsStep({ onNext, onBack }: DeploySettingsStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys, servicesStep } =
-    useOnboardingFlow();
+  const { connectStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const showIdentityFederation = useMemo(() => {
@@ -47,28 +46,30 @@ export function ConnectStep({ onNext, onBack }: ConnectStepProps) {
   );
 
   return (
-    <div data-test-subj="onboardingStep-connect">
+    <div data-test-subj="onboardingStep-deploy-settings">
       {onBack && (
         <>
           <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
-            <FormattedMessage id="xpack.ingestHub.connectStep.backButton" defaultMessage="Back" />
+            <FormattedMessage
+              id="xpack.ingestHub.deploySettingsStep.backButton"
+              defaultMessage="Back"
+            />
           </EuiButtonEmpty>
           <EuiSpacer size="m" />
         </>
       )}
-      <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
+      <Suspense
+        fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-deploy-settings-loading" />}
+      >
         <LazyAwsConnectSetup
           cloud={services.cloud as CloudSetupForCloudConnector | undefined}
           initialConnectorId={connectStep.connectorId}
           initialStaticKeys={connectStep.staticKeys}
-          // TODO remove temporary Keys
-          initialTemporaryKeys={connectStep.temporaryKeys}
           showIdentityFederation={showIdentityFederation}
           staticKeysContent={staticKeysContent}
           onNext={onNext}
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}
-          onTemporaryKeysChange={setTemporaryKeys}
         />
       </Suspense>
     </div>

@@ -24,15 +24,14 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
       defaultMessage: 'Service Settings',
     }),
   },
-  // TODO rename connect and deployment step ID, URL and component names to match the new step names
   {
-    id: 'connect',
+    id: 'deploy-settings',
     title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
       defaultMessage: 'Deploy Settings & Auth',
     }),
   },
   {
-    id: 'deployment',
+    id: 'deploy-and-detect',
     title: i18n.translate('xpack.ingestHub.onboarding.steps.deployment.title', {
       defaultMessage: 'Deploy and Detect',
     }),
