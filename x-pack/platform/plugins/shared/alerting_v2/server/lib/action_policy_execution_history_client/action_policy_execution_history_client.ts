@@ -13,6 +13,8 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import {
   POLICY_EXECUTION_HISTORY_MAX_PER_PAGE,
   type PolicyExecutionHistoryItem,
+  type PolicyExecutionOutcome,
+  type PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
@@ -29,11 +31,15 @@ import { collectIdsFromEvents, denormalizeEvent, type NameMaps } from './denorma
 const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
+const SEARCH_ID_CAP = 500;
+const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'dispatched';
 
 export interface ListExecutionHistoryParams {
   request: KibanaRequest;
   page?: number;
   perPage?: number;
+  search?: string;
+  outcome?: PolicyExecutionOutcomeFilter;
 }
 
 export interface ListExecutionHistoryResult {
@@ -46,10 +52,18 @@ export interface ListExecutionHistoryResult {
 export interface CountNewEventsSinceParams {
   request: KibanaRequest;
   since: string;
+  search?: string;
+  outcome?: PolicyExecutionOutcomeFilter;
 }
 
 export interface CountNewEventsSinceResult {
   count: number;
+}
+
+interface ResolvedSearchIds {
+  policyIds: string[];
+  ruleIds: string[];
+  hasMatches: boolean;
 }
 
 @injectable()
@@ -63,22 +77,49 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+  ) { }
 
   public async listExecutionHistory({
     request,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PER_PAGE,
+    search,
+    outcome = DEFAULT_OUTCOME_FILTER,
   }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
     const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
 
+    const searchIds = await this.resolveSearchIds(search);
+
+    this.logger.warn(
+      {
+        message: `Listing action policy execution history with search "${search}" resolved to ${searchIds.policyIds.length} policies and ${searchIds.ruleIds.length} rules.`
+      }
+    );
+
+    if (search !== undefined && !searchIds.hasMatches) {
+      return { items: [], page, perPage, totalEvents: 0 };
+    }
+
+    console.log({
+      request,
+      spaceId,
+      startDate,
+      page,
+      perPage,
+      outcome: toOutcomeForService(outcome),
+      policyIds: searchIds.policyIds,
+      ruleIds: searchIds.ruleIds,
+    });
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       request,
       spaceId,
       startDate,
       page,
       perPage,
+      outcome: toOutcomeForService(outcome),
+      policyIds: searchIds.policyIds,
+      ruleIds: searchIds.ruleIds,
     });
 
     const nameMaps = await this.resolveNames(result.events, spaceId);
@@ -95,13 +136,65 @@ export class ActionPolicyExecutionHistoryClient {
   public async countNewEventsSince({
     request,
     since,
+    search,
+    outcome = DEFAULT_OUTCOME_FILTER,
   }: CountNewEventsSinceParams): Promise<CountNewEventsSinceResult> {
     const spaceId = this.spaces.spacesService.getSpaceId(request);
+
+    const searchIds = await this.resolveSearchIds(search);
+    if (search !== undefined && !searchIds.hasMatches) {
+      return { count: 0 };
+    }
+
     return this.eventLogService.countActionPolicyExecutionEventsSince({
       request,
       spaceId,
       since,
+      outcome: toOutcomeForService(outcome),
+      policyIds: searchIds.policyIds,
+      ruleIds: searchIds.ruleIds,
     });
+  }
+
+  private async resolveSearchIds(search: string | undefined): Promise<ResolvedSearchIds> {
+    if (!search) return { policyIds: [], ruleIds: [], hasMatches: true };
+
+    const [policiesRes, rulesRes] = await Promise.allSettled([
+      this.actionPolicyClient.findActionPolicies({ search, perPage: SEARCH_ID_CAP }),
+      this.rulesClient.findRules({ search, perPage: SEARCH_ID_CAP }),
+    ]);
+
+    this.logger.warn(
+      {
+        message: `Search for "${search}" resolved to ${this.unwrapItems(
+          policiesRes,
+          'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED'
+        ).length} policies and ${this.unwrapItems(
+          rulesRes,
+          'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED'
+        ).length} rules.`
+      }
+    );
+
+    const policyIds = new Set<string>(
+      this.unwrapItems(policiesRes, 'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED').map(
+        (p) => p.id
+      )
+    );
+    const ruleIds = new Set<string>(
+      this.unwrapItems(rulesRes, 'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED').map((r) => r.id)
+    );
+
+    if (looksLikeSavedObjectId(search)) {
+      policyIds.add(search);
+      ruleIds.add(search);
+    }
+
+    return {
+      policyIds: [...policyIds],
+      ruleIds: [...ruleIds],
+      hasMatches: policyIds.size > 0 || ruleIds.size > 0,
+    };
   }
 
   private async resolveNames(events: IValidatedEvent[], spaceId: string): Promise<NameMaps> {
@@ -113,9 +206,9 @@ export class ActionPolicyExecutionHistoryClient {
       this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
-    const policies = this.unwrap(policiesRes, 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED');
-    const rules = this.unwrap(rulesRes, 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED');
-    const workflows = this.unwrap(workflowsRes, 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED');
+    const policies = this.unwrapArray(policiesRes, 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED');
+    const rules = this.unwrapArray(rulesRes, 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED');
+    const workflows = this.unwrapArray(workflowsRes, 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED');
 
     return {
       policyNames: new Map(policies.map((p) => [p.id, p.name])),
@@ -124,10 +217,27 @@ export class ActionPolicyExecutionHistoryClient {
     };
   }
 
-  private unwrap<T>(result: PromiseSettledResult<T[]>, code: string): T[] {
+  private unwrapArray<T>(result: PromiseSettledResult<T[]>, code: string): T[] {
     if (result.status === 'fulfilled') return result.value;
-    const error = result.reason instanceof Error ? result.reason : new Error(String(result.reason));
-    this.logger.error({ error, code });
+    this.logFailure(result.reason, code);
     return [];
   }
+
+  private unwrapItems<T>(result: PromiseSettledResult<{ items: T[] }>, code: string): T[] {
+    if (result.status === 'fulfilled') return result.value.items;
+    this.logFailure(result.reason, code);
+    return [];
+  }
+
+  private logFailure(reason: unknown, code: string): void {
+    const error = reason instanceof Error ? reason : new Error(String(reason));
+    this.logger.error({ error, code });
+  }
 }
+
+const toOutcomeForService = (
+  outcome: PolicyExecutionOutcomeFilter
+): PolicyExecutionOutcome | undefined => (outcome === 'all' ? undefined : outcome);
+
+const SO_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+const looksLikeSavedObjectId = (value: string): boolean => SO_ID_PATTERN.test(value);

@@ -8,9 +8,30 @@
 import { z } from '@kbn/zod/v4';
 
 export const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
+export const POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;
 
 export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
+
+export const policyExecutionOutcomeFilterSchema = z.enum(['dispatched', 'throttled', 'all']);
+export type PolicyExecutionOutcomeFilter = z.infer<typeof policyExecutionOutcomeFilterSchema>;
+
+const sharedFilterFields = {
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .max(POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH)
+    .optional()
+    .describe(
+      'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
+    ),
+  outcome: policyExecutionOutcomeFilterSchema
+    .optional()
+    .describe(
+      'Outcome filter. When omitted defaults to "dispatched". Use "all" for both dispatched and throttled.'
+    ),
+};
 
 export const listPolicyExecutionHistoryQuerySchema = z.object({
   page: z.coerce.number().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
@@ -20,6 +41,7 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
     .optional()
     .describe('Number of events per page. Defaults to 100.'),
+  ...sharedFilterFields,
 });
 export type ListPolicyExecutionHistoryParams = z.infer<
   typeof listPolicyExecutionHistoryQuerySchema
@@ -27,6 +49,7 @@ export type ListPolicyExecutionHistoryParams = z.infer<
 
 export const countPolicyExecutionEventsQuerySchema = z.object({
   since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
+  ...sharedFilterFields,
 });
 export type CountPolicyExecutionEventsParams = z.infer<
   typeof countPolicyExecutionEventsQuerySchema
