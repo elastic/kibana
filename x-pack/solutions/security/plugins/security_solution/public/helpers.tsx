@@ -24,6 +24,7 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
+  RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
@@ -183,7 +184,7 @@ export const isDashboardViewPath = (pathname: string): boolean =>
 
 export const isRuleChangesHistoryPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
-    path: `${RULES_PATH}/id/:id/changes-history`,
+    path: RULES_CHANGES_HISTORY_PATH,
     exact: true,
     strict: false,
   });
