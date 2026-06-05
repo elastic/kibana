@@ -14,6 +14,8 @@ import {
   getMaintenanceWindowsApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
+  getTaskManagerService,
+  getTelemetryService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
   type DispatcherApiService,
@@ -21,6 +23,8 @@ import {
   type RuleExecutionsApiService,
   type RulesApiService,
   type RuleEventsApiService,
+  type TaskManagerService,
+  type TelemetryService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -35,6 +39,8 @@ export interface AlertingApiServices {
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
+  taskManager: TaskManagerService;
+  telemetry: TelemetryService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -63,6 +69,8 @@ export const buildAlertingApiServices = ({
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
   dispatcher: getDispatcherApiService({ esClient, log }),
+  taskManager: getTaskManagerService({ kbnClient, log }),
+  telemetry: getTelemetryService({ esClient, log }),
 });
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
