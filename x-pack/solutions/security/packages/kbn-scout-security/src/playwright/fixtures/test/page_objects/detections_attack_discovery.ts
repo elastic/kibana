@@ -26,6 +26,7 @@ const ATTACKS_PAGE_SEARCH_BAR_TEST_ID = 'attacks-page-search-bar';
 const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
 const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
 const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
+const ATTACKS_PAGE_TYPE_FILTER_TEST_ID = 'attacks-page-type-filter';
 const ATTACKS_KPIS_SECTION_TEST_ID = 'attacks-kpis-section';
 const ATTACKS_SUMMARY_VIEW_TEST_ID = 'summary-view-content';
 const ATTACKS_LIST_PANEL_TEST_ID = 'attacksListPanel';
@@ -38,6 +39,7 @@ const SCHEDULES_TABLE_TEST_ID = 'schedulesTable';
 const ATTACK_DETAILS_FLYOUT_BODY_TEST_ID = 'attack-details-flyout-body';
 const FILTER_BY_ASSIGNEES_BUTTON_TEST_ID = 'filter-popover-button-assignees';
 const CONNECTOR_FILTER_BUTTON_TEST_ID = 'connectorFilterButton';
+const TYPE_FILTER_BUTTON_TEST_ID = 'typeFilterButton';
 const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 const SCHEDULE_BUTTON_TEST_ID_TABLE = 'scheduleButton';
 const SCHEDULE_DETAILS_FLYOUT_TEST_ID = 'scheduleDetailsFlyout';
@@ -57,6 +59,7 @@ export class DetectionsAttackDiscoveryPage {
   public readonly attacksPageStandardFilters: Locator;
   public readonly attacksPageAssigneeFilter: Locator;
   public readonly attacksPageConnectorFilter: Locator;
+  public readonly attacksPageTypeFilter: Locator;
   public readonly attacksKpisSection: Locator;
   public readonly kpisSectionToggleButton: Locator;
   public readonly attacksSummaryView: Locator;
@@ -71,6 +74,7 @@ export class DetectionsAttackDiscoveryPage {
   public readonly attackDetailsFlyoutBody: Locator;
   public readonly assigneesFilterButton: Locator;
   public readonly connectorFilterButton: Locator;
+  public readonly typeFilterButton: Locator;
   public readonly tableExpandAttackDetailsButtons: Locator;
   public readonly tableScheduleButtons: Locator;
   public readonly settingsButton: Locator;
@@ -94,6 +98,7 @@ export class DetectionsAttackDiscoveryPage {
     this.attacksPageConnectorFilter = this.page.testSubj.locator(
       ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID
     );
+    this.attacksPageTypeFilter = this.page.testSubj.locator(ATTACKS_PAGE_TYPE_FILTER_TEST_ID);
     this.attacksKpisSection = this.page.testSubj.locator(ATTACKS_KPIS_SECTION_TEST_ID);
     this.kpisSectionToggleButton = this.attacksKpisSection.getByTestId(QUERY_TOGGLE_HEADER_TEST_ID);
     this.attacksSummaryView = this.page.testSubj.locator(ATTACKS_SUMMARY_VIEW_TEST_ID);
@@ -108,6 +113,7 @@ export class DetectionsAttackDiscoveryPage {
     this.attackDetailsFlyoutBody = this.page.testSubj.locator(ATTACK_DETAILS_FLYOUT_BODY_TEST_ID);
     this.assigneesFilterButton = this.page.testSubj.locator(FILTER_BY_ASSIGNEES_BUTTON_TEST_ID);
     this.connectorFilterButton = this.page.testSubj.locator(CONNECTOR_FILTER_BUTTON_TEST_ID);
+    this.typeFilterButton = this.page.testSubj.locator(TYPE_FILTER_BUTTON_TEST_ID);
     this.tableExpandAttackDetailsButtons = this.attacksTableSection.getByTestId(
       EXPAND_ATTACK_BUTTON_TEST_ID
     );
