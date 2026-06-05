@@ -119,6 +119,11 @@ apiTest.describe('PrivateLocationAddMonitor', { tag: ['@local-stateful-classic']
       name: `Test monitor ${uuidv4()}`,
       namespace: 'default',
       locations: [privateLocation],
+      // `httpMonitorFixture` hard-codes `spaces: ['default']`; posting that to a
+      // non-default space is rejected by server validation (the monitor's spaces
+      // must include the current space). An empty array lets the server assign the
+      // current space, mirroring `create_monitor.spec.ts`.
+      spaces: [],
     };
 
     const res = await apiClient.post(`s/${spaceId}/api/synthetics/monitors`, {

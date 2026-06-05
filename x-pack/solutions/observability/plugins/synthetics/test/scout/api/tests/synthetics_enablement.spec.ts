@@ -75,8 +75,6 @@ const SYNTHETICS_SERVICE_WRITER_INDICES = [
     privileges: ['view_index_metadata', 'create_doc', 'auto_configure', 'read'],
   },
 ];
-/** Cluster privileges of the synthetics service writer role on stateful (`getServiceApiKeyPrivileges(false).cluster`). */
-const SYNTHETICS_SERVICE_WRITER_CLUSTER = ['monitor', 'read_pipeline', 'read_ilm'];
 /** Saved object that stores the synthetics service api key — from `server/saved_objects/service_api_key.ts`. */
 const SYNTHETICS_API_KEY_SO_ID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
 const SYNTHETICS_API_KEY_SO_TYPE = 'uptime-synthetics-api-key';
@@ -291,7 +289,10 @@ apiTest.describe(
           expiration: '1d',
           role_descriptors: {
             'role-a': {
-              cluster: SYNTHETICS_SERVICE_WRITER_CLUSTER,
+              // The key is *invalid* purely because the index privileges below omit
+              // `read`; cluster privileges are irrelevant here. Use the common
+              // serverless-safe subset (no `read_ilm`, which ES rejects on serverless).
+              cluster: COMMON_SYNTHETICS_WRITER_CLUSTER_PRIVS,
               indices: [
                 {
                   names: ['synthetics-*'],
