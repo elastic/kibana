@@ -211,7 +211,10 @@ const useSolutionSideNavItems = (
         return navItems;
       }
 
-      if (navLink.id === SecurityPageName.administration) {
+      if (
+        navLink.id === SecurityPageName.launchpad ||
+        navLink.id === SecurityPageName.administration
+      ) {
         return navItems;
       }
 
