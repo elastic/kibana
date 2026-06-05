@@ -290,8 +290,8 @@ const grindBeans = (drink: DrinkType, size: DrinkSize): Promise<void> =>
 
 ### Verify
 
-Brew another batch and watch your **collector terminal** (or your Jaeger UI, if you added
-one). You should see `process_order` spans with nested `grind_beans` / `brew` / `garnish`
+Brew another batch and watch your **collector terminal**. Then, head to the APM UI in Kibana.
+You should see `process_order` spans with nested `grind_beans` / `brew` / `garnish`
 children, your `coffee.*` attributes, and — for the orders that fail — a span automatically
 marked **error** with the exception recorded. You did not write any error-handling code for
 that: `withActiveSpan` does it for you.
