@@ -116,7 +116,7 @@ export const getEndpointStatusTool = (
                 const indicesExists = await esClient.indices.exists({
                   index: '.ds-metrics-endpoint.metadata-default',
                 });
-                if (!indicesExists.body) {
+                if (!indicesExists) {
                   return {
                     results: [
                       {

@@ -117,6 +117,10 @@ describe('unisolateHostTool', () => {
           wasSuccessful: true,
           hosts: { 'agent-123': { name: 'my-host' } },
         }),
+        // Un-isolate is deliberately NOT a method on ResponseActionsClient;
+        // the client uses `release` instead.  Keeping this spy here lets us
+        // assert the tool does not call a non-existent method (FR-015, FR-031).
+        unisolate: jest.fn().mockReturnValue(Promise.resolve()),
         suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
         upload: jest.fn().mockReturnValue(Promise.resolve()),
         getFile: jest.fn().mockReturnValue(Promise.resolve()),
@@ -162,6 +166,10 @@ describe('unisolateHostTool', () => {
         // Ensure isolate was NOT called
         expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
 
+        // Ensure unisolate was NOT called (FR-015, FR-031)
+        // The ResponseActionsClient uses `release`, not `unisolate`.
+        expect(mockResponseActionsClient.unisolate).not.toHaveBeenCalled();
+
         expect(result.results).toHaveLength(1);
         expect(result.results[0].type).toBe(ToolResultType.other);
         const data = result.results[0].data as Record<string, unknown>;
@@ -193,6 +201,7 @@ describe('unisolateHostTool', () => {
           wasSuccessful: true,
           hosts: { 'agent-123': { name: 'test-host' } },
         }),
+        unisolate: jest.fn().mockReturnValue(Promise.resolve()),
         suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
         upload: jest.fn().mockReturnValue(Promise.resolve()),
         getFile: jest.fn().mockReturnValue(Promise.resolve()),
@@ -231,6 +240,9 @@ describe('unisolateHostTool', () => {
           },
           { hosts: { 'agent-123': { name: 'test-host' } } }
         );
+
+        // Ensure unisolate was NOT called (FR-015, FR-031)
+        expect(mockResponseActionsClient.unisolate).not.toHaveBeenCalled();
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getInternalResponseActionsClient =
@@ -275,6 +287,7 @@ describe('unisolateHostTool', () => {
       const mockResponseActionsClient = {
         isolate: jest.fn().mockReturnValue(Promise.resolve()),
         release: jest.fn().mockRejectedValue(new Error('release failed')),
+        unisolate: jest.fn().mockReturnValue(Promise.resolve()),
         suspendProcess: jest.fn().mockReturnValue(Promise.resolve()),
         upload: jest.fn().mockReturnValue(Promise.resolve()),
         getFile: jest.fn().mockReturnValue(Promise.resolve()),
