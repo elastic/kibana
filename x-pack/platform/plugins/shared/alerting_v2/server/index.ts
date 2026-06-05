@@ -38,4 +38,4 @@ export const module = new ContainerModule((options) => {
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';
-export type { AlertingServerStart, RulesClientApi } from './types';
+export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';
