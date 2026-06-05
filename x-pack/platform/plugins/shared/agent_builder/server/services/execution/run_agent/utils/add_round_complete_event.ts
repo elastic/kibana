@@ -28,6 +28,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
@@ -515,7 +516,15 @@ const buildRoundState = ({
     return undefined;
   }
 
-  const nodes = promptRequestEvents.map((promptRequest) => {
+  // ask_user_question prompts don't need a node-state snapshot: the pending
+  // `ask_user_question` step in `round.steps` (with `data.answers === undefined`)
+  // is itself the resume marker. The `pendingAskUserQuestionStepsToActions`
+  // helper walks `round.steps` directly at resume time.
+  const toolCallPromptRequests = promptRequestEvents.filter(
+    (event) => !isAskUserQuestionPrompt(event.prompt)
+  );
+
+  const nodes = toolCallPromptRequests.map((promptRequest) => {
     const toolCallId = promptRequest.source.tool_call_id;
     const toolCall = round.steps
       .filter(isToolCallStep)

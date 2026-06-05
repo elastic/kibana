@@ -15,7 +15,11 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  AgentExecutionMode,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -412,7 +416,14 @@ const createInitializerCommand = ({
     for (const id of consumedPromptIds) {
       promptManager.deleteResponse(id);
     }
-    startAt = steps.executeTool;
+    // If any tool-call step is still pending (empty results), executeTool must
+    // run it. Otherwise the only thing that was paused was ask_user_question —
+    // the synthesized action pair is already "completed", so we go straight to
+    // researchAgent and let the agent continue with the new messages in context.
+    const hasPendingToolCall = lastRound.steps.some(
+      (step) => isToolCallStep(step) && step.results.length === 0
+    );
+    startAt = hasPendingToolCall ? steps.executeTool : steps.researchAgent;
   }
 
   if (lastRound?.state) {
