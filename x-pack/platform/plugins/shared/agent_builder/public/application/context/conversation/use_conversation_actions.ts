@@ -33,7 +33,7 @@ import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-co
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
-import { patchSidebarConversationListTitle } from '../../utils/conversation_sidebar_list_cache';
+import { patchConversationList } from '../../utils/conversation_sidebar_list_cache';
 import { createNewConversation, createNewRound } from '../../utils/new_conversation';
 
 export interface ConversationActions {
@@ -85,6 +85,7 @@ export interface ConversationActions {
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
+  onRoundComplete: (conversationRound: ConversationRound) => void;
 }
 
 interface UseConversationActionsParams {
@@ -332,11 +333,11 @@ export const createConversationActions = ({
       if (conversationId) {
         const conversation = queryClient.getQueryData<Conversation>(queryKey);
         if (conversation?.agent_id) {
-          patchSidebarConversationListTitle({
+          patchConversationList({
             queryClient,
             agentId: conversation.agent_id,
             conversationId,
-            title,
+            values: { title },
           });
         }
       }
@@ -353,6 +354,17 @@ export const createConversationActions = ({
       // Call provider-specific callback if provided
       if (onDeleteConversation) {
         onDeleteConversation({ id, isCurrentConversation });
+      }
+    },
+    onRoundComplete: (round: ConversationRound) => {
+      const conversation = queryClient.getQueryData<Conversation>(queryKey);
+      if (conversation?.agent_id) {
+        patchConversationList({
+          queryClient,
+          agentId: conversation.agent_id,
+          conversationId: conversation.id,
+          values: { status: round.status, read: false, updated_at: new Date().toISOString() },
+        });
       }
     },
     renameConversation: async (id: string, title: string) => {
