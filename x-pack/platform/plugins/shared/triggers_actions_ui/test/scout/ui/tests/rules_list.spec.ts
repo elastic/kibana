@@ -16,7 +16,7 @@
 import type { KbnClient, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule } from '../fixtures';
+import { test, makeEsQueryRule, deleteRulesByPrefix } from '../fixtures';
 
 // ── API helpers ──────────────────────────────────────────────────────────────
 
@@ -190,6 +190,10 @@ const ensureRuleStatus = async (
 test.describe('Rules list', { tag: tags.stateful.classic }, () => {
   const createdRuleIds: string[] = [];
   const createdConnectorIds: string[] = [];
+
+  test.beforeAll(async ({ kbnClient }) => {
+    await deleteRulesByPrefix(kbnClient, 'clear-');
+  });
 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
