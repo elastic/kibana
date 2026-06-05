@@ -14,10 +14,31 @@ import { HostStatus } from '../../../../../../common/endpoint/types';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
+import type { EndpointNotFoundResult } from '../types';
 
 const getEndpointStatusSchema = z.object({
   hostName: z.string().min(1).describe('The hostname of the endpoint to check status for.'),
 });
+
+/**
+ * Builds a consistent "endpoint not found" result object. The consumer
+ * (agent / caller) can distinguish the cause by inspecting `reason`.
+ */
+function notFoundResult(hostName: string, reason: 'endpoint_not_found' | 'index_not_found'): EndpointNotFoundResult {
+  const messages: Record<string, string> = {
+    endpoint_not_found: `No endpoint found with hostname '${hostName}'.`,
+    index_not_found: `The endpoint metadata index is not available. Cannot retrieve status for '${hostName}'.`,
+  };
+  return {
+    hostName,
+    found: false,
+    reason,
+    status: HostStatus.OFFLINE,
+    isolated: false,
+    lastSeen: null,
+    message: messages[reason],
+  };
+}
 
 export const getEndpointStatusTool = (
   endpointAppContextService: EndpointAppContextService
@@ -47,14 +68,7 @@ export const getEndpointStatusTool = (
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.other,
-                data: {
-                  hostName,
-                  found: false,
-                  status: HostStatus.OFFLINE,
-                  isolated: false,
-                  lastSeen: null,
-                  message: `No endpoint found with hostname '${hostName}'.`,
-                },
+                data: notFoundResult(hostName, 'endpoint_not_found'),
               },
             ],
           };
@@ -83,6 +97,37 @@ export const getEndpointStatusTool = (
             isolated = Boolean(hostMetadata.metadata.Endpoint?.state?.isolation);
             lastSeen = hostMetadata.last_checkin || null;
             status = hostMetadata.host_status || HostStatus.OFFLINE;
+          } else {
+            // Agent exists in fleet but metadata index returned zero hits.
+            // The metadata service catches `index_not_found_exception` and
+            // returns `{ data: [], total: 0 }`, so we infer index_not_found
+            // when the total is zero.  If total > 0 but data is empty, the
+            // agent was filtered out by policy/space — treat as endpoint not found.
+            if (hostInfo.total === 0) {
+              // The metadata service already handles index_not_found gracefully.
+              // However, if the index does not exist the service returns empty
+              // data without error. We use the ES client to check whether the
+              // backing index actually exists.
+              const esClient = endpointAppContextService.getInternalEsClient();
+              try {
+                const indicesExists = await esClient.indices.exists({
+                  index: '.ds-metrics-endpoint.metadata-default',
+                });
+                if (!indicesExists.body) {
+                  return {
+                    results: [
+                      {
+                        tool_result_id: getToolResultId(),
+                        type: ToolResultType.other,
+                        data: notFoundResult(hostName, 'index_not_found'),
+                      },
+                    ],
+                  };
+                }
+              } catch (esError) {
+                logger.warn(`Could not verify index existence for host ${hostName}: ${esError.message}`);
+              }
+            }
           }
         } catch (metadataError) {
           logger.warn(`Could not retrieve metadata for host ${hostName}: ${metadataError.message}`);
