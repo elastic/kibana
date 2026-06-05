@@ -222,5 +222,8 @@ const toOutcomeForService = (
   outcome: PolicyExecutionOutcomeFilter
 ): PolicyExecutionOutcome | undefined => (outcome === 'all' ? undefined : outcome);
 
-const SO_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
-const looksLikeSavedObjectId = (value: string): boolean => SO_ID_PATTERN.test(value);
+// Only treat the search term as a candidate id when it looks like a UUID — Kibana saved
+// objects created via the API use UUIDs by default. Avoids polluting the KQL with ordinary
+// words like "rule" or "cpu" that would otherwise be added as candidate ids.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const looksLikeSavedObjectId = (value: string): boolean => UUID_PATTERN.test(value);

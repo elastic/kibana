@@ -321,18 +321,19 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         expect(call.ruleIds).toEqual(expect.arrayContaining(['r-1']));
       });
 
-      it('also includes the raw search term as a candidate id when it looks like a saved object id', async () => {
+      it('also includes the raw search term as a candidate id when it is a UUID', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
+        const uuid = 'e057fcc7-9402-4e5a-b5b5-1575b7b8d651';
 
-        await client.listExecutionHistory({ request, search: 'p-abc' });
+        await client.listExecutionHistory({ request, search: uuid });
 
         const call = eventLogService.findActionPolicyExecutionEvents.mock.calls[0][0];
-        expect(call.policyIds).toContain('p-abc');
-        expect(call.ruleIds).toContain('p-abc');
+        expect(call.policyIds).toContain(uuid);
+        expect(call.ruleIds).toContain(uuid);
       });
 
-      it('does not add the term as a candidate id when it contains characters that break id matching', async () => {
+      it('does not add the term as a candidate id when it is not a UUID', async () => {
         const { client, eventLogService, actionPolicyClient } = createMocks();
         (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
           items: [{ id: 'p-1' } as any],
@@ -342,11 +343,14 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         });
         const request = httpServerMock.createKibanaRequest();
 
-        await client.listExecutionHistory({ request, search: 'two words' });
+        for (const term of ['rule', 'cpu', '2', 'p-abc', 'two words']) {
+          (eventLogService.findActionPolicyExecutionEvents as jest.Mock).mockClear();
+          await client.listExecutionHistory({ request, search: term });
 
-        const call = eventLogService.findActionPolicyExecutionEvents.mock.calls[0][0];
-        expect(call.policyIds).not.toContain('two words');
-        expect(call.ruleIds).not.toContain('two words');
+          const call = eventLogService.findActionPolicyExecutionEvents.mock.calls[0][0];
+          expect(call.policyIds).not.toContain(term);
+          expect(call.ruleIds).not.toContain(term);
+        }
       });
 
       it('short-circuits with an empty result when search yields no matching ids', async () => {
