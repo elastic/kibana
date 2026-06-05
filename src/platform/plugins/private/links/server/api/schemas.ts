@@ -16,7 +16,7 @@ import {
   EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
-} from '../../common/types';
+} from '../../common/constants';
 
 const baseLinkSchema = {
   label: schema.maybe(

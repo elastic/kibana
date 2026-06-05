@@ -9,7 +9,7 @@
 
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { transformIn } from './transform_in';
-import { DASHBOARD_LINK_TYPE } from '../../types';
+import { DASHBOARD_LINK_TYPE } from '../../constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValueOnce('fb1b3fc7-6e12-4542-bcf5-c61ad77241c5'),

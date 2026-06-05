@@ -14,22 +14,19 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroupItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
+import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import type { LinksLayoutType } from '../../../common/types';
+import type { DashboardLink } from '../../../server';
 import { trackUiMetric } from '../../services/kibana_services';
 import type { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import type { DashboardLink } from '../../../server';
-import {
-  DASHBOARD_LINK_TYPE,
-  LINKS_VERTICAL_LAYOUT,
-  type LinksLayoutType,
-} from '../../../common/types';
 
 export interface DashboardLinkProps {
   link: ResolvedLink;

@@ -9,7 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
 import type { LinksSearchRequestQuery, LinksSearchResponseBody } from './types';
 import type { StoredLinksState } from '../../links_saved_object';
 
@@ -20,7 +20,7 @@ export async function search(
   const { core } = await requestCtx.resolve(['core']);
 
   const soResponse = await core.savedObjects.client.find<StoredLinksState>({
-    type: LINKS_SAVED_OBJECT_TYPE,
+    type: LINKS_LIBRARY_TYPE,
     searchFields: ['title^3', 'description'],
     fields: ['description', 'title'],
     search: searchQuery.query,

@@ -31,8 +31,12 @@ import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-
 import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-navigation-options-components';
 import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE, type LinkType } from '../../../common/types';
+import {
+  DASHBOARD_LINK_TYPE,
+  DEFAULT_EXTERNAL_LINK_OPTIONS,
+  EXTERNAL_LINK_TYPE,
+} from '../../../common/constants';
+import type { LinkType } from '../../../common/types';
 import type { ExternalLinkOptions } from '../../../server';
 import type { ResolvedLink } from '../../types';
 import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_editor';

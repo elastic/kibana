@@ -8,7 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from './types';
 import type { StoredLinksState } from '../../links_saved_object';
@@ -22,7 +22,7 @@ export async function create(
 
   const { state: soState, references } = transformIn(createBody);
   const savedObject = await core.savedObjects.client.create<StoredLinksState>(
-    LINKS_SAVED_OBJECT_TYPE,
+    LINKS_LIBRARY_TYPE,
     soState,
     { references }
   );

@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/types';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/constants';
 import type { Link } from '../../server';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
 import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tools';

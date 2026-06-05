@@ -15,11 +15,7 @@ import type {
   VisualizationClient,
 } from '@kbn/visualizations-plugin/public';
 
-import {
-  LINKS_API_PATH,
-  PUBLIC_API_VERSION,
-  LINKS_SAVED_OBJECT_TYPE,
-} from '../../common/constants';
+import { LINKS_API_PATH, PUBLIC_API_VERSION, LINKS_LIBRARY_TYPE } from '../../common/constants';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
 import type { LinksSearchRequestQuery, LinksSearchResponseBody } from '../../server/api/search';
@@ -34,7 +30,7 @@ export const linksClient = {
       })
       .catch((e) => {
         if (e.response?.status === 404) {
-          throw new SavedObjectNotFound({ type: LINKS_SAVED_OBJECT_TYPE, id });
+          throw new SavedObjectNotFound({ type: LINKS_LIBRARY_TYPE, id });
         }
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
@@ -75,6 +71,6 @@ export const linksClient = {
 
 export function getLinksClient<
   Attr extends SerializableAttributes = SerializableAttributes
->(): VisualizationClient<typeof LINKS_SAVED_OBJECT_TYPE, Attr> {
-  return linksClient as unknown as VisualizationClient<typeof LINKS_SAVED_OBJECT_TYPE, Attr>;
+>(): VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr> {
+  return linksClient as unknown as VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr>;
 }

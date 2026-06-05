@@ -11,7 +11,8 @@ import React, { useState } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE, type LinkType } from '../../../common/types';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../common/constants';
+import type { LinkType } from '../../../common/types';
 import type { ResolvedLink } from '../../types';
 import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';

@@ -12,7 +12,7 @@ import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-
 import { resolveLinkInfo, resolveLinks, serializeResolvedLinks } from './resolve_links';
 import type { Link } from '../../server';
 import type { ResolvedLink } from '../types';
-import { DASHBOARD_LINK_TYPE } from '../../common/types';
+import { DASHBOARD_LINK_TYPE } from '../../common/constants';
 
 jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
   fetchDashboard: async (id: string) => {

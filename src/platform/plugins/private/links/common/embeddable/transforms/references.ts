@@ -16,7 +16,7 @@ import type {
   StoredDashboardLink,
   StoredLinksState,
 } from '../../../server';
-import { DASHBOARD_LINK_TYPE } from '../../types';
+import { DASHBOARD_LINK_TYPE } from '../../constants';
 
 export function extractReferences(links: LinksState['links']) {
   const extractedReferences: Reference[] = [];

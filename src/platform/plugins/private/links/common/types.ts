@@ -7,25 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  DASHBOARD_LINK_TYPE,
+  EXTERNAL_LINK_TYPE,
+  LINKS_HORIZONTAL_LAYOUT,
+  LINKS_VERTICAL_LAYOUT,
+} from './constants';
 
-export interface SharingSavedObjectProps {
-  outcome: SavedObjectsResolveResponse['outcome'];
-  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
-  sourceId?: string;
-}
-
-/**
- * Link types
- */
-export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export const EXTERNAL_LINK_TYPE = 'externalLink';
 export type LinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
-
-/**
- * Layout options
- */
-export const LINKS_HORIZONTAL_LAYOUT = 'horizontal';
-export const LINKS_VERTICAL_LAYOUT = 'vertical';
 export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERTICAL_LAYOUT;

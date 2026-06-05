@@ -10,7 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 
 import type { StoredLinksState } from '../../../server';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
+import { LINKS_LIBRARY_TYPE } from '../../constants';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 import { extractReferences } from './references';
 
@@ -25,7 +25,7 @@ export function transformIn(state: LinksEmbeddableState): {
       references: [
         {
           name: 'savedObjectRef',
-          type: LINKS_SAVED_OBJECT_TYPE,
+          type: LINKS_LIBRARY_TYPE,
           id: ref_id,
         },
       ],
