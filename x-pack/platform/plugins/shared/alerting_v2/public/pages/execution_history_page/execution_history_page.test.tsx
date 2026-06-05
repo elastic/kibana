@@ -297,7 +297,7 @@ describe('ExecutionHistoryPage', () => {
     expect(workflowLink).toHaveAttribute('target', '_blank');
   });
 
-  it('queries with default page=1, perPage=100, outcome=dispatched and no search', () => {
+  it('queries with default page=1, perPage=100, outcome=all and no search', () => {
     mockFetchResult();
     renderPage();
 
@@ -305,7 +305,7 @@ describe('ExecutionHistoryPage', () => {
       page: 1,
       perPage: 100,
       search: undefined,
-      outcome: 'dispatched',
+      outcome: 'all',
     });
   });
 
@@ -321,14 +321,17 @@ describe('ExecutionHistoryPage', () => {
     mockFetchResult();
     renderPage();
 
-    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'all');
+    await userEvent.selectOptions(
+      screen.getByTestId('executionHistoryOutcomeFilter'),
+      'dispatched'
+    );
 
     await waitFor(() => {
       expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 100,
         search: undefined,
-        outcome: 'all',
+        outcome: 'dispatched',
       });
     });
   });
@@ -345,7 +348,7 @@ describe('ExecutionHistoryPage', () => {
           page: 1,
           perPage: 100,
           search: 'cpu',
-          outcome: 'dispatched',
+          outcome: 'all',
         });
       },
       { timeout: 2000 }
@@ -356,7 +359,7 @@ describe('ExecutionHistoryPage', () => {
     mockFetchResult();
     renderPage();
 
-    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'all');
+    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'throttled');
 
     expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
     expect(

@@ -29,7 +29,7 @@ const sharedFilterFields = {
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted defaults to "dispatched". Use "all" for both dispatched and throttled.'
+      'Outcome filter. When omitted defaults to "all" (both dispatched and throttled). Pass "dispatched" or "throttled" to narrow.'
     ),
 };
 

@@ -30,7 +30,7 @@ import { ExecutionHistoryErrorState } from './error_state';
 import { NewEventsBanner } from './new_events_banner';
 
 const DEFAULT_PER_PAGE = 100;
-const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'dispatched';
+const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
 
 const buildColumns = (
   onPolicyClick: (policyId: string) => void,

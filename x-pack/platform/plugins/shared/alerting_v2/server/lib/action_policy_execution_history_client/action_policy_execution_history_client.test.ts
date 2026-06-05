@@ -122,7 +122,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         startDate: '2026-10-10T11:00:00.000Z',
         page: 2,
         perPage: 25,
-        outcome: 'dispatched',
+        outcome: undefined,
         policyIds: [],
         ruleIds: [],
       });
@@ -260,14 +260,14 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
       });
 
-      it('defaults to outcome="dispatched" when not provided', async () => {
+      it('defaults to outcome="all" (no narrowing → undefined to service) when not provided', async () => {
         const { client, eventLogService } = createMocks();
         const request = httpServerMock.createKibanaRequest();
 
         await client.listExecutionHistory({ request });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
-          expect.objectContaining({ outcome: 'dispatched' })
+          expect.objectContaining({ outcome: undefined })
         );
       });
     });
@@ -442,7 +442,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         request,
         spaceId: 'my-space',
         since,
-        outcome: 'dispatched',
+        outcome: undefined,
         policyIds: [],
         ruleIds: [],
       });

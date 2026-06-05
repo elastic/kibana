@@ -32,7 +32,7 @@ const TIME_WINDOW_HOURS = 24;
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = POLICY_EXECUTION_HISTORY_MAX_PER_PAGE;
 const SEARCH_ID_CAP = 500;
-const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'dispatched';
+const DEFAULT_OUTCOME_FILTER: PolicyExecutionOutcomeFilter = 'all';
 
 export interface ListExecutionHistoryParams {
   request: KibanaRequest;
@@ -77,7 +77,7 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) { }
+  ) {}
 
   public async listExecutionHistory({
     request,
@@ -91,11 +91,6 @@ export class ActionPolicyExecutionHistoryClient {
 
     const searchIds = await this.resolveSearchIds(search);
 
-    this.logger.warn(
-      {
-        message: `Listing action policy execution history with search "${search}" resolved to ${searchIds.policyIds.length} policies and ${searchIds.ruleIds.length} rules.`
-      }
-    );
 
     if (search !== undefined && !searchIds.hasMatches) {
       return { items: [], page, perPage, totalEvents: 0 };
@@ -163,18 +158,6 @@ export class ActionPolicyExecutionHistoryClient {
       this.actionPolicyClient.findActionPolicies({ search, perPage: SEARCH_ID_CAP }),
       this.rulesClient.findRules({ search, perPage: SEARCH_ID_CAP }),
     ]);
-
-    this.logger.warn(
-      {
-        message: `Search for "${search}" resolved to ${this.unwrapItems(
-          policiesRes,
-          'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED'
-        ).length} policies and ${this.unwrapItems(
-          rulesRes,
-          'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED'
-        ).length} rules.`
-      }
-    );
 
     const policyIds = new Set<string>(
       this.unwrapItems(policiesRes, 'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED').map(
