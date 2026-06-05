@@ -233,7 +233,7 @@ describe('LifecycleTabLabel', () => {
       page: 'index_template_edit',
       indexTemplate: 'logs@stream',
     });
-    expect(windowOpenSpy).toHaveBeenCalledWith(editUrl, '_blank', 'noopener,noreferrer');
+    expect(windowOpenSpy).toHaveBeenCalledWith(editUrl, '_blank');
 
     windowOpenSpy.mockRestore();
   });
