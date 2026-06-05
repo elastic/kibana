@@ -7,6 +7,7 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useMemo, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -45,9 +46,12 @@ export const useResumeRoundMutation = ({
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
   const queryClient = useQueryClient();
-  // One controller per in-flight conversation. Concurrent streams need independent cancel.
+  // One controller + executionId per in-flight conversation. Concurrent streams need
+  // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
   // `useResumeRoundMutation` is called exactly once — by the `StreamingProvider`.
-  const controllersRef = useRef<Map<string, AbortController>>(new Map());
+  const controllersRef = useRef<Map<string, { controller: AbortController; executionId: string }>>(
+    new Map()
+  );
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -62,9 +66,14 @@ export const useResumeRoundMutation = ({
         conversationsService,
       });
 
-      controllersRef.current.get(vars.conversationId)?.abort();
+      const previous = controllersRef.current.get(vars.conversationId);
+      if (previous) {
+        chatService.abort(previous.executionId).catch(() => {});
+        previous.controller.abort();
+      }
       const controller = new AbortController();
-      controllersRef.current.set(vars.conversationId, controller);
+      const executionId = uuidv4();
+      controllersRef.current.set(vars.conversationId, { controller, executionId });
 
       // Drop pending prompts from the round — the user has answered, the round is back in progress.
       streamActions.clearPendingPrompts();
@@ -75,6 +84,7 @@ export const useResumeRoundMutation = ({
 
         const events$ = chatService.resume({
           signal: controller.signal,
+          executionId,
           prompts: vars.prompts,
           conversationId: vars.conversationId,
           agentId: vars.agentId,
@@ -105,22 +115,31 @@ export const useResumeRoundMutation = ({
           streamActions.invalidateConversation();
         }
         clearActiveStream(vars.conversationId);
-        if (controllersRef.current.get(vars.conversationId) === controller) {
+        if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
         }
       }
     },
   });
 
-  const cancel = useCallback((conversationId: string) => {
-    controllersRef.current.get(conversationId)?.abort();
-  }, []);
+  const cancel = useCallback(
+    (conversationId: string) => {
+      const entry = controllersRef.current.get(conversationId);
+      if (entry) {
+        // Stop the run server-side, then tear down the local subscription.
+        chatService.abort(entry.executionId).catch(() => {});
+        entry.controller.abort();
+      }
+    },
+    [chatService]
+  );
 
   const cancelAll = useCallback(() => {
-    for (const controller of controllersRef.current.values()) {
+    for (const { controller, executionId } of controllersRef.current.values()) {
+      chatService.abort(executionId).catch(() => {});
       controller.abort();
     }
-  }, []);
+  }, [chatService]);
 
   return {
     mutate,
