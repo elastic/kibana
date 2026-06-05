@@ -19,27 +19,21 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
     }),
   },
   {
-    id: 'connect',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
-      defaultMessage: 'Connect',
+    id: 'service-settings',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.serviceSettings.title', {
+      defaultMessage: 'Service Settings',
     }),
   },
   {
-    id: 'name-and-scope',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.nameAndScope.title', {
-      defaultMessage: 'Name & Scope',
+    id: 'connect',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
+      defaultMessage: 'Deploy Settings & Auth',
     }),
   },
   {
     id: 'deployment',
     title: i18n.translate('xpack.ingestHub.onboarding.steps.deployment.title', {
-      defaultMessage: 'Deployment',
-    }),
-  },
-  {
-    id: 'see-data',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.seeData.title', {
-      defaultMessage: 'See Data',
+      defaultMessage: 'Deploy and Detect',
     }),
   },
 ];

@@ -8,14 +8,13 @@
 import React, { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
-import type { EuiStepProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPageTemplate,
   EuiSpacer,
-  EuiSteps,
+  EuiStepsHorizontal,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -26,25 +25,20 @@ import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
-import {
-  ConnectStep,
-  ServicesStep,
-  NameAndScopeStep,
-  DeploymentStep,
-  SeeDataStep,
-} from './step_components';
+import { ConnectStep, ServicesStep, ServiceSettingsStep, DeploymentStep } from './step_components';
+
 const CONNECT_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'connect');
 
-interface StepComponentProps {
+export interface StepComponentProps {
   onNext: () => void;
+  onBack?: () => void;
 }
 
 const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> = {
   connect: ConnectStep,
   services: ServicesStep,
-  'name-and-scope': NameAndScopeStep,
+  'service-settings': ServiceSettingsStep,
   deployment: DeploymentStep,
-  'see-data': SeeDataStep,
 };
 
 interface IntegrationMeta {
@@ -94,52 +88,57 @@ export function OnboardingShell() {
     }
   }, [meta, isValidStep, firstIncompleteStepId, history, location]);
 
-  const stepsConfig: EuiStepProps[] = useMemo(
-    () =>
-      ONBOARDING_STEPS.map((step, index) => {
-        const isCurrent = step.id === currentStepId;
-        const isComplete = completedSteps.has(step.id);
+  const currentStepIndex = ONBOARDING_STEPS.findIndex((s) => s.id === currentStepId);
 
-        let status: EuiStepProps['status'] = 'incomplete';
-        if (isCurrent) {
-          status = 'current';
-        } else if (isComplete) {
-          status = 'complete';
+  const onNext = useMemo(() => {
+    const nextStep = ONBOARDING_STEPS[currentStepIndex + 1];
+    return () => {
+      markStepComplete(currentStepId);
+      if (currentStepId === 'services' && !needsConnectStep) {
+        markStepComplete('connect');
+        const stepAfterConnect = ONBOARDING_STEPS[CONNECT_STEP_INDEX + 1];
+        if (stepAfterConnect) {
+          history.push({ ...location, hash: `#${stepAfterConnect.id}` });
         }
+      } else if (nextStep) {
+        history.push({ ...location, hash: `#${nextStep.id}` });
+      }
+    };
+  }, [currentStepId, currentStepIndex, markStepComplete, needsConnectStep, history, location]);
 
-        const StepComponent = isCurrent ? STEP_COMPONENTS[step.id] : undefined;
-        const nextStep = ONBOARDING_STEPS[index + 1];
-        const onNext = () => {
-          markStepComplete(step.id);
-          if (step.id === 'services' && !needsConnectStep) {
-            markStepComplete('connect');
-            const stepAfterConnect = ONBOARDING_STEPS[CONNECT_STEP_INDEX + 1];
-            if (stepAfterConnect) {
-              history.push({ ...location, hash: `#${stepAfterConnect.id}` });
-            }
-          } else if (nextStep) {
-            history.push({ ...location, hash: `#${nextStep.id}` });
-          }
-        };
+  const onBack = useMemo(() => {
+    const prevStep = currentStepIndex > 0 ? ONBOARDING_STEPS[currentStepIndex - 1] : null;
+    if (!prevStep) return undefined;
+    return () => history.push({ ...location, hash: `#${prevStep.id}` });
+  }, [currentStepIndex, history, location]);
 
+  const horizontalStepsConfig = useMemo(
+    () =>
+      ONBOARDING_STEPS.map((step) => {
+        const isComplete = completedSteps.has(step.id);
+        const isCurrent = step.id === currentStepId;
         return {
           title: step.title,
-          status,
-          children: StepComponent ? <StepComponent onNext={onNext} /> : null,
+          status: (isComplete ? 'complete' : isCurrent ? 'current' : 'incomplete') as
+            | 'complete'
+            | 'current'
+            | 'incomplete',
+          onClick: () => {
+            if (isComplete || isCurrent) {
+              history.push({ ...location, hash: `#${step.id}` });
+            }
+          },
           'data-test-subj': `onboardingStepIndicator-${step.id}`,
-          ...(isComplete && !isCurrent
-            ? {
-                onClick: () => history.push({ ...location, hash: `#${step.id}` }),
-              }
-            : {}),
         };
       }),
-    [currentStepId, completedSteps, markStepComplete, history, location, needsConnectStep]
+    [completedSteps, currentStepId, history, location]
   );
 
   if (!meta || !isValidStep) {
     return null;
   }
+
+  const CurrentStepComponent = STEP_COMPONENTS[currentStepId];
 
   return (
     <EuiPageTemplate data-test-subj="onboardingShell">
@@ -167,7 +166,9 @@ export function OnboardingShell() {
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
-        <EuiSteps steps={stepsConfig} data-test-subj="onboardingStepIndicator" />
+        <EuiStepsHorizontal steps={horizontalStepsConfig} />
+        <EuiSpacer size="xl" />
+        {CurrentStepComponent && <CurrentStepComponent onNext={onNext} onBack={onBack} />}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

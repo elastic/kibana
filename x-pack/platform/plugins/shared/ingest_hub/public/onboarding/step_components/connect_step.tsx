@@ -6,7 +6,8 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -17,9 +18,10 @@ import { useOnboardingFlow } from '../onboarding_flow_context';
 
 interface ConnectStepProps {
   onNext: () => void;
+  onBack?: () => void;
 }
 
-export function ConnectStep({ onNext }: ConnectStepProps) {
+export function ConnectStep({ onNext, onBack }: ConnectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys, servicesStep } =
     useOnboardingFlow();
@@ -34,6 +36,14 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
 
   return (
     <div data-test-subj="onboardingStep-connect">
+      {onBack && (
+        <>
+          <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+            <FormattedMessage id="xpack.ingestHub.connectStep.backButton" defaultMessage="Back" />
+          </EuiButtonEmpty>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
         <LazyAwsConnectSetup
           cloud={services.cloud as CloudSetupForCloudConnector | undefined}

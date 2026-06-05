@@ -7,6 +7,5 @@
 
 export { ConnectStep } from './connect_step';
 export { ServicesStep } from './services_step';
-export { NameAndScopeStep } from './name_and_scope_step';
 export { DeploymentStep } from './deployment_step';
-export { SeeDataStep } from './see_data_step';
+export { ServiceSettingsStep } from './service_settings_step';

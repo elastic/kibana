@@ -6,14 +6,33 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-export function DeploymentStep() {
+interface DeploymentStepProps {
+  onNext: () => void;
+  onBack?: () => void;
+}
+
+export function DeploymentStep({ onBack }: DeploymentStepProps) {
   return (
-    <EuiEmptyPrompt
-      data-test-subj="onboardingStep-deployment"
-      title={<h2>Deployment</h2>}
-      body={<p>Deployment step content will go here.</p>}
-    />
+    <>
+      {onBack && (
+        <>
+          <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+            <FormattedMessage
+              id="xpack.ingestHub.deploymentStep.backButton"
+              defaultMessage="Back"
+            />
+          </EuiButtonEmpty>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiEmptyPrompt
+        data-test-subj="onboardingStep-deployment"
+        title={<h2>Deploy and Detect</h2>}
+        body={<p>Deploy and Detect step content will go here.</p>}
+      />
+    </>
   );
 }
