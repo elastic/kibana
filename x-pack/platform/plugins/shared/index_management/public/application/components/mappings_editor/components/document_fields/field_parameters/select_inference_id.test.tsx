@@ -194,6 +194,35 @@ function TestFormWrapper({
   return <Form form={form}>{children}</Form>;
 }
 
+function TestFormWithSubmit({
+  children,
+  initialValue = '',
+  onSubmit,
+}: {
+  children: React.ReactElement;
+  initialValue?: string;
+  onSubmit: (isValid: boolean) => void;
+}) {
+  const { form } = useForm({
+    defaultValue: { inference_id: initialValue },
+  });
+
+  return (
+    <Form form={form}>
+      {children}
+      <button
+        data-test-subj="submitForm"
+        onClick={async () => {
+          const { isValid } = await form.submit();
+          onSubmit(isValid);
+        }}
+      >
+        Submit
+      </button>
+    </Form>
+  );
+}
+
 const renderSelectInferenceId = async ({
   initialValue,
   fieldType,
@@ -545,6 +574,49 @@ describe('SelectInferenceId', () => {
           expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)
         );
       });
+    });
+  });
+
+  describe('WHEN fieldType is semantic and no endpoint is selected', () => {
+    it('SHOULD fail form validation on submit', async () => {
+      // No compatible "embedding" endpoints, so nothing is auto-selected.
+      setupInferenceEndpointsMocks({ data: [] });
+      const onSubmit = jest.fn();
+
+      await act(async () => {
+        render(
+          <TestFormWithSubmit initialValue="" onSubmit={onSubmit}>
+            <SelectInferenceId data-test-subj="data-inference-endpoint-list" fieldType="semantic" />
+          </TestFormWithSubmit>
+        );
+      });
+
+      await user.click(await screen.findByTestId('submitForm'));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(false));
+      expect(await screen.findByText('Select an inference endpoint.')).toBeInTheDocument();
+    });
+  });
+
+  describe('WHEN fieldType is semantic_text and no endpoint is selected', () => {
+    it('SHOULD pass form validation on submit (inference_id is optional)', async () => {
+      setupInferenceEndpointsMocks({ data: [] });
+      const onSubmit = jest.fn();
+
+      await act(async () => {
+        render(
+          <TestFormWithSubmit initialValue="" onSubmit={onSubmit}>
+            <SelectInferenceId
+              data-test-subj="data-inference-endpoint-list"
+              fieldType="semantic_text"
+            />
+          </TestFormWithSubmit>
+        );
+      });
+
+      await user.click(await screen.findByTestId('submitForm'));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(true));
     });
   });
 });

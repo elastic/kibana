@@ -200,7 +200,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
     }
 
-    if (!clickOutside && fieldTypeInputRef.current) {
+    if (isValid && !clickOutside && fieldTypeInputRef.current) {
       fieldTypeInputRef.current.focus();
     }
   };
