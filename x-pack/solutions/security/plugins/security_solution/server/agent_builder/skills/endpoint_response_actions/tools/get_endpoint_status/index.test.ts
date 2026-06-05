@@ -9,9 +9,9 @@
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
-import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import { createMockEndpointAppContext } from '../../../../endpoint/mocks';
-import { GET_ENDPOINT_STATUS_TOOL_ID } from '..';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
 import { getEndpointStatusTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
