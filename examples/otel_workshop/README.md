@@ -91,11 +91,11 @@ docker run --rm -p 4317:4317 -p 4318:4318 -e ELASTIC_AGENT_OTEL=true \
   elastic/elastic-agent:9.4.2 --config /etc/otelcol-config.yml
 ```
 
-This terminal now streams only your workshop metrics and spans, and push them to the local Elasticsearch instance that will be started in the following steps.
+This terminal now streams only your workshop metrics and spans, and push them to the local Elasticsearch instance that will be started in the following steps (so that we can use the local Kibana to inspect our metrics in the datastream `metrics-generic.otel-default` and our traces in `traces-generic.otel-default` and the APM UI).
 
 ### 2. Start Elasticsearch
 
-In a **separate terminal**, start a local snapshot and leave it running:
+In a **separate terminal**, start a local ES cluster and leave it running:
 
 ```bash
 yarn es snapshot
