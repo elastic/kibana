@@ -127,12 +127,13 @@ a batch to confirm the app works. It emits **no** telemetry yet — that's the e
 > Re-read its "Instrument your code with metrics", "Which metric type should I use?", and
 > "Attributes" sections — they are the source of truth.
 
-You'll add **two** instruments to the order pipeline:
+You'll add **three** instruments to the order pipeline:
 
-| Instrument      | Name                                  | What it measures                                               |
-| --------------- | ------------------------------------- | -------------------------------------------------------------- |
-| `UpDownCounter` | `kibana.otel_workshop.order.active`   | Orders **currently** in the pipeline (goes up, then down).     |
-| `Histogram`     | `kibana.otel_workshop.order.duration` | How long each order took, split by `coffee.drink` + `outcome`. |
+| Instrument      | Name                                  | What it measures                                                       |
+| --------------- | ------------------------------------- | ---------------------------------------------------------------------- |
+| `UpDownCounter` | `kibana.otel_workshop.order.active`   | Orders **currently** in the pipeline, by drink (goes up, then down).   |
+| `Counter`       | `kibana.otel_workshop.order.served`   | Total orders completed, by drink and outcome.                          |
+| `Histogram`     | `kibana.otel_workshop.order.duration` | How long each order took, split by `coffee.drink` + `outcome`.         |
 
 ### Recommended: let the `kibana-otel-instrumentation` skill wire it up
 
@@ -144,10 +145,11 @@ to **review** its own output against the skill's checklist.
 
 Two things to confirm in what it produces:
 
-- the in-flight metric is emitted **twice** — `+1` where the order enters, `-1` in the
-  `finally` block (so it still fires when an order fails);
-- the duration histogram carries `coffee.drink` + `outcome`, while the UpDownCounter stays
-  attribute-free (the callouts below explain _why_).
+- the UpDownCounter is emitted **twice** — `+1` where the order enters, `-1` in `finally`
+  — and **both** carry `{ 'coffee.drink': drink }` with identical attributes so the series
+  nets back to zero per drink (the callout below explains _why_ they must match);
+- the served Counter and the duration Histogram both carry `coffee.drink` + `outcome` —
+  the Counter has no matching constraint, so attributes are unconstrained.
 
 <details>
 <summary><strong>Prefer to wire it by hand? Manual steps</strong></summary>
@@ -168,6 +170,12 @@ export const activeOrders = meter.createUpDownCounter('kibana.otel_workshop.orde
   valueType: ValueType.INT,
 });
 
+export const orderServed = meter.createCounter('kibana.otel_workshop.order.served', {
+  description: 'Total orders completed, by drink and outcome.',
+  unit: '1',
+  valueType: ValueType.INT,
+});
+
 export const orderDuration = meter.createHistogram('kibana.otel_workshop.order.duration', {
   description: 'Time taken to prepare an order, by drink and outcome.',
   unit: 'ms',
@@ -177,16 +185,17 @@ export const orderDuration = meter.createHistogram('kibana.otel_workshop.order.d
 
 #### Step 2 — Emit at the markers in `process_order.ts`
 
-Import them: `import { activeOrders, orderDuration } from '../metrics';` then replace the
-three `// @otel:` markers:
+Import them: `import { activeOrders, orderServed, orderDuration } from '../metrics';` then
+replace the four `// @otel:` markers:
 
 ```ts
 // at the "+1" marker, before the try block:
-activeOrders.add(1);
+activeOrders.add(1, { 'coffee.drink': drink });
 
 // in the finally block:
 orderDuration.record(durationMs, { 'coffee.drink': drink, outcome });
-activeOrders.add(-1);
+orderServed.add(1, { 'coffee.drink': drink, outcome });
+activeOrders.add(-1, { 'coffee.drink': drink });
 ```
 
 (You can delete the `void durationMs;` line once you're using `durationMs`.)
@@ -198,17 +207,26 @@ activeOrders.add(-1);
 > succeeds or fails — otherwise the in-flight count would leak upward forever. An instrument
 > is a stable handle: you create it once and emit on it many times.
 >
-> **Why no attributes on the UpDownCounter.** For the series to net back to zero, the `+1`
-> and `-1` must carry _identical_ attributes. We keep it attribute-free here to stay simple;
-> all the interesting dimensions go on the histogram, where there's no matching constraint.
-> (See the Appendix for the attributed variant.)
+> **Why both UpDownCounter emit sites must carry identical attributes.** For the series to
+> net back to zero _per drink_, the `+1` and `-1` must carry exactly the same attributes.
+> If you added `{ 'coffee.drink': drink }` to the `+1` but forgot it on the `-1`, the
+> active count for that drink would leak upward forever — the SDK would see them as two
+> separate series that never cancel.
+>
+> **Why the Counter has no such constraint.** A Counter only ever increments — each `add()`
+> is independent, nothing needs to "cancel out". That makes attributes unconstrained: you
+> can add any dimension you want. `coffee.drink` + `outcome` on `orderServed` lets you ask
+> "how many cappuccinos succeeded?" and sum the answer meaningfully, because the Counter is
+> monotonically increasing. (That's the key difference from a Gauge/Observable, where each
+> reading is a point-in-time snapshot you can't meaningfully sum.)
 
 ### Verify
 
 Restart `yarn start`, open the app, and click **Brew a batch of 25**. Within ~10s
 (`interval`) your **collector terminal** prints metric records — look for:
 
-- `kibana.otel_workshop.order.active` rising above 1 during the batch, then settling to 0.
+- `kibana.otel_workshop.order.active` rising above 1 per drink during the batch, then settling to 0.
+- `kibana.otel_workshop.order.served` as a Counter per drink and outcome, totalling 25.
 - `kibana.otel_workshop.order.duration` as a histogram carrying the `coffee.drink` and
   `outcome` (`success` / `failure`) attributes.
 
@@ -284,9 +302,6 @@ that: `withActiveSpan` does it for you.
 - **Tier 2 — observable (pull-based) metrics.** Track live queue depth or per-drink bean
   inventory with `meter.createObservableGauge(...).addCallback(...)`, and batch several
   pull-based metrics that share one fetcher with `meter.addBatchObservableCallback(...)`.
-- **A "total orders served" Counter.** The monotonic sibling of the in-flight UpDownCounter:
-  `meter.createCounter('kibana.otel_workshop.order.served', …)`, `add(1, { outcome })` once
-  per order. Sums are meaningful, so attributes here are fine.
 - **Attribute cardinality trap.** Never put the order `id` (or any unbounded value) on a
   metric attribute — it creates one time series per order and blows up storage. `coffee.drink`
   is bounded and safe; `id` is not. (It's fine as a _span_ attribute, though.)

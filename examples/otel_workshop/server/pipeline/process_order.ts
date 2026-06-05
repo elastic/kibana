@@ -20,7 +20,7 @@ import { MENU, SIZE_MULTIPLIER } from './menu';
  * │  → garnish — each with a little latency and a chance of failing. It is    │
  * │  fully working but completely UN-instrumented. Your job is to add:        │
  * │                                                                           │
- * │   • Tier 1 (metrics): an in-flight UpDownCounter + a duration Histogram.  │
+ * │   • Tier 1 (metrics): UpDownCounter (active) + Counter (served) + Histogram. │
  * │   • Tier 3 (traces):  wrap the pipeline + each stage in `withActiveSpan`. │
  * │                                                                           │
  * │  Look for the `// @otel:` and `// TODO(Tier N):` markers below. The       │
@@ -70,8 +70,9 @@ export async function processOrder(order: OrderRequest): Promise<OrderResult> {
   const { drink, size } = order;
   const start = performance.now();
 
-  // @otel: kibana.otel_workshop.order.active
-  // TODO(Tier 1): an order just entered the pipeline — increment the in-flight UpDownCounter by +1.
+  // @otel: kibana.otel_workshop.order.active { 'coffee.drink': drink }
+  // TODO(Tier 1): an order just entered the pipeline — increment the in-flight UpDownCounter by +1
+  //               with attribute { 'coffee.drink': drink }.
 
   let outcome: OrderOutcome = 'success';
 
@@ -94,9 +95,14 @@ export async function processOrder(order: OrderRequest): Promise<OrderResult> {
     // TODO(Tier 1): record the order `durationMs` on the duration Histogram (runs on success AND failure).
     void durationMs;
 
-    // @otel: kibana.otel_workshop.order.active
-    // TODO(Tier 1): the order just left the pipeline — decrement the in-flight UpDownCounter by -1.
-    //               (Must run on success AND failure — that is why it lives in `finally`.)
+    // @otel: kibana.otel_workshop.order.served { 'coffee.drink': drink, outcome }
+    // TODO(Tier 1): the order is done — increment the served Counter by +1 with attributes
+    //               { 'coffee.drink': drink, outcome }.
+
+    // @otel: kibana.otel_workshop.order.active { 'coffee.drink': drink }
+    // TODO(Tier 1): the order just left the pipeline — decrement the in-flight UpDownCounter by -1
+    //               with attribute { 'coffee.drink': drink }. MUST match the +1 attribute exactly,
+    //               and MUST run on success AND failure — that is why it lives in `finally`.
   }
 }
 
