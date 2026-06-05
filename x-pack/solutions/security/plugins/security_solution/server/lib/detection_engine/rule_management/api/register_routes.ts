@@ -50,7 +50,7 @@ export const registerRuleManagementRoutes = (
   findRulesRoute(router, logger);
   searchRulesRoute(router, logger);
 
-  // Rule Birthdays 🎂 (demo)
+  // Rule birthdays 🎂
   birthdaysTodayRoute(router, logger);
 
   // Rule tags

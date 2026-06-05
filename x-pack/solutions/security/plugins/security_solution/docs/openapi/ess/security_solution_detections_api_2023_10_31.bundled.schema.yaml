@@ -2122,6 +2122,7 @@ paths:
                 - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
+                - $ref: '#/components/schemas/BulkBirthdayCelebrate'
       responses:
         '200':
           content:
@@ -4998,6 +4999,44 @@ components:
       required:
         - id
         - skip_reason
+    BulkBirthdayCelebrate:
+      type: object
+      properties:
+        action:
+          enum:
+            - birthday_celebrate
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for
+            rules
+          type: string
+        gap_fill_statuses:
+          description: Gap fill statuses to filter rules with gaps by status (used
+            together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        ids:
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules.
+          type: string
+      required:
+        - action
     BulkDeleteRules:
       type: object
       properties:

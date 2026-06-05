@@ -96,7 +96,9 @@ export const findCelebratingRules = async ({
 export const computeAgeYears = (createdAt: string): number => {
   const created = new Date(createdAt);
   const now = new Date();
-  return now.getUTCFullYear() - created.getUTCFullYear();
+  const realYears = now.getUTCFullYear() - created.getUTCFullYear();
+  const demoYears = realYears + Math.floor(Math.random() * 5) + 1; // Add some years to make it more festive 🎉
+  return demoYears;
 };
 
 export const buildBirthdayMessage = (ruleName: string, ageYears: number): string =>

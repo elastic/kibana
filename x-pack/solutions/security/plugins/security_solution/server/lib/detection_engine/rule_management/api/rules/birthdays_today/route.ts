@@ -45,10 +45,10 @@ export const birthdaysTodayRoute = (router: SecuritySolutionPluginRouter, _logge
       async (context, request, response): Promise<IKibanaResponse<BirthdaysTodayResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { birthdayDate, birthdayYear } = request.query;
           const ctx = await context.resolve(['core', 'securitySolution']);
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
+          const { birthdayDate, birthdayYear } = request.query;
           const targetDate = birthdayDate ?? new Date().toISOString().slice(0, 10);
           const parts = targetDate.split('-').map((p) => Number(p));
           const month = parts[1];

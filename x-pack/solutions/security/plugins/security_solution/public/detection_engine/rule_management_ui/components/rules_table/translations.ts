@@ -66,19 +66,20 @@ export const birthdaysCardRuleLine = ({
   alertTypeId,
   createdBy,
   createdDate,
+  birthdayMessage,
 }: {
   name: string;
   ageYears: number;
   alertTypeId: string;
   createdBy: string;
   createdDate: string;
+  birthdayMessage: string;
 }) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.birthdaysCard.ruleLine',
     {
-      defaultMessage:
-        '🎂 {name} — {ageYears} year(s) old · {alertTypeId} · created by {createdBy} on {createdDate}',
-      values: { name, ageYears, alertTypeId, createdBy, createdDate },
+      defaultMessage: '{birthdayMessage}',
+      values: { birthdayMessage },
     }
   );
 

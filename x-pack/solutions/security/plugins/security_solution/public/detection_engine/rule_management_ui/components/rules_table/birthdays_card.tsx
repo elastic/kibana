@@ -32,15 +32,15 @@ export const BirthdaysCard = React.memo(() => {
     return (
       <>
         <EuiCallOut
+          announceOnMount
           data-test-subj="rule-birthdays-card"
           title={BIRTHDAYS_CARD_TITLE}
           color="primary"
-          iconType="gift"
-          size="s"
+          size="m"
         >
           <EuiText size="s">{BIRTHDAYS_CARD_NONE}</EuiText>
         </EuiCallOut>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </>
     );
   }
@@ -53,8 +53,7 @@ export const BirthdaysCard = React.memo(() => {
         data-test-subj="rule-birthdays-card"
         title={BIRTHDAYS_CARD_TITLE}
         color="success"
-        iconType="gift"
-        size="s"
+        size="m"
       >
         <EuiText size="s">
           <p>{birthdaysCardSummary(total)}</p>
@@ -67,6 +66,7 @@ export const BirthdaysCard = React.memo(() => {
                   alertTypeId: rule.alertTypeId,
                   createdBy: rule.createdBy,
                   createdDate: rule.createdAt.slice(0, 10),
+                  birthdayMessage: rule.birthdayMessage,
                 })}
               </li>
             ))}
@@ -76,7 +76,7 @@ export const BirthdaysCard = React.memo(() => {
           </ul>
         </EuiText>
       </EuiCallOut>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
     </>
   );
 });
