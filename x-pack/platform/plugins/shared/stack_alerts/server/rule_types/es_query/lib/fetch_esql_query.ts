@@ -16,7 +16,11 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { EsqlEsqlShardFailure, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlEsqlShardFailure,
+  EsqlQueryRequest,
+  EsqlQueryResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { hasStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams, EsQuerySourceFields } from '../types';
@@ -127,7 +131,12 @@ export const getEsqlQuery = (
       },
     },
     ...(hasStartEndParams(params.esqlQuery.esql)
-      ? { params: [{ _tstart: dateStart }, { _tend: dateEnd }] }
+      ? {
+          params: [
+            { _tstart: dateStart },
+            { _tend: dateEnd },
+          ] as unknown as EsqlQueryRequest['params'],
+        }
       : {}),
   };
   return query;
