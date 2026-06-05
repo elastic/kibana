@@ -14,5 +14,6 @@
     "@kbn/repo-info",
     "@kbn/esql-language",
     "@kbn/language-documentation",
+    "@kbn/i18n",
   ]
 }
