@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 
 // --- CODEOWNERS resolution ---
@@ -107,9 +107,17 @@ function gradeEmoji(grade) {
   }
 }
 
-function trendEmoji(direction) {
-  if (direction === 'improving') return '↑';
-  if (direction === 'declining') return '↓';
+function scoreTrendEmoji(delta) {
+  if (delta > 0.05) return '↑';
+  if (delta < -0.05) return '↓';
+  return '→';
+}
+
+function metricTrendEmoji(delta, lowerIsBetter) {
+  const improving = lowerIsBetter ? delta < -0.05 : delta > 0.05;
+  const declining = lowerIsBetter ? delta > 0.05 : delta < -0.05;
+  if (improving) return '↑';
+  if (declining) return '↓';
   return '→';
 }
 
@@ -122,12 +130,25 @@ const targetOwners =
   ownersIdx !== -1
     ? args.slice(ownersIdx + 1).map((o) => o.replace('@', '').replace('elastic/', 'elastic/'))
     : [];
+const prevSnapshotIdx = args.indexOf('--prev-snapshot');
+const prevSnapshotPath = prevSnapshotIdx !== -1 ? args[prevSnapshotIdx + 1] : null;
+const saveSnapshotIdx = args.indexOf('--save-owner-snapshot');
+const saveSnapshotPath = saveSnapshotIdx !== -1 ? args[saveSnapshotIdx + 1] : null;
 
 if (!jsonPath) {
   console.error(
-    'Usage: node fallow_report.mjs <fallow.json> --owners @elastic/team1 @elastic/team2'
+    'Usage: node fallow_report.mjs <fallow.json> --owners @elastic/team1 @elastic/team2 [--prev-snapshot <path>] [--save-owner-snapshot <path>]'
   );
   process.exit(1);
+}
+
+let prevSnapshot = null;
+if (prevSnapshotPath) {
+  try {
+    prevSnapshot = JSON.parse(readFileSync(prevSnapshotPath, 'utf8'));
+  } catch {
+    // no previous snapshot — first run
+  }
 }
 
 const data = JSON.parse(readFileSync(jsonPath, 'utf8'));
@@ -171,6 +192,7 @@ const filteredOwners = targetOwners.length
 
 const lines = [];
 const annotationLines = ['**Code Quality**\n'];
+const currentSnapshot = { timestamp: new Date().toISOString(), owners: {} };
 
 // Summary table
 lines.push('--- Per-owner summary');
@@ -224,47 +246,55 @@ for (const owner of filteredOwners) {
     }
   }
 
-  // Annotation
-  annotationLines.push(
-    `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
-      2
-    )} · ${critical.length} critical`
-  );
-}
+  // Save current metrics for snapshot
+  currentSnapshot.owners[owner] = {
+    score: parseFloat(score.toFixed(2)),
+    density: parseFloat(density.toFixed(3)),
+    critical: critical.length,
+    hotspots: d.hotspots.length,
+  };
 
-// Trend (global, from fallow health_trend — present only when --trend was used)
-// metrics is an array: [{ name, label, previous, current, direction }, ...]
-const trend = data.health_trend;
-if (trend) {
-  const prevDate = new Date(trend.compared_to.timestamp).toISOString().slice(0, 10);
-  const arrow = trendEmoji(trend.overall_direction);
-  const direction = trend.overall_direction;
+  // Per-owner trend vs previous snapshot
+  const prev = prevSnapshot?.owners?.[owner];
+  if (prev) {
+    const scoreDelta = score - prev.score;
+    const densityDelta = density - prev.density;
+    const criticalDelta = critical.length - prev.critical;
+    const prevDate = prevSnapshot.timestamp.slice(0, 10);
 
-  const findMetric = (name) => trend.metrics?.find((m) => m.name === name);
+    const scoreArrow = scoreTrendEmoji(scoreDelta);
+    const densityArrow = metricTrendEmoji(densityDelta, true);
+    const criticalArrow = metricTrendEmoji(criticalDelta, true);
 
-  lines.push(`\n--- Trend vs ${prevDate}`);
-  lines.push(`  ${arrow} ${direction}`);
+    const deltaStr = [
+      `${scoreArrow} score: ${prev.score.toFixed(1)}→${score.toFixed(1)} (${
+        scoreDelta >= 0 ? '+' : ''
+      }${scoreDelta.toFixed(1)})`,
+      `${densityArrow} density: ${prev.density.toFixed(3)}→${density.toFixed(3)}`,
+      `${criticalArrow} critical: ${prev.critical}→${critical.length}`,
+    ].join(' · ');
 
-  const metricsToShow = ['avg_cyclomatic', 'maintainability_avg', 'unit_size_very_high_pct'];
-  for (const key of metricsToShow) {
-    const m = findMetric(key);
-    if (!m) continue;
-    lines.push(
-      `  ${trendEmoji(m.direction)} ${m.label}: ${m.previous?.toFixed(2) ?? '?'} → ${
-        m.current?.toFixed(2) ?? '?'
-      }`
+    lines.push(`  Trend vs ${prevDate}: ${deltaStr}`);
+
+    annotationLines.push(
+      `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
+        2
+      )} · ${critical.length} critical · vs ${prevDate}: ${scoreArrow}${
+        scoreDelta >= 0 ? '+' : ''
+      }${scoreDelta.toFixed(1)}`
+    );
+  } else {
+    annotationLines.push(
+      `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
+        2
+      )} · ${critical.length} critical`
     );
   }
+}
 
-  const trendParts = metricsToShow
-    .map(findMetric)
-    .filter(Boolean)
-    .map(
-      (m) =>
-        `${trendEmoji(m.direction)} ${m.label}: ${m.previous?.toFixed(2)}→${m.current?.toFixed(2)}`
-    );
-
-  annotationLines.push(`\n${arrow} **${direction}** vs ${prevDate} · ${trendParts.join(' · ')}`);
+// Save owner snapshot if requested
+if (saveSnapshotPath) {
+  writeFileSync(saveSnapshotPath, JSON.stringify(currentSnapshot, null, 2));
 }
 
 // Print sections

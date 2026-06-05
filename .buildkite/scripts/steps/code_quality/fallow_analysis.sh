@@ -9,48 +9,37 @@ FALLOW_OWNERS="@elastic/search-kibana @elastic/workchat-eng"
 FALLOW_JSON=".fallow/fallow-results.json"
 REPORT_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_report.mjs"
 SLACK_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_slack_notify.mjs"
+OWNER_SNAPSHOT=".fallow/owner-snapshot.json"
+OWNER_SNAPSHOT_PREV=".fallow/owner-snapshot-prev.json"
 
 echo "--- fallow v${FALLOW_VERSION}"
 .buildkite/node_modules/.bin/fallow --version
 
 mkdir -p .fallow
 
-SNAPSHOT_DIR=".fallow/snapshots"
-SNAPSHOT_FILE="fallow-snapshot.json"
-SAVE_SNAPSHOT_FLAG=""
-if [ "${BUILDKITE_PIPELINE_SLUG:-}" = "kibana-code-quality-fallow" ] || [ "${FALLOW_SAVE_SNAPSHOT:-}" = "true" ]; then
-  mkdir -p "$SNAPSHOT_DIR"
-  SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
-
-  # Download previous snapshot from last successful build for trend comparison
-  if [ -n "${BUILDKITE_TOKEN:-}" ] && [ -n "${BUILDKITE_PIPELINE_SLUG:-}" ]; then
-    echo "Fetching previous snapshot for trend analysis..."
-    PREV_BUILD=$(curl -sf \
-      -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
-      "https://api.buildkite.com/v2/organizations/elastic/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?state=passed&per_page=5" \
-      | node -e "
-        let d='';
-        process.stdin.on('data',c=>d+=c);
-        process.stdin.on('end',()=>{
-          const cur='${BUILDKITE_BUILD_ID:-}';
-          const prev=JSON.parse(d).find(b=>b.id!==cur);
-          process.stdout.write(prev?.id||'');
-        });" 2>/dev/null || true)
-    if [ -n "$PREV_BUILD" ]; then
-      buildkite-agent artifact download "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" . \
-        --build "$PREV_BUILD" 2>/dev/null \
-        && echo "Previous snapshot loaded from build ${PREV_BUILD}" \
-        || echo "No previous snapshot found in build ${PREV_BUILD}"
-    else
-      echo "No previous successful build found — first run without trend"
-    fi
+# Download previous owner snapshot from last successful build for per-owner trend
+if [ -n "${BUILDKITE_TOKEN:-}" ] && [ -n "${BUILDKITE_PIPELINE_SLUG:-}" ]; then
+  echo "Fetching previous owner snapshot for trend analysis..."
+  PREV_BUILD=$(curl -sf \
+    -H "Authorization: Bearer ${BUILDKITE_TOKEN}" \
+    "https://api.buildkite.com/v2/organizations/elastic/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?state=passed&per_page=5" \
+    | node -e "
+      let d='';
+      process.stdin.on('data',c=>d+=c);
+      process.stdin.on('end',()=>{
+        const cur='${BUILDKITE_BUILD_ID:-}';
+        const prev=JSON.parse(d).find(b=>b.id!==cur);
+        process.stdout.write(prev?.id||'');
+      });" 2>/dev/null || true)
+  if [ -n "$PREV_BUILD" ]; then
+    buildkite-agent artifact download "$OWNER_SNAPSHOT" . \
+      --build "$PREV_BUILD" 2>/dev/null \
+      && mv "$OWNER_SNAPSHOT" "$OWNER_SNAPSHOT_PREV" \
+      && echo "Previous owner snapshot loaded from build ${PREV_BUILD}" \
+      || echo "No previous owner snapshot found in build ${PREV_BUILD}"
+  else
+    echo "No previous successful build found — first run without trend"
   fi
-fi
-
-# Use --trend if a previous snapshot exists
-TREND_FLAG=""
-if [ -n "$(ls -A "$SNAPSHOT_DIR" 2>/dev/null)" ]; then
-  TREND_FLAG="--trend"
 fi
 
 echo "--- Run fallow analysis"
@@ -62,18 +51,22 @@ echo "Run locally (same as CI):"
 echo "  npx fallow health --format json --quiet > fallow.json"
 echo "  node ${REPORT_SCRIPT} fallow.json --owners ${FALLOW_OWNERS}"
 set +e
-# shellcheck disable=SC2086
 .buildkite/node_modules/.bin/fallow health \
   --format json \
   --quiet \
-  $TREND_FLAG \
-  $SAVE_SNAPSHOT_FLAG \
   > "$FALLOW_JSON"
 set -e
 
 echo "--- Process results"
+PREV_SNAPSHOT_FLAG=""
+if [ -f "$OWNER_SNAPSHOT_PREV" ]; then
+  PREV_SNAPSHOT_FLAG="--prev-snapshot ${OWNER_SNAPSHOT_PREV}"
+fi
 # shellcheck disable=SC2086
-REPORT=$(node "$REPORT_SCRIPT" "$FALLOW_JSON" --owners $FALLOW_OWNERS)
+REPORT=$(node "$REPORT_SCRIPT" "$FALLOW_JSON" \
+  --owners $FALLOW_OWNERS \
+  --save-owner-snapshot "$OWNER_SNAPSHOT" \
+  $PREV_SNAPSHOT_FLAG)
 
 ANNOTATION=$(printf '%s' "$REPORT" | sed -n '/^---ANNOTATION---$/,$ p' | tail -n +2)
 SECTIONS=$(printf '%s' "$REPORT" | sed '/^---ANNOTATION---$/,$ d')
@@ -83,10 +76,8 @@ echo "$SECTIONS"
 echo "--- Post Buildkite annotation"
 buildkite-agent annotate --style info --context fallow-report "$ANNOTATION"
 
-if [ -n "$SAVE_SNAPSHOT_FLAG" ]; then
-  echo "--- Save snapshot for next run"
-  buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
-fi
+echo "--- Save owner snapshot for next run"
+buildkite-agent artifact upload "$OWNER_SNAPSHOT"
 
 if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
