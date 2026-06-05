@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable require-atomic-updates */
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../endpoint/mocks';
 import { UNISOLATE_TOOL_ID } from '..';
-import { unisolateHostTool } from './index';
+import { unisolateHostTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
@@ -69,8 +70,7 @@ describe('unisolateHostTool', () => {
         expect(data.hostName).toBe('nonexistent-host');
         expect(mockLogger.error).not.toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
@@ -96,8 +96,7 @@ describe('unisolateHostTool', () => {
           perPage: 1,
         });
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
@@ -142,8 +141,8 @@ describe('unisolateHostTool', () => {
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agentService: mockAgentService,
       }));
-      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(() =>
-        mockResponseActionsClient
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
       );
 
       try {
@@ -171,8 +170,7 @@ describe('unisolateHostTool', () => {
         expect(data.wasSuccessful).toBe(true);
         expect(data.comment).toBe('reconnecting');
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getInternalResponseActionsClient =
           originalGetInternalResponseActionsClient;
       }
@@ -219,8 +217,8 @@ describe('unisolateHostTool', () => {
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agentService: mockAgentService,
       }));
-      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(() =>
-        mockResponseActionsClient
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
       );
 
       try {
@@ -234,8 +232,7 @@ describe('unisolateHostTool', () => {
           { hosts: { 'agent-123': { name: 'test-host' } } }
         );
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getInternalResponseActionsClient =
           originalGetInternalResponseActionsClient;
       }
@@ -262,8 +259,7 @@ describe('unisolateHostTool', () => {
         expect(result.results[0].data).toHaveProperty('message');
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
       }
     });
 
@@ -303,8 +299,8 @@ describe('unisolateHostTool', () => {
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agentService: mockAgentService,
       }));
-      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(() =>
-        mockResponseActionsClient
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
       );
 
       try {
@@ -317,8 +313,7 @@ describe('unisolateHostTool', () => {
         );
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
-        mockEndpointAppContextService.getInternalFleetServices =
-          originalGetInternalFleetServices;
+        mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
         mockEndpointAppContextService.getInternalResponseActionsClient =
           originalGetInternalResponseActionsClient;
       }
