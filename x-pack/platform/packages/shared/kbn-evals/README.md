@@ -6,7 +6,7 @@ Offline evaluation framework for LLM-based workflows in Kibana. Requires the `ev
 
 - **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
 - **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
-- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand)
+- **On-demand** - [CI Stats trigger](https://ci-stats.kibana.dev/trigger_evals_runner)
 
 ---
 
@@ -202,13 +202,16 @@ Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>`
 
 ---
 
-### 1.3 On-demand evals (Buildkite)
+### 1.3 On-demand evals
 
-Run a suite on any branch without a PR:
+Run a suite on any branch without a PR via the CI Stats trigger at [https://ci-stats.kibana.dev/trigger_evals_runner](https://ci-stats.kibana.dev/trigger_evals_runner).
 
-1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand)
-2. Click **New build**, select branch/commit
-3. Add environment variables:
+1. Choose a branch or open PR
+2. Select the eval suite and model groups
+3. Optionally set a test name filter (`EVAL_GREP`), repetitions (`EVALUATION_REPETITIONS`), judge connector, or Kibana build id to reuse
+4. Review the build parameters and trigger
+
+Note: you can trigger On-demand evals directly on Buildkite, open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand), click **New build**, Add environment variables:
 
 | Variable                  | Required           | Description                                                                 |
 | ------------------------- | ------------------ | --------------------------------------------------------------------------- |
