@@ -151,8 +151,8 @@ function NoData(): JSX.Element {
     <EuiPanel hasBorder data-test-subj="ruleChangeHistoryTableEmpty">
       <EuiEmptyPrompt
         iconType="clock"
-        title={<h2>{i18n.EMPTY_PROMPT_TITLE}</h2>}
-        body={<p>{i18n.EMPTY_PROMPT_BODY}</p>}
+        title={<h2>{i18n.NO_CHANGE_HISTORY_TITLE}</h2>}
+        body={<p>{i18n.NO_CHANGE_HISTORY_BODY}</p>}
       />
     </EuiPanel>
   );

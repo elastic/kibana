@@ -73,7 +73,6 @@ export enum SecurityPageName {
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesAdd = 'rules-add',
-  rulesChangesHistory = 'rules-changes-history',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
