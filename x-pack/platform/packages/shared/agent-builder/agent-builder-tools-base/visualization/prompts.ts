@@ -7,8 +7,6 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeConfigPromptContent } from './chart_type_guidance';
-import { getColorPalettesPromptContent } from './color_palettes';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -27,8 +25,6 @@ export const createGenerateConfigPrompt = ({
   additionalChartConfigInstructions?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
-  const chartTypeConfigPromptContent = getChartTypeConfigPromptContent(chartType);
-  const colorPalettesPromptContent = getColorPalettesPromptContent(chartType);
   const esqlQueryJson = JSON.stringify(esqlQuery);
 
   return [
@@ -56,23 +52,6 @@ DATASET RULES:
 2. For ES|QL column bindings use { column: '<esql column name>', ...other options }
 3. All field names must match those available in the ES|QL query result
 4. Follow the schema definition strictly
-
-TITLE RULES:
-- Omit the 'title' field when the chart already displays the information within itself (e.g. metric, gauge, tagcloud, waffle charts show their value and label directly).
-- When a title is needed, make it self-explanatory and exhaustive so that axis titles become unnecessary.
-- NEVER duplicate information across the chart title, axis titles, and metric labels.
-
-NUMBER FORMAT RULES:
-- Always apply a 'format' to columns when the data has a well-known unit:
-  - CPU / utilization percentages → { type: "percent", decimals: 1, compact: true }
-  - Bytes (disk, memory, network volume) → { type: "bytes", decimals: 1 }
-  - Bits (network throughput) → { type: "bits", decimals: 1 }
-  - Durations (response time, latency) → { type: "duration", from: "<source unit>", to: "" } where <source unit> matches the ES field unit (e.g. "ms", "s", "micros")
-- When column names or the user query hint at a unit (e.g. "cpu", "percent", "bytes_in", "disk_used", "latency_ms"), infer the correct format even if the user did not explicitly ask for it.
-- Do NOT apply a format when the metric is a plain count, rate, or when the unit is ambiguous.
-
-${colorPalettesPromptContent ? `${colorPalettesPromptContent}\n` : ''}
-${chartTypeConfigPromptContent ? `${chartTypeConfigPromptContent}` : ''}
 
 ${additionalChartConfigInstructions ?? ''}
 
@@ -102,10 +81,6 @@ export const esqlAdditionalInstructions = `
 You are generating an ES|QL query for a Kibana Lens visualization. The query will be used to create a visualization in Kibana.
 
 For that purpose, follow these guidelines:
-
-## Human-readable column aliases
-
-Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
 
 ## Time picker compatibility
 
