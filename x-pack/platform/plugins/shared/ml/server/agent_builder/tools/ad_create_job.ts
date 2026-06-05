@@ -15,11 +15,11 @@ const schema = z.object({
   operation: z.enum(['validate_spec', 'estimate_memory', 'create_job', 'create_datafeed']),
   job_id: z.string().optional().describe('Job ID. Required for create_job and create_datafeed.'),
   job_config: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Full job configuration body for create_job or validate_spec.'),
   datafeed_config: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Full datafeed configuration body for create_datafeed.'),
 });
