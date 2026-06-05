@@ -296,13 +296,6 @@ that: `withActiveSpan` does it for you.
 
 ---
 
-## Use the `kibana-otel-instrumentation` skill (optional)
-
-If you're working in Claude Code, the `@otel:` markers in `process_order.ts` follow the
-exact convention the **`kibana-otel-instrumentation`** skill expects. Trigger the skill and
-ask it to **review** your instrumentation against its checklist, or to wire the markers for
-you.
-
 ## Appendix — going further (not part of the 60-minute flow)
 
 - **Tier 2 — observable (pull-based) metrics.** Track live queue depth or per-drink bean
