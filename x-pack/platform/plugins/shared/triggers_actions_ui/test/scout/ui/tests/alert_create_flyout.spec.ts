@@ -45,7 +45,7 @@ const defineEsQueryAlert = async (page: ScoutPage, alertName: string) => {
   await indexOption.waitFor({ state: 'visible', timeout: 30_000 });
   await indexOption.click();
   const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
-  await timeFieldSelect.locator('option:nth-child(2)').waitFor();
+  await timeFieldSelect.locator('option:nth-child(2)').waitFor({ state: 'attached' });
   await timeFieldSelect.selectOption({ index: 1 });
   await page.testSubj.click('closePopover');
   await page.testSubj.locator('ruleDetailsNameInput').click();
