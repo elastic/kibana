@@ -557,12 +557,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
       await page.testSubj.click('dataGridColumnSelectorButton');
 
       // At least one timestamp cell must be visible and not show "Invalid Date"
-      const firstTimestampCell = page.locator(
+      const timestampCellLocator = page.locator(
         '[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]'
       );
-      await expect(firstTimestampCell).not.toHaveCount(0, { timeout: 5_000 });
-      const cellText = await firstTimestampCell.first().innerText();
-      expect(cellText.toLowerCase()).not.toBe('invalid date');
+      await expect(timestampCellLocator).not.toHaveCount(0, { timeout: 5_000 });
+      const cellTexts = await timestampCellLocator.allInnerTexts();
+      expect(cellTexts[0].toLowerCase()).not.toBe('invalid date');
 
       // Sort ascending: open column action menu, click 2nd button (index 1 = ascending)
       await page.testSubj.locator('dataGridHeaderCell-timestamp').hover();
