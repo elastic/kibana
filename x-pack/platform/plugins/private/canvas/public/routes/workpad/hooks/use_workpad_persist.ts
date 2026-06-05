@@ -24,9 +24,17 @@ export const useWorkpadPersist = () => {
 
   const workpadChanged = previousWorkpad && workpad !== previousWorkpad;
 
+  // The server stamps `@timestamp` on every save, while local edits leave it
+  // untouched. So a changed `@timestamp` means this workpad was (re)loaded from
+  // the server (e.g. by the auto-refresh reload) rather than edited locally —
+  // persisting it would echo a server reload straight back, so we skip it.
+  const reloadedFromServer = Boolean(
+    previousWorkpad && workpad['@timestamp'] !== previousWorkpad['@timestamp']
+  );
+
   useEffect(() => {
     if (canWrite) {
-      if (workpadChanged) {
+      if (workpadChanged && !reloadedFromServer) {
         getCanvasWorkpadService()
           .updateWorkpad(workpad.id, workpad)
           .catch((err) => {
@@ -34,5 +42,5 @@ export const useWorkpadPersist = () => {
           });
       }
     }
-  }, [workpad, workpadChanged, canWrite]);
+  }, [workpad, workpadChanged, reloadedFromServer, canWrite]);
 };

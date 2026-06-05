@@ -106,4 +106,47 @@ describe('useWorkpadPersist', () => {
 
     expect(mockUpdateWorkpad).not.toHaveBeenCalled();
   });
+
+  test('does not persist a workpad reloaded from the server', () => {
+    const id = crypto.randomUUID();
+    mockGetState.mockReturnValue({
+      ...initialState,
+      persistent: { workpad: { id, '@timestamp': '2021-01-01T00:00:00.000Z', pages: [] } },
+    });
+
+    const { rerender } = renderHook(useWorkpadPersist);
+
+    // Auto-refresh reload: same workpad, but the server bumped @timestamp because
+    // it was edited elsewhere. This must not be echoed back to the server.
+    mockGetState.mockReturnValue({
+      ...initialState,
+      persistent: {
+        workpad: { id, '@timestamp': '2021-01-01T00:05:00.000Z', pages: [{ id: 'page-1' }] },
+      },
+    });
+    rerender();
+
+    expect(mockUpdateWorkpad).not.toHaveBeenCalled();
+  });
+
+  test('persists a local edit, which leaves @timestamp untouched', () => {
+    const id = crypto.randomUUID();
+    mockGetState.mockReturnValue({
+      ...initialState,
+      persistent: { workpad: { id, '@timestamp': '2021-01-01T00:00:00.000Z', pages: [] } },
+    });
+
+    const { rerender } = renderHook(useWorkpadPersist);
+
+    // Local edit: content changes but @timestamp is unchanged (only the server stamps it).
+    mockGetState.mockReturnValue({
+      ...initialState,
+      persistent: {
+        workpad: { id, '@timestamp': '2021-01-01T00:00:00.000Z', pages: [{ id: 'page-1' }] },
+      },
+    });
+    rerender();
+
+    expect(mockUpdateWorkpad).toHaveBeenCalled();
+  });
 });
