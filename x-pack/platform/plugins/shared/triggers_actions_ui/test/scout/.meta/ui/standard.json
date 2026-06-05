@@ -1,5 +1,5 @@
 {
-  "sha1": "09149f5dafff317839f3b76f6b4edb982e766397",
+  "sha1": "2da7fa23c23ff4648ee18103c9a5b0ce26a4a21a",
   "tests": [
     {
       "id": "9b2dcf397b5bf4d-f3183219f13c400",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_deletion.spec.ts",
-        "line": 106,
+        "line": 108,
         "column": 7
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
-        "line": 85,
+        "line": 79,
         "column": 7
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
-        "line": 96,
+        "line": 88,
         "column": 7
       }
     },
@@ -109,7 +109,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
-        "line": 136,
+        "line": 128,
+        "column": 7
+      }
+    },
+    {
+      "id": "3727cd43770f0ac-e62c321150177d3",
+      "title": "Slack connector saves a rule with a Slack API connector as its action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_slack.spec.ts",
+        "line": 168,
         "column": 7
       }
     },
@@ -151,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 204,
+        "line": 216,
         "column": 7
       }
     },
@@ -165,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 243,
+        "line": 255,
         "column": 7
       }
     },
@@ -179,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 274,
+        "line": 286,
         "column": 7
       }
     },
@@ -193,7 +207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 293,
+        "line": 301,
         "column": 7
       }
     },
@@ -207,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 310,
+        "line": 318,
         "column": 7
       }
     },
@@ -221,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 323,
+        "line": 331,
         "column": 7
       }
     },
@@ -235,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 351,
+        "line": 358,
         "column": 7
       }
     },
@@ -249,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_tines.spec.ts",
-        "line": 372,
+        "line": 379,
         "column": 7
       }
     },
@@ -293,6 +307,90 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
         "line": 98,
         "column": 7
+      }
+    },
+    {
+      "id": "17c585a729157bb-944e1bb34bf9a6b",
+      "title": "Edit Rule Flow Edit from rules list navigates to edit page when clicking edit button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/edit_rule_flow.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "17c585a729157bb-a7753cd64de83cf",
+      "title": "Edit Rule Flow Edit from rules list returns to rules list after saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/edit_rule_flow.spec.ts",
+        "line": 67,
+        "column": 9
+      }
+    },
+    {
+      "id": "17c585a729157bb-54ed021c76ff025",
+      "title": "Edit Rule Flow Edit from rules list returns to rules list after clicking cancel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/edit_rule_flow.spec.ts",
+        "line": 89,
+        "column": 9
+      }
+    },
+    {
+      "id": "17c585a729157bb-9d655005bd2554a",
+      "title": "Edit Rule Flow Edit from rule details page navigates to edit page when clicking edit button from details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/edit_rule_flow.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "17c585a729157bb-e46f25dbf8e7879",
+      "title": "Edit Rule Flow Edit from rule details page returns to rule details page after saving from details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/edit_rule_flow.spec.ts",
+        "line": 117,
+        "column": 9
+      }
+    },
+    {
+      "id": "17c585a729157bb-a4a06d495b9092c",
+      "title": "Edit Rule Flow Edit from rule details page returns to rule details page after clicking cancel from details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/edit_rule_flow.spec.ts",
+        "line": 140,
+        "column": 9
       }
     },
     {
@@ -366,6 +464,118 @@
       }
     },
     {
+      "id": "d3aa7e994c58826-c77e4ca0779d951",
+      "title": "Maintenance windows table should cancel a running maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 116,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-e80ae849d265aaa",
+      "title": "Maintenance windows table should archive a finished maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-e10565be1d3ae6a",
+      "title": "Maintenance windows table should cancel and archive a running maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 166,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-b5e5531ade6172d",
+      "title": "Maintenance windows table should unarchive a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 193,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-4b20997f1455065",
+      "title": "Maintenance windows table should filter maintenance windows by status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 228,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-22902fc39320eeb",
+      "title": "Maintenance windows table should filter maintenance windows by archived status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 256,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-1569d54895d893e",
+      "title": "Maintenance windows table paginates maintenance windows correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 297,
+        "column": 7
+      }
+    },
+    {
+      "id": "d3aa7e994c58826-1b8880c76ffd379",
+      "title": "Maintenance windows table should delete a maintenance window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_windows_table.spec.ts",
+        "line": 322,
+        "column": 7
+      }
+    },
+    {
       "id": "b4b539a64e36b08-cf340212ea83da6",
       "title": "Rule details alerts tab filters alerts table with search bar query",
       "expectedStatus": "skipped",
@@ -422,6 +632,20 @@
       }
     },
     {
+      "id": "e3c419a0049fd78-26ee1dab0262b36",
+      "title": "Rule snooze scheduler legacy theme independence keeps the scheduler stable without legacy theme CSS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_snooze_scheduler_legacy_theme.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
       "id": "bae6b7d04612518-73fc6642f1d9bb6",
       "title": "Rules create flow opens the rule type modal and the rule form when a rule type is selected",
       "expectedStatus": "passed",
@@ -431,7 +655,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 7
       }
     },
@@ -459,7 +683,133 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
-        "line": 96,
+        "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "id": "59219de08c9bf80-9a8d3eed27e7927",
+      "title": "Rules list bulk actions should allow rules to be snoozed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "59219de08c9bf80-28ce0cfc904342d",
+      "title": "Rules list bulk actions should allow rules to be unsnoozed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 128,
+        "column": 7
+      }
+    },
+    {
+      "id": "59219de08c9bf80-b5c23b139eef4dd",
+      "title": "Rules list bulk actions should allow rule snooze to be scheduled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 156,
+        "column": 7
+      }
+    },
+    {
+      "id": "59219de08c9bf80-f228e2b6d4265cd",
+      "title": "Rules list bulk actions should allow rule schedule to be removed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 183,
+        "column": 7
+      }
+    },
+    {
+      "id": "59219de08c9bf80-1eb09ecdd07e4e8",
+      "title": "Rules list bulk actions can bulk update API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 214,
+        "column": 7
+      }
+    },
+    {
+      "id": "59219de08c9bf80-061248a113b22aa",
+      "title": "Rules list bulk actions should apply filters to bulk actions when using the select all button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_bulk_actions.spec.ts",
+        "line": 239,
+        "column": 7
+      }
+    },
+    {
+      "id": "bae6b7d04612518-5b9be9b48198418",
+      "title": "Create Rule Flow create rule button is visible and enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "bae6b7d04612518-18b14faaa3bf468",
+      "title": "Create Rule Flow clicking create rule button opens rule type modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "bae6b7d04612518-a290861c8dff540",
+      "title": "Create Rule Flow selecting a rule type navigates to create form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_create_flow.spec.ts",
+        "line": 36,
         "column": 7
       }
     },
@@ -725,7 +1075,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
-        "line": 50,
+        "line": 46,
         "column": 7
       }
     },
@@ -739,7 +1089,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
-        "line": 65,
+        "line": 61,
         "column": 7
       }
     },
@@ -753,7 +1103,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/stack_alerts_page_admin.spec.ts",
-        "line": 83,
+        "line": 80,
         "column": 7
       }
     },
