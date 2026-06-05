@@ -10,7 +10,7 @@
 import type { StabilityLevel } from '@kbn/workflows';
 
 /**
- * Until event-driven triggers GA (#16714), stability is required and only tech_preview is accepted.
+ * Until event-driven triggers GA, stability is required and only tech_preview is accepted.
  */
 export function validateTriggerStability(
   triggerId: string,

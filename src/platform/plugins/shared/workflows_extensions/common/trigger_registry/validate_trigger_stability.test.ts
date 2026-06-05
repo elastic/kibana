@@ -24,13 +24,13 @@ describe('validateTriggerStability', () => {
 
   it('rejects stable stability', () => {
     expect(() => validateTriggerStability(triggerId, 'stable')).toThrow(
-      'Trigger "example.myTrigger": stability "stable" is not supported until event-driven triggers GA (#16714). Use "tech_preview".'
+      'Trigger "example.myTrigger": stability "stable" is not supported until event-driven triggers GA. Use "tech_preview".'
     );
   });
 
   it('rejects beta stability', () => {
     expect(() => validateTriggerStability(triggerId, 'beta')).toThrow(
-      'Trigger "example.myTrigger": stability "beta" is not supported until event-driven triggers GA (#16714). Use "tech_preview".'
+      'Trigger "example.myTrigger": stability "beta" is not supported until event-driven triggers GA. Use "tech_preview".'
     );
   });
 });
