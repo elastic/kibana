@@ -26,7 +26,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         },
       },
       options: {
-        tags: ['access:clientApps'],
+        access: 'internal',
       },
       validate: {
         query: schema.object({
@@ -93,7 +93,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
         },
       },
       options: {
-        tags: ['access:clientApps'],
+        access: 'internal',
       },
       validate: {
         body: schema.object({
