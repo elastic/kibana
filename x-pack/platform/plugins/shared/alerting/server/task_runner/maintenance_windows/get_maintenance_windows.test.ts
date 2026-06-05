@@ -23,7 +23,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { getMockMaintenanceWindow } from './maintenance_windows_service.mock';
 
 const logger = loggingSystemMock.create().get();
-const mockBasePathService = { set: jest.fn() };
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
 const apiKey = mockedRawRuleSO.attributes.apiKey!;
@@ -385,7 +384,6 @@ describe('filterMaintenanceWindowsIds', () => {
 
 function getTaskRunnerContext() {
   return {
-    basePathService: mockBasePathService,
     getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
   };
 }

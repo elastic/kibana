@@ -367,11 +367,7 @@ export class ActionPolicyClient {
       rule: {
         id: ruleId ?? '',
         name: resolvedName,
-        description: '',
         tags: resolvedTags,
-        enabled: true,
-        createdAt: '',
-        updatedAt: '',
       },
     };
 

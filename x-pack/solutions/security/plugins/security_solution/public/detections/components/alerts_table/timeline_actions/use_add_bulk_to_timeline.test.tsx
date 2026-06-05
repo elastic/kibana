@@ -28,14 +28,6 @@ jest.mock('../../../../data_view_manager/hooks/use_selected_patterns', () => ({
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    browserFields: {},
-    dataViewId: 'test-data-view-id',
-    sourcererDataView: { runtimeFieldMap: {} },
-    selectedPatterns: [],
-  }),
-}));
 jest.mock('../../../../timelines/containers', () => ({
   useTimelineEventsHandler: jest.fn().mockReturnValue([null, null, jest.fn()]),
 }));
