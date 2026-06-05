@@ -9,6 +9,9 @@ import { useCallback } from 'react';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { useSeverityOptions } from './use_severity_options';
 
+const getSeverityThresholdMax = (threshold: SeverityThreshold) =>
+  'max' in threshold ? threshold.max : undefined;
+
 /**
  * React hook that returns a function to find severity options by threshold values
  * @returns A function that converts threshold objects to severity options
@@ -22,7 +25,8 @@ export const useThresholdToSeverity = () => {
       const matchingSeverities = severityOptions.filter((severity) =>
         thresholds.some(
           (threshold) =>
-            threshold.min === severity.threshold.min && threshold.max === severity.threshold.max
+            threshold.min === severity.threshold.min &&
+            getSeverityThresholdMax(threshold) === getSeverityThresholdMax(severity.threshold)
         )
       );
 

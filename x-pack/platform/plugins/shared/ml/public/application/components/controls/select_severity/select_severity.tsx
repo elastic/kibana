@@ -92,6 +92,9 @@ export const getSeverityRangeDisplay = (val: number): string => {
   }
 };
 
+const getSeverityThresholdMax = (threshold: SeverityThreshold) =>
+  'max' in threshold ? threshold.max : undefined;
+
 const useFormattedSeverityOptions = (selectedSeverities: TableSeverity[] = []) => {
   const severityOptions = useSeverityOptions();
 
@@ -152,7 +155,8 @@ export const SelectSeverityUI: FC<
       allSeverityOptions.filter((option) =>
         severity.some(
           (threshold) =>
-            threshold.min === option.threshold.min && threshold.max === option.threshold.max
+            threshold.min === option.threshold.min &&
+            getSeverityThresholdMax(threshold) === getSeverityThresholdMax(option.threshold)
         )
       ),
     [allSeverityOptions, severity]

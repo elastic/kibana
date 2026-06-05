@@ -10,7 +10,6 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
-  AnomalyChartsEmbeddableOverridableState,
   AnomalyChartsEmbeddableState,
   SeverityThreshold,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
@@ -31,6 +30,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { AnomalyExplorerChartsEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import type { AnomalySwimLaneEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -45,7 +45,7 @@ import type { MlTimeSeriesSearchService } from '../application/timeseriesexplore
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type { MlPublicUsageCollection } from '../application/services/usage_collection';
-import type { AnomalyExplorerChartsEmbeddableType, MlEmbeddableTypes } from './constants';
+import type { MlEmbeddableTypes } from './constants';
 
 export type { AnomalySwimLaneEmbeddableApi } from './anomaly_swimlane/types';
 
@@ -86,9 +86,9 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
 export interface AnomalyChartsComponentApi {
   jobIds$: PublishingSubject<JobId[]>;
   maxSeriesToPlot$: PublishingSubject<number>;
-  severityThreshold$: PublishingSubject<SeverityThreshold[]>;
+  severityThreshold$: PublishingSubject<SeverityThreshold[] | undefined>;
   selectedEntities$: PublishingSubject<MlEntityField[] | undefined>;
-  updateUserInput: (input: AnomalyChartsEmbeddableOverridableState) => void;
+  updateUserInput: (input: AnomalyChartsEmbeddableState) => void;
   updateSeverityThreshold: (v?: SeverityThreshold[]) => void;
   updateSelectedEntities: (entities?: MlEntityField[] | undefined) => void;
 }
@@ -111,7 +111,13 @@ export interface AnomalyChartsFieldSelectionApi {
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 
+/**
+ * Case attachment wrapper state. The core Anomaly Charts embeddable state does
+ * not persist id/query/filters; cases keep them alongside the embeddable state
+ * so attachments can render with their original context.
+ */
 export type AnomalyChartsAttachmentState = AnomalyChartsEmbeddableState & {
+  id?: string;
   query?: Query;
   filters?: Filter[];
 };

@@ -958,9 +958,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return severity.some((threshold) => {
+        const thresholdMax = 'max' in threshold ? threshold.max : undefined;
+
         return (
           Number(record.record_score) >= threshold.min &&
-          (threshold.max === undefined || Number(record.record_score) <= threshold.max)
+          (thresholdMax === undefined || Number(record.record_score) <= thresholdMax)
         );
       });
     });
@@ -1949,14 +1951,18 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const thresholdCriteria = threshold.map((t) => ({
-      range: {
-        record_score: {
-          gte: t.min,
-          ...(t.max !== undefined && { lte: t.max }),
+    const thresholdCriteria = threshold.map((t) => {
+      const thresholdMax = 'max' in t ? t.max : undefined;
+
+      return {
+        range: {
+          record_score: {
+            gte: t.min,
+            ...(thresholdMax !== undefined && { lte: thresholdMax }),
+          },
         },
-      },
-    }));
+      };
+    });
 
     boolCriteria.push({
       bool: {

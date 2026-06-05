@@ -178,14 +178,18 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       });
     }
 
-    const thresholdCriteria = threshold.map((t) => ({
-      range: {
-        record_score: {
-          gte: t.min,
-          ...(t.max !== undefined && { lte: t.max }),
+    const thresholdCriteria = threshold.map((t) => {
+      const max = 'max' in t ? t.max : undefined;
+
+      return {
+        range: {
+          record_score: {
+            gte: t.min,
+            ...(max !== undefined && { lte: max }),
+          },
         },
-      },
-    }));
+      };
+    });
 
     boolCriteria.push({
       bool: {
