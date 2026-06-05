@@ -1103,8 +1103,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with enrichments', () => {
+        // User enrichment in V2 requires local-namespace resolution: host.id must be present and
+        // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+        // EUID for a local-namespace user: user:<name>@<host.id>@local
+        const TEST_HOST_ID = 'ml-suppression-test-host-id';
         before(async () => {
-          // ML anomaly docs use host.name only (no host.id) → EUID is name-based.
           await entityStoreV2.setup({
             hosts: [
               {
@@ -1119,8 +1122,9 @@ export default ({ getService }: FtrProviderContext) => {
             ],
             users: [
               {
-                user: { name: 'root' },
-                entity: { id: 'user:root@unknown', type: 'user' },
+                user: { name: 'alice' },
+                host: { id: TEST_HOST_ID },
+                entity: { id: `user:alice@${TEST_HOST_ID}@local`, type: 'user' },
                 asset: { criticality: 'extreme_impact' },
               },
             ],
@@ -1136,8 +1140,8 @@ export default ({ getService }: FtrProviderContext) => {
           const anomalyWithKnownEntities = {
             ...baseAnomaly,
             timestamp,
-            user: { name: 'root' },
-            host: { name: 'zeek-newyork-sha-aa8df15' },
+            user: { name: 'alice' },
+            host: { name: 'zeek-newyork-sha-aa8df15', id: TEST_HOST_ID },
           };
           await indexListOfDocuments([anomalyWithKnownEntities]);
 

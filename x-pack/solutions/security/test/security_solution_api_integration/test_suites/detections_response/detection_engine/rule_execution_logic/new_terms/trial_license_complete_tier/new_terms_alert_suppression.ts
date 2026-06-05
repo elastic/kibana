@@ -2257,14 +2257,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('enrichment', () => {
       const config = getService('config');
+      // User enrichment in V2 requires local-namespace resolution: host.id must be present and
+      // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+      // EUID for a local-namespace user: user:<name>@<host.id>@local
+      const NT_TEST_HOST_ID = 'new-terms-suppression-host-id';
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
       before(async () => {
         await esArchiver.load(path);
-        // Two entities are needed:
-        //   1. Id-based EUID for auditbeat docs (risk test, host.id present in alert).
-        //   2. Name-based EUID for dynamic ecs_compliant docs (criticality test, no host.id).
         await entityStoreV2.setup({
           hosts: [
             {
@@ -2283,8 +2284,9 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           users: [
             {
-              user: { name: 'root' },
-              entity: { id: 'user:root@unknown', type: 'user' },
+              user: { name: 'alice' },
+              host: { id: NT_TEST_HOST_ID },
+              entity: { id: `user:alice@${NT_TEST_HOST_ID}@local`, type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],
@@ -2321,8 +2323,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const firstExecutionDocuments = [
           {
-            host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
-            user: { name: 'root' },
+            host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5', id: NT_TEST_HOST_ID },
+            user: { name: 'alice' },
             id,
             '@timestamp': timestamp,
           },

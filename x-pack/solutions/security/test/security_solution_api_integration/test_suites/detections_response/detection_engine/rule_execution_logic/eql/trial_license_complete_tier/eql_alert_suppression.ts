@@ -1720,9 +1720,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('alert enrichment', () => {
+        // User enrichment in V2 requires local-namespace resolution: host.id must be present and
+        // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+        // EUID for a local-namespace user: user:<name>@<host.id>@local
+        const TEST_HOST_ID = 'eql-suppression-test-host-id';
         before(async () => {
-          // Dynamic docs in this describe only have host.name / user.name (no host.id),
-          // so the EUID is name-based.
           await entityStoreV2.setup({
             hosts: [
               {
@@ -1741,8 +1743,9 @@ export default ({ getService }: FtrProviderContext) => {
             ],
             users: [
               {
-                user: { name: 'root' },
-                entity: { id: 'user:root@unknown', type: 'user' },
+                user: { name: 'alice' },
+                host: { id: TEST_HOST_ID },
+                entity: { id: `user:alice@${TEST_HOST_ID}@local`, type: 'user' },
                 asset: { criticality: 'extreme_impact' },
               },
             ],
@@ -1788,8 +1791,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           const firstExecutionDocuments = [
             {
-              host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
-              user: { name: 'root' },
+              host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5', id: TEST_HOST_ID },
+              user: { name: 'alice' },
               id,
               '@timestamp': timestamp,
             },

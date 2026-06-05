@@ -2500,6 +2500,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('alerts should be enriched', () => {
+          // User enrichment in V2 requires local-namespace resolution: host.id must be present and
+          // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+          // EUID for a local-namespace user: user:<name>@<host.id>@local
+          const TEST_HOST_ID = 'zeek-amsterdam-test-host-id';
           before(async () => {
             await entityStoreV2.setup({
               hosts: [
@@ -2514,9 +2518,10 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               users: [
                 {
-                  user: { name: 'root' },
+                  user: { name: 'alice' },
+                  host: { id: TEST_HOST_ID },
                   entity: {
-                    id: 'user:root@unknown',
+                    id: `user:alice@${TEST_HOST_ID}@local`,
                     type: 'user',
                     risk: { calculated_level: 'Low', calculated_score_norm: 11 },
                   },
@@ -2536,8 +2541,8 @@ export default ({ getService }: FtrProviderContext) => {
             const doc1 = {
               id,
               '@timestamp': timestamp,
-              host: { name: 'zeek-sensor-amsterdam' },
-              user: { name: 'root' },
+              host: { name: 'zeek-sensor-amsterdam', id: TEST_HOST_ID },
+              user: { name: 'alice' },
             };
             const doc1WithLaterTimestamp = {
               ...doc1,
@@ -2590,6 +2595,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('with asset criticality', () => {
+          // User enrichment in V2 requires local-namespace resolution: host.id must be present and
+          // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+          const TEST_CRITICALITY_HOST_ID = 'zeek-amsterdam-criticality-host-id';
           before(async () => {
             await entityStoreV2.setup({
               hosts: [
@@ -2601,8 +2609,12 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               users: [
                 {
-                  user: { name: 'root' },
-                  entity: { id: 'user:root@unknown', type: 'user' },
+                  user: { name: 'alice' },
+                  host: { id: TEST_CRITICALITY_HOST_ID },
+                  entity: {
+                    id: `user:alice@${TEST_CRITICALITY_HOST_ID}@local`,
+                    type: 'user',
+                  },
                   asset: { criticality: 'extreme_impact' },
                 },
               ],
@@ -2620,8 +2632,8 @@ export default ({ getService }: FtrProviderContext) => {
             const doc1 = {
               id,
               '@timestamp': timestamp,
-              host: { name: 'zeek-sensor-amsterdam' },
-              user: { name: 'root' },
+              host: { name: 'zeek-sensor-amsterdam', id: TEST_CRITICALITY_HOST_ID },
+              user: { name: 'alice' },
             };
             const doc1WithLaterTimestamp = {
               ...doc1,
