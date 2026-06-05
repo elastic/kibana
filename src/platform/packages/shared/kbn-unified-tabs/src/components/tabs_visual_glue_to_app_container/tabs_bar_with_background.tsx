@@ -16,10 +16,7 @@ import {
   DEFAULT_TABS_BAR_VISUAL_VARIANT,
   type TabsBarVisualVariant,
 } from '../../tabs_bar_visual_variant';
-import {
-  getTabsBarWithBackgroundStyles,
-  shouldApplyTabsBarGlobalChromeStyles,
-} from './tab_visual_variant_styles';
+import { getTabsBarWithBackgroundStyles } from './tab_visual_variant_styles';
 
 const globalCss = cssString`
   // Disables the overscroll behavior to prevent the page from bouncing when scrolling
@@ -47,19 +44,13 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const applyGlobalChromeStyles = shouldApplyTabsBarGlobalChromeStyles(visualVariant);
-
   useEffect(() => {
-    if (!applyGlobalChromeStyles) {
-      return;
-    }
-
     document.body.classList.add(globalCss);
 
     return () => {
       document.body.classList.remove(globalCss);
     };
-  }, [applyGlobalChromeStyles]);
+  }, []);
 
   return (
     <div

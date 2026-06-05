@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiResizeObserver, useEuiTheme } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
@@ -30,6 +31,7 @@ import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 
 export const TabsView = (props: SingleTabViewProps) => {
+  const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
@@ -78,18 +80,24 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const renderTabsBar = useMemo((): UnifiedTabsProps['renderTabsBar'] => {
-    if (!isChromeNextProjectHeader) {
-      return undefined;
+    if (isChromeNextProjectHeader) {
+      return (tabsBar) => (
+        <ChromeAppHeader
+          menu={topNavMenuItems}
+          titleAppend={tabsBar}
+          isCollapsed={shouldCollapseAppMenu}
+        />
+      );
     }
 
-    return (tabsBar) => (
-      <ChromeAppHeader
-        menu={topNavMenuItems}
-        titleAppend={tabsBar}
-        isCollapsed={shouldCollapseAppMenu}
-      />
-    );
-  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu]);
+    const tabsBarShellCss = css`
+      min-height: ${euiTheme.size.xxxl};
+      padding: ${euiTheme.size.s};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      border-bottom: ${euiTheme.border.thin};
+    `;
+    return (tabsBar) => (tabsBar ? <div css={tabsBarShellCss}>{tabsBar}</div> : null);
+  }, [isChromeNextProjectHeader, topNavMenuItems, shouldCollapseAppMenu, euiTheme]);
 
   const appendRight = useMemo(() => {
     if (!isChromeNextProjectHeader) {
