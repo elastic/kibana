@@ -77,7 +77,7 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
       >
         <RuleChangesHistory header={header} />
       </SecuritySolutionPageWrapper>
-      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.rulesChangesHistory} state={{ ruleName: rule?.name }} />
     </>
   );
 });
