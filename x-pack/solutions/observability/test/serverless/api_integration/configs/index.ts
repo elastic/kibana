@@ -13,7 +13,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('../test_suites/apm_api_integration/feature_flags.ts'));
     loadTestFile(require.resolve('../test_suites/cases'));
-    loadTestFile(require.resolve('../test_suites/synthetics'));
+    // synthetics enablement migrated to Scout (runs on serverless via
+    // `@local-serverless-observability_complete`):
+    // x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts
     loadTestFile(require.resolve('../test_suites/platform_security'));
   });
 }
