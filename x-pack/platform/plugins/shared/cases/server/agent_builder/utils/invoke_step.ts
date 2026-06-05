@@ -29,6 +29,9 @@ export async function invokeStepHandler(
       throw new Error('getScopedEsClient is not available in the agent builder execution context');
     },
     renderInputTemplate: <T>(v: T) => v,
+    callKibanaApi: () => {
+      throw new Error('callKibanaApi is not available in the agent builder execution context');
+    },
   };
 
   const fakeStepCtx = {
