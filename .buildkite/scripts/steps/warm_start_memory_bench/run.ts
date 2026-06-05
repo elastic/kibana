@@ -19,8 +19,6 @@ import { spawnSync } from 'child_process';
 import { rm } from 'fs/promises';
 import path from 'path';
 
-import { resolveBaselineBuild } from '@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build';
-
 import {
   annotateBaselineUnavailable,
   annotateExecutionFailure,
@@ -38,6 +36,7 @@ import { downloadAndExtractKibanaDistributable } from './download_and_extract_ki
 import { getEffectiveTargetBuildId } from './get_effective_target_build_id';
 import { getParentCommitSha } from './get_parent_commit_sha';
 import { readRegressionReportIfPresent } from './read_regression_report';
+import { resolveBaselineBuild } from './resolve_baseline_build';
 import { setWarmStartMemoryReportContextEnv } from './set_report_context_env';
 import { BuildkiteClient } from '#pipeline-utils';
 

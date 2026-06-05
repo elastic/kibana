@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnavailableBaselineBuild } from '@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build';
-import type { WarmStartMemoryRegressionReport } from '@kbn/core-server-benchmarks/ci_warm_start_memory/memory_regression_report';
-
 import { ANNOTATION_CONTEXT } from './constants';
 import { formatBytes } from './format_bytes';
+import type { WarmStartMemoryRegressionReport } from './regression_report';
+import type { UnavailableBaselineBuild } from './resolve_baseline_build';
 
 export type AnnotateFn = (
   context: string,

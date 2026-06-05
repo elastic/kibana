@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaselineBuildkiteClient } from '@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build';
+import type { BaselineBuildkiteClient } from './resolve_baseline_build';
 import type { BuildkiteClient } from '#pipeline-utils';
 
 export const createBaselineBuildkiteClient = (

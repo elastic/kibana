@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with,
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export const KIBANA_ON_MERGE_PIPELINE_SLUG = 'kibana-on-merge';
 export const KIBANA_REUSABLE_DISTRIBUTABLE_ARTIFACT_FILENAME = 'kibana-default.tar.zst';
 export const BASELINE_ANCESTOR_LOOKUP_LIMIT = 10;

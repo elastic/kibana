@@ -9,13 +9,10 @@
 
 import { readFile } from 'fs/promises';
 
-import {
-  getWarmStartMemoryRegressionReportPath,
-  type WarmStartMemoryRegressionReport,
-} from '@kbn/core-server-benchmarks/ci_warm_start_memory/memory_regression_report';
+import type { WarmStartMemoryRegressionReport } from './regression_report';
 
 export const readRegressionReportIfPresent = async (
-  reportPath: string = getWarmStartMemoryRegressionReportPath()
+  reportPath: string
 ): Promise<WarmStartMemoryRegressionReport | null> => {
   try {
     const contents = await readFile(reportPath, 'utf8');

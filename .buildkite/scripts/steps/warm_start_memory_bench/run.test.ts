@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WarmStartMemoryRegressionReport } from '@kbn/core-server-benchmarks/ci_warm_start_memory/memory_regression_report';
+import type { AnnotateFn } from './annotate';
+import type { WarmStartMemoryRegressionReport } from './regression_report';
 import {
   KIBANA_ON_MERGE_PIPELINE_SLUG,
   KIBANA_REUSABLE_DISTRIBUTABLE_ARTIFACT_FILENAME,
   type ResolveBaselineBuildResult,
-} from '@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build';
-
-import type { AnnotateFn } from './annotate';
+} from './resolve_baseline_build';
 import { runWarmStartMemoryBench } from './run';
 
 const MERGE_BASE_SHA = 'a'.repeat(40);
 const BASELINE_SHA = 'b'.repeat(40);
 const TARGET_SHA = 'c'.repeat(40);
 
-jest.mock('@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build', () => ({
-  ...jest.requireActual('@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build'),
+jest.mock('./resolve_baseline_build', () => ({
+  ...jest.requireActual('./resolve_baseline_build'),
   resolveBaselineBuild: jest.fn(),
 }));
 
@@ -30,8 +29,8 @@ jest.mock('./read_regression_report', () => ({
   readRegressionReportIfPresent: jest.fn(),
 }));
 
-import { resolveBaselineBuild } from '@kbn/core-server-benchmarks/ci_warm_start_memory/resolve_baseline_build';
 import { readRegressionReportIfPresent } from './read_regression_report';
+import { resolveBaselineBuild } from './resolve_baseline_build';
 
 const mockResolveBaselineBuild = resolveBaselineBuild as jest.MockedFunction<
   typeof resolveBaselineBuild
