@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PolicyExecutionHistoryItem } from '../../services/execution_history_api';
@@ -297,11 +297,71 @@ describe('ExecutionHistoryPage', () => {
     expect(workflowLink).toHaveAttribute('target', '_blank');
   });
 
-  it('queries with default page=1 and perPage=100', () => {
+  it('queries with default page=1, perPage=100, outcome=dispatched and no search', () => {
     mockFetchResult();
     renderPage();
 
-    expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({ page: 1, perPage: 100 });
+    expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
+      page: 1,
+      perPage: 100,
+      search: undefined,
+      outcome: 'dispatched',
+    });
+  });
+
+  it('renders the search bar and outcome filter above the table', () => {
+    mockFetchResult();
+    renderPage();
+
+    expect(screen.getByTestId('executionHistorySearchBar')).toBeInTheDocument();
+    expect(screen.getByTestId('executionHistoryOutcomeFilter')).toBeInTheDocument();
+  });
+
+  it('changing the outcome filter resets to page 1 and refetches with the new outcome', async () => {
+    mockFetchResult();
+    renderPage();
+
+    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'all');
+
+    await waitFor(() => {
+      expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 100,
+        search: undefined,
+        outcome: 'all',
+      });
+    });
+  });
+
+  it('typing in the search bar debounces and forwards the trimmed search term', async () => {
+    mockFetchResult();
+    renderPage();
+
+    await userEvent.type(screen.getByTestId('executionHistorySearchBar'), '  cpu  ');
+
+    await waitFor(
+      () => {
+        expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith({
+          page: 1,
+          perPage: 100,
+          search: 'cpu',
+          outcome: 'dispatched',
+        });
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it('shows the filtered empty state when search or outcome is active and there are no rows', async () => {
+    mockFetchResult();
+    renderPage();
+
+    await userEvent.selectOptions(screen.getByTestId('executionHistoryOutcomeFilter'), 'all');
+
+    expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
+    expect(
+      screen.queryByText(/No policy execution activity in the last 24 hours/i)
+    ).not.toBeInTheDocument();
   });
 
   it('shows the new-events banner when count > 0', () => {
