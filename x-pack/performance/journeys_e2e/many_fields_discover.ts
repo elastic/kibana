@@ -25,7 +25,7 @@ export const journey = new Journey({
   .step('Expand a document', async ({ page }) => {
     const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
     await expandButtons.nth(3).click();
-    await page.waitForSelector(subj('docTableRowAction'));
-    await page.click(subj('docTableRowAction'));
+    await page.waitForSelector(subj('~docTableRowAction-singleDocument'));
+    await page.click(subj('~docTableRowAction-singleDocument'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   });

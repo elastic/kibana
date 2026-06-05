@@ -115,7 +115,10 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view without timefield', async () => {
     const { props, user } = await renderComponent({});
 
-    expect(screen.getByTestId('docTableRowAction')).toHaveAttribute(
+    // Buttons carry two space-separated subjs (`docTableRowAction
+    // docTableRowAction-<id>`) so legacy whole-word selectors still match.
+    // Match the per-id token with a regex.
+    expect(screen.getByTestId(/(^|\s)docTableRowAction-singleDocument(\s|$)/)).toHaveAttribute(
       'href',
       'mock-doc-redirect-url'
     );
@@ -127,10 +130,12 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view with timefield', async () => {
     const { props, user } = await renderComponent({ dataView: dataViewWithTimefieldMock });
 
-    const actions = screen.getAllByTestId('docTableRowAction');
-    expect(actions.length).toBe(2);
-    expect(actions[0]).toHaveAttribute('href', 'mock-doc-redirect-url');
-    expect(actions[1]).toHaveAttribute('href', 'mock-context-redirect-url');
+    const singleDoc = screen.getByTestId(/(^|\s)docTableRowAction-singleDocument(\s|$)/);
+    const surroundingDoc = screen.getByTestId(
+      /(^|\s)docTableRowAction-surroundingDocument(\s|$)/
+    );
+    expect(singleDoc).toHaveAttribute('href', 'mock-doc-redirect-url');
+    expect(surroundingDoc).toHaveAttribute('href', 'mock-context-redirect-url');
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(props.onClose).toHaveBeenCalled();
@@ -268,7 +273,12 @@ describe('Discover flyout', function () {
       query: { esql: 'FROM indexpattern' },
     });
 
-    expect(screen.queryByTestId('docTableRowAction')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(/(^|\s)docTableRowAction-singleDocument(\s|$)/)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId(/(^|\s)docTableRowAction-surroundingDocument(\s|$)/)
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('mockFlyoutTitle')).toHaveTextContent('Result');
   });
 

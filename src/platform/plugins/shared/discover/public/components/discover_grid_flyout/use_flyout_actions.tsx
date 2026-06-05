@@ -25,7 +25,7 @@ export const useFlyoutActions = (
       {
         id: 'singleDocument',
         enabled: true,
-        dataTestSubj: 'docTableRowAction',
+        dataTestSubj: 'docTableRowAction docTableRowAction-singleDocument',
         iconType: 'document',
         href: singleDocHref,
         onClick: onOpenSingleDoc,
@@ -36,7 +36,7 @@ export const useFlyoutActions = (
       {
         id: 'surroundingDocument',
         enabled: Boolean(dataView.isTimeBased() && dataView.id),
-        dataTestSubj: 'docTableRowAction',
+        dataTestSubj: 'docTableRowAction docTableRowAction-surroundingDocument',
         iconType: 'documents',
         href: contextViewHref,
         onClick: onOpenContextView,
