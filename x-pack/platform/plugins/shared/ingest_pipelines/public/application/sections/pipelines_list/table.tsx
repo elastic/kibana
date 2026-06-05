@@ -239,6 +239,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     'data-test-subj': 'pipelinesTable',
+    itemId: 'name',
     sorting,
     selection: {
       onSelectionChange: setSelection,
