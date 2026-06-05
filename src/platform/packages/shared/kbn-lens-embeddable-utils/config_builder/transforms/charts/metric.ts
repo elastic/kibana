@@ -671,6 +671,17 @@ export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'sta
 };
 
 /**
+ * Type guard that narrows a TextBasedLayer to one with a defined index and an ES|QL query.
+ * Both fields are optional on TextBasedLayer, and query is the broad AggregateQuery union;
+ * this guard ensures index is a string and query is specifically the { esql: string } variant.
+ */
+function isEsqlLayerWithIndex(
+  layer: TextBasedLayer | undefined
+): layer is TextBasedLayer & { index: string; query: { esql: string } } {
+  return Boolean(layer?.index && layer.query && 'esql' in layer.query);
+}
+
+/**
  * Builds a text-based trendline layer for ES|QL metric charts.
  * The trendline layer needs its own ES|QL query with BUCKET() time bucketing
  * and copies of the metric columns from the main layer.
@@ -767,17 +778,13 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   // layer with a BUCKET() time-bucketing query.
   const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
   const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
-  if (trendlineLayerId && mainLayer && 'query' in mainLayer && 'columns' in mainLayer) {
-    const trendlineResult = buildEsqlTrendlineLayer(
-      config,
-      DEFAULT_LAYER_ID,
-      mainLayer as {
-        index: string;
-        query: { esql: string };
-        timeField?: string;
-        columns: TextBasedLayerColumn[];
-      }
-    );
+  if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {
+    const trendlineResult = buildEsqlTrendlineLayer(config, DEFAULT_LAYER_ID, {
+      index: mainLayer.index,
+      query: { esql: mainLayer.query.esql },
+      timeField: mainLayer.timeField,
+      columns: mainLayer.columns,
+    });
     if (trendlineResult) {
       layers.textBased = {
         ...layers.textBased,
