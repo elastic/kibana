@@ -180,7 +180,6 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
   });
 
   test('connector page - should edit the connector', async ({ page, kbnUrl, apiServices }) => {
-    await navigateToConnectors(page, kbnUrl);
     const connectorName = `jsm-edit-${Date.now()}`;
     const updatedName = `${connectorName}-updated`;
     const created = await apiServices.alerting.connectors.create({
@@ -190,6 +189,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
       secrets: { apiKey: '1234' },
     });
     createdConnectorIds.push(created.id);
+    await navigateToConnectors(page, kbnUrl);
 
     await searchAndOpenConnector(page, connectorName);
     await page.testSubj.locator('nameInput').fill(updatedName);
@@ -213,7 +213,6 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     kbnUrl,
     apiServices,
   }) => {
-    await navigateToConnectors(page, kbnUrl);
     const connectorName = `jsm-cancel-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
       name: connectorName,
@@ -222,6 +221,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
       secrets: { apiKey: '1234' },
     });
     createdConnectorIds.push(created.id);
+    await navigateToConnectors(page, kbnUrl);
 
     await searchAndOpenConnector(page, connectorName);
     await page.testSubj.locator('nameInput').fill('some test name to cancel');
@@ -239,7 +239,6 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     kbnUrl,
     apiServices,
   }) => {
-    await navigateToConnectors(page, kbnUrl);
     const connectorName = `jsm-disable-run-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
       name: connectorName,
@@ -248,6 +247,7 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
       secrets: { apiKey: '1234' },
     });
     createdConnectorIds.push(created.id);
+    await navigateToConnectors(page, kbnUrl);
 
     await searchAndOpenConnector(page, connectorName);
     await page.locator('[data-test-subj="testConnectorTab"]').click();
