@@ -245,6 +245,19 @@ function splitPrompt(userQuery: string): { request: string; availableLine: strin
 }
 
 /**
+ * Strip trailing qualifier phrases from the request that describe the
+ * available data source (e.g. "using only network traffic logs").  These
+ * phrases inject the available-data keywords back into the request tokens
+ * and create false overlap.
+ */
+function stripQualifiers(request: string): string {
+  return request
+    .replace(/\s+using only\b[\s\S]*?$/i, '')
+    .replace(/\s+via\b[\s\S]*?$/i, '')
+    .replace(/\s+from\b[\s\S]*?\b(logs?|data)\b[\s\S]*?$/i, '');
+}
+
+/**
  * Tokenise the user request into candidate keywords.
  */
 function tokenizeRequest(request: string): Set<string> {
@@ -292,6 +305,8 @@ export function detectDataSourceMismatch(userQuery: string): string | null {
   const { request, availableLine } = splitPrompt(userQuery);
   if (!availableLine) return null;
 
+  const strippedRequest = stripQualifiers(request);
+
   const availableIndices = availableLine
     .replace(/^Available data:\s*/i, '')
     .split(/,|\s+and\s+/i)
@@ -316,7 +331,7 @@ export function detectDataSourceMismatch(userQuery: string): string | null {
     }
   }
 
-  const requestTokens = tokenizeRequest(request);
+  const requestTokens = tokenizeRequest(strippedRequest);
 
   // Compute overlap between request tokens and allowed integration keywords
   const overlap: string[] = [];
