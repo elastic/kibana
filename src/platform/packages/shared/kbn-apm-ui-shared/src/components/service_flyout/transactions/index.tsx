@@ -12,8 +12,10 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { LatencyAggregationType } from '@kbn/apm-types';
 import {
+  SERVICE_ALERTS_LOCATOR_ID,
   SERVICE_TRANSACTIONS_LOCATOR_ID,
   TRANSACTION_DETAILS_BY_NAME_LOCATOR,
+  type ServiceAlertsLocatorParams,
   type ServiceTransactionsLocatorParams,
   type TransactionDetailsByNameParams,
 } from '@kbn/deeplinks-observability';
@@ -87,6 +89,7 @@ export function ServiceFlyoutTransactionsSection({
   const transactionDetailLocator = locators?.get<TransactionDetailsByNameParams>(
     TRANSACTION_DETAILS_BY_NAME_LOCATOR
   );
+  const serviceAlertsLocator = locators?.get<ServiceAlertsLocatorParams>(SERVICE_ALERTS_LOCATOR_ID);
 
   const openInTransactionsHref = openInTransactionsLocator?.getRedirectUrl({
     serviceName,
@@ -106,6 +109,18 @@ export function ServiceFlyoutTransactionsSection({
         rangeTo: end,
       }),
     [transactionDetailLocator, serviceName, start, end]
+  );
+
+  const getAlertsBadgeHref = useCallback(
+    (item: TransactionGroup) =>
+      serviceAlertsLocator?.getRedirectUrl({
+        serviceName,
+        transactionName: item.name,
+        transactionType: item.transactionType,
+        rangeFrom: start,
+        rangeTo: end,
+      }),
+    [serviceAlertsLocator, serviceName, start, end]
   );
 
   return (
@@ -146,6 +161,7 @@ export function ServiceFlyoutTransactionsSection({
           ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_NAME },
         },
         alerts: {
+          href: getAlertsBadgeHref,
           ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_ALERTS_BADGE },
         },
       }}

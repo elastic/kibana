@@ -26,7 +26,7 @@ const FIXTURE_RESPONSE = {
       latency: 1200000,
       throughput: 42.3,
       errorRate: 0.02,
-      alertsCount: 0,
+      alertsCount: 3,
     },
     {
       name: 'POST /api/checkout',
@@ -37,6 +37,7 @@ const FIXTURE_RESPONSE = {
       alertsCount: 0,
     },
   ],
+  hasActiveAlerts: true,
 };
 
 const http = {
@@ -97,8 +98,6 @@ describe('ServiceFlyoutTransactionsSection', () => {
   });
 
   it('renders the alerts column when hasActiveAlerts is true', async () => {
-    (http.get as jest.Mock).mockResolvedValue({ ...FIXTURE_RESPONSE, hasActiveAlerts: true });
-
     render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
 
     await waitFor(() => screen.getByText('GET /api/orders'));
@@ -107,10 +106,23 @@ describe('ServiceFlyoutTransactionsSection', () => {
   });
 
   it('omits the alerts column when hasActiveAlerts is false', async () => {
+    (http.get as jest.Mock).mockResolvedValue({ ...FIXTURE_RESPONSE, hasActiveAlerts: false });
+
     render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
 
     await waitFor(() => screen.getByText('GET /api/orders'));
 
     expect(screen.queryByRole('columnheader', { name: /active alerts/i })).not.toBeInTheDocument();
+  });
+
+  it('renders the alerts badge as a link pointing to the service alerts locator', async () => {
+    render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+    await waitFor(() => screen.getByText('GET /api/orders'));
+
+    const badge = screen.getByRole('link', { name: '3' });
+    expect(badge).toBeInTheDocument();
+    expect(badge.getAttribute('href')).toContain('serviceAlertsLocator');
+    expect(badge.getAttribute('href')).toContain('frontend-node');
   });
 });
