@@ -11,6 +11,14 @@ Chrome Next uses one shared header view with two placement models:
 Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
 the page cannot safely own the header placement yet.
 
+## Folder layout
+
+Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
+files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
+graduates to its own folder only when it gains real complexity of its own — an internal component
+split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
+until they earn a folder; don't pre-folder simple slots.
+
 ## Which API should I use?
 
 Use `AppHeader` when the page can render its header inline. This is the preferred model for pages
@@ -24,6 +32,27 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
+
+## Editable titles
+
+Pass a title object when the page title can be renamed from the header:
+
+```tsx
+<AppHeader
+  title={{
+    text: name,
+    onSave: async (nextName) => {
+      const saved = await saveName(nextName);
+      if (!saved) {
+        return 'Choose a different name.';
+      }
+    },
+  }}
+/>
+```
+
+The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
+saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
 
 ## Chrome Next flag and runtime checks
 
