@@ -32,12 +32,12 @@ import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
-import { CreateAlertFlyout } from './create_alert_flyout';
+import { CreateRuleOptionsFlyout } from './create_rule_options_flyout';
 import type { AlertingV2PublicStart } from './types';
 
-export type { AlertingV2PublicStart, CreateAlertFlyoutLegacyItem } from './types';
+export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
 export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
-export type { CreateAlertFlyoutProps } from './create_alert_flyout';
+export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -48,7 +48,7 @@ export const module = new ContainerModule(({ bind }) => {
     .inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
-    CreateAlertFlyout,
+    CreateRuleOptionsFlyout,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));

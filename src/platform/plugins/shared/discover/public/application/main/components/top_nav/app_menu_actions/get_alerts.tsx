@@ -18,7 +18,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
-import type { CreateAlertFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/public';
+import type { CreateRuleOptionsFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/public';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
@@ -136,7 +136,7 @@ export const getAlertsAppMenuItem = ({
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
   if (showCreateRuleV2) {
-    const legacyRuleTypes: CreateAlertFlyoutLegacyItem[] = [];
+    const legacyRuleTypes: CreateRuleOptionsFlyoutLegacyItem[] = [];
 
     if (
       services.capabilities.management?.insightsAndAlerting?.triggersActions &&
@@ -174,7 +174,7 @@ export const getAlertsAppMenuItem = ({
         const { query } = tab.appState;
         const esqlQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
         const esqlVariables = tab.esqlVariables;
-        const V2Flyout = services.alertingVTwo!.CreateAlertFlyout;
+        const V2Flyout = services.alertingVTwo!.CreateRuleOptionsFlyout;
         return (
           <V2Flyout
             onClose={onFinishAction}

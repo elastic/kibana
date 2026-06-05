@@ -7,11 +7,11 @@
 
 import type { ComponentType } from 'react';
 import type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
-import type { CreateAlertFlyoutProps } from './create_alert_flyout';
+import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 
-export type { CreateAlertFlyoutLegacyItem } from './create_alert_flyout';
+export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_flyout';
 
 export interface AlertingV2PublicStart {
   DynamicRuleFormFlyout: ComponentType<CreateRuleFormFlyoutProps>;
-  CreateAlertFlyout: ComponentType<CreateAlertFlyoutProps>;
+  CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;
 }

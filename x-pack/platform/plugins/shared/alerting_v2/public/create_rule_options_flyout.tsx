@@ -6,11 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -21,29 +17,23 @@ import type {
   ComposeDiscoverFlyoutProps,
   DynamicRuleFormFlyoutProps,
 } from '@kbn/alerting-v2-rule-form';
-import {
-  untilPluginStartServicesReady,
-  type AlertingV2KibanaServices,
-} from './kibana_services';
+import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
-import {
-  CREATE_WITH_AGENT_INITIAL_PROMPT,
-  AGENT_BUILDER_NEW_CONVERSATION_PATH,
-} from './constants';
+import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
 
-export interface CreateAlertFlyoutLegacyItem {
+export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
   label: string;
   render: (onClose: () => void) => React.ReactElement | null;
   'data-test-subj'?: string;
 }
 
-export interface CreateAlertFlyoutProps {
+export interface CreateRuleOptionsFlyoutProps {
   onClose: () => void;
   initialQuery?: string;
   esqlVariables?: ESQLControlVariable[];
-  legacyRuleTypes?: CreateAlertFlyoutLegacyItem[];
+  legacyRuleTypes?: CreateRuleOptionsFlyoutLegacyItem[];
 }
 
 type Step =
@@ -58,12 +48,12 @@ interface LoadedModules {
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }
 
-const CreateAlertFlyoutInner = ({
+const CreateRuleOptionsFlyoutInner = ({
   onClose,
   initialQuery,
   esqlVariables,
   legacyRuleTypes,
-}: CreateAlertFlyoutProps) => {
+}: CreateRuleOptionsFlyoutProps) => {
   const [step, setStep] = useState<Step>({ type: 'selector' });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -134,7 +124,13 @@ const CreateAlertFlyoutInner = ({
 
   if (loading || !value) {
     return (
-      <EuiFlyout type="push" size="s" ownFocus onClose={onClose} data-test-subj="createAlertFlyoutLoading">
+      <EuiFlyout
+        type="push"
+        size="s"
+        ownFocus
+        onClose={onClose}
+        data-test-subj="createAlertFlyoutLoading"
+      >
         <EuiFlyoutBody>
           <EuiLoadingSpinner size="l" />
         </EuiFlyoutBody>
@@ -187,11 +183,11 @@ const CreateAlertFlyoutInner = ({
   );
 };
 
-export const CreateAlertFlyout = (props: CreateAlertFlyoutProps) => {
+export const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
-      <CreateAlertFlyoutInner {...props} />
+      <CreateRuleOptionsFlyoutInner {...props} />
     </QueryClientProvider>
   );
 };
