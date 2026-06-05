@@ -78,6 +78,8 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(reopenOperations, privilegeDefinition.cases?.reopenCase),
       ...getCasesPrivilege(assignOperations, privilegeDefinition.cases?.assign),
       ...getCasesPrivilege(manageTemplatesOperations, privilegeDefinition.cases?.manageTemplates),
+      // manageTemplates users need read access to the field library even when they lack cases.read
+      ...getCasesPrivilege(['getFieldDefinitions'], privilegeDefinition.cases?.manageTemplates),
     ]);
   }
 }
