@@ -41,6 +41,10 @@ function doWithTimeout<T = unknown>(fn: () => T, timeout: number = 0): Promise<T
 const savedObject = {
   id: 'id',
   version: 'version',
+  created_at: '2026-06-04T14:55:23.000Z',
+  created_by: 'user1',
+  updated_at: '2026-06-05T10:00:00.000Z',
+  updated_by: 'user2',
   attributes: {
     title: 'kibana-*',
     name: 'Kibana *',
@@ -83,11 +87,7 @@ describe('IndexPatterns', () => {
     savedObjectsClient.create = jest.fn();
     savedObjectsClient.get = jest.fn().mockImplementation(async (type, id) => {
       await new Promise((resolve) => setTimeout(resolve, SOClientGetDelay));
-      return {
-        id: object.id,
-        version: object.version,
-        attributes: object.attributes,
-      };
+      return { ...object };
     });
     savedObjectsClient.update = jest.fn().mockImplementation(async (id, body, { version }) => {
       if (object.version !== version) {
@@ -615,6 +615,20 @@ describe('IndexPatterns', () => {
   test('savedObjectToSpec', () => {
     const spec = indexPatterns.savedObjectToSpec(savedObject);
     expect(spec).toMatchSnapshot();
+    expect(spec.createdAt).toBe(savedObject.created_at);
+    expect(spec.createdBy).toBe(savedObject.created_by);
+    expect(spec.updatedAt).toBe(savedObject.updated_at);
+    expect(spec.updatedBy).toBe(savedObject.updated_by);
+  });
+
+  test('loads meta props when getting data view from saved object', async () => {
+    setDocsourcePayload('id', savedObject);
+    const dataView = await indexPatterns.get('id');
+
+    expect(dataView.createdAt).toBe(savedObject.created_at);
+    expect(dataView.createdBy).toBe(savedObject.created_by);
+    expect(dataView.updatedAt).toBe(savedObject.updated_at);
+    expect(dataView.updatedBy).toBe(savedObject.updated_by);
   });
 
   test('correctly composes runtime field', async () => {

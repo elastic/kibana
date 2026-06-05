@@ -76,6 +76,20 @@ describe('IndexPattern', () => {
   });
 
   describe('api', () => {
+    test('initializes meta props from spec', () => {
+      const dataView = create('test-meta-props', {
+        createdAt: '2026-06-04T14:55:23.000Z',
+        createdBy: 'user1',
+        updatedAt: '2026-06-05T10:00:00.000Z',
+        updatedBy: 'user2',
+      });
+
+      expect(dataView.createdAt).toBe('2026-06-04T14:55:23.000Z');
+      expect(dataView.createdBy).toBe('user1');
+      expect(dataView.updatedAt).toBe('2026-06-05T10:00:00.000Z');
+      expect(dataView.updatedBy).toBe('user2');
+    });
+
     test('should have expected properties', () => {
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
