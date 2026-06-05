@@ -121,6 +121,9 @@ export const getESQLControlFactory = <
 
           return false;
         },
+        relatedObservables: [
+          selections.api.query$?.pipe(map((query) => query?.esql)) ?? of(undefined),
+        ],
         relatedSiblingObservables: ['query$'],
       });
 

@@ -277,11 +277,11 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const relatedPanelsApi = initializeRelatedPanels({
         uuid,
         parentApi,
-        isRelated: (sibling) => {
-          return apiHasUseGlobalFiltersSetting(sibling)
-            ? Boolean(sibling.useGlobalFilters$.getValue())
-            : true;
-        },
+        isRelated: (sibling) =>
+          apiHasUseGlobalFiltersSetting(sibling)
+            ? Boolean(sibling.useGlobalFilters$.value) &&
+              dataControlManager.api.useGlobalFilters$.value
+            : true,
         relatedSiblingObservables: ['useGlobalFilters$'],
       });
 

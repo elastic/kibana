@@ -27,14 +27,24 @@ import type { ViewMode } from '../../publishes_view_mode';
 import { apiPublishesViewMode } from '../../publishes_view_mode';
 import { apiHasSections, apiPublishesChildren } from '../presentation_container';
 
+/**
+ * Initializes the subject that publishes which sibling panels in the parent container are related to panel `uuid`
+ * @param uuid - The panel uuid to compute relations from
+ * @param parentApi - The container parent parentApi
+ * @param relatedObservables - Observables that should trigger a recompute whenever they emit
+ * @param relatedSiblingObservables - Observable names to pull from siblings; recompute that sibling's relation whenever they emit
+ * @param isRelated - Comparator to use to check if a sibling within compatible scope is actually related to the panel
+ */
 export const initializeRelatedPanels = ({
   uuid,
   parentApi,
+  relatedObservables,
   relatedSiblingObservables,
   isRelated,
 }: {
   uuid: string;
   parentApi: unknown;
+  relatedObservables?: Observable<any>[];
   relatedSiblingObservables?: string[];
   isRelated: (sibling: unknown) => boolean;
 }): { relatedPanels$: BehaviorSubject<string[]> } => {
@@ -44,18 +54,18 @@ export const initializeRelatedPanels = ({
     return { relatedPanels$ };
   }
 
-  const childrenApi = parentApi;
   const section$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
   const viewMode$: Observable<ViewMode> = apiPublishesViewMode(parentApi)
     ? parentApi.viewMode$
     : of('view' as ViewMode);
 
-  const teardown$ = childrenApi.children$.pipe(
+  const teardown$ = parentApi.children$.pipe(
     pairwise(),
     filter(([prev, curr]) => uuid in prev && !(uuid in curr)),
     take(1)
   );
 
+  // From the parentApi, get the latest children so we can compare this panel to its sibling
   combineLatest([
     viewMode$,
     'childrenLoading$' in parentApi
@@ -63,23 +73,25 @@ export const initializeRelatedPanels = ({
       : of(false),
   ])
     .pipe(
+      // First, make sure we're in edit view mode and that the children have all loaded
       skipWhile(([viewMode, childrenLoading]) => childrenLoading || viewMode !== 'edit'),
       distinctUntilChanged(),
       switchMap(() => {
-        return combineLatest([childrenApi.children$, section$]).pipe(
+        // Combine the relatedObservables so that the result recomputes when they change, even though we never use their values
+        return combineLatest([parentApi.children$, section$, ...(relatedObservables ?? [])]).pipe(
           switchMap(([children, section]) => {
+            // Get all this panel's siblings from the observed children by filtering out its own uuid
             const siblingEntries = Object.entries(children).filter(
               ([siblingUuid]) => siblingUuid !== uuid
             );
             if (siblingEntries.length === 0) return of<string[]>([]);
 
-            const siblingObservables =
+            const siblings$ =
               siblingEntries.map(([siblingUuid, sibling]) => {
                 const siblingSection$: Observable<string | undefined> = apiHasSections(parentApi)
                   ? parentApi.panelSection$(siblingUuid)
                   : of(undefined);
-
-                const otherObservables: Observable<unknown>[] = (
+                const recomputeSiblingsOnUpdateObservables: Observable<unknown>[] = (
                   relatedSiblingObservables ?? []
                 ).reduce(
                   (prev, key) =>
@@ -89,7 +101,10 @@ export const initializeRelatedPanels = ({
                   [] as Observable<unknown>[]
                 );
 
-                return combineLatest([siblingSection$, ...otherObservables]).pipe(
+                return combineLatest([
+                  siblingSection$,
+                  ...recomputeSiblingsOnUpdateObservables,
+                ]).pipe(
                   map(([siblingSection]) => ({
                     uuid: siblingUuid,
                     sibling,
@@ -98,7 +113,7 @@ export const initializeRelatedPanels = ({
                 );
               }) ?? [];
 
-            return combineLatest(siblingObservables).pipe(
+            return combineLatest(siblings$).pipe(
               map((siblings) => {
                 const related: string[] = [];
                 for (const { uuid: siblingUuid, sibling, section: siblingSection } of siblings) {
