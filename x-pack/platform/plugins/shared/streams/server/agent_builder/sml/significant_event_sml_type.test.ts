@@ -123,6 +123,7 @@ describe('createSignificantEventSmlType', () => {
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
           origin_id: 'payment-outage',
+          origin: { uri: `${SIGNIFICANT_EVENT_SML_TYPE}://payment-outage` },
           content: 'Payment outage',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',

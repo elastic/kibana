@@ -17,7 +17,7 @@ const liveQueryQueryItemSchema = schema.object(
     query: schema.maybe(schema.string()),
     timeout: schema.maybe(schema.number()),
     ecs_mapping: schema.maybe(schema.nullable(schema.recordOf(schema.string(), schema.any()))),
-    agents: schema.maybe(schema.arrayOf(schema.string())),
+    agents: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100000 })),
     saved_query_id: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),
     platform: schema.maybe(schema.string()),
@@ -36,7 +36,7 @@ const liveQueryDetailsQueryItemSchema = schema.object(
     query: schema.maybe(schema.string()),
     saved_query_id: schema.maybe(schema.nullable(schema.string())),
     ecs_mapping: schema.maybe(schema.nullable(schema.recordOf(schema.string(), schema.any()))),
-    agents: schema.maybe(schema.arrayOf(schema.string())),
+    agents: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100000 })),
     docs: schema.maybe(schema.number()),
     failed: schema.maybe(schema.number()),
     pending: schema.maybe(schema.number()),
@@ -58,10 +58,12 @@ const findLiveQueryItemSchema = schema.object(
           action_id: schema.maybe(schema.string()),
           expiration: schema.maybe(schema.string()),
           '@timestamp': schema.maybe(schema.string()),
-          agents: schema.maybe(schema.arrayOf(schema.string())),
+          agents: schema.maybe(
+            schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100000 })
+          ),
           user_id: schema.maybe(schema.string()),
           pack_id: schema.maybe(schema.string()),
-          queries: schema.maybe(schema.arrayOf(liveQueryQueryItemSchema)),
+          queries: schema.maybe(schema.arrayOf(liveQueryQueryItemSchema, { maxSize: 1000 })),
           result_counts: schema.maybe(
             schema.object({
               total_rows: schema.maybe(schema.number()),
@@ -102,15 +104,21 @@ export const createLiveQueryResponseSchema = schema.object({
       expiration: schema.maybe(schema.string()),
       type: schema.maybe(schema.string()),
       input_type: schema.maybe(schema.string()),
-      agent_ids: schema.maybe(schema.arrayOf(schema.string())),
+      agent_ids: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100000 })
+      ),
       agent_all: schema.maybe(schema.boolean()),
-      agent_platforms: schema.maybe(schema.arrayOf(schema.string())),
-      agent_policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-      agents: schema.maybe(schema.arrayOf(schema.string())),
+      agent_platforms: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 1000 })
+      ),
+      agent_policy_ids: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
+      ),
+      agents: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100000 })),
       user_id: schema.maybe(schema.string()),
       pack_id: schema.maybe(schema.nullable(schema.string())),
       metadata: schema.maybe(schema.nullable(schema.any())),
-      queries: schema.maybe(schema.arrayOf(liveQueryQueryItemSchema)),
+      queries: schema.maybe(schema.arrayOf(liveQueryQueryItemSchema, { maxSize: 1000 })),
     },
     { unknowns: 'allow' }
   ),
@@ -121,7 +129,7 @@ export const findLiveQueryResponseSchema = schema.object({
     schema.object(
       {
         total: schema.maybe(schema.number()),
-        items: schema.maybe(schema.arrayOf(findLiveQueryItemSchema)),
+        items: schema.maybe(schema.arrayOf(findLiveQueryItemSchema, { maxSize: 10000 })),
       },
       { unknowns: 'allow' }
     )
@@ -135,15 +143,17 @@ export const getLiveQueryDetailsResponseSchema = schema.object({
         action_id: schema.maybe(schema.string()),
         expiration: schema.maybe(schema.string()),
         '@timestamp': schema.maybe(schema.string()),
-        agents: schema.maybe(schema.arrayOf(schema.string())),
+        agents: schema.maybe(
+          schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100000 })
+        ),
         user_id: schema.maybe(schema.string()),
         user_profile_uid: schema.maybe(schema.string()),
         pack_id: schema.maybe(schema.string()),
         pack_name: schema.maybe(schema.string()),
         prebuilt_pack: schema.maybe(schema.boolean()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
+        tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })),
         status: schema.maybe(schema.string()),
-        queries: schema.maybe(schema.arrayOf(liveQueryDetailsQueryItemSchema)),
+        queries: schema.maybe(schema.arrayOf(liveQueryDetailsQueryItemSchema, { maxSize: 1000 })),
       },
       { unknowns: 'allow' }
     )
@@ -155,7 +165,7 @@ export const getLiveQueryResultsResponseSchema = schema.object({
     schema.object(
       {
         total: schema.maybe(schema.number()),
-        edges: schema.maybe(schema.arrayOf(liveQueryResultEdgeSchema)),
+        edges: schema.maybe(schema.arrayOf(liveQueryResultEdgeSchema, { maxSize: 10000 })),
       },
       { unknowns: 'allow' }
     )
@@ -164,6 +174,6 @@ export const getLiveQueryResultsResponseSchema = schema.object({
 
 export const updateActionTagsResponseSchema = schema.object({
   data: schema.object({
-    tags: schema.arrayOf(schema.string()),
+    tags: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 }),
   }),
 });
