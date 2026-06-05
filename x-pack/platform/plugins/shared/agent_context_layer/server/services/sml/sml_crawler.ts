@@ -497,7 +497,10 @@ export class SmlCrawlerImpl implements SmlCrawler {
         _source: ['origin.uri'],
         query: {
           bool: {
-            filter: [{ terms: { 'origin.uri': originUris } }, { term: { ingestion_method: 'manual' } }],
+            filter: [
+              { terms: { 'origin.uri': originUris } },
+              { term: { ingestion_method: 'manual' } },
+            ],
           },
         },
         // Collapse so we get at most one hit per origin.uri even if multiple

@@ -83,7 +83,9 @@ describe('registerUpsertRoute', () => {
     const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
     const body = response.ok.mock.calls[0][0]?.body as Record<string, unknown>;
     expect(body.created).toBe(false);
-    expect(body.item).toEqual(expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin }));
+    expect(body.item).toEqual(
+      expect.objectContaining({ id: sampleDocument.id, origin: sampleDocument.origin })
+    );
   });
 
   it('returns 404 when the document exists in another space', async () => {
