@@ -50,6 +50,7 @@ import {
 } from '../../common/services';
 
 import {
+  BUMP_AGENT_POLICIES_BATCH_SIZE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -206,8 +207,6 @@ export async function getAgentPolicySavedObjectType() {
 
 // Above this number of agent policies, `_bumpPoliciesOrScheduleAsync` offloads the revision bump to a
 // background Task Manager task instead of blocking the request thread with the bulk Saved Objects updates.
-const BUMP_AGENT_POLICIES_ASYNC_THRESHOLD = 100;
-
 class AgentPolicyService {
   protected getLogger(...childContextPaths: string[]): Logger {
     return appContextService.getLogger().get('AgentPolicyService', ...childContextPaths);
@@ -1464,7 +1463,7 @@ class AgentPolicyService {
     savedObjectsResults: Array<SavedObject<AgentPolicySOAttributes>>,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    if (savedObjectsResults.length <= BUMP_AGENT_POLICIES_ASYNC_THRESHOLD) {
+    if (savedObjectsResults.length <= BUMP_AGENT_POLICIES_BATCH_SIZE) {
       return this._bumpPolicies(
         internalSoClientWithoutSpaceExtension,
         savedObjectsResults,

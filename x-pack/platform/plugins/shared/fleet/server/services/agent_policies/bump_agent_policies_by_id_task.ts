@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
+import { chunk } from 'lodash';
 
 import { agentPolicyService, appContextService } from '..';
+import { BUMP_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
 import { runWithCache } from '../epm/packages/cache';
 
 const TASK_TYPE = 'fleet:bump_agent_policies_by_id';
@@ -24,13 +26,20 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
       title: 'Fleet Bump agent policies revision',
       timeout: '5m',
       maxAttempts: 3,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const agentPolicyIdsWithSpace: Array<{ id: string; spaceId: string }> =
-          taskInstance.params.agentPolicyIdsWithSpace;
-        const user: AuthenticatedUser | undefined = taskInstance.params.user;
-        let cancelled = false;
+      paramsSchema: schema.object({
+        agentPolicyIdsWithSpace: schema.arrayOf(
+          schema.object({ id: schema.string(), spaceId: schema.string() })
+        ),
+        user: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      }),
+      createTaskRunner: ({ taskInstance, abortController }) => {
         return {
           async run() {
+            const { agentPolicyIdsWithSpace, user } = taskInstance.params as {
+              agentPolicyIdsWithSpace: Array<{ id: string; spaceId: string }>;
+              user?: AuthenticatedUser;
+            };
+
             if (!agentPolicyIdsWithSpace.length) {
               return;
             }
@@ -54,15 +63,15 @@ export function registerBumpAgentPoliciesByIdTask(taskManagerSetup: TaskManagerS
               for (const [spaceId, agentPolicyIds] of Object.entries(
                 agentPolicyIdsIndexedBySpace
               )) {
-                if (cancelled) {
-                  throw new Error('Task has been cancelled');
+                if (abortController.signal.aborted) {
+                  appContextService
+                    .getLogger()
+                    .warn('Bump agent policies task was cancelled before completing all spaces');
+                  return;
                 }
                 await agentPolicyService.bumpAgentPoliciesByIds(agentPolicyIds, { user }, spaceId);
               }
             });
-          },
-          async cancel() {
-            cancelled = true;
           },
         };
       },
@@ -79,12 +88,17 @@ export async function scheduleBumpAgentPoliciesByIdTask(
     return;
   }
 
-  await taskManagerStart.ensureScheduled({
-    id: `${TASK_TYPE}:${uuidv4()}`,
-    scope: ['fleet'],
-    params: { agentPolicyIdsWithSpace, user },
-    taskType: TASK_TYPE,
-    runAt: new Date(Date.now() + 3 * 1000),
-    state: {},
-  });
+  const batches = chunk(agentPolicyIdsWithSpace, BUMP_AGENT_POLICIES_BATCH_SIZE);
+  await Promise.all(
+    batches.map((batch) =>
+      taskManagerStart.schedule({
+        id: `${TASK_TYPE}:${uuidv4()}`,
+        scope: ['fleet'],
+        params: { agentPolicyIdsWithSpace: batch, user },
+        taskType: TASK_TYPE,
+        runAt: new Date(Date.now() + 3 * 1000),
+        state: {},
+      })
+    )
+  );
 }

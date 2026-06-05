@@ -33,15 +33,19 @@ const mockedAppContextService = jest.mocked(appContextService);
 const TASK_TYPE = 'fleet:bump_agent_policies_by_id';
 
 const getRegisteredTaskRunner = (
-  taskInstance: ConcreteTaskInstance
-): { run: () => Promise<unknown>; cancel: () => Promise<void> } => {
+  taskInstance: ConcreteTaskInstance,
+  abortController = new AbortController()
+): { run: () => Promise<unknown>; abortController: AbortController } => {
   const registerTaskDefinitions = jest.fn();
   registerBumpAgentPoliciesByIdTask({
     registerTaskDefinitions,
   } as unknown as TaskManagerSetupContract);
 
   const definition = registerTaskDefinitions.mock.calls[0][0][TASK_TYPE];
-  return definition.createTaskRunner({ taskInstance }) as any;
+  return {
+    ...(definition.createTaskRunner({ taskInstance, abortController }) as any),
+    abortController,
+  };
 };
 
 const buildTaskInstance = (params: Record<string, unknown>): ConcreteTaskInstance =>
@@ -90,34 +94,37 @@ describe('bump_agent_policies_by_id_task', () => {
       expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).not.toHaveBeenCalled();
     });
 
-    it('throws and stops processing further spaces once cancelled', async () => {
+    it('stops processing further spaces when aborted', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+
       const runner = getRegisteredTaskRunner(
         buildTaskInstance({
           agentPolicyIdsWithSpace: [
             { id: 'policy-1', spaceId: 'default' },
             { id: 'policy-2', spaceId: 'space-a' },
           ],
-        })
+        }),
+        abortController
       );
 
-      await runner.cancel();
+      await runner.run();
 
-      await expect(runner.run()).rejects.toThrow('Task has been cancelled');
       expect(mockedAgentPolicyService.bumpAgentPoliciesByIds).not.toHaveBeenCalled();
     });
   });
 
   describe('scheduleBumpAgentPoliciesByIdTask', () => {
     it('schedules the task with the policy ids and user', async () => {
-      const ensureScheduled = jest.fn();
-      const taskManagerStart = { ensureScheduled } as unknown as TaskManagerStartContract;
+      const schedule = jest.fn();
+      const taskManagerStart = { schedule } as unknown as TaskManagerStartContract;
       const agentPolicyIdsWithSpace = [{ id: 'policy-1', spaceId: 'default' }];
       const user = { username: 'jdoe' } as any;
 
       await scheduleBumpAgentPoliciesByIdTask(taskManagerStart, agentPolicyIdsWithSpace, user);
 
-      expect(ensureScheduled).toHaveBeenCalledTimes(1);
-      expect(ensureScheduled).toHaveBeenCalledWith(
+      expect(schedule).toHaveBeenCalledTimes(1);
+      expect(schedule).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: TASK_TYPE,
           scope: ['fleet'],
@@ -126,13 +133,29 @@ describe('bump_agent_policies_by_id_task', () => {
       );
     });
 
+    it('splits large sets into multiple tasks of at most 100 policies each', async () => {
+      const schedule = jest.fn();
+      const taskManagerStart = { schedule } as unknown as TaskManagerStartContract;
+      const agentPolicyIdsWithSpace = Array.from({ length: 250 }, (_, i) => ({
+        id: `policy-${i}`,
+        spaceId: 'default',
+      }));
+
+      await scheduleBumpAgentPoliciesByIdTask(taskManagerStart, agentPolicyIdsWithSpace);
+
+      expect(schedule).toHaveBeenCalledTimes(3);
+      expect(schedule.mock.calls[0][0].params.agentPolicyIdsWithSpace).toHaveLength(100);
+      expect(schedule.mock.calls[1][0].params.agentPolicyIdsWithSpace).toHaveLength(100);
+      expect(schedule.mock.calls[2][0].params.agentPolicyIdsWithSpace).toHaveLength(50);
+    });
+
     it('does not schedule anything when there are no policies', async () => {
-      const ensureScheduled = jest.fn();
-      const taskManagerStart = { ensureScheduled } as unknown as TaskManagerStartContract;
+      const schedule = jest.fn();
+      const taskManagerStart = { schedule } as unknown as TaskManagerStartContract;
 
       await scheduleBumpAgentPoliciesByIdTask(taskManagerStart, []);
 
-      expect(ensureScheduled).not.toHaveBeenCalled();
+      expect(schedule).not.toHaveBeenCalled();
     });
   });
 });
