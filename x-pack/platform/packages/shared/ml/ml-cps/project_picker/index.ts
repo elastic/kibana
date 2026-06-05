@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { CpsMigrationCallout } from './cps_migration_callout';
 export { MlProjectPickerPanel, type MlProjectPickerPanelProps } from './project_picker';

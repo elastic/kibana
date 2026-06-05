@@ -7,19 +7,12 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { ProjectPicker, useFetchProjects } from '@kbn/cps-utils';
+import { useFetchProjects } from '@kbn/cps-utils';
+import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
@@ -133,27 +126,13 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
                   />
                 }
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <ProjectPicker
-                      projectRouting={projectRouting}
-                      onProjectRoutingChange={onProjectRoutingChange}
-                      projects={projects}
-                      totalProjectCount={totalProjectCount}
-                    />
-                  </EuiFlexItem>
-                  {projectRouting ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="s"
-                        color="subdued"
-                        data-test-subj="mlIndexOrSearchProjectRoutingValue"
-                      >
-                        {projectRouting}
-                      </EuiText>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
+                <MlProjectPickerPanel
+                  projectRouting={projectRouting}
+                  onProjectRoutingChange={onProjectRoutingChange}
+                  projects={projects}
+                  totalProjectCount={totalProjectCount}
+                  projectRoutingValueTestSubj="mlIndexOrSearchProjectRoutingValue"
+                />
               </EuiFormRow>
               <EuiSpacer size="m" />
             </>

@@ -29,7 +29,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
-import { ProjectPicker, useFetchProjects } from '@kbn/cps-utils';
+import { useFetchProjects } from '@kbn/cps-utils';
+import { MlProjectPickerPanel } from '@kbn/ml-cps';
 
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
 import { useJobsApiService } from '../../../../application/services/ml_api_service/jobs';
@@ -231,7 +232,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
           </p>
         </EuiText>
 
-        <EuiListGroup maxWidth={true} data-test-subj="mlMigrateAdJobsToCpsJobList" gutterSize="s">
+        <EuiListGroup maxWidth={true} data-test-subj="mlMigrateAdJobsToCpsJobList">
           {jobIds.map((id) => {
             const result = migrationResults?.[id];
             const label = (
@@ -274,27 +275,13 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
             />
           }
         >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <ProjectPicker
-                projectRouting={selectedProjectRouting}
-                onProjectRoutingChange={onProjectRoutingChange}
-                projects={projects}
-                totalProjectCount={totalProjectCount}
-              />
-            </EuiFlexItem>
-            {selectedProjectRouting ? (
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="s"
-                  color="subdued"
-                  data-test-subj="mlMigrateAdJobsToCpsProjectRoutingValue"
-                >
-                  {selectedProjectRouting}
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          <MlProjectPickerPanel
+            projectRouting={selectedProjectRouting}
+            onProjectRoutingChange={onProjectRoutingChange}
+            projects={projects}
+            totalProjectCount={totalProjectCount}
+            projectRoutingValueTestSubj="mlMigrateAdJobsToCpsProjectRoutingValue"
+          />
         </EuiFormRow>
         <EuiSpacer size="m" />
       </>

@@ -359,7 +359,8 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       try {
         await mlClient.updateDatafeed({
           datafeed_id: datafeedId,
-          body: { project_routing: projectRouting },
+          body: {},
+          // body: { project_routing: projectRouting },
         });
         results[jobId] = {
           datafeedId,

@@ -10,22 +10,18 @@ import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
   EuiFieldNumber,
   EuiCallOut,
-  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ProjectRouting } from '@kbn/es-query';
-import { ProjectPicker, useFetchProjects } from '@kbn/cps-utils';
-
-import { DisabledProjectPicker } from '@kbn/cps-utils/components/project_picker';
+import { useFetchProjects } from '@kbn/cps-utils';
+import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
@@ -199,31 +195,14 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
               />
             }
           >
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {datafeedRunning ? (
-                  <DisabledProjectPicker
-                    totalProjectCount={totalProjectCount}
-                    displayTooltip={false}
-                  />
-                ) : (
-                  <ProjectPicker
-                    projectRouting={datafeedProjectRouting}
-                    onProjectRoutingChange={onProjectRoutingChange}
-                    projects={projects}
-                    totalProjectCount={totalProjectCount}
-                    isReadonly={datafeedRunning}
-                  />
-                )}
-              </EuiFlexItem>
-              {datafeedProjectRouting && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {datafeedProjectRouting}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <MlProjectPickerPanel
+              projectRouting={datafeedProjectRouting}
+              onProjectRoutingChange={onProjectRoutingChange}
+              projects={projects}
+              totalProjectCount={totalProjectCount}
+              disabled={datafeedRunning}
+              displayDisabledTooltip={false}
+            />
           </EuiFormRow>
         ) : null}
       </EuiForm>
