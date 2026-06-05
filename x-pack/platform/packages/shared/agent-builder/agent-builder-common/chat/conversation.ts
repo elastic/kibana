@@ -130,11 +130,6 @@ export interface ToolCallWithResult {
    */
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
-  /**
-   * The type of the tool that was called.
-   * Used by telemetry to decide whether the tool ID can be reported verbatim
-   * (built-in tools) or must be anonymized (user-created tools).
-   */
   tool_type?: ToolType;
 }
 

@@ -155,18 +155,14 @@ export class ToolManager implements IToolManager {
     return this.toolIdMappings;
   }
 
-  /**
-   * Returns the origin metadata for a given internal tool ID.
-   */
-  public getToolOrigin(toolId: string): ToolOrigin | undefined {
-    return this.toolOrigins.get(toolId);
-  }
-
-  /**
-   * Returns the tool type for a given internal tool ID.
-   */
-  public getToolType(toolId: string): ToolType | undefined {
-    return this.toolTypes.get(toolId);
+  public getToolMeta(toolId: string): {
+    origin: ToolOrigin | undefined;
+    type: ToolType | undefined;
+  } {
+    return {
+      origin: this.toolOrigins.get(toolId),
+      type: this.toolTypes.get(toolId),
+    };
   }
 
   /**

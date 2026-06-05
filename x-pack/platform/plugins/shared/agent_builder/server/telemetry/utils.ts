@@ -52,16 +52,8 @@ export function normalizeAgentIdForTelemetry(agentId?: string): string | undefin
 
 /**
  * Normalizes tool IDs for telemetry to protect user privacy.
- *
- * Built-in tools (statically registered in code, `ToolType.builtin`) and internal
- * framework tools are reported with their actual ID. User-created tools (esql,
- * index_search, workflow, mcp) are reported as a stable hashed label
- * (`custom-<sha256_prefix>`) since their IDs can contain user-chosen content.
- *
- * Prefer passing the tool `type` so any built-in tool (regardless of which plugin
- * registers it) keeps a readable ID. When only the ID is available (e.g. round
- * aggregates, agent tool selections), the `AGENT_BUILDER_BUILTIN_TOOLS` allow-list
- * is used as a best-effort fallback.
+ * custom/user-created tools are reported as a stable hashed label (CUSTOM-<sha256_prefix>).
+ * Pass `toolType` when available; falls back to allow-list for legacy callers that only have a tool ID string.
  */
 export function normalizeToolIdForTelemetry(toolId: string, toolType?: ToolType | string): string {
   const isBuiltin =

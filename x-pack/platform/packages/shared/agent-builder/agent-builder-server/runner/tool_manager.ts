@@ -81,15 +81,7 @@ export interface ToolManager {
    */
   getToolIdMapping(): Map<string, string>;
 
-  /**
-   * Returns the origin for an internal tool ID, if known.
-   */
-  getToolOrigin(toolId: string): ToolOrigin | undefined;
-
-  /**
-   * Returns the tool type for an internal tool ID, if known.
-   */
-  getToolType(toolId: string): ToolType | undefined;
+  getToolMeta(toolId: string): { origin: ToolOrigin | undefined; type: ToolType | undefined };
 
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.

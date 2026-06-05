@@ -153,14 +153,15 @@ export const convertGraphEvents = ({
                     })
                   );
                 } else {
+                  const { origin: toolOrigin, type: toolType } = toolManager.getToolMeta(toolId);
                   events.push(
                     createToolCallEvent({
                       toolId,
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
-                      toolOrigin: toolManager.getToolOrigin(toolId),
-                      toolType: toolManager.getToolType(toolId),
+                      toolOrigin,
+                      toolType,
                     })
                   );
                 }
