@@ -14,7 +14,6 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { docLinks } from '../common/doc_links';
 import type {
   ServerlessSearchPluginSetup,
@@ -142,11 +141,8 @@ export class ServerlessSearchPlugin
         const showAiAssistant = chatExperience !== AIChatExperience.Agent;
         return createNavigationTree({
           ...application,
+          core,
           showAiAssistant,
-          showAlertingV2: core.settings.globalClient.get<boolean>(
-            ALERTING_V2_ENABLED_SETTING_ID,
-            false
-          ),
         });
       })
     );

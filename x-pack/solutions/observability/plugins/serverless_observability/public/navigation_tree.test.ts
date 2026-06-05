@@ -7,10 +7,19 @@
 
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('Navigation Tree', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+  });
+
   it('should generate tree with overview', () => {
-    const navigation = createNavigationTree({});
+    const navigation = createNavigationTree({ core });
     const { body } = navigation;
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
@@ -21,7 +30,7 @@ describe('Navigation Tree', () => {
   });
 
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
-    const { body } = createNavigationTree({});
+    const { body } = createNavigationTree({ core });
     const mlNode = body.find((item) => item.id === 'machine_learning-landing');
     const anomalySection = mlNode?.children?.find(
       (item) => item.id === 'category-anomaly_detection'
@@ -36,7 +45,7 @@ describe('Navigation Tree', () => {
   });
 
   it('should not generate tree with overview', () => {
-    const navigation = createNavigationTree({ overviewAvailable: false });
+    const navigation = createNavigationTree({ core, overviewAvailable: false });
     expect(navigation.body).not.toEqual(
       expect.arrayContaining([
         {
@@ -48,7 +57,7 @@ describe('Navigation Tree', () => {
   });
 
   it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
-    const { body } = createNavigationTree({});
+    const { body } = createNavigationTree({ core });
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
@@ -58,7 +67,7 @@ describe('Navigation Tree', () => {
   });
 
   it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
-    const { body } = createNavigationTree({ showAiAssistant: false });
+    const { body } = createNavigationTree({ core, showAiAssistant: false });
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
@@ -68,7 +77,7 @@ describe('Navigation Tree', () => {
   });
 
   it('hides GenAI Settings in admin settings when unavailable', () => {
-    const { body } = createNavigationTree({ genAiSettingsAvailable: false });
+    const { body } = createNavigationTree({ core, genAiSettingsAvailable: false });
     const adminSettingsNode = body.find((item) => item.id === 'admin_and_settings');
     const aiSection = adminSettingsNode?.children?.find(
       (item) => item.title === 'AI' && 'children' in item
@@ -79,8 +88,10 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts', () => {
-    const { body } = createNavigationTree({ showAlertingV2: true });
+  it('uses a single Alerts link to classic Observability alerts even when alerting v2 is enabled', () => {
+    core.settings.globalClient.get = <T>(_key: string) => true as T;
+
+    const { body } = createNavigationTree({ core });
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
     );

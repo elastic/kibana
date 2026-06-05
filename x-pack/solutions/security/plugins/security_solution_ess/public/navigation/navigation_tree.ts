@@ -14,7 +14,7 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 
@@ -22,10 +22,6 @@ export const createNavigationTree = (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => {
-  const showAlertingV2 = services.settings.globalClient.get<boolean>(
-    ALERTING_V2_ENABLED_SETTING_ID,
-    false
-  );
   return {
     body: [
       {
@@ -210,21 +206,7 @@ export const createNavigationTree = (
               { link: 'monitoring' },
             ],
           },
-          ...(showAlertingV2
-            ? [
-                {
-                  id: 'v2_alerting_preview',
-                  title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
-                  renderAs: 'panelOpener' as const,
-                  children: [
-                    { link: 'management:rules' as const },
-                    { link: 'management:episodes' as const },
-                    { link: 'management:action_policies' as const },
-                    { link: 'management:execution_history' as const },
-                  ],
-                },
-              ]
-            : []),
+          ...getAlertingV2ManagementNavPanel(services),
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [

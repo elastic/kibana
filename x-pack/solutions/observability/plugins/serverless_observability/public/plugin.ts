@@ -12,7 +12,6 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
@@ -56,15 +55,12 @@ export class ServerlessObservabilityPlugin
     ]).pipe(
       map(([{ status }, chatExperience]) => {
         return createNavigationTree({
+          core,
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           genAiSettingsAvailable: core.pricing.isFeatureAvailable('observability:gen_ai_settings'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          showAlertingV2: core.settings.globalClient.get<boolean>(
-            ALERTING_V2_ENABLED_SETTING_ID,
-            false
-          ),
         });
       })
     );

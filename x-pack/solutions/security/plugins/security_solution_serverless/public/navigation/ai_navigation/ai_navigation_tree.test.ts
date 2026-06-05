@@ -5,12 +5,21 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { createAiNavigationTree } from './ai_navigation_tree';
 
 describe('createAiNavigationTree', () => {
+  let core: CoreStart;
+
+  beforeEach(() => {
+    core = coreMock.createStart();
+    core.settings.globalClient.get = <T>(_key: string) => false as T;
+  });
+
   it('returns the Workflows link between Agents and Value report when enabled', () => {
-    const navigationTree = createAiNavigationTree(AIChatExperience.Agent, true);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true);
 
     const primaryNavSection = navigationTree.body[4];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
@@ -26,7 +35,7 @@ describe('createAiNavigationTree', () => {
   });
 
   it('does not include the Workflows link when disabled', () => {
-    const navigationTree = createAiNavigationTree(AIChatExperience.Agent, false);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, false);
 
     const primaryNavSection = navigationTree.body[4];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];

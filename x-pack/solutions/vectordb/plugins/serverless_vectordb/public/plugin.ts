@@ -11,7 +11,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { VECTORDB_APP_ID, TUTORIALS_DEEP_LINK_ID } from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
 import type {
@@ -80,11 +79,8 @@ export class ServerlessVectordbPlugin
         const showAiAssistant = chatExperience !== AIChatExperience.Agent;
         return createNavigationTree({
           ...application,
+          core,
           showAiAssistant,
-          showAlertingV2: core.settings.globalClient.get<boolean>(
-            ALERTING_V2_ENABLED_SETTING_ID,
-            false
-          ),
         });
       })
     );

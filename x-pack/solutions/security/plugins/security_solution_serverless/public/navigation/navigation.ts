@@ -10,7 +10,6 @@ import { firstValueFrom } from 'rxjs';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
@@ -37,13 +36,8 @@ export const registerSolutionNavigation = async (
   const workflowsUiEnabled$ = services.settings.client.get$<boolean>(WORKFLOWS_UI_SETTING_ID);
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
-  const showAlertingV2 = services.settings.globalClient.get<boolean>(
-    ALERTING_V2_ENABLED_SETTING_ID,
-    false
-  );
-
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, showAlertingV2)
+    ? createAiNavigationTree(services, initialChatExperience, workflowsUiEnabled)
     : await createNavigationTree(services, initialChatExperience);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
