@@ -37,8 +37,15 @@ globalSetupHook(
         `[security-ai-rules] restoring snapshot from ` +
           `gs://${snapshotConfig.bucket}/${snapshotConfig.basePath}`
       );
-      await restoreRuleDataSnapshot({ esClient, log, config: snapshotConfig });
-      await verifyRuleDataInvariants({ esClient, log });
+      try {
+        await restoreRuleDataSnapshot({ esClient, log, config: snapshotConfig });
+        await verifyRuleDataInvariants({ esClient, log });
+      } catch (err) {
+        log.warning(
+          `[security-ai-rules] snapshot restore failed: ${err.message}; falling back to seeding`
+        );
+        await seedDataFromScratch({ esClient, log });
+      }
     } else {
       log.warning(
         '[security-ai-rules] no GCS credentials; falling back to slow on-the-fly seeding. ' +

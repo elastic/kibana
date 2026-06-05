@@ -151,10 +151,7 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
   model_id: options?.taskModelId,
 });
 
-const VERSIONED_HEADERS = {
-  'elastic-api-version': API_VERSIONS.internal.v1,
-  'x-elastic-internal-origin': 'kibana',
-};
+const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
 export class EvalsClient {
   constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
