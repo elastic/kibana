@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/deeplinks-observability'
   - '@kbn/share-plugin'
+  - '@kbn/react-hooks'
 tags:
   - shared-browser
   - package
