@@ -1,6 +1,6 @@
 # Client Apps Plugin
 
-Plugin that complements client applications' UX. It currently allows retracing obfuscated
+Plugin that complements client applications' dashboards. It currently allows retracing obfuscated
 errors back to human-readable source code references. It is designed to accommodate multiple platforms (Android,
 JavaScript, iOS) within the same plugin, with each platform defining its own backend services and UI independently.
 
@@ -27,7 +27,7 @@ Two things must be in place before the plugin can retrace a stacktrace:
 
 1. **Mapping documents uploaded.** The platform's retrace maps must be uploaded to an
    Elasticsearch index accessible by Kibana before retracing can succeed. When and how this
-   upload happens is platform-specific — refer to each platform's upload tooling for details.
+   upload happens is platform-specific. Refer to each platform's upload tooling for details.
 
 2. **Build identifier present in the log event.** Each crash or error document must carry a
    platform-specific build identifier field that the plugin uses to locate the correct mapping
@@ -83,7 +83,7 @@ Utilities needed by more than one platform belong in:
 
 ### URL drilldown integration
 
-The plugin registers with `visibleIn: []` — it does not appear in Kibana's navigation menu.
+The plugin registers with `visibleIn: []`, meaning that it does not appear in Kibana's navigation menu.
 Users reach platform views via URL drilldowns configured on dashboard panels:
 
 ```
