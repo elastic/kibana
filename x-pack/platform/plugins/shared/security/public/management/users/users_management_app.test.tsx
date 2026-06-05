@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -19,6 +20,7 @@ jest.mock('./edit_user', () => ({
   CreateUserPage: () => 'Create User Page',
   EditUserPage: () => 'Edit User Page',
 }));
+
 jest.mock('./user_api_client', () => ({ UserAPIClient: class {} }));
 jest.mock('../roles', () => ({ RolesAPIClient: class {} }));
 
