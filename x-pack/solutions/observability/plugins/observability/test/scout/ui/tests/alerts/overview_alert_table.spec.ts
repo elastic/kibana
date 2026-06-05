@@ -42,7 +42,17 @@ test.describe(
       pageObjects,
     }) => {
       // No Observability rules => the overview reports no data and shows the CTA.
+      // The overview's `hasData.alert` flag is driven by `/api/alerting/rules/_find`,
+      // so wait until no rules remain before navigating: `deleteAllRules` issues
+      // async deletes and a stale rule would keep the page in its "has data"
+      // layout, in which case the no-data prompt never renders.
       await apiServices.alerting.cleanup.deleteAllRules();
+      await expect
+        .poll(async () => (await apiServices.alerting.rules.find({ per_page: 1 })).data.total, {
+          timeout: 30_000,
+          intervals: [1_000],
+        })
+        .toBe(0);
 
       await pageObjects.overviewPage.gotoWithoutAlerts();
       await expect(pageObjects.overviewPage.noDataPrompt).toBeVisible();

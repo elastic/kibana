@@ -115,8 +115,15 @@ export class AlertsTablePage {
    * data grid's `aria-rowcount` (set by EuiDataGrid to the full alert count)
    * rather than counting rendered cells, which would undercount because the grid
    * virtualizes rows outside the viewport.
+   *
+   * When a query matches no alerts the page renders the empty state instead of
+   * the data grid, so short-circuit to 0 rather than waiting for a grid body
+   * that will never appear (which would otherwise time out).
    */
   async getRowCount(): Promise<number> {
+    if (await this.noDataState.isVisible()) {
+      return 0;
+    }
     const grid = this.page.locator(
       '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="euiDataGridBody"]'
     );
