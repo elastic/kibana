@@ -211,7 +211,11 @@ export {
   type CanIndicateRelatedChildren,
   type CanIndicateRelatedSiblings,
 } from './interfaces/containers/related_panels/can_indicate_related_panels';
-export { initializeRelatedPanels } from './interfaces/containers/related_panels/initialize_related_panels';
+export {
+  initializeRelatedPanels,
+  type InitializeRelatedPanelsArgs,
+  type RelatedPanelsConfig,
+} from './interfaces/containers/related_panels/initialize_related_panels';
 export { panelIsRelatedByGlobalFilters } from './interfaces/containers/related_panels/panel_is_related_by_global_filters';
 
 export {

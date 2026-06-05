@@ -71,18 +71,27 @@ export const ControlPanel = ({
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
   const [panelTooltipLabel, setPanelTooltipLabel] = useState<string | undefined>();
-  const [relatedPanels, setRelatedPanels] = useState<string[]>([]);
+  const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
 
+  const selectedPanel = useMemo(
+    () =>
+      relatedPanelsIndicatorId &&
+      Object.entries(parentApi.children$.value).find(
+        ([key]) => key === relatedPanelsIndicatorId
+      )?.[1],
+    [parentApi.children$.value, relatedPanelsIndicatorId]
+  );
   const indicateControl = useMemo(
     () =>
       Boolean(
         api &&
-          relatedPanelsIndicatorId !== undefined &&
-          relatedPanels.includes(relatedPanelsIndicatorId)
+          selectedPanel &&
+          apiPublishesRelatedPanels(selectedPanel) &&
+          selectedPanelRelatedPanels.includes(id)
       ),
-    [relatedPanels, relatedPanelsIndicatorId, api]
+    [api, selectedPanel, selectedPanelRelatedPanels, id]
   );
   const {
     canIndicateRelatedPanels,
@@ -110,13 +119,15 @@ export const ControlPanel = ({
         })
       );
     }
-    if (apiPublishesRelatedPanels(api)) {
-      subscriptions.add(api.relatedPanels$.subscribe(setRelatedPanels));
+    if (apiPublishesRelatedPanels(selectedPanel)) {
+      subscriptions.add(selectedPanel.relatedPanels$.subscribe(setSelectedPanelRelatedPanels));
+    } else {
+      setSelectedPanelRelatedPanels([]);
     }
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [api]);
+  }, [api, selectedPanel]);
 
   const setRefs = useCallback(
     (ref: HTMLElement | null) => {

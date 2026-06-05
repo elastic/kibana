@@ -7,30 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ViewMode } from '../../..';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 import { initializeRelatedPanels } from './initialize_related_panels';
 
-interface MockChild {
-  uuid: string;
-  appliedFilters$?: BehaviorSubject<Filter[] | undefined>;
-  appliedTimeslice$?: BehaviorSubject<[number, number] | undefined>;
-  useGlobalFilters$?: BehaviorSubject<boolean | undefined>;
-  esqlVariable$?: BehaviorSubject<ESQLControlVariable>;
-  query$?: BehaviorSubject<AggregateQuery | undefined>;
+interface MockSibling {
+  related$?: BehaviorSubject<boolean>;
 }
 
 const buildMockParent = ({
   children,
   sectionByUuid = {},
   viewMode = 'edit' as ViewMode,
+  childrenLoading = false,
 }: {
-  children: Record<string, MockChild>;
+  children: Record<string, MockSibling>;
   sectionByUuid?: Record<string, string | undefined>;
   viewMode?: ViewMode;
+  childrenLoading?: boolean;
 }) => {
   const childrenSubjects: Record<string, BehaviorSubject<string | undefined>> = {};
   for (const uuid of Object.keys(children)) {
@@ -39,6 +34,7 @@ const buildMockParent = ({
 
   return {
     children$: new BehaviorSubject(children),
+    childrenLoading$: new BehaviorSubject(childrenLoading),
     viewMode$: new BehaviorSubject<ViewMode>(viewMode),
     getPanelSection: (uuid: string) => sectionByUuid[uuid],
     panelSection$: (uuid: string): Observable<string | undefined> =>
@@ -50,86 +46,49 @@ const buildMockParent = ({
   };
 };
 
-const filterControl = (uuid: string, useGlobalFilters = true): MockChild => ({
-  uuid,
-  appliedFilters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-  useGlobalFilters$: new BehaviorSubject<boolean | undefined>(useGlobalFilters),
-});
+const panel = (): MockSibling => ({});
 
-const timeSlider = (uuid: string): MockChild => ({
-  uuid,
-  appliedTimeslice$: new BehaviorSubject<[number, number] | undefined>([0, 1]),
+const flaggedSibling = (related = true): MockSibling & { related$: BehaviorSubject<boolean> } => ({
+  related$: new BehaviorSubject(related),
 });
-
-const esqlControl = (uuid: string, variableKey = 'variable'): MockChild => ({
-  uuid,
-  esqlVariable$: new BehaviorSubject<ESQLControlVariable>({
-    key: variableKey,
-  } as ESQLControlVariable),
-});
-
-const esqlPanel = (uuid: string, esql: string): MockChild => ({
-  uuid,
-  query$: new BehaviorSubject<AggregateQuery | undefined>({ esql }),
-});
-
-const panel = (uuid: string): MockChild => ({ uuid });
 
 describe('initializeRelatedPanels', () => {
   test('does nothing when parent does not publish children', () => {
     const result = initializeRelatedPanels({
       uuid: 'self',
       parentApi: {},
-      isFilterControl: true,
+      isRelated: () => true,
     });
     expect(result.relatedPanels$.value).toEqual([]);
   });
 
-  describe('filter controls', () => {
-    test('list other panels, time controls, and filter controls whose useGlobalFilters is true', () => {
-      const parent = buildMockParent({
-        children: {
-          self: filterControl('self', false),
-          globalReader: filterControl('globalReader', true),
-          standaloneReader: filterControl('standaloneReader', false),
-          timeSlider: timeSlider('timeSlider'),
-          panel: panel('panel'),
-        },
-      });
-      const { relatedPanels$ } = initializeRelatedPanels({
-        uuid: 'self',
-        parentApi: parent,
-        isFilterControl: true,
-      });
-      expect(relatedPanels$.value.sort()).toEqual(['globalReader', 'panel', 'timeSlider']);
+  test('lists siblings that pass isRelated', () => {
+    const parent = buildMockParent({
+      children: {
+        self: panel(),
+        related: flaggedSibling(true),
+        unrelated: flaggedSibling(false),
+      },
+    });
+    const { relatedPanels$ } = initializeRelatedPanels({
+      uuid: 'self',
+      parentApi: parent,
+      isRelated: (sibling) =>
+        Boolean((sibling as MockSibling & { related$?: BehaviorSubject<boolean> }).related$?.value),
+      siblingDependentObservableNames: ['related$'],
     });
 
-    test('react to sibling useGlobalFilters toggling at runtime', () => {
-      const reader = filterControl('reader', true);
-      const parent = buildMockParent({
-        children: {
-          self: filterControl('self', true),
-          reader,
-        },
-      });
-      const { relatedPanels$ } = initializeRelatedPanels({
-        uuid: 'self',
-        parentApi: parent,
-        isFilterControl: true,
-      });
-      expect(relatedPanels$.value).toEqual(['reader']);
-      reader.useGlobalFilters$!.next(false);
-      expect(relatedPanels$.value).toEqual([]);
-    });
+    expect(relatedPanels$.value).toEqual(['related']);
+  });
 
-    test('sectioned control only lists same-section panels and unsectioned controls', () => {
+  describe('section scoping', () => {
+    test('sectioned panel only lists same-section siblings', () => {
       const parent = buildMockParent({
         children: {
-          self: filterControl('self'),
-          sameSectionPanel: panel('sameSectionPanel'),
-          otherSectionPanel: panel('otherSectionPanel'),
-          unsectionedPanel: panel('unsectionedPanel'),
-          unsectionedTimeSlider: timeSlider('unsectionedTimeSlider'),
+          self: panel(),
+          sameSectionPanel: panel(),
+          otherSectionPanel: panel(),
+          unsectionedPanel: panel(),
         },
         sectionByUuid: {
           self: 'sectionA',
@@ -140,18 +99,19 @@ describe('initializeRelatedPanels', () => {
       const { relatedPanels$ } = initializeRelatedPanels({
         uuid: 'self',
         parentApi: parent,
-        isFilterControl: true,
+        isRelated: () => true,
       });
-      expect(relatedPanels$.value.sort()).toEqual(['sameSectionPanel', 'unsectionedTimeSlider']);
+
+      expect(relatedPanels$.value).toEqual(['sameSectionPanel']);
     });
 
-    test('unsectioned control reaches panels in any section', () => {
+    test('unsectioned panel reaches panels in any section', () => {
       const parent = buildMockParent({
         children: {
-          self: filterControl('self'),
-          sectionAPanel: panel('sectionAPanel'),
-          sectionBPanel: panel('sectionBPanel'),
-          unsectionedPanel: panel('unsectionedPanel'),
+          self: panel(),
+          sectionAPanel: panel(),
+          sectionBPanel: panel(),
+          unsectionedPanel: panel(),
         },
         sectionByUuid: {
           sectionAPanel: 'sectionA',
@@ -161,8 +121,9 @@ describe('initializeRelatedPanels', () => {
       const { relatedPanels$ } = initializeRelatedPanels({
         uuid: 'self',
         parentApi: parent,
-        isFilterControl: true,
+        isRelated: () => true,
       });
+
       expect(relatedPanels$.value.sort()).toEqual([
         'sectionAPanel',
         'sectionBPanel',
@@ -171,99 +132,139 @@ describe('initializeRelatedPanels', () => {
     });
   });
 
-  describe('ES|QL controls', () => {
-    test('list ES|QL panels whose query consumes my variable', () => {
-      const self = esqlControl('self', 'myVar');
-      const parent = buildMockParent({
-        children: {
-          self,
-          usingPanel: esqlPanel('usingPanel', 'FROM logs | WHERE level == ?myVar'),
-          unrelatedPanel: esqlPanel('unrelatedPanel', 'FROM logs | WHERE level == ?other'),
-          plainPanel: panel('plainPanel'),
-          siblingControl: esqlControl('siblingControl', 'siblingVar'),
-        },
-      });
-      const { relatedPanels$ } = initializeRelatedPanels({
-        uuid: 'self',
-        parentApi: parent,
-        isESQLControl: true,
-        esqlVariable$: self.esqlVariable$!,
-      });
-      expect(relatedPanels$.value).toEqual(['usingPanel']);
-    });
-  });
-
   describe('reactivity', () => {
     test('emits empty list while view mode is not edit, then recomputes when entering edit', () => {
       const parent = buildMockParent({
         children: {
-          self: filterControl('self'),
-          panel: panel('panel'),
+          self: panel(),
+          sibling: panel(),
         },
         viewMode: 'view',
       });
       const { relatedPanels$ } = initializeRelatedPanels({
         uuid: 'self',
         parentApi: parent,
-        isFilterControl: true,
+        isRelated: () => true,
       });
+
       expect(relatedPanels$.value).toEqual([]);
       parent.viewMode$.next('edit');
-      expect(relatedPanels$.value).toEqual(['panel']);
+      expect(relatedPanels$.value).toEqual(['sibling']);
     });
 
-    test('reacts to children being added or removed', () => {
+    test('emits empty list while children are loading, then recomputes when loading completes', () => {
       const parent = buildMockParent({
-        children: { self: filterControl('self') },
+        children: {
+          self: panel(),
+          sibling: panel(),
+        },
+        childrenLoading: true,
       });
       const { relatedPanels$ } = initializeRelatedPanels({
         uuid: 'self',
         parentApi: parent,
-        isFilterControl: true,
+        isRelated: () => true,
       });
+
+      expect(relatedPanels$.value).toEqual([]);
+      parent.childrenLoading$.next(false);
+      expect(relatedPanels$.value).toEqual(['sibling']);
+    });
+
+    test('reacts to children being added or removed', () => {
+      const parent = buildMockParent({
+        children: { self: panel() },
+      });
+      const { relatedPanels$ } = initializeRelatedPanels({
+        uuid: 'self',
+        parentApi: parent,
+        isRelated: () => true,
+      });
+
       expect(relatedPanels$.value).toEqual([]);
       parent.children$.next({
         ...parent.children$.value,
-        panel: panel('panel'),
+        sibling: panel(),
       });
-      expect(relatedPanels$.value).toEqual(['panel']);
+      expect(relatedPanels$.value).toEqual(['sibling']);
     });
 
     test('reacts to a sibling moving sections', () => {
-      const movable = panel('movable');
       const parent = buildMockParent({
-        children: { self: filterControl('self'), movable },
+        children: { self: panel(), movable: panel() },
         sectionByUuid: { self: 'sectionA', movable: 'sectionA' },
       });
       const { relatedPanels$ } = initializeRelatedPanels({
         uuid: 'self',
         parentApi: parent,
-        isFilterControl: true,
+        isRelated: () => true,
       });
+
       expect(relatedPanels$.value).toEqual(['movable']);
       parent.setPanelSection('movable', 'sectionB');
+      expect(relatedPanels$.value).toEqual([]);
+    });
+
+    test('reacts to siblingDependentObservableNames emitting', () => {
+      const sibling = flaggedSibling(true);
+      const parent = buildMockParent({
+        children: { self: panel(), sibling },
+      });
+      const { relatedPanels$ } = initializeRelatedPanels({
+        uuid: 'self',
+        parentApi: parent,
+        isRelated: (candidate) =>
+          Boolean(
+            (candidate as MockSibling & { related$?: BehaviorSubject<boolean> }).related$?.value
+          ),
+        siblingDependentObservableNames: ['related$'],
+      });
+
+      expect(relatedPanels$.value).toEqual(['sibling']);
+      sibling.related$.next(false);
+      expect(relatedPanels$.value).toEqual([]);
+    });
+
+    test('reacts to dependentObservables emitting', () => {
+      const selfRelated$ = new BehaviorSubject(true);
+      const parent = buildMockParent({
+        children: {
+          self: panel(),
+          sibling: panel(),
+        },
+      });
+      const { relatedPanels$ } = initializeRelatedPanels({
+        uuid: 'self',
+        parentApi: parent,
+        isRelated: (_sibling, [selfRelated]) => selfRelated,
+        dependentObservables: [selfRelated$],
+      });
+
+      expect(relatedPanels$.value).toEqual(['sibling']);
+      selfRelated$.next(false);
       expect(relatedPanels$.value).toEqual([]);
     });
 
     test('subscription stops emitting once self is removed from children$', () => {
       const parent = buildMockParent({
         children: {
-          self: filterControl('self'),
-          panel: panel('panel'),
+          self: panel(),
+          sibling: panel(),
         },
       });
       const { relatedPanels$ } = initializeRelatedPanels({
         uuid: 'self',
         parentApi: parent,
-        isFilterControl: true,
+        isRelated: () => true,
       });
-      expect(relatedPanels$.value).toEqual(['panel']);
+
+      expect(relatedPanels$.value).toEqual(['sibling']);
 
       const { self: _removed, ...remaining } = parent.children$.value;
       parent.children$.next(remaining);
 
       const lastValue = relatedPanels$.value;
-      parent.children$.next({ ...remaining, anotherPanel: panel('anotherPanel') });
+      parent.children$.next({ ...remaining, anotherSibling: panel() });
       expect(relatedPanels$.value).toEqual(lastValue);
     });
   });

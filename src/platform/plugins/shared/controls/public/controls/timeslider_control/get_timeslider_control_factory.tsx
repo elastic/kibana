@@ -260,7 +260,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
             ? Boolean(sibling.useGlobalFilters$.getValue())
             : true;
         },
-        siblingDependentObservables: ['useGlobalFilters$'],
+        siblingDependentObservableNames: ['useGlobalFilters$'],
       });
 
       const api = finalizeApi({

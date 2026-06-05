@@ -32,22 +32,21 @@ import { apiHasSections, apiPublishesChildren } from '../presentation_container'
  * @param uuid - The panel uuid to compute relations from
  * @param parentApi - The container parent parentApi
  * @param dependentObservables - Observables that should trigger a recompute whenever they emit
- * @param siblingDependentObservables - Observable names to pull from siblings; recompute that sibling's relation whenever they emit
+ * @param siblingDependentObservableNames - Observable names to pull from siblings; recompute that sibling's relation whenever they emit
  * @param isRelated - Comparator to use to check if a sibling within compatible scope is actually related to the panel
  */
-export const initializeRelatedPanels = ({
+export const initializeRelatedPanels = <
+  SiblingDependentValues extends unknown[],
+  const DependentObservables extends readonly Observable<unknown>[] = readonly []
+>({
   uuid,
   parentApi,
   dependentObservables,
-  siblingDependentObservables,
+  siblingDependentObservableNames,
   isRelated,
-}: {
-  uuid: string;
-  parentApi: unknown;
-  dependentObservables?: Observable<any>[];
-  siblingDependentObservables?: string[];
-  isRelated: (sibling: unknown) => boolean;
-}): { relatedPanels$: BehaviorSubject<string[]> } => {
+}: InitializeRelatedPanelsArgs<DependentObservables, SiblingDependentValues>): {
+  relatedPanels$: BehaviorSubject<string[]>;
+} => {
   const relatedPanels$ = new BehaviorSubject<string[]>([]);
 
   if (!apiPublishesChildren(parentApi)) {
@@ -79,7 +78,7 @@ export const initializeRelatedPanels = ({
       switchMap(() => {
         // Combine the dependentObservables so that the result recomputes when they change, even though we never use their values
         return combineLatest([parentApi.children$, section$, ...(dependentObservables ?? [])]).pipe(
-          switchMap(([children, section]) => {
+          switchMap(([children, section, ...dependentValues]) => {
             // Get all this panel's siblings from the observed children by filtering out its own uuid
             const siblingEntries = Object.entries(children).filter(
               ([siblingUuid]) => siblingUuid !== uuid
@@ -91,8 +90,8 @@ export const initializeRelatedPanels = ({
                 const siblingSection$: Observable<string | undefined> = apiHasSections(parentApi)
                   ? parentApi.panelSection$(siblingUuid)
                   : of(undefined);
-                const recomputeSiblingsOnUpdateObservables: Observable<unknown>[] = (
-                  siblingDependentObservables ?? []
+                const siblingDependentObservables: Observable<unknown>[] = (
+                  siblingDependentObservableNames ?? []
                 ).reduce(
                   (prev, key) =>
                     Object.hasOwn(sibling as object, key)
@@ -101,14 +100,12 @@ export const initializeRelatedPanels = ({
                   [] as Observable<unknown>[]
                 );
 
-                return combineLatest([
-                  siblingSection$,
-                  ...recomputeSiblingsOnUpdateObservables,
-                ]).pipe(
-                  map(([siblingSection]) => ({
+                return combineLatest([siblingSection$, ...siblingDependentObservables]).pipe(
+                  map(([siblingSection, ...siblingDependentValues]) => ({
                     uuid: siblingUuid,
                     sibling,
                     section: siblingSection,
+                    siblingDependentValues,
                   }))
                 );
               }) ?? [];
@@ -116,9 +113,21 @@ export const initializeRelatedPanels = ({
             return combineLatest(siblings$).pipe(
               map((siblings) => {
                 const related: string[] = [];
-                for (const { uuid: siblingUuid, sibling, section: siblingSection } of siblings) {
+                for (const {
+                  uuid: siblingUuid,
+                  sibling,
+                  section: siblingSection,
+                  siblingDependentValues,
+                } of siblings) {
                   const compatibleScope = section === siblingSection || section === undefined;
-                  if (compatibleScope && isRelated(sibling)) {
+                  if (
+                    compatibleScope &&
+                    isRelated(
+                      sibling,
+                      dependentValues as unknown as ObservableEmittedValues<DependentObservables>,
+                      siblingDependentValues as unknown as SiblingDependentValues
+                    )
+                  ) {
                     related.push(siblingUuid);
                   }
                 }
@@ -138,3 +147,46 @@ export const initializeRelatedPanels = ({
 
   return { relatedPanels$ };
 };
+
+/**
+ * This typescript magic allows initializeRelatedPanels to infer what values are emitted by everything
+ * passed to dependentObservables, and automatically type the arguments passed to isRelated accordingly
+ */
+
+export interface RelatedPanelsConfig<
+  DependentObservables extends readonly Observable<unknown>[] = readonly [],
+  SiblingDependentValues extends readonly unknown[] = readonly []
+> {
+  dependentObservables?: DependentObservables;
+  siblingDependentObservableNames?: string[];
+  isRelated: (
+    sibling: unknown,
+    dependentValues: ObservableEmittedValues<DependentObservables>,
+    siblingDependentValues: SiblingDependentValues
+  ) => boolean;
+}
+
+export type InitializeRelatedPanelsArgs<
+  DependentObservables extends readonly Observable<unknown>[] = readonly [],
+  SiblingDependentValues extends readonly unknown[] = readonly []
+> = {
+  uuid: string;
+  parentApi: unknown;
+} & RelatedPanelsConfig<DependentObservables, SiblingDependentValues>;
+
+type ObservableEmittedValue<TObservable> = TObservable extends Observable<infer TValue>
+  ? TValue
+  : never;
+
+type ObservableEmittedValueTuple<
+  Observables extends readonly Observable<unknown>[],
+  Accumulated extends unknown[] = []
+> = Observables extends readonly [
+  infer Head extends Observable<unknown>,
+  ...infer Tail extends readonly Observable<unknown>[]
+]
+  ? ObservableEmittedValueTuple<Tail, [...Accumulated, ObservableEmittedValue<Head>]>
+  : Accumulated;
+
+type ObservableEmittedValues<Observables extends readonly Observable<unknown>[]> =
+  ObservableEmittedValueTuple<Observables>;

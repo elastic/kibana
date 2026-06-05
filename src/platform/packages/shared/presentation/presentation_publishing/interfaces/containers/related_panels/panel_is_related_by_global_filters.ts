@@ -7,16 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasUseGlobalFiltersSetting } from '../../fetch/applies_filters';
-import { apiHasUseGlobalFiltersSetting } from '../../fetch/applies_filters';
+import type { Observable } from 'rxjs';
 
-export const panelIsRelatedByGlobalFilters = (
-  useGlobalFilters$: HasUseGlobalFiltersSetting['useGlobalFilters$']
-) => ({
-  isRelated: (sibling: unknown) =>
-    apiHasUseGlobalFiltersSetting(sibling)
-      ? Boolean(sibling.useGlobalFilters$.value) && useGlobalFilters$.value
-      : true,
-  dependentObservables: [useGlobalFilters$],
-  siblingDependentObservables: ['useGlobalFilters$'],
-});
+import { apiHasUseGlobalFiltersSetting } from '../../fetch/applies_filters';
+import type { RelatedPanelsConfig } from './initialize_related_panels';
+
+export const panelIsRelatedByGlobalFilters = <
+  const UseGlobalFilters$ extends Observable<boolean | undefined>
+>(
+  useGlobalFilters$: UseGlobalFilters$
+) => {
+  const dependentObservables = [useGlobalFilters$] as const;
+
+  return {
+    dependentObservables,
+    siblingDependentObservableNames: ['useGlobalFilters$'],
+    isRelated: (sibling: unknown, [selfUseGlobalFilters], [siblingUseGlobalFilters]) =>
+      apiHasUseGlobalFiltersSetting(sibling)
+        ? Boolean(siblingUseGlobalFilters && selfUseGlobalFilters)
+        : true,
+  } satisfies RelatedPanelsConfig<typeof dependentObservables, [boolean | undefined]>;
+};

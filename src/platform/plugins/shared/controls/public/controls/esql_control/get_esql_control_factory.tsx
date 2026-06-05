@@ -21,18 +21,17 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
-  apiPublishesESQLQuery,
   initializeRelatedPanels,
   initializeStateApi,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { defaultControlLabelComparators, initializeLabelManager } from '../control_labels';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { VariableControlsStrings } from './constants';
+import { panelIsRelatedByEsqlVariable } from './panel_is_related_by_esql_variable';
 import { getSelectionComparators, initializeESQLControlManager } from './esql_control_manager';
 import {
   type ESQLControlApi,
@@ -105,26 +104,9 @@ export const getESQLControlFactory = <
       const relatedPanelsApi = initializeRelatedPanels({
         uuid,
         parentApi,
-        isRelated: (sibling) => {
-          // If a sibling uses this control's ES|QL variable, it's related
-          const siblingESQL = apiPublishesESQLQuery(sibling)
-            ? sibling.query$.getValue().esql
-            : undefined;
-          const siblingUsesESQLVariable =
-            siblingESQL &&
-            getESQLQueryVariables(siblingESQL).includes(
-              selections.api.esqlVariable$.getValue().key
-            );
-          if (siblingUsesESQLVariable) {
-            return true;
-          }
-
-          return false;
-        },
-        dependentObservables: [
-          selections.api.query$?.pipe(map((query) => query?.esql)) ?? of(undefined),
-        ],
-        siblingDependentObservables: ['query$'],
+        ...panelIsRelatedByEsqlVariable({
+          esqlVariable$: selections.api.esqlVariable$,
+        }),
       });
 
       const api = finalizeApi({
